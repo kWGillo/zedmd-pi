@@ -104,7 +104,7 @@ cd rpi-rgb-led-matrix_pwm_experiment && make && cd examples-api-use && make
 Then install `zedmd-pi`:
 
 ```bash
-git clone https://github.com/YOURNAME/zedmd-pi.git
+git clone https://github.com/kWGillo/zedmd-pi.git
 cd zedmd-pi
 sudo ./install.sh
 ```
