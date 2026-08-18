@@ -1,0 +1,19 @@
+[Unit]
+Description=DMD Controller (pannello LED, ZeDMD, web UI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/dmd
+Environment=PYTHONUNBUFFERED=1
+Environment=DMD_CONFIG=/etc/dmd/config.json
+ExecStart=/usr/bin/python3 /opt/dmd/dmdd.py
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target

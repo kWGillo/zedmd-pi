@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Media Player{% endblock %}
+
+{% block content %}
+
+{% if not ffmpeg %}
+<div class="banner warn">ffmpeg non è installato: i video non possono essere riprodotti.</div>
+{% endif %}
+
+<section class="card">
+  <h2>Libreria</h2>
+  <dl class="info">
+    <dt>Cartella</dt><dd class="mono">{{ media_dir }}</dd>
+    <dt>Condivisione di rete</dt><dd class="mono">\\{{ request.host.split(':')[0] }}\dmd-media</dd>
+    <dt>File utilizzabili</dt><dd>{{ total }}</dd>
+  </dl>
+  <p class="status">{{ status }}</p>
+
+  <form method="post" action="{{ url_for('api_media_upload') }}" enctype="multipart/form-data">
+    <label for="files">Carica immagini o video</label>
+    <input type="file" id="files" name="files" multiple
+           accept="image/*,video/*,.gif,.mp4,.mkv,.avi,.mov,.webm">
+    <button type="submit">Carica</button>
+  </form>
+
+  <form method="post" action="{{ url_for('api_media_preview') }}" class="inline">
+    <button type="submit" class="ghost">Mostra subito un contenuto</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Riproduzione</h2>
+  <form method="post" action="{{ url_for('api_media') }}">
+
+    <div class="row2">
+      <div><label for="min_interval">Intervallo minimo (s)</label>
+        <input type="number" id="min_interval" name="min_interval" min="3" max="3600"
+               value="{{ cfg.mediaplayer.min_interval }}"></div>
+      <div><label for="max_interval">Intervallo massimo (s)</label>
+        <input type="number" id="max_interval" name="max_interval" min="3" max="3600"
+               value="{{ cfg.mediaplayer.max_interval }}"></div>
+    </div>
+    <p class="hint">Tra un contenuto e il successivo il sistema attende un tempo
+       casuale compreso in questo intervallo.</p>
+
+    <div class="row2">
+      <div><label for="image_duration">Durata delle foto (s)</label>
+        <input type="number" id="image_duration" name="image_duration" min="1" max="120"
+               value="{{ cfg.mediaplayer.image_duration }}"></div>
+      <div><label for="video_duration">Durata dei video (s)</label>
+        <input type="number" id="video_duration" name="video_duration" min="1" max="300"
+               value="{{ cfg.mediaplayer.video_duration }}"></div>
+    </div>
+    <p class="hint">Le animazioni brevi, come le GIF di Pixelcade, vengono
+       ripetute fino a coprire la durata indicata.</p>
+
+    <div class="row2">
+      <div><label for="video_fps">Fotogrammi al secondo</label>
+        <input type="number" id="video_fps" name="video_fps" min="5" max="60"
+               value="{{ cfg.mediaplayer.video_fps }}"></div>
+      <div><label for="scale_mode">Adattamento al pannello</label>
+        <select id="scale_mode" name="scale_mode">
+          <option value="fit" {{ 'selected' if cfg.mediaplayer.scale_mode == 'fit' }}>Adatta (bande nere)</option>
+          <option value="fill" {{ 'selected' if cfg.mediaplayer.scale_mode == 'fill' }}>Riempi (ritaglia)</option>
+        </select></div>
+    </div>
+
+    <label class="check">
+      <input type="checkbox" name="pixel_art" {{ 'checked' if cfg.mediaplayer.pixel_art }}>
+      Modalità pixel art — bordi netti, consigliata per il materiale Pixelcade
+    </label>
+
+    <button type="submit">Salva</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>File presenti</h2>
+  {% if files %}
+  <table class="files">
+    {% for f in files %}
+    <tr>
+      <td class="mono">{{ f.rel }}</td>
+      <td class="size">{{ f.size }}</td>
+      <td class="act">
+        <form method="post" action="{{ url_for('api_media_delete') }}">
+          <input type="hidden" name="rel" value="{{ f.rel }}">
+          <button type="submit" class="ghost small">Elimina</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% if total > files|length %}
+  <p class="hint">Mostrati i primi {{ files|length }} di {{ total }}.</p>
+  {% endif %}
+  {% else %}
+  <p class="hint">Nessun file. Caricane dalla sezione qui sopra oppure copiali
+     nella condivisione di rete.</p>
+  {% endif %}
+</section>
+
+{% endblock %}

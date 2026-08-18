@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Configurazione e libreria locali: non appartengono al repository
+config.local.json
+media/
+*.log
+.DS_Store

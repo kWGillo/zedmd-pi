@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Impostazioni{% endblock %}
+
+{% block content %}
+
+{% if sleeping or night %}
+<div class="banner">
+  {% if sleeping %}Sleep mode attivo: display spento.{% else %}Night mode attivo: luminosità ridotta.{% endif %}
+</div>
+{% endif %}
+
+<section class="card">
+  <h2>Luminosità</h2>
+  <div class="slider-row">
+    <input type="range" id="brightness" min="0" max="100" step="1"
+           value="{{ cfg.display.brightness }}">
+    <output id="brightness-value">{{ cfg.display.brightness }}%</output>
+  </div>
+  <p class="hint">Valore diurno di riferimento. La modifica è immediata sul
+     pannello e viene salvata automaticamente.</p>
+</section>
+
+<section class="card">
+  <h2>Night mode e Sleep mode</h2>
+  <form method="post" action="{{ url_for('api_display') }}">
+
+    <label class="check">
+      <input type="checkbox" name="night_enabled" {{ 'checked' if cfg.display.night_enabled }}>
+      Night mode — abbassa la luminosità in una fascia oraria
+    </label>
+    <div class="row3">
+      <div><label for="night_start">Dalle</label>
+        <input type="time" id="night_start" name="night_start" value="{{ cfg.display.night_start }}"></div>
+      <div><label for="night_end">Alle</label>
+        <input type="time" id="night_end" name="night_end" value="{{ cfg.display.night_end }}"></div>
+      <div><label for="night_brightness">Luminosità</label>
+        <input type="number" id="night_brightness" name="night_brightness" min="0" max="100"
+               value="{{ cfg.display.night_brightness }}"></div>
+    </div>
+
+    <label class="check">
+      <input type="checkbox" name="sleep_enabled" {{ 'checked' if cfg.display.sleep_enabled }}>
+      Sleep mode — spegne il display in una fascia oraria
+    </label>
+    <div class="row3">
+      <div><label for="sleep_start">Dalle</label>
+        <input type="time" id="sleep_start" name="sleep_start" value="{{ cfg.display.sleep_start }}"></div>
+      <div><label for="sleep_end">Alle</label>
+        <input type="time" id="sleep_end" name="sleep_end" value="{{ cfg.display.sleep_end }}"></div>
+      <div></div>
+    </div>
+
+    <label class="check">
+      <input type="checkbox" name="sleep_wake_on_zedmd" {{ 'checked' if cfg.display.sleep_wake_on_zedmd }}>
+      Risveglia il display se arrivano frame da Batocera durante lo Sleep
+    </label>
+
+    <button type="submit">Salva</button>
+  </form>
+  <p class="hint">Sleep ha la precedenza su Night. Le fasce possono attraversare
+     la mezzanotte, ad esempio dalle 23:00 alle 07:00.</p>
+</section>
+
+<section class="card">
+  <h2>Ora e sincronizzazione</h2>
+  <form method="post" action="{{ url_for('api_time') }}">
+    <label for="ntp_server">Server NTP</label>
+    <input type="text" id="ntp_server" name="ntp_server"
+           value="{{ cfg.time.ntp_server }}" placeholder="pool.ntp.org">
+
+    <label for="timezone">Fuso orario</label>
+    <input list="tzlist" id="timezone" name="timezone" value="{{ cfg.time.timezone }}">
+    <datalist id="tzlist">
+      {% for tz in timezones %}<option value="{{ tz }}">{% endfor %}
+    </datalist>
+
+    <label class="check">
+      <input type="checkbox" name="dst_auto" {{ 'checked' if cfg.time.dst_auto }}>
+      Ora legale automatica (secondo il fuso orario selezionato)
+    </label>
+
+    <label for="utc_offset">Scostamento UTC manuale (se l'automatismo è disattivato)</label>
+    <select id="utc_offset" name="utc_offset">
+      {% for h in range(-12, 15) %}
+      <option value="{{ h }}" {{ 'selected' if cfg.time.utc_offset == h }}>UTC{{ '%+d' % h }}</option>
+      {% endfor %}
+    </select>
+
+    <button type="submit">Salva e applica</button>
+  </form>
+
+  <dl class="info">
+    <dt>Ora di sistema</dt><dd>{{ now }}</dd>
+    <dt>Fuso attivo</dt><dd>{{ ntp.get('Timezone', 'n/d') }}</dd>
+    <dt>NTP attivo</dt><dd>{{ 'sì' if ntp.get('NTP') == 'yes' else 'no' }}</dd>
+    <dt>Sincronizzato</dt><dd>{{ 'sì' if ntp.get('NTPSynchronized') == 'yes' else 'no' }}</dd>
+  </dl>
+</section>
+
+<section class="card">
+  <h2>Rete</h2>
+  <dl class="info">
+    <dt>Hostname</dt><dd>{{ hostname }}</dd>
+    {% for ip in ips %}
+    <dt>Indirizzo IP locale</dt><dd class="mono big">{{ ip }}</dd>
+    {% else %}
+    <dt>Indirizzo IP locale</dt><dd>non rilevato</dd>
+    {% endfor %}
+    <dt>Handshake ZeDMD</dt><dd class="mono">porta {{ cfg.zedmd.http_port }}</dd>
+    <dt>Stream ZeDMD</dt><dd class="mono">porta {{ cfg.zedmd.stream_port }} ({{ cfg.zedmd.transport }})</dd>
+    <dt>Interfaccia web</dt><dd class="mono">porta {{ cfg.web.port }}</dd>
+  </dl>
+  <p class="hint">Nel client ZeDMD indica solo questo indirizzo IP: userà da sé
+     le porte corrette.</p>
+</section>
+
+<script>
+const slider = document.getElementById('brightness');
+const out = document.getElementById('brightness-value');
+let pending = null;
+slider.addEventListener('input', () => {
+  out.textContent = slider.value + '%';
+  clearTimeout(pending);
+  pending = setTimeout(() => {
+    const body = new FormData();
+    body.append('value', slider.value);
+    fetch('/api/brightness', { method: 'POST', body });
+  }, 120);
+});
+</script>
+{% endblock %}

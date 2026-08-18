@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Servizi{% endblock %}
+
+{% block content %}
+
+{% if sleeping or night %}
+<div class="banner">
+  {% if sleeping %}Sleep mode attivo: display spento.{% else %}Night mode attivo: luminosità ridotta.{% endif %}
+</div>
+{% endif %}
+
+<section class="card">
+  <h2>Sorgente a schermo</h2>
+  <p class="current">Attualmente sul display: <strong>{{ current }}</strong></p>
+
+  <form method="post" action="{{ url_for('api_force') }}" class="inline">
+    <label for="force">Modalità</label>
+    <select id="force" name="source">
+      <option value="auto" {{ 'selected' if cfg.arbiter.force_source == 'auto' }}>Automatica (per priorità)</option>
+      <option value="zedmd" {{ 'selected' if cfg.arbiter.force_source == 'zedmd' }}>Forza ZeDMD</option>
+      <option value="mediaplayer" {{ 'selected' if cfg.arbiter.force_source == 'mediaplayer' }}>Forza Media Player</option>
+      <option value="clock" {{ 'selected' if cfg.arbiter.force_source == 'clock' }}>Forza Clock</option>
+    </select>
+    <button type="submit">Applica</button>
+  </form>
+  <p class="hint">In automatico ZeDMD ha la precedenza appena riceve frame e la
+     mantiene per {{ cfg.zedmd.grace_seconds }} secondi dopo l'ultimo segnale.
+     Il Media Player si sovrappone all'orologio solo per la durata del contenuto.</p>
+</section>
+
+{% for service in services %}
+<section class="card service {{ 'disabled' if not service.ready }}">
+  <div class="service-head">
+    <h2>{{ service.label }}</h2>
+    <form method="post" action="{{ url_for('api_service') }}">
+      <input type="hidden" name="key" value="{{ service.key }}">
+      <input type="hidden" name="value" value="{{ '0' if cfg.services[service.key] else '1' }}">
+      <button type="submit" class="toggle {{ 'on' if cfg.services[service.key] }}">
+        {{ 'Attivo' if cfg.services[service.key] else 'Spento' }}
+      </button>
+    </form>
+  </div>
+  <p class="desc">{{ service.desc }}</p>
+  <p class="status">{{ service.status }}</p>
+  {% if not service.ready %}
+  <p class="badge">In arrivo</p>
+  {% endif %}
+</section>
+{% endfor %}
+
+{% endblock %}

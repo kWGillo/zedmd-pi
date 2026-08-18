@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DMD — {% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="dot"></span>
+      <h1>DMD Controller</h1>
+      <span class="version">v{{ version }}</span>
+    </div>
+    <nav>
+      <a href="{{ url_for('page_settings') }}" class="{{ 'on' if page == 'settings' }}">Impostazioni</a>
+      <a href="{{ url_for('page_clock') }}" class="{{ 'on' if page == 'clock' }}">Orologio</a>
+      <a href="{{ url_for('page_media') }}" class="{{ 'on' if page == 'media' }}">Media</a>
+      <a href="{{ url_for('page_services') }}" class="{{ 'on' if page == 'services' }}">Servizi</a>
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <span>256 &times; 64 px &middot; FM6373 &middot; versione {{ version }}</span>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,75 @@
+{
+  "panel": {
+    "rows": 64,
+    "cols": 128,
+    "chain": 2,
+    "parallel": 1,
+    "hardware_mapping": "regular",
+    "slowdown": 3,
+    "panel_type": "fm6373",
+    "spwm_row_address_type": 1,
+    "spwm_scan_rows": 64,
+    "spwm_data_layout": 0,
+    "spwm_register_config": 2,
+    "limit_refresh": 60,
+    "pwm_bits": 11,
+    "profile_dir": "/home/gillo/rpi-rgb-led-matrix_pwm_experiment/lib/spwm/registertest/data"
+  },
+  "display": {
+    "brightness": 50,
+    "night_enabled": false,
+    "night_start": "22:00",
+    "night_end": "07:00",
+    "night_brightness": 15,
+    "sleep_enabled": false,
+    "sleep_start": "01:00",
+    "sleep_end": "06:00",
+    "sleep_wake_on_zedmd": true
+  },
+  "clock": {
+    "time_color": "#ff8c1a",
+    "date_color": "#00a0d0",
+    "format_24h": true,
+    "show_date": true,
+    "language": "it",
+    "blink_colon": true
+  },
+  "mediaplayer": {
+    "media_dir": "/srv/dmd/media",
+    "min_interval": 20,
+    "max_interval": 30,
+    "image_duration": 5,
+    "video_duration": 8,
+    "video_fps": 20,
+    "scale_mode": "fit",
+    "pixel_art": true
+  },
+  "time": {
+    "ntp_server": "pool.ntp.org",
+    "timezone": "Europe/Rome",
+    "dst_auto": true,
+    "utc_offset": 1
+  },
+  "web": {
+    "port": 8080
+  },
+  "services": {
+    "zedmd": true,
+    "clock": true,
+    "mediaplayer": false,
+    "status_player": false,
+    "air_radar": false
+  },
+  "zedmd": {
+    "stream_port": 3333,
+    "http_port": 80,
+    "transport": "TCP",
+    "grace_seconds": 60,
+    "client_timeout": 10,
+    "device_name": "ZeDMD-Pi",
+    "firmware_version": "6.0.0"
+  },
+  "arbiter": {
+    "force_source": "auto"
+  }
+}
