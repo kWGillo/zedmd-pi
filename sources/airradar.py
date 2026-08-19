@@ -110,7 +110,7 @@ class AirRadarSource(Source):
 
         self._showing = False
         self._recent = {}       # hex -> istante dell'ultima visualizzazione
-        self._status = "in attesa"
+        self._status = ("status.radar.waiting", {})
         self._last_poll = 0.0
         self._seen = 0
 
@@ -151,10 +151,16 @@ class AirRadarSource(Source):
             self._dirty = False
             return self._image
 
-    def status(self):
+    def status(self, lang=None):
         if not self._running:
-            return "disabilitato"
-        return self._status
+            return self.t("status.disabled", lang)
+        key, values = self._status
+        text = self.t(key, lang, **values)
+        if self._routes_found or self._routes_missing:
+            text += " | " + self.t("status.radar.routes", lang,
+                                   found=self._routes_found,
+                                   missing=self._routes_missing)
+        return text
 
     # ------------------------------------------------------------------ ciclo principale
 
@@ -165,7 +171,7 @@ class AirRadarSource(Source):
                 aircraft = self._poll(cfg)
                 self._show_all(aircraft, cfg)
             except Exception as exc:
-                self._status = "errore: %s" % exc
+                self._status = ("status.radar.error", {"error": str(exc)})
                 print("[airradar] %s" % exc)
 
             interval = max(15, int(cfg["poll_interval"]))
@@ -179,7 +185,7 @@ class AirRadarSource(Source):
 
         # Coordinate non impostate: nessuna interrogazione, nessun dato inviato.
         if abs(lat) < 0.0001 and abs(lon) < 0.0001:
-            self._status = "coordinate non impostate: apri la pagina Radar"
+            self._status = ("status.radar.nocoords", {})
             return []
         radius_km = max(0.5, float(cfg["radius_km"]))
         params = {"lat": lat, "lon": lon, "nm": max(1.0, radius_km / KM_PER_NM)}
@@ -248,10 +254,10 @@ class AirRadarSource(Source):
                 plane["route"] = self._route_cache.get(plane["flight"], "")
 
         self._log_flights(found, cfg)
-        self._status = "%s: %d aerei nel raggio di %.1f km" % (used, len(found), radius_km)
-        if self._routes_found or self._routes_missing:
-            self._status += " | rotte trovate %d, non disponibili %d" % (
-                self._routes_found, self._routes_missing)
+        # Lo stato si conserva come chiave e valori, non come frase gia'
+        # composta: la lingua la decide chi lo legge, non chi lo scrive.
+        self._status = ("status.radar.found",
+                        {"provider": used, "count": len(found), "radius": radius_km})
         return found
 
     # ------------------------------------------------------------------ registro CSV

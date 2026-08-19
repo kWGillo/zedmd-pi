@@ -16,6 +16,14 @@ fi
 
 SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+if [ -f "$SRC_DIR/manifest.md5" ]; then
+    bash "$SRC_DIR/verify.sh" "$SRC_DIR" || {
+        echo
+        echo "Il pacchetto non e' integro: ritrasferiscilo prima di installare."
+        exit 1
+    }
+fi
+
 echo "==> Libreria matrice attesa in: $MATRIX_DIR"
 if [ ! -d "$MATRIX_DIR" ]; then
     echo "ERRORE: cartella della libreria non trovata."

@@ -8,6 +8,17 @@ set -e
 
 SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Prima di toccare l'installazione funzionante, controlla che il pacchetto sia
+# arrivato intero. Un file corrotto in silenzio costa molto piu' tempo di
+# questa verifica.
+if [ -f "$SRC_DIR/manifest.md5" ]; then
+    bash "$SRC_DIR/verify.sh" "$SRC_DIR" || {
+        echo
+        echo "Aggiornamento interrotto: l'installazione attuale non e' stata toccata."
+        exit 1
+    }
+fi
+
 echo "==> Copia dei file in /opt/dmd"
 mkdir -p /opt/dmd
 cp -r "$SRC_DIR"/*.py "$SRC_DIR"/templates "$SRC_DIR"/static /opt/dmd/
@@ -35,6 +46,11 @@ if web.get("port", 8080) == 80:
     print("    web.port: 80 -> 8080")
 zedmd.setdefault("http_port", 80)
 zedmd.setdefault("transport", "TCP")
+
+# 1.7: lingua della web UI. Vuoto = la decide il browser.
+if "language" not in web:
+    web["language"] = ""
+    print("    web.language: aggiunta (rilevata dal browser)")
 
 # 1.0 aveva un unico servizio "mediaplayer_clock": ora sono due.
 services = cfg.setdefault("services", {})
@@ -65,6 +81,14 @@ fi
 
 echo "==> Libreria media e condivisione SMB"
 bash "$SRC_DIR/setup_share.sh" /srv/dmd/media || true
+
+echo "==> Verifica dei file installati"
+bash "$SRC_DIR/verify.sh" /opt/dmd || {
+    echo
+    echo "I file sono stati scritti male durante la copia."
+    echo "Non riavvio il servizio: correggi il problema e rilancia update.sh."
+    exit 1
+}
 
 echo "==> Riavvio del servizio"
 systemctl restart dmd

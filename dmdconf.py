@@ -89,6 +89,10 @@ DEFAULTS = {
     },
     "web": {
         "port": 8080,
+        # Lingua dell'interfaccia: "it", "en", oppure vuoto per lasciar
+        # decidere al browser tramite Accept-Language. Non ha effetto sul
+        # testo mostrato sul pannello, che segue clock.language.
+        "language": "",
     },
     "ota": {
         "repo": "kWGillo/zedmd-pi",
@@ -165,6 +169,67 @@ def load():
 
 def get():
     return load()
+
+
+def _apply_in_place(target, source):
+    """Riversa `source` dentro `target` senza cambiare l'identita' dei dizionari.
+
+    Le sorgenti tengono un riferimento alla configurazione e ai suoi rami
+    (`self.cfg`, `cfg["air_radar"]`, ...). Sostituire il dizionario con uno
+    nuovo lascerebbe meta' del programma a guardare quello vecchio: qui si
+    aggiorna il contenuto, non il contenitore.
+    """
+    for key in list(target):
+        if key not in source:
+            del target[key]
+    for key, value in source.items():
+        if isinstance(value, dict) and isinstance(target.get(key), dict):
+            _apply_in_place(target[key], value)
+        else:
+            target[key] = value
+
+
+KNOWN_SECTIONS = set(DEFAULTS)
+
+
+def looks_like_config(raw):
+    """Un file di configurazione plausibile, non un JSON qualsiasi."""
+    if not isinstance(raw, dict):
+        return False
+    return bool(KNOWN_SECTIONS & set(raw))
+
+
+def replace(raw):
+    """Sostituisce la configurazione con quella indicata e la salva.
+
+    Il contenuto passa dagli stessi `_migrate` e `_merge` del caricamento
+    normale: un file salvato da una versione precedente viene adeguato, e le
+    chiavi che non conosciamo vengono ignorate invece di far danni.
+    """
+    if not looks_like_config(raw):
+        raise ValueError("il file non contiene una configurazione del DMD")
+    merged = _merge(DEFAULTS, _migrate(dict(raw)))
+    with _lock:
+        if _config is None:
+            raise RuntimeError("configurazione non ancora caricata")
+        _apply_in_place(_config, merged)
+    save()
+    return _config
+
+
+def snapshot(include_position=True):
+    """Copia della configurazione da esportare.
+
+    Senza `include_position` le coordinate del radar tornano a zero: un file
+    di configurazione condiviso o allegato a una segnalazione non deve
+    portarsi dietro l'indirizzo di casa.
+    """
+    import copy
+    data = copy.deepcopy(load())
+    if not include_position:
+        data["air_radar"]["latitude"] = 0.0
+        data["air_radar"]["longitude"] = 0.0
+    return data
 
 
 def save():

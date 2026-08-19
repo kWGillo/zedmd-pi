@@ -25,6 +25,18 @@ Storico:
        rileggere il disco a ogni contenuto e a ogni richiesta della web UI:
        con librerie molto grandi la scansione continua occupava CPU e scheda
        SD e si vedeva come righe bianche sul pannello.
+  1.7  Interfaccia web in italiano e inglese, con la lingua rilevata dal
+       browser e un selettore in ogni pagina; link al progetto su GitHub nel
+       piede di pagina.
+  1.7.1 Un errore dell'interfaccia web non ferma piu' il servizio: il pannello
+        resta acceso e il motivo finisce nel log invece di far riavviare il
+        processo all'infinito.
+  1.7.2 Impronte md5 di tutti i file e verifica automatica prima e dopo la
+        copia: un file arrivato corrotto viene riconosciuto subito, per nome,
+        invece di far fallire l'avvio senza spiegazioni.
+  1.8  Esportazione e importazione della configurazione dalla web UI, con
+       esclusione facoltativa delle coordinate del radar. La taratura del
+       pannello, trovata per tentativi, non dipende piu' dalla scheda SD.
 """
 
-__version__ = "1.6"
+__version__ = "1.8"

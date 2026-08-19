@@ -4,20 +4,25 @@ Gira sulla porta 8080. La porta 80 e' riservata all'handshake ZeDMD,
 servito da `zedmd_http.py`, che redirige qui ogni altro percorso.
 """
 
+import json
 import os
 import socket
 import subprocess
 import time
 
-from flask import (Flask, jsonify, redirect, render_template, request,
-                   send_file, url_for)
+from flask import (Flask, has_request_context, jsonify, redirect,
+                   render_template, request, send_file, url_for)
 from werkzeug.utils import secure_filename
 
 import dmdconf
+import i18n
 import ota
 from sources import (FIELD_LIST, LANGUAGES, PROVIDER_LIST, invalidate_scan,
                      is_supported, scan_media, have_ffmpeg)
 from version import __version__
+
+# Dove finiscono le copie della configurazione prima di un'importazione.
+BACKUP_DIR = "/var/lib/dmd"
 
 COMMON_TIMEZONES = [
     "Europe/Rome", "Europe/London", "Europe/Paris", "Europe/Berlin",
@@ -107,16 +112,37 @@ def create_app(runtime):
     app.config["MAX_CONTENT_LENGTH"] = 512 * 1024 * 1024
     cfg = runtime.cfg
 
+    def current_language():
+        """Lingua di questa richiesta: preferenza salvata, poi browser.
+
+        Fuori da una richiesta — un errore in fase di avvio, un template reso
+        da codice di servizio — `request` non esiste: chiederglielo
+        solleverebbe un'eccezione, quindi si guarda prima se il contesto c'e'.
+        """
+        header = ""
+        if has_request_context():
+            header = request.headers.get("Accept-Language", "")
+        return i18n.resolve(cfg["web"].get("language"), header)
+
     @app.context_processor
     def inject_globals():
-        return {"version": __version__}
+        lang = current_language()
+        return {
+            "version": __version__,
+            "lang": lang,
+            "languages": i18n.LANGUAGES,
+            "github_url": i18n.GITHUB_URL,
+            # `t` chiude sulla lingua della richiesta: nei template basta
+            # scrivere t('chiave'), senza ripetere ogni volta la lingua.
+            "t": lambda key, **values: i18n.translate(key, lang, **values),
+        }
 
     @app.template_filter("timestamp")
     def _timestamp(value):
         try:
             return time.strftime("%d/%m/%Y %H:%M", time.localtime(float(value)))
         except (TypeError, ValueError):
-            return "mai"
+            return i18n.translate("common.never", current_language())
 
     # ------------------------------------------------------------ protocollo ZeDMD
     # Serviti anche qui per poterli provare con curl sulla porta 8080;
@@ -154,11 +180,15 @@ def create_app(runtime):
             hostname=socket.gethostname(), timezones=all_timezones(),
             ntp=ntp_status(), now=time.strftime("%d/%m/%Y %H:%M:%S"),
             sleeping=runtime.sleeping, night=runtime.night,
-            update=runtime.update_info, ota_log=ota.tail_log(12), page="settings")
+            update=runtime.update_info, ota_log=ota.tail_log(12),
+            config_result=request.args.get("config_result"), page="settings")
 
     @app.route("/clock")
     def page_clock():
-        return render_template("clock.html", cfg=cfg, languages=LANGUAGES, page="clock")
+        # Nome diverso da `languages`, che nel contesto globale sono le lingue
+        # dell'interfaccia: queste sono quelle dei giorni sul pannello.
+        return render_template("clock.html", cfg=cfg, clock_languages=LANGUAGES,
+                               page="clock")
 
     @app.route("/media")
     def page_media():
@@ -178,42 +208,49 @@ def create_app(runtime):
         return render_template(
             "media.html", cfg=cfg, files=listing, total=len(files),
             media_dir=media_dir, ffmpeg=have_ffmpeg(),
-            status=runtime.media.status(), page="media")
+            status=runtime.media.status(current_language()), page="media")
 
     @app.route("/radar")
     def page_radar():
         return render_template("radar.html", cfg=cfg, providers=PROVIDER_LIST,
                                fields=FIELD_LIST, log=runtime.radar.log_info(),
-                               status=runtime.radar.status(),
+                               status=runtime.radar.status(current_language()),
                                probe_callsign=request.args.get("callsign", ""),
                                probe_result=request.args.get("result"), page="radar")
 
     @app.route("/services")
     def page_services():
+        lang = current_language()
         services = [
             {"key": "zedmd", "label": "ZeDMD", "ready": True,
-             "desc": "Riceve i frame DMD via rete da Batocera, dmdserver o VPX.",
-             "status": runtime.zedmd.status()},
+             "status": runtime.zedmd.status(lang)},
             {"key": "mediaplayer", "label": "Media Player", "ready": True,
-             "desc": "Foto e video a rotazione dalla libreria, a intervalli casuali.",
-             "status": runtime.media.status()},
+             "status": runtime.media.status(lang)},
             {"key": "clock", "label": "Clock", "ready": True,
-             "desc": "Orologio e data, mostrati quando nessun altro servizio è attivo.",
-             "status": runtime.clock.status()},
+             "status": runtime.clock.status(lang)},
             {"key": "status_player", "label": "Status Player", "ready": False,
-             "desc": "Attività e punteggi RetroAchievements, propri e degli amici.",
-             "status": "non ancora implementato"},
+             "status": ""},
             {"key": "air_radar", "label": "Air Radar", "ready": True,
-             "desc": "Aerei in transito entro un raggio configurabile dalle coordinate GPS.",
-             "status": runtime.radar.status()},
+             "status": runtime.radar.status(lang)},
         ]
         current = runtime.arbiter.current
         return render_template(
             "services.html", cfg=cfg, services=services,
-            current=current.label if current else "nessuna",
+            current=current.label if current else "—",
             sleeping=runtime.sleeping, night=runtime.night, page="services")
 
     # ------------------------------------------------------------ API
+
+    @app.route("/api/language", methods=["POST"])
+    def api_language():
+        # Stringa vuota ammessa: significa "torna a seguire il browser".
+        cfg["web"]["language"] = i18n.normalize(request.form.get("language", ""))
+        dmdconf.save()
+        target = request.form.get("next") or url_for("page_settings")
+        # Solo percorsi interni: un redirect verso l'esterno non deve passare.
+        if not target.startswith("/") or target.startswith("//"):
+            target = url_for("page_settings")
+        return redirect(target)
 
     @app.route("/api/brightness", methods=["POST"])
     def api_brightness():
@@ -365,6 +402,59 @@ def create_app(runtime):
         subprocess.Popen(["systemctl", "restart", "dmd"])
         return redirect(url_for("page_settings"))
 
+    # ------------------------------------------------------------ configurazione
+
+    @app.route("/api/config/export")
+    def api_config_export():
+        keep = request.args.get("position") == "1"
+        data = dmdconf.snapshot(include_position=keep)
+        body = json.dumps(data, indent=2, ensure_ascii=False)
+        name = "dmd-config-%s-%s-%s.json" % (
+            socket.gethostname(), __version__, time.strftime("%Y%m%d"))
+        response = app.response_class(body, mimetype="application/json")
+        response.headers["Content-Disposition"] = 'attachment; filename="%s"' % name
+        return response
+
+    @app.route("/api/config/import", methods=["POST"])
+    def api_config_import():
+        lang = current_language()
+        storage = request.files.get("file")
+        if not storage or not storage.filename:
+            return _config_result(lang, "settings.config.nofile")
+
+        try:
+            raw = json.loads(storage.read().decode("utf-8"))
+        except (UnicodeDecodeError, ValueError):
+            return _config_result(lang, "settings.config.badjson")
+
+        # Copia di sicurezza prima di sovrascrivere: se il file importato non
+        # e' quello che l'utente credeva, deve poter tornare indietro.
+        backup = ""
+        try:
+            os.makedirs(BACKUP_DIR, exist_ok=True)
+            backup = os.path.join(BACKUP_DIR, "config-%s.json"
+                                  % time.strftime("%Y%m%d-%H%M%S"))
+            with open(backup, "w") as handle:
+                json.dump(dmdconf.get(), handle, indent=2)
+        except OSError:
+            backup = ""
+
+        try:
+            dmdconf.replace(raw)
+        except (ValueError, RuntimeError) as exc:
+            return _config_result(lang, "settings.config.rejected", error=str(exc))
+
+        runtime.clock.invalidate()
+        runtime._applied_brightness = None
+        # Le impostazioni del pannello valgono solo alla creazione della
+        # matrice: senza riavvio ne resterebbe applicata solo una parte.
+        subprocess.Popen(["systemctl", "restart", "dmd"])
+        return _config_result(lang, "settings.config.imported", backup=backup)
+
+    def _config_result(lang, key, **values):
+        return redirect(url_for("page_settings",
+                                config_result=i18n.translate(key, lang, **values)))
+
     @app.route("/api/radar", methods=["POST"])
     def api_radar():
         radar = cfg["air_radar"]
@@ -463,15 +553,16 @@ def create_app(runtime):
     @app.route("/api/status")
     def api_status():
         current = runtime.arbiter.current
+        lang = current_language()
         return jsonify(
             version=__version__,
             current=current.name if current else None,
             brightness=cfg["display"]["brightness"],
             sleeping=runtime.sleeping,
             night=runtime.night,
-            zedmd=runtime.zedmd.status(),
-            media=runtime.media.status(),
-            radar=runtime.radar.status(),
+            zedmd=runtime.zedmd.status(lang),
+            media=runtime.media.status(lang),
+            radar=runtime.radar.status(lang),
             time=time.strftime("%H:%M:%S"),
             update=runtime.update_info,
         )

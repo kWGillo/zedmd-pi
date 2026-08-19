@@ -36,12 +36,13 @@ USER_AGENT = "zedmd-pi OTA"
 
 # File e cartelle che compongono l'installazione.
 PAYLOAD_FILES = ["dmdd.py", "dmdconf.py", "display.py", "webui.py", "ota.py",
-                 "zedmd_http.py", "version.py", "config.json", "dmd.service",
-                 "install.sh", "update.sh", "setup_share.sh"]
+                 "zedmd_http.py", "i18n.py", "version.py", "config.json",
+                 "dmd.service", "install.sh", "update.sh", "setup_share.sh",
+                 "verify.sh", "manifest.md5", "manifest-install.md5"]
 PAYLOAD_DIRS = ["sources", "templates", "static"]
 
 # Presenza minima perche' un archivio sia considerato valido.
-REQUIRED = ["dmdd.py", "version.py", "webui.py", "sources", "templates"]
+REQUIRED = ["dmdd.py", "version.py", "webui.py", "i18n.py", "sources", "templates"]
 
 
 def log(message):
@@ -157,8 +158,40 @@ def verify(source):
             if name.endswith(".py"):
                 py_compile.compile(os.path.join(base, name), doraise=True)
                 count += 1
+
+    check_manifest(source)
     log("verifica superata: %d file Python compilano, versione %s" % (count, remote))
     return remote
+
+
+def check_manifest(source):
+    """Confronta i file con le impronte, se l'archivio le porta con se'.
+
+    La compilazione non basta: un template o un foglio di stile corrotto passa
+    inosservato perche' non e' codice Python.
+    """
+    manifest = os.path.join(source, "manifest-install.md5")
+    if not os.path.exists(manifest):
+        return  # archivio precedente alla 1.7.2: nulla da confrontare
+
+    import hashlib
+    bad = []
+    with open(manifest) as handle:
+        for line in handle:
+            parts = line.split()
+            if len(parts) != 2:
+                continue
+            expected, name = parts
+            path = os.path.join(source, name)
+            if not os.path.exists(path):
+                bad.append("%s mancante" % name)
+                continue
+            digest = hashlib.md5(open(path, "rb").read()).hexdigest()
+            if digest != expected:
+                bad.append("%s alterato" % name)
+    if bad:
+        raise RuntimeError("archivio non integro: %s" % ", ".join(bad[:5]))
+    log("impronte verificate: nessun file alterato")
 
 
 def backup():

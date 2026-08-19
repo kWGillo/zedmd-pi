@@ -1,22 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Orologio{% endblock %}
+{% block title %}{{ t('clock.title') }}{% endblock %}
 
 {% block content %}
 
 <section class="card">
-  <h2>Aspetto dell'orologio</h2>
+  <h2>{{ t('clock.appearance') }}</h2>
   <form method="post" action="{{ url_for('api_clock') }}">
 
     <div class="row2">
       <div>
-        <label for="time_color">Colore dell'ora</label>
+        <label for="time_color">{{ t('clock.timecolor') }}</label>
         <div class="color-row">
           <input type="color" id="time_color" name="time_color" value="{{ cfg.clock.time_color }}">
           <span class="mono" id="time_color_hex">{{ cfg.clock.time_color }}</span>
         </div>
       </div>
       <div>
-        <label for="date_color">Colore della data</label>
+        <label for="date_color">{{ t('clock.datecolor') }}</label>
         <div class="color-row">
           <input type="color" id="date_color" name="date_color" value="{{ cfg.clock.date_color }}">
           <span class="mono" id="date_color_hex">{{ cfg.clock.date_color }}</span>
@@ -26,32 +26,33 @@
 
     <div class="preview" id="preview">
       <span id="pv_time" style="color: {{ cfg.clock.time_color }}">12:34</span>
-      <span id="pv_date" style="color: {{ cfg.clock.date_color }}">LUN 18/08</span>
+      <span id="pv_date" style="color: {{ cfg.clock.date_color }}">{{ t('clock.preview.date') }}</span>
     </div>
 
-    <label for="language">Lingua dei giorni della settimana</label>
+    <label for="language">{{ t('clock.language') }}</label>
     <select id="language" name="language">
-      {% for code, name in languages %}
+      {% for code, name in clock_languages %}
       <option value="{{ code }}" {{ 'selected' if cfg.clock.language == code }}>{{ name }}</option>
       {% endfor %}
     </select>
+    <p class="hint">{{ t('clock.language.hint') }}</p>
 
     <label class="check">
       <input type="checkbox" name="format_24h" {{ 'checked' if cfg.clock.format_24h }}>
-      Formato 24 ore (se disattivato: 12 ore con indicatore AM/PM)
+      {{ t('clock.format24') }}
     </label>
 
     <label class="check">
       <input type="checkbox" name="show_date" {{ 'checked' if cfg.clock.show_date }}>
-      Mostra la data
+      {{ t('clock.showdate') }}
     </label>
 
     <label class="check">
       <input type="checkbox" name="blink_colon" {{ 'checked' if cfg.clock.blink_colon }}>
-      Due punti lampeggianti
+      {{ t('clock.blink') }}
     </label>
 
-    <button type="submit">Salva</button>
+    <button type="submit">{{ t('common.save') }}</button>
   </form>
 </section>
 

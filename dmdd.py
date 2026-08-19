@@ -263,19 +263,30 @@ def main():
     signal.signal(signal.SIGTERM, runtime.shutdown)
     signal.signal(signal.SIGINT, runtime.shutdown)
 
-    import webui
+    # L'interfaccia web e' un accessorio: se non parte, il pannello deve
+    # comunque accendersi. Prima l'errore faceva uscire il processo e systemd
+    # lo riavviava all'infinito, lasciando il display spento e nessun modo
+    # comodo di capire perche'.
+    try:
+        import webui
 
-    app = webui.create_app(runtime)
-    port = runtime.cfg["web"]["port"]
+        app = webui.create_app(runtime)
+        port = runtime.cfg["web"]["port"]
 
-    web_thread = threading.Thread(
-        target=lambda: app.run(host="0.0.0.0", port=port, threaded=True,
-                               use_reloader=False, debug=False),
-        name="webui",
-        daemon=True,
-    )
-    web_thread.start()
-    print("[dmd] web UI su http://0.0.0.0:%d" % port)
+        web_thread = threading.Thread(
+            target=lambda: app.run(host="0.0.0.0", port=port, threaded=True,
+                                   use_reloader=False, debug=False),
+            name="webui",
+            daemon=True,
+        )
+        web_thread.start()
+        print("[dmd] web UI su http://0.0.0.0:%d" % port)
+    except Exception:
+        import traceback
+        print("[dmd] ATTENZIONE: interfaccia web non avviata", flush=True)
+        traceback.print_exc()
+        print("[dmd] il pannello continua a funzionare; "
+              "correggi l'errore qui sopra e riavvia il servizio", flush=True)
 
     try:
         runtime.render_loop()

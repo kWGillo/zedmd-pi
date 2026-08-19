@@ -70,12 +70,13 @@ class ClockSource(Source):
     def active(self):
         return self._running
 
-    def status(self):
+    def status(self, lang=None):
         if not self._running:
-            return "disabilitato"
+            return self.t("status.disabled", lang)
         clock = self.cfg["clock"]
-        return "attivo, formato %s, giorni in %s" % (
-            "24h" if clock["format_24h"] else "12h", clock["language"].upper())
+        return self.t("status.clock.active", lang,
+                      format="24h" if clock["format_24h"] else "12h",
+                      language=clock["language"].upper())
 
     def invalidate(self):
         """Forza il ridisegno, ad esempio dopo un cambio di impostazioni."""

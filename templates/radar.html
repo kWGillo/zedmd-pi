@@ -1,117 +1,102 @@
 {% extends "base.html" %}
-{% block title %}Air Radar{% endblock %}
+{% block title %}{{ t('radar.title') }}{% endblock %}
 
 {% block content %}
 
 {% if not cfg.air_radar.latitude and not cfg.air_radar.longitude %}
-<div class="banner">Coordinate non impostate: il servizio non interroga nulla
-  finché non indichi una posizione qui sotto.</div>
+<div class="banner">{{ t('radar.nocoords') }}</div>
 {% endif %}
 
 <section class="card">
-  <h2>Stato</h2>
+  <h2>{{ t('radar.state') }}</h2>
   <p class="status">{{ status }}</p>
   <form method="post" action="{{ url_for('api_radar_poll') }}" class="inline">
-    <button type="submit" class="ghost">Interroga adesso</button>
+    <button type="submit" class="ghost">{{ t('radar.pollnow') }}</button>
   </form>
 
-  <label for="probe">Prova la ricerca di una rotta</label>
+  <label for="probe">{{ t('radar.probe') }}</label>
   <form method="post" action="{{ url_for('api_radar_probe') }}" class="inline">
     <input type="text" id="probe" name="callsign" placeholder="RYR1234"
            value="{{ probe_callsign or '' }}">
-    <button type="submit" class="ghost">Prova</button>
+    <button type="submit" class="ghost">{{ t('radar.probe.button') }}</button>
   </form>
   {% if probe_result is not none %}
   <p class="status">{{ probe_result }}</p>
   {% endif %}
-  <p class="hint">Air Radar ha priorità sul Media Player e sull'orologio, ma
-     resta sempre sotto ZeDMD: durante una partita su Batocera non compare mai.</p>
+  <p class="hint">{{ t('radar.priority.hint') }}</p>
 </section>
 
 <section class="card">
-  <h2>Posizione e raggio</h2>
+  <h2>{{ t('radar.position') }}</h2>
   <form method="post" action="{{ url_for('api_radar') }}">
 
     <div class="row2">
-      <div><label for="latitude">Latitudine</label>
+      <div><label for="latitude">{{ t('radar.lat') }}</label>
         <input type="text" id="latitude" name="latitude" value="{{ cfg.air_radar.latitude }}"></div>
-      <div><label for="longitude">Longitudine</label>
+      <div><label for="longitude">{{ t('radar.lon') }}</label>
         <input type="text" id="longitude" name="longitude" value="{{ cfg.air_radar.longitude }}"></div>
     </div>
-    <p class="hint">Coordinate decimali, con il punto come separatore. Su una
-       mappa online si ottengono con un clic destro sul punto desiderato.
-       Restano solo in <span class="mono">/etc/dmd/config.json</span> su questo
-       Raspberry: non fanno parte del software e non finiscono in nessun
-       pacchetto o repository.</p>
+    <p class="hint">{{ t('radar.coords.hint', path='/etc/dmd/config.json') }}</p>
 
     <div class="row3">
-      <div><label for="radius_km">Raggio (km)</label>
+      <div><label for="radius_km">{{ t('radar.radius') }}</label>
         <input type="text" id="radius_km" name="radius_km" value="{{ cfg.air_radar.radius_km }}"></div>
-      <div><label for="max_altitude_ft">Quota massima (ft)</label>
+      <div><label for="max_altitude_ft">{{ t('radar.maxalt') }}</label>
         <input type="number" id="max_altitude_ft" name="max_altitude_ft" min="0" max="60000"
                value="{{ cfg.air_radar.max_altitude_ft }}"></div>
-      <div><label for="provider">Servizio dati</label>
+      <div><label for="provider">{{ t('radar.provider') }}</label>
         <select id="provider" name="provider">
           {% for code, name in providers %}
           <option value="{{ code }}" {{ 'selected' if cfg.air_radar.provider == code }}>{{ name }}</option>
           {% endfor %}
         </select></div>
     </div>
-    <p class="hint">Quota massima 0 = nessun filtro. Impostandola, ad esempio,
-       a 15000 ft si ignorano i voli di alta quota mostrando solo chi sta
-       davvero passando sopra di te. Se il servizio scelto non risponde, gli
-       altri vengono usati automaticamente come riserva.</p>
+    <p class="hint">{{ t('radar.filter.hint') }}</p>
 
     <div class="row3">
-      <div><label for="poll_interval">Intervallo interrogazioni (s)</label>
+      <div><label for="poll_interval">{{ t('radar.interval') }}</label>
         <input type="number" id="poll_interval" name="poll_interval" min="15" max="3600"
                value="{{ cfg.air_radar.poll_interval }}"></div>
-      <div><label for="display_seconds">Durata a schermo (s)</label>
+      <div><label for="display_seconds">{{ t('radar.duration') }}</label>
         <input type="number" id="display_seconds" name="display_seconds" min="2" max="120"
                value="{{ cfg.air_radar.display_seconds }}"></div>
-      <div><label for="cooldown">Riposo per aereo (s)</label>
+      <div><label for="cooldown">{{ t('radar.cooldown') }}</label>
         <input type="number" id="cooldown" name="cooldown" min="30" max="86400"
                value="{{ cfg.air_radar.cooldown }}"></div>
     </div>
-    <p class="hint">Il riposo evita che lo stesso volo venga riproposto in
-       continuazione mentre resta nel raggio.</p>
+    <p class="hint">{{ t('radar.cooldown.hint') }}</p>
 
-    <label>Parametri di volo da mostrare</label>
+    <label>{{ t('radar.fields') }}</label>
     <div class="fields">
       {% for key, label in fields %}
       <label class="check">
         <input type="checkbox" name="fields" value="{{ key }}"
                {{ 'checked' if key in cfg.air_radar.fields }}>
-        {{ label }}
+        {{ t('radar.field.' ~ key) }}
       </label>
       {% endfor %}
     </div>
-    <p class="hint">Il codice volo compare sempre in grande. Questi campi
-       formano la riga di dettaglio sotto: se non ci stanno tutti, quelli
-       centrali vengono tolti automaticamente per non sbordare.</p>
-    <p class="hint">La rotta viene cercata su hexdb.io solo se il campo è
-       selezionato qui. È disponibile per i voli di linea, molto meno per
-       cargo, aviazione generale e voli di Stato: conviene selezionare anche
-       altri campi, altrimenti quando la rotta manca resta solo la distanza.</p>
+    <p class="hint">{{ t('radar.fields.hint') }}</p>
+    <p class="hint">{{ t('radar.route.hint') }}</p>
 
     <label class="check">
       <input type="checkbox" name="log_enabled" {{ 'checked' if cfg.air_radar.log_enabled }}>
-      Registra ogni passaggio nel file CSV
+      {{ t('radar.log.enable') }}
     </label>
 
     <label class="check">
       <input type="checkbox" name="log_route" {{ 'checked' if cfg.air_radar.log_route }}>
-      Cerca la rotta anche per i voli registrati nel CSV che non vanno a schermo
+      {{ t('radar.log.route') }}
     </label>
 
     <div class="row2">
-      <div><label for="callsign_color">Colore del codice volo</label>
+      <div><label for="callsign_color">{{ t('radar.callsigncolor') }}</label>
         <div class="color-row">
           <input type="color" id="callsign_color" name="callsign_color"
                  value="{{ cfg.air_radar.callsign_color }}">
           <span class="mono">{{ cfg.air_radar.callsign_color }}</span>
         </div></div>
-      <div><label for="info_color">Colore dei dettagli</label>
+      <div><label for="info_color">{{ t('radar.infocolor') }}</label>
         <div class="color-row">
           <input type="color" id="info_color" name="info_color"
                  value="{{ cfg.air_radar.info_color }}">
@@ -119,39 +104,30 @@
         </div></div>
     </div>
 
-    <button type="submit">Salva</button>
+    <button type="submit">{{ t('common.save') }}</button>
   </form>
 </section>
 
 <section class="card">
-  <h2>Registro dei passaggi</h2>
+  <h2>{{ t('radar.log') }}</h2>
   <dl class="info">
-    <dt>File</dt><dd class="mono">{{ log.path }}</dd>
-    <dt>Voli registrati</dt><dd>{{ log.rows }}</dd>
-    <dt>Dimensione</dt><dd>{{ log.size }}</dd>
+    <dt>{{ t('radar.log.file') }}</dt><dd class="mono">{{ log.path }}</dd>
+    <dt>{{ t('radar.log.rows') }}</dt><dd>{{ log.rows }}</dd>
+    <dt>{{ t('radar.log.size') }}</dt><dd>{{ log.size }}</dd>
   </dl>
-  <p class="hint">Una riga per ogni volo a ogni passaggio, con data e ora,
-     codice volo, immatricolazione, modello, quota, velocità, direzione,
-     transponder, distanza, coordinate e rotta. Lo stesso aereo non viene
-     riscritto finché resta nel raggio.</p>
+  <p class="hint">{{ t('radar.log.hint') }}</p>
   <div class="actions">
-    <a class="btn" href="{{ url_for('api_radar_log') }}">Scarica il CSV</a>
+    <a class="btn" href="{{ url_for('api_radar_log') }}">{{ t('radar.log.download') }}</a>
     <form method="post" action="{{ url_for('api_radar_log_clear') }}">
-      <button type="submit" class="ghost">Svuota il registro</button>
+      <button type="submit" class="ghost">{{ t('radar.log.clear') }}</button>
     </form>
   </div>
 </section>
 
 <section class="card">
-  <h2>Note sui dati</h2>
-  <p class="hint">I dati arrivano dalle reti ADS-B comunitarie, gratuite e senza
-     registrazione. Non essendoci un'antenna locale, la copertura dipende dai
-     riceventi volontari della zona: il traffico commerciale compare quasi
-     sempre, aviazione generale e voli militari spesso no. La rotta proviene da
-     hexdb.io ed è disponibile solo per i voli di linea.</p>
-  <p class="hint">Con un raggio di pochi chilometri le apparizioni possono
-     essere rare: se non sei sotto una rotta o vicino a un aeroporto, conviene
-     allargare il raggio per verificare che tutto funzioni.</p>
+  <h2>{{ t('radar.notes') }}</h2>
+  <p class="hint">{{ t('radar.notes.coverage') }}</p>
+  <p class="hint">{{ t('radar.notes.radius') }}</p>
 </section>
 
 {% endblock %}

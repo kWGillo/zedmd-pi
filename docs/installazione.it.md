@@ -5,7 +5,7 @@ presenta a Batocera come un **ZeDMD-WiFi** e offre un'interfaccia web di
 controllo.
 
 Repository: **https://github.com/kWGillo/zedmd-pi**
-Versione documentata: **1.6**
+Versione documentata: **1.8**
 
 Dalla versione 1.5 il software si installa e si aggiorna direttamente da
 GitHub: non serve più trasferire archivi a mano.
@@ -224,10 +224,27 @@ esegue una volta sola in fase di installazione.
 
 ## 8. Interfaccia web
 
-**Impostazioni** — luminosità con applicazione immediata, server NTP, fuso
-orario, ora legale automatica o scostamento UTC manuale, Night mode e Sleep
-mode, regolazioni fini del driver S-PWM, aggiornamento via rete, indirizzo IP
-locale e riepilogo delle porte.
+### Lingua
+
+L'interfaccia è disponibile in **italiano e inglese**. Alla prima apertura la
+lingua viene dedotta da quella del browser; il selettore **IT / EN** in alto a
+destra la cambia in qualsiasi momento e la scelta viene salvata in
+`/etc/dmd/config.json`. Nella pagina Impostazioni, riportando la voce *Lingua
+dell'interfaccia* su **predefinito**, si torna a seguire il browser — utile se
+al DMD accedono persone diverse dai propri dispositivi.
+
+I nomi dei giorni che appaiono **sul pannello** hanno un'impostazione a parte,
+nella pagina Orologio, e comprendono anche il francese: chi guarda il cabinato
+non è necessariamente chi configura il sistema.
+
+Il piede di ogni pagina riporta il link al progetto su GitHub.
+
+### Le pagine
+
+**Impostazioni** — luminosità con applicazione immediata, lingua
+dell'interfaccia, server NTP, fuso orario, ora legale automatica o scostamento
+UTC manuale, Night mode e Sleep mode, regolazioni fini del driver S-PWM,
+aggiornamento via rete, indirizzo IP locale e riepilogo delle porte.
 
 **Orologio** — colori indipendenti per ora e data, formato 12 o 24 ore, lingua
 dei nomi dei giorni (italiano, francese, inglese), lampeggio dei due punti.
@@ -241,6 +258,26 @@ rotta.
 
 **Servizi** — attivazione dei quattro servizi, sorgente attualmente a schermo e
 possibilità di forzarne una invece di lasciar decidere l'arbitro.
+
+### Salvare la configurazione
+
+In fondo alla pagina Impostazioni, il riquadro **Configurazione** esporta un
+file JSON con tutto: taratura del pannello, colori, fasce orarie, servizi,
+impostazioni del radar. **Fallo dopo ogni modifica importante e tieni il file
+altrove.**
+
+La ragione è concreta: il codice è su GitHub e si riscarica in un minuto, ma la
+taratura del pannello si trova per tentativi e vive solo su questo Raspberry.
+Se la scheda SD si guasta — e le schede SD si guastano — quel file è la
+differenza tra venti minuti e mezza giornata.
+
+La casella *Includi le coordinate del radar* si può togliere quando il file
+serve per una segnalazione o per qualcun altro: in quel caso la posizione viene
+esportata a zero.
+
+L'importazione accetta anche file salvati da versioni precedenti, che vengono
+adeguati automaticamente. La configurazione in uso viene copiata in
+`/var/lib/dmd/` prima di essere sostituita, e il servizio si riavvia.
 
 ---
 
@@ -308,7 +345,7 @@ Rimedi, in ordine di efficacia:
 | `panel.slowdown` corretto per il modello | `/etc/dmd/config.json` |
 | `panel.limit_refresh` a 60 — un refresh più alto costa CPU senza guadagno visibile | pagina Impostazioni |
 | `panel.pwm_bits` più basso (8 invece di 11) — meno sfumature, molto meno lavoro | pagina Impostazioni |
-| tenere la libreria media su chiavetta USB anziché su SD | vedi 11.3 |
+| tenere la libreria media su chiavetta USB anziché su SD | vedi 12.2 |
 
 ### 11.2 Blocchi, `Bus error`, `Input/output error`
 
@@ -351,8 +388,9 @@ sudo touch /forcefsck && sudo reboot
 ```
 
 Righe `mmcblk0: error -110` o `EXT4-fs error` confermano la diagnosi. Rimedio:
-scheda nuova di tipo *high endurance* (Samsung PRO Endurance, SanDisk Max
-Endurance) e reinstallazione.
+scheda nuova di tipo *high endurance* (SanDisk High Endurance o Max Endurance,
+Samsung PRO Endurance) e reinstallazione: vedi la sezione 12, che spiega come
+non ritrovarsi nella stessa situazione.
 
 > Passare a un Raspberry Pi 4 **non risolve** questo secondo problema: la
 > scheda SD resta la stessa. Risolve invece il primo, perché ha più CPU e
@@ -395,7 +433,126 @@ bianche. Dopo aver copiato file dalla condivisione di rete, usa il pulsante
 
 ---
 
-## 12. Risoluzione problemi
+## 12. Installazione resistente all'usura
+
+Questa sezione nasce da un guasto reale: una scheda SD che ha cominciato ad
+accettare scritture e a restituire dati diversi. Nessun comando segnalava
+niente — `scp`, `tar` e `cp` riportavano successo — e i file arrivavano della
+lunghezza giusta con byte nulli al centro. Il servizio non partiva, e l'unico
+indizio era un `ValueError` sul primo `import`.
+
+Le quattro contromisure qui sotto, messe in opera durante l'installazione,
+costano venti minuti e cambiano l'ordine di grandezza della vita della scheda.
+
+### 12.1 Scegliere la scheda giusta
+
+Le sigle grandi sulla confezione — V10, V30, A1, "100 MB/s" — misurano la
+**velocità**, non la durata. Nessuna dice quanti dati la scheda può scrivere
+prima di degradarsi, che è il parametro rilevante per un sistema acceso sempre.
+
+Servono schede della linea **high endurance** (SanDisk High Endurance o Max
+Endurance, Samsung PRO Endurance), nate per dashcam e videosorveglianza, cioè
+per lo stesso profilo d'uso. Bastano 32 GB: il sistema ne occupa meno di otto e
+i media stanno altrove.
+
+Evita le schede a marchio concesso in licenza, dove il produttore reale del
+chip non è dichiarato e cambia tra una partita e l'altra.
+
+> **Le partizioni non proteggono dall'usura.** Dedicare una partizione ai media
+> sembra isolarli, ma il *wear leveling* lavora sull'intero chip: le partizioni
+> esistono solo nello spazio degli indirizzi logici, mentre il controller
+> distribuisce le scritture su tutte le celle fisiche. Una partizione separata
+> aiuta il recupero — reinstalli il sistema e i media restano — ma non allunga
+> la vita della scheda di un giorno. A separare davvero è solo un **supporto
+> fisico diverso**.
+
+### 12.2 Media su chiavetta USB
+
+È l'intervento con il rapporto migliore fra sforzo e risultato: toglie dalla
+scheda sia le scritture massive sia le letture continue, e le lascia il solo
+sistema operativo, che scrive pochissimo.
+
+```bash
+lsblk
+```
+
+Individua la chiavetta (di solito `sda1`) e annota lo UUID:
+
+```bash
+sudo blkid /dev/sda1
+```
+
+```bash
+sudo mkdir -p /srv/dmd/media
+```
+
+Aggiungi la riga a `/etc/fstab` sostituendo lo UUID e il tipo di filesystem
+(`exfat` per una chiavetta formattata su Windows o Mac, `ext4` se l'hai
+formattata su Linux):
+
+```bash
+echo 'UUID=xxxx-xxxx /srv/dmd/media exfat defaults,nofail,uid=1000,gid=1000 0 0' | sudo tee -a /etc/fstab
+```
+
+```bash
+sudo mount -a && df -h /srv/dmd/media
+```
+
+L'opzione `nofail` è importante: senza, se un giorno la chiavetta non c'è il
+Raspberry si ferma all'avvio invece di proseguire.
+
+### 12.3 Radice in sola lettura
+
+Raspberry Pi OS può montare la radice in sola lettura, con tutte le scritture
+dirottate in memoria e scartate al riavvio. Su un sistema che una volta
+configurato non cambia più, è la misura che allunga di più la vita della
+scheda: le scritture scendono praticamente a zero.
+
+```bash
+sudo raspi-config
+```
+
+*Performance Options* → *Overlay File System* → abilita l'overlay e imposta la
+partizione di avvio in sola lettura. Poi riavvia.
+
+**Il prezzo da pagare** è che da quel momento nessuna modifica sopravvive al
+riavvio: né gli aggiornamenti del software, né le impostazioni cambiate dalla
+web UI, né la configurazione. Per intervenire si disattiva, si lavora, si
+riattiva:
+
+```bash
+sudo raspi-config nonint disable_overlayfs && sudo reboot
+```
+
+```bash
+cd ~/dmd && git pull && sudo ./update.sh
+```
+
+```bash
+sudo raspi-config nonint enable_overlayfs && sudo reboot
+```
+
+Se ti dimentichi di riattivarlo non succede niente di grave: il sistema
+funziona esattamente come prima, semplicemente senza la protezione.
+
+> Attivalo **alla fine**, quando pannello, colori e servizi sono a posto. Con
+> l'overlay attivo la web UI accetta le modifiche e le mostra, ma al riavvio
+> tutto torna com'era — un comportamento che fa perdere un pomeriggio a
+> chiunque non se lo ricordi.
+
+### 12.4 Esportare la configurazione
+
+Dalla pagina Impostazioni, riquadro **Configurazione**. È l'unica parte del
+sistema che non si può riscaricare: il codice sta su GitHub, la taratura del
+pannello sta solo qui.
+
+Esportala **dopo ogni modifica importante** e tieni il file su un'altra
+macchina. Con quel file, rimettere in piedi tutto su una scheda nuova sono
+venti minuti; senza, si ricomincia la campagna di prove sul pannello.
+
+---
+
+## 13. Risoluzione problemi
 
 | Sintomo | Causa probabile | Rimedio |
 |---|---|---|
@@ -413,7 +570,7 @@ bianche. Dopo aver copiato file dalla condivisione di rete, usa il pulsante
 
 ---
 
-## 13. Struttura dei file installati
+## 14. Struttura dei file installati
 
 ```
 /opt/dmd/dmdd.py          servizio principale, arbitro e ciclo di rendering

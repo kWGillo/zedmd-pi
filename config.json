@@ -78,7 +78,8 @@
     "utc_offset": 1
   },
   "web": {
-    "port": 8080
+    "port": 8080,
+    "language": ""
   },
   "ota": {
     "repo": "kWGillo/zedmd-pi",

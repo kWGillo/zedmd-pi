@@ -38,11 +38,17 @@ cd ~/Downloads
 ```
 
 ```bash
-tar xzf zedmd*pi*.tar.gz
+ls ~/Downloads/*.tar.gz
 ```
 
-Il carattere jolly copre i nomi che il browser aggiunge in fase di download
-(`zedmd-pi-1.tar.gz`, `zedmdpi.tar.gz` e simili).
+Guarda il nome esatto che compare e usalo nel comando successivo. In `zsh` —
+la shell del Mac — un carattere jolly che non trova nulla fa fallire l'intero
+comando con `zsh: no matches found`, quindi conviene leggere il nome vero
+invece di indovinarlo.
+
+```bash
+tar xzf zedmd-pi.tar.gz
+```
 
 ```bash
 cd ~/Downloads/zedmd-pi
@@ -67,32 +73,71 @@ Devono comparire tre cose:
 | file | `version.py` |
 | remote | `origin  https://github.com/kWGillo/zedmd-pi.git` |
 
-### Se il remote non compare
-
-Vuol dire che la cartella è nuova e non contiene ancora `.git` (normale: il
-pacchetto non include la cronologia). Collegala al repository:
-
-```bash
-git init
-```
-
-```bash
-git remote add origin https://github.com/kWGillo/zedmd-pi.git
-```
-
-```bash
-git branch -M main
-```
+Se compaiono tutte e tre, salta al passo 4.
 
 ### Se `pwd` mostra `/Users/<tuonome>/Downloads`
 
 Il `cd` del passo 1 non è andato a buon fine, quasi sempre perché il `tar` ha
-fallito. Non proseguire: torna al passo 1 e controlla il nome del file con
-`ls ~/Downloads/*.tar.gz`.
+fallito. Non proseguire: torna al passo 1.
 
 ---
 
-## 3. Controllare che cosa stai per pubblicare
+## 3. Se manca il remote: `fatal: not a git repository`
+
+È il caso **normale**, non un errore: il pacchetto contiene i file, non la
+cronologia del progetto.
+
+Qui la tentazione è fare `git init` nella cartella scompattata. **Non
+funziona**: creerebbe una storia nuova, senza parentela con quella già
+pubblicata su GitHub, e il push verrebbe rifiutato con
+*"refusing to merge unrelated histories"*. Se ne esce solo cancellando la
+cronologia remota.
+
+La strada giusta è l'inversa: si parte dal repository vero e gli si sostituisce
+il contenuto.
+
+```bash
+cd ~/Downloads
+```
+
+```bash
+git clone https://github.com/kWGillo/zedmd-pi.git zedmd-pi-repo
+```
+
+```bash
+cd ~/Downloads/zedmd-pi-repo
+```
+
+Svuota la cartella tenendo **solo** `.git`, che è la cronologia:
+
+```bash
+find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
+```
+
+Copia dentro i file nuovi (il punto finale dopo la barra è indispensabile:
+significa "il contenuto della cartella", non la cartella stessa):
+
+```bash
+cp -R ~/Downloads/zedmd-pi/. .
+```
+
+Controlla che sia andata:
+
+```bash
+pwd && grep __version__ version.py && git remote -v
+```
+
+Da qui in avanti lavori in `~/Downloads/zedmd-pi-repo`. La cartella
+`~/Downloads/zedmd-pi` scompattata dal pacchetto non serve più e puoi
+cancellarla.
+
+> Le volte successive puoi saltare tutto questo: `zedmd-pi-repo` resta sul Mac
+> con il suo `.git`. Basta `git pull`, svuotare, ricopiare il contenuto del
+> pacchetto nuovo e ripartire dal passo 4.
+
+---
+
+## 4. Controllare che cosa stai per pubblicare
 
 ```bash
 grep __version__ version.py
@@ -107,7 +152,7 @@ comparire file personali, `.DS_Store`, o la cartella `__pycache__`.
 
 ---
 
-## 4. Pubblicare
+## 5. Pubblicare
 
 ```bash
 git add -A
@@ -128,7 +173,7 @@ Dalla seconda volta in poi basta `git push`.
 
 ---
 
-## 5. Se il push viene rifiutato
+## 6. Se il push viene rifiutato
 
 Messaggio tipico: *"Updates were rejected because the remote contains work that
 you do not have locally"*. Vuol dire che su GitHub c'è qualcosa che nella tua
@@ -155,7 +200,7 @@ frattempo qualcun altro ha pubblicato qualcosa.
 
 ---
 
-## 6. Verifica finale
+## 7. Verifica finale
 
 ```bash
 gh repo view kWGillo/zedmd-pi --web
@@ -175,7 +220,7 @@ del Raspberry: se qui vedi il numero nuovo, l'OTA lo vedrà.
 
 ---
 
-## 7. Aggiornare il Raspberry
+## 8. Aggiornare il Raspberry
 
 Dopo la pubblicazione non serve più trasferire niente a mano.
 
@@ -201,14 +246,20 @@ cd ~/dmd && git pull && sudo ./update.sh
 
 ## Riepilogo, per quando la procedura è già nota
 
+Con `~/Downloads/zedmd-pi-repo` già presente sul Mac dalla volta precedente:
+
 ```bash
 cd ~/Downloads
-tar xzf zedmd*pi*.tar.gz
-cd ~/Downloads/zedmd-pi
-pwd && ls version.py && git remote -v     # ← verifica, non saltare
+ls ~/Downloads/*.tar.gz
+tar xzf zedmd-pi.tar.gz
+cd ~/Downloads/zedmd-pi-repo
+git pull
+find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
+cp -R ~/Downloads/zedmd-pi/. .
+pwd && grep __version__ version.py && git remote -v   # ← verifica, non saltare
 git add -A
 git commit -m "<versione>: <cosa è cambiato>"
-git push -u origin main
+git push
 curl -s https://raw.githubusercontent.com/kWGillo/zedmd-pi/main/version.py | grep __version__
 ```
 
@@ -218,11 +269,13 @@ curl -s https://raw.githubusercontent.com/kWGillo/zedmd-pi/main/version.py | gre
 
 | Messaggio | Che cosa è successo | Rimedio |
 |---|---|---|
-| `tar: ... Cannot open: No such file or directory` | nome del pacchetto diverso da quello atteso | `ls ~/Downloads/*.tar.gz` e usa il nome reale |
+| `zsh: no matches found: zedmd*pi*.tar.gz` | il jolly non trova nulla; in zsh questo blocca il comando | `ls ~/Downloads/*.tar.gz` e scrivi il nome reale |
+| `tar: ... Cannot open: No such file or directory` | nome del pacchetto diverso da quello atteso | come sopra |
 | `cd: no such file or directory: zedmd-pi` | il `tar` era fallito, la cartella non esiste | ripeti il passo 1 |
-| `fatal: not a git repository` | sei fuori dalla cartella del progetto | `cd ~/Downloads/zedmd-pi` |
+| `fatal: not a git repository` | la cartella scompattata non contiene la cronologia | passo 3, **non** `git init` |
+| `refusing to merge unrelated histories` | è stato fatto `git init` invece del clone | rifai dal passo 3 partendo dal clone |
 | `gh: command not found` | manca il client GitHub | `brew install gh` |
-| `Updates were rejected` | il remoto è avanti | passo 5 |
+| `Updates were rejected` | il remoto è avanti | passo 6 |
 | `git init` eseguito per sbaglio in `~/Downloads` | `cd` fallito e comandi incollati in blocco | `rm -rf ~/Downloads/.git` |
 
 Quest'ultima riga merita attenzione: un `git init` in `~/Downloads` trasforma

@@ -1,94 +1,88 @@
 {% extends "base.html" %}
-{% block title %}Media Player{% endblock %}
+{% block title %}{{ t('media.title') }}{% endblock %}
 
 {% block content %}
 
 {% if not ffmpeg %}
-<div class="banner warn">ffmpeg non è installato: i video non possono essere riprodotti.</div>
+<div class="banner warn">{{ t('media.noffmpeg') }}</div>
 {% endif %}
 
 <section class="card">
-  <h2>Libreria</h2>
+  <h2>{{ t('media.library') }}</h2>
   <dl class="info">
-    <dt>Cartella</dt><dd class="mono">{{ media_dir }}</dd>
-    <dt>Condivisione di rete</dt><dd class="mono">\\{{ request.host.split(':')[0] }}\dmd-media</dd>
-    <dt>File utilizzabili</dt><dd>{{ total }}</dd>
+    <dt>{{ t('media.folder') }}</dt><dd class="mono">{{ media_dir }}</dd>
+    <dt>{{ t('media.share') }}</dt><dd class="mono">\\{{ request.host.split(':')[0] }}\dmd-media</dd>
+    <dt>{{ t('media.usable') }}</dt><dd>{{ total }}</dd>
   </dl>
   <p class="status">{{ status }}</p>
 
   <form method="post" action="{{ url_for('api_media_upload') }}" enctype="multipart/form-data">
-    <label for="files">Carica immagini o video</label>
+    <label for="files">{{ t('media.upload') }}</label>
     <input type="file" id="files" name="files" multiple
            accept="image/*,video/*,.gif,.mp4,.mkv,.avi,.mov,.webm">
-    <button type="submit">Carica</button>
+    <button type="submit">{{ t('media.upload.button') }}</button>
   </form>
 
-  <p class="hint">L'elenco dei file viene tenuto in memoria per qualche minuto:
-     con librerie molto grandi rileggere il disco a ogni richiesta rallenta il
-     sistema e produce righe bianche sul pannello. Dopo aver copiato file dalla
-     condivisione di rete, usa il pulsante qui sotto.</p>
+  <p class="hint">{{ t('media.rescan.hint') }}</p>
   <form method="post" action="{{ url_for('api_media_rescan') }}">
-    <button type="submit" class="ghost">Rileggi la libreria</button>
+    <button type="submit" class="ghost">{{ t('media.rescan.button') }}</button>
   </form>
 </section>
 
 <section class="card">
-  <h2>Anteprima</h2>
-  <p class="hint">Interrompe l'attesa e manda subito sul pannello un contenuto
-     scelto a caso dalla libreria.</p>
+  <h2>{{ t('media.preview') }}</h2>
+  <p class="hint">{{ t('media.preview.hint') }}</p>
   <form method="post" action="{{ url_for('api_media_preview') }}">
-    <button type="submit" class="ghost">Mostra subito un contenuto</button>
+    <button type="submit" class="ghost">{{ t('media.preview.button') }}</button>
   </form>
 </section>
 
 <section class="card">
-  <h2>Riproduzione</h2>
+  <h2>{{ t('media.playback') }}</h2>
   <form method="post" action="{{ url_for('api_media') }}">
 
     <div class="row2">
-      <div><label for="min_interval">Intervallo minimo (s)</label>
+      <div><label for="min_interval">{{ t('media.minint') }}</label>
         <input type="number" id="min_interval" name="min_interval" min="3" max="3600"
                value="{{ cfg.mediaplayer.min_interval }}"></div>
-      <div><label for="max_interval">Intervallo massimo (s)</label>
+      <div><label for="max_interval">{{ t('media.maxint') }}</label>
         <input type="number" id="max_interval" name="max_interval" min="3" max="3600"
                value="{{ cfg.mediaplayer.max_interval }}"></div>
     </div>
-    <p class="hint">Tra un contenuto e il successivo il sistema attende un tempo
-       casuale compreso in questo intervallo.</p>
+    <p class="hint">{{ t('media.interval.hint') }}</p>
 
     <div class="row2">
-      <div><label for="image_duration">Durata delle foto (s)</label>
+      <div><label for="image_duration">{{ t('media.imgdur') }}</label>
         <input type="number" id="image_duration" name="image_duration" min="1" max="120"
                value="{{ cfg.mediaplayer.image_duration }}"></div>
-      <div><label for="video_duration">Durata dei video (s)</label>
+      <div><label for="video_duration">{{ t('media.viddur') }}</label>
         <input type="number" id="video_duration" name="video_duration" min="1" max="300"
                value="{{ cfg.mediaplayer.video_duration }}"></div>
     </div>
-    <p class="hint">Le animazioni brevi, come le GIF di Pixelcade, vengono
-       ripetute fino a coprire la durata indicata.</p>
+    <p class="hint">{{ t('media.duration.hint') }}</p>
 
     <div class="row2">
-      <div><label for="video_fps">Fotogrammi al secondo</label>
+      <div><label for="video_fps">{{ t('media.fps') }}</label>
         <input type="number" id="video_fps" name="video_fps" min="5" max="60"
                value="{{ cfg.mediaplayer.video_fps }}"></div>
-      <div><label for="scale_mode">Adattamento al pannello</label>
+      <div><label for="scale_mode">{{ t('media.scale') }}</label>
         <select id="scale_mode" name="scale_mode">
-          <option value="fit" {{ 'selected' if cfg.mediaplayer.scale_mode == 'fit' }}>Adatta (bande nere)</option>
-          <option value="fill" {{ 'selected' if cfg.mediaplayer.scale_mode == 'fill' }}>Riempi (ritaglia)</option>
+          <option value="fit" {{ 'selected' if cfg.mediaplayer.scale_mode == 'fit' }}>{{ t('media.scale.fit') }}</option>
+          <option value="fill" {{ 'selected' if cfg.mediaplayer.scale_mode == 'fill' }}>{{ t('media.scale.fill') }}</option>
         </select></div>
     </div>
 
     <label class="check">
       <input type="checkbox" name="pixel_art" {{ 'checked' if cfg.mediaplayer.pixel_art }}>
-      Modalità pixel art — bordi netti, consigliata per il materiale Pixelcade
+      {{ t('media.pixelart') }}
     </label>
 
-    <button type="submit">Salva</button>
+    <button type="submit">{{ t('common.save') }}</button>
   </form>
 </section>
 
 <section class="card">
-  <h2>File presenti</h2>
+  <h2>{{ t('media.files') }}</h2>
   {% if files %}
   <table class="files">
     {% for f in files %}
@@ -98,18 +92,17 @@
       <td class="act">
         <form method="post" action="{{ url_for('api_media_delete') }}">
           <input type="hidden" name="rel" value="{{ f.rel }}">
-          <button type="submit" class="ghost small">Elimina</button>
+          <button type="submit" class="ghost small">{{ t('common.delete') }}</button>
         </form>
       </td>
     </tr>
     {% endfor %}
   </table>
   {% if total > files|length %}
-  <p class="hint">Mostrati i primi {{ files|length }} di {{ total }}.</p>
+  <p class="hint">{{ t('media.files.shown', shown=files|length, total=total) }}</p>
   {% endif %}
   {% else %}
-  <p class="hint">Nessun file. Caricane dalla sezione qui sopra oppure copiali
-     nella condivisione di rete.</p>
+  <p class="hint">{{ t('media.files.empty') }}</p>
   {% endif %}
 </section>
 

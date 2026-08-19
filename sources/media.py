@@ -151,21 +151,23 @@ class MediaPlayerSource(Source):
             self._dirty = False
             return self._image
 
-    def status(self):
+    def status(self, lang=None):
         if not self._running:
-            return "disabilitato"
+            return self.t("status.disabled", lang)
         if self._error:
-            return self._error
+            return self.t("status.media.error", lang,
+                          name=self._error[0], error=self._error[1])
         # Solo il numero gia' noto: lo stato viene chiesto spesso e non deve
         # mai far ripartire una scansione del disco.
         count = cached_count(self.cfg["mediaplayer"]["media_dir"])
         if self._showing and self._current:
-            return "in riproduzione: %s" % os.path.basename(self._current)
+            return self.t("status.media.playing", lang,
+                          name=os.path.basename(self._current))
         if count < 0:
-            return "in attesa, libreria non ancora letta"
+            return self.t("status.media.unread", lang)
         if count == 0:
-            return "nessun file nella libreria"
-        return "in attesa, %d file in libreria, %d mostrati" % (count, self._shown)
+            return self.t("status.media.empty", lang)
+        return self.t("status.media.waiting", lang, count=count, shown=self._shown)
 
     # ------------------------------------------------------------------ ciclo principale
 
@@ -197,8 +199,10 @@ class MediaPlayerSource(Source):
                 self._error = None
                 self._shown += 1
             except Exception as exc:  # un file rovinato non deve fermare il servizio
-                self._error = "errore su %s: %s" % (os.path.basename(path), exc)
-                print("[media] %s" % self._error)
+                # Nome ed errore restano separati: la frase viene composta
+                # nella lingua dell'interfaccia solo al momento di mostrarla.
+                self._error = (os.path.basename(path), str(exc))
+                print("[media] errore su %s: %s" % self._error)
             finally:
                 self._showing = False
                 self._current = None

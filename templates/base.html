@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="{{ lang }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,16 +10,24 @@
   <header>
     <div class="brand">
       <span class="dot"></span>
-      <h1>DMD Controller</h1>
+      <h1>{{ t('app.title') }}</h1>
       <span class="version">v{{ version }}</span>
     </div>
     <nav>
-      <a href="{{ url_for('page_settings') }}" class="{{ 'on' if page == 'settings' }}">Impostazioni</a>
-      <a href="{{ url_for('page_clock') }}" class="{{ 'on' if page == 'clock' }}">Orologio</a>
-      <a href="{{ url_for('page_media') }}" class="{{ 'on' if page == 'media' }}">Media</a>
-      <a href="{{ url_for('page_radar') }}" class="{{ 'on' if page == 'radar' }}">Radar</a>
-      <a href="{{ url_for('page_services') }}" class="{{ 'on' if page == 'services' }}">Servizi</a>
+      <a href="{{ url_for('page_settings') }}" class="{{ 'on' if page == 'settings' }}">{{ t('nav.settings') }}</a>
+      <a href="{{ url_for('page_clock') }}" class="{{ 'on' if page == 'clock' }}">{{ t('nav.clock') }}</a>
+      <a href="{{ url_for('page_media') }}" class="{{ 'on' if page == 'media' }}">{{ t('nav.media') }}</a>
+      <a href="{{ url_for('page_radar') }}" class="{{ 'on' if page == 'radar' }}">{{ t('nav.radar') }}</a>
+      <a href="{{ url_for('page_services') }}" class="{{ 'on' if page == 'services' }}">{{ t('nav.services') }}</a>
     </nav>
+    <form method="post" action="{{ url_for('api_language') }}" class="langpick">
+      <input type="hidden" name="next" value="{{ request.path }}">
+      {% for code, name in languages %}
+      <button type="submit" name="language" value="{{ code }}"
+              class="lang {{ 'on' if lang == code }}"
+              title="{{ name }}">{{ code | upper }}</button>
+      {% endfor %}
+    </form>
   </header>
 
   <main>
@@ -27,7 +35,8 @@
   </main>
 
   <footer>
-    <span>256 &times; 64 px &middot; FM6373 &middot; versione {{ version }}</span>
+    <span>256 &times; 64 px &middot; FM6373 &middot; {{ t('footer.version') }} {{ version }}</span>
+    <a href="{{ github_url }}" target="_blank" rel="noopener">{{ t('footer.project') }}</a>
   </footer>
 </body>
 </html>

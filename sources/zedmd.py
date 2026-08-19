@@ -141,16 +141,20 @@ class ZeDMDSource(Source):
             # fromarray copia già: una seconda copia sarebbe sprecata.
             return Image.fromarray(self._buffer, "RGB")
 
-    def status(self):
+    def status(self, lang=None):
         if not self._running:
-            return "disabilitato"
+            return self.t("status.disabled", lang)
         if self._client_addr:
-            return "connesso da %s via %s (%d frame)" % (
-                self._client_addr[0], self._transport or "TCP", self._frames)
+            return self.t("status.zedmd.connected", lang,
+                          addr=self._client_addr[0],
+                          transport=self._transport or "TCP",
+                          frames=self._frames)
         if self._last_activity:
-            idle = int(time.time() - self._last_activity)
-            return "in attesa, ultimo frame %d s fa (%d totali)" % (idle, self._frames)
-        return "in ascolto su TCP/UDP %d, nessun client" % self.cfg["zedmd"]["stream_port"]
+            return self.t("status.zedmd.idle", lang,
+                          idle=int(time.time() - self._last_activity),
+                          frames=self._frames)
+        return self.t("status.zedmd.listening", lang,
+                      port=self.cfg["zedmd"]["stream_port"])
 
     # ------------------------------------------------------------------ handshake HTTP
 

@@ -56,7 +56,11 @@ driver, A/B/C address lines only) chained to 256×64.
   before installing, and rolls back automatically if the service does not come
   back up.
 - **Web interface** — brightness, NTP, timezone, DST, S-PWM fine tuning,
-  services, media upload, radar configuration, updates.
+  services, media upload, radar configuration, updates. Available in **English
+  and Italian**: the language is picked from the browser's `Accept-Language` on
+  first visit and can be switched from any page. The weekday names shown on the
+  panel are a separate setting, since whoever looks at the cabinet is not
+  necessarily whoever configures it.
 - **Single owner of the panel** — one process, several content sources, one
   arbiter with pre-emption and a grace period.
 
@@ -273,8 +277,12 @@ display.py     exclusive owner of the panel
 zedmd_http.py  ZeDMD handshake server (port 80)
 webui.py       Flask web interface (port 8080)
 ota.py         over-the-air update from this repository
+i18n.py        English/Italian strings for the web interface
 sources/       zedmd.py, airradar.py, media.py, clock.py
 ```
+
+Adding a language means adding a column to the tuples in `i18n.py` and a code
+to `LANGUAGES` — there are no `.po` files to compile and no build step.
 
 Adding a service means writing a new source in `sources/`, registering it in
 `Runtime`, and adding an entry to the services page.

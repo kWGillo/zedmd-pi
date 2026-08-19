@@ -1,74 +1,87 @@
 {% extends "base.html" %}
-{% block title %}Impostazioni{% endblock %}
+{% block title %}{{ t('nav.settings') }}{% endblock %}
 
 {% block content %}
 
 {% if sleeping or night %}
 <div class="banner">
-  {% if sleeping %}Sleep mode attivo: display spento.{% else %}Night mode attivo: luminosità ridotta.{% endif %}
+  {% if sleeping %}{{ t('banner.sleep') }}{% else %}{{ t('banner.night') }}{% endif %}
 </div>
 {% endif %}
 
 <section class="card">
-  <h2>Luminosità</h2>
+  <h2>{{ t('settings.brightness') }}</h2>
   <div class="slider-row">
     <input type="range" id="brightness" min="0" max="100" step="1"
            value="{{ cfg.display.brightness }}">
     <output id="brightness-value">{{ cfg.display.brightness }}%</output>
   </div>
-  <p class="hint">Valore diurno di riferimento. La modifica è immediata sul
-     pannello e viene salvata automaticamente.</p>
+  <p class="hint">{{ t('settings.brightness.hint') }}</p>
 </section>
 
 <section class="card">
-  <h2>Night mode e Sleep mode</h2>
+  <h2>{{ t('settings.language') }}</h2>
+  <form method="post" action="{{ url_for('api_language') }}" class="inline">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <select name="language">
+      {% for code, name in languages %}
+      <option value="{{ code }}" {{ 'selected' if cfg.web.language == code }}>{{ name }}</option>
+      {% endfor %}
+      <option value="" {{ 'selected' if not cfg.web.language }}>{{ t('common.default') }}</option>
+    </select>
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+  <p class="hint">{{ t('settings.language.hint') }}</p>
+</section>
+
+<section class="card">
+  <h2>{{ t('settings.modes') }}</h2>
   <form method="post" action="{{ url_for('api_display') }}">
 
     <label class="check">
       <input type="checkbox" name="night_enabled" {{ 'checked' if cfg.display.night_enabled }}>
-      Night mode — abbassa la luminosità in una fascia oraria
+      {{ t('settings.night') }}
     </label>
     <div class="row3">
-      <div><label for="night_start">Dalle</label>
+      <div><label for="night_start">{{ t('common.from') }}</label>
         <input type="time" id="night_start" name="night_start" value="{{ cfg.display.night_start }}"></div>
-      <div><label for="night_end">Alle</label>
+      <div><label for="night_end">{{ t('common.to') }}</label>
         <input type="time" id="night_end" name="night_end" value="{{ cfg.display.night_end }}"></div>
-      <div><label for="night_brightness">Luminosità</label>
+      <div><label for="night_brightness">{{ t('settings.brightness') }}</label>
         <input type="number" id="night_brightness" name="night_brightness" min="0" max="100"
                value="{{ cfg.display.night_brightness }}"></div>
     </div>
 
     <label class="check">
       <input type="checkbox" name="sleep_enabled" {{ 'checked' if cfg.display.sleep_enabled }}>
-      Sleep mode — spegne il display in una fascia oraria
+      {{ t('settings.sleep') }}
     </label>
     <div class="row3">
-      <div><label for="sleep_start">Dalle</label>
+      <div><label for="sleep_start">{{ t('common.from') }}</label>
         <input type="time" id="sleep_start" name="sleep_start" value="{{ cfg.display.sleep_start }}"></div>
-      <div><label for="sleep_end">Alle</label>
+      <div><label for="sleep_end">{{ t('common.to') }}</label>
         <input type="time" id="sleep_end" name="sleep_end" value="{{ cfg.display.sleep_end }}"></div>
       <div></div>
     </div>
 
     <label class="check">
       <input type="checkbox" name="sleep_wake_on_zedmd" {{ 'checked' if cfg.display.sleep_wake_on_zedmd }}>
-      Risveglia il display se arrivano frame da Batocera durante lo Sleep
+      {{ t('settings.wake') }}
     </label>
 
-    <button type="submit">Salva</button>
+    <button type="submit">{{ t('common.save') }}</button>
   </form>
-  <p class="hint">Sleep ha la precedenza su Night. Le fasce possono attraversare
-     la mezzanotte, ad esempio dalle 23:00 alle 07:00.</p>
+  <p class="hint">{{ t('settings.modes.hint') }}</p>
 </section>
 
 <section class="card">
-  <h2>Ora e sincronizzazione</h2>
+  <h2>{{ t('settings.time') }}</h2>
   <form method="post" action="{{ url_for('api_time') }}">
-    <label for="ntp_server">Server NTP</label>
+    <label for="ntp_server">{{ t('settings.ntp') }}</label>
     <input type="text" id="ntp_server" name="ntp_server"
            value="{{ cfg.time.ntp_server }}" placeholder="pool.ntp.org">
 
-    <label for="timezone">Fuso orario</label>
+    <label for="timezone">{{ t('settings.timezone') }}</label>
     <input list="tzlist" id="timezone" name="timezone" value="{{ cfg.time.timezone }}">
     <datalist id="tzlist">
       {% for tz in timezones %}<option value="{{ tz }}">{% endfor %}
@@ -76,159 +89,178 @@
 
     <label class="check">
       <input type="checkbox" name="dst_auto" {{ 'checked' if cfg.time.dst_auto }}>
-      Ora legale automatica (secondo il fuso orario selezionato)
+      {{ t('settings.dst') }}
     </label>
 
-    <label for="utc_offset">Scostamento UTC manuale (se l'automatismo è disattivato)</label>
+    <label for="utc_offset">{{ t('settings.utc') }}</label>
     <select id="utc_offset" name="utc_offset">
       {% for h in range(-12, 15) %}
       <option value="{{ h }}" {{ 'selected' if cfg.time.utc_offset == h }}>UTC{{ '%+d' % h }}</option>
       {% endfor %}
     </select>
 
-    <button type="submit">Salva e applica</button>
+    <button type="submit">{{ t('common.save_apply') }}</button>
   </form>
 
   <dl class="info">
-    <dt>Ora di sistema</dt><dd>{{ now }}</dd>
-    <dt>Fuso attivo</dt><dd>{{ ntp.get('Timezone', 'n/d') }}</dd>
-    <dt>NTP attivo</dt><dd>{{ 'sì' if ntp.get('NTP') == 'yes' else 'no' }}</dd>
-    <dt>Sincronizzato</dt><dd>{{ 'sì' if ntp.get('NTPSynchronized') == 'yes' else 'no' }}</dd>
+    <dt>{{ t('settings.systime') }}</dt><dd>{{ now }}</dd>
+    <dt>{{ t('settings.activetz') }}</dt><dd>{{ ntp.get('Timezone', '—') }}</dd>
+    <dt>{{ t('settings.ntpon') }}</dt><dd>{{ t('common.yes') if ntp.get('NTP') == 'yes' else t('common.no') }}</dd>
+    <dt>{{ t('settings.synced') }}</dt><dd>{{ t('common.yes') if ntp.get('NTPSynchronized') == 'yes' else t('common.no') }}</dd>
   </dl>
 </section>
 
 <section class="card">
-  <h2>Rete</h2>
+  <h2>{{ t('settings.network') }}</h2>
   <dl class="info">
-    <dt>Hostname</dt><dd>{{ hostname }}</dd>
+    <dt>{{ t('settings.hostname') }}</dt><dd>{{ hostname }}</dd>
     {% for ip in ips %}
-    <dt>Indirizzo IP locale</dt><dd class="mono big">{{ ip }}</dd>
+    <dt>{{ t('settings.localip') }}</dt><dd class="mono big">{{ ip }}</dd>
     {% else %}
-    <dt>Indirizzo IP locale</dt><dd>non rilevato</dd>
+    <dt>{{ t('settings.localip') }}</dt><dd>{{ t('common.none') }}</dd>
     {% endfor %}
-    <dt>Handshake ZeDMD</dt><dd class="mono">porta {{ cfg.zedmd.http_port }}</dd>
-    <dt>Stream ZeDMD</dt><dd class="mono">porta {{ cfg.zedmd.stream_port }} ({{ cfg.zedmd.transport }})</dd>
-    <dt>Interfaccia web</dt><dd class="mono">porta {{ cfg.web.port }}</dd>
+    <dt>{{ t('settings.handshake') }}</dt><dd class="mono">{{ t('common.port') }} {{ cfg.zedmd.http_port }}</dd>
+    <dt>{{ t('settings.stream') }}</dt><dd class="mono">{{ t('common.port') }} {{ cfg.zedmd.stream_port }} ({{ cfg.zedmd.transport }})</dd>
+    <dt>{{ t('settings.webui') }}</dt><dd class="mono">{{ t('common.port') }} {{ cfg.web.port }}</dd>
   </dl>
-  <p class="hint">Nel client ZeDMD indica solo questo indirizzo IP: userà da sé
-     le porte corrette.</p>
+  <p class="hint">{{ t('settings.network.hint') }}</p>
 </section>
 
 <section class="card">
-  <h2>Regolazione fine del pannello</h2>
-  <p class="hint">Se compaiono lampi o strisce bianche orizzontali, agisci prima
-     su <em>cicli extra a fine frame</em>: aggiunge tempo dopo l'invio dei dati e
-     copre il vuoto che genera il lampo. Parti da 1 e sali di uno alla volta.
-     Campo vuoto = valore predefinito della libreria.</p>
+  <h2>{{ t('settings.panel') }}</h2>
+  <p class="hint">{{ t('settings.panel.hint') | safe }}</p>
 
   <form method="post" action="{{ url_for('api_panel') }}">
     <div class="row2">
-      <div><label for="SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES">Cicli extra a fine frame</label>
+      <div><label for="SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES">{{ t('settings.panel.extra') }}</label>
         <input type="number" min="0" max="16"
                id="SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES" name="SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES"
                value="{{ cfg.panel.spwm_env.SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES }}"
-               placeholder="predefinito"></div>
-      <div><label for="SPWM_FRAME_END_SLEEP_US">Pausa tra frame (µs)</label>
+               placeholder="{{ t('common.default') }}"></div>
+      <div><label for="SPWM_FRAME_END_SLEEP_US">{{ t('settings.panel.sleep') }}</label>
         <input type="number" min="0" max="5000"
                id="SPWM_FRAME_END_SLEEP_US" name="SPWM_FRAME_END_SLEEP_US"
                value="{{ cfg.panel.spwm_env.SPWM_FRAME_END_SLEEP_US }}"
-               placeholder="predefinito"></div>
+               placeholder="{{ t('common.default') }}"></div>
     </div>
 
     <div class="row3">
-      <div><label for="limit_refresh">Refresh massimo (Hz)</label>
+      <div><label for="limit_refresh">{{ t('settings.panel.refresh') }}</label>
         <input type="number" id="limit_refresh" name="limit_refresh" min="0" max="300"
                value="{{ cfg.panel.limit_refresh }}"></div>
-      <div><label for="pwm_bits">Profondità PWM</label>
+      <div><label for="pwm_bits">{{ t('settings.panel.pwm') }}</label>
         <input type="number" id="pwm_bits" name="pwm_bits" min="1" max="11"
                value="{{ cfg.panel.pwm_bits }}"></div>
-      <div><label for="slowdown">Rallentamento GPIO</label>
+      <div><label for="slowdown">{{ t('settings.panel.slowdown') }}</label>
         <input type="number" id="slowdown" name="slowdown" min="0" max="6"
                value="{{ cfg.panel.slowdown }}"></div>
     </div>
 
-    <label for="spwm_register_config">Profilo di registro del chip</label>
+    <label for="spwm_register_config">{{ t('settings.panel.profile') }}</label>
     <input type="number" id="spwm_register_config" name="spwm_register_config" min="0" max="77"
            value="{{ cfg.panel.spwm_register_config }}">
 
     <label class="check">
       <input type="checkbox" name="show_refresh" {{ 'checked' if cfg.panel.show_refresh }}>
-      Scrivi il refresh rate nel log — utile durante la taratura
+      {{ t('settings.panel.showrefresh') }}
     </label>
 
     <input type="hidden" name="restart" value="1">
-    <button type="submit">Salva e riavvia il servizio</button>
+    <button type="submit">{{ t('settings.panel.button') }}</button>
   </form>
 
-  <p class="hint">Queste impostazioni si applicano solo alla creazione del
-     pannello, quindi il servizio viene riavviato: il display resta spento per
-     qualche secondo. Segui l'effetto con <span class="mono">journalctl -u dmd -f</span>.</p>
+  <p class="hint">{{ t('settings.panel.note') }}
+     <span class="mono">journalctl -u dmd -f</span>.</p>
 </section>
 
 <section class="card">
-  <h2>Aggiornamenti</h2>
+  <h2>{{ t('settings.updates') }}</h2>
 
   <dl class="info">
-    <dt>Versione installata</dt><dd class="mono big">{{ update.current }}</dd>
-    <dt>Versione su GitHub</dt>
-    <dd class="mono">{{ update.latest if update.latest else 'non verificata' }}</dd>
-    <dt>Ultimo controllo</dt>
-    <dd>{% if update.checked %}{{ update.checked | timestamp }}{% else %}mai{% endif %}</dd>
+    <dt>{{ t('settings.update.current') }}</dt><dd class="mono big">{{ update.current }}</dd>
+    <dt>{{ t('settings.update.latest') }}</dt>
+    <dd class="mono">{{ update.latest if update.latest else t('settings.update.unchecked') }}</dd>
+    <dt>{{ t('settings.update.checked') }}</dt>
+    <dd>{% if update.checked %}{{ update.checked | timestamp }}{% else %}{{ t('common.never') }}{% endif %}</dd>
   </dl>
 
   {% if update.error %}
-  <div class="banner warn">Controllo non riuscito: {{ update.error }}</div>
+  <div class="banner warn">{{ t('settings.update.failed', error=update.error) }}</div>
   {% elif update.available %}
-  <div class="banner">È disponibile la versione {{ update.latest }}.</div>
+  <div class="banner">{{ t('settings.update.available', version=update.latest) }}</div>
   {% elif update.latest %}
-  <p class="hint">Il software è aggiornato.</p>
+  <p class="hint">{{ t('settings.update.uptodate') }}</p>
   {% endif %}
 
   <div class="actions">
     <form method="post" action="{{ url_for('api_update_check') }}">
-      <button type="submit" class="ghost">Controlla ora</button>
+      <button type="submit" class="ghost">{{ t('settings.update.checknow') }}</button>
     </form>
     {% if update.available %}
     <form method="post" action="{{ url_for('api_update_install') }}">
-      <button type="submit">Installa la versione {{ update.latest }}</button>
+      <button type="submit">{{ t('settings.update.install', version=update.latest) }}</button>
     </form>
     {% endif %}
   </div>
 
   <form method="post" action="{{ url_for('api_update_settings') }}">
     <div class="row3">
-      <div><label for="repo">Repository</label>
+      <div><label for="repo">{{ t('settings.update.repo') }}</label>
         <input type="text" id="repo" name="repo" value="{{ cfg.ota.repo }}"></div>
-      <div><label for="branch">Ramo</label>
+      <div><label for="branch">{{ t('settings.update.branch') }}</label>
         <input type="text" id="branch" name="branch" value="{{ cfg.ota.branch }}"></div>
-      <div><label for="check_interval_hours">Controllo ogni (ore)</label>
+      <div><label for="check_interval_hours">{{ t('settings.update.interval') }}</label>
         <input type="number" id="check_interval_hours" name="check_interval_hours"
                min="1" max="720" value="{{ cfg.ota.check_interval_hours }}"></div>
     </div>
     <label class="check">
       <input type="checkbox" name="auto_check" {{ 'checked' if cfg.ota.auto_check }}>
-      Controlla automaticamente la disponibilità di aggiornamenti
+      {{ t('settings.update.auto') }}
     </label>
-    <button type="submit">Salva</button>
+    <button type="submit">{{ t('common.save') }}</button>
   </form>
 
-  <p class="hint">L'installazione scarica l'archivio dal ramo indicato, verifica
-     che contenga i file attesi e che tutto il codice compili, salva una copia
-     della versione in uso e solo allora sostituisce i file. Se dopo il riavvio
-     il servizio non risponde, la versione precedente viene ripristinata da sola.
-     La configurazione in <span class="mono">/etc/dmd/config.json</span> non
-     viene mai toccata.</p>
+  <p class="hint">{{ t('settings.update.hint', path='/etc/dmd/config.json') }}</p>
+  <p class="hint"><a href="{{ github_url }}" target="_blank" rel="noopener">{{ github_url }}</a></p>
 
   {% if ota_log %}
-  <label>Diario degli aggiornamenti</label>
+  <label>{{ t('settings.update.log') }}</label>
   <pre class="log">{{ ota_log }}</pre>
   {% endif %}
 </section>
 
 <section class="card">
-  <h2>Servizio</h2>
+  <h2>{{ t('settings.config') }}</h2>
+  <p class="hint">{{ t('settings.config.hint') }}</p>
+
+  {% if config_result %}
+  <div class="banner">{{ config_result }}</div>
+  {% endif %}
+
+  <form method="get" action="{{ url_for('api_config_export') }}">
+    <label class="check">
+      <input type="checkbox" name="position" value="1" checked>
+      {{ t('settings.config.position') }}
+    </label>
+    <p class="hint">{{ t('settings.config.position.hint') }}</p>
+    <button type="submit">{{ t('settings.config.export') }}</button>
+  </form>
+
+  <hr class="sep">
+
+  <form method="post" action="{{ url_for('api_config_import') }}"
+        enctype="multipart/form-data">
+    <label for="configfile">{{ t('settings.config.import') }}</label>
+    <input type="file" id="configfile" name="file" accept=".json,application/json">
+    <button type="submit" class="ghost">{{ t('settings.config.import.button') }}</button>
+  </form>
+  <p class="hint">{{ t('settings.config.import.hint', path='/var/lib/dmd/') }}</p>
+</section>
+
+<section class="card">
+  <h2>{{ t('settings.service') }}</h2>
   <form method="post" action="{{ url_for('api_restart') }}">
-    <button type="submit" class="ghost">Riavvia il servizio DMD</button>
+    <button type="submit" class="ghost">{{ t('settings.service.restart') }}</button>
   </form>
 </section>
 
