@@ -26,6 +26,13 @@ DEFAULTS = {
         "limit_refresh": 60,
         "pwm_bits": 11,
         "profile_dir": "/home/gillo/rpi-rgb-led-matrix_pwm_experiment/lib/spwm/registertest/data",
+        "show_refresh": False,
+        # Regolazioni fini del driver S-PWM, applicate come variabili d'ambiente.
+        # Vuoto = valore predefinito della libreria.
+        "spwm_env": {
+            "SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES": "",
+            "SPWM_FRAME_END_SLEEP_US": "",
+        },
     },
     "display": {
         "brightness": 50,
@@ -56,6 +63,24 @@ DEFAULTS = {
         "scale_mode": "fit",
         "pixel_art": True,
     },
+    "air_radar": {
+        # Nessuna posizione preimpostata: va indicata dall'utente nella web UI.
+        # Il servizio non interroga nulla finche' le coordinate sono a zero.
+        "latitude": 0.0,
+        "longitude": 0.0,
+        "radius_km": 3.0,
+        "provider": "adsb.fi",
+        "poll_interval": 30,
+        "display_seconds": 10,
+        "cooldown": 600,
+        "max_altitude_ft": 0,
+        "log_route": True,
+        "fields": ["route", "type", "altitude", "speed", "distance"],
+        "log_enabled": True,
+        "log_path": "/var/lib/dmd/flights.csv",
+        "callsign_color": "#00d0ff",
+        "info_color": "#ff8c1a",
+    },
     "time": {
         "ntp_server": "pool.ntp.org",
         "timezone": "Europe/Rome",
@@ -64,6 +89,12 @@ DEFAULTS = {
     },
     "web": {
         "port": 8080,
+    },
+    "ota": {
+        "repo": "kWGillo/zedmd-pi",
+        "branch": "main",
+        "auto_check": True,
+        "check_interval_hours": 24,
     },
     "services": {
         "zedmd": True,

@@ -23,7 +23,20 @@
     <button type="submit">Carica</button>
   </form>
 
-  <form method="post" action="{{ url_for('api_media_preview') }}" class="inline">
+  <p class="hint">L'elenco dei file viene tenuto in memoria per qualche minuto:
+     con librerie molto grandi rileggere il disco a ogni richiesta rallenta il
+     sistema e produce righe bianche sul pannello. Dopo aver copiato file dalla
+     condivisione di rete, usa il pulsante qui sotto.</p>
+  <form method="post" action="{{ url_for('api_media_rescan') }}">
+    <button type="submit" class="ghost">Rileggi la libreria</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Anteprima</h2>
+  <p class="hint">Interrompe l'attesa e manda subito sul pannello un contenuto
+     scelto a caso dalla libreria.</p>
+  <form method="post" action="{{ url_for('api_media_preview') }}">
     <button type="submit" class="ghost">Mostra subito un contenuto</button>
   </form>
 </section>

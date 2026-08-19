@@ -45,10 +45,24 @@ driver, A/B/C address lines only) chained to 256×64.
   weekday names in Italian, French or English.
 - **Media player** — random photos and videos from a library folder, shown at
   random intervals. Works with Pixelcade artwork, with or without Batocera.
+  Files arrive over SMB or through the web interface; ffmpeg does the
+  conversion, so most formats work without preparation.
+- **Air radar** — aircraft passing within a radius of a GPS position, from the
+  community ADS-B APIs (adsb.fi, adsb.one, adsb.lol — free, no key). Selectable
+  flight fields, origin/destination lookup, and a downloadable CSV log of every
+  pass.
 - **Night mode / Sleep mode** — scheduled dimming and scheduled blackout.
-- **Web interface** — brightness, NTP, timezone, DST, services, media upload.
+- **Over-the-air updates** — checks this repository, verifies the archive
+  before installing, and rolls back automatically if the service does not come
+  back up.
+- **Web interface** — brightness, NTP, timezone, DST, S-PWM fine tuning,
+  services, media upload, radar configuration, updates.
 - **Single owner of the panel** — one process, several content sources, one
   arbiter with pre-emption and a grace period.
+
+No GPS coordinates ship with this repository: the radar starts at 0/0 and does
+nothing until a position is entered locally. Your location stays in
+`/etc/dmd/config.json` on your own machine.
 
 ---
 
@@ -104,8 +118,9 @@ cd rpi-rgb-led-matrix_pwm_experiment && make && cd examples-api-use && make
 Then install `zedmd-pi`:
 
 ```bash
-git clone https://github.com/kWGillo/zedmd-pi.git
-cd zedmd-pi
+git clone https://github.com/kWGillo/zedmd-pi.git ~/dmd
+cd ~/dmd
+chmod +x install.sh update.sh setup_share.sh
 sudo ./install.sh
 ```
 
@@ -119,7 +134,23 @@ journalctl -u dmd -f
 
 The web interface is on port **8080**. Port 80 redirects to it.
 
-To update an existing installation: `sudo ./update.sh`.
+### Updating
+
+From the web interface: the *Settings* page compares the installed version
+with the one published here and offers a button when a newer one exists. The
+update downloads the branch archive, checks that every expected file is present
+and that all Python compiles, backs up the current installation, swaps the
+files, restarts the service, and then polls `/api/status`. If the service does
+not answer, the backup is restored automatically. The installer runs detached
+so it survives the restart of the service that launched it.
+
+From the command line:
+
+```bash
+cd ~/dmd && git pull && sudo ./update.sh
+```
+
+Either way, restart Batocera afterwards.
 
 ### Finding the right panel profile
 
@@ -224,6 +255,7 @@ service and an arbiter decides who owns the display.
 | Priority | Source |
 |---|---|
 | 100 | ZeDMD |
+| 60 | Air radar |
 | 50 | Media player |
 | 10 | Clock |
 
@@ -240,11 +272,40 @@ dmdd.py        main service, arbiter, render loop
 display.py     exclusive owner of the panel
 zedmd_http.py  ZeDMD handshake server (port 80)
 webui.py       Flask web interface (port 8080)
-sources/       zedmd.py, media.py, clock.py
+ota.py         over-the-air update from this repository
+sources/       zedmd.py, airradar.py, media.py, clock.py
 ```
 
 Adding a service means writing a new source in `sources/`, registering it in
 `Runtime`, and adding an entry to the services page.
+
+---
+
+## Timing, or: why white lines appear
+
+The matrix library generates the panel signal in software, timing GPIO
+transitions to the microsecond. Anything that preempts the process — another
+program, disk I/O, network traffic — stretches one row's on-time, and that row
+shows up brighter. **Horizontal white lines are a load indicator, not a panel
+fault.**
+
+This has practical consequences for the rest of the system:
+
+- Keep `isolcpus=3` and `dtparam=audio=off`. They are not optional.
+- Lower `panel.pwm_bits` before lowering anything else: 8 bits instead of 11
+  cuts the work substantially and the difference is hard to see on a DMD.
+- Avoid repeated filesystem walks. A full Pixelcade collection is tens of
+  thousands of files; since 1.6 the library listing is cached rather than
+  re-read on every content change and every status request, because that scan
+  alone was enough to produce visible lines.
+- Prefer a USB stick over the SD card for the media library, and stop the
+  service before bulk-copying into it.
+
+If instead you see `Bus error` or `Input/output error` on system binaries, that
+is not a timing problem — the machine has lost the ability to read its own
+executables. Check `vcgencmd get_throttled` for undervoltage (panels and Pi on
+one supply is the usual cause) and `dmesg` for `mmc`/`ext4` errors before
+blaming the CPU.
 
 ---
 

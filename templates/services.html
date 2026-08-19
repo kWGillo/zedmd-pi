@@ -18,6 +18,7 @@
     <select id="force" name="source">
       <option value="auto" {{ 'selected' if cfg.arbiter.force_source == 'auto' }}>Automatica (per priorità)</option>
       <option value="zedmd" {{ 'selected' if cfg.arbiter.force_source == 'zedmd' }}>Forza ZeDMD</option>
+      <option value="air_radar" {{ 'selected' if cfg.arbiter.force_source == 'air_radar' }}>Forza Air Radar</option>
       <option value="mediaplayer" {{ 'selected' if cfg.arbiter.force_source == 'mediaplayer' }}>Forza Media Player</option>
       <option value="clock" {{ 'selected' if cfg.arbiter.force_source == 'clock' }}>Forza Clock</option>
     </select>

@@ -4,58 +4,54 @@ Servizio che pilota il pannello LED 256×64 (chip FM6373) da Raspberry Pi, si
 presenta a Batocera come un **ZeDMD-WiFi** e offre un'interfaccia web di
 controllo.
 
-Pacchetto: `dmdcontroller.tar.gz`
+Repository: **https://github.com/kWGillo/zedmd-pi**
+Versione documentata: **1.6**
+
+Dalla versione 1.5 il software si installa e si aggiorna direttamente da
+GitHub: non serve più trasferire archivi a mano.
 
 ---
 
 ## 1. Prerequisiti
 
 Il Raspberry deve essere già preparato secondo la procedura hardware del
-progetto:
+progetto (manuale *DMD Pi — procedura di preparazione*):
 
 - audio integrato disattivato (`dtparam=audio=off` in `/boot/firmware/config.txt`)
 - `isolcpus=3` in `/boot/firmware/cmdline.txt` sui modelli quad-core
 - libreria `rpi-rgb-led-matrix_pwm_experiment` clonata e compilata nella home
 - pannelli cablati e già verificati con la demo del quadrato rotante
 
-Serve inoltre l'accesso SSH al Raspberry (in questo manuale: utente `gillo`,
-hostname `dmdpi`).
+Serve inoltre l'accesso SSH al Raspberry. In questo manuale l'utente è `gillo`
+e l'host è `dmdpi.local`.
 
 ---
 
-## 2. Trasferimento dei file
+## 2. Installazione da GitHub
 
-Dal **Mac**, nella cartella dove hai scaricato il pacchetto:
-
-```bash
-cd ~/Downloads
-tar xzf dmd*controller*.tar.gz
-scp -r dmd gillo@dmdpi.local:~/
-```
-
-Il carattere jolly `dmd*controller*` copre le varianti del nome file introdotte
-dal browser in fase di download.
-
----
-
-## 3. Installazione
-
-Via SSH sul Raspberry:
+Tutto si fa via SSH sul Raspberry. Non serve più il Mac come intermediario.
 
 ```bash
 ssh gillo@dmdpi.local
+
+sudo apt update
+sudo apt install -y git
+
+git clone https://github.com/kWGillo/zedmd-pi.git ~/dmd
 cd ~/dmd
-chmod +x install.sh
+chmod +x install.sh update.sh setup_share.sh
 sudo ./install.sh
 ```
 
 Lo script esegue in sequenza:
 
-1. installazione dei pacchetti di sistema (Flask, NumPy, Pillow, Cython, font)
+1. installazione dei pacchetti di sistema (Flask, NumPy, Pillow, Cython, font,
+   ffmpeg, Samba)
 2. **compilazione dei binding Python** della libreria matrice
 3. copia dei file in `/opt/dmd`
 4. creazione della configurazione in `/etc/dmd/config.json`
-5. registrazione del servizio systemd `dmd`
+5. creazione della libreria media e della condivisione SMB
+6. registrazione del servizio systemd `dmd`
 
 > **Il passo 2 è lento.** Compila da sorgente l'intera libreria C++: da qualche
 > minuto su Pi 4 fino a oltre dieci minuti su Pi Zero 2 W. È normale, non
@@ -67,9 +63,22 @@ Se la libreria matrice non si trova nella home dell'utente:
 sudo MATRIX_DIR=/percorso/della/libreria ./install.sh
 ```
 
+### Se la cartella `~/dmd` esiste già
+
+Da un'installazione precedente fatta con il pacchetto `.tar.gz`:
+
+```bash
+mv ~/dmd ~/dmd-vecchia
+git clone https://github.com/kWGillo/zedmd-pi.git ~/dmd
+cd ~/dmd && sudo ./update.sh
+```
+
+La configurazione in `/etc/dmd/config.json` non viene toccata: le impostazioni
+esistenti restano.
+
 ---
 
-## 4. Configurazione prima del primo avvio
+## 3. Configurazione prima del primo avvio
 
 Apri `/etc/dmd/config.json` e verifica due valori:
 
@@ -87,10 +96,11 @@ Le altre chiavi rilevanti, già corrette di default:
 | `zedmd.stream_port` | `3333` | frame DMD (TCP e UDP) |
 | `zedmd.grace_seconds` | `60` | quanto ZeDMD trattiene il display dopo l'ultimo frame |
 | `zedmd.client_timeout` | `10` | silenzio oltre il quale il client è considerato caduto |
+| `ota.repo` | `kWGillo/zedmd-pi` | repository per l'aggiornamento via rete |
 
 ---
 
-## 5. Avvio
+## 4. Avvio
 
 ```bash
 sudo systemctl start dmd
@@ -109,7 +119,7 @@ Digitando l'indirizzo senza porta si viene rediretti automaticamente.
 
 ---
 
-## 6. Le tre porte
+## 5. Le tre porte
 
 | Porta | Uso | Servita da |
 |---|---|---|
@@ -125,7 +135,7 @@ server dedicato invia tutto in una sola scrittura.
 
 ---
 
-## 7. Collegamento a Batocera
+## 6. Collegamento a Batocera
 
 Sulla macchina Batocera, via SSH come `root`, crea il file di configurazione di
 `dmdserver`:
@@ -168,20 +178,33 @@ non sta riuscendo ad aprire lo stream: verifica che `zedmd.http_port` sia 80 e
 
 ---
 
-## 8. Aggiornamento
+## 7. Aggiornamento
 
-Quando ricevi una nuova versione del pacchetto, dal Mac:
+Ci sono due modi. Il primo non richiede la riga di comando.
+
+### 7.1 Dall'interfaccia web (consigliato)
+
+Nella pagina **Impostazioni**, sezione *Aggiornamento*, il sistema confronta la
+versione installata con quella pubblicata su GitHub. Quando ce n'è una nuova
+compare il pulsante di installazione.
+
+L'aggiornamento è progettato per non poter lasciare il sistema rotto:
+
+1. scarica l'archivio del ramo in una cartella temporanea
+2. verifica che ci siano tutti i file attesi e che tutto il Python compili
+3. salva una copia dell'installazione corrente in `/var/lib/dmd/backup`
+4. sostituisce i file e riavvia il servizio
+5. interroga la web UI per capire se il servizio è davvero ripartito
+6. se non risponde, ripristina la copia e riavvia di nuovo
+
+L'esito si legge nel riquadro del registro, in fondo alla stessa pagina.
+
+### 7.2 Da riga di comando
 
 ```bash
-cd ~/Downloads
-tar xzf dmd*controller*.tar.gz
-scp -r dmd gillo@dmdpi.local:~/
-```
-
-Poi sul Raspberry:
-
-```bash
-cd ~/dmd && sudo ./update.sh
+cd ~/dmd
+git pull
+sudo ./update.sh
 ```
 
 Lo script copia i file aggiornati in `/opt/dmd`, adegua automaticamente la
@@ -199,26 +222,29 @@ esegue una volta sola in fase di installazione.
 
 ---
 
-## 9. Interfaccia web
+## 8. Interfaccia web
 
-**Impostazioni** — luminosità con applicazione immediata sul pannello, server
-NTP, fuso orario, ora legale automatica o scostamento UTC manuale, indirizzo IP
-locale, stato della sincronizzazione oraria e riepilogo delle porte.
+**Impostazioni** — luminosità con applicazione immediata, server NTP, fuso
+orario, ora legale automatica o scostamento UTC manuale, Night mode e Sleep
+mode, regolazioni fini del driver S-PWM, aggiornamento via rete, indirizzo IP
+locale e riepilogo delle porte.
 
-**Servizi** — attivazione dei quattro servizi, indicazione della sorgente
-attualmente a schermo e possibilità di forzarne una invece di lasciar decidere
-l'arbitro:
+**Orologio** — colori indipendenti per ora e data, formato 12 o 24 ore, lingua
+dei nomi dei giorni (italiano, francese, inglese), lampeggio dei due punti.
 
-| Servizio | Stato |
-|---|---|
-| ZeDMD | funzionante |
-| Media Player - Clock | orologio funzionante, slideshow da implementare |
-| Status Player | da implementare |
-| Air Radar | da implementare |
+**Media** — libreria, caricamento file, rilettura della libreria, anteprima
+immediata, durate e intervalli, adattamento al pannello, modalità pixel art.
+
+**Radar** — coordinate e raggio, provider ADS-B, scelta dei parametri di volo da
+mostrare, registro CSV dei passaggi con scaricamento, prova diagnostica di una
+rotta.
+
+**Servizi** — attivazione dei quattro servizi, sorgente attualmente a schermo e
+possibilità di forzarne una invece di lasciar decidere l'arbitro.
 
 ---
 
-## 10. Come viene deciso cosa appare sul display
+## 9. Come viene deciso cosa appare sul display
 
 Un solo processo può pilotare i GPIO, quindi tutte le sorgenti vivono nello
 stesso servizio e un arbitro sceglie chi vince:
@@ -226,12 +252,17 @@ stesso servizio e un arbitro sceglie chi vince:
 | Priorità | Sorgente |
 |---|---|
 | 100 | ZeDMD |
-| 10 | Media Player - Clock |
+| 60 | Air Radar |
+| 50 | Media Player |
+| 10 | Orologio |
 
 ZeDMD prende il controllo **immediatamente** appena un client si connette o
 arriva un frame, e lo mantiene per `grace_seconds` dopo l'ultimo segnale. Il
 tempo di grazia serve a evitare che l'orologio si intrometta durante le pause
 normali di Batocera: menu, caricamenti, cambi di schermata.
+
+Sleep mode e Night mode stanno sopra a tutto: Sleep spegne il display, Night ne
+riduce la luminosità, e Sleep ha la precedenza su Night.
 
 Se Batocera viene spento bruscamente, la connessione non viene chiusa in modo
 pulito: il ricevitore se ne accorge dopo `client_timeout` secondi di silenzio,
@@ -240,7 +271,7 @@ all'orologio entro circa 70 secondi.
 
 ---
 
-## 11. Comandi utili
+## 10. Comandi utili
 
 ```bash
 sudo systemctl start dmd        # avvia
@@ -250,7 +281,117 @@ systemctl status dmd            # stato
 journalctl -u dmd -f            # log in tempo reale
 journalctl -u dmd -n 100        # ultime 100 righe
 curl http://localhost/handshake # verifica dell'handshake
+cd ~/dmd && git pull            # scarica l'ultima versione
 ```
+
+---
+
+## 11. Righe bianche, rallentamenti e blocchi
+
+Questa sezione merita attenzione: gli stessi sintomi hanno due cause diverse,
+che vanno distinte prima di cambiare hardware.
+
+### 11.1 Righe bianche orizzontali
+
+La libreria genera il segnale del pannello **da programma**, temporizzando i
+GPIO con precisione di microsecondi. Ogni interruzione del processo — un altro
+programma che gira, un accesso alla scheda SD, il traffico di rete — allunga il
+tempo di accensione di una riga, e quella riga appare più chiara. Sono quindi
+un indicatore di carico, non un guasto del pannello.
+
+Rimedi, in ordine di efficacia:
+
+| Intervento | Dove |
+|---|---|
+| `isolcpus=3` — riserva un core al pannello | `/boot/firmware/cmdline.txt` |
+| `dtparam=audio=off` — l'audio integrato usa lo stesso hardware PWM | `/boot/firmware/config.txt` |
+| `panel.slowdown` corretto per il modello | `/etc/dmd/config.json` |
+| `panel.limit_refresh` a 60 — un refresh più alto costa CPU senza guadagno visibile | pagina Impostazioni |
+| `panel.pwm_bits` più basso (8 invece di 11) — meno sfumature, molto meno lavoro | pagina Impostazioni |
+| tenere la libreria media su chiavetta USB anziché su SD | vedi 11.3 |
+
+### 11.2 Blocchi, `Bus error`, `Input/output error`
+
+Messaggi come questi **non** sono un problema di velocità:
+
+```
+Bus error
+-bash: /usr/bin/nice: Input/output error
+-bash: /usr/bin/rm: Input/output error
+cat: command not found
+```
+
+Il sistema non riesce più a **leggere i propri programmi dal disco**. Un
+Raspberry lento è lento, non perde l'accesso a `/usr/bin`. Le cause possibili
+sono due, entrambe da verificare prima di comprare una scheda nuova.
+
+**Alimentazione insufficiente.** Se Raspberry e pannelli condividono lo stesso
+alimentatore, l'assorbimento dei LED fa scendere la tensione sul Raspberry.
+Sotto i 4,65 V il controller della scheda SD si resetta e le letture
+falliscono. È coerente con il fatto che i problemi peggiorano sotto carico.
+
+```bash
+vcgencmd get_throttled          # 0x0 = tutto bene
+dmesg | grep -i -E "under-voltage|voltage"
+```
+
+Il bit 0 acceso significa sottotensione in corso, il bit 16 che si è verificata
+almeno una volta dall'accensione. Rimedio: alimentare il Raspberry con un
+proprio alimentatore, separato da quello dei pannelli, con la massa in comune.
+
+**Scheda SD in esaurimento.** Scrivere decine di migliaia di file piccoli è tra
+le cose più dure per una scheda SD. Quando i blocchi iniziano a cedere, i
+programmi di sistema diventano illeggibili.
+
+```bash
+dmesg | grep -i -E "mmc|ext4|i/o error"
+df -h /                         # spazio
+df -i /                         # inode
+sudo touch /forcefsck && sudo reboot
+```
+
+Righe `mmcblk0: error -110` o `EXT4-fs error` confermano la diagnosi. Rimedio:
+scheda nuova di tipo *high endurance* (Samsung PRO Endurance, SanDisk Max
+Endurance) e reinstallazione.
+
+> Passare a un Raspberry Pi 4 **non risolve** questo secondo problema: la
+> scheda SD resta la stessa. Risolve invece il primo, perché ha più CPU e
+> perché può avviarsi da SSD USB 3.0, togliendo del tutto la SD dal percorso.
+
+### 11.3 Librerie media molto grandi
+
+Le raccolte Pixelcade complete arrivano a decine di migliaia di file. Due
+accorgimenti:
+
+**Tieni la libreria fuori dalla scheda SD.** Una chiavetta USB montata su
+`/srv/dmd/media` toglie sia le scritture sia le letture dalla SD:
+
+```bash
+lsblk                                   # individua la chiavetta, es. sda1
+sudo blkid /dev/sda1                    # annota lo UUID
+sudo mkdir -p /srv/dmd/media
+echo 'UUID=xxxx-xxxx /srv/dmd/media exfat defaults,nofail,uid=1000,gid=1000 0 0' | sudo tee -a /etc/fstab
+sudo mount -a
+```
+
+**Scompatta con priorità bassa.** Se devi comunque scrivere sulla SD, limita
+l'impatto sia sulla CPU sia sul disco:
+
+```bash
+sudo systemctl stop dmd
+nice -n 19 ionice -c3 tar xzf pixelcade.tar.gz -C /srv/dmd/media
+sync
+sudo systemctl start dmd
+```
+
+Fermare il servizio durante l'operazione è il singolo accorgimento più utile:
+il pannello non viene disturbato e l'estrazione ha la macchina per sé.
+
+Dalla versione 1.6 l'elenco dei file viene tenuto in memoria per cinque minuti
+invece di essere riletto a ogni contenuto e a ogni richiesta della web UI. Con
+40.000 file quella scansione continua era essa stessa una causa di righe
+bianche. Dopo aver copiato file dalla condivisione di rete, usa il pulsante
+**Rileggi la libreria** nella pagina Media.
 
 ---
 
@@ -259,13 +400,16 @@ curl http://localhost/handshake # verifica dell'handshake
 | Sintomo | Causa probabile | Rimedio |
 |---|---|---|
 | Il servizio non parte, errore su `rgbmatrix` | binding Python non compilati | rilanciare `install.sh` |
-| Pannello nero ma servizio attivo | nessuna sorgente abilitata | attivare Media Player - Clock dalla pagina Servizi |
+| Pannello nero ma servizio attivo | nessuna sorgente abilitata | attivare Orologio dalla pagina Servizi |
 | `Address already in use` sulla porta 80 | un altro web server è attivo | fermarlo (`lighttpd`, `apache2`, `nginx`) |
 | Handshake ripetuto, nessun frame | porte scambiate | `zedmd.http_port` = 80, `web.port` = 8080 |
-| Immagine a scatti o righe sporadiche | `panel.slowdown` errato per il modello | correggere e riavviare il servizio |
+| Righe bianche orizzontali | carico della CPU o del disco | sezione 11.1 |
+| `Bus error`, `Input/output error` | alimentazione o scheda SD | sezione 11.2 |
 | L'orologio interrompe Batocera | tempo di grazia troppo corto | alzare `zedmd.grace_seconds` |
 | Dopo un aggiornamento il display resta fermo | stato del client non più valido | riavviare Batocera |
-| Selezioni rapide: il display resta indietro di un passo | il client scarta i frame intermedi | verificare che il contatore frame avanzi nella pagina Servizi |
+| I file copiati via SMB non compaiono | elenco ancora in cache | pulsante *Rileggi la libreria* |
+| Il radar non mostra nulla | coordinate a 0 | inserirle nella pagina Radar |
+| La rotta non appare | volo non presente nel servizio rotte | usare la prova diagnostica nella pagina Radar |
 
 ---
 
@@ -276,8 +420,13 @@ curl http://localhost/handshake # verifica dell'handshake
 /opt/dmd/display.py       proprietario esclusivo del pannello
 /opt/dmd/dmdconf.py       configurazione persistente
 /opt/dmd/webui.py         interfaccia web (Flask)
+/opt/dmd/ota.py           aggiornamento via rete da GitHub
 /opt/dmd/zedmd_http.py    server dell'handshake ZeDMD sulla porta 80
 /opt/dmd/sources/         sorgenti di contenuto
 /etc/dmd/config.json      configurazione
+/var/lib/dmd/backup/      copia dell'installazione precedente
+/var/lib/dmd/flights.csv  registro dei passaggi aerei
+/var/lib/dmd/ota.log      registro degli aggiornamenti
+/srv/dmd/media/           libreria media, condivisa via SMB
 /etc/systemd/system/dmd.service
 ```

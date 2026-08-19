@@ -30,13 +30,23 @@ ALL_EXT = IMAGE_EXT | VIDEO_EXT
 # Cartelle di servizio create da Samba o dai sistemi operativi.
 SKIP_DIRS = {".AppleDouble", ".Trashes", "__MACOSX", ".git", "@eaDir"}
 
+# Per quanto tempo l'elenco dei file resta valido senza rileggere il disco.
+# Una libreria come quella di Pixelcade puo' contenere decine di migliaia di
+# file: percorrerla a ogni cambio di contenuto e a ogni richiesta della web UI
+# tiene occupati CPU e scheda SD, e sul pannello questo si vede come righe
+# bianche. L'elenco cambia di rado, quindi si tiene in memoria.
+SCAN_TTL = 300.0
+
+_scan_lock = threading.Lock()
+_scan_cache = {}          # root -> (istante, elenco)
+
 
 def is_supported(name):
     return os.path.splitext(name)[1].lower() in ALL_EXT
 
 
-def scan_media(root):
-    """Elenca ricorsivamente i file utilizzabili sotto `root`."""
+def walk_media(root):
+    """Percorre il disco. Da usare solo attraverso `scan_media`."""
     found = []
     if not os.path.isdir(root):
         return found
@@ -49,6 +59,41 @@ def scan_media(root):
                 found.append(os.path.join(base, name))
     found.sort()
     return found
+
+
+def scan_media(root, force=False):
+    """Elenco dei file utilizzabili sotto `root`, con cache.
+
+    Con `force` la cache viene ignorata: lo usano l'upload e la
+    cancellazione, che sanno di aver cambiato il contenuto della cartella.
+    """
+    now = time.time()
+    if not force:
+        with _scan_lock:
+            entry = _scan_cache.get(root)
+        if entry and now - entry[0] < SCAN_TTL:
+            return entry[1]
+
+    found = walk_media(root)
+    with _scan_lock:
+        _scan_cache[root] = (time.time(), found)
+    return found
+
+
+def invalidate_scan(root=None):
+    """Butta via la cache: la prossima richiesta rileggera' il disco."""
+    with _scan_lock:
+        if root is None:
+            _scan_cache.clear()
+        else:
+            _scan_cache.pop(root, None)
+
+
+def cached_count(root):
+    """Numero di file noti senza toccare il disco. -1 se non e' mai stato letto."""
+    with _scan_lock:
+        entry = _scan_cache.get(root)
+    return len(entry[1]) if entry else -1
 
 
 def have_ffmpeg():
@@ -111,10 +156,13 @@ class MediaPlayerSource(Source):
             return "disabilitato"
         if self._error:
             return self._error
-        count = len(scan_media(self.cfg["mediaplayer"]["media_dir"]))
+        # Solo il numero gia' noto: lo stato viene chiesto spesso e non deve
+        # mai far ripartire una scansione del disco.
+        count = cached_count(self.cfg["mediaplayer"]["media_dir"])
         if self._showing and self._current:
-            return "in riproduzione: %s (%d file in libreria)" % (
-                os.path.basename(self._current), count)
+            return "in riproduzione: %s" % os.path.basename(self._current)
+        if count < 0:
+            return "in attesa, libreria non ancora letta"
         if count == 0:
             return "nessun file nella libreria"
         return "in attesa, %d file in libreria, %d mostrati" % (count, self._shown)

@@ -18,8 +18,9 @@ import threading
 import time
 
 import dmdconf
+import ota
 from display import Display
-from sources import ClockSource, MediaPlayerSource, ZeDMDSource
+from sources import AirRadarSource, ClockSource, MediaPlayerSource, ZeDMDSource
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -101,9 +102,10 @@ class Runtime:
             on_brightness=self.set_brightness,
         )
         self.media = MediaPlayerSource(self.cfg, self.display.width, self.display.height)
+        self.radar = AirRadarSource(self.cfg, self.display.width, self.display.height)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
-        for source in (self.zedmd, self.media, self.clock):
+        for source in (self.zedmd, self.radar, self.media, self.clock):
             self.arbiter.register(source)
         self.arbiter.apply_services()
 
@@ -116,10 +118,41 @@ class Runtime:
         self.zedmd_http.start()
 
         self.running = True
+        self.update_info = {"ok": False, "error": "", "current": __version__,
+                            "latest": "", "available": False, "checked": 0}
+        self._ota_thread = threading.Thread(target=self._ota_loop, name="ota", daemon=True)
+        self._ota_thread.start()
         self._blank_shown = False
         self._applied_brightness = None
         self.sleeping = False
         self.night = False
+
+    # ------------------------------------------------------------------ aggiornamenti
+
+    def check_update(self):
+        """Interroga GitHub e memorizza l'esito per la web UI."""
+        try:
+            self.update_info = ota.check(self.cfg)
+        except Exception as exc:
+            self.update_info = {"ok": False, "error": str(exc),
+                                "current": __version__, "latest": "",
+                                "available": False, "checked": time.time()}
+        return self.update_info
+
+    def _ota_loop(self):
+        # Un attimo di attesa: alla partenza la rete potrebbe non esserci ancora.
+        time.sleep(30)
+        while self.running:
+            if self.cfg["ota"]["auto_check"]:
+                info = self.check_update()
+                if info.get("available"):
+                    print("[ota] disponibile la versione %s (installata %s)"
+                          % (info["latest"], info["current"]))
+            hours = max(1, int(self.cfg["ota"]["check_interval_hours"]))
+            for _ in range(hours * 60):
+                if not self.running:
+                    return
+                time.sleep(60)
 
     # ------------------------------------------------------------------ luminosita'
 

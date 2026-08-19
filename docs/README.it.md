@@ -1,4 +1,4 @@
-# DMD Controller 1.1.1
+# DMD Controller 1.5.2
 
 Servizio unico che possiede il pannello LED (256x64, FM6373) e lo condivide fra
 più sorgenti di contenuto, con interfaccia web di controllo.
@@ -13,8 +13,9 @@ Servizi implementati:
   anche il materiale Pixelcade, utilizzabile a prescindere da Batocera.
 - **Clock** — orologio e data, con colori indipendenti, formato 12/24 ore e
   nomi dei giorni in italiano, francese o inglese.
-- **Status Player** e **Air Radar** — presenti nell'interfaccia ma non ancora
-  implementati.
+- **Air Radar** — informazioni degli aerei in transito entro un raggio dato da
+  una coordinata GPS, tramite le API pubbliche ADS-B della comunità.
+- **Status Player** — presente nell'interfaccia ma non ancora implementato.
 
 Fasce orarie: **Night mode** abbassa la luminosità, **Sleep mode** spegne il
 display. Sleep ha la precedenza su Night.
@@ -157,6 +158,7 @@ stesso servizio e un arbitro sceglie chi vince:
 | Priorità | Sorgente |
 |---|---|
 | 100 | ZeDMD |
+| 60 | Air Radar |
 | 50 | Media Player |
 | 10 | Clock |
 
@@ -250,3 +252,85 @@ copiare così com'è.
 | 1.0 | Ricevitore ZeDMD-WiFi, orologio, web UI |
 | 1.1 | Colori di ora e data separati, formato 12/24h, lingua dei giorni, Media Player separato con foto e video, Night mode e Sleep mode, condivisione SMB e upload da web |
 | 1.1.1 | `update.sh` installa ffmpeg e samba in modo indipendente |
+| 1.2 | Regolazione fine del driver S-PWM dalla web UI, riavvio del servizio dall'interfaccia |
+| 1.3 | Air Radar: aerei in transito da coordinate GPS e raggio, via API pubbliche ADS-B |
+| 1.3.1 | Nessuna coordinata preimpostata nel software distribuito |
+| 1.4 | Air Radar: scelta dei parametri di volo mostrati e registro CSV scaricabile |
+| 1.5 | Aggiornamento via rete da GitHub, con verifica preventiva e ripristino automatico |
+| 1.5.1 | Corretta la ricerca della rotta: era subordinata a una seconda casella, ora rimossa |
+| 1.5.2 | Rotte dal servizio routeset di adsb.lol, in blocco e con codici IATA; prova diagnostica |
+
+
+---
+
+## Air Radar
+
+Interroga a intervalli regolari le reti ADS-B comunitarie e mostra i voli entro
+il raggio impostato. Servizi supportati, tutti gratuiti e senza chiave:
+
+| Servizio | Endpoint |
+|---|---|
+| adsb.fi | `https://opendata.adsb.fi/api/v3/lat/{lat}/lon/{lon}/dist/{nm}` |
+| adsb.one | `https://api.adsb.one/v2/point/{lat}/{lon}/{nm}` |
+| adsb.lol | `https://api.adsb.lol/v2/point/{lat}/{lon}/{nm}` |
+
+Sono compatibili tra loro (formato ADSBexchange v2): se quello scelto non
+risponde, gli altri vengono usati automaticamente come riserva. Il raggio si
+indica in chilometri e viene convertito in miglia nautiche; la distanza di ogni
+aereo viene poi ricalcolata con l'emisenoverso perché il filtro dell'API è
+approssimativo.
+
+La rotta origine → destinazione arriva dal servizio `routeset` di adsb.lol
+(`POST https://api.adsb.lol/api/0/routeset`), che accetta fino a 100 voli per
+richiesta: tutte le rotte di un giro si ottengono con una sola chiamata.
+Vengono preferiti i codici IATA, più corti e leggibili su un pannello stretto,
+con ricaduta sugli ICAO quando mancano. Se il servizio non risponde si ripiega
+su hexdb.io, volo per volo.
+
+La ricerca avviene solo se il campo è selezionato o se la si vuole nel registro
+CSV. È disponibile per i voli di linea, molto meno per cargo, aviazione
+generale e voli di Stato: la riga di stato riporta quante rotte sono state
+trovate e quante no, e la pagina Radar ha una prova diagnostica per un singolo
+codice volo.
+
+I parametri mostrati sul pannello si scelgono dalla pagina Radar: rotta,
+modello, immatricolazione, quota, velocità, direzione, transponder, distanza e
+codice Mode S. Il codice volo compare sempre in grande.
+
+Ogni passaggio viene registrato in `/var/lib/dmd/flights.csv`, scaricabile
+dalla web UI. Colonne: `timestamp, hex, callsign, registration, type,
+altitude_ft, speed_kt, track_deg, squawk, distance_km, latitude, longitude,
+route`. Lo stesso aereo non viene riscritto finché resta nel raggio, quindi c'è
+una riga per passaggio.
+
+Le coordinate impostate restano solo in `/etc/dmd/config.json` su questo
+Raspberry: non fanno parte del software distribuito.
+
+Non essendoci un'antenna locale la copertura dipende dai riceventi volontari
+della zona: il traffico commerciale compare quasi sempre, aviazione generale e
+voli militari spesso no.
+
+
+---
+
+## Aggiornamento via rete
+
+Il servizio confronta la propria versione con il `version.py` del repository
+GitHub configurato e, se ne trova una più recente, la può installare da solo
+dalla pagina Impostazioni.
+
+L'installazione procede in quest'ordine, e si ferma al primo intoppo:
+
+1. scarica l'archivio del ramo in una cartella temporanea
+2. rifiuta archivi con percorsi assoluti o risalite di cartella
+3. verifica la presenza dei file attesi e compila tutto il Python
+4. salva una copia dell'installazione corrente in `/var/lib/dmd/backup`
+5. sostituisce i file e riavvia il servizio
+6. interroga `/api/status` per verificare che sia davvero ripartito
+7. se non risponde, ripristina la copia e riavvia di nuovo
+
+L'ultimo passo è il motivo per cui l'aggiornamento gira in un processo
+staccato: deve sopravvivere al riavvio del servizio che lo ha avviato.
+
+La configurazione in `/etc/dmd/config.json` non viene mai toccata, e il diario
+delle operazioni resta in `/var/lib/dmd/ota.log`, consultabile dalla web UI.

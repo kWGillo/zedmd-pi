@@ -6,6 +6,7 @@ venv/
 
 # Configurazione e libreria locali: non appartengono al repository
 config.local.json
+# La configurazione reale vive in /etc/dmd/config.json, fuori dal repository.
 media/
 *.log
 .DS_Store

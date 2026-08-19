@@ -2,6 +2,84 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.6]
+
+### Modificato
+- L'elenco della libreria media viene tenuto in memoria per cinque minuti
+  invece di essere riletto dal disco a ogni cambio di contenuto e a ogni
+  richiesta della web UI. Con una raccolta Pixelcade completa — decine di
+  migliaia di file — quella scansione continua occupava CPU e scheda SD, e sul
+  pannello si vedeva come righe bianche orizzontali.
+- `status()` del Media Player non fa più accessi al disco: riporta solo il
+  numero di file già noto.
+
+### Aggiunto
+- Pulsante **Rileggi la libreria** nella pagina Media, per i file copiati
+  dalla condivisione di rete senza passare dall'upload.
+- Manuale di installazione riscritto sull'installazione da GitHub, con una
+  sezione dedicata a righe bianche, blocchi ed errori di I/O.
+
+## [1.5.2]
+
+### Corretto
+- Le rotte dei voli arrivano dal servizio `routeset` di adsb.lol: una sola
+  richiesta per tutti i voli visibili, con codici IATA quando disponibili.
+  hexdb.io resta come ripiego. Prima la rotta non compariva quasi mai.
+
+### Aggiunto
+- Prova diagnostica di una singola rotta nella pagina Radar.
+
+### Modificato
+- Nella pagina Media il caricamento dei file e l'anteprima immediata sono in
+  due riquadri distinti.
+
+## [1.5.1]
+
+### Corretto
+- La rotta veniva cercata solo se era attiva una seconda casella, che
+  duplicava il campo *Rotta* nell'elenco dei parametri. La casella è stata
+  rimossa.
+- Ricerca su hexdb.io più robusta, con memoria anche degli esiti negativi.
+
+## [1.5]
+
+### Aggiunto
+- **Aggiornamento via rete** dal repository GitHub. L'archivio viene scaricato
+  in una cartella temporanea, verificato (file attesi presenti, tutto il Python
+  compila) e solo allora installato, dopo una copia di sicurezza. Se il
+  servizio non risponde al riavvio, la copia viene ripristinata da sola.
+- Pagina Impostazioni: stato dell'aggiornamento, repository e ramo, controllo
+  automatico e registro delle operazioni.
+
+## [1.4]
+
+### Aggiunto
+- Air Radar: scelta dei parametri di volo da mostrare sul pannello.
+- Registro CSV di tutti i passaggi, scaricabile dalla web UI, con possibilità
+  di svuotarlo.
+
+## [1.3.1]
+
+### Corretto
+- Nessuna coordinata preimpostata nel codice: la posizione resta soltanto
+  nella configurazione locale e non entra mai nel pacchetto distribuito.
+
+## [1.3]
+
+### Aggiunto
+- Servizio **Air Radar**: aerei in transito entro un raggio da una coordinata
+  GPS, tramite le API pubbliche ADS-B della comunità (adsb.fi, adsb.one,
+  adsb.lol), senza chiavi di accesso.
+- Priorità 60: sta sopra a Media Player e orologio, sotto a ZeDMD.
+
+## [1.2]
+
+### Aggiunto
+- Regolazioni fini del driver S-PWM dalla web UI
+  (`SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES`, `SPWM_FRAME_END_SLEEP_US`,
+  `limit_refresh`, `pwm_bits`), per intervenire sui lampi orizzontali.
+- Riavvio del servizio dall'interfaccia web.
+
 ## [1.1.1]
 
 ### Corretto

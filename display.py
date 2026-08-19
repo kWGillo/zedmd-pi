@@ -15,6 +15,17 @@ class Display:
         # Il catalogo dei profili di registro va indicato prima di creare la matrice.
         os.environ["SPWM_PROFILE_DIR"] = panel["profile_dir"]
 
+        # Regolazioni fini del driver S-PWM: la libreria le legge dall'ambiente
+        # al momento della creazione della matrice. Un valore vuoto significa
+        # "lascia il predefinito", quindi la variabile viene rimossa.
+        for name, value in (panel.get("spwm_env") or {}).items():
+            text = str(value).strip()
+            if text:
+                os.environ[name] = text
+                print("[display] %s=%s" % (name, text))
+            else:
+                os.environ.pop(name, None)
+
         from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
         options = RGBMatrixOptions()
@@ -32,6 +43,7 @@ class Display:
         options.limit_refresh_rate_hz = panel["limit_refresh"]
         options.pwm_bits = panel["pwm_bits"]
         options.brightness = cfg["display"]["brightness"]
+        options.show_refresh_rate = bool(panel.get("show_refresh", False))
         # Senza questo la libreria perde l'accesso al catalogo profili.
         options.drop_privileges = False
 

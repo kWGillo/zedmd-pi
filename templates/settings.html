@@ -114,6 +114,124 @@
      le porte corrette.</p>
 </section>
 
+<section class="card">
+  <h2>Regolazione fine del pannello</h2>
+  <p class="hint">Se compaiono lampi o strisce bianche orizzontali, agisci prima
+     su <em>cicli extra a fine frame</em>: aggiunge tempo dopo l'invio dei dati e
+     copre il vuoto che genera il lampo. Parti da 1 e sali di uno alla volta.
+     Campo vuoto = valore predefinito della libreria.</p>
+
+  <form method="post" action="{{ url_for('api_panel') }}">
+    <div class="row2">
+      <div><label for="SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES">Cicli extra a fine frame</label>
+        <input type="number" min="0" max="16"
+               id="SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES" name="SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES"
+               value="{{ cfg.panel.spwm_env.SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES }}"
+               placeholder="predefinito"></div>
+      <div><label for="SPWM_FRAME_END_SLEEP_US">Pausa tra frame (µs)</label>
+        <input type="number" min="0" max="5000"
+               id="SPWM_FRAME_END_SLEEP_US" name="SPWM_FRAME_END_SLEEP_US"
+               value="{{ cfg.panel.spwm_env.SPWM_FRAME_END_SLEEP_US }}"
+               placeholder="predefinito"></div>
+    </div>
+
+    <div class="row3">
+      <div><label for="limit_refresh">Refresh massimo (Hz)</label>
+        <input type="number" id="limit_refresh" name="limit_refresh" min="0" max="300"
+               value="{{ cfg.panel.limit_refresh }}"></div>
+      <div><label for="pwm_bits">Profondità PWM</label>
+        <input type="number" id="pwm_bits" name="pwm_bits" min="1" max="11"
+               value="{{ cfg.panel.pwm_bits }}"></div>
+      <div><label for="slowdown">Rallentamento GPIO</label>
+        <input type="number" id="slowdown" name="slowdown" min="0" max="6"
+               value="{{ cfg.panel.slowdown }}"></div>
+    </div>
+
+    <label for="spwm_register_config">Profilo di registro del chip</label>
+    <input type="number" id="spwm_register_config" name="spwm_register_config" min="0" max="77"
+           value="{{ cfg.panel.spwm_register_config }}">
+
+    <label class="check">
+      <input type="checkbox" name="show_refresh" {{ 'checked' if cfg.panel.show_refresh }}>
+      Scrivi il refresh rate nel log — utile durante la taratura
+    </label>
+
+    <input type="hidden" name="restart" value="1">
+    <button type="submit">Salva e riavvia il servizio</button>
+  </form>
+
+  <p class="hint">Queste impostazioni si applicano solo alla creazione del
+     pannello, quindi il servizio viene riavviato: il display resta spento per
+     qualche secondo. Segui l'effetto con <span class="mono">journalctl -u dmd -f</span>.</p>
+</section>
+
+<section class="card">
+  <h2>Aggiornamenti</h2>
+
+  <dl class="info">
+    <dt>Versione installata</dt><dd class="mono big">{{ update.current }}</dd>
+    <dt>Versione su GitHub</dt>
+    <dd class="mono">{{ update.latest if update.latest else 'non verificata' }}</dd>
+    <dt>Ultimo controllo</dt>
+    <dd>{% if update.checked %}{{ update.checked | timestamp }}{% else %}mai{% endif %}</dd>
+  </dl>
+
+  {% if update.error %}
+  <div class="banner warn">Controllo non riuscito: {{ update.error }}</div>
+  {% elif update.available %}
+  <div class="banner">È disponibile la versione {{ update.latest }}.</div>
+  {% elif update.latest %}
+  <p class="hint">Il software è aggiornato.</p>
+  {% endif %}
+
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_update_check') }}">
+      <button type="submit" class="ghost">Controlla ora</button>
+    </form>
+    {% if update.available %}
+    <form method="post" action="{{ url_for('api_update_install') }}">
+      <button type="submit">Installa la versione {{ update.latest }}</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <form method="post" action="{{ url_for('api_update_settings') }}">
+    <div class="row3">
+      <div><label for="repo">Repository</label>
+        <input type="text" id="repo" name="repo" value="{{ cfg.ota.repo }}"></div>
+      <div><label for="branch">Ramo</label>
+        <input type="text" id="branch" name="branch" value="{{ cfg.ota.branch }}"></div>
+      <div><label for="check_interval_hours">Controllo ogni (ore)</label>
+        <input type="number" id="check_interval_hours" name="check_interval_hours"
+               min="1" max="720" value="{{ cfg.ota.check_interval_hours }}"></div>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="auto_check" {{ 'checked' if cfg.ota.auto_check }}>
+      Controlla automaticamente la disponibilità di aggiornamenti
+    </label>
+    <button type="submit">Salva</button>
+  </form>
+
+  <p class="hint">L'installazione scarica l'archivio dal ramo indicato, verifica
+     che contenga i file attesi e che tutto il codice compili, salva una copia
+     della versione in uso e solo allora sostituisce i file. Se dopo il riavvio
+     il servizio non risponde, la versione precedente viene ripristinata da sola.
+     La configurazione in <span class="mono">/etc/dmd/config.json</span> non
+     viene mai toccata.</p>
+
+  {% if ota_log %}
+  <label>Diario degli aggiornamenti</label>
+  <pre class="log">{{ ota_log }}</pre>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Servizio</h2>
+  <form method="post" action="{{ url_for('api_restart') }}">
+    <button type="submit" class="ghost">Riavvia il servizio DMD</button>
+  </form>
+</section>
+
 <script>
 const slider = document.getElementById('brightness');
 const out = document.getElementById('brightness-value');

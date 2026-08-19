@@ -10,11 +10,13 @@ import subprocess
 import time
 
 from flask import (Flask, jsonify, redirect, render_template, request,
-                   url_for)
+                   send_file, url_for)
 from werkzeug.utils import secure_filename
 
 import dmdconf
-from sources import LANGUAGES, is_supported, scan_media, have_ffmpeg
+import ota
+from sources import (FIELD_LIST, LANGUAGES, PROVIDER_LIST, invalidate_scan,
+                     is_supported, scan_media, have_ffmpeg)
 from version import __version__
 
 COMMON_TIMEZONES = [
@@ -109,6 +111,13 @@ def create_app(runtime):
     def inject_globals():
         return {"version": __version__}
 
+    @app.template_filter("timestamp")
+    def _timestamp(value):
+        try:
+            return time.strftime("%d/%m/%Y %H:%M", time.localtime(float(value)))
+        except (TypeError, ValueError):
+            return "mai"
+
     # ------------------------------------------------------------ protocollo ZeDMD
     # Serviti anche qui per poterli provare con curl sulla porta 8080;
     # il client reale usa il server dedicato sulla porta 80.
@@ -144,7 +153,8 @@ def create_app(runtime):
             "settings.html", cfg=cfg, ips=local_ips(),
             hostname=socket.gethostname(), timezones=all_timezones(),
             ntp=ntp_status(), now=time.strftime("%d/%m/%Y %H:%M:%S"),
-            sleeping=runtime.sleeping, night=runtime.night, page="settings")
+            sleeping=runtime.sleeping, night=runtime.night,
+            update=runtime.update_info, ota_log=ota.tail_log(12), page="settings")
 
     @app.route("/clock")
     def page_clock():
@@ -170,6 +180,14 @@ def create_app(runtime):
             media_dir=media_dir, ffmpeg=have_ffmpeg(),
             status=runtime.media.status(), page="media")
 
+    @app.route("/radar")
+    def page_radar():
+        return render_template("radar.html", cfg=cfg, providers=PROVIDER_LIST,
+                               fields=FIELD_LIST, log=runtime.radar.log_info(),
+                               status=runtime.radar.status(),
+                               probe_callsign=request.args.get("callsign", ""),
+                               probe_result=request.args.get("result"), page="radar")
+
     @app.route("/services")
     def page_services():
         services = [
@@ -185,9 +203,9 @@ def create_app(runtime):
             {"key": "status_player", "label": "Status Player", "ready": False,
              "desc": "Attività e punteggi RetroAchievements, propri e degli amici.",
              "status": "non ancora implementato"},
-            {"key": "air_radar", "label": "Air Radar", "ready": False,
+            {"key": "air_radar", "label": "Air Radar", "ready": True,
              "desc": "Aerei in transito entro un raggio configurabile dalle coordinate GPS.",
-             "status": "non ancora implementato"},
+             "status": runtime.radar.status()},
         ]
         current = runtime.arbiter.current
         return render_template(
@@ -265,6 +283,7 @@ def create_app(runtime):
             if not name or not is_supported(name):
                 continue
             storage.save(os.path.join(media_dir, name))
+        invalidate_scan(media_dir)
         return redirect(url_for("page_media"))
 
     @app.route("/api/media/delete", methods=["POST"])
@@ -277,12 +296,139 @@ def create_app(runtime):
                 os.remove(target)
             except OSError:
                 pass
+            invalidate_scan(cfg["mediaplayer"]["media_dir"])
+        return redirect(url_for("page_media"))
+
+    @app.route("/api/media/rescan", methods=["POST"])
+    def api_media_rescan():
+        # I file copiati via SMB non passano da qui: questo pulsante forza la
+        # rilettura senza aspettare la scadenza della cache.
+        scan_media(cfg["mediaplayer"]["media_dir"], force=True)
         return redirect(url_for("page_media"))
 
     @app.route("/api/media/preview", methods=["POST"])
     def api_media_preview():
         runtime.media.trigger_now()
         return redirect(url_for("page_media"))
+
+    @app.route("/api/panel", methods=["POST"])
+    def api_panel():
+        panel = cfg["panel"]
+        for key, low, high, default in (("limit_refresh", 0, 300, 60),
+                                        ("pwm_bits", 1, 11, 11),
+                                        ("slowdown", 0, 6, 3),
+                                        ("spwm_register_config", 0, 77, 2)):
+            try:
+                panel[key] = max(low, min(high, int(request.form.get(key, default))))
+            except ValueError:
+                panel[key] = default
+        panel["show_refresh"] = request.form.get("show_refresh") == "on"
+
+        env = panel.setdefault("spwm_env", {})
+        for name in list(env.keys()):
+            raw = request.form.get(name, "").strip()
+            # Un campo vuoto rimuove l'override e ripristina il predefinito.
+            env[name] = str(int(raw)) if raw.lstrip("-").isdigit() else ""
+        dmdconf.save()
+
+        if request.form.get("restart") == "1":
+            subprocess.Popen(["systemctl", "restart", "dmd"])
+        return redirect(url_for("page_settings"))
+
+    @app.route("/api/update/check", methods=["POST"])
+    def api_update_check():
+        runtime.check_update()
+        return redirect(url_for("page_settings"))
+
+    @app.route("/api/update/settings", methods=["POST"])
+    def api_update_settings():
+        conf = cfg["ota"]
+        conf["repo"] = request.form.get("repo", conf["repo"]).strip()
+        conf["branch"] = request.form.get("branch", "main").strip() or "main"
+        conf["auto_check"] = request.form.get("auto_check") == "on"
+        try:
+            conf["check_interval_hours"] = max(1, min(720,
+                int(request.form.get("check_interval_hours", 24))))
+        except ValueError:
+            conf["check_interval_hours"] = 24
+        dmdconf.save()
+        runtime.check_update()
+        return redirect(url_for("page_settings"))
+
+    @app.route("/api/update/install", methods=["POST"])
+    def api_update_install():
+        ota.start_update(cfg)
+        return redirect(url_for("page_settings"))
+
+    @app.route("/api/restart", methods=["POST"])
+    def api_restart():
+        subprocess.Popen(["systemctl", "restart", "dmd"])
+        return redirect(url_for("page_settings"))
+
+    @app.route("/api/radar", methods=["POST"])
+    def api_radar():
+        radar = cfg["air_radar"]
+        for key, low, high, default in (("latitude", -90.0, 90.0, 0.0),
+                                        ("longitude", -180.0, 180.0, 0.0),
+                                        ("radius_km", 0.5, 400.0, 3.0)):
+            try:
+                radar[key] = max(low, min(high, float(request.form.get(key, default)
+                                                     .replace(",", "."))))
+            except (ValueError, AttributeError):
+                radar[key] = default
+        for key, low, high, default in (("poll_interval", 15, 3600, 30),
+                                        ("display_seconds", 2, 120, 10),
+                                        ("cooldown", 30, 86400, 600),
+                                        ("max_altitude_ft", 0, 60000, 0)):
+            try:
+                radar[key] = max(low, min(high, int(request.form.get(key, default))))
+            except ValueError:
+                radar[key] = default
+        provider = request.form.get("provider", "adsb.fi")
+        radar["provider"] = provider if provider in dict(PROVIDER_LIST) else "adsb.fi"
+        radar["log_route"] = request.form.get("log_route") == "on"
+        chosen = request.form.getlist("fields")
+        valid = [key for key, _ in FIELD_LIST]
+        radar["fields"] = [k for k in valid if k in chosen]
+        radar["log_enabled"] = request.form.get("log_enabled") == "on"
+        radar["callsign_color"] = request.form.get("callsign_color", "#00d0ff")
+        radar["info_color"] = request.form.get("info_color", "#ff8c1a")
+        dmdconf.save()
+        runtime.radar.poll_now()
+        return redirect(url_for("page_radar"))
+
+    @app.route("/api/radar/poll", methods=["POST"])
+    def api_radar_poll():
+        runtime.radar.poll_now()
+        return redirect(url_for("page_radar"))
+
+    @app.route("/api/radar/probe", methods=["POST"])
+    def api_radar_probe():
+        callsign = (request.form.get("callsign") or "").strip().upper()
+        if not callsign:
+            return redirect(url_for("page_radar"))
+        radar = runtime.radar
+        radar._route_cache.pop(callsign, None)
+        radar.resolve_routes([{"flight": callsign,
+                               "lat": cfg["air_radar"]["latitude"],
+                               "lon": cfg["air_radar"]["longitude"]}])
+        route = radar._route_cache.get(callsign) or radar._lookup_route(callsign)
+        result = ("rotta di %s: %s" % (callsign, route) if route
+                  else "nessuna rotta disponibile per %s" % callsign)
+        return redirect(url_for("page_radar", callsign=callsign, result=result))
+
+    @app.route("/api/radar/log")
+    def api_radar_log():
+        info = runtime.radar.log_info()
+        if not info["exists"]:
+            return plain("Nessun volo registrato.")
+        return send_file(info["path"], as_attachment=True,
+                         download_name="voli.csv", mimetype="text/csv")
+
+    @app.route("/api/radar/log/clear", methods=["POST"])
+    def api_radar_log_clear():
+        runtime.radar.clear_log()
+        return redirect(url_for("page_radar"))
 
     @app.route("/api/time", methods=["POST"])
     def api_time():
@@ -325,7 +471,9 @@ def create_app(runtime):
             night=runtime.night,
             zedmd=runtime.zedmd.status(),
             media=runtime.media.status(),
+            radar=runtime.radar.status(),
             time=time.strftime("%H:%M:%S"),
+            update=runtime.update_info,
         )
 
     return app

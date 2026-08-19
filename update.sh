@@ -12,6 +12,7 @@ echo "==> Copia dei file in /opt/dmd"
 mkdir -p /opt/dmd
 cp -r "$SRC_DIR"/*.py "$SRC_DIR"/templates "$SRC_DIR"/static /opt/dmd/
 cp -r "$SRC_DIR"/sources /opt/dmd/
+mkdir -p /var/lib/dmd
 
 echo "==> Adeguamento della configurazione"
 python3 - <<'PYEOF'
