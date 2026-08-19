@@ -326,9 +326,12 @@ blaming the CPU.
 
 ## Documentation in Italian
 
+- [`docs/manuale-completo.it.md`](docs/manuale-completo.it.md) — the full
+  manual: first boot, system updates, wiring, panel tuning, installation from
+  this repository, Batocera, updates, wear-resistant setup, troubleshooting.
+  Also available as [PDF](docs/DMD_manuale_completo.pdf).
 - [`docs/README.it.md`](docs/README.it.md) — service documentation
-- [`docs/installazione.it.md`](docs/installazione.it.md) — installation manual
-- [`docs/hardware-setup.it.md`](docs/hardware-setup.it.md) — panel wiring and tuning
+- [`docs/pubblicazione.it.md`](docs/pubblicazione.it.md) — release procedure
 
 ## License
 
