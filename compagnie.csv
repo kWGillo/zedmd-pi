@@ -1,0 +1,160 @@
+# Compagnie aeree: dal prefisso del nominativo al nome commerciale.
+#
+#   codice ICAO,forma breve,nome completo
+#
+# Il codice e' il prefisso di tre lettere del nominativo di volo: in AFR1732
+# la compagnia e' AFR, cioe' Air France. E' il designatore ICAO, non la sigla
+# IATA di due lettere che compare sul biglietto (AF).
+#
+# Nella prima colonna puoi mettere piu' codici separati da `/`, per esempio
+# se vuoi che risponda anche alla sigla IATA.
+#
+# La forma breve va sul pannello, dove lo spazio e' poco. Il nome completo
+# compare nella web UI e nel registro dei passaggi.
+#
+# Un codice che non e' qui dentro viene mostrato com'e': non e' un errore.
+# La pagina Radar elenca quelli incontrati e non tradotti, ordinati per
+# frequenza: quella e' la lista di cosa conviene aggiungere per primo.
+#
+# Righe che iniziano con # sono commenti. Una riga sbagliata si perde da
+# sola: le altre continuano a funzionare.
+# --- Italia ---
+ITY,ITA Airways,ITA Airways
+AZA,Alitalia,Alitalia (cessata)
+NOS,Neos,Neos
+IAM,Aeronautica,Aeronautica Militare Italiana
+# --- Low cost europee ---
+RYR,Ryanair,Ryanair
+RUK,Ryanair UK,Ryanair UK
+MAY,Malta Air,Malta Air
+EJU,easyJet,easyJet Europe
+EZY,easyJet,easyJet UK
+EZS,easyJet CH,easyJet Switzerland
+WZZ,Wizz Air,Wizz Air
+WMT,Wizz Malta,Wizz Air Malta
+VOE,Volotea,Volotea
+VLG,Vueling,Vueling
+EXS,Jet2,Jet2.com
+TVS,Smartwings,Smartwings
+# --- Europa occidentale ---
+AFR,Air France,Air France
+HOP,AF Hop,Air France Hop
+TVF,Transavia FR,Transavia France
+TRA,Transavia,Transavia
+KLM,KLM,KLM Royal Dutch Airlines
+KLC,KLM Cityhop,KLM Cityhopper
+DLH,Lufthansa,Lufthansa
+CLH,Lufthansa Cy,Lufthansa CityLine
+GEC,Lufthansa Crg,Lufthansa Cargo
+EWG,Eurowings,Eurowings
+CFG,Condor,Condor
+SWR,Swiss,Swiss International Air Lines
+EDW,Edelweiss,Edelweiss Air
+AUA,Austrian,Austrian Airlines
+BEL,Brussels,Brussels Airlines
+LGL,Luxair,Luxair
+BAW,British Airw.,British Airways
+SHT,BA Shuttle,British Airways Shuttle
+VIR,Virgin Atl.,Virgin Atlantic
+EIN,Aer Lingus,Aer Lingus
+BCY,CityJet,CityJet
+IBE,Iberia,Iberia
+IBS,Iberia Exp,Iberia Express
+ANE,Air Nostrum,Air Nostrum
+AEA,Air Europa,Air Europa
+TAP,TAP,TAP Air Portugal
+PGA,Portugalia,Portugalia Airlines
+TOM,TUI Airways,TUI Airways
+JAF,TUI fly,TUI fly Belgium
+# --- Nord Europa ---
+SAS,SAS,Scandinavian Airlines
+NAX,Norwegian,Norwegian Air Shuttle
+WIF,Wideroe,Wideroe
+FIN,Finnair,Finnair
+ICE,Icelandair,Icelandair
+BTI,airBaltic,Air Baltic
+# --- Europa centrale e orientale ---
+LOT,LOT,LOT Polish Airlines
+CSA,CSA,Czech Airlines
+ROT,TAROM,TAROM
+CTN,Croatia,Croatia Airlines
+ASL,Air Serbia,Air Serbia
+AUI,Ukraine Intl,Ukraine International Airlines
+AFL,Aeroflot,Aeroflot
+SBI,S7,S7 Airlines
+# --- Mediterraneo e Medio Oriente ---
+AEE,Aegean,Aegean Airlines
+OAL,Olympic,Olympic Air
+CYP,Cyprus Airw.,Cyprus Airways
+THY,Turkish,Turkish Airlines
+PGT,Pegasus,Pegasus Airlines
+SXS,SunExpress,SunExpress
+CAI,Corendon,Corendon Airlines
+ELY,El Al,El Al
+RJA,Royal Jordan,Royal Jordanian
+MSR,EgyptAir,EgyptAir
+TAR,Tunisair,Tunisair
+DAH,Air Algerie,Air Algerie
+RAM,Royal Air Mar,Royal Air Maroc
+UAE,Emirates,Emirates
+ETD,Etihad,Etihad Airways
+QTR,Qatar,Qatar Airways
+SVA,Saudia,Saudia
+KAC,Kuwait Airw.,Kuwait Airways
+GFA,Gulf Air,Gulf Air
+OMA,Oman Air,Oman Air
+AHY,AZAL,Azerbaijan Airlines
+IRA,Iran Air,Iran Air
+# --- Asia e Oceania ---
+AIC,Air India,Air India
+AXB,Air India Exp,Air India Express
+VTI,Vistara,Vistara
+IGO,IndiGo,IndiGo
+SIA,Singapore,Singapore Airlines
+THA,Thai,Thai Airways International
+CPA,Cathay,Cathay Pacific
+JAL,JAL,Japan Airlines
+ANA,ANA,All Nippon Airways
+KAL,Korean Air,Korean Air
+AAR,Asiana,Asiana Airlines
+CCA,Air China,Air China
+CES,China East.,China Eastern Airlines
+CSN,China South.,China Southern Airlines
+CHH,Hainan,Hainan Airlines
+EVA,EVA Air,EVA Air
+CAL,China Airl.,China Airlines
+QFA,Qantas,Qantas
+ANZ,Air NZ,Air New Zealand
+# --- Americhe ---
+AAL,American,American Airlines
+UAL,United,United Airlines
+DAL,Delta,Delta Air Lines
+SWA,Southwest,Southwest Airlines
+JBU,JetBlue,JetBlue Airways
+ASA,Alaska,Alaska Airlines
+ACA,Air Canada,Air Canada
+WJA,WestJet,WestJet
+AMX,Aeromexico,Aeromexico
+CMP,Copa,Copa Airlines
+AVA,Avianca,Avianca
+LAN,LATAM,LATAM Airlines
+TAM,LATAM Brasil,LATAM Airlines Brasil
+GLO,Gol,Gol Linhas Aereas
+AZU,Azul,Azul Linhas Aereas
+ARG,Aerolineas,Aerolineas Argentinas
+# --- Africa ---
+SAA,South African,South African Airways
+ETH,Ethiopian,Ethiopian Airlines
+KQA,Kenya Airw.,Kenya Airways
+# --- Merci ---
+FDX,FedEx,FedEx Express
+UPS,UPS,UPS Airlines
+GTI,Atlas Air,Atlas Air
+CLX,Cargolux,Cargolux
+BCS,DHL,DHL / European Air Transport
+DHK,DHL Air UK,DHL Air UK
+TAY,ASL Belgium,ASL Airlines Belgium
+BOX,AeroLogic,AeroLogic
+# --- Aviazione d'affari ---
+NJE,NetJets,NetJets Europe
+VJT,VistaJet,VistaJet

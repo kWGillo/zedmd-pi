@@ -278,6 +278,7 @@ copiare così com'è.
 | 1.9.4 | Durata del bit minimo e bit con dithering: alzano il refresh senza perdere profondità PWM |
 | 1.10 | Now Playing: brano in ascolto da AirPlay 2, Spotify o MQTT; entità in Home Assistant |
 | 1.11 | Radar: due tabelle CSV modificabili traducono i codici degli aeromobili e degli aeroporti in nomi leggibili |
+| 1.12 | Radar: compagnia aerea fra i parametri mostrabili, con la sua tabella di conversione |
 
 
 ---
@@ -459,7 +460,7 @@ La pagina Radar decide come comportarsi:
 | Modalità | Che cosa fa |
 |---|---|
 | **A pagine** (predefinita) | I campi si dividono in gruppi che ci stanno per intero e si alternano ogni `page_seconds` secondi. Non se ne perde nessuno, e il testo resta fermo. |
-| **Scorrevole** | La riga passa da destra a sinistra a `scroll_speed` pixel al secondo. Si legge senza attese, ma è l'unica parte del pannello in movimento continuo: su una matrice a 38 Hz lascia una scia leggera. |
+| **Scorrevole** | La riga passa da destra a sinistra a `scroll_speed` pixel al secondo. Si legge senza attese, ma è l'unica parte del pannello in movimento continuo: su una matrice a 38 Hz lascia una scia leggera. Qui `display_seconds` diventa un **minimo**: una passata iniziata arriva in fondo, e si cambia aereo quando il testo è uscito del tutto da sinistra. |
 | **Accorcia la riga** | Il comportamento fino alla 1.11.3: i campi in eccesso vengono scartati dal fondo. |
 
 Identificativo e rotta non si muovono mai: cambia solo la fascia bassa, così
@@ -481,7 +482,15 @@ Due file CSV modificabili traducono le sigle in nomi leggibili:
 ```
 /var/lib/dmd/aerei.csv       177 tipi di aeromobile
 /var/lib/dmd/aeroporti.csv   326 aeroporti
+/var/lib/dmd/compagnie.csv   129 compagnie aeree
 ```
+
+La compagnia non arriva come campo a sé: sta nelle **prime tre lettere del
+nominativo di volo**. In `AFR1732` la compagnia è `AFR`, Air France — il
+designatore ICAO, non la sigla IATA di due lettere del biglietto. Un
+nominativo che non ha quella forma non ha una compagnia da mostrare:
+l'aviazione generale usa l'immatricolazione (`I-ABCD`), e quel campo resta
+vuoto invece di inventarsi una sigla.
 
 Ogni riga ha tre campi — `codice,forma breve,nome completo`. Nella prima
 colonna possono stare **più codici separati da `/`**, e la riga risponde a

@@ -251,9 +251,9 @@ def create_app(runtime):
                                status=runtime.radar.status(current_language()),
                                probe_callsign=request.args.get("callsign", ""),
                                probe_result=request.args.get("result"),
-                               tables=[lookup.stats(k) for k in ("aircraft", "airport")],
+                               tables=[lookup.stats(k) for k in lookup.KINDS],
                                table_text={k: lookup.read_text(k)
-                                           for k in ("aircraft", "airport")},
+                                           for k in lookup.KINDS},
                                unknown=lookup.unknown(),
                                data_dir=lookup.DATA_DIR,
                                lookup_result=request.args.get("lookup_result", ""),

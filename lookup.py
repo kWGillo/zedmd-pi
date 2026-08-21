@@ -1,4 +1,4 @@
-"""Da codice a nome: aerei e aeroporti.
+"""Da codice a nome: aerei, aeroporti e compagnie.
 
 Il radar riceve sigle. Il tipo di aeromobile arriva come **designatore ICAO**
 (`B738`, `A20N`). Gli aeroporti delle rotte arrivano **in due grafie**: il
@@ -8,7 +8,10 @@ servizio routeset di adsb.lol risponde con i codici IATA di tre lettere
 conoscesse una sola delle due grafie lascerebbe meta' dei voli senza
 traduzione — che e' esattamente quello che succedeva nella 1.11.
 
-Le conversioni stanno in due file CSV, uno per tipo, modificabili a mano.
+La compagnia non arriva come campo a se': sta nelle prime tre lettere del
+nominativo di volo. In `AFR1732` la compagnia e' `AFR`, Air France.
+
+Le conversioni stanno in tre file CSV, uno per tipo, modificabili a mano.
 Ogni riga ha tre campi:
 
     codice,forma breve,nome completo
@@ -63,6 +66,7 @@ TEMPLATE_DIR = os.environ.get(
 KINDS = {
     "aircraft": "aerei.csv",
     "airport": "aeroporti.csv",
+    "airline": "compagnie.csv",
 }
 
 # Quanti codici sconosciuti tenere in memoria. Un tetto serve: senza, una
@@ -91,6 +95,9 @@ def template(kind):
 # configurazione. Ogni versione che cambia un modello aggiunge qui l'impronta
 # di quello che sostituisce, mai togliendo le precedenti.
 DISTRIBUITI = {
+    # La tabella delle compagnie nasce con la 1.12: non c'e' ancora nessun
+    # modello precedente da sostituire.
+    "airline": set(),
     "aircraft": {
         "0d763ff25342351827c349175789dcc4",   # 1.11 - 1.11.2
     },
@@ -312,6 +319,33 @@ def route(text, index=0):
     if token:
         out.append(_lookup("airport", token, index))
     return "".join(out)
+
+
+def callsign_prefix(callsign):
+    """Le lettere iniziali del nominativo, che sono la compagnia.
+
+    In `AFR1732` la compagnia e' `AFR`: tre lettere e poi il numero di volo.
+    Non tutti i nominativi hanno questa forma — l'aviazione generale usa
+    l'immatricolazione, `I-ABCD`, e li' non c'e' nessuna compagnia da
+    trovare. Per questo si accetta solo un prefisso di **tre lettere seguito
+    da una cifra**: e' la forma dei voli di linea, e non rischia di
+    scambiare una targa per una sigla.
+    """
+    text = (callsign or "").strip().upper()
+    if len(text) < 4:
+        return ""
+    prefix, rest = text[:3], text[3:]
+    if prefix.isalpha() and rest[:1].isdigit():
+        return prefix
+    return ""
+
+
+def airline(callsign, index=0):
+    """Compagnia di un nominativo, vuoto se il nominativo non ne ha una."""
+    prefix = callsign_prefix(callsign)
+    if not prefix:
+        return ""
+    return _lookup("airline", prefix, index)
 
 
 # --------------------------------------------------------- codici mancanti

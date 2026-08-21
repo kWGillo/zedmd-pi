@@ -747,6 +747,18 @@ STRINGS = {
         "additions stay."),
     "lookup.aircraft": ("Modelli di aeromobile", "Aircraft models"),
     "lookup.airport": ("Aeroporti", "Airports"),
+    "lookup.airline": ("Compagnie aeree", "Airlines"),
+    "lookup.airline.hint": (
+        "Il codice è il prefisso di tre lettere del nominativo di volo: in "
+        "AFR1732 la compagnia è AFR, cioè Air France. È il designatore ICAO, "
+        "non la sigla IATA di due lettere che compare sul biglietto. I voli "
+        "senza compagnia — aviazione generale, che usa l'immatricolazione — "
+        "non mostrano nulla in quel campo, invece di inventarsi una sigla.",
+        "The code is the three-letter prefix of the callsign: in AFR1732 the "
+        "airline is AFR, that is Air France. It is the ICAO designator, not "
+        "the two-letter IATA code printed on the ticket. Flights with no "
+        "airline — general aviation, which uses the registration — show "
+        "nothing in that field instead of inventing a code."),
     "lookup.count": ("%(count)d voci in tabella", "%(count)d entries in the table"),
     "lookup.saved": ("Salvato: %(count)d voci valide.",
                      "Saved: %(count)d valid entries."),
@@ -843,11 +855,16 @@ STRINGS = {
         "qualcosa deve cedere. Le pagine non perdono nulla e lasciano il "
         "pannello fermo; lo scorrimento si legge senza attese ma tiene il "
         "testo sempre in movimento. Finché i campi ci stanno tutti le tre "
-        "scelte si comportano allo stesso modo.",
+        "scelte si comportano allo stesso modo. Con lo scorrimento la durata "
+        "a schermo diventa un minimo: una passata iniziata arriva in fondo, "
+        "e si cambia aereo quando il testo è uscito del tutto.",
         "The bottom line is 256 pixels wide: past four or five fields "
         "something has to give. Pages lose nothing and keep the panel still; "
         "scrolling reads without waiting but keeps the text always moving. As "
-        "long as every field fits, the three choices behave identically."),
+        "long as every field fits, the three choices behave identically. With "
+        "scrolling the time on screen becomes a minimum: a pass that has "
+        "started runs to the end, and the aircraft changes once the text has "
+        "left the panel."),
     "radar.overflow.crop": ("Accorcia la riga (comportamento storico)",
                             "Shorten the line (historical behaviour)"),
     "radar.overflow.pages": ("A pagine, a turno", "Pages, in turn"),
@@ -912,6 +929,7 @@ STRINGS = {
         "that everything works."),
 
     "radar.field.route": ("Rotta (origine → destinazione)", "Route (origin → destination)"),
+    "radar.field.airline": ("Compagnia aerea", "Airline"),
     "radar.field.type": ("Modello di aeromobile", "Aircraft type"),
     "radar.field.reg": ("Immatricolazione", "Registration"),
     "radar.field.altitude": ("Quota", "Altitude"),

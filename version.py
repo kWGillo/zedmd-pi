@@ -143,6 +143,20 @@ Storico:
         tivo e rotta non si muovono mai: cambia solo la fascia bassa.
   1.11.5 "Disposizione informazioni": l'etichetta della scelta nuova era
         lunga, andava a capo e sfalsava le tre caselle affiancate.
+  1.11.6 Lo scorrimento veniva interrotto allo scadere del tempo dell'aereo,
+        anche a meta' riga: spariva un testo che si stava ancora leggendo,
+        cioe' proprio il difetto per cui lo scorrimento esiste. Ora la durata
+        a schermo e' un minimo: la passata arriva in fondo e si cambia aereo
+        quando l'ultimo carattere e' uscito da sinistra. Stessa regola per le
+        pagine, che si vedono per tutto il loro turno.
+  1.12  Air Radar: la compagnia aerea fra i parametri mostrabili. Non e' un
+        campo che arriva dal servizio — sta nelle prime tre lettere del
+        nominativo, e in AFR1732 la compagnia e' Air France — quindi serve
+        una terza tabella di conversione, modificabile come le altre due e
+        distribuita con 129 compagnie. Un volo che non ha compagnia, come
+        l'aviazione generale che usa l'immatricolazione, non mostra nulla in
+        quel campo invece di inventarsi una sigla. Il registro dei passaggi
+        guadagna la colonna airline_name.
 """
 
-__version__ = "1.11.5"
+__version__ = "1.12"

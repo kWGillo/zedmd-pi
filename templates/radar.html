@@ -203,6 +203,8 @@
     <span class="version">{{ t('lookup.count', count=tabella.count) }}</span></h2>
   {% if tabella.kind == 'airport' %}
   <p class="hint">{{ t('lookup.iata.warning') }}</p>
+  {% elif tabella.kind == 'airline' %}
+  <p class="hint">{{ t('lookup.airline.hint') }}</p>
   {% endif %}
   <p class="hint">{{ t('lookup.format') }}</p>
   <form method="post" action="{{ url_for('api_radar_lookup') }}">

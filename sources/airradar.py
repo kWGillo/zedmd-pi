@@ -60,6 +60,7 @@ PROVIDER_LIST = [("adsb.fi", "adsb.fi"), ("adsb.one", "adsb.one / airplanes.live
 # Campi selezionabili per la riga di dettaglio, nell'ordine in cui compaiono.
 FIELD_LIST = [
     ("route", "Rotta (origine → destinazione)"),
+    ("airline", "Compagnia aerea"),
     ("type", "Modello di aeromobile"),
     ("reg", "Immatricolazione"),
     ("altitude", "Quota"),
@@ -76,7 +77,7 @@ CSV_COLUMNS = ["timestamp", "hex", "callsign", "registration", "type",
                # I codici grezzi restano dove sono: sono il dato certo, e
                # servono per rielaborare il registro. Accanto ci si mette il
                # nome leggibile, che e' quello che si vuole aprendo il CSV.
-               "type_name", "route_name"]
+               "type_name", "route_name", "airline_name"]
 
 
 def haversine_km(lat1, lon1, lat2, lon2):
@@ -357,6 +358,7 @@ class AirRadarSource(Source):
                         route,
                         lookup.full("aircraft", plane["type"]) if plane["type"] else "",
                         lookup.route(route, 1),
+                        lookup.airline(plane["flight"], 1),
                     ])
         except OSError as exc:
             print("[airradar] registro non scrivibile: %s" % exc)
@@ -450,7 +452,10 @@ class AirRadarSource(Source):
         index = 0
         while self._running and time.time() < deadline:
             self._pubblica(self._render_details(layout, "  ".join(pages[index])))
-            self._attendi(min(deadline, time.time() + durata))
+            # Una pagina cominciata si vede per intero: il tempo dell'aereo e'
+            # un minimo, non una ghigliottina. Tagliarla a meta' del suo turno
+            # e' esattamente cio' che si e' voluto evitare impaginando.
+            self._attendi(time.time() + durata)
             index = (index + 1) % len(pages)
 
     def _scorri(self, layout, line, cfg, deadline):
@@ -460,23 +465,31 @@ class AirRadarSource(Source):
         parte del pannello in movimento continuo: su una matrice a 38 Hz
         lascia una scia leggera. E' il motivo per cui non e' la modalita'
         predefinita.
+
+        **Una passata cominciata si porta a termine.** Il tempo dell'aereo qui
+        e' un minimo, non una scadenza: interromperlo a meta' significherebbe
+        far sparire una riga che si sta ancora leggendo, che e' il difetto per
+        cui lo scorrimento esisteva. Si cambia aereo solo quando l'ultimo
+        carattere e' uscito da sinistra e il tempo previsto e' passato.
         """
         strip = self._striscia(layout, line)
         fondo = self._base(layout)
         fps = max(10, min(60, int(cfg.get("scroll_fps", 30))))
         speed = max(10, int(cfg.get("scroll_speed", 40)))
         step = speed / float(fps)
-
-        position = float(self.width)
         end = -float(strip.width)
-        while self._running and time.time() < deadline:
-            canvas = fondo.copy()
-            canvas.paste(strip, (int(round(position)), layout["bottom"]))
-            self._pubblica(canvas)
-            position -= step
-            if position <= end:
-                position = float(self.width)
-            time.sleep(1.0 / fps)
+
+        while self._running:
+            position = float(self.width)
+            while self._running and position > end:
+                canvas = fondo.copy()
+                canvas.paste(strip, (int(round(position)), layout["bottom"]))
+                self._pubblica(canvas)
+                position -= step
+                time.sleep(1.0 / fps)
+            # Fuori campo a sinistra: qui, e solo qui, si guarda l'orologio.
+            if time.time() >= deadline:
+                return
 
     # ------------------------------------------------------------------ rotta
 
@@ -577,6 +590,10 @@ class AirRadarSource(Source):
                 return lookup.route(plane.get("route") or "")
             if key == "type":
                 return lookup.short("aircraft", plane.get("type") or "")
+            if key == "airline":
+                # Non e' un campo che arriva dal servizio: sta nelle prime
+                # tre lettere del nominativo.
+                return lookup.airline(plane.get("flight") or "")
             if key == "reg":
                 return plane.get("reg") or ""
             if key == "hex":

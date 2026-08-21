@@ -2,6 +2,35 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.12]
+
+### Aggiunto
+- **Compagnia aerea** fra i parametri di volo mostrabili sul pannello.
+- Non e' un campo che arriva dal servizio: sta nelle **prime tre lettere del
+  nominativo**. In `AFR1732` la compagnia e' `AFR`, Air France — il
+  designatore ICAO, non la sigla IATA di due lettere del biglietto.
+- Terza tabella di conversione, `/var/lib/dmd/compagnie.csv`, modificabile
+  dalla pagina Radar e dal file come le altre due. Distribuita con **129
+  compagnie**: le europee, le principali intercontinentali, i corrieri merci
+  e l'aviazione d'affari.
+- Un nominativo che non ha quella forma non ha una compagnia da mostrare:
+  l'aviazione generale usa l'immatricolazione (`I-ABCD`), e il campo resta
+  vuoto invece di inventarsi una sigla dalle prime tre lettere della targa.
+- Il registro dei passaggi guadagna la colonna `airline_name`. Il registro
+  esistente viene messo da parte con la data, come sempre quando cambiano le
+  colonne, invece di continuare con righe disallineate.
+
+## [1.11.6]
+
+### Corretto
+- **Lo scorrimento veniva tagliato allo scadere del tempo dell'aereo**, anche
+  a meta' riga: spariva un testo che si stava ancora leggendo, cioe' proprio
+  il difetto per cui lo scorrimento esiste. La durata a schermo diventa un
+  **minimo**: la passata arriva in fondo e si cambia aereo quando l'ultimo
+  carattere e' uscito da sinistra.
+- Stessa regola per le pagine: una pagina cominciata si vede per tutto il suo
+  turno, invece di essere accorciata dalla scadenza.
+
 ## [1.11.5]
 
 ### Modificato
