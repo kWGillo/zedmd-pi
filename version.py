@@ -70,6 +70,12 @@ Storico:
         con setup_share.sh: ma quello lo chiamano install.sh e update.sh,
         mentre questo lo lancia l'utente. Dopo un aggiornamento via rete non
         c'e' nessuna cartella scompattata, e lo script non si trovava.
+  1.10.2 setup_nowplaying.sh: mancava il pacchetto libplist-utils fra le
+        dipendenze, e senza il programma plistutil la configurazione di
+        shairport-sync per AirPlay 2 si ferma. Corretto anche il flag di
+        systemd, che e' --with-systemd-startup. E quando qualcosa fallisce lo
+        script stampa la riga del registro che spiega il motivo, invece di
+        limitarsi a dire dove trovarla.
 """
 
-__version__ = "1.10.1"
+__version__ = "1.10.2"

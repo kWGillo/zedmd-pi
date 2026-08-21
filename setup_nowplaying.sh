@@ -44,6 +44,20 @@ passo()  { printf '    %s\n' "$*"; }
 fallisci() {
     echo
     rosso "ERRORE: $*"
+    # Citare il registro senza mostrarlo costringe a un secondo giro di
+    # comandi proprio quando si e' gia' fermi. La riga che spiega il motivo
+    # va stampata qui, adesso.
+    if [ -s "$LOG" ]; then
+        MOTIVO="$(grep -aE "configure: error:|No package .* found|were not met|Error 1$|command not found" "$LOG" | tail -4)"
+        if [ -n "$MOTIVO" ]; then
+            echo
+            giallo "  Il registro dice questo:"
+            echo "$MOTIVO" | sed 's/^/    /'
+        fi
+        echo
+        echo "  Ultime righe del registro:"
+        tail -12 "$LOG" | sed 's/^/    /'
+    fi
     echo
     echo "Niente e' stato lasciato a meta': i passi gia' completati restano"
     echo "validi e rilanciare lo script riprende da dove si e' fermato."
@@ -366,7 +380,7 @@ else
         libpopt-dev libconfig-dev libasound2-dev avahi-daemon \
         libavahi-client-dev libssl-dev libsoxr-dev libplist-dev libsodium-dev \
         libavutil-dev libavcodec-dev libavformat-dev uuid-dev libgcrypt-dev \
-        xxd libmosquitto-dev \
+        xxd libplist-utils libmosquitto-dev \
         || fallisci "installazione delle dipendenze non riuscita (vedi $LOG)"
     verde "    installate"
 
@@ -385,23 +399,27 @@ else
     LAVORI="$(( CORE > 1 ? CORE - 1 : 1 ))"
 
     titolo "nqptp (sincronizzazione PTP di AirPlay 2)"
-    if [ -d "$SORGENTI/nqptp/.git" ]; then
+    if command -v nqptp >/dev/null 2>&1 && attivo nqptp; then
+        passo "gia' compilato e attivo: salto"
+    elif [ -d "$SORGENTI/nqptp/.git" ]; then
         passo "sorgenti gia' presenti, aggiorno"
         esegui git -C "$SORGENTI/nqptp" pull --ff-only
     else
         esegui git clone --depth 1 https://github.com/mikebrady/nqptp.git \
             "$SORGENTI/nqptp" || fallisci "clone di nqptp non riuscito"
     fi
-    cd "$SORGENTI/nqptp" || fallisci "cartella di nqptp irraggiungibile"
-    passo "compilazione"
-    esegui autoreconf -fi
-    esegui ./configure --with-systemd-startup || fallisci "configure di nqptp fallito (vedi $LOG)"
-    $GENTILE make -j"$LAVORI" >>"$LOG" 2>&1 || fallisci "compilazione di nqptp fallita (vedi $LOG)"
-    esegui make install
-    esegui systemctl enable nqptp
-    esegui systemctl restart nqptp
-    sleep 1
-    attivo nqptp || fallisci "nqptp non parte (vedi $LOG)"
+    if ! command -v nqptp >/dev/null 2>&1 || ! attivo nqptp; then
+        cd "$SORGENTI/nqptp" || fallisci "cartella di nqptp irraggiungibile"
+        passo "compilazione"
+        esegui autoreconf -fi
+        esegui ./configure --with-systemd-startup || fallisci "configure di nqptp non riuscito"
+        $GENTILE make -j"$LAVORI" >>"$LOG" 2>&1 || fallisci "compilazione di nqptp fallita"
+        esegui make install
+        esegui systemctl enable nqptp
+        esegui systemctl restart nqptp
+        sleep 1
+        attivo nqptp || fallisci "nqptp non parte"
+    fi
     verde "    nqptp attivo"
 
     titolo "shairport-sync (un quarto d'ora circa)"
@@ -417,8 +435,8 @@ else
     passo "configurazione con AirPlay 2, metadati e MQTT"
     esegui ./configure --sysconfdir=/etc --with-alsa --with-avahi \
         --with-ssl=openssl --with-soxr --with-airplay-2 \
-        --with-metadata --with-mqtt-client --with-systemd \
-        || fallisci "configure di shairport-sync fallito: l'ultima riga del registro dice quale libreria manca ($LOG)"
+        --with-metadata --with-mqtt-client --with-systemd-startup \
+        || fallisci "configure di shairport-sync non e' andato a buon fine"
     passo "compilazione con $LAVORI lavori, a priorita' bassa"
     $GENTILE make -j"$LAVORI" >>"$LOG" 2>&1 \
         || fallisci "compilazione di shairport-sync fallita (vedi $LOG)"

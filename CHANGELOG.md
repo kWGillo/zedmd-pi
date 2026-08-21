@@ -2,6 +2,31 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.10.2]
+
+### Corretto
+- **`setup_nowplaying.sh`: mancava `libplist-utils`.** Il `configure` di
+  shairport-sync per AirPlay 2 cerca il programma `plistutil` e si ferma se
+  non lo trova: *"plistutil can not be found. Please install plistutil for
+  building for AirPlay 2."* L'elenco delle dipendenze ora coincide con quello
+  del BUILD.md ufficiale, con in piu' `pkg-config` e `libmosquitto-dev` che
+  servono a noi.
+- **Flag di systemd sbagliato**: era `--with-systemd`, ma nella versione
+  attuale si chiama `--with-systemd-startup`. Autoconf un flag sconosciuto lo
+  segnala solo come avviso, quindi la compilazione sarebbe riuscita e
+  l'errore sarebbe saltato fuori dopo, con l'unita' di servizio assente.
+
+### Modificato
+- Quando un passo fallisce, lo script **stampa la riga del registro che
+  spiega il motivo** invece di limitarsi a dire dove trovarla. Citare un file
+  di log senza mostrarlo costringe a un secondo giro di comandi proprio
+  quando si e' gia' fermi.
+- `nqptp` non viene ricompilato se e' gia' installato e attivo: dopo un
+  errore si rilancia lo script, e non ha senso rifare ogni volta una
+  compilazione riuscita.
+- La guida riporta i due dettagli corretti, con la spiegazione del perche'
+  sbagliarli costa tempo.
+
 ## [1.10.1]
 
 ### Corretto

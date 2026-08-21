@@ -161,10 +161,10 @@ al capitolo 3. Se manca anche solo uno dei due, va ricompilato.
 ```bash
 sudo apt update
 sudo apt install -y --no-install-recommends build-essential git autoconf \
-  automake libtool libpopt-dev libconfig-dev libasound2-dev avahi-daemon \
-  libavahi-client-dev libssl-dev libsoxr-dev libplist-dev libsodium-dev \
-  libavutil-dev libavcodec-dev libavformat-dev uuid-dev libgcrypt-dev xxd \
-  libmosquitto-dev
+  automake libtool pkg-config libpopt-dev libconfig-dev libasound2-dev \
+  avahi-daemon libavahi-client-dev libssl-dev libsoxr-dev libplist-dev \
+  libplist-utils libsodium-dev libavutil-dev libavcodec-dev libavformat-dev \
+  uuid-dev libgcrypt-dev xxd libmosquitto-dev
 ```
 
 ## nqptp
@@ -198,14 +198,21 @@ autoreconf -fi
             --with-airplay-2 \
             --with-metadata \
             --with-mqtt-client \
-            --with-systemd
+            --with-systemd-startup
 make -j4
 sudo make install
 ```
 
-La compilazione sul Pi 4 richiede una decina di minuti. Se `./configure`
-protesta per una libreria mancante, installala e rilancia: l'elenco delle
-dipendenze qui sopra copre i casi normali, ma le versioni cambiano.
+La compilazione sul Pi 4 richiede una decina di minuti.
+
+Due dettagli che costano tempo se sbagliati. Il flag di systemd è
+`--with-systemd-startup`: `--with-systemd` non esiste più, e autoconf lo
+segnala solo come avviso — l'errore vero salta fuori dopo, quando manca
+l'unità di servizio. E `libplist-utils` serve davvero: `configure` cerca il
+programma `plistutil`, e per AirPlay 2 senza quello si ferma.
+
+Se `./configure` protesta per un'altra libreria, installala e rilancia:
+l'elenco qui sopra copre i casi normali, ma le versioni cambiano.
 
 # 3. L'audio deve finire nel nulla, ma con un orologio vero
 
