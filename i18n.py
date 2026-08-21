@@ -835,8 +835,9 @@ STRINGS = {
         "The cooldown stops the same flight from being shown over and over "
         "while it stays within range."),
     "radar.fields": ("Parametri di volo da mostrare", "Flight details to show"),
-    "radar.overflow": ("Quando i campi non stanno su una riga",
-                       "When the fields do not fit on one line"),
+    # Corta di proposito: e' la prima di tre caselle affiancate, e
+    # un'etichetta che va a capo sfalsa la riga.
+    "radar.overflow": ("Disposizione informazioni", "Details layout"),
     "radar.overflow.hint": (
         "La riga in basso è larga 256 pixel: oltre i quattro o cinque campi "
         "qualcosa deve cedere. Le pagine non perdono nulla e lasciano il "

@@ -141,6 +141,8 @@ Storico:
         oppure farla scorrere. Finche' i campi ci stanno tutti le tre scelte
         si comportano allo stesso modo, e il pannello resta fermo. Identifica-
         tivo e rotta non si muovono mai: cambia solo la fascia bassa.
+  1.11.5 "Disposizione informazioni": l'etichetta della scelta nuova era
+        lunga, andava a capo e sfalsava le tre caselle affiancate.
 """
 
-__version__ = "1.11.4"
+__version__ = "1.11.5"

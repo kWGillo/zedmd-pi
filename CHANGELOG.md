@@ -2,6 +2,12 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.11.5]
+
+### Modificato
+- L'etichetta della scelta nuova diventa **"Disposizione informazioni"**:
+  quella precedente andava a capo e sfalsava le tre caselle affiancate.
+
 ## [1.11.4]
 
 ### Aggiunto
