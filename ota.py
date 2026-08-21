@@ -203,11 +203,39 @@ def backup():
     log("copia di sicurezza in %s" % BACKUP_DIR)
 
 
+def payload_files(source):
+    """I file da installare, dichiarati dalla versione che si sta installando.
+
+    `PAYLOAD_FILES` e' un elenco cablato nel codice, quindi appartiene alla
+    versione *gia' installata*: un file introdotto da una versione successiva
+    non ci sarebbe mai. E' esattamente cosi' che la 1.9 e' arrivata senza
+    `libcheck.py`, lasciando un `dmdd.py` che importava un modulo assente.
+
+    L'archivio scaricato pero' porta con se' `manifest-install.md5`, che
+    elenca cio' che deve stare in /opt/dmd. Quello e' l'elenco giusto: lo
+    scrive la versione nuova, e comprende i file che il codice vecchio non
+    puo' conoscere.
+    """
+    manifest = os.path.join(source, "manifest-install.md5")
+    names = set(PAYLOAD_FILES)
+    if os.path.exists(manifest):
+        try:
+            with open(manifest) as handle:
+                for line in handle:
+                    parts = line.split()
+                    if len(parts) == 2 and "/" not in parts[1]:
+                        # Solo la radice: le sottocartelle le copia PAYLOAD_DIRS.
+                        names.add(parts[1])
+        except OSError:
+            pass
+    return sorted(names)
+
+
 def install_files(source, destination=None):
     # Risolta alla chiamata, non all'importazione: la cartella puo' cambiare.
     destination = destination or INSTALL_DIR
     os.makedirs(destination, exist_ok=True)
-    for name in PAYLOAD_FILES:
+    for name in payload_files(source):
         src = os.path.join(source, name)
         if os.path.exists(src):
             shutil.copy2(src, os.path.join(destination, name))
@@ -248,15 +276,42 @@ def healthy(port, attempts=20, delay=2.0):
     return ""
 
 
+def check_installed(source, destination=None):
+    """Cio' che l'archivio dichiara deve essere davvero finito a destinazione.
+
+    Serve a intercettare un file mancante *prima* di riavviare il servizio,
+    invece di scoprirlo da un `ModuleNotFoundError` a display spento.
+    """
+    destination = destination or INSTALL_DIR
+    manifest = os.path.join(source, "manifest-install.md5")
+    if not os.path.exists(manifest):
+        return
+
+    missing = []
+    with open(manifest) as handle:
+        for line in handle:
+            parts = line.split()
+            if len(parts) != 2:
+                continue
+            if not os.path.exists(os.path.join(destination, parts[1])):
+                missing.append(parts[1])
+    if missing:
+        raise RuntimeError("file non installati: %s" % ", ".join(missing[:6]))
+    log("installazione completa: nessun file dichiarato risulta mancante")
+
+
 def apply_update(repo, branch, port):
     log("=== aggiornamento da %s ramo %s ===" % (repo, branch))
     workdir = tempfile.mkdtemp(prefix="dmd-ota-")
+    touched = False   # da qui in poi /opt/dmd non e' piu' quello di partenza
     try:
         source = download_source(repo, branch, workdir)
         remote = verify(source)
 
         backup()
+        touched = True
         install_files(source)
+        check_installed(source)
         log("file installati, riavvio del servizio")
         service("restart")
 
@@ -274,6 +329,16 @@ def apply_update(repo, branch, port):
         return 1
     except Exception as exc:
         log("aggiornamento fallito: %s" % exc)
+        # Se l'installazione era gia' cominciata, /opt/dmd e' un misto di
+        # vecchio e nuovo: peggio di entrambe le versioni. Va rimesso a posto
+        # anche quando a fallire e' stata la copia, non solo l'avvio.
+        if touched:
+            log("l'installazione era in corso: ripristino la copia di sicurezza")
+            if restore():
+                service("restart")
+                back = healthy(port)
+                log("ripristino %s" % ("riuscito, versione %s" % back if back
+                                       else "eseguito ma il servizio non risponde"))
         return 1
     finally:
         shutil.rmtree(workdir, ignore_errors=True)

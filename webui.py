@@ -179,8 +179,7 @@ def create_app(runtime):
     def page_settings():
         return render_template(
             "settings.html", cfg=cfg, ips=local_ips(),
-            hostname=socket.gethostname(), timezones=all_timezones(),
-            ntp=ntp_status(), now=time.strftime("%d/%m/%Y %H:%M:%S"),
+            hostname=socket.gethostname(),
             sleeping=runtime.sleeping, night=runtime.night,
             update=runtime.update_info, ota_log=ota.tail_log(12),
             lib=runtime.lib_info,
@@ -191,8 +190,10 @@ def create_app(runtime):
     def page_clock():
         # Nome diverso da `languages`, che nel contesto globale sono le lingue
         # dell'interfaccia: queste sono quelle dei giorni sul pannello.
-        return render_template("clock.html", cfg=cfg, clock_languages=LANGUAGES,
-                               page="clock")
+        return render_template(
+            "clock.html", cfg=cfg, clock_languages=LANGUAGES,
+            timezones=all_timezones(), ntp=ntp_status(),
+            now=time.strftime("%d/%m/%Y %H:%M:%S"), page="clock")
 
     @app.route("/media")
     def page_media():
@@ -597,7 +598,8 @@ def create_app(runtime):
         apply_timezone(cfg)
         apply_ntp(cfg)
         runtime.clock.invalidate()
-        return redirect(url_for("page_settings"))
+        # Il riquadro vive nella pagina Orologio: si torna li'.
+        return redirect(url_for("page_clock"))
 
     @app.route("/api/service", methods=["POST"])
     def api_service():

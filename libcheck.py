@@ -51,8 +51,24 @@ def library_dir(cfg):
     return FALLBACK_DIRS[0]
 
 
+def git_argv(path, args):
+    """Comando git per un repository che appartiene a un altro utente.
+
+    Il servizio gira come root — deve, per i GPIO — mentre la libreria sta
+    nella home dell'utente. Dalla 2.35.2 git rifiuta i repository di altri
+    proprietari (`detected dubious ownership`): e' una difesa contro la
+    configurazione ostile di una cartella altrui.
+
+    `-c safe.directory=<path>` toglie l'eccezione **solo per questa
+    invocazione e solo per questa cartella**, senza toccare la
+    configurazione globale del sistema. Qui leggiamo e basta, e di quella
+    cartella ci fidiamo gia': da li' viene la libreria che pilota il pannello.
+    """
+    return ["git", "-c", "safe.directory=%s" % path, "-C", path] + list(args)
+
+
 def _git(path, *args):
-    result = subprocess.run(["git", "-C", path] + list(args),
+    result = subprocess.run(git_argv(path, args),
                             capture_output=True, text=True, timeout=20)
     if result.returncode != 0:
         raise RuntimeError((result.stderr or result.stdout).strip() or "git ha fallito")

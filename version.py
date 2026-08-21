@@ -41,6 +41,17 @@ Storico:
        velocita' e lampeggio propri, a comparsa periodica. Controllo degli
        aggiornamenti della libreria della matrice, senza installazione
        automatica.
+  1.9.1 L'aggiornamento via rete installa i file dichiarati dall'archivio
+        scaricato, non quelli elencati nel codice gia' installato: una
+        versione che aggiunge un file non lo lasciava indietro. Controllo
+        dei file mancanti prima del riavvio e ripristino anche quando a
+        fallire e' la copia.
+  1.9.2 Il controllo della libreria funziona anche quando la cartella
+        appartiene all'utente e il servizio gira come root: git rifiutava il
+        repository con "dubious ownership".
+  1.9.3 Il riquadro "Ora e sincronizzazione" passa dalla pagina Impostazioni
+        a quella dell'Orologio, sotto le impostazioni di aspetto: le due cose
+        si regolano insieme.
 """
 
-__version__ = "1.9"
+__version__ = "1.9.3"

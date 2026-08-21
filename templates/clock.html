@@ -56,6 +56,42 @@
   </form>
 </section>
 
+<section class="card">
+  <h2>{{ t('settings.time') }}</h2>
+  <form method="post" action="{{ url_for('api_time') }}">
+    <label for="ntp_server">{{ t('settings.ntp') }}</label>
+    <input type="text" id="ntp_server" name="ntp_server"
+           value="{{ cfg.time.ntp_server }}" placeholder="pool.ntp.org">
+
+    <label for="timezone">{{ t('settings.timezone') }}</label>
+    <input list="tzlist" id="timezone" name="timezone" value="{{ cfg.time.timezone }}">
+    <datalist id="tzlist">
+      {% for tz in timezones %}<option value="{{ tz }}">{% endfor %}
+    </datalist>
+
+    <label class="check">
+      <input type="checkbox" name="dst_auto" {{ 'checked' if cfg.time.dst_auto }}>
+      {{ t('settings.dst') }}
+    </label>
+
+    <label for="utc_offset">{{ t('settings.utc') }}</label>
+    <select id="utc_offset" name="utc_offset">
+      {% for h in range(-12, 15) %}
+      <option value="{{ h }}" {{ 'selected' if cfg.time.utc_offset == h }}>UTC{{ '%+d' % h }}</option>
+      {% endfor %}
+    </select>
+
+    <button type="submit">{{ t('common.save_apply') }}</button>
+  </form>
+
+  <dl class="info">
+    <dt>{{ t('settings.systime') }}</dt><dd>{{ now }}</dd>
+    <dt>{{ t('settings.activetz') }}</dt><dd>{{ ntp.get('Timezone', '—') }}</dd>
+    <dt>{{ t('settings.ntpon') }}</dt><dd>{{ t('common.yes') if ntp.get('NTP') == 'yes' else t('common.no') }}</dd>
+    <dt>{{ t('settings.synced') }}</dt><dd>{{ t('common.yes') if ntp.get('NTPSynchronized') == 'yes' else t('common.no') }}</dd>
+  </dl>
+</section>
+
 <script>
 function bind(id, hexId, previewId) {
   const input = document.getElementById(id);

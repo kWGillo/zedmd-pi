@@ -2,6 +2,50 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.9.3]
+
+### Modificato
+- Il riquadro **Ora e sincronizzazione** si sposta dalla pagina Impostazioni a
+  quella dell'Orologio, sotto le impostazioni di aspetto. Formato dell'ora,
+  colori, lingua dei giorni, fuso orario e server NTP sono aspetti della stessa
+  cosa e si regolano nello stesso posto. Dopo il salvataggio si torna alla
+  pagina Orologio.
+
+## [1.9.2]
+
+### Corretto
+- Il controllo della libreria falliva con `fatal: detected dubious ownership in
+  repository`. Il servizio gira come `root` — necessario per i GPIO — mentre la
+  libreria sta nella home dell'utente, e dalla versione 2.35.2 git rifiuta i
+  repository di un altro proprietario. Ora l'eccezione viene passata alla
+  singola invocazione con `-c safe.directory=<percorso>`, senza modificare la
+  configurazione globale del sistema.
+
+## [1.9.1]
+
+### Corretto
+- **L'aggiornamento via rete non installava i file nuovi.** L'elenco dei file
+  da copiare (`PAYLOAD_FILES`) è cablato nel codice, quindi appartiene alla
+  versione *già installata*: un file introdotto da una versione successiva non
+  poteva comparirvi. Aggiornando dalla 1.8 alla 1.9, `libcheck.py` non è stato
+  copiato e il nuovo `dmdd.py` è morto su `ModuleNotFoundError` con il display
+  spento. Ora l'elenco si legge da `manifest-install.md5`, che l'archivio
+  scaricato porta con sé: è la versione nuova a dichiarare cosa contiene.
+- Controllo dei file mancanti **prima** del riavvio del servizio: un'anomalia
+  viene intercettata mentre il sistema è ancora in piedi, non dopo.
+- Il ripristino della copia di sicurezza scatta anche quando a fallire è la
+  copia dei file, non solo l'avvio del servizio. Prima, un errore a metà
+  installazione lasciava `/opt/dmd` con un misto di vecchio e nuovo.
+
+### Nota per chi aggiorna dalla 1.9
+La correzione riguarda il codice che *esegue* l'aggiornamento, quindi ha
+effetto dal passaggio successivo. Se il servizio non riparte dopo un
+aggiornamento e il log riporta `ModuleNotFoundError`, il file mancante si
+recupera così:
+
+    sudo curl -fsSL https://raw.githubusercontent.com/kWGillo/zedmd-pi/main/<file>.py -o /opt/dmd/<file>.py
+    sudo systemctl restart dmd
+
 ## [1.9]
 
 ### Aggiunto
