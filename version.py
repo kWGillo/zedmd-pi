@@ -89,6 +89,21 @@ Storico:
         lo script lo rifiutava. Ora la grafia viene normalizzata prima di
         confrontare, e se il controllo fallisce lo script stampa la stringa
         che ha letto invece di limitarsi a dire che qualcosa non va.
+  1.10.5 setup_nowplaying.sh scriveva /etc/shairport-sync.conf a 640 root:root
+        quando c'e' la password del broker: il demone non gira come root e
+        non riusciva a leggerlo, fallendo l'avvio con "file I/O error". Ora
+        il file passa al gruppo del servizio, e lo script verifica davvero
+        che quell'utente riesca a leggerlo invece di darlo per scontato.
+        Prima di riavviare i servizi azzera il contatore dei fallimenti, che
+        altrimenti fa rifiutare il riavvio anche a causa corretta.
+  1.10.6 La pausa dal telefono non veniva vista: il pannello continuava a far
+        avanzare il tempo di un brano fermo, e dieci secondi dopo faceva
+        sparire tutto. L'unico avviso e' il codice grezzo `paus`, che ora
+        viene ascoltato, insieme allo stato esplicito sul topic `playing`.
+        La fine della sessione non cancella piu' il brano di colpo: resta
+        fermo per la finestra di permanenza. Le sottoscrizioni non prendono
+        piu' l'intero ramo: le copertine non attraversano piu' la rete per
+        essere buttate.
 """
 
-__version__ = "1.10.4"
+__version__ = "1.10.6"

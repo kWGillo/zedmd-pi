@@ -178,8 +178,17 @@ class Runtime:
         conf = self.cfg.get("mqtt") or {}
         shairport = str(conf.get("shairport_topic") or "").strip("/")
         if shairport:
-            self.mqtt.subscribe("%s/#" % shairport,
+            # Non `#`: con publish_raw attivo quel ramo porta anche le
+            # copertine, centinaia di kilobyte di JPEG per ogni brano che
+            # attraverserebbero il broker e la rete per essere poi buttati.
+            # `+` prende il solo livello leggibile (title, artist, playing,
+            # active, play_*), e i due codici grezzi che servono davvero si
+            # chiedono per nome.
+            self.mqtt.subscribe("%s/+" % shairport,
                                 self.nowplaying.handle_shairport)
+            for codice in ("prgr", "paus"):
+                self.mqtt.subscribe("%s/ssnc/%s" % (shairport, codice),
+                                    self.nowplaying.handle_shairport)
         external = str(conf.get("external_topic") or "").strip("/")
         if external:
             self.mqtt.subscribe(external, self.nowplaying.handle_external)

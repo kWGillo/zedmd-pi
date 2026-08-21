@@ -2,6 +2,68 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.10.6]
+
+### Corretto
+- **La pausa dal telefono non veniva vista.** Mettendo in pausa, il pannello
+  continuava a mostrare "in riproduzione" e a far avanzare il tempo di un
+  brano fermo; una decina di secondi dopo faceva sparire tutto. Da una
+  cattura del traffico reale risulta che l'unico avviso e' il codice grezzo
+  `shairport/ssnc/paus`, che arriva nell'istante esatto della pausa: non
+  veniva ascoltato. Lo stato leggibile `shairport/playing` resta invece a
+  "1" fino alla chiusura della sessione, quindi aspettare quello significava
+  mentire per dieci secondi. Ora si ascoltano entrambi.
+- **La fine della sessione cancellava il brano di colpo.** `play_end` faceva
+  piazza pulita: ecco perche' dopo la pausa il player spariva da solo. Ora
+  la sessione che si chiude mette in pausa, e il brano resta fermo a schermo
+  per la finestra di permanenza prima di lasciare il posto.
+
+### Modificato
+- **Il fondo di sicurezza era tarato male.** La stessa cattura mostra
+  ventuno secondi di riproduzione normale senza un solo messaggio: il limite
+  di venti secondi entro cui l'orologio poteva avanzare senza conferme
+  avrebbe prodotto pause finte a meta' di ogni brano. Ora e' di dieci
+  minuti, e serve solo per sorgenti che non annunciano la pausa affatto.
+  Regolabile con `nowplaying.advance_timeout`.
+- **Le sottoscrizioni non prendono piu' l'intero ramo.** Con `publish_raw`
+  attivo, `shairport/#` porta anche le copertine: centinaia di kilobyte di
+  JPEG per ogni brano, che attraversavano broker e rete per essere poi
+  buttati. Ora si chiede il solo livello leggibile piu' i due codici grezzi
+  che servono, `prgr` e `paus`.
+
+### Note
+Il test `test_pausa.py` riproduce la sessione catturata topic per topic —
+avvio, silenzio, pausa, chiusura, ripresa — e verifica lo stato del pannello
+a ogni passaggio. Sarebbe bastato a intercettare tutti e tre i difetti.
+
+## [1.10.5]
+
+### Corretto
+- **shairport-sync non partiva quando il broker ha una password.** Lo script
+  scriveva `/etc/shairport-sync.conf` a `640 root:root` per non lasciare la
+  password leggibile da chiunque, ma il demone gira come utente
+  `shairport-sync` e cosi' non riusciva ad aprirlo. L'errore che ne usciva —
+  *"Error reading configuration file: file I/O error"* — non nomina i
+  permessi e manda a cercare tutt'altro. Ora il file passa al gruppo
+  dichiarato dall'unita' di servizio, e lo script **verifica davvero** che
+  quell'utente riesca a leggerlo, provandoci; se non ci riesce allenta i
+  permessi e lo dice, perche' un file leggibile con un avviso e' meglio di un
+  servizio morto in silenzio.
+- **`systemctl reset-failed` prima di ogni riavvio.** Dopo qualche tentativo
+  fallito systemd blocca il servizio con *"start request repeated too
+  quickly"* e da quel momento rifiuta di riavviarlo anche a causa corretta:
+  si corregge il problema vero e sembra che la correzione non abbia
+  funzionato.
+
+### Modificato
+- Se shairport-sync non parte, lo script stampa le ultime righe del suo
+  journal. Era l'unico posto dove si leggeva il motivo, e costava un altro
+  giro di comandi.
+- Il messaggio sul confinamento ai core non dice piu' "sarebbe
+  controproducente" quando i core contati sono meno di quattro: con
+  `isolcpus` il core riservato non viene contato e non e' comunque
+  raggiungibile, quindi il lavoro e' gia' fatto.
+
 ## [1.10.4]
 
 ### Corretto

@@ -286,12 +286,33 @@ mqtt = {
 };
 ```
 
-`publish_raw = "yes"` non è facoltativo se vuoi la barra di avanzamento: la
-posizione nel brano viaggia solo sul topic grezzo `prgr`, non fra quelli
-leggibili.
+`publish_raw = "yes"` non è facoltativo, e per due motivi. La posizione nel
+brano viaggia solo sul topic grezzo `prgr`; e soprattutto **la pausa si
+riconosce solo da `paus`**, anch'esso grezzo. Lo stato leggibile
+`shairport/playing` resta a `1` per una decina di secondi dopo che hai messo
+in pausa, finché l'iPhone non chiude la sessione: aspettare quello
+significherebbe mostrare un brano che avanza mentre è fermo.
+
+Il DMD non si iscrive a `shairport/#` ma al solo livello leggibile più
+`ssnc/prgr` e `ssnc/paus`. Con `publish_raw` attivo il ramo grezzo porta
+anche le copertine — centinaia di kilobyte di JPEG per ogni brano — che
+attraverserebbero il broker per essere poi scartate.
 
 Se il broker vuole le credenziali, aggiungi `username` e `password` dentro il
-blocco `mqtt`.
+blocco `mqtt`. In quel caso il file non deve restare leggibile da chiunque,
+ma attenzione a come lo stringi: shairport-sync gira come utente
+`shairport-sync`, quindi il file va dato al suo gruppo, non lasciato a
+`root:root`.
+
+```bash
+sudo chgrp shairport-sync /etc/shairport-sync.conf
+sudo chmod 640 /etc/shairport-sync.conf
+sudo -u shairport-sync test -r /etc/shairport-sync.conf && echo "leggibile"
+```
+
+Un file `640 root:root` fa fallire l'avvio con *"Error reading configuration
+file: file I/O error"*, che non nomina i permessi e manda a cercare
+altrove.
 
 Poi:
 

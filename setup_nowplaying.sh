@@ -466,6 +466,7 @@ else
         $GENTILE make -j"$LAVORI" >>"$LOG" 2>&1 || fallisci "compilazione di nqptp fallita"
         esegui make install
         esegui systemctl enable nqptp
+        esegui systemctl reset-failed nqptp
         esegui systemctl restart nqptp
         sleep 1
         attivo nqptp || fallisci "nqptp non parte"
@@ -545,11 +546,34 @@ fi
     echo "};"
 } > "$CONF_SHAIRPORT"
 chmod 644 "$CONF_SHAIRPORT"
-# La password del broker finisce qui dentro: non deve essere leggibile da
-# tutti come il resto del file.
+
+# La password del broker finisce qui dentro, quindi il file non deve restare
+# leggibile da chiunque. Ma stringere i permessi senza dare il file al gruppo
+# del demone lo rende illeggibile anche a lui: shairport-sync non gira come
+# root, e un file 640 root:root gli fa fallire l'avvio senza spiegazioni.
 if [ -n "$BROKER_PASS" ]; then
-    chmod 640 "$CONF_SHAIRPORT"
-    passo "permessi ristretti: il file contiene la password del broker"
+    UTENTE_SPS="$(systemctl show -p User --value shairport-sync 2>/dev/null)"
+    GRUPPO_SPS="$(systemctl show -p Group --value shairport-sync 2>/dev/null)"
+    [ -z "$GRUPPO_SPS" ] && GRUPPO_SPS="$UTENTE_SPS"
+
+    if [ -n "$GRUPPO_SPS" ] && getent group "$GRUPPO_SPS" >/dev/null 2>&1; then
+        chgrp "$GRUPPO_SPS" "$CONF_SHAIRPORT"
+        chmod 640 "$CONF_SHAIRPORT"
+        passo "permessi root:$GRUPPO_SPS — il file contiene la password del broker"
+    fi
+
+    # Verifica invece di dare per scontato: si prova davvero a leggerlo con
+    # l'identita' del demone. Se non ci riesce, meglio un file leggibile e un
+    # servizio funzionante che il contrario, ma dicendolo a voce alta.
+    if [ -n "$UTENTE_SPS" ] && [ "$UTENTE_SPS" != "root" ]; then
+        if ! sudo -n -u "$UTENTE_SPS" test -r "$CONF_SHAIRPORT" 2>/dev/null; then
+            chmod 644 "$CONF_SHAIRPORT"
+            giallo "    ATTENZIONE: l'utente $UTENTE_SPS non riusciva a leggere la"
+            giallo "    configurazione, quindi resta leggibile da tutti. Dentro"
+            giallo "    c'e' la password del broker: valuta un utente MQTT"
+            giallo "    dedicato al DMD, con i soli permessi che gli servono."
+        fi
+    fi
 fi
 verde "    scritto $CONF_SHAIRPORT"
 
@@ -573,13 +597,21 @@ FINE
     done
     esegui systemctl daemon-reload
 else
-    passo "solo $CORE_TOT core: nessun confinamento, sarebbe controproducente"
+    passo "$CORE_TOT core disponibili: nessun confinamento da impostare"
+    passo "se hai isolcpus nel cmdline, il core riservato non viene contato"
+    passo "qui e non e' comunque raggiungibile: il lavoro e' gia' fatto"
 fi
 
 esegui systemctl enable shairport-sync
+esegui systemctl reset-failed shairport-sync
 esegui systemctl restart shairport-sync
 sleep 2
-attivo shairport-sync || fallisci "shairport-sync non parte: systemctl status shairport-sync"
+if ! attivo shairport-sync; then
+    echo
+    giallo "  Le ultime righe del suo journal:"
+    journalctl -u shairport-sync -n 12 --no-pager 2>/dev/null | sed 's/^/    /'
+    fallisci "shairport-sync non parte"
+fi
 verde "    shairport-sync attivo"
 
 if ! attivo avahi-daemon; then

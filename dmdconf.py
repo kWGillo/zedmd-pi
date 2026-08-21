@@ -125,6 +125,11 @@ DEFAULTS = {
     "nowplaying": {
         # Quanto resta a schermo un brano in pausa prima di lasciare il posto.
         "hold_seconds": 90,
+        # Per quanti secondi l'orologio del brano continua ad avanzare senza
+        # ricevere nulla. E' un fondo di sicurezza per sorgenti che non
+        # annunciano la pausa: durante la riproduzione normale il silenzio di
+        # decine di secondi e' normale, quindi il valore va tenuto largo.
+        "advance_timeout": 600,
         "title_color": "#ffffff",
         "artist_color": "#00ffff",
         "album_color": "#0000ff",
