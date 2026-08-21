@@ -65,6 +65,11 @@ Storico:
         Discovery, ma funziona anche senza. Il testo del player si disegna
         senza antialiasing e con soli colori pieni: le intensita' intermedie
         erano la causa dello sfarfallio, non il numero di colori.
+  1.10.1 setup_nowplaying.sh viene installato in /opt/dmd insieme al resto.
+        Nella 1.10 restava solo dentro il pacchetto scompattato, per analogia
+        con setup_share.sh: ma quello lo chiamano install.sh e update.sh,
+        mentre questo lo lancia l'utente. Dopo un aggiornamento via rete non
+        c'e' nessuna cartella scompattata, e lo script non si trovava.
 """
 
-__version__ = "1.10"
+__version__ = "1.10.1"

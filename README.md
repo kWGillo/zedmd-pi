@@ -413,10 +413,8 @@ brightness. See [Timing](#timing-or-why-white-lines-appear).
 
 ### Installation
 
-From the unpacked package directory:
-
 ```bash
-sudo ./setup_nowplaying.sh
+sudo /opt/dmd/setup_nowplaying.sh
 ```
 
 It asks for the speaker name and where the broker is, then does the rest:
@@ -426,8 +424,9 @@ cores 0-2 so core 3 stays with the panel, and the DMD's own MQTT section. It
 is re-runnable and skips whatever is already done — including the fifteen
 minute build. `--verifica` reports the state without changing anything.
 
-It sits apart from `install.sh` for the same reason `setup_share.sh` does: it
-is optional, and the build alone takes a quarter of an hour.
+It is installed with everything else but never run automatically: it is
+optional, and the build alone takes a quarter of an hour. It depends on no
+other file, so it can also be downloaded on its own.
 
 ### Dependency
 

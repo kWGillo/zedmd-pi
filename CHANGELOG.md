@@ -2,6 +2,25 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.10.1]
+
+### Corretto
+- **`setup_nowplaying.sh` non arrivava sul Raspberry.** Nella 1.10 restava
+  solo dentro il pacchetto scompattato, escluso da `/opt/dmd` per analogia
+  con `setup_share.sh`. Ma l'analogia era sbagliata: `setup_share.sh` lo
+  chiamano `install.sh` e `update.sh`, quindi e' sempre presente quando
+  serve, mentre `setup_nowplaying.sh` lo lancia l'utente — e dopo un
+  aggiornamento via rete non esiste nessuna cartella scompattata in cui
+  cercarlo. Ora viene installato con il resto ed e' in `/opt/dmd`.
+
+### Modificato
+- La documentazione indica `sudo /opt/dmd/setup_nowplaying.sh` invece del
+  percorso relativo.
+- La pagina Musica suggerisce il comando finche' il broker non e'
+  configurato, invece di lasciar compilare le caselle a mano.
+- Lo script e' elencato anche in `PAYLOAD_FILES`, cosi' arriva anche a chi
+  aggiorna da una versione il cui manifest non lo prevedeva.
+
 ## [1.10]
 
 ### Aggiunto

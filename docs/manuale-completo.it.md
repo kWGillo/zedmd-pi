@@ -562,11 +562,10 @@ e occupati prima di quello.
 
 ### Come si fa
 
-Dalla cartella del pacchetto scompattato, la stessa da cui hai lanciato
-`update.sh`:
+Lo script è installato insieme al DMD. Da SSH sul Raspberry:
 
 ```bash
-sudo ./setup_nowplaying.sh
+sudo /opt/dmd/setup_nowplaying.sh
 ```
 
 Chiede quattro cose — il nome con cui comparire fra le casse, e dove sta il
@@ -582,7 +581,7 @@ particolare, se `shairport-sync` è già compilato a dovere salta del tutto il
 quarto d'ora di compilazione. Per controllare lo stato senza toccare niente:
 
 ```bash
-sudo ./setup_nowplaying.sh --verifica
+sudo /opt/dmd/setup_nowplaying.sh --verifica
 ```
 
 ### Che cosa resta da fare a mano

@@ -57,6 +57,10 @@
   <section class="card">
     <h2>{{ t('nowplaying.broker') }}</h2>
     <p class="hint">{{ t('nowplaying.broker.hint') }}</p>
+    {% if not cfg.mqtt.enabled or not mqtt.available %}
+    <p class="hint">{{ t('nowplaying.setup.hint',
+                         command='sudo /opt/dmd/setup_nowplaying.sh') }}</p>
+    {% endif %}
 
     {% if not mqtt.available %}
     <p class="status">{{ t('nowplaying.mqtt.missing', package=mqtt.package) }}</p>

@@ -426,10 +426,8 @@ ottiene cambiando tinta invece che luminosità.
 
 ### Installazione
 
-Dalla cartella del pacchetto scompattato:
-
 ```bash
-sudo ./setup_nowplaying.sh
+sudo /opt/dmd/setup_nowplaying.sh
 ```
 
 Chiede il nome della cassa e dove sta il broker, poi fa tutto: Mosquitto,
@@ -438,8 +436,9 @@ scheda audio fittizia, file di configurazione, confinamento ai core 0-2 e
 sezione MQTT del DMD. Ripetibile: salta i passi già fatti, compresa la
 compilazione. `--verifica` controlla lo stato senza toccare niente.
 
-Sta a parte da `install.sh` per la stessa ragione di `setup_share.sh`: è
-facoltativo, e la sola compilazione porta via un quarto d'ora.
+Viene installato insieme al resto ma non viene mai lanciato in
+automatico: è facoltativo, e la sola compilazione porta via un quarto d'ora.
+Non dipende da nessun altro file, quindi si può anche scaricare da solo.
 
 ### Dipendenze
 

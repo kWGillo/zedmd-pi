@@ -536,6 +536,13 @@ STRINGS = {
         "sudo apt install %(package)s",
         "The MQTT library is not installed. On the Raspberry Pi: "
         "sudo apt install %(package)s"),
+    "nowplaying.setup.hint": (
+        "Se non hai ancora preparato il sistema, non compilare queste caselle "
+        "a mano: c'è uno script che installa e configura tutto, e le riempie "
+        "lui. Da SSH sul Raspberry: %(command)s",
+        "If you have not set the system up yet, do not fill these fields in by "
+        "hand: a script installs and configures everything and fills them in "
+        "for you. Over SSH on the Raspberry Pi: %(command)s"),
     "nowplaying.mqtt.state": ("Stato", "State"),
     "nowplaying.mqtt.connected": ("connesso a %(host)s:%(port)s",
                                   "connected to %(host)s:%(port)s"),

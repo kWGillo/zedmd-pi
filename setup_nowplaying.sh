@@ -3,14 +3,16 @@
 # Prepara il sistema per Now Playing: broker MQTT, shairport-sync con
 # AirPlay 2 e metadati, scheda audio fittizia, e configurazione del DMD.
 #
-#   sudo ./setup_nowplaying.sh              interattivo, chiede quattro cose
-#   sudo ./setup_nowplaying.sh --verifica   controlla e basta, non tocca nulla
-#   sudo ./setup_nowplaying.sh --aiuto      elenco delle opzioni
+#   sudo /opt/dmd/setup_nowplaying.sh              interattivo
+#   sudo /opt/dmd/setup_nowplaying.sh --verifica   controlla e basta
+#   sudo /opt/dmd/setup_nowplaying.sh --aiuto      elenco delle opzioni
 #
-# Sta a parte da install.sh per la stessa ragione per cui ci sta setup_share.sh:
-# e' una funzione facoltativa, e la sola compilazione di shairport-sync porta
-# via un quarto d'ora. Nessun aggiornamento ordinario deve rischiare di
-# trovarselo dentro.
+# Viene installato insieme al resto, ma non viene mai lanciato da solo: e' una
+# funzione facoltativa, e la sola compilazione di shairport-sync porta via un
+# quarto d'ora. Nessun aggiornamento ordinario deve trovarselo dentro.
+#
+# Non dipende da nessun altro file del pacchetto: si puo' anche scaricare da
+# solo ed eseguire dovunque.
 #
 # Ogni passo e' ripetibile: se una cosa e' gia' fatta, lo script lo dice e
 # passa oltre invece di rifarla. Si puo' rilanciare senza paura.
@@ -65,7 +67,7 @@ setup_nowplaying.sh — prepara il sistema per Now Playing
   --aiuto              questo testo
 
 Esempio, broker sotto Home Assistant:
-  sudo ./setup_nowplaying.sh --broker 192.168.0.20 --utente dmd --password xxx
+  sudo /opt/dmd/setup_nowplaying.sh --broker 192.168.0.20 --utente dmd --password xxx
 FINE
     exit 0
 }

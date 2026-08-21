@@ -62,11 +62,11 @@ e ottiene le due cose insieme, senza installare Mosquitto due volte.
 
 # Il modo veloce
 
-Tutto quello che segue è automatizzato. Dalla cartella del pacchetto
-scompattato, la stessa da cui lanci `update.sh`:
+Tutto quello che segue è automatizzato. Lo script viene installato
+insieme al DMD, quindi da SSH sul Raspberry:
 
 ```bash
-sudo ./setup_nowplaying.sh
+sudo /opt/dmd/setup_nowplaying.sh
 ```
 
 Chiede quattro cose — il nome con cui comparire fra le casse, e dove sta il
@@ -90,14 +90,14 @@ qualcosa fallisce, si ferma dicendo cosa, e rilanciarlo riprende da lì.
 Per controllare lo stato senza modificare niente:
 
 ```bash
-sudo ./setup_nowplaying.sh --verifica
+sudo /opt/dmd/setup_nowplaying.sh --verifica
 ```
 
 Se il broker sta sotto Home Assistant, si può anche passare tutto da riga di
 comando:
 
 ```bash
-sudo ./setup_nowplaying.sh --broker 192.168.0.20 --utente dmd --password xxx
+sudo /opt/dmd/setup_nowplaying.sh --broker 192.168.0.20 --utente dmd --password xxx
 ```
 
 Restano da fare a mano soltanto le cose che nessuno script può fare al posto

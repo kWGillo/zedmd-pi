@@ -38,7 +38,8 @@ USER_AGENT = "zedmd-pi OTA"
 PAYLOAD_FILES = ["dmdd.py", "dmdconf.py", "display.py", "webui.py", "ota.py",
                  "zedmd_http.py", "i18n.py", "libcheck.py", "version.py", "config.json",
                  "dmd.service", "install.sh", "update.sh", "setup_share.sh",
-                 "verify.sh", "manifest.md5", "manifest-install.md5"]
+                 "setup_nowplaying.sh", "verify.sh", "manifest.md5",
+                 "manifest-install.md5"]
 PAYLOAD_DIRS = ["sources", "templates", "static"]
 
 # Presenza minima perche' un archivio sia considerato valido.
