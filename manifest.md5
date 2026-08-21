@@ -10,7 +10,7 @@ fc397659015522098f3c97f272441df4  install.sh
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
 5ab7686b137217104f3c4df9d60b5b87  nowplaying.py
 7c0c1b7c32b8089bf0f3d544761d3d45  ota.py
-fdf604285b070ac9cca653989f2a415c  setup_nowplaying.sh
+87432f0ee58e9ebfa722598e945829ad  setup_nowplaying.sh
 ce34b7916936b8b98bf2db8900b565a4  setup_share.sh
 a74de5e508848ffbd07f8d46a31faf9f  sources/__init__.py
 81fce7431f405f1b8aeadaa4f309e221  sources/airradar.py
@@ -32,6 +32,6 @@ fc820c3435f5edea162ed83ce33fb964  templates/services.html
 8151f3bab9ae148c25a3fd7298f14479  templates/settings.html
 d2259ba3cad7af70f230ae109f80ff17  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-eaaf7678d4b386b84aa95c830ca39de0  version.py
+8ce784e6538cc414173a4127dadf05be  version.py
 74fad787a5c9312cabc42cd3868c48f5  webui.py
 e7b708e4959cc839675a02d9ff481d81  zedmd_http.py

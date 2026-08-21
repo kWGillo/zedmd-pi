@@ -76,6 +76,19 @@ Storico:
         systemd, che e' --with-systemd-startup. E quando qualcosa fallisce lo
         script stampa la riga del registro che spiega il motivo, invece di
         limitarsi a dire dove trovarla.
+  1.10.3 setup_nowplaying.sh: aggiunto systemd-dev, che serve a configure per
+        interrogare systemd e su Debian recenti e' un pacchetto a parte.
+        Soprattutto: prima di compilare, lo script verifica in due secondi
+        tutto quello che configure andra' a cercare, e se manca qualcosa lo
+        elenca con il nome del pacchetto. Prima ogni dipendenza mancante si
+        scopriva a compilazione avviata, una per volta, e ogni giro era un
+        altro tentativo da capo.
+  1.10.4 setup_nowplaying.sh riconosceva la compilazione riuscita solo se la
+        stringa di versione diceva "AirPlay-2" col trattino, mentre
+        shairport-sync scrive "AirPlay2" attaccato: il binario era a posto e
+        lo script lo rifiutava. Ora la grafia viene normalizzata prima di
+        confrontare, e se il controllo fallisce lo script stampa la stringa
+        che ha letto invece di limitarsi a dire che qualcosa non va.
 """
 
-__version__ = "1.10.2"
+__version__ = "1.10.4"

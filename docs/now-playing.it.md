@@ -153,8 +153,10 @@ mosquitto_pub -h 127.0.0.1 -t 'prova' -m 'ciao'
 shairport-sync -V
 ```
 
-Nella riga che stampa devono comparire `AirPlay-2` e `mqtt`. Se ci sono, vai
-al capitolo 3. Se manca anche solo uno dei due, va ricompilato.
+Nella riga che stampa devono comparire **AirPlay 2** e **mqtt**. Attenzione
+alla grafia: la versione attuale scrive `AirPlay2` attaccato, le precedenti
+`AirPlay-2` col trattino. Se ci sono entrambe le voci vai al capitolo 3, se
+ne manca anche una sola va ricompilato.
 
 ## Dipendenze
 
@@ -164,7 +166,11 @@ sudo apt install -y --no-install-recommends build-essential git autoconf \
   automake libtool pkg-config libpopt-dev libconfig-dev libasound2-dev \
   avahi-daemon libavahi-client-dev libssl-dev libsoxr-dev libplist-dev \
   libplist-utils libsodium-dev libavutil-dev libavcodec-dev libavformat-dev \
-  uuid-dev libgcrypt-dev xxd libmosquitto-dev
+  libswresample-dev uuid-dev libgcrypt-dev xxd libmosquitto-dev
+
+# Il file pkg-config di systemd: su Debian recenti e' un pacchetto a parte,
+# su quelle precedenti sta in libsystemd-dev. Uno dei due esistera'.
+sudo apt install -y systemd-dev || sudo apt install -y libsystemd-dev
 ```
 
 ## nqptp
@@ -205,13 +211,31 @@ sudo make install
 
 La compilazione sul Pi 4 richiede una decina di minuti.
 
-Due dettagli che costano tempo se sbagliati. Il flag di systemd è
-`--with-systemd-startup`: `--with-systemd` non esiste più, e autoconf lo
-segnala solo come avviso — l'errore vero salta fuori dopo, quando manca
-l'unità di servizio. E `libplist-utils` serve davvero: `configure` cerca il
-programma `plistutil`, e per AirPlay 2 senza quello si ferma.
+Prima di lanciare `make`, conviene controllare in due secondi tutto quello
+che `configure` andrà a cercare, invece di scoprire una dipendenza mancante
+per volta a compilazione avviata:
 
-Se `./configure` protesta per un'altra libreria, installala e rilancia:
+```bash
+for m in libplist-2.0 libsodium libavutil libavcodec libavformat \
+         libswresample systemd; do
+  pkg-config --exists $m || echo "manca: $m"
+done
+command -v plistutil xxd
+```
+
+Tre dettagli che costano tempo se sbagliati:
+
+- Il flag di systemd è **`--with-systemd-startup`**. `--with-systemd` non
+  esiste più, e autoconf un flag sconosciuto lo segnala solo come avviso:
+  l'errore vero salta fuori un quarto d'ora dopo, quando manca l'unità di
+  servizio.
+- **`libplist-utils`** serve davvero: `configure` cerca il programma
+  `plistutil`, e per AirPlay 2 senza quello si ferma.
+- **`systemd-dev`** fornisce il file pkg-config di systemd, che `configure`
+  interroga per sapere dove mettere l'unità. Su Debian recenti è un pacchetto
+  separato; su quelle precedenti lo stesso file sta in `libsystemd-dev`.
+
+Se `configure` protesta per un'altra libreria, installala e rilancia:
 l'elenco qui sopra copre i casi normali, ma le versioni cambiano.
 
 # 3. L'audio deve finire nel nulla, ma con un orologio vero

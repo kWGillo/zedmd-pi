@@ -113,15 +113,28 @@ esegui() {
 
 # --------------------------------------------------------- stato del sistema
 
-ha_shairport_giusto() {
+versione_shairport() {
     command -v shairport-sync >/dev/null 2>&1 || return 1
+    shairport-sync -V 2>&1 | head -1
+}
+
+ha_shairport_giusto() {
     local versione
-    versione="$(shairport-sync -V 2>&1 || true)"
-    case "$versione" in
-        *AirPlay-2*) ;;
+    versione="$(versione_shairport)" || return 1
+    # La stringa di versione elenca le funzioni compilate separandole con
+    # trattini, ma la grafia cambia fra le versioni: "AirPlay2", "AirPlay-2",
+    # "airplay-2". Si normalizza tutto in minuscolo togliendo trattini e
+    # spazi, cosi' il confronto non dipende da come e' scritta oggi.
+    local piatta
+    # Il trattino va per ultimo: in mezzo, tr lo interpreta come intervallo
+    # (' -_' vale da spazio a underscore, cifre comprese) e "AirPlay2"
+    # diventerebbe "airplay", senza il 2 da cercare.
+    piatta="$(printf '%s' "$versione" | tr 'A-Z' 'a-z' | tr -d ' _-')"
+    case "$piatta" in
+        *airplay2*) ;;
         *) return 1 ;;
     esac
-    case "$versione" in
+    case "$piatta" in
         *mqtt*) return 0 ;;
         *) return 1 ;;
     esac
@@ -380,9 +393,46 @@ else
         libpopt-dev libconfig-dev libasound2-dev avahi-daemon \
         libavahi-client-dev libssl-dev libsoxr-dev libplist-dev libsodium-dev \
         libavutil-dev libavcodec-dev libavformat-dev uuid-dev libgcrypt-dev \
-        xxd libplist-utils libmosquitto-dev \
-        || fallisci "installazione delle dipendenze non riuscita (vedi $LOG)"
+        xxd libplist-utils libmosquitto-dev libswresample-dev \
+        || fallisci "installazione delle dipendenze non riuscita"
+    # Il file pkg-config di systemd sta in systemd-dev sulle distribuzioni
+    # recenti e in libsystemd-dev su quelle precedenti. Si tentano entrambi
+    # senza pretendere che esistano tutti e due.
+    for pacchetto in systemd-dev libsystemd-dev; do
+        esegui apt-get install -y "$pacchetto" || true
+    done
     verde "    installate"
+
+    # Il controllo che segue costa due secondi e fa risparmiare un quarto
+    # d'ora: senza, ogni dipendenza mancante si scopre a compilazione avviata,
+    # una per volta, e ogni giro e' un altro tentativo da capo.
+    titolo "Verifica delle dipendenze prima di compilare"
+    MANCANTI=""
+    for coppia in "libplist-2.0:libplist-dev" "libsodium:libsodium-dev" \
+                  "libavutil:libavutil-dev" "libavcodec:libavcodec-dev" \
+                  "libavformat:libavformat-dev" \
+                  "libswresample:libswresample-dev" \
+                  "systemd:systemd-dev (oppure libsystemd-dev)"; do
+        modulo="${coppia%%:*}"
+        pacchetto="${coppia#*:}"
+        if ! pkg-config --exists "$modulo" 2>/dev/null; then
+            MANCANTI="$MANCANTI\n      $modulo -> $pacchetto"
+        fi
+    done
+    for coppia in "plistutil:libplist-utils" "xxd:xxd" "autoreconf:autoconf"; do
+        programma="${coppia%%:*}"
+        pacchetto="${coppia#*:}"
+        if ! command -v "$programma" >/dev/null 2>&1; then
+            MANCANTI="$MANCANTI\n      $programma -> $pacchetto"
+        fi
+    done
+    if [ -n "$MANCANTI" ]; then
+        echo
+        giallo "  Manca ancora qualcosa che configure andra' a cercare:"
+        printf "%b\n" "$MANCANTI"
+        fallisci "installa i pacchetti elencati qui sopra e rilancia"
+    fi
+    verde "    tutto quello che configure cerchera' e' presente"
 
     mkdir -p "$SORGENTI"
 
@@ -441,7 +491,14 @@ else
     $GENTILE make -j"$LAVORI" >>"$LOG" 2>&1 \
         || fallisci "compilazione di shairport-sync fallita (vedi $LOG)"
     esegui make install
-    ha_shairport_giusto || fallisci "il binario compilato non dichiara AirPlay 2 e MQTT"
+    if ! ha_shairport_giusto; then
+        echo
+        giallo "  La compilazione e' andata a termine, ma il binario non"
+        giallo "  dichiara quello che serve. Ecco che cosa dice di se':"
+        echo "    $(versione_shairport || echo 'shairport-sync non trovato')"
+        echo "    binari trovati: $(command -v -a shairport-sync 2>/dev/null | tr '\n' ' ')"
+        fallisci "manca AirPlay 2 o MQTT fra le funzioni compilate"
+    fi
     verde "    compilato: $(shairport-sync -V 2>&1 | head -c 100)"
 fi
 

@@ -2,6 +2,46 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.10.4]
+
+### Corretto
+- **La compilazione riuscita veniva scambiata per fallita.** Lo script
+  verificava il binario cercando `AirPlay-2` nella stringa di versione, ma
+  shairport-sync scrive `AirPlay2` attaccato. Risultato: `configure`, `make`
+  e `make install` andavano a buon fine, e lo script si fermava un attimo
+  dopo dicendo che mancava AirPlay 2. Ora la stringa viene normalizzata
+  prima del confronto, quindi vanno bene tutte le grafie.
+- Il primo tentativo di normalizzazione aveva a sua volta un difetto:
+  `tr -d ' -_'` interpreta l'argomento come **intervallo** da spazio a
+  underscore, cifre comprese, e "airplay2" diventava "airplay". Il trattino
+  ora sta in fondo all'insieme, dove tr lo tratta come carattere.
+
+### Modificato
+- Se il controllo del binario fallisce, lo script stampa la stringa di
+  versione che ha letto e l'elenco dei binari trovati. Senza quel dato non
+  si distingue una compilazione incompleta da un confronto sbagliato — ed
+  era un confronto sbagliato.
+- La guida avverte della differenza di grafia fra le versioni.
+
+## [1.10.3]
+
+### Aggiunto
+- **Verifica delle dipendenze prima di compilare.** Lo script controlla in due
+  secondi, con `pkg-config` e `command -v`, tutto quello che il `configure` di
+  shairport-sync andra' a cercare, e se manca qualcosa lo elenca con accanto
+  il nome del pacchetto da installare. Prima ogni dipendenza mancante si
+  scopriva a compilazione avviata, una per volta, e ogni giro era un altro
+  tentativo da capo.
+
+### Corretto
+- Manca(va) **`systemd-dev`**: `configure` interroga pkg-config sul pacchetto
+  systemd per sapere dove installare l'unita' di servizio, e su Debian recenti
+  quel file e' in un pacchetto separato. Su quelle precedenti sta in
+  `libsystemd-dev`, quindi si tentano entrambi senza pretendere che esistano
+  tutti e due.
+- Aggiunto anche `libswresample-dev`, che le versioni recenti di
+  shairport-sync cercano per AirPlay 2.
+
 ## [1.10.2]
 
 ### Corretto
