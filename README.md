@@ -330,6 +330,9 @@ blaming the CPU.
   manual: first boot, system updates, wiring, panel tuning, installation from
   this repository, Batocera, updates, wear-resistant setup, troubleshooting.
   Also available as [PDF](docs/DMD_manuale_completo.pdf).
+- [`docs/zedmd-wifi.it.md`](docs/zedmd-wifi.it.md) — connecting a ZeDMD-WiFi
+  client (Batocera, Visual Pinball) to the display, and the Pi's own Wi-Fi.
+  Also available as [PDF](docs/DMD_zedmd_wifi.pdf).
 - [`docs/README.it.md`](docs/README.it.md) — service documentation
 - [`docs/pubblicazione.it.md`](docs/pubblicazione.it.md) — release procedure
 

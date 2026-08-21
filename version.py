@@ -37,6 +37,10 @@ Storico:
   1.8  Esportazione e importazione della configurazione dalla web UI, con
        esclusione facoltativa delle coordinate del radar. La taratura del
        pannello, trovata per tentativi, non dipende piu' dalla scheda SD.
+  1.9  Rolling banner: dieci testi scorrevoli con colore, dimensione,
+       velocita' e lampeggio propri, a comparsa periodica. Controllo degli
+       aggiornamenti della libreria della matrice, senza installazione
+       automatica.
 """
 
-__version__ = "1.8"
+__version__ = "1.9"

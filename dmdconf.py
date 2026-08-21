@@ -27,6 +27,9 @@ DEFAULTS = {
         "pwm_bits": 11,
         "profile_dir": "/home/gillo/rpi-rgb-led-matrix_pwm_experiment/lib/spwm/registertest/data",
         "show_refresh": False,
+        # Cartella del fork della libreria matrice. Vuoto = dedotta da
+        # profile_dir, che ne e' una sottocartella.
+        "library_dir": "",
         # Regolazioni fini del driver S-PWM, applicate come variabili d'ambiente.
         # Vuoto = valore predefinito della libreria.
         "spwm_env": {
@@ -62,6 +65,14 @@ DEFAULTS = {
         "video_fps": 20,
         "scale_mode": "fit",
         "pixel_art": True,
+    },
+    "banner": {
+        "min_interval": 30,
+        "max_interval": 60,
+        "fps": 30,
+        "shuffle": False,
+        # Dieci caselle, riempite al primo caricamento da sources.banner.
+        "items": [],
     },
     "air_radar": {
         # Nessuna posizione preimpostata: va indicata dall'utente nella web UI.
@@ -104,6 +115,7 @@ DEFAULTS = {
         "zedmd": True,
         "clock": True,
         "mediaplayer": False,
+        "banner": False,
         "status_player": False,
         "air_radar": False,
     },
@@ -148,6 +160,12 @@ def _migrate(raw):
         raw["arbiter"]["force_source"] = "clock"
     if raw.get("web", {}).get("port") == 80:
         raw["web"]["port"] = 8080
+
+    # 1.9: le dieci caselle del Rolling banner devono esserci sempre, anche
+    # in una configurazione salvata prima che la funzione esistesse.
+    from sources.banner import normalize_list
+    banner = raw.setdefault("banner", {})
+    banner["items"] = normalize_list(banner.get("items"))
     return raw
 
 

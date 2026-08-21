@@ -36,13 +36,14 @@ USER_AGENT = "zedmd-pi OTA"
 
 # File e cartelle che compongono l'installazione.
 PAYLOAD_FILES = ["dmdd.py", "dmdconf.py", "display.py", "webui.py", "ota.py",
-                 "zedmd_http.py", "i18n.py", "version.py", "config.json",
+                 "zedmd_http.py", "i18n.py", "libcheck.py", "version.py", "config.json",
                  "dmd.service", "install.sh", "update.sh", "setup_share.sh",
                  "verify.sh", "manifest.md5", "manifest-install.md5"]
 PAYLOAD_DIRS = ["sources", "templates", "static"]
 
 # Presenza minima perche' un archivio sia considerato valido.
-REQUIRED = ["dmdd.py", "version.py", "webui.py", "i18n.py", "sources", "templates"]
+REQUIRED = ["dmdd.py", "version.py", "webui.py", "i18n.py", "libcheck.py",
+            "sources", "templates"]
 
 
 def log(message):

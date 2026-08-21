@@ -230,6 +230,53 @@
 </section>
 
 <section class="card">
+  <h2>{{ t('settings.lib') }}</h2>
+  <p class="hint">{{ t('settings.lib.hint') }}</p>
+
+  <dl class="info">
+    <dt>{{ t('settings.lib.repo') }}</dt>
+    <dd class="mono">{{ lib.repo }} · {{ lib.branch }}</dd>
+    <dt>{{ t('settings.lib.path') }}</dt>
+    <dd class="mono">{{ lib.path or '—' }}</dd>
+    <dt>{{ t('settings.lib.local') }}</dt>
+    <dd class="mono">{% if lib.local.sha %}{{ lib.local.sha[:7] }} · {{ lib.local.date[:10] }}{% else %}—{% endif %}</dd>
+    <dt>{{ t('settings.lib.remote') }}</dt>
+    <dd class="mono">{% if lib.remote.sha %}{{ lib.remote.sha[:7] }} · {{ lib.remote.date[:10] }}{% else %}—{% endif %}</dd>
+    <dt>{{ t('settings.lib.checked') }}</dt>
+    <dd>{% if lib.checked %}{{ lib.checked | timestamp }}{% else %}{{ t('common.never') }}{% endif %}</dd>
+  </dl>
+
+  {% if lib.error %}
+  <div class="banner warn">{{ t('settings.lib.failed', error=lib.error) }}</div>
+  {% elif lib.behind %}
+  <div class="banner">{{ t('settings.lib.behind') }}</div>
+  {% if lib.remote.subject %}
+  <p class="hint mono">{{ lib.remote.subject }}</p>
+  {% endif %}
+  {% elif lib.ok %}
+  <p class="hint">{{ t('settings.lib.uptodate') }}</p>
+  {% endif %}
+
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_library_check') }}">
+      <button type="submit" class="ghost">{{ t('settings.lib.check') }}</button>
+    </form>
+  </div>
+
+  {% if lib.behind %}
+  <p class="hint">{{ t('settings.lib.manual') | safe }}</p>
+  <pre class="log">{% for line in lib_commands %}{{ line }}
+{% endfor %}</pre>
+  {% endif %}
+
+  <p class="hint">
+    <a href="https://github.com/{{ lib.repo }}" target="_blank" rel="noopener">https://github.com/{{ lib.repo }}</a><br>
+    <a href="https://github.com/{{ lib.repo }}/blob/{{ lib.branch }}/spwm.md"
+       target="_blank" rel="noopener">{{ t('settings.lib.doc') }} — spwm.md</a>
+  </p>
+</section>
+
+<section class="card">
   <h2>{{ t('settings.config') }}</h2>
   <p class="hint">{{ t('settings.config.hint') }}</p>
 

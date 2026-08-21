@@ -18,9 +18,11 @@ import threading
 import time
 
 import dmdconf
+import libcheck
 import ota
 from display import Display
-from sources import AirRadarSource, ClockSource, MediaPlayerSource, ZeDMDSource
+from sources import (AirRadarSource, BannerSource, ClockSource,
+                     MediaPlayerSource, ZeDMDSource)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -102,10 +104,11 @@ class Runtime:
             on_brightness=self.set_brightness,
         )
         self.media = MediaPlayerSource(self.cfg, self.display.width, self.display.height)
+        self.banner = BannerSource(self.cfg, self.display.width, self.display.height)
         self.radar = AirRadarSource(self.cfg, self.display.width, self.display.height)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
-        for source in (self.zedmd, self.radar, self.media, self.clock):
+        for source in (self.zedmd, self.radar, self.banner, self.media, self.clock):
             self.arbiter.register(source)
         self.arbiter.apply_services()
 
@@ -120,6 +123,11 @@ class Runtime:
         self.running = True
         self.update_info = {"ok": False, "error": "", "current": __version__,
                             "latest": "", "available": False, "checked": 0}
+        # Non si interroga GitHub all'avvio: il controllo della libreria e'
+        # su richiesta, dal pulsante nella pagina Impostazioni.
+        self.lib_info = {"ok": False, "error": "", "path": "",
+                         "repo": libcheck.REPO, "branch": libcheck.BRANCH,
+                         "local": {}, "remote": {}, "behind": False, "checked": 0}
         self._ota_thread = threading.Thread(target=self._ota_loop, name="ota", daemon=True)
         self._ota_thread.start()
         self._blank_shown = False
@@ -128,6 +136,22 @@ class Runtime:
         self.night = False
 
     # ------------------------------------------------------------------ aggiornamenti
+
+    def check_library(self):
+        """Confronta la libreria della matrice con il ramo remoto.
+
+        Solo controllo: l'aggiornamento resta un'operazione manuale, perche'
+        richiede una ricompilazione lunga e puo' cambiare il comportamento di
+        una taratura funzionante.
+        """
+        try:
+            self.lib_info = libcheck.check(self.cfg)
+        except Exception as exc:
+            self.lib_info = {"ok": False, "error": str(exc), "path": "",
+                             "repo": libcheck.REPO, "branch": libcheck.BRANCH,
+                             "local": {}, "remote": {}, "behind": False,
+                             "checked": time.time()}
+        return self.lib_info
 
     def check_update(self):
         """Interroga GitHub e memorizza l'esito per la web UI."""

@@ -302,3 +302,27 @@ hr.sep {
   border-top: 1px solid var(--line);
   margin: 18px 0;
 }
+
+/* ---- versione 1.9: caselle del Rolling banner ---- */
+
+.slot {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, .18);
+}
+
+.slot.on { border-left-color: var(--accent); }
+
+.slot-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.slot-head strong { color: var(--muted); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+
+.check.inline { margin: 0; font-size: 13px; }

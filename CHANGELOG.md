@@ -2,6 +2,34 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.9]
+
+### Aggiunto
+- **Rolling banner**, nuovo servizio con pagina propria. Fino a dieci testi
+  scorrevoli, ciascuno con testo, colore, dimensione (piccola/media/grande),
+  velocità in pixel al secondo e lampeggio indipendenti. Compaiono a intervalli
+  casuali come i contenuti del Media Player: il testo entra da destra,
+  attraversa il pannello ed esce a sinistra, poi il display torna a chi lo
+  aveva. Ordine sequenziale o casuale, e un pulsante di anteprima immediata.
+- **Controllo aggiornamenti della libreria della matrice.** Il fork
+  `kingdo9/rpi-rgb-led-matrix_pwm_experiment` non usa numeri di versione, si
+  aggiorna a commit: il confronto è fra il commit installato in locale, letto
+  con git, e quello in cima al ramo remoto, letto dall'API di GitHub. La scheda
+  mostra entrambi, l'oggetto del commit remoto e il collegamento a `spwm.md`.
+
+### Scelte di progetto
+- Il banner sta a priorità **55**: sopra il Media Player (50), sotto Air Radar
+  (60) e ZeDMD (100). Un testo scorre una volta sola e dura pochi secondi,
+  mentre una foto può restare a schermo a lungo: sotto al Media Player non
+  comparirebbe quasi mai. Sopra a ZeDMD interromperebbe le partite.
+- L'aggiornamento della libreria **non è automatico, di proposito**.
+  Ricompilarla e reinstallare i binding richiede una decina di minuti su una Pi
+  Zero 2 W, con il pannello fermo, e può cambiare il comportamento di una
+  taratura funzionante. La pagina mostra i comandi da dare a mano, nell'ordine.
+- La cartella della libreria viene dedotta da `panel.profile_dir`, che ne è una
+  sottocartella: nessuna configurazione in più da compilare. Resta la chiave
+  `panel.library_dir` per i casi fuori standard.
+
 ## [1.8]
 
 ### Aggiunto

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ t('banner.title') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('banner.title') }}</h2>
+  <p class="hint">{{ t('banner.intro') }}</p>
+  <p class="status">{{ status }}</p>
+  <p class="hint">{{ t('banner.priority.hint') }}</p>
+</section>
+
+<section class="card">
+  <h2>{{ t('banner.preview') }}</h2>
+  <p class="hint">{{ t('banner.preview.hint') }}</p>
+  <form method="post" action="{{ url_for('api_banner_preview') }}">
+    <button type="submit" class="ghost">{{ t('banner.preview.button') }}</button>
+  </form>
+</section>
+
+<form method="post" action="{{ url_for('api_banner') }}">
+
+  <section class="card">
+    <h2>{{ t('banner.playback') }}</h2>
+    <div class="row3">
+      <div><label for="min_interval">{{ t('banner.minint') }}</label>
+        <input type="number" id="min_interval" name="min_interval" min="3" max="3600"
+               value="{{ cfg.banner.min_interval }}"></div>
+      <div><label for="max_interval">{{ t('banner.maxint') }}</label>
+        <input type="number" id="max_interval" name="max_interval" min="3" max="3600"
+               value="{{ cfg.banner.max_interval }}"></div>
+      <div><label for="fps">{{ t('banner.fps') }}</label>
+        <input type="number" id="fps" name="fps" min="10" max="60"
+               value="{{ cfg.banner.fps }}"></div>
+    </div>
+    <p class="hint">{{ t('banner.interval.hint') }}</p>
+
+    <label class="check">
+      <input type="checkbox" name="shuffle" {{ 'checked' if cfg.banner.shuffle }}>
+      {{ t('banner.shuffle') }}
+    </label>
+  </section>
+
+  <section class="card">
+    <h2>{{ t('banner.texts') }} <span class="version">{{ active }}/{{ slots }}</span></h2>
+    <p class="hint">{{ t('banner.slot.hint') }}</p>
+    <p class="hint">{{ t('banner.speed.hint') }}</p>
+
+    {% for item in items %}
+    <div class="slot {{ 'on' if item.enabled and item.text.strip() }}">
+      <div class="slot-head">
+        <strong>{{ t('banner.slot', n=loop.index) }}</strong>
+        <label class="check inline">
+          <input type="checkbox" name="enabled_{{ loop.index0 }}"
+                 {{ 'checked' if item.enabled }}>
+          {{ t('banner.enabled') }}
+        </label>
+      </div>
+
+      <label for="text_{{ loop.index0 }}">{{ t('banner.text') }}</label>
+      <input type="text" id="text_{{ loop.index0 }}" name="text_{{ loop.index0 }}"
+             maxlength="120" value="{{ item.text }}"
+             placeholder="{{ t('banner.text.placeholder') }}">
+
+      <div class="row3">
+        <div><label for="color_{{ loop.index0 }}">{{ t('banner.color') }}</label>
+          <div class="color-row">
+            <input type="color" id="color_{{ loop.index0 }}"
+                   name="color_{{ loop.index0 }}" value="{{ item.color }}">
+            <span class="mono">{{ item.color }}</span>
+          </div></div>
+        <div><label for="size_{{ loop.index0 }}">{{ t('banner.size') }}</label>
+          <select id="size_{{ loop.index0 }}" name="size_{{ loop.index0 }}">
+            {% for key in sizes %}
+            <option value="{{ key }}" {{ 'selected' if item.size == key }}>
+              {{ t('banner.size.' ~ key) }}</option>
+            {% endfor %}
+          </select></div>
+        <div><label for="speed_{{ loop.index0 }}">{{ t('banner.speed') }}</label>
+          <input type="number" id="speed_{{ loop.index0 }}" name="speed_{{ loop.index0 }}"
+                 min="10" max="300" value="{{ item.speed }}"></div>
+      </div>
+
+      <label class="check">
+        <input type="checkbox" name="blink_{{ loop.index0 }}"
+               {{ 'checked' if item.blink }}>
+        {{ t('banner.blink') }}
+      </label>
+    </div>
+    {% endfor %}
+
+    <button type="submit">{{ t('common.save') }}</button>
+  </section>
+
+</form>
+
+{% endblock %}

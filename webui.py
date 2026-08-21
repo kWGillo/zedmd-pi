@@ -16,9 +16,11 @@ from werkzeug.utils import secure_filename
 
 import dmdconf
 import i18n
+import libcheck
 import ota
-from sources import (FIELD_LIST, LANGUAGES, PROVIDER_LIST, invalidate_scan,
-                     is_supported, scan_media, have_ffmpeg)
+from sources import (FIELD_LIST, LANGUAGES, PROVIDER_LIST, SIZE_KEYS, SLOTS,
+                     invalidate_scan, is_supported, normalize_list, scan_media,
+                     have_ffmpeg, usable)
 from version import __version__
 
 # Dove finiscono le copie della configurazione prima di un'importazione.
@@ -181,6 +183,8 @@ def create_app(runtime):
             ntp=ntp_status(), now=time.strftime("%d/%m/%Y %H:%M:%S"),
             sleeping=runtime.sleeping, night=runtime.night,
             update=runtime.update_info, ota_log=ota.tail_log(12),
+            lib=runtime.lib_info,
+            lib_commands=libcheck.update_commands(libcheck.library_dir(cfg)),
             config_result=request.args.get("config_result"), page="settings")
 
     @app.route("/clock")
@@ -210,6 +214,15 @@ def create_app(runtime):
             media_dir=media_dir, ffmpeg=have_ffmpeg(),
             status=runtime.media.status(current_language()), page="media")
 
+    @app.route("/banner")
+    def page_banner():
+        return render_template(
+            "banner.html", cfg=cfg,
+            items=normalize_list(cfg["banner"]["items"]),
+            sizes=SIZE_KEYS, slots=SLOTS,
+            active=len(usable(cfg["banner"]["items"])),
+            status=runtime.banner.status(current_language()), page="banner")
+
     @app.route("/radar")
     def page_radar():
         return render_template("radar.html", cfg=cfg, providers=PROVIDER_LIST,
@@ -226,6 +239,8 @@ def create_app(runtime):
              "status": runtime.zedmd.status(lang)},
             {"key": "mediaplayer", "label": "Media Player", "ready": True,
              "status": runtime.media.status(lang)},
+            {"key": "banner", "label": "Rolling Banner", "ready": True,
+             "status": runtime.banner.status(lang)},
             {"key": "clock", "label": "Clock", "ready": True,
              "status": runtime.clock.status(lang)},
             {"key": "status_player", "label": "Status Player", "ready": False,
@@ -402,6 +417,55 @@ def create_app(runtime):
         subprocess.Popen(["systemctl", "restart", "dmd"])
         return redirect(url_for("page_settings"))
 
+    # ------------------------------------------------------------ rolling banner
+
+    @app.route("/api/banner", methods=["POST"])
+    def api_banner():
+        banner = cfg["banner"]
+        items = []
+        for index in range(SLOTS):
+            def field(name, default=""):
+                return request.form.get("%s_%d" % (name, index), default)
+            items.append({
+                "text": field("text"),
+                "color": field("color", "#ff8c1a"),
+                "size": field("size", "medium"),
+                "speed": field("speed", 60),
+                # Una casella spuntata arriva come "on"; una non spuntata
+                # non arriva affatto, per questo si guarda la presenza.
+                "blink": request.form.get("blink_%d" % index) == "on",
+                "enabled": request.form.get("enabled_%d" % index) == "on",
+            })
+        # La normalizzazione e' la stessa del caricamento: un valore fuori
+        # scala torna nei limiti invece di essere rifiutato.
+        banner["items"] = normalize_list(items)
+
+        for key, low, high, default in (("min_interval", 3, 3600, 30),
+                                        ("max_interval", 3, 3600, 60),
+                                        ("fps", 10, 60, 30)):
+            try:
+                banner[key] = max(low, min(high, int(request.form.get(key, default))))
+            except ValueError:
+                banner[key] = default
+        if banner["max_interval"] < banner["min_interval"]:
+            banner["max_interval"] = banner["min_interval"]
+        banner["shuffle"] = request.form.get("shuffle") == "on"
+
+        dmdconf.save()
+        return redirect(url_for("page_banner"))
+
+    @app.route("/api/banner/preview", methods=["POST"])
+    def api_banner_preview():
+        runtime.banner.trigger_now()
+        return redirect(url_for("page_banner"))
+
+    # ------------------------------------------------------- libreria del pannello
+
+    @app.route("/api/library/check", methods=["POST"])
+    def api_library_check():
+        runtime.check_library()
+        return redirect(url_for("page_settings"))
+
     # ------------------------------------------------------------ configurazione
 
     @app.route("/api/config/export")
@@ -562,6 +626,7 @@ def create_app(runtime):
             night=runtime.night,
             zedmd=runtime.zedmd.status(lang),
             media=runtime.media.status(lang),
+            banner=runtime.banner.status(lang),
             radar=runtime.radar.status(lang),
             time=time.strftime("%H:%M:%S"),
             update=runtime.update_info,

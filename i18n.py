@@ -34,6 +34,7 @@ STRINGS = {
     "nav.settings": ("Impostazioni", "Settings"),
     "nav.clock": ("Orologio", "Clock"),
     "nav.media": ("Media", "Media"),
+    "nav.banner": ("Banner", "Banner"),
     "nav.radar": ("Radar", "Radar"),
     "nav.services": ("Servizi", "Services"),
     "nav.language": ("Lingua", "Language"),
@@ -75,6 +76,10 @@ STRINGS = {
                              "idle, %(count)d files in library, %(shown)d shown"),
     "status.media.error": ("errore su %(name)s: %(error)s",
                            "error on %(name)s: %(error)s"),
+    "status.banner.empty": ("nessun testo attivo", "no active text"),
+    "status.banner.showing": ("in scorrimento: %(text)s", "scrolling: %(text)s"),
+    "status.banner.waiting": ("in attesa, %(count)d testi attivi, %(shown)d mostrati",
+                              "idle, %(count)d active texts, %(shown)d shown"),
     "status.radar.waiting": ("in attesa", "waiting"),
     "status.radar.error": ("errore: %(error)s", "error: %(error)s"),
     "status.radar.nocoords": ("coordinate non impostate: apri la pagina Radar",
@@ -187,6 +192,40 @@ STRINGS = {
         "is restored automatically. The configuration in %(path)s is never "
         "touched."),
     "settings.update.log": ("Diario degli aggiornamenti", "Update log"),
+
+    "settings.lib": ("Libreria del pannello", "Panel library"),
+    "settings.lib.hint": (
+        "Il fork che pilota i pannelli S-PWM non usa numeri di versione: si "
+        "aggiorna a commit. Qui si confronta quello installato con quello in "
+        "cima al ramo remoto.",
+        "The fork that drives S-PWM panels does not use version numbers: it is "
+        "updated commit by commit. Here the installed one is compared with the "
+        "head of the remote branch."),
+    "settings.lib.repo": ("Repository", "Repository"),
+    "settings.lib.path": ("Cartella locale", "Local folder"),
+    "settings.lib.local": ("Commit installato", "Installed commit"),
+    "settings.lib.remote": ("Commit su GitHub", "Commit on GitHub"),
+    "settings.lib.checked": ("Ultimo controllo", "Last check"),
+    "settings.lib.check": ("Controlla la libreria", "Check the library"),
+    "settings.lib.uptodate": ("La libreria è aggiornata.", "The library is up to date."),
+    "settings.lib.behind": (
+        "Sul repository c'è un commit più recente di quello installato.",
+        "The repository has a commit newer than the installed one."),
+    "settings.lib.failed": ("Controllo non riuscito: %(error)s",
+                            "Check failed: %(error)s"),
+    "settings.lib.manual": (
+        "L'aggiornamento <strong>non</strong> è automatico, di proposito: "
+        "ricompilare la libreria e reinstallare i binding richiede una decina "
+        "di minuti su una Pi Zero 2 W, con il pannello fermo, e può cambiare il "
+        "comportamento di una taratura che funziona. È un'operazione da fare "
+        "guardando il terminale. I comandi, nell'ordine:",
+        "Updating is <strong>not</strong> automatic, deliberately: rebuilding "
+        "the library and reinstalling the bindings takes some ten minutes on a "
+        "Pi Zero 2 W, with the panel down, and can change the behaviour of a "
+        "working setup. It is an operation to do while watching the terminal. "
+        "The commands, in order:"),
+    "settings.lib.doc": ("Guida alla taratura S-PWM del fork",
+                         "The fork's S-PWM tuning guide"),
 
     "settings.config": ("Configurazione", "Configuration"),
     "settings.config.hint": (
@@ -311,6 +350,60 @@ STRINGS = {
         "condivisione di rete.",
         "No files. Upload some from the section above, or copy them into the "
         "network share."),
+
+    # -------------------------------------------------------------------- banner
+    "banner.title": ("Rolling Banner", "Rolling Banner"),
+    "banner.intro": (
+        "Fino a dieci testi scorrevoli. Compaiono a intervalli casuali come i "
+        "contenuti del Media Player: il testo entra da destra, attraversa il "
+        "pannello ed esce a sinistra, poi il display torna a chi lo aveva.",
+        "Up to ten scrolling texts. They appear at random intervals like Media "
+        "Player items: the text enters from the right, crosses the panel and "
+        "exits to the left, then the display goes back to whoever had it."),
+    "banner.texts": ("Testi", "Texts"),
+    "banner.slot": ("Testo %(n)d", "Text %(n)d"),
+    "banner.text": ("Testo", "Text"),
+    "banner.text.placeholder": ("Lascia vuoto per non usare questa casella",
+                                "Leave empty to skip this slot"),
+    "banner.color": ("Colore", "Colour"),
+    "banner.size": ("Dimensione", "Size"),
+    "banner.size.small": ("Piccola", "Small"),
+    "banner.size.medium": ("Media", "Medium"),
+    "banner.size.large": ("Grande", "Large"),
+    "banner.speed": ("Velocità (px/s)", "Speed (px/s)"),
+    "banner.blink": ("Lampeggio", "Blinking"),
+    "banner.enabled": ("Attivo", "Active"),
+    "banner.slot.hint": (
+        "Una casella entra nella rotazione solo se è attiva e contiene del testo.",
+        "A slot joins the rotation only if it is active and contains text."),
+    "banner.playback": ("Comparsa", "Appearance"),
+    "banner.minint": ("Intervallo minimo (s)", "Minimum interval (s)"),
+    "banner.maxint": ("Intervallo massimo (s)", "Maximum interval (s)"),
+    "banner.interval.hint": (
+        "Tra un banner e il successivo il sistema attende un tempo casuale "
+        "compreso in questo intervallo.",
+        "Between one banner and the next the system waits a random time within "
+        "this range."),
+    "banner.fps": ("Fotogrammi al secondo", "Frames per second"),
+    "banner.shuffle": ("Ordine casuale invece che in sequenza",
+                       "Random order instead of sequential"),
+    "banner.speed.hint": (
+        "La velocità è per singolo testo: a 60 px/s un testo attraversa il "
+        "pannello in poco più di quattro secondi. Valori bassi si leggono "
+        "meglio, valori alti si notano di più.",
+        "Speed is per text: at 60 px/s a text crosses the panel in a little "
+        "over four seconds. Lower values read better, higher ones draw more "
+        "attention."),
+    "banner.preview": ("Anteprima", "Preview"),
+    "banner.preview.hint": (
+        "Interrompe l'attesa e manda subito in scorrimento il testo successivo.",
+        "Skips the wait and immediately scrolls the next text."),
+    "banner.preview.button": ("Mostra subito un banner", "Show a banner now"),
+    "banner.priority.hint": (
+        "Il banner sta sopra al Media Player ma sotto ad Air Radar e a ZeDMD: "
+        "durante una partita su Batocera non compare mai.",
+        "The banner outranks the Media Player but stays below Air Radar and "
+        "ZeDMD: it never appears during a game on Batocera."),
 
     # --------------------------------------------------------------------- radar
     "radar.title": ("Air Radar", "Air Radar"),
@@ -450,6 +543,8 @@ STRINGS = {
                                   "Photos and videos from the library, at random intervals."),
     "services.desc.clock": ("Orologio e data, sorgente di riserva quando non c'è altro.",
                             "Clock and date, the fallback source when nothing else is on."),
+    "services.desc.banner": ("Testi scorrevoli a intervalli casuali, fino a dieci.",
+                             "Scrolling texts at random intervals, up to ten."),
     "services.desc.status_player": ("Notifiche sui giochi avviati dagli amici su Batocera.",
                                     "Notifications about games your friends launch on Batocera."),
     "services.desc.air_radar": ("Aerei in transito entro un raggio dalla posizione indicata.",

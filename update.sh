@@ -62,6 +62,14 @@ if "mediaplayer_clock" in services:
 if cfg.get("arbiter", {}).get("force_source") == "mediaplayer_clock":
     cfg["arbiter"]["force_source"] = "clock"
 
+# 1.9: servizio Rolling banner e cartella della libreria matrice.
+# Va dopo la creazione di `services`, non prima.
+if "banner" not in services:
+    services["banner"] = False
+    print("    servizi: aggiunto il Rolling banner")
+cfg.setdefault("banner", {})
+cfg.setdefault("panel", {}).setdefault("library_dir", "")
+
 with open(path, "w") as handle:
     json.dump(cfg, handle, indent=2)
 print("    configurazione aggiornata")
