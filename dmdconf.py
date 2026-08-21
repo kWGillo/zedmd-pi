@@ -102,6 +102,14 @@ DEFAULTS = {
         # segue il colore dei dettagli: chi non tocca nulla non vede
         # cambiare niente.
         "route_color": "",
+        # Che fare quando i campi scelti non stanno su una riga sola:
+        #   crop   la riga viene accorciata buttando via campi (com'era)
+        #   pages  i campi si alternano a gruppi, senza perderne nessuno
+        #   scroll la riga scorre da destra a sinistra
+        "overflow": "pages",
+        "page_seconds": 3,
+        "scroll_speed": 40,
+        "scroll_fps": 30,
     },
     "mqtt": {
         # Predefinito: un Mosquitto sul Raspberry stesso. Cosi' la funzione

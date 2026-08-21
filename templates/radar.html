@@ -79,6 +79,25 @@
     <p class="hint">{{ t('radar.fields.hint') }}</p>
     <p class="hint">{{ t('radar.route.hint') }}</p>
 
+    <div class="row3">
+      <div><label for="overflow">{{ t('radar.overflow') }}</label>
+        <select id="overflow" name="overflow">
+          {% for key in overflow_modes %}
+          <option value="{{ key }}"
+                  {{ 'selected' if cfg.air_radar.overflow == key }}>
+            {{ t('radar.overflow.' ~ key) }}</option>
+          {% endfor %}
+        </select></div>
+      <div><label for="page_seconds">{{ t('radar.page_seconds') }}</label>
+        <input type="number" id="page_seconds" name="page_seconds" min="1" max="30"
+               value="{{ cfg.air_radar.page_seconds }}"></div>
+      <div><label for="scroll_speed">{{ t('radar.scroll_speed') }}</label>
+        <input type="number" id="scroll_speed" name="scroll_speed" min="10" max="200"
+               value="{{ cfg.air_radar.scroll_speed }}"></div>
+    </div>
+    <p class="hint">{{ t('radar.overflow.hint') }}</p>
+    <input type="hidden" name="scroll_fps" value="{{ cfg.air_radar.scroll_fps }}">
+
     <label class="check">
       <input type="checkbox" name="log_enabled" {{ 'checked' if cfg.air_radar.log_enabled }}>
       {{ t('radar.log.enable') }}

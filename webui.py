@@ -21,7 +21,8 @@ import lookup
 import nowplaying
 import ota
 import spotifyapi
-from sources import (FIELD_LIST, LANGUAGES, PROVIDER_LIST, SIZE_KEYS, SLOTS,
+from sources import (FIELD_LIST, LANGUAGES, OVERFLOW_MODES, PROVIDER_LIST,
+                     SIZE_KEYS, SLOTS,
                      invalidate_scan, is_supported, normalize_list, scan_media,
                      have_ffmpeg, usable)
 from version import __version__
@@ -245,7 +246,8 @@ def create_app(runtime):
     @app.route("/radar")
     def page_radar():
         return render_template("radar.html", cfg=cfg, providers=PROVIDER_LIST,
-                               fields=FIELD_LIST, log=runtime.radar.log_info(),
+                               fields=FIELD_LIST, overflow_modes=OVERFLOW_MODES,
+                               log=runtime.radar.log_info(),
                                status=runtime.radar.status(current_language()),
                                probe_callsign=request.args.get("callsign", ""),
                                probe_result=request.args.get("result"),
@@ -705,7 +707,10 @@ def create_app(runtime):
         for key, low, high, default in (("poll_interval", 15, 3600, 30),
                                         ("display_seconds", 2, 120, 10),
                                         ("cooldown", 30, 86400, 600),
-                                        ("max_altitude_ft", 0, 60000, 0)):
+                                        ("max_altitude_ft", 0, 60000, 0),
+                                        ("page_seconds", 1, 30, 3),
+                                        ("scroll_speed", 10, 200, 40),
+                                        ("scroll_fps", 10, 60, 30)):
             try:
                 radar[key] = max(low, min(high, int(request.form.get(key, default))))
             except ValueError:
@@ -723,6 +728,9 @@ def create_app(runtime):
         # dettagli: e' il comportamento di prima, quando la rotta stava in
         # quella riga.
         radar["route_color"] = request.form.get("route_color", "").strip()
+        # Come comportarsi quando i campi scelti non stanno su una riga.
+        modo = request.form.get("overflow", "pages")
+        radar["overflow"] = modo if modo in OVERFLOW_MODES else "pages"
         dmdconf.save()
         runtime.radar.poll_now()
         return redirect(url_for("page_radar"))

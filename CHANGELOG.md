@@ -2,6 +2,25 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.11.4]
+
+### Aggiunto
+- **Che fare quando i parametri di volo non stanno su una riga.** Con nove
+  campi selezionati la riga in basso misura circa 400 pixel su 252
+  disponibili, e fino a ieri il pannello ne buttava via quattro senza
+  segnalarlo. La pagina Radar ora offre tre comportamenti:
+  - **a pagine** (predefinito): i campi si dividono in gruppi che ci stanno
+    per intero e si alternano ogni tre secondi, regolabili. Non se ne perde
+    nemmeno uno e il testo resta fermo;
+  - **scorrevole**: la riga passa da destra a sinistra, con velocità
+    regolabile. Si legge senza attese, ma è l'unica parte del pannello in
+    movimento continuo;
+  - **accorcia la riga**: il comportamento storico, per chi lo preferisce.
+- Identificativo e rotta **non si muovono mai**: cambia solo la fascia bassa,
+  così l'aereo non salta mentre lo stai leggendo.
+- Finché i campi ci stanno tutti le tre scelte si comportano allo stesso
+  modo: chi ne seleziona quattro non vede cambiare niente.
+
 ## [1.11.3]
 
 ### Corretto

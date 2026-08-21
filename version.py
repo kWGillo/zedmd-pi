@@ -134,6 +134,13 @@ Storico:
         quattro, che restavano sigle. Ora ogni riga puo' portare piu' codici
         separati da una barra e la tabella distribuita li ha gia' entrambi
         (MXP/LIMC): tutti e 326 gli scali rispondono a tutte e due le grafie.
+  1.11.4 Air Radar: scegliendo molti parametri di volo la riga in basso non ci
+        stava, e i campi in eccesso venivano buttati via senza dirlo. Ora la
+        pagina Radar decide che cosa fare: accorciare la riga come prima,
+        alternare gruppi di campi che ci stanno per intero — nessuno perso —
+        oppure farla scorrere. Finche' i campi ci stanno tutti le tre scelte
+        si comportano allo stesso modo, e il pannello resta fermo. Identifica-
+        tivo e rotta non si muovono mai: cambia solo la fascia bassa.
 """
 
-__version__ = "1.11.3"
+__version__ = "1.11.4"

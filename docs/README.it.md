@@ -449,6 +449,23 @@ spento; il resto del DMD non se ne accorge.
 
 Guida completa, anche per farlo a mano: `docs/now-playing.it.md`.
 
+
+### Quando i parametri non stanno su una riga
+
+La fascia bassa è larga 256 pixel: oltre i quattro o cinque campi qualcosa
+deve cedere. Con nove parametri selezionati la riga misura circa 400 pixel.
+La pagina Radar decide come comportarsi:
+
+| Modalità | Che cosa fa |
+|---|---|
+| **A pagine** (predefinita) | I campi si dividono in gruppi che ci stanno per intero e si alternano ogni `page_seconds` secondi. Non se ne perde nessuno, e il testo resta fermo. |
+| **Scorrevole** | La riga passa da destra a sinistra a `scroll_speed` pixel al secondo. Si legge senza attese, ma è l'unica parte del pannello in movimento continuo: su una matrice a 38 Hz lascia una scia leggera. |
+| **Accorcia la riga** | Il comportamento fino alla 1.11.3: i campi in eccesso vengono scartati dal fondo. |
+
+Identificativo e rotta non si muovono mai: cambia solo la fascia bassa, così
+l'aereo non salta mentre lo stai leggendo. Finché i campi ci stanno tutti le
+tre scelte si comportano allo stesso modo.
+
 ---
 
 ## Conversioni dei codici del radar

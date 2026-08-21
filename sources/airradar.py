@@ -38,6 +38,14 @@ from .base import Source
 from .clock import _load_font, parse_color
 
 KM_PER_NM = 1.852
+
+# Tela minuscola usata solo per misurare i testi: serve un contesto di
+# disegno, non un'immagine vera, e crearne una nuova a ogni misura sarebbe
+# sprecato visto quante volte si misura per impaginare.
+_SCRATCH = Image.new("RGB", (1, 1))
+
+# Che cosa fare quando la riga dei dettagli e' piu' larga del pannello.
+OVERFLOW_MODES = ("crop", "pages", "scroll")
 USER_AGENT = "zedmd-pi AirRadar"
 
 PROVIDERS = {
@@ -382,16 +390,93 @@ class AirRadarSource(Source):
             if "route" in (cfg.get("fields") or []) and plane["flight"]:
                 plane["route"] = self._lookup_route(plane["flight"])
 
-            with self._lock:
-                self._image = self._render(plane, cfg)
-                self._dirty = True
             self._showing = True
-
-            deadline = time.time() + duration
-            while self._running and time.time() < deadline:
-                time.sleep(0.1)
+            self._mostra(plane, cfg, duration)
 
         self._showing = False
+
+    def _pubblica(self, image):
+        with self._lock:
+            self._image = image
+            self._dirty = True
+
+    def _mostra(self, plane, cfg, duration):
+        """Tiene un aereo sul pannello per il tempo previsto.
+
+        Con pochi campi selezionati non succede niente di speciale: si disegna
+        una volta e si aspetta. Il resto di questo metodo esiste per il caso
+        in cui i campi scelti sono piu' di quanti ne stiano su una riga, e
+        serve decidere che cosa sacrificare: un'informazione, un po' di
+        attesa, o l'immobilita' del pannello.
+        """
+        layout = self._layout(plane, cfg)
+        deadline = time.time() + duration
+        intera = "  ".join(layout["details"])
+
+        if (not layout["details"]
+                or self._text_width(intera, self._font_small) <= self.width - 4):
+            # Ci sta tutto: nessuna modalita' ha motivo di comportarsi
+            # diversamente, e il pannello resta fermo.
+            self._pubblica(self._render_details(layout, intera))
+            self._attendi(deadline)
+            return
+
+        mode = cfg.get("overflow", "pages")
+        if mode not in OVERFLOW_MODES:
+            mode = "pages"
+
+        if mode == "crop":
+            self._pubblica(self._render_details(layout, self._troncata(layout["details"])))
+            self._attendi(deadline)
+        elif mode == "scroll":
+            self._scorri(layout, intera, cfg, deadline)
+        else:
+            self._impagina(layout, cfg, deadline)
+
+    def _attendi(self, deadline):
+        while self._running and time.time() < deadline:
+            time.sleep(0.1)
+
+    def _impagina(self, layout, cfg, deadline):
+        """Alterna gruppi di campi, ognuno dei quali ci sta per intero.
+
+        Le prime due fasce non si toccano: cambia solo il fondo, quindi
+        l'aereo non "salta" mentre lo stai leggendo. Se il tempo dell'aereo
+        non basta per tutte le pagine, quelle che restano si vedranno al
+        passaggio successivo: meglio che non vederle mai.
+        """
+        pages = self._pagine(layout["details"])
+        durata = max(1, int(cfg.get("page_seconds", 3)))
+        index = 0
+        while self._running and time.time() < deadline:
+            self._pubblica(self._render_details(layout, "  ".join(pages[index])))
+            self._attendi(min(deadline, time.time() + durata))
+            index = (index + 1) % len(pages)
+
+    def _scorri(self, layout, line, cfg, deadline):
+        """Fa scorrere la sola fascia dei dettagli, da destra a sinistra.
+
+        Il testo che scorre si legge senza aspettare, ma e' anche l'unica
+        parte del pannello in movimento continuo: su una matrice a 38 Hz
+        lascia una scia leggera. E' il motivo per cui non e' la modalita'
+        predefinita.
+        """
+        strip = self._striscia(layout, line)
+        fondo = self._base(layout)
+        fps = max(10, min(60, int(cfg.get("scroll_fps", 30))))
+        speed = max(10, int(cfg.get("scroll_speed", 40)))
+        step = speed / float(fps)
+
+        position = float(self.width)
+        end = -float(strip.width)
+        while self._running and time.time() < deadline:
+            canvas = fondo.copy()
+            canvas.paste(strip, (int(round(position)), layout["bottom"]))
+            self._pubblica(canvas)
+            position -= step
+            if position <= end:
+                position = float(self.width)
+            time.sleep(1.0 / fps)
 
     # ------------------------------------------------------------------ rotta
 
@@ -510,33 +595,19 @@ class AirRadarSource(Source):
             return ""
         return ""
 
-    def _render(self, plane, cfg):
-        """Tre fasce: identificativo, rotta, dettagli.
+    # -------------------------------------------------------------- disegno
 
-        Fra il numero di volo in alto e la riga dei dettagli in basso restava
-        una banda vuota di una ventina di pixel. Metterci la rotta non serve
-        solo a riempirla: le toglie di dosso la concorrenza per la larghezza.
-        Su una riga sola, "Orio al Serio->Stansted" mangiava lo spazio di
-        modello e quota, che venivano scartati per far stare tutto.
+    def _text_width(self, text, font):
+        return ImageDraw.Draw(_SCRATCH).textbbox((0, 0), text, font=font)[2]
+
+    def _layout(self, plane, cfg):
+        """Quello che va disegnato, prima di decidere *come* disegnarlo.
+
+        Separare il calcolo dal disegno serve perche' la fascia dei dettagli
+        ha tre comportamenti possibili quando non ci sta — troncata, a pagine,
+        scorrevole — e tutti e tre partono dagli stessi campi, dagli stessi
+        colori e dalle stesse tre fasce.
         """
-        image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
-        draw = ImageDraw.Draw(image)
-
-        title_color = parse_color(cfg.get("callsign_color", "#00d0ff"), (0, 208, 255))
-        info_color = parse_color(cfg.get("info_color", "#ff8c1a"), (255, 140, 26))
-        # Vuoto = segue il colore dei dettagli, cosi' chi non tocca nulla non
-        # vede cambiare niente.
-        route_color = parse_color(cfg.get("route_color") or "", info_color)
-
-        def centrato(text, font, y, color):
-            box = draw.textbbox((0, 0), text, font=font)
-            draw.text(((self.width - (box[2] - box[0])) // 2 - box[0], y),
-                      text, font=font, fill=color)
-            return box[2] - box[0]
-
-        title = plane["flight"] or plane["reg"] or plane["hex"] or "SCONOSCIUTO"
-        centrato(title, self._font_big, 2, title_color)
-
         wanted = cfg.get("fields") or ["route", "type", "altitude", "speed", "distance"]
 
         # La rotta prende la fascia centrale e lascia il fondo agli altri campi.
@@ -545,8 +616,7 @@ class AirRadarSource(Source):
             grezza = plane.get("route") or ""
             if grezza:
                 route_line = lookup.route(grezza)
-                box = draw.textbbox((0, 0), route_line, font=self._font_small)
-                if (box[2] - box[0]) > self.width - 4:
+                if self._text_width(route_line, self._font_small) > self.width - 4:
                     # I nomi non ci stanno: meglio i codici, che ci stanno
                     # sempre, che un testo tagliato a meta'.
                     route_line = grezza
@@ -561,21 +631,120 @@ class AirRadarSource(Source):
         if not details and not route_line:
             details.append("%.1fkm" % plane["distance"])
 
+        info_color = parse_color(cfg.get("info_color", "#ff8c1a"), (255, 140, 26))
+
         # Le tre fasce si ricavano dall'altezza, non da numeri fissi: il
         # pannello potrebbe non essere alto 64 pixel.
         bottom = self.height - max(14, int(self.height * 0.31))
-        if route_line:
-            middle = 2 + max(14, int(self.height * 0.40)) + 1
-            # Se le due righe si toccherebbero, la rotta sale di quel poco.
-            middle = min(middle, bottom - max(9, int(self.height * 0.20)) - 1)
-            centrato(route_line, self._font_small, middle, route_color)
+        middle = 2 + max(14, int(self.height * 0.40)) + 1
+        # Se le due righe si toccherebbero, la rotta sale di quel poco.
+        middle = min(middle, bottom - max(9, int(self.height * 0.20)) - 1)
 
-        if details:
-            line = "  ".join(details)
-            box = draw.textbbox((0, 0), line, font=self._font_small)
-            while (box[2] - box[0]) > self.width - 4 and len(details) > 1:
-                details.pop(-2 if len(details) > 2 else -1)
-                line = "  ".join(details)
-                box = draw.textbbox((0, 0), line, font=self._font_small)
-            centrato(line, self._font_small, bottom, info_color)
+        return {
+            "title": plane["flight"] or plane["reg"] or plane["hex"] or "SCONOSCIUTO",
+            "title_color": parse_color(cfg.get("callsign_color", "#00d0ff"),
+                                       (0, 208, 255)),
+            "route": route_line,
+            # Vuoto = segue il colore dei dettagli, cosi' chi non tocca nulla
+            # non vede cambiare niente.
+            "route_color": parse_color(cfg.get("route_color") or "", info_color),
+            "details": details,
+            "info_color": info_color,
+            "middle": middle,
+            "bottom": bottom,
+        }
+
+    def _base(self, layout):
+        """Le due fasce che non cambiano mai: identificativo e rotta."""
+        image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
+        draw = ImageDraw.Draw(image)
+
+        def centrato(text, font, y, color):
+            box = draw.textbbox((0, 0), text, font=font)
+            draw.text(((self.width - (box[2] - box[0])) // 2 - box[0], y),
+                      text, font=font, fill=color)
+
+        centrato(layout["title"], self._font_big, 2, layout["title_color"])
+        if layout["route"]:
+            centrato(layout["route"], self._font_small,
+                     layout["middle"], layout["route_color"])
         return image
+
+    def _troncata(self, details):
+        """La riga piu' lunga che ci sta, buttando via campi dal fondo.
+
+        E' il comportamento storico: semplice, ma qualche informazione si
+        perde senza dirlo. Resta disponibile per chi preferisce un pannello
+        immobile.
+        """
+        details = list(details)
+        line = "  ".join(details)
+        while (self._text_width(line, self._font_small) > self.width - 4
+               and len(details) > 1):
+            details.pop(-2 if len(details) > 2 else -1)
+            line = "  ".join(details)
+        return line
+
+    def _pagine(self, details):
+        """Divide i dettagli in gruppi che ci stanno per intero.
+
+        Nessun campo viene perso: quelli che non entrano nella prima pagina
+        vanno nella seconda. Un campo cosi' lungo da non starci da solo resta
+        comunque una pagina sua, tagliata dal bordo: e' il caso limite, e
+        toglierlo del tutto sarebbe peggio.
+        """
+        pages = []
+        current = []
+        for value in details:
+            prova = current + [value]
+            if current and self._text_width("  ".join(prova),
+                                            self._font_small) > self.width - 4:
+                pages.append(current)
+                current = [value]
+            else:
+                current = prova
+        if current:
+            pages.append(current)
+        return pages or [[]]
+
+    def _render_details(self, layout, line):
+        image = self._base(layout)
+        if not line:
+            return image
+        draw = ImageDraw.Draw(image)
+        box = draw.textbbox((0, 0), line, font=self._font_small)
+        draw.text(((self.width - (box[2] - box[0])) // 2 - box[0],
+                   layout["bottom"]), line,
+                  font=self._font_small, fill=layout["info_color"])
+        return image
+
+    def _striscia(self, layout, line):
+        """La riga dei dettagli su tela propria, per farla scorrere.
+
+        Alta quanto la sola fascia bassa, non quanto il pannello: cosi'
+        scorrendo passa sotto identificativo e rotta senza cancellarli.
+        """
+        larghezza = max(1, self._text_width(line, self._font_small))
+        altezza = max(1, self.height - layout["bottom"])
+        strip = Image.new("RGB", (larghezza, altezza), (0, 0, 0))
+        draw = ImageDraw.Draw(strip)
+        box = draw.textbbox((0, 0), line, font=self._font_small)
+        draw.text((-box[0], 0), line,
+                  font=self._font_small, fill=layout["info_color"])
+        return strip
+
+    def _render(self, plane, cfg):
+        """Tre fasce: identificativo, rotta, dettagli.
+
+        Fra il numero di volo in alto e la riga dei dettagli in basso restava
+        una banda vuota di una ventina di pixel. Metterci la rotta non serve
+        solo a riempirla: le toglie di dosso la concorrenza per la larghezza.
+        Su una riga sola, "Orio al Serio->Stansted" mangiava lo spazio di
+        modello e quota, che venivano scartati per far stare tutto.
+
+        Questa e' l'immagine singola: la usano l'anteprima della web UI e i
+        casi in cui i dettagli ci stanno tutti. Quando non ci stanno, la
+        scelta fra troncare, impaginare e far scorrere la prende `_mostra`.
+        """
+        layout = self._layout(plane, cfg)
+        return self._render_details(layout, self._troncata(layout["details"]))

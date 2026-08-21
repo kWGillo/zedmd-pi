@@ -835,6 +835,25 @@ STRINGS = {
         "The cooldown stops the same flight from being shown over and over "
         "while it stays within range."),
     "radar.fields": ("Parametri di volo da mostrare", "Flight details to show"),
+    "radar.overflow": ("Quando i campi non stanno su una riga",
+                       "When the fields do not fit on one line"),
+    "radar.overflow.hint": (
+        "La riga in basso è larga 256 pixel: oltre i quattro o cinque campi "
+        "qualcosa deve cedere. Le pagine non perdono nulla e lasciano il "
+        "pannello fermo; lo scorrimento si legge senza attese ma tiene il "
+        "testo sempre in movimento. Finché i campi ci stanno tutti le tre "
+        "scelte si comportano allo stesso modo.",
+        "The bottom line is 256 pixels wide: past four or five fields "
+        "something has to give. Pages lose nothing and keep the panel still; "
+        "scrolling reads without waiting but keeps the text always moving. As "
+        "long as every field fits, the three choices behave identically."),
+    "radar.overflow.crop": ("Accorcia la riga (comportamento storico)",
+                            "Shorten the line (historical behaviour)"),
+    "radar.overflow.pages": ("A pagine, a turno", "Pages, in turn"),
+    "radar.overflow.scroll": ("Scorrevole", "Scrolling"),
+    "radar.page_seconds": ("Secondi per pagina", "Seconds per page"),
+    "radar.scroll_speed": ("Velocità (px/s)", "Speed (px/s)"),
+    "radar.scroll_fps": ("Fotogrammi al secondo", "Frames per second"),
     "radar.fields.hint": (
         "Il codice volo compare sempre in grande. Questi campi formano la riga "
         "di dettaglio sotto: se non ci stanno tutti, quelli centrali vengono "
