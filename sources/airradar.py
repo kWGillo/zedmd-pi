@@ -426,7 +426,10 @@ class AirRadarSource(Source):
             callsign = (row.get("callsign") or "").strip()
             if not callsign:
                 continue
-            # I codici IATA sono piu' corti e leggibili su un pannello stretto.
+            # I codici IATA sono piu' corti e leggibili su un pannello
+            # stretto, ma spesso il servizio non li ha e resta solo la grafia
+            # ICAO: la tabella di conversione conosce entrambe, quindi
+            # ripiegare qui non costa piu' la traduzione.
             codes = row.get("_airport_codes_iata") or ""
             if not codes or codes == "unknown":
                 codes = row.get("airport_codes") or ""

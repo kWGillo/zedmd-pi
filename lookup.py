@@ -1,16 +1,24 @@
 """Da codice a nome: aerei e aeroporti.
 
 Il radar riceve sigle. Il tipo di aeromobile arriva come **designatore ICAO**
-(`B738`, `A20N`), gli aeroporti delle rotte come **codici IATA** (`MXP`,
-`FCO`) — non ICAO, perche' il servizio routeset di adsb.lol restituisce
-quelli. E' una distinzione che conta: cercare "Malpensa" e trovare `LIMC` non
-serve, perche' quel codice non arrivera' mai.
+(`B738`, `A20N`). Gli aeroporti delle rotte arrivano **in due grafie**: il
+servizio routeset di adsb.lol risponde con i codici IATA di tre lettere
+(`MXP`), ma quando quel campo manca si ripiega sui codici ICAO di quattro
+(`LIMC`), e lo stesso vale per la seconda fonte, hexdb.io. Una tabella che
+conoscesse una sola delle due grafie lascerebbe meta' dei voli senza
+traduzione — che e' esattamente quello che succedeva nella 1.11.
 
 Le conversioni stanno in due file CSV, uno per tipo, modificabili a mano.
 Ogni riga ha tre campi:
 
     codice,forma breve,nome completo
     B738,737-800,Boeing 737-800
+
+Nella prima colonna possono stare **piu' codici separati da `/`**, e la riga
+risponde a tutti. E' cosi' che un aeroporto porta entrambe le grafie senza
+doverne tenere allineate due righe:
+
+    MXP/LIMC,Malpensa,Milano Malpensa
 
 Servono due forme perche' il pannello e' largo 256 pixel e la riga del radar
 porta gia' rotta, quota, velocita' e distanza: "Boeing 737-800" non ci sta,
@@ -22,13 +30,18 @@ e' il comportamento previsto, e il sistema tiene il conto di quelli che
 incontra senza saperli tradurre, cosi' la pagina Radar puo' dirti che cosa
 conviene aggiungere per primo invece di lasciartelo indovinare.
 
-I file vivono in /var/lib/dmd e **non vengono mai toccati dagli
-aggiornamenti**: /opt/dmd viene riscritto a ogni installazione, e le tue
-aggiunte sparirebbero senza che tu te ne accorga. Al primo avvio vengono
-copiati da un modello contenuto nel pacchetto; da quel momento sono tuoi.
+I file vivono in /var/lib/dmd e **quello che ci scrivi tu non viene mai
+toccato dagli aggiornamenti**: /opt/dmd viene riscritto a ogni installazione,
+e le tue aggiunte sparirebbero senza che tu te ne accorga. Al primo avvio
+vengono copiati da un modello contenuto nel pacchetto; da quel momento sono
+tuoi. L'unico caso in cui un aggiornamento li sostituisce e' quando sono
+ancora *identici* a un modello distribuito da noi, quindi mai aperti: allora
+non c'e' niente da salvare e tenersi una tabella vecchia sarebbe solo un
+danno.
 """
 
 import csv
+import hashlib
 import io
 import os
 import shutil
@@ -71,6 +84,35 @@ def template(kind):
     return os.path.join(TEMPLATE_DIR, KINDS[kind])
 
 
+# Impronte dei modelli gia' distribuiti in passato. Un file dell'utente che
+# corrisponde a una di queste non e' mai stato toccato: e' la copia di un
+# modello vecchio, e sostituirla con quello nuovo non porta via niente. E'
+# lo stesso criterio con cui i gestori di pacchetti trattano i file di
+# configurazione. Ogni versione che cambia un modello aggiunge qui l'impronta
+# di quello che sostituisce, mai togliendo le precedenti.
+DISTRIBUITI = {
+    "aircraft": {
+        "0d763ff25342351827c349175789dcc4",   # 1.11 - 1.11.2
+    },
+    "airport": {
+        "96678004b56af040372199f37aa1c08b",   # 1.11 - 1.11.2, solo codici IATA
+    },
+}
+
+
+def _impronta(percorso):
+    try:
+        with open(percorso, "rb") as handle:
+            return hashlib.md5(handle.read()).hexdigest()
+    except OSError:
+        return ""
+
+
+def _intatto(kind, target):
+    """Vero se il file dell'utente e' ancora un modello distribuito da noi."""
+    return _impronta(target) in DISTRIBUITI.get(kind, set())
+
+
 def _vuoto(target):
     """Vero se il file non contiene nessuna conversione utilizzabile.
 
@@ -88,25 +130,35 @@ def _vuoto(target):
 def ensure(kind):
     """Crea il file dell'utente dal modello, se non c'e' ancora.
 
-    Non sovrascrive mai un file che contiene qualcosa: da quel momento e'
-    dell'utente. L'unica eccezione e' un file senza nemmeno una riga valida,
-    che viene ricreato dal modello: non c'e' niente da salvare, e lasciarlo li'
-    significherebbe non tradurre piu' nulla per sempre — e' quello che
-    succedeva a chi aveva installato la 1.11 senza le tabelle.
+    Un file che porta lavoro dell'utente non viene mai sovrascritto. Ci sono
+    due eccezioni, e in nessuna delle due c'e' qualcosa da perdere:
+
+    * il file non ha **nemmeno una riga valida** — e' il segnaposto scritto
+      quando il modello non si trovava, e lasciarlo li' significherebbe non
+      tradurre piu' niente per sempre;
+    * il file e' **ancora identico a un modello che abbiamo distribuito
+      noi**, quindi non e' mai stato aperto. Chi si e' fermato alla tabella
+      della 1.11, che conosceva solo i codici IATA, riceve cosi' quella con
+      entrambe le grafie senza doverla chiedere.
     """
     target = path(kind)
     if os.path.exists(target):
-        if not _vuoto(target):
+        motivo = ""
+        if _vuoto(target):
+            motivo = "era vuoto"
+        elif _intatto(kind, target):
+            motivo = "era ancora il modello di una versione precedente"
+        if not motivo:
             return target
         source = template(kind)
-        if os.path.exists(source):
+        if os.path.exists(source) and _impronta(source) != _impronta(target):
             try:
                 shutil.copy2(source, target)
                 invalidate(kind)
-                print("[lookup] %s era vuoto: ripristinato dal modello"
-                      % os.path.basename(target))
+                print("[lookup] %s %s: aggiornato dal modello"
+                      % (os.path.basename(target), motivo))
             except OSError as exc:
-                print("[lookup] impossibile ripristinare %s: %s" % (target, exc))
+                print("[lookup] impossibile aggiornare %s: %s" % (target, exc))
         return target
     source = template(kind)
     try:
@@ -151,20 +203,26 @@ def parse(text):
             errors.append((number, "servono almeno codice e forma breve",
                            delimiter.join(row)[:60]))
             continue
-        code = row[0].strip().upper()
+        # Piu' codici per la stessa riga, separati da `/`: un aeroporto ha un
+        # codice IATA di tre lettere e uno ICAO di quattro, e a seconda di
+        # cosa risponde il servizio delle rotte arriva l'uno o l'altro.
+        # Scriverli sulla stessa riga evita di dover tenere allineate due
+        # righe che dicono la stessa cosa.
+        codes = [c.strip().upper() for c in row[0].split("/") if c.strip()]
         short_form = row[1].strip()
         full_form = row[2].strip() if len(row) > 2 and row[2].strip() else short_form
-        if not code:
+        if not codes:
             errors.append((number, "codice vuoto", delimiter.join(row)[:60]))
             continue
         if not short_form:
             # Riga segnaposto: il codice c'e' ma la traduzione no. Non e' un
             # errore, e' un promemoria lasciato in sospeso.
             continue
-        if code in entries:
-            errors.append((number, "codice ripetuto: %s" % code, short_form))
-            continue
-        entries[code] = (short_form, full_form)
+        for code in codes:
+            if code in entries:
+                errors.append((number, "codice ripetuto: %s" % code, short_form))
+                continue
+            entries[code] = (short_form, full_form)
     return entries, errors
 
 

@@ -1,360 +1,352 @@
-# Aeroporti: da codice IATA a nome leggibile.
+# Aeroporti: da codice a nome leggibile.
 #
-#   codice IATA,forma breve,nome completo
+#   codice[/codice],forma breve,nome completo
 #
-# ATTENZIONE: qui servono i codici IATA di tre lettere (MXP, FCO), non quelli
-# ICAO di quattro (LIMC, LIRF). Le rotte arrivano dal servizio routeset di
-# adsb.lol, che restituisce IATA: una riga scritta con il codice ICAO non
-# verra' mai usata.
+# Nella prima colonna puoi mettere piu' codici separati da `/`: qui trovi il
+# codice IATA di tre lettere (MXP) e quello ICAO di quattro (LIMC) sulla
+# stessa riga, perche' il servizio delle rotte a volte risponde con l'uno e a
+# volte con l'altro. Basta che uno dei due corrisponda.
 #
-# La forma breve va sul pannello, dove lo spazio e' poco. Il nome completo
-# compare nella web UI e nel registro dei passaggi.
-#
-# Un codice che non e' qui dentro viene mostrato com'e': non e' un errore.
-# La pagina Radar elenca quelli incontrati e non tradotti, ordinati per
-# frequenza: quella e' la lista di cosa conviene aggiungere per primo.
-#
-# Questo elenco e' un punto di partenza: se trovi un errore, correggilo,
-# e' una riga. Il file non viene mai sovrascritto dagli aggiornamenti.
-# --- Italia ---
-FCO,Fiumicino,Roma Fiumicino
-CIA,Ciampino,Roma Ciampino
-MXP,Malpensa,Milano Malpensa
-LIN,Linate,Milano Linate
-BGY,Orio al Serio,Bergamo Orio al Serio
-VCE,Venezia,Venezia Marco Polo
-TSF,Treviso,Treviso Canova
-VRN,Verona,Verona Villafranca
-BLQ,Bologna,Bologna Marconi
-FLR,Firenze,Firenze Peretola
-PSA,Pisa,Pisa Galilei
-TRN,Torino,Torino Caselle
-GOA,Genova,Genova Colombo
-NAP,Napoli,Napoli Capodichino
-BRI,Bari,Bari Palese
-BDS,Brindisi,Brindisi Salento
-CTA,Catania,Catania Fontanarossa
-PMO,Palermo,Palermo Punta Raisi
-CAG,Cagliari,Cagliari Elmas
-OLB,Olbia,Olbia Costa Smeralda
-AHO,Alghero,Alghero Fertilia
-TPS,Trapani,Trapani Birgi
-SUF,Lamezia,Lamezia Terme
-REG,Reggio Cal.,Reggio Calabria
-PSR,Pescara,Pescara Abruzzo
-AOI,Ancona,Ancona Falconara
-TRS,Trieste,Trieste Ronchi dei Legionari
-PMF,Parma,Parma
-RMI,Rimini,Rimini Federico Fellini
-CUF,Cuneo,Cuneo Levaldigi
-PEG,Perugia,Perugia San Francesco
-FOG,Foggia,Foggia Gino Lisa
-QSR,Salerno,Salerno Costa d'Amalfi
-BZO,Bolzano,Bolzano
-CRV,Crotone,Crotone
-TAR,Grottaglie,Taranto Grottaglie
-PNL,Pantelleria,Pantelleria
-LMP,Lampedusa,Lampedusa
-EBA,Elba,Marina di Campo
-CIY,Comiso,Comiso
+# La forma breve va sul pannello, il nome completo nella web UI e nel
+# registro dei passaggi.
+FCO/LIRF,Fiumicino,Roma Fiumicino
+CIA/LIRA,Ciampino,Roma Ciampino
+MXP/LIMC,Malpensa,Milano Malpensa
+LIN/LIML,Linate,Milano Linate
+BGY/LIME,Orio al Serio,Bergamo Orio al Serio
+VCE/LIPZ,Venezia,Venezia Marco Polo
+TSF/LIPH,Treviso,Treviso Canova
+VRN/LIPX,Verona,Verona Villafranca
+BLQ/LIPE,Bologna,Bologna Marconi
+FLR/LIRQ,Firenze,Firenze Peretola
+PSA/LIRP,Pisa,Pisa Galilei
+TRN/LIMF,Torino,Torino Caselle
+GOA/LIMJ,Genova,Genova Colombo
+NAP/LIRN,Napoli,Napoli Capodichino
+BRI/LIBD,Bari,Bari Palese
+BDS/LIBR,Brindisi,Brindisi Salento
+CTA/LICC,Catania,Catania Fontanarossa
+PMO/LICJ,Palermo,Palermo Punta Raisi
+CAG/LIEE,Cagliari,Cagliari Elmas
+OLB/LIEO,Olbia,Olbia Costa Smeralda
+AHO/LIEA,Alghero,Alghero Fertilia
+TPS/LICT,Trapani,Trapani Birgi
+SUF/LICA,Lamezia,Lamezia Terme
+REG/LICR,Reggio Cal.,Reggio Calabria
+PSR/LIBP,Pescara,Pescara Abruzzo
+AOI/LIPY,Ancona,Ancona Falconara
+TRS/LIPQ,Trieste,Trieste Ronchi dei Legionari
+PMF/LIMP,Parma,Parma
+RMI/LIPR,Rimini,Rimini Federico Fellini
+CUF/LIMZ,Cuneo,Cuneo Levaldigi
+PEG/LIRZ,Perugia,Perugia San Francesco
+FOG/LIBF,Foggia,Foggia Gino Lisa
+QSR/LIRI,Salerno,Salerno Costa d'Amalfi
+BZO/LIPB,Bolzano,Bolzano
+CRV/LIBC,Crotone,Crotone
+TAR/LIBG,Grottaglie,Taranto Grottaglie
+PNL/LICG,Pantelleria,Pantelleria
+LMP/LICD,Lampedusa,Lampedusa
+EBA/LIRJ,Elba,Marina di Campo
+CIY/LICB,Comiso,Comiso
 # --- Regno Unito e Irlanda ---
-LHR,Heathrow,Londra Heathrow
-LGW,Gatwick,Londra Gatwick
-LTN,Luton,Londra Luton
-STN,Stansted,Londra Stansted
-LCY,London City,Londra City
-SEN,Southend,Londra Southend
-MAN,Manchester,Manchester
-BHX,Birmingham,Birmingham
-EDI,Edimburgo,Edimburgo
-GLA,Glasgow,Glasgow
-BRS,Bristol,Bristol
-LPL,Liverpool,Liverpool
-NCL,Newcastle,Newcastle
-LBA,Leeds,Leeds Bradford
-DUB,Dublino,Dublino
-ORK,Cork,Cork
-SNN,Shannon,Shannon
+LHR/EGLL,Heathrow,Londra Heathrow
+LGW/EGKK,Gatwick,Londra Gatwick
+LTN/EGGW,Luton,Londra Luton
+STN/EGSS,Stansted,Londra Stansted
+LCY/EGLC,London City,Londra City
+SEN/EGMC,Southend,Londra Southend
+MAN/EGCC,Manchester,Manchester
+BHX/EGBB,Birmingham,Birmingham
+EDI/EGPH,Edimburgo,Edimburgo
+GLA/EGPF,Glasgow,Glasgow
+BRS/EGGD,Bristol,Bristol
+LPL/EGGP,Liverpool,Liverpool
+NCL/EGNT,Newcastle,Newcastle
+LBA/EGNM,Leeds,Leeds Bradford
+DUB/EIDW,Dublino,Dublino
+ORK/EICK,Cork,Cork
+SNN/EINN,Shannon,Shannon
 # --- Francia ---
-CDG,Charles de Gaulle,Parigi Charles de Gaulle
-ORY,Orly,Parigi Orly
-BVA,Beauvais,Parigi Beauvais
-NCE,Nizza,Nizza Costa Azzurra
-MRS,Marsiglia,Marsiglia Provenza
-LYS,Lione,Lione Saint-Exupery
-TLS,Tolosa,Tolosa Blagnac
-BOD,Bordeaux,Bordeaux Merignac
-NTE,Nantes,Nantes Atlantique
-MPL,Montpellier,Montpellier
-AJA,Ajaccio,Ajaccio
-BIA,Bastia,Bastia
-FSC,Figari,Figari Sud Corse
+CDG/LFPG,Charles de Gaulle,Parigi Charles de Gaulle
+ORY/LFPO,Orly,Parigi Orly
+BVA/LFOB,Beauvais,Parigi Beauvais
+NCE/LFMN,Nizza,Nizza Costa Azzurra
+MRS/LFML,Marsiglia,Marsiglia Provenza
+LYS/LFLL,Lione,Lione Saint-Exupery
+TLS/LFBO,Tolosa,Tolosa Blagnac
+BOD/LFBD,Bordeaux,Bordeaux Merignac
+NTE/LFRS,Nantes,Nantes Atlantique
+MPL/LFMT,Montpellier,Montpellier
+AJA/LFKJ,Ajaccio,Ajaccio
+BIA/LFKB,Bastia,Bastia
+FSC/LFKF,Figari,Figari Sud Corse
 # --- Benelux, Germania, Austria, Svizzera ---
-AMS,Schiphol,Amsterdam Schiphol
-EIN,Eindhoven,Eindhoven
-RTM,Rotterdam,Rotterdam L'Aia
-BRU,Bruxelles,Bruxelles Zaventem
-CRL,Charleroi,Bruxelles Charleroi
-LUX,Lussemburgo,Lussemburgo
-FRA,Francoforte,Francoforte sul Meno
-MUC,Monaco,Monaco di Baviera
-BER,Berlino,Berlino Brandeburgo
-DUS,Dusseldorf,Dusseldorf
-HAM,Amburgo,Amburgo
-STR,Stoccarda,Stoccarda
-CGN,Colonia,Colonia Bonn
-HAJ,Hannover,Hannover
-NUE,Norimberga,Norimberga
-LEJ,Lipsia,Lipsia Halle
-BRE,Brema,Brema
-FMM,Memmingen,Memmingen
-DTM,Dortmund,Dortmund
-FDH,Friedrichshafen,Friedrichshafen
-VIE,Vienna,Vienna Schwechat
-SZG,Salisburgo,Salisburgo
-INN,Innsbruck,Innsbruck
-GRZ,Graz,Graz
-ZRH,Zurigo,Zurigo
-GVA,Ginevra,Ginevra
-BSL,Basilea,Basilea Mulhouse
-LUG,Lugano,Lugano
-BRN,Berna,Berna
+AMS/EHAM,Schiphol,Amsterdam Schiphol
+EIN/EHEH,Eindhoven,Eindhoven
+RTM/EHRD,Rotterdam,Rotterdam L'Aia
+BRU/EBBR,Bruxelles,Bruxelles Zaventem
+CRL/EBCI,Charleroi,Bruxelles Charleroi
+LUX/ELLX,Lussemburgo,Lussemburgo
+FRA/EDDF,Francoforte,Francoforte sul Meno
+MUC/EDDM,Monaco,Monaco di Baviera
+BER/EDDB,Berlino,Berlino Brandeburgo
+DUS/EDDL,Dusseldorf,Dusseldorf
+HAM/EDDH,Amburgo,Amburgo
+STR/EDDS,Stoccarda,Stoccarda
+CGN/EDDK,Colonia,Colonia Bonn
+HAJ/EDDV,Hannover,Hannover
+NUE/EDDN,Norimberga,Norimberga
+LEJ/EDDP,Lipsia,Lipsia Halle
+BRE/EDDW,Brema,Brema
+FMM/EDJA,Memmingen,Memmingen
+DTM/EDLW,Dortmund,Dortmund
+FDH/EDNY,Friedrichshafen,Friedrichshafen
+VIE/LOWW,Vienna,Vienna Schwechat
+SZG/LOWS,Salisburgo,Salisburgo
+INN/LOWI,Innsbruck,Innsbruck
+GRZ/LOWG,Graz,Graz
+ZRH/LSZH,Zurigo,Zurigo
+GVA/LSGG,Ginevra,Ginevra
+BSL/LFSB,Basilea,Basilea Mulhouse
+LUG/LSZA,Lugano,Lugano
+BRN/LSZB,Berna,Berna
 # --- Spagna e Portogallo ---
-MAD,Madrid,Madrid Barajas
-BCN,Barcellona,Barcellona El Prat
-AGP,Malaga,Malaga
-PMI,Palma,Palma di Maiorca
-IBZ,Ibiza,Ibiza
-MAH,Minorca,Minorca
-VLC,Valencia,Valencia
-SVQ,Siviglia,Siviglia
-BIO,Bilbao,Bilbao
-ALC,Alicante,Alicante Elche
-SCQ,Santiago,Santiago de Compostela
-LPA,Gran Canaria,Las Palmas Gran Canaria
-TFS,Tenerife Sud,Tenerife Sud
-TFN,Tenerife Nord,Tenerife Nord
-ACE,Lanzarote,Lanzarote
-FUE,Fuerteventura,Fuerteventura
-LIS,Lisbona,Lisbona
-OPO,Porto,Porto
-FAO,Faro,Faro
-FNC,Madeira,Funchal Madeira
-PDL,Ponta Delgada,Ponta Delgada Azzorre
+MAD/LEMD,Madrid,Madrid Barajas
+BCN/LEBL,Barcellona,Barcellona El Prat
+AGP/LEMG,Malaga,Malaga
+PMI/LEPA,Palma,Palma di Maiorca
+IBZ/LEIB,Ibiza,Ibiza
+MAH/LEMH,Minorca,Minorca
+VLC/LEVC,Valencia,Valencia
+SVQ/LEZL,Siviglia,Siviglia
+BIO/LEBB,Bilbao,Bilbao
+ALC/LEAL,Alicante,Alicante Elche
+SCQ/LEST,Santiago,Santiago de Compostela
+LPA/GCLP,Gran Canaria,Las Palmas Gran Canaria
+TFS/GCTS,Tenerife Sud,Tenerife Sud
+TFN/GCXO,Tenerife Nord,Tenerife Nord
+ACE/GCRR,Lanzarote,Lanzarote
+FUE/GCFV,Fuerteventura,Fuerteventura
+LIS/LPPT,Lisbona,Lisbona
+OPO/LPPR,Porto,Porto
+FAO/LPFR,Faro,Faro
+FNC/LPMA,Madeira,Funchal Madeira
+PDL/LPPD,Ponta Delgada,Ponta Delgada Azzorre
 # --- Scandinavia e Baltico ---
-CPH,Copenaghen,Copenaghen Kastrup
-BLL,Billund,Billund
-ARN,Arlanda,Stoccolma Arlanda
-NYO,Skavsta,Stoccolma Skavsta
-GOT,Goteborg,Goteborg Landvetter
-OSL,Oslo,Oslo Gardermoen
-TRF,Torp,Sandefjord Torp
-BGO,Bergen,Bergen
-TRD,Trondheim,Trondheim
-SVG,Stavanger,Stavanger
-HEL,Helsinki,Helsinki Vantaa
-KEF,Reykjavik,Reykjavik Keflavik
-RIX,Riga,Riga
-TLL,Tallinn,Tallinn
-VNO,Vilnius,Vilnius
-KUN,Kaunas,Kaunas
+CPH/EKCH,Copenaghen,Copenaghen Kastrup
+BLL/EKBI,Billund,Billund
+ARN/ESSA,Arlanda,Stoccolma Arlanda
+NYO/ESKN,Skavsta,Stoccolma Skavsta
+GOT/ESGG,Goteborg,Goteborg Landvetter
+OSL/ENGM,Oslo,Oslo Gardermoen
+TRF/ENTO,Torp,Sandefjord Torp
+BGO/ENBR,Bergen,Bergen
+TRD/ENVA,Trondheim,Trondheim
+SVG/ENZV,Stavanger,Stavanger
+HEL/EFHK,Helsinki,Helsinki Vantaa
+KEF/BIKF,Reykjavik,Reykjavik Keflavik
+RIX/EVRA,Riga,Riga
+TLL/EETN,Tallinn,Tallinn
+VNO/EYVI,Vilnius,Vilnius
+KUN/EYKA,Kaunas,Kaunas
 # --- Europa centrale e orientale ---
-WAW,Varsavia,Varsavia Chopin
-WMI,Modlin,Varsavia Modlin
-KRK,Cracovia,Cracovia
-KTW,Katowice,Katowice
-GDN,Danzica,Danzica
-WRO,Breslavia,Breslavia
-POZ,Poznan,Poznan
-PRG,Praga,Praga
-BRQ,Brno,Brno
-BTS,Bratislava,Bratislava
-BUD,Budapest,Budapest Ferenc Liszt
-DEB,Debrecen,Debrecen
-OTP,Bucarest,Bucarest Otopeni
-CLJ,Cluj,Cluj-Napoca
-TSR,Timisoara,Timisoara
-SOF,Sofia,Sofia
-VAR,Varna,Varna
-BOJ,Burgas,Burgas
+WAW/EPWA,Varsavia,Varsavia Chopin
+WMI/EPMO,Modlin,Varsavia Modlin
+KRK/EPKK,Cracovia,Cracovia
+KTW/EPKT,Katowice,Katowice
+GDN/EPGD,Danzica,Danzica
+WRO/EPWR,Breslavia,Breslavia
+POZ/EPPO,Poznan,Poznan
+PRG/LKPR,Praga,Praga
+BRQ/LKTB,Brno,Brno
+BTS/LZIB,Bratislava,Bratislava
+BUD/LHBP,Budapest,Budapest Ferenc Liszt
+DEB/LHDC,Debrecen,Debrecen
+OTP/LROP,Bucarest,Bucarest Otopeni
+CLJ/LRCL,Cluj,Cluj-Napoca
+TSR/LRTR,Timisoara,Timisoara
+SOF/LBSF,Sofia,Sofia
+VAR/LBWN,Varna,Varna
+BOJ/LBBG,Burgas,Burgas
 # --- Balcani ---
-BEG,Belgrado,Belgrado Nikola Tesla
-ZAG,Zagabria,Zagabria
-SPU,Spalato,Spalato
-DBV,Dubrovnik,Dubrovnik
-PUY,Pola,Pola
-ZAD,Zara,Zara
-RJK,Fiume,Fiume
-LJU,Lubiana,Lubiana
-SJJ,Sarajevo,Sarajevo
-TGD,Podgorica,Podgorica
-TIV,Tivat,Tivat
-TIA,Tirana,Tirana
-SKP,Skopje,Skopje
-OHD,Ohrid,Ohrid
-PRN,Pristina,Pristina
+BEG/LYBE,Belgrado,Belgrado Nikola Tesla
+ZAG/LDZA,Zagabria,Zagabria
+SPU/LDSP,Spalato,Spalato
+DBV/LDDU,Dubrovnik,Dubrovnik
+PUY/LDPL,Pola,Pola
+ZAD/LDZD,Zara,Zara
+RJK/LDRI,Fiume,Fiume
+LJU/LJLJ,Lubiana,Lubiana
+SJJ/LQSA,Sarajevo,Sarajevo
+TGD/LYPG,Podgorica,Podgorica
+TIV/LYTV,Tivat,Tivat
+TIA/LATI,Tirana,Tirana
+SKP/LWSK,Skopje,Skopje
+OHD/LWOH,Ohrid,Ohrid
+PRN/BKPR,Pristina,Pristina
 # --- Grecia, Turchia, Cipro, Malta ---
-ATH,Atene,Atene
-SKG,Salonicco,Salonicco
-HER,Heraklion,Creta Heraklion
-CHQ,Chania,Creta Chania
-RHO,Rodi,Rodi
-CFU,Corfu,Corfu
-JMK,Mykonos,Mykonos
-JTR,Santorini,Santorini
-KGS,Kos,Kos
-ZTH,Zante,Zante
-IST,Istanbul,Istanbul
-SAW,Sabiha,Istanbul Sabiha Gokcen
-AYT,Antalya,Antalya
-ADB,Izmir,Izmir
-ESB,Ankara,Ankara Esenboga
-DLM,Dalaman,Dalaman
-BJV,Bodrum,Bodrum
-LCA,Larnaca,Larnaca
-PFO,Paphos,Paphos
-MLA,Malta,Malta
+ATH/LGAV,Atene,Atene
+SKG/LGTS,Salonicco,Salonicco
+HER/LGIR,Heraklion,Creta Heraklion
+CHQ/LGSA,Chania,Creta Chania
+RHO/LGRP,Rodi,Rodi
+CFU/LGKR,Corfu,Corfu
+JMK/LGMK,Mykonos,Mykonos
+JTR/LGSR,Santorini,Santorini
+KGS/LGKO,Kos,Kos
+ZTH/LGZA,Zante,Zante
+IST/LTFM,Istanbul,Istanbul
+SAW/LTFJ,Sabiha,Istanbul Sabiha Gokcen
+AYT/LTAI,Antalya,Antalya
+ADB/LTBJ,Izmir,Izmir
+ESB/LTAC,Ankara,Ankara Esenboga
+DLM/LTBS,Dalaman,Dalaman
+BJV/LTFE,Bodrum,Bodrum
+LCA/LCLK,Larnaca,Larnaca
+PFO/LCPH,Paphos,Paphos
+MLA/LMML,Malta,Malta
 # --- Russia e Ucraina ---
-SVO,Sheremetyevo,Mosca Sheremetyevo
-DME,Domodedovo,Mosca Domodedovo
-VKO,Vnukovo,Mosca Vnukovo
-LED,San Pietroburgo,San Pietroburgo Pulkovo
-KBP,Kiev,Kiev Boryspil
+SVO/UUEE,Sheremetyevo,Mosca Sheremetyevo
+DME/UUDD,Domodedovo,Mosca Domodedovo
+VKO/UUWW,Vnukovo,Mosca Vnukovo
+LED/ULLI,San Pietroburgo,San Pietroburgo Pulkovo
+KBP/UKBB,Kiev,Kiev Boryspil
 # --- Medio Oriente e Golfo ---
-TLV,Tel Aviv,Tel Aviv Ben Gurion
-AMM,Amman,Amman
-BEY,Beirut,Beirut
-DXB,Dubai,Dubai
-DWC,Dubai Al Maktoum,Dubai World Central
-AUH,Abu Dhabi,Abu Dhabi
-DOH,Doha,Doha Hamad
-KWI,Kuwait,Kuwait
-BAH,Bahrein,Bahrein
-MCT,Mascate,Mascate
-RUH,Riyadh,Riyadh
-JED,Gedda,Gedda
+TLV/LLBG,Tel Aviv,Tel Aviv Ben Gurion
+AMM/OJAI,Amman,Amman
+BEY/OLBA,Beirut,Beirut
+DXB/OMDB,Dubai,Dubai
+DWC/OMDW,Dubai Al Maktoum,Dubai World Central
+AUH/OMAA,Abu Dhabi,Abu Dhabi
+DOH/OTHH,Doha,Doha Hamad
+KWI/OKKK,Kuwait,Kuwait
+BAH/OBBI,Bahrein,Bahrein
+MCT/OOMS,Mascate,Mascate
+RUH/OERK,Riyadh,Riyadh
+JED/OEJN,Gedda,Gedda
 # --- Africa ---
-CAI,Il Cairo,Il Cairo
-HRG,Hurghada,Hurghada
-SSH,Sharm,Sharm el Sheikh
-TUN,Tunisi,Tunisi Cartagine
-DJE,Djerba,Djerba
-MIR,Monastir,Monastir
-CMN,Casablanca,Casablanca Mohammed V
-RAK,Marrakech,Marrakech
-AGA,Agadir,Agadir
-TNG,Tangeri,Tangeri
-ALG,Algeri,Algeri
-ORN,Orano,Orano
-TIP,Tripoli,Tripoli
-JNB,Johannesburg,Johannesburg
-CPT,Citta del Capo,Citta del Capo
-NBO,Nairobi,Nairobi
-ADD,Addis Abeba,Addis Abeba
-LOS,Lagos,Lagos
-ACC,Accra,Accra
-DKR,Dakar,Dakar
-MRU,Mauritius,Mauritius
-SEZ,Seychelles,Seychelles
-ZNZ,Zanzibar,Zanzibar
+CAI/HECA,Il Cairo,Il Cairo
+HRG/HEGN,Hurghada,Hurghada
+SSH/HESH,Sharm,Sharm el Sheikh
+TUN/DTTA,Tunisi,Tunisi Cartagine
+DJE/DTTJ,Djerba,Djerba
+MIR/DTMB,Monastir,Monastir
+CMN/GMMN,Casablanca,Casablanca Mohammed V
+RAK/GMMX,Marrakech,Marrakech
+AGA/GMAD,Agadir,Agadir
+TNG/GMTT,Tangeri,Tangeri
+ALG/DAAG,Algeri,Algeri
+ORN/DAOO,Orano,Orano
+TIP/HLLT,Tripoli,Tripoli
+JNB/FAOR,Johannesburg,Johannesburg
+CPT/FACT,Citta del Capo,Citta del Capo
+NBO/HKJK,Nairobi,Nairobi
+ADD/HAAB,Addis Abeba,Addis Abeba
+LOS/DNMM,Lagos,Lagos
+ACC/DGAA,Accra,Accra
+DKR/GOOY,Dakar,Dakar
+MRU/FIMP,Mauritius,Mauritius
+SEZ/FSIA,Seychelles,Seychelles
+ZNZ/HTZA,Zanzibar,Zanzibar
 # --- Asia ---
-DEL,Delhi,Nuova Delhi
-BOM,Mumbai,Mumbai
-BLR,Bangalore,Bangalore
-MAA,Chennai,Chennai
-HYD,Hyderabad,Hyderabad
-CCU,Calcutta,Calcutta
-COK,Kochi,Kochi
-MLE,Maldive,Male Maldive
-CMB,Colombo,Colombo
-KTM,Kathmandu,Kathmandu
-BKK,Bangkok,Bangkok Suvarnabhumi
-DMK,Don Mueang,Bangkok Don Mueang
-HKT,Phuket,Phuket
-SIN,Singapore,Singapore Changi
-KUL,Kuala Lumpur,Kuala Lumpur
-CGK,Giacarta,Giacarta
-DPS,Bali,Denpasar Bali
-MNL,Manila,Manila
-HAN,Hanoi,Hanoi
-SGN,Ho Chi Minh,Ho Chi Minh
-HKG,Hong Kong,Hong Kong
-TPE,Taipei,Taipei Taoyuan
-ICN,Seul,Seul Incheon
-NRT,Narita,Tokyo Narita
-HND,Haneda,Tokyo Haneda
-KIX,Kansai,Osaka Kansai
-NGO,Nagoya,Nagoya Chubu
-PEK,Pechino,Pechino Capital
-PKX,Daxing,Pechino Daxing
-PVG,Shanghai,Shanghai Pudong
-SHA,Hongqiao,Shanghai Hongqiao
-CAN,Canton,Canton Baiyun
-SZX,Shenzhen,Shenzhen
-CTU,Chengdu,Chengdu
-XIY,Xi'an,Xi'an
+DEL/VIDP,Delhi,Nuova Delhi
+BOM/VABB,Mumbai,Mumbai
+BLR/VOBL,Bangalore,Bangalore
+MAA/VOMM,Chennai,Chennai
+HYD/VOHS,Hyderabad,Hyderabad
+CCU/VECC,Calcutta,Calcutta
+COK/VOCI,Kochi,Kochi
+MLE/VRMM,Maldive,Male Maldive
+CMB/VCBI,Colombo,Colombo
+KTM/VNKT,Kathmandu,Kathmandu
+BKK/VTBS,Bangkok,Bangkok Suvarnabhumi
+DMK/VTBD,Don Mueang,Bangkok Don Mueang
+HKT/VTSP,Phuket,Phuket
+SIN/WSSS,Singapore,Singapore Changi
+KUL/WMKK,Kuala Lumpur,Kuala Lumpur
+CGK/WIII,Giacarta,Giacarta
+DPS/WADD,Bali,Denpasar Bali
+MNL/RPLL,Manila,Manila
+HAN/VVNB,Hanoi,Hanoi
+SGN/VVTS,Ho Chi Minh,Ho Chi Minh
+HKG/VHHH,Hong Kong,Hong Kong
+TPE/RCTP,Taipei,Taipei Taoyuan
+ICN/RKSI,Seul,Seul Incheon
+NRT/RJAA,Narita,Tokyo Narita
+HND/RJTT,Haneda,Tokyo Haneda
+KIX/RJBB,Kansai,Osaka Kansai
+NGO/RJGG,Nagoya,Nagoya Chubu
+PEK/ZBAA,Pechino,Pechino Capital
+PKX/ZBAD,Daxing,Pechino Daxing
+PVG/ZSPD,Shanghai,Shanghai Pudong
+SHA/ZSSS,Hongqiao,Shanghai Hongqiao
+CAN/ZGGG,Canton,Canton Baiyun
+SZX/ZGSZ,Shenzhen,Shenzhen
+CTU/ZUUU,Chengdu,Chengdu
+XIY/ZLXY,Xi'an,Xi'an
 # --- Nord America ---
-JFK,New York JFK,New York John F. Kennedy
-EWR,Newark,New York Newark
-LGA,LaGuardia,New York LaGuardia
-BOS,Boston,Boston Logan
-PHL,Filadelfia,Filadelfia
-IAD,Washington Dulles,Washington Dulles
-DCA,Washington Reagan,Washington Reagan
-BWI,Baltimora,Baltimora
-ATL,Atlanta,Atlanta Hartsfield-Jackson
-MIA,Miami,Miami
-FLL,Fort Lauderdale,Fort Lauderdale
-MCO,Orlando,Orlando
-TPA,Tampa,Tampa
-ORD,Chicago O'Hare,Chicago O'Hare
-MDW,Chicago Midway,Chicago Midway
-DTW,Detroit,Detroit
-MSP,Minneapolis,Minneapolis Saint Paul
-CLT,Charlotte,Charlotte
-DEN,Denver,Denver
-LAX,Los Angeles,Los Angeles
-SFO,San Francisco,San Francisco
-SJC,San Jose,San Jose
-SEA,Seattle,Seattle Tacoma
-PDX,Portland,Portland
-LAS,Las Vegas,Las Vegas Harry Reid
-PHX,Phoenix,Phoenix Sky Harbor
-SLC,Salt Lake City,Salt Lake City
-DFW,Dallas,Dallas Fort Worth
-IAH,Houston,Houston Intercontinental
-AUS,Austin,Austin
-SAN,San Diego,San Diego
-HNL,Honolulu,Honolulu
-YYZ,Toronto,Toronto Pearson
-YUL,Montreal,Montreal Trudeau
-YVR,Vancouver,Vancouver
-YYC,Calgary,Calgary
-YOW,Ottawa,Ottawa
+JFK/KJFK,New York JFK,New York John F. Kennedy
+EWR/KEWR,Newark,New York Newark
+LGA/KLGA,LaGuardia,New York LaGuardia
+BOS/KBOS,Boston,Boston Logan
+PHL/KPHL,Filadelfia,Filadelfia
+IAD/KIAD,Washington Dulles,Washington Dulles
+DCA/KDCA,Washington Reagan,Washington Reagan
+BWI/KBWI,Baltimora,Baltimora
+ATL/KATL,Atlanta,Atlanta Hartsfield-Jackson
+MIA/KMIA,Miami,Miami
+FLL/KFLL,Fort Lauderdale,Fort Lauderdale
+MCO/KMCO,Orlando,Orlando
+TPA/KTPA,Tampa,Tampa
+ORD/KORD,Chicago O'Hare,Chicago O'Hare
+MDW/KMDW,Chicago Midway,Chicago Midway
+DTW/KDTW,Detroit,Detroit
+MSP/KMSP,Minneapolis,Minneapolis Saint Paul
+CLT/KCLT,Charlotte,Charlotte
+DEN/KDEN,Denver,Denver
+LAX/KLAX,Los Angeles,Los Angeles
+SFO/KSFO,San Francisco,San Francisco
+SJC/KSJC,San Jose,San Jose
+SEA/KSEA,Seattle,Seattle Tacoma
+PDX/KPDX,Portland,Portland
+LAS/KLAS,Las Vegas,Las Vegas Harry Reid
+PHX/KPHX,Phoenix,Phoenix Sky Harbor
+SLC/KSLC,Salt Lake City,Salt Lake City
+DFW/KDFW,Dallas,Dallas Fort Worth
+IAH/KIAH,Houston,Houston Intercontinental
+AUS/KAUS,Austin,Austin
+SAN/KSAN,San Diego,San Diego
+HNL/PHNL,Honolulu,Honolulu
+YYZ/CYYZ,Toronto,Toronto Pearson
+YUL/CYUL,Montreal,Montreal Trudeau
+YVR/CYVR,Vancouver,Vancouver
+YYC/CYYC,Calgary,Calgary
+YOW/CYOW,Ottawa,Ottawa
 # --- America centrale e meridionale ---
-MEX,Citta del Messico,Citta del Messico
-CUN,Cancun,Cancun
-GDL,Guadalajara,Guadalajara
-GRU,San Paolo,San Paolo Guarulhos
-GIG,Rio de Janeiro,Rio de Janeiro Galeao
-BSB,Brasilia,Brasilia
-EZE,Buenos Aires,Buenos Aires Ezeiza
-AEP,Aeroparque,Buenos Aires Aeroparque
-SCL,Santiago,Santiago del Cile
-LIM,Lima,Lima
-BOG,Bogota,Bogota
-UIO,Quito,Quito
-PTY,Panama,Panama Tocumen
-HAV,L'Avana,L'Avana
-PUJ,Punta Cana,Punta Cana
-SJU,San Juan,San Juan Porto Rico
-MBJ,Montego Bay,Montego Bay
+MEX/MMMX,Citta del Messico,Citta del Messico
+CUN/MMUN,Cancun,Cancun
+GDL/MMGL,Guadalajara,Guadalajara
+GRU/SBGR,San Paolo,San Paolo Guarulhos
+GIG/SBGL,Rio de Janeiro,Rio de Janeiro Galeao
+BSB/SBBR,Brasilia,Brasilia
+EZE/SAEZ,Buenos Aires,Buenos Aires Ezeiza
+AEP/SABE,Aeroparque,Buenos Aires Aeroparque
+SCL/SCEL,Santiago,Santiago del Cile
+LIM/SPJC,Lima,Lima
+BOG/SKBO,Bogota,Bogota
+UIO/SEQM,Quito,Quito
+PTY/MPTO,Panama,Panama Tocumen
+HAV/MUHA,L'Avana,L'Avana
+PUJ/MDPC,Punta Cana,Punta Cana
+SJU/TJSJ,San Juan,San Juan Porto Rico
+MBJ/MKJS,Montego Bay,Montego Bay
 # --- Oceania ---
-SYD,Sydney,Sydney
-MEL,Melbourne,Melbourne
-BNE,Brisbane,Brisbane
-PER,Perth,Perth
-ADL,Adelaide,Adelaide
-AKL,Auckland,Auckland
-CHC,Christchurch,Christchurch
-NAN,Nadi,Nadi Figi
+SYD/YSSY,Sydney,Sydney
+MEL/YMML,Melbourne,Melbourne
+BNE/YBBN,Brisbane,Brisbane
+PER/YPPH,Perth,Perth
+ADL/YPAD,Adelaide,Adelaide
+AKL/NZAA,Auckland,Auckland
+CHC/NZCH,Christchurch,Christchurch
+NAN/NFFN,Nadi,Nadi Figi

@@ -708,27 +708,35 @@ STRINGS = {
     "lookup.title": ("Conversioni dei codici", "Code translations"),
     "lookup.intro": (
         "Il radar riceve sigle: il modello arriva come designatore ICAO "
-        "(B738), gli aeroporti delle rotte come codici IATA (MXP). Queste "
-        "due tabelle li trasformano in nomi leggibili. Un codice che non è "
-        "in tabella viene mostrato com'è: non è un errore.",
+        "(B738), gli aeroporti delle rotte come codice IATA (MXP) oppure "
+        "ICAO (LIMC), a seconda di che cosa risponde il servizio delle "
+        "rotte. Queste due tabelle li trasformano in nomi leggibili. Un "
+        "codice che non è in tabella viene mostrato com'è: non è un errore.",
         "The radar receives codes: the aircraft model as an ICAO designator "
-        "(B738), route airports as IATA codes (MXP). These two tables turn "
-        "them into readable names. A code that is not in the table is shown "
-        "as it is: that is not an error."),
+        "(B738), route airports as either an IATA code (MXP) or an ICAO one "
+        "(LIMC), depending on what the route service answers. These two "
+        "tables turn them into readable names. A code that is not in the "
+        "table is shown as it is: that is not an error."),
     "lookup.iata.warning": (
-        "Per gli aeroporti servono i codici IATA di tre lettere (MXP, FCO), "
-        "non quelli ICAO di quattro (LIMC, LIRF): le rotte arrivano da "
-        "adsb.lol, che restituisce IATA. Una riga scritta con il codice ICAO "
-        "non verrà mai usata.",
-        "Airports need the three-letter IATA codes (MXP, FCO), not the "
-        "four-letter ICAO ones (LIMC, LIRF): routes come from adsb.lol, which "
-        "returns IATA. A row written with the ICAO code will never be used."),
+        "Gli aeroporti si possono scrivere con entrambi i codici sulla "
+        "stessa riga, separati da una barra: MXP/LIMC. Il servizio delle "
+        "rotte a volte risponde con il codice IATA di tre lettere e a volte "
+        "con quello ICAO di quattro: basta che uno dei due corrisponda. La "
+        "tabella di partenza li porta già tutti e due.",
+        "Airports can carry both codes on the same row, separated by a "
+        "slash: MXP/LIMC. The route service sometimes answers with the "
+        "three-letter IATA code and sometimes with the four-letter ICAO one: "
+        "either match is enough. The bundled table already carries both."),
     "lookup.format": (
-        "Una riga per voce: codice, forma breve, nome completo. La forma "
+        "Una riga per voce: codice, forma breve, nome completo. Nella prima "
+        "colonna si possono mettere più codici separati da una barra, e la "
+        "riga risponde a tutti. La forma "
         "breve va sul pannello, dove lo spazio è poco; il nome completo nella "
         "web UI e nel registro. Le righe che iniziano con # sono commenti, e "
         "una riga sbagliata si perde da sola senza compromettere le altre.",
-        "One row per entry: code, short form, full name. The short form goes "
+        "One row per entry: code, short form, full name. The first column can "
+        "hold several codes separated by a slash, and the row answers to all "
+        "of them. The short form goes "
         "on the panel, where space is tight; the full name in the web "
         "interface and the log. Rows starting with # are comments, and a "
         "broken row is dropped on its own without affecting the others."),

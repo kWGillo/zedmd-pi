@@ -2,6 +2,9 @@
 #
 #   codice ICAO,forma breve,nome completo
 #
+# Nella prima colonna puoi mettere piu' codici separati da `/` se due
+# designatori diversi vanno tradotti allo stesso modo.
+#
 # La forma breve va sul pannello, dove lo spazio e' poco. Il nome completo
 # compare nella web UI e nel registro dei passaggi.
 #

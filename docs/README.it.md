@@ -277,6 +277,7 @@ copiare così com'è.
 | 1.9.3 | "Ora e sincronizzazione" spostato nella pagina Orologio |
 | 1.9.4 | Durata del bit minimo e bit con dithering: alzano il refresh senza perdere profondità PWM |
 | 1.10 | Now Playing: brano in ascolto da AirPlay 2, Spotify o MQTT; entità in Home Assistant |
+| 1.11 | Radar: due tabelle CSV modificabili traducono i codici degli aeromobili e degli aeroporti in nomi leggibili |
 
 
 ---
@@ -302,7 +303,8 @@ La rotta origine → destinazione arriva dal servizio `routeset` di adsb.lol
 (`POST https://api.adsb.lol/api/0/routeset`), che accetta fino a 100 voli per
 richiesta: tutte le rotte di un giro si ottengono con una sola chiamata.
 Vengono preferiti i codici IATA, più corti e leggibili su un pannello stretto,
-con ricaduta sugli ICAO quando mancano. Se il servizio non risponde si ripiega
+con ricaduta sugli ICAO quando mancano — cosa che succede spesso, ed è il
+motivo per cui la tabella di conversione conosce entrambe le grafie. Se il servizio non risponde si ripiega
 su hexdb.io, volo per volo.
 
 La ricerca avviene solo se il campo è selezionato o se la si vuole nel registro
@@ -451,11 +453,11 @@ Guida completa, anche per farlo a mano: `docs/now-playing.it.md`.
 
 ## Conversioni dei codici del radar
 
-Il radar riceve sigle. Il modello arriva come **designatore ICAO** (`B738`),
-gli aeroporti delle rotte come **codici IATA** (`MXP`) — non ICAO, perché il
-servizio routeset di adsb.lol restituisce quelli. È una distinzione che
-conta: una riga scritta con `LIMC` non verrà mai usata, perché quel codice
-non arriva.
+Il radar riceve sigle. Il modello arriva come **designatore ICAO** (`B738`).
+Gli aeroporti delle rotte arrivano invece **in due grafie**: il servizio
+routeset di adsb.lol è documentato per rispondere con i codici IATA di tre
+lettere (`MXP`), ma quel campo spesso non c'è e sia routeset sia hexdb.io
+ripiegano sui codici ICAO di quattro (`LIMC`). Le tabelle conoscono entrambe.
 
 Due file CSV modificabili traducono le sigle in nomi leggibili:
 
@@ -464,8 +466,16 @@ Due file CSV modificabili traducono le sigle in nomi leggibili:
 /var/lib/dmd/aeroporti.csv   326 aeroporti
 ```
 
-Ogni riga ha tre campi — `codice,forma breve,nome completo`. Servono due
-forme perché il pannello è largo 256 px e la riga del radar porta già rotta,
+Ogni riga ha tre campi — `codice,forma breve,nome completo`. Nella prima
+colonna possono stare **più codici separati da `/`**, e la riga risponde a
+tutti: è così che un aeroporto porta le due grafie senza doverne tenere
+allineate due righe.
+
+```
+MXP/LIMC,Malpensa,Milano Malpensa
+```
+
+Servono due forme perché il pannello è largo 256 px e la riga del radar porta già rotta,
 quota, velocità e distanza: `737-800` ci sta, `Boeing 737-800` no. Il nome
 completo va nella web UI e nelle due colonne nuove del registro
 (`type_name`, `route_name`), dove lo spazio non manca.

@@ -128,6 +128,12 @@ Storico:
         vede, e la scelta delle cartelle e' dichiarata dall'archivio come gia'
         avviene per i file, cosi' la prossima cartella nuova non ripetera' la
         storia. I file gia' presenti in /var/lib/dmd non vengono toccati.
+  1.11.3 Le rotte non venivano tradotte quasi mai: la tabella degli aeroporti
+        conosceva solo i codici IATA di tre lettere, ma il servizio delle
+        rotte quel campo spesso non ce l'ha e ripiega sui codici ICAO di
+        quattro, che restavano sigle. Ora ogni riga puo' portare piu' codici
+        separati da una barra e la tabella distribuita li ha gia' entrambi
+        (MXP/LIMC): tutti e 326 gli scali rispondono a tutte e due le grafie.
 """
 
-__version__ = "1.11.2"
+__version__ = "1.11.3"

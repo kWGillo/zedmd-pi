@@ -2,6 +2,23 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.11.3]
+
+### Corretto
+- **Le rotte non venivano quasi mai tradotte.** La tabella degli aeroporti
+  conosceva solo i codici IATA di tre lettere, perche' il servizio routeset
+  di adsb.lol e' documentato per restituire quelli. In pratica quel campo
+  spesso non c'e', e sia routeset sia hexdb.io ripiegano sui codici ICAO di
+  quattro lettere: `LFPG→LIML` invece di `MXP→FCO`. Nessuna riga
+  corrispondeva, e sul pannello restavano le sigle.
+- La prima colonna dei due file ora accetta **piu' codici separati da `/`**,
+  e la riga risponde a tutti: `MXP/LIMC,Malpensa,Milano Malpensa`.
+- La tabella distribuita porta gia' **entrambe le grafie per tutti e 326 gli
+  scali**, quindi non c'e' niente da fare a mano.
+- Un file gia' presente in `/var/lib/dmd` non viene toccato: chi vuole le
+  nuove sigle puo' aggiungerle a mano, oppure rinominare il proprio file e
+  lasciare che venga ricreato dal modello.
+
 ## [1.11.2]
 
 ### Corretto
