@@ -56,6 +56,15 @@ Storico:
         significativo e bit resi con dithering temporale. Alzano il refresh
         reale senza abbassare la profondita' PWM, che era l'unico rimedio
         allo sfarfallio dei mezzi toni.
+  1.10  Now Playing: il pannello mostra titolo, artista, album e avanzamento
+        del brano in ascolto. I metadati arrivano da shairport-sync via MQTT
+        (AirPlay 2: qualunque applicazione di iPhone, iPad o Mac, quindi
+        anche Amazon Music e Apple Music), dall'API di Spotify per la musica
+        che non passa da AirPlay, oppure da un topic MQTT libero per tutto il
+        resto. Il DMD si presenta da solo a Home Assistant con MQTT
+        Discovery, ma funziona anche senza. Il testo del player si disegna
+        senza antialiasing e con soli colori pieni: le intensita' intermedie
+        erano la causa dello sfarfallio, non il numero di colori.
 """
 
-__version__ = "1.9.4"
+__version__ = "1.10"

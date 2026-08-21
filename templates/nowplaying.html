@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nowplaying.title') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('nowplaying.title') }}</h2>
+  <p class="hint">{{ t('nowplaying.intro') }}</p>
+  <p class="status">{{ status }}</p>
+  <p class="hint">{{ t('nowplaying.priority.hint') }}</p>
+</section>
+
+{% if result %}
+<section class="card"><p class="status">{{ result }}</p></section>
+{% endif %}
+
+<section class="card">
+  <h2>{{ t('nowplaying.current') }}</h2>
+  {% if track.title or track.artist %}
+  <table class="grid">
+    <tr><th>{{ t('nowplaying.color.title') }}</th><td>{{ track.title or '—' }}</td></tr>
+    <tr><th>{{ t('nowplaying.color.artist') }}</th><td>{{ track.artist or '—' }}</td></tr>
+    <tr><th>{{ t('nowplaying.color.album') }}</th><td>{{ track.album or '—' }}</td></tr>
+    <tr><th>{{ t('nowplaying.mqtt.state') }}</th>
+        <td>{{ t('nowplaying.panel.playing') if track.playing
+                else t('nowplaying.panel.paused') }}
+            {% if track.duration %}
+            — {{ track.position | mmss }} / {{ track.duration | mmss }}
+            {% endif %}</td></tr>
+    <tr><th>{{ t('nowplaying.source') }}</th><td><code>{{ track.source }}</code></td></tr>
+    {% if track.client %}
+    <tr><th>{{ t('nowplaying.device') }}</th><td>{{ track.client }}</td></tr>
+    {% endif %}
+  </table>
+  {% else %}
+  <p class="hint">{{ t('nowplaying.nothing') }}</p>
+  {% endif %}
+
+  <h3>{{ t('nowplaying.test') }}</h3>
+  <p class="hint">{{ t('nowplaying.test.hint') }}</p>
+  <form method="post" action="{{ url_for('api_nowplaying_test') }}">
+    <button type="submit" class="ghost">{{ t('nowplaying.test.button') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('nowplaying.coverage.title') }}</h2>
+  <table class="grid">
+    <tr><th>AirPlay 2</th><td>{{ t('nowplaying.coverage.airplay') }}</td></tr>
+    <tr><th>Spotify</th><td>{{ t('nowplaying.coverage.spotify') }}</td></tr>
+    <tr><th>MQTT</th><td>{{ t('nowplaying.coverage.external') }}</td></tr>
+  </table>
+  <p class="hint">{{ t('nowplaying.coverage.gap') }}</p>
+</section>
+
+<form method="post" action="{{ url_for('api_mqtt') }}">
+  <section class="card">
+    <h2>{{ t('nowplaying.broker') }}</h2>
+    <p class="hint">{{ t('nowplaying.broker.hint') }}</p>
+
+    {% if not mqtt.available %}
+    <p class="status">{{ t('nowplaying.mqtt.missing', package=mqtt.package) }}</p>
+    {% else %}
+    <p class="status">
+      {% if not mqtt.enabled %}{{ t('nowplaying.mqtt.off') }}
+      {% elif mqtt.connected %}{{ t('nowplaying.mqtt.connected',
+                                    host=mqtt.host, port=mqtt.port) }}
+        — {{ t('nowplaying.mqtt.messages', count=mqtt.messages) }}
+      {% else %}{{ t('nowplaying.mqtt.disconnected') }}{% endif %}
+      {% if mqtt.error %} — <code>{{ mqtt.error }}</code>{% endif %}
+    </p>
+    {% endif %}
+
+    <label class="check">
+      <input type="checkbox" name="enabled" {{ 'checked' if cfg.mqtt.enabled }}>
+      {{ t('nowplaying.mqtt.enabled') }}
+    </label>
+
+    <div class="row3">
+      <div><label for="host">{{ t('nowplaying.mqtt.host') }}</label>
+        <input type="text" id="host" name="host" value="{{ cfg.mqtt.host }}"></div>
+      <div><label for="port">{{ t('common.port') }}</label>
+        <input type="number" id="port" name="port" min="1" max="65535"
+               value="{{ cfg.mqtt.port }}"></div>
+      <div><label for="client_id">{{ t('nowplaying.mqtt.client_id') }}</label>
+        <input type="text" id="client_id" name="client_id"
+               value="{{ cfg.mqtt.client_id }}"></div>
+    </div>
+
+    <div class="row3">
+      <div><label for="username">{{ t('nowplaying.mqtt.username') }}</label>
+        <input type="text" id="username" name="username"
+               value="{{ cfg.mqtt.username }}" autocomplete="off"></div>
+      <div><label for="password">{{ t('nowplaying.mqtt.password') }}</label>
+        <input type="password" id="password" name="password"
+               value="{{ cfg.mqtt.password }}" autocomplete="new-password"></div>
+      <div><label for="base_topic">{{ t('nowplaying.mqtt.base_topic') }}</label>
+        <input type="text" id="base_topic" name="base_topic"
+               value="{{ cfg.mqtt.base_topic }}"></div>
+    </div>
+    <p class="hint">{{ t('nowplaying.mqtt.password.hint') }}</p>
+
+    <label for="shairport_topic">{{ t('nowplaying.mqtt.shairport') }}</label>
+    <input type="text" id="shairport_topic" name="shairport_topic"
+           value="{{ cfg.mqtt.shairport_topic }}">
+    <p class="hint">{{ t('nowplaying.mqtt.shairport.hint') }}</p>
+
+    <label for="external_topic">{{ t('nowplaying.mqtt.external') }}</label>
+    <input type="text" id="external_topic" name="external_topic"
+           value="{{ cfg.mqtt.external_topic }}">
+    <p class="hint">{{ t('nowplaying.mqtt.external.hint') }}</p>
+  </section>
+
+  <section class="card">
+    <h2>{{ t('nowplaying.hass') }}</h2>
+    <p class="hint">{{ t('nowplaying.hass.hint') }}</p>
+    <label class="check">
+      <input type="checkbox" name="discovery" {{ 'checked' if cfg.mqtt.discovery }}>
+      {{ t('nowplaying.hass.enabled') }}
+    </label>
+    <div class="row3">
+      <div><label for="discovery_prefix">{{ t('nowplaying.hass.prefix') }}</label>
+        <input type="text" id="discovery_prefix" name="discovery_prefix"
+               value="{{ cfg.mqtt.discovery_prefix }}"></div>
+      <div><label for="node_id">{{ t('nowplaying.hass.node') }}</label>
+        <input type="text" id="node_id" name="node_id"
+               value="{{ cfg.mqtt.node_id }}"></div>
+      <div><label for="device_name">{{ t('nowplaying.hass.device') }}</label>
+        <input type="text" id="device_name" name="device_name"
+               value="{{ cfg.mqtt.device_name }}"></div>
+    </div>
+    <button type="submit">{{ t('nowplaying.mqtt.apply') }}</button>
+  </section>
+</form>
+
+<section class="card">
+  <h2>{{ t('nowplaying.hass.announce') }}</h2>
+  <p class="hint">{{ t('nowplaying.hass.birth',
+                       topic=cfg.mqtt.discovery_prefix ~ '/status') }}</p>
+  <form method="post" action="{{ url_for('api_hass_announce') }}">
+    <button type="submit" class="ghost">{{ t('nowplaying.hass.announce') }}</button>
+  </form>
+  <p class="hint">{{ t('nowplaying.hass.remove.hint') }}</p>
+  <form method="post" action="{{ url_for('api_hass_remove') }}">
+    <button type="submit" class="ghost">{{ t('nowplaying.hass.remove') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('nowplaying.spotify') }}</h2>
+  <p class="hint">{{ t('nowplaying.spotify.hint') }}</p>
+  <p class="status">
+    {% if spotify.connected %}
+      {% if spotify.account %}{{ t('nowplaying.spotify.connected', name=spotify.account) }}
+      {% else %}{{ t('nowplaying.spotify.connected.anon') }}{% endif %}
+    {% else %}{{ t('nowplaying.spotify.notconnected') }}{% endif %}
+    {% if spotify.error %} — <code>{{ spotify.error }}</code>{% endif %}
+  </p>
+
+  <form method="post" action="{{ url_for('api_spotify') }}">
+    <label class="check">
+      <input type="checkbox" name="enabled" {{ 'checked' if cfg.spotify.enabled }}>
+      {{ t('nowplaying.spotify.enabled') }}
+    </label>
+    <div class="row3">
+      <div><label for="client_id_sp">{{ t('nowplaying.spotify.client_id') }}</label>
+        <input type="text" id="client_id_sp" name="client_id"
+               value="{{ cfg.spotify.client_id }}" autocomplete="off"></div>
+      <div><label for="redirect_uri">{{ t('nowplaying.spotify.redirect') }}</label>
+        <input type="text" id="redirect_uri" name="redirect_uri"
+               value="{{ cfg.spotify.redirect_uri }}"></div>
+      <div><label for="poll_interval">{{ t('nowplaying.spotify.poll') }}</label>
+        <input type="number" id="poll_interval" name="poll_interval" min="3" max="300"
+               value="{{ cfg.spotify.poll_interval }}"></div>
+    </div>
+    <p class="hint">{{ t('nowplaying.spotify.redirect.hint') }}</p>
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+
+  <h3>{{ t('nowplaying.spotify.steps') }}</h3>
+  <ol class="hint">
+    <li>{{ t('nowplaying.spotify.step1') }}</li>
+    <li>{{ t('nowplaying.spotify.step2') }}</li>
+    <li>{{ t('nowplaying.spotify.step3') }}</li>
+    <li>{{ t('nowplaying.spotify.step4') }}</li>
+  </ol>
+
+  <form method="post" action="{{ url_for('api_spotify_authorize') }}">
+    <button type="submit" class="ghost">{{ t('nowplaying.spotify.authorize') }}</button>
+  </form>
+
+  {% if authorize_url %}
+  <p class="hint">{{ t('nowplaying.spotify.open') }}</p>
+  <p><a href="{{ authorize_url }}" target="_blank" rel="noopener"
+        class="mono break">{{ authorize_url }}</a></p>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('api_spotify_complete') }}">
+    <label for="pasted">{{ t('nowplaying.spotify.paste') }}</label>
+    <input type="text" id="pasted" name="pasted" autocomplete="off"
+           placeholder="http://127.0.0.1:8080/api/spotify/callback?code=...">
+    <button type="submit">{{ t('nowplaying.spotify.complete') }}</button>
+  </form>
+
+  {% if spotify.connected %}
+  <form method="post" action="{{ url_for('api_spotify_disconnect') }}">
+    <button type="submit" class="ghost">{{ t('nowplaying.spotify.disconnect') }}</button>
+  </form>
+  {% endif %}
+  <p class="hint">{{ t('nowplaying.spotify.tokens.hint') }}</p>
+</section>
+
+<form method="post" action="{{ url_for('api_nowplaying') }}">
+  <section class="card">
+    <h2>{{ t('nowplaying.appearance') }}</h2>
+
+    <div class="row3">
+      <div><label for="title_color">{{ t('nowplaying.color.title') }}</label>
+        <div class="color-row">
+          <input type="color" id="title_color" name="title_color"
+                 value="{{ cfg.nowplaying.title_color }}">
+          <span class="mono">{{ cfg.nowplaying.title_color }}</span>
+        </div></div>
+      <div><label for="artist_color">{{ t('nowplaying.color.artist') }}</label>
+        <div class="color-row">
+          <input type="color" id="artist_color" name="artist_color"
+                 value="{{ cfg.nowplaying.artist_color }}">
+          <span class="mono">{{ cfg.nowplaying.artist_color }}</span>
+        </div></div>
+      <div><label for="album_color">{{ t('nowplaying.color.album') }}</label>
+        <div class="color-row">
+          <input type="color" id="album_color" name="album_color"
+                 value="{{ cfg.nowplaying.album_color }}">
+          <span class="mono">{{ cfg.nowplaying.album_color }}</span>
+        </div></div>
+    </div>
+
+    <div class="row3">
+      <div><label for="bar_color">{{ t('nowplaying.color.bar') }}</label>
+        <div class="color-row">
+          <input type="color" id="bar_color" name="bar_color"
+                 value="{{ cfg.nowplaying.bar_color }}">
+          <span class="mono">{{ cfg.nowplaying.bar_color }}</span>
+        </div></div>
+      <div><label for="hold_seconds">{{ t('nowplaying.hold') }}</label>
+        <input type="number" id="hold_seconds" name="hold_seconds" min="5" max="3600"
+               value="{{ cfg.nowplaying.hold_seconds }}"></div>
+    </div>
+    <p class="hint">{{ t('nowplaying.hold.hint') }}</p>
+
+    <label class="check">
+      <input type="checkbox" name="safe_colors"
+             {{ 'checked' if cfg.nowplaying.safe_colors }}>
+      {{ t('nowplaying.safe_colors') }}
+    </label>
+    <p class="hint">{{ t('nowplaying.safe_colors.hint') }}</p>
+    <p class="hint">{{ t('nowplaying.nocover') }}</p>
+
+    <button type="submit">{{ t('common.save') }}</button>
+  </section>
+</form>
+
+{% endblock %}

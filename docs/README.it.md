@@ -1,4 +1,4 @@
-# DMD Controller 1.5.2
+# DMD Controller 1.10
 
 Servizio unico che possiede il pannello LED (256x64, FM6373) e lo condivide fra
 più sorgenti di contenuto, con interfaccia web di controllo.
@@ -159,6 +159,8 @@ stesso servizio e un arbitro sceglie chi vince:
 |---|---|
 | 100 | ZeDMD |
 | 60 | Air Radar |
+| 58 | Now Playing |
+| 55 | Rolling Banner |
 | 50 | Media Player |
 | 10 | Clock |
 
@@ -181,7 +183,12 @@ di Batocera (menu, caricamenti); alzalo se vedi passaggi indesiderati.
 /opt/dmd/dmdconf.py       configurazione persistente
 /opt/dmd/webui.py         Flask: pagine + endpoint del protocollo ZeDMD
 /opt/dmd/sources/         sorgenti di contenuto
+/opt/dmd/mqttbus.py       client MQTT condiviso (ingresso metadati, uscita HA)
+/opt/dmd/nowplaying.py    stato del brano corrente, indipendente dalla sorgente
+/opt/dmd/spotifyapi.py    API web di Spotify (OAuth con PKCE)
+/opt/dmd/hass.py          entità di Home Assistant via MQTT Discovery
 /etc/dmd/config.json      configurazione
+/var/lib/dmd/spotify.json token di Spotify, permessi 0600, fuori dall'export
 ```
 
 Aggiungere un servizio significa scrivere una nuova sorgente in `sources/`,
@@ -259,6 +266,17 @@ copiare così com'è.
 | 1.5 | Aggiornamento via rete da GitHub, con verifica preventiva e ripristino automatico |
 | 1.5.1 | Corretta la ricerca della rotta: era subordinata a una seconda casella, ora rimossa |
 | 1.5.2 | Rotte dal servizio routeset di adsb.lol, in blocco e con codici IATA; prova diagnostica |
+| 1.6 | Elenco della libreria media tenuto in memoria invece di rileggere il disco a ogni contenuto |
+| 1.7 | Interfaccia web in italiano e inglese, lingua rilevata dal browser, link al progetto |
+| 1.7.1 | Un errore della web UI non ferma più il servizio: il pannello resta acceso |
+| 1.7.2 | Impronte md5 di tutti i file e verifica automatica prima e dopo la copia |
+| 1.8 | Esportazione e importazione della configurazione, con esclusione delle coordinate |
+| 1.9 | Rolling banner (dieci testi scorrevoli) e controllo aggiornamenti della libreria matrice |
+| 1.9.1 | L'aggiornamento installa i file dichiarati dall'archivio scaricato, non quelli del codice già installato |
+| 1.9.2 | Controllo della libreria anche quando la cartella appartiene all'utente e il servizio gira come root |
+| 1.9.3 | "Ora e sincronizzazione" spostato nella pagina Orologio |
+| 1.9.4 | Durata del bit minimo e bit con dithering: alzano il refresh senza perdere profondità PWM |
+| 1.10 | Now Playing: brano in ascolto da AirPlay 2, Spotify o MQTT; entità in Home Assistant |
 
 
 ---
@@ -334,3 +352,98 @@ staccato: deve sopravvivere al riavvio del servizio che lo ha avviato.
 
 La configurazione in `/etc/dmd/config.json` non viene mai toccata, e il diario
 delle operazioni resta in `/var/lib/dmd/ota.log`, consultabile dalla web UI.
+
+---
+
+## Now Playing
+
+Il pannello mostra che cosa stai ascoltando: titolo, artista, album, stato e
+avanzamento del brano. Il DMD non riproduce audio e non si mette fra la
+musica e le casse — si limita ad ascoltare i metadati.
+
+### Come arrivano i metadati
+
+**AirPlay 2.** `shairport-sync` gira sul Raspberry e si presenta in rete come
+una cassa AirPlay. L'audio finisce nella scheda fittizia `snd_dummy` (che ha
+un orologio vero, a differenza di `/dev/null`), i metadati escono su MQTT. Al
+ricevitore AirPlay non importa quale applicazione stia suonando: Apple Music,
+Spotify, Amazon Music e YouTube funzionano tutte allo stesso modo, senza
+niente da configurare per ciascuna.
+
+**Spotify.** Copre la musica che *non* passa da AirPlay: Spotify Connect
+verso casse vere, il computer, un Echo. Autenticazione OAuth con PKCE, senza
+segreto dell'applicazione; i token stanno in `/var/lib/dmd/spotify.json` con
+permessi `0600` e non compaiono mai in una configurazione esportata.
+
+**Topic MQTT libero.** Qualsiasi altra cosa può pubblicare un JSON con
+`title`, `artist`, `album`, `duration`, `position` e `playing` — sono
+accettati anche i nomi di Home Assistant (`media_title`, `media_artist`, …).
+È il modo di coprire un HomePod avviato a voce o un Echo, che il DMD non
+vedrebbe altrimenti.
+
+Quando più sorgenti hanno qualcosa da dire comanda AirPlay: se sta arrivando
+un flusso audio qui, quello è ciò che si sta ascoltando. A parità, vince chi
+suona su chi è in pausa.
+
+### Senza Home Assistant
+
+Il broker predefinito è `127.0.0.1`, cioè un Mosquitto installato sul
+Raspberry stesso. Home Assistant è una possibilità, non un requisito.
+
+### Con Home Assistant
+
+Con `mqtt.discovery` attivo il DMD si presenta da solo via MQTT Discovery. In
+Home Assistant compare un dispositivo con il brano corrente (titolo come
+stato, il resto come attributi), un interruttore per ogni servizio e la
+luminosità come `number`. Sono comandabili, non solo leggibili. Le entità
+sono legate al testamento MQTT: se il servizio si ferma diventano *non
+disponibili* invece di restare congelate.
+
+Quando Home Assistant riparte non serve sorvegliarlo, e il DMD non ha bisogno
+di sapere dove sia: le dichiarazioni sono pubblicate con `retain`, quindi il
+broker le riconsegna a chi si iscrive dopo, e in più Home Assistant pubblica
+`online` su `homeassistant/status` all'avvio — il DMD è iscritto a quel topic
+e si ridichiara, con un ritardo casuale per non sommare la propria risposta a
+quella di tutti gli altri dispositivi della casa. La pagina Musica ha
+comunque un pulsante per ridichiarare a mano e uno per rimuovere le entità.
+
+### La posizione nel brano
+
+AirPlay manda `prgr` — tre timestamp RTP a 44100 Hz — solo al cambio di
+traccia e dopo un salto; Spotify risponde solo quando lo si interroga. Fra un
+aggiornamento e l'altro il tempo lo conta il DMD, ripartendo dall'ultimo
+valore certo. Il conteggio usa `time.monotonic()` e non l'orologio di
+sistema: una correzione NTP non deve far saltare la barra.
+
+### Perché non c'è la copertina
+
+A 64 pixel di lato sarebbe illeggibile, ma soprattutto è fatta quasi solo di
+mezzi toni — il contenuto peggiore possibile per un pannello S-PWM a refresh
+basso. Per la stessa ragione il testo si disegna **senza antialiasing**
+(le sfumature dei bordi sono anch'esse mezzi toni) e, con l'opzione *Solo
+colori pieni*, in otto soli colori saturi: la gerarchia fra le righe si
+ottiene cambiando tinta invece che luminosità.
+
+### Installazione
+
+Dalla cartella del pacchetto scompattato:
+
+```bash
+sudo ./setup_nowplaying.sh
+```
+
+Chiede il nome della cassa e dove sta il broker, poi fa tutto: Mosquitto,
+dipendenze, `nqptp`, `shairport-sync` compilato con AirPlay 2 e metadati,
+scheda audio fittizia, file di configurazione, confinamento ai core 0-2 e
+sezione MQTT del DMD. Ripetibile: salta i passi già fatti, compresa la
+compilazione. `--verifica` controlla lo stato senza toccare niente.
+
+Sta a parte da `install.sh` per la stessa ragione di `setup_share.sh`: è
+facoltativo, e la sola compilazione porta via un quarto d'ora.
+
+### Dipendenze
+
+`python3-paho-mqtt`. Se manca, la pagina Musica lo dice e Now Playing resta
+spento; il resto del DMD non se ne accorge.
+
+Guida completa, anche per farlo a mano: `docs/now-playing.it.md`.

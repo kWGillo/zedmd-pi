@@ -51,6 +51,18 @@ driver, A/B/C address lines only) chained to 256×64.
   community ADS-B APIs (adsb.fi, adsb.one, adsb.lol — free, no key). Selectable
   flight fields, origin/destination lookup, and a downloadable CSV log of every
   pass.
+- **Rolling banner** — up to ten scrolling texts, each with its own colour,
+  size, speed and blinking, appearing at random intervals.
+- **Now playing** — title, artist, album and progress of whatever you are
+  listening to. The Pi runs `shairport-sync` and appears on the network as an
+  AirPlay 2 speaker that throws the audio away and keeps only the metadata, so
+  any app on an iPhone, iPad or Mac works — Apple Music, Spotify, Amazon
+  Music, YouTube alike. Spotify Connect playing elsewhere is covered through
+  Spotify's own API, and anything else through a free MQTT topic. See
+  [Now playing](#now-playing).
+- **Home Assistant** — the DMD announces itself over MQTT Discovery: current
+  track, a switch per service and brightness, all controllable. Entirely
+  optional; the default broker is a local Mosquitto.
 - **Night mode / Sleep mode** — scheduled dimming and scheduled blackout.
 - **Over-the-air updates** — checks this repository, verifies the archive
   before installing, and rolls back automatically if the service does not come
@@ -260,6 +272,8 @@ service and an arbiter decides who owns the display.
 |---|---|
 | 100 | ZeDMD |
 | 60 | Air radar |
+| 58 | Now playing |
+| 55 | Rolling banner |
 | 50 | Media player |
 | 10 | Clock |
 
@@ -278,7 +292,11 @@ zedmd_http.py  ZeDMD handshake server (port 80)
 webui.py       Flask web interface (port 8080)
 ota.py         over-the-air update from this repository
 i18n.py        English/Italian strings for the web interface
-sources/       zedmd.py, airradar.py, media.py, clock.py
+mqttbus.py     shared MQTT client: metadata in, Home Assistant entities out
+nowplaying.py  current-track state, independent of where it came from
+spotifyapi.py  Spotify Web API, OAuth with PKCE
+hass.py        Home Assistant entities over MQTT Discovery
+sources/       zedmd.py, airradar.py, media.py, banner.py, nowplaying.py, clock.py
 ```
 
 Adding a language means adding a column to the tuples in `i18n.py` and a code
@@ -317,6 +335,110 @@ blaming the CPU.
 
 ---
 
+## Now playing
+
+The panel shows what you are listening to: title, artist, album, playing or
+paused, and how far into the track you are. The DMD plays no audio and never
+sits between the music and your speakers — it only listens for the metadata.
+
+### Where the metadata comes from
+
+**AirPlay 2.** `shairport-sync` runs on the Pi and advertises itself as an
+AirPlay speaker. The audio goes into the kernel's `snd_dummy` card — which
+has a real clock, unlike `/dev/null` or ALSA's `null` plugin, and that
+difference is what keeps a multi-room group in sync — while the metadata goes
+out over MQTT. The AirPlay receiver does not care which app is playing, so
+Apple Music, Spotify, Amazon Music and YouTube all work with nothing to
+configure per app.
+
+**Spotify.** Covers music that does *not* go through AirPlay: Spotify Connect
+to real speakers, a computer, an Echo. OAuth with PKCE, so no application
+secret is stored; tokens live in `/var/lib/dmd/spotify.json` with mode `0600`
+and never appear in an exported configuration.
+
+**A free MQTT topic.** Anything else can publish a JSON with `title`,
+`artist`, `album`, `duration`, `position` and `playing` — Home Assistant's own
+names (`media_title`, `media_artist`, …) are accepted too. This is how you
+cover a HomePod started by voice or an Echo, which the DMD cannot see on its
+own.
+
+When several sources have something to say, AirPlay wins: if an audio stream
+is arriving here, that is what is being listened to. Otherwise a playing
+source beats a paused one.
+
+### Passive sniffing does not work, and cannot
+
+AirPlay 2 encrypts the stream end to end with keys derived from pairing. A
+port mirror shows you device names in mDNS and nothing else. Being a paired
+endpoint is the supported way to read the metadata, and that is what this is.
+
+### Without Home Assistant
+
+The default broker is `127.0.0.1` — a Mosquitto on the Pi itself. Home
+Assistant is an option, not a requirement.
+
+### With Home Assistant
+
+With `mqtt.discovery` on, the DMD announces itself. A device appears carrying
+the current track (title as the state, the rest as attributes), a switch per
+service and brightness as a `number`. They are controllable, not just
+readable. Everything is tied to the MQTT will, so if the service stops the
+entities go *unavailable* instead of freezing on a value that looks live.
+
+Nothing watches Home Assistant, and the DMD never needs to know where it is.
+Discovery is published retained, so the broker replays it to whoever
+subscribes later; and Home Assistant publishes `online` to
+`homeassistant/status` when it starts, which the DMD subscribes to and treats
+as the trigger to re-declare — after a random delay, so every MQTT device in
+the house does not answer the same announcement in the same instant. The
+Music page also has a manual re-declare button and one to remove the
+entities.
+
+### Track position
+
+AirPlay sends `prgr` — three RTP timestamps at 44100 Hz — only on track
+change and after a seek; Spotify answers only when polled. Between updates the
+DMD counts the time itself from the last known-good value, using
+`time.monotonic()` rather than the system clock: an NTP correction must not
+make the progress bar jump.
+
+### No album artwork, on purpose
+
+At 64 pixels it would be unreadable, but more importantly it is made almost
+entirely of mid-tones — the worst possible content for an S-PWM panel at a low
+refresh rate. For the same reason the text is drawn **without antialiasing**
+(edge shading is mid-tones too) and, with *fully saturated colours only*, in
+eight colours: hierarchy between lines comes from changing hue rather than
+brightness. See [Timing](#timing-or-why-white-lines-appear).
+
+### Installation
+
+From the unpacked package directory:
+
+```bash
+sudo ./setup_nowplaying.sh
+```
+
+It asks for the speaker name and where the broker is, then does the rest:
+Mosquitto, build dependencies, `nqptp`, `shairport-sync` built with AirPlay 2
+and metadata, the dummy sound card, the configuration file, confinement to
+cores 0-2 so core 3 stays with the panel, and the DMD's own MQTT section. It
+is re-runnable and skips whatever is already done — including the fifteen
+minute build. `--verifica` reports the state without changing anything.
+
+It sits apart from `install.sh` for the same reason `setup_share.sh` does: it
+is optional, and the build alone takes a quarter of an hour.
+
+### Dependency
+
+`python3-paho-mqtt`. If it is missing, the Music page says so and Now playing
+stays off; the rest of the DMD does not notice.
+
+Full setup guide, including doing it by hand (in Italian):
+[`docs/now-playing.it.md`](docs/now-playing.it.md).
+
+---
+
 ## Credits
 
 - [hzeller/rpi-rgb-led-matrix](https://github.com/hzeller/rpi-rgb-led-matrix) — the LED matrix library
@@ -333,6 +455,10 @@ blaming the CPU.
 - [`docs/zedmd-wifi.it.md`](docs/zedmd-wifi.it.md) — connecting a ZeDMD-WiFi
   client (Batocera, Visual Pinball) to the display, and the Pi's own Wi-Fi.
   Also available as [PDF](docs/DMD_zedmd_wifi.pdf).
+- [`docs/now-playing.it.md`](docs/now-playing.it.md) — installing
+  shairport-sync, nqptp and Mosquitto, linking Spotify, and wiring the whole
+  thing into Home Assistant. Also available as
+  [PDF](docs/DMD_now_playing.pdf).
 - [`docs/README.it.md`](docs/README.it.md) — service documentation
 - [`docs/pubblicazione.it.md`](docs/pubblicazione.it.md) — release procedure
 

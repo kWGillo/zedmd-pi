@@ -35,7 +35,8 @@ fi
 echo "==> Installazione pacchetti di sistema"
 apt update
 apt install -y python3 python3-pip python3-dev python3-numpy python3-pil \
-               python3-flask cython3 fonts-dejavu-core tzdata ffmpeg samba samba-common-bin
+               python3-flask python3-paho-mqtt cython3 fonts-dejavu-core \
+               tzdata ffmpeg samba samba-common-bin
 
 echo "==> Compilazione dei binding Python della libreria matrice"
 cd "$MATRIX_DIR"

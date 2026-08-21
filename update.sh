@@ -74,6 +74,28 @@ cfg.setdefault("panel", {}).setdefault("library_dir", "")
 cfg.setdefault("panel", {}).setdefault("pwm_lsb_nanoseconds", 130)
 cfg["panel"].setdefault("pwm_dither_bits", 0)
 
+# 1.10: Now Playing, bus MQTT, Spotify. Il broker predefinito e' locale,
+# cosi' la funzione lavora anche senza Home Assistant.
+if "nowplaying" not in services:
+    services["nowplaying"] = False
+    print("    servizi: aggiunto Now Playing")
+for section, values in (
+    ("mqtt", {"enabled": False, "host": "127.0.0.1", "port": 1883,
+              "username": "", "password": "", "client_id": "dmd",
+              "base_topic": "dmd", "shairport_topic": "shairport",
+              "external_topic": "dmd/external/nowplaying",
+              "discovery": True, "discovery_prefix": "homeassistant",
+              "node_id": "dmd", "device_name": "DMD Controller"}),
+    ("nowplaying", {"hold_seconds": 90, "title_color": "#ffffff",
+                    "artist_color": "#00ffff", "album_color": "#0000ff",
+                    "bar_color": "#ffff00", "safe_colors": True}),
+    ("spotify", {"enabled": False, "client_id": "", "poll_interval": 8,
+                 "redirect_uri": "http://127.0.0.1:8080/api/spotify/callback"}),
+):
+    branch = cfg.setdefault(section, {})
+    for key, value in values.items():
+        branch.setdefault(key, value)
+
 with open(path, "w") as handle:
     json.dump(cfg, handle, indent=2)
 print("    configurazione aggiornata")
@@ -83,6 +105,9 @@ echo "==> Dipendenze per il Media Player"
 MISSING=""
 command -v ffmpeg >/dev/null 2>&1 || MISSING="$MISSING ffmpeg"
 command -v smbd  >/dev/null 2>&1 || MISSING="$MISSING samba samba-common-bin"
+# 1.10: libreria MQTT. Se manca, Now Playing resta spento e la sua pagina lo
+# dice: il resto del DMD non se ne accorge nemmeno.
+python3 -c "import paho.mqtt.client" >/dev/null 2>&1 || MISSING="$MISSING python3-paho-mqtt"
 if [ -n "$MISSING" ]; then
     echo "    da installare:$MISSING"
     apt update

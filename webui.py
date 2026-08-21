@@ -17,7 +17,9 @@ from werkzeug.utils import secure_filename
 import dmdconf
 import i18n
 import libcheck
+import nowplaying
 import ota
+import spotifyapi
 from sources import (FIELD_LIST, LANGUAGES, PROVIDER_LIST, SIZE_KEYS, SLOTS,
                      invalidate_scan, is_supported, normalize_list, scan_media,
                      have_ffmpeg, usable)
@@ -146,6 +148,10 @@ def create_app(runtime):
         except (TypeError, ValueError):
             return i18n.translate("common.never", current_language())
 
+    @app.template_filter("mmss")
+    def _mmss(value):
+        return nowplaying.format_time(value)
+
     # ------------------------------------------------------------ protocollo ZeDMD
     # Serviti anche qui per poterli provare con curl sulla porta 8080;
     # il client reale usa il server dedicato sulla porta 80.
@@ -224,6 +230,17 @@ def create_app(runtime):
             active=len(usable(cfg["banner"]["items"])),
             status=runtime.banner.status(current_language()), page="banner")
 
+    @app.route("/nowplaying")
+    def page_nowplaying():
+        return render_template(
+            "nowplaying.html", cfg=cfg,
+            track=runtime.nowplaying.snapshot(),
+            mqtt=runtime.mqtt.status(),
+            spotify=runtime.spotify.status(),
+            authorize_url=request.args.get("authorize", ""),
+            result=request.args.get("result", ""),
+            status=runtime.player.status(current_language()), page="nowplaying")
+
     @app.route("/radar")
     def page_radar():
         return render_template("radar.html", cfg=cfg, providers=PROVIDER_LIST,
@@ -242,6 +259,8 @@ def create_app(runtime):
              "status": runtime.media.status(lang)},
             {"key": "banner", "label": "Rolling Banner", "ready": True,
              "status": runtime.banner.status(lang)},
+            {"key": "nowplaying", "label": "Now Playing", "ready": True,
+             "status": runtime.player.status(lang)},
             {"key": "clock", "label": "Clock", "ready": True,
              "status": runtime.clock.status(lang)},
             {"key": "status_player", "label": "Status Player", "ready": False,
@@ -462,6 +481,136 @@ def create_app(runtime):
         runtime.banner.trigger_now()
         return redirect(url_for("page_banner"))
 
+    # ------------------------------------------------------------- now playing
+
+    @app.route("/api/mqtt", methods=["POST"])
+    def api_mqtt():
+        conf = cfg["mqtt"]
+        conf["enabled"] = request.form.get("enabled") == "on"
+        conf["discovery"] = request.form.get("discovery") == "on"
+        for key, default in (("host", "127.0.0.1"), ("username", ""),
+                             ("password", ""), ("client_id", "dmd"),
+                             ("base_topic", "dmd"),
+                             ("shairport_topic", "shairport"),
+                             ("external_topic", ""),
+                             ("discovery_prefix", "homeassistant"),
+                             ("node_id", "dmd"),
+                             ("device_name", "DMD Controller")):
+            conf[key] = request.form.get(key, default).strip()
+        try:
+            conf["port"] = max(1, min(65535, int(request.form.get("port", 1883))))
+        except ValueError:
+            conf["port"] = 1883
+        # Un topic di base vuoto produrrebbe percorsi che iniziano con "/":
+        # meglio riportarlo al valore predefinito che pubblicare a vuoto.
+        conf["base_topic"] = conf["base_topic"] or "dmd"
+        dmdconf.save()
+        runtime.reconnect_mqtt()
+        return redirect(url_for("page_nowplaying"))
+
+    @app.route("/api/hass/announce", methods=["POST"])
+    def api_hass_announce():
+        # Via d'uscita manuale. Normalmente non serve: le dichiarazioni sono
+        # ritenute dal broker e Home Assistant, quando riparte, annuncia la
+        # propria presenza e il DMD si ridichiara da solo.
+        ok = runtime.hass.reannounce()
+        return _hass_result("nowplaying.hass.announced" if ok
+                            else "nowplaying.hass.disabled")
+
+    @app.route("/api/hass/remove", methods=["POST"])
+    def api_hass_remove():
+        runtime.hass.remove()
+        return _hass_result("nowplaying.hass.removed")
+
+    def _hass_result(key):
+        return redirect(url_for("page_nowplaying", result=i18n.translate(
+            key, current_language())))
+
+    @app.route("/api/nowplaying", methods=["POST"])
+    def api_nowplaying():
+        conf = cfg["nowplaying"]
+        for key in ("title_color", "artist_color", "album_color", "bar_color"):
+            conf[key] = request.form.get(key, conf[key]).strip()
+        try:
+            conf["hold_seconds"] = max(5, min(3600,
+                int(request.form.get("hold_seconds", 90))))
+        except ValueError:
+            conf["hold_seconds"] = 90
+        conf["safe_colors"] = request.form.get("safe_colors") == "on"
+        dmdconf.save()
+        runtime.player.invalidate()
+        return redirect(url_for("page_nowplaying"))
+
+    @app.route("/api/nowplaying/test", methods=["POST"])
+    def api_nowplaying_test():
+        # Un brano finto con una durata plausibile e una scadenza breve: si
+        # vede subito com'e' fatto il player, senza dover far partire musica.
+        runtime.nowplaying.update(
+            "external", title="Bohemian Rhapsody", artist="Queen",
+            album="A Night at the Opera", duration=355.0, position=167.0,
+            playing=True, active=True, client="test", expires=60)
+        runtime.player.invalidate()
+        return redirect(url_for("page_nowplaying"))
+
+    # ------------------------------------------------------------------ spotify
+
+    @app.route("/api/spotify", methods=["POST"])
+    def api_spotify():
+        conf = cfg["spotify"]
+        conf["enabled"] = request.form.get("enabled") == "on"
+        conf["client_id"] = request.form.get("client_id", "").strip()
+        conf["redirect_uri"] = (request.form.get("redirect_uri", "").strip()
+                                or spotifyapi.DEFAULT_REDIRECT)
+        try:
+            conf["poll_interval"] = max(3, min(300,
+                int(request.form.get("poll_interval", 8))))
+        except ValueError:
+            conf["poll_interval"] = 8
+        dmdconf.save()
+        runtime.spotify.poll_now()
+        return redirect(url_for("page_nowplaying"))
+
+    @app.route("/api/spotify/authorize", methods=["POST"])
+    def api_spotify_authorize():
+        lang = current_language()
+        try:
+            target = spotifyapi.authorize_url(cfg)
+        except ValueError as exc:
+            return redirect(url_for("page_nowplaying", result=i18n.translate(
+                "nowplaying.spotify.failed", lang, error=str(exc))))
+        return redirect(url_for("page_nowplaying", authorize=target))
+
+    @app.route("/api/spotify/complete", methods=["POST"])
+    def api_spotify_complete():
+        return _spotify_exchange(request.form.get("pasted", ""))
+
+    @app.route("/api/spotify/callback")
+    def api_spotify_callback():
+        # Raggiungibile solo se qualcuno riesce davvero ad arrivare qui; il
+        # percorso normale resta l'indirizzo incollato a mano.
+        if request.args.get("error"):
+            return _spotify_result("nowplaying.spotify.failed",
+                                   error=request.args["error"])
+        return _spotify_exchange(request.url)
+
+    def _spotify_exchange(pasted):
+        try:
+            spotifyapi.complete(cfg, pasted)
+        except Exception as exc:
+            return _spotify_result("nowplaying.spotify.failed", error=str(exc))
+        runtime.spotify.poll_now()
+        return _spotify_result("nowplaying.spotify.ok")
+
+    @app.route("/api/spotify/disconnect", methods=["POST"])
+    def api_spotify_disconnect():
+        spotifyapi.disconnect()
+        runtime.nowplaying.clear("spotify")
+        return _spotify_result("nowplaying.spotify.gone")
+
+    def _spotify_result(key, **values):
+        return redirect(url_for("page_nowplaying", result=i18n.translate(
+            key, current_language(), **values)))
+
     # ------------------------------------------------------- libreria del pannello
 
     @app.route("/api/library/check", methods=["POST"])
@@ -632,6 +781,8 @@ def create_app(runtime):
             media=runtime.media.status(lang),
             banner=runtime.banner.status(lang),
             radar=runtime.radar.status(lang),
+            nowplaying=runtime.nowplaying.snapshot(),
+            mqtt=runtime.mqtt.status(),
             time=time.strftime("%H:%M:%S"),
             update=runtime.update_info,
         )

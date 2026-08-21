@@ -6,11 +6,14 @@ from .base import Source
 from .clock import ClockSource, DAY_NAMES, LANGUAGES, parse_color
 from .media import (MediaPlayerSource, cached_count, invalidate_scan,
                     scan_media, walk_media, is_supported, have_ffmpeg)
+from .nowplaying import (NowPlayingSource, DEFAULT_COLORS, draw_text,
+                         snap_color, text_width)
 from .zedmd import ZeDMDSource
 
 __all__ = [
     "Source", "ClockSource", "MediaPlayerSource", "ZeDMDSource", "AirRadarSource",
-    "BannerSource", "SIZES", "SIZE_KEYS", "SLOTS", "default_banner",
+    "BannerSource", "NowPlayingSource", "SIZES", "SIZE_KEYS", "SLOTS",
+    "default_banner", "DEFAULT_COLORS", "draw_text", "snap_color", "text_width",
     "default_list", "normalize", "normalize_list", "usable",
     "DAY_NAMES", "LANGUAGES", "PROVIDER_LIST", "FIELD_LIST", "CSV_COLUMNS",
     "parse_color", "haversine_km",

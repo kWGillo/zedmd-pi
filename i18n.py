@@ -35,6 +35,7 @@ STRINGS = {
     "nav.clock": ("Orologio", "Clock"),
     "nav.media": ("Media", "Media"),
     "nav.banner": ("Banner", "Banner"),
+    "nav.nowplaying": ("Musica", "Music"),
     "nav.radar": ("Radar", "Radar"),
     "nav.services": ("Servizi", "Services"),
     "nav.language": ("Lingua", "Language"),
@@ -88,6 +89,11 @@ STRINGS = {
                            "%(provider)s: %(count)d aircraft within %(radius).1f km"),
     "status.radar.routes": ("rotte trovate %(found)d, non disponibili %(missing)d",
                             "routes found %(found)d, unavailable %(missing)d"),
+    "status.nowplaying.idle": ("nessun brano in riproduzione", "nothing playing"),
+    "status.nowplaying.playing": ("%(title)s — %(artist)s (da %(source)s)",
+                                  "%(title)s — %(artist)s (from %(source)s)"),
+    "status.nowplaying.paused": ("in pausa: %(title)s — %(artist)s",
+                                 "paused: %(title)s — %(artist)s"),
 
     # -------------------------------------------------------------- impostazioni
     "settings.brightness": ("Luminosità", "Brightness"),
@@ -431,6 +437,255 @@ STRINGS = {
         "The banner outranks the Media Player but stays below Air Radar and "
         "ZeDMD: it never appears during a game on Batocera."),
 
+    # --------------------------------------------------------------- now playing
+    "nowplaying.title": ("Now Playing", "Now Playing"),
+    "nowplaying.intro": (
+        "Il DMD mostra che cosa stai ascoltando: titolo, artista, album, stato "
+        "e avanzamento del brano. Non riproduce audio e non si mette in mezzo "
+        "fra la musica e le casse: si limita ad ascoltare i metadati.",
+        "The DMD shows what you are listening to: title, artist, album, state "
+        "and progress. It plays no audio and never sits between the music and "
+        "your speakers: it only listens for the metadata."),
+    "nowplaying.coverage.title": ("Che cosa viene rilevato", "What gets picked up"),
+    "nowplaying.coverage.airplay": (
+        "Tutto quello che parte da un iPhone, un iPad o un Mac via AirPlay, "
+        "purché il DMD sia selezionato fra le casse. Non conta l'applicazione: "
+        "Apple Music, Spotify, Amazon Music, YouTube funzionano allo stesso modo.",
+        "Anything sent from an iPhone, iPad or Mac over AirPlay, as long as the "
+        "DMD is selected among the speakers. The app does not matter: Apple "
+        "Music, Spotify, Amazon Music and YouTube all work the same way."),
+    "nowplaying.coverage.spotify": (
+        "Spotify anche quando non passa da AirPlay: casse Connect, computer, "
+        "Echo. Lo stato arriva direttamente da Spotify.",
+        "Spotify even when it does not go through AirPlay: Connect speakers, "
+        "computers, Echo devices. The state comes straight from Spotify."),
+    "nowplaying.coverage.external": (
+        "Qualunque altra cosa, tramite un JSON pubblicato su MQTT da "
+        "un'automazione di Home Assistant.",
+        "Anything else, through a JSON message published to MQTT by a Home "
+        "Assistant automation."),
+    "nowplaying.coverage.gap": (
+        "Resta fuori la musica che nasce e muore su un altro apparecchio senza "
+        "passare di qui: un HomePod a cui chiedi un brano a voce, o Amazon "
+        "Music su un Echo. Per quelli serve Home Assistant, che li legge e "
+        "ripubblica sul topic esterno qui sotto.",
+        "What stays out is music that starts and ends on another device "
+        "without passing through here: a HomePod asked by voice, or Amazon "
+        "Music on an Echo. Those need Home Assistant, which can read them and "
+        "republish to the external topic below."),
+    "nowplaying.priority.hint": (
+        "Mentre suona qualcosa il player resta a schermo al posto di foto e "
+        "banner, ma lascia passare Air Radar e si toglie di mezzo appena "
+        "arrivano frame da Batocera.",
+        "While something is playing the player stays on screen instead of "
+        "photos and banners, but it lets Air Radar through and steps aside as "
+        "soon as frames arrive from Batocera."),
+    "nowplaying.current": ("In riproduzione adesso", "Playing now"),
+    "nowplaying.nothing": ("Niente in riproduzione.", "Nothing playing."),
+    "nowplaying.source": ("Sorgente", "Source"),
+    "nowplaying.device": ("Dispositivo", "Device"),
+    "nowplaying.test": ("Prova senza musica", "Try it without music"),
+    "nowplaying.test.hint": (
+        "Mette un brano finto nello stato del player, per vedere subito come "
+        "viene sul pannello senza dover far partire nulla. Sparisce da solo.",
+        "Puts a fake track into the player state, so you can see how it looks "
+        "on the panel without starting anything. It clears itself."),
+    "nowplaying.test.button": ("Mostra un brano di prova", "Show a test track"),
+
+    "nowplaying.broker": ("Broker MQTT", "MQTT broker"),
+    "nowplaying.broker.hint": (
+        "I metadati di AirPlay arrivano qui passando da un broker MQTT. Il "
+        "valore predefinito è un Mosquitto installato sul Raspberry stesso: "
+        "così la funzione lavora da sola, senza Home Assistant. Se hai già un "
+        "broker sotto Home Assistant, scrivi quel suo indirizzo e ottieni le "
+        "due cose insieme.",
+        "AirPlay metadata reaches the DMD through an MQTT broker. The default "
+        "is a Mosquitto running on the Raspberry Pi itself, so the feature "
+        "works on its own without Home Assistant. If you already run a broker "
+        "under Home Assistant, put its address here and get both at once."),
+    "nowplaying.mqtt.enabled": ("Collega il DMD al broker",
+                                "Connect the DMD to the broker"),
+    "nowplaying.mqtt.host": ("Indirizzo", "Address"),
+    "nowplaying.mqtt.username": ("Utente", "Username"),
+    "nowplaying.mqtt.password": ("Password", "Password"),
+    "nowplaying.mqtt.password.hint": (
+        "La password non finisce mai in un file di configurazione esportato: "
+        "viene tolta all'esportazione e va riscritta dopo un'importazione.",
+        "The password never ends up in an exported configuration file: it is "
+        "stripped on export and must be typed again after an import."),
+    "nowplaying.mqtt.client_id": ("Nome del client", "Client name"),
+    "nowplaying.mqtt.base_topic": ("Topic di base del DMD", "DMD base topic"),
+    "nowplaying.mqtt.shairport": ("Topic di shairport-sync", "shairport-sync topic"),
+    "nowplaying.mqtt.shairport.hint": (
+        "Lo stesso valore scritto in `mqtt.topic` dentro "
+        "/etc/shairport-sync.conf. Il DMD si iscrive a tutto quello che ci sta "
+        "sotto.",
+        "The same value set as `mqtt.topic` in /etc/shairport-sync.conf. The "
+        "DMD subscribes to everything below it."),
+    "nowplaying.mqtt.external": ("Topic esterno", "External topic"),
+    "nowplaying.mqtt.external.hint": (
+        "Topic facoltativo su cui qualsiasi cosa può pubblicare un JSON con "
+        "title, artist, album, duration, position e playing. Serve a coprire "
+        "gli apparecchi che il DMD non vede da solo. Lascialo vuoto per non "
+        "ascoltare nulla.",
+        "Optional topic where anything can publish a JSON with title, artist, "
+        "album, duration, position and playing. It covers devices the DMD "
+        "cannot see by itself. Leave it empty to listen to nothing."),
+    "nowplaying.mqtt.missing": (
+        "La libreria MQTT non è installata. Sul Raspberry: "
+        "sudo apt install %(package)s",
+        "The MQTT library is not installed. On the Raspberry Pi: "
+        "sudo apt install %(package)s"),
+    "nowplaying.mqtt.state": ("Stato", "State"),
+    "nowplaying.mqtt.connected": ("connesso a %(host)s:%(port)s",
+                                  "connected to %(host)s:%(port)s"),
+    "nowplaying.mqtt.disconnected": ("non connesso", "not connected"),
+    "nowplaying.mqtt.off": ("disattivato", "disabled"),
+    "nowplaying.mqtt.messages": ("%(count)d messaggi ricevuti",
+                                 "%(count)d messages received"),
+    "nowplaying.mqtt.apply": ("Salva e riconnetti", "Save and reconnect"),
+
+    "nowplaying.hass": ("Home Assistant", "Home Assistant"),
+    "nowplaying.hass.enabled": ("Crea le entità automaticamente",
+                                "Create the entities automatically"),
+    "nowplaying.hass.hint": (
+        "Il DMD si presenta da solo a Home Assistant tramite MQTT Discovery. "
+        "Compare un dispositivo con il brano in riproduzione, un interruttore "
+        "per ogni servizio e la luminosità, tutti comandabili. Se Home "
+        "Assistant non c'è, questi messaggi non li legge nessuno e non "
+        "cambia niente.",
+        "The DMD announces itself to Home Assistant through MQTT Discovery. A "
+        "device appears with the current track, a switch for every service and "
+        "the brightness, all controllable. If Home Assistant is not there, "
+        "nobody reads those messages and nothing changes."),
+    "nowplaying.hass.birth": (
+        "Non serve sorvegliare Home Assistant: quando riparte lo annuncia da "
+        "solo sul topic %(topic)s, e il DMD si ridichiara. In più le "
+        "dichiarazioni restano depositate sul broker, che le riconsegna a chi "
+        "si collega dopo. I due pulsanti qui sotto servono solo come "
+        "scorciatoia manuale.",
+        "There is no need to watch Home Assistant: when it restarts it "
+        "announces itself on %(topic)s and the DMD re-declares. On top of "
+        "that the declarations stay on the broker, which hands them to "
+        "whoever subscribes later. The two buttons below are just a manual "
+        "shortcut."),
+    "nowplaying.hass.announce": ("Ridichiara le entità", "Re-declare the entities"),
+    "nowplaying.hass.announced": ("Entità ridichiarate.", "Entities re-declared."),
+    "nowplaying.hass.disabled": (
+        "Non ho ridichiarato nulla: il broker o la creazione automatica sono "
+        "disattivati.",
+        "Nothing was re-declared: the broker or the automatic creation is "
+        "disabled."),
+    "nowplaying.hass.remove": ("Rimuovi le entità", "Remove the entities"),
+    "nowplaying.hass.removed": (
+        "Entità rimosse da Home Assistant.", "Entities removed from Home Assistant."),
+    "nowplaying.hass.remove.hint": (
+        "Cancella il dispositivo da Home Assistant. Da usare se cambi "
+        "identificativo o se smetti di usare l'integrazione: senza, le "
+        "vecchie entità resterebbero depositate sul broker come fantasmi.",
+        "Deletes the device from Home Assistant. Use it if you change the "
+        "device id or stop using the integration: without it the old entities "
+        "would stay on the broker as ghosts."),
+    "nowplaying.hass.prefix": ("Prefisso discovery", "Discovery prefix"),
+    "nowplaying.hass.node": ("Identificativo del dispositivo", "Device id"),
+    "nowplaying.hass.device": ("Nome mostrato", "Displayed name"),
+
+    "nowplaying.spotify": ("Spotify", "Spotify"),
+    "nowplaying.spotify.hint": (
+        "Serve solo per la musica che non passa da AirPlay. Se ascolti "
+        "Spotify dall'iPhone mandandolo al DMD come cassa, questa sezione "
+        "puoi lasciarla spenta.",
+        "This is only for music that does not go through AirPlay. If you play "
+        "Spotify from your iPhone and send it to the DMD as a speaker, you can "
+        "leave this section off."),
+    "nowplaying.spotify.enabled": ("Interroga Spotify", "Poll Spotify"),
+    "nowplaying.spotify.client_id": ("Client ID", "Client ID"),
+    "nowplaying.spotify.redirect": ("Indirizzo di ritorno", "Redirect URI"),
+    "nowplaying.spotify.redirect.hint": (
+        "Va registrato identico nella tua applicazione su Spotify. Deve "
+        "restare un indirizzo di loopback: Spotify non accetta più http su un "
+        "indirizzo di rete.",
+        "It must be registered exactly like this in your Spotify application. "
+        "Keep it a loopback address: Spotify no longer accepts plain http on a "
+        "network address."),
+    "nowplaying.spotify.poll": ("Ogni quanti secondi", "Poll every (s)"),
+    "nowplaying.spotify.steps": ("Come si collega", "How to link it"),
+    "nowplaying.spotify.step1": (
+        "Su developer.spotify.com crea un'applicazione e copia qui il suo "
+        "Client ID. Il segreto non serve.",
+        "On developer.spotify.com create an application and copy its Client ID "
+        "here. The secret is not needed."),
+    "nowplaying.spotify.step2": (
+        "Nella stessa applicazione aggiungi l'indirizzo di ritorno qui sopra, "
+        "scritto identico.",
+        "In the same application add the redirect URI above, written exactly "
+        "the same."),
+    "nowplaying.spotify.step3": (
+        "Salva, poi premi il pulsante qui sotto e apri l'indirizzo dal browser "
+        "di un computer qualsiasi.",
+        "Save, then press the button below and open the address in the browser "
+        "of any computer."),
+    "nowplaying.spotify.step4": (
+        "Dopo aver autorizzato, la pagina non si aprirà: è previsto. Copia "
+        "l'intero indirizzo dalla barra del browser e incollalo qui.",
+        "After authorising, the page will not load: that is expected. Copy the "
+        "whole address from the browser bar and paste it here."),
+    "nowplaying.spotify.authorize": ("Genera l'indirizzo di autorizzazione",
+                                     "Generate the authorisation address"),
+    "nowplaying.spotify.open": ("Apri questo indirizzo nel browser",
+                                "Open this address in your browser"),
+    "nowplaying.spotify.paste": ("Indirizzo o codice di ritorno",
+                                 "Returned address or code"),
+    "nowplaying.spotify.complete": ("Collega l'account", "Link the account"),
+    "nowplaying.spotify.connected": ("account collegato: %(name)s",
+                                     "account linked: %(name)s"),
+    "nowplaying.spotify.connected.anon": ("account collegato", "account linked"),
+    "nowplaying.spotify.notconnected": ("account non collegato",
+                                        "account not linked"),
+    "nowplaying.spotify.disconnect": ("Scollega l'account", "Unlink the account"),
+    "nowplaying.spotify.tokens.hint": (
+        "I token restano in /var/lib/dmd/spotify.json, leggibile solo da root, "
+        "e non finiscono mai nel file di configurazione esportato.",
+        "The tokens live in /var/lib/dmd/spotify.json, readable only by root, "
+        "and never end up in an exported configuration file."),
+    "nowplaying.spotify.ok": ("Account collegato.", "Account linked."),
+    "nowplaying.spotify.failed": ("Collegamento non riuscito: %(error)s",
+                                  "Linking failed: %(error)s"),
+    "nowplaying.spotify.gone": ("Account scollegato.", "Account unlinked."),
+
+    "nowplaying.appearance": ("Aspetto sul pannello", "Panel appearance"),
+    "nowplaying.color.title": ("Titolo", "Title"),
+    "nowplaying.color.artist": ("Artista", "Artist"),
+    "nowplaying.color.album": ("Album", "Album"),
+    "nowplaying.color.bar": ("Barra di avanzamento", "Progress bar"),
+    "nowplaying.safe_colors": ("Solo colori pieni", "Fully saturated colours only"),
+    "nowplaying.safe_colors.hint": (
+        "Porta ogni componente a 0 o 255, lasciando otto colori in tutto. Sono "
+        "gli stessi otto di una PNG a palette, gli unici che su questo "
+        "pannello non tremolano: le intensità intermedie sono la causa dello "
+        "sfarfallio, non il numero di colori. La differenza fra le righe si "
+        "ottiene cambiando tinta invece che luminosità.",
+        "Rounds every channel to 0 or 255, leaving eight colours in total. "
+        "They are the same eight as a palette PNG, the only ones that do not "
+        "flicker on this panel: intermediate intensities cause the flicker, "
+        "not the number of colours. The hierarchy between lines comes from "
+        "changing hue rather than brightness."),
+    "nowplaying.hold": ("Permanenza in pausa (s)", "Hold when paused (s)"),
+    "nowplaying.hold.hint": (
+        "Quanto resta a schermo un brano messo in pausa prima di restituire il "
+        "display. Un brano in riproduzione non scade mai da solo.",
+        "How long a paused track stays on screen before handing the display "
+        "back. A playing track never expires on its own."),
+    "nowplaying.nocover": (
+        "La copertina dell'album non viene mostrata di proposito: a 64 pixel "
+        "sarebbe illeggibile, ed essendo fatta quasi solo di mezzi toni "
+        "sarebbe il contenuto peggiore possibile per questo pannello.",
+        "Album artwork is deliberately not shown: at 64 pixels it would be "
+        "unreadable, and being made almost entirely of mid-tones it would be "
+        "the worst possible content for this panel."),
+    "nowplaying.panel.playing": ("in riproduzione", "playing"),
+    "nowplaying.panel.paused": ("in pausa", "paused"),
+
     # --------------------------------------------------------------------- radar
     "radar.title": ("Air Radar", "Air Radar"),
     "radar.nocoords": (
@@ -571,6 +826,9 @@ STRINGS = {
                             "Clock and date, the fallback source when nothing else is on."),
     "services.desc.banner": ("Testi scorrevoli a intervalli casuali, fino a dieci.",
                              "Scrolling texts at random intervals, up to ten."),
+    "services.desc.nowplaying": (
+        "Titolo, artista e avanzamento del brano in ascolto, da AirPlay o Spotify.",
+        "Title, artist and progress of the current track, from AirPlay or Spotify."),
     "services.desc.status_player": ("Notifiche sui giochi avviati dagli amici su Batocera.",
                                     "Notifications about games your friends launch on Batocera."),
     "services.desc.air_radar": ("Aerei in transito entro un raggio dalla posizione indicata.",

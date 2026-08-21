@@ -18,11 +18,15 @@ import threading
 import time
 
 import dmdconf
+import hass
 import libcheck
+import mqttbus
+import nowplaying
 import ota
+import spotifyapi
 from display import Display
 from sources import (AirRadarSource, BannerSource, ClockSource,
-                     MediaPlayerSource, ZeDMDSource)
+                     MediaPlayerSource, NowPlayingSource, ZeDMDSource)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -108,9 +112,22 @@ class Runtime:
         self.radar = AirRadarSource(self.cfg, self.display.width, self.display.height)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
-        for source in (self.zedmd, self.radar, self.banner, self.media, self.clock):
+        # Il brano corrente e chi lo disegna sono due cose distinte: lo stato
+        # viene aggiornato anche a servizio spento, cosi' Home Assistant lo
+        # vede lo stesso e accendendo il player non si parte da zero.
+        self.nowplaying = nowplaying.NowPlaying(self.cfg)
+        self.player = NowPlayingSource(self.cfg, self.display.width,
+                                       self.display.height, self.nowplaying)
+        self.mqtt = mqttbus.MqttBus(self.cfg)
+        self.spotify = spotifyapi.SpotifyPoller(self.cfg, self.nowplaying)
+        self.hass = hass.HassBridge(self.cfg, self.mqtt, self)
+
+        for source in (self.zedmd, self.radar, self.player, self.banner,
+                       self.media, self.clock):
             self.arbiter.register(source)
         self.arbiter.apply_services()
+
+        self._start_audio()
 
         # Handshake ZeDMD sulla porta 80: server dedicato, non Flask.
         self.zedmd_http = ZeDMDHttpServer(
@@ -134,6 +151,52 @@ class Runtime:
         self._applied_brightness = None
         self.sleeping = False
         self.night = False
+
+    # ------------------------------------------------------------------ musica
+
+    def _start_audio(self):
+        """Collega il bus MQTT, le sottoscrizioni e il poller di Spotify.
+
+        Tutto avvolto: un broker irraggiungibile o una libreria mancante non
+        devono impedire al pannello di accendersi. E' la stessa lezione della
+        1.7.1 sull'interfaccia web, applicata a un accessorio in piu'.
+        """
+        try:
+            self._subscribe_audio()
+            if self.mqtt.start():
+                self.hass.start()
+        except Exception:
+            import traceback
+            print("[dmd] ATTENZIONE: MQTT non avviato", flush=True)
+            traceback.print_exc()
+        try:
+            self.spotify.start()
+        except Exception as exc:
+            print("[dmd] Spotify non avviato: %s" % exc)
+
+    def _subscribe_audio(self):
+        conf = self.cfg.get("mqtt") or {}
+        shairport = str(conf.get("shairport_topic") or "").strip("/")
+        if shairport:
+            self.mqtt.subscribe("%s/#" % shairport,
+                                self.nowplaying.handle_shairport)
+        external = str(conf.get("external_topic") or "").strip("/")
+        if external:
+            self.mqtt.subscribe(external, self.nowplaying.handle_external)
+
+    def reconnect_mqtt(self):
+        """Riapre la connessione dopo un cambio di impostazioni dalla web UI."""
+        try:
+            self.mqtt.stop()
+            self.mqtt._handlers = []
+            self._subscribe_audio()
+            if self.mqtt.start():
+                self.hass.start()
+            self.player.invalidate()
+            return True
+        except Exception as exc:
+            print("[mqtt] riconnessione fallita: %s" % exc)
+            return False
 
     # ------------------------------------------------------------------ aggiornamenti
 
@@ -265,10 +328,11 @@ class Runtime:
         if not self.running:
             return
         self.running = False
-        try:
-            self.zedmd_http.stop()
-        except Exception:
-            pass
+        for closing in (self.zedmd_http, self.spotify, self.hass, self.mqtt):
+            try:
+                closing.stop()
+            except Exception:
+                pass
         for source in self.arbiter.sources.values():
             try:
                 source.stop()

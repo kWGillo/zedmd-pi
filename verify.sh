@@ -60,7 +60,7 @@ if [ $bad -gt 0 ] || [ $missing -gt 0 ]; then
     echo "I file elencati sopra non corrispondono all'originale."
     echo "Ritrasferisci il pacchetto e riprova. Se l'errore si ripresenta,"
     echo "su file diversi a ogni tentativo, il problema e' la scheda SD o"
-    echo "l'alimentazione: vedi la sezione 11 del manuale."
+    echo "l'alimentazione: vedi la sezione 15 del manuale."
     exit 1
 fi
 

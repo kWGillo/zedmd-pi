@@ -2,6 +2,103 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.10]
+
+### Aggiunto
+- **Now Playing**: il pannello mostra titolo, artista, album, stato e
+  avanzamento del brano in ascolto. Nuova pagina **Musica** nella web UI e
+  nuovo servizio attivabile dalla pagina Servizi.
+- **Ingresso AirPlay 2** tramite `shairport-sync`: il Raspberry si presenta in
+  rete come una cassa AirPlay, scarta l'audio e tiene i metadati. Al ricevitore
+  non importa quale applicazione stia suonando, quindi Apple Music, Spotify,
+  Amazon Music e YouTube funzionano tutte senza configurazioni per ciascuna.
+- **Ingresso Spotify** tramite l'API web, per la musica che non passa da
+  AirPlay: Spotify Connect verso casse vere, computer, Echo. Autenticazione
+  OAuth con PKCE, senza segreto dell'applicazione.
+- **Ingresso MQTT libero**: qualsiasi cosa può pubblicare un JSON con titolo,
+  artista, album, durata, posizione e stato. Sono accettati anche i nomi usati
+  da Home Assistant. Serve a coprire un HomePod avviato a voce o un Echo.
+- **Entità in Home Assistant** via MQTT Discovery: sensore del brano corrente,
+  un interruttore per ogni servizio e la luminosità come `number`, tutti
+  comandabili. Disponibilità legata al testamento MQTT.
+- `mqttbus.py`, `nowplaying.py`, `spotifyapi.py`, `hass.py`,
+  `sources/nowplaying.py`, `templates/nowplaying.html`.
+- **`setup_nowplaying.sh`**: prepara il sistema da solo — Mosquitto,
+  dipendenze, `nqptp`, `shairport-sync` compilato con AirPlay 2 e metadati,
+  scheda audio fittizia, configurazione e confinamento ai core 0-2. La guida
+  richiedeva 132 righe di comandi digitati a mano, di cui i dieci flag di
+  `./configure` e le venti righe di `shairport-sync.conf` erano anche le più
+  fragili: un refuso lì non dà errore, dà un sistema che non funziona senza
+  dire perché. Sta a parte da `install.sh` come `setup_share.sh`, perché è
+  facoltativo e la compilazione porta via un quarto d'ora. È ripetibile,
+  salta i passi già fatti, riconosce il pacchetto della distribuzione che
+  altrimenti si sovrapporrebbe alla compilazione, e in chiusura resta in
+  ascolto del broker per dire se i metadati arrivano davvero.
+- Il DMD si ridichiara a Home Assistant quando questa riparta: HA pubblica
+  `online` su `homeassistant/status` e il DMD è iscritto a quel topic. Con un
+  ritardo casuale, come raccomanda la loro documentazione, per non sommare la
+  propria risposta a quella di tutti gli altri dispositivi della casa. Due
+  pulsanti nella pagina Musica per ridichiarare e per rimuovere le entità.
+- Guida completa in `docs/now-playing.it.md` (e PDF).
+
+### Modificato
+- La **password del broker MQTT** viene tolta da ogni configurazione
+  esportata, senza opzione. Un file di configurazione gira: finisce in un
+  backup, in un allegato, in una segnalazione.
+- Nuova priorità nell'arbitro: Now Playing sta a **58**, sopra Rolling Banner
+  e Media Player, sotto Air Radar e ZeDMD. Mentre suona musica il player resta
+  a schermo al posto delle foto, ma un aereo di passaggio può interromperlo e
+  durante una partita comanda il flipper.
+- `install.sh` e `update.sh` installano `python3-paho-mqtt`.
+- Il manuale completo ha una nuova sezione 12, fra Batocera e Aggiornamenti,
+  che rimanda allo script e al documento dedicato. Le sezioni successive
+  scalano di uno. Il rimando dentro `verify.sh` puntava alla sezione
+  sbagliata già da prima: corretto.
+
+### Corretto
+- Il ponte verso Home Assistant dichiarava le entità solo *alla* connessione
+  MQTT. Se il bus era già connesso quando il ponte partiva, quell'evento era
+  passato e non sarebbe tornato: Home Assistant non vedeva mai il
+  dispositivo. Capitava di più proprio con il broker predefinito, quello
+  locale, perché è il più veloce a connettersi.
+- Salvare le impostazioni MQTT ricostruiva il bus azzerando le sottoscrizioni,
+  ma `hass.start()` usciva subito perché il thread era già in corsa e non le
+  rimetteva: da quel momento gli interruttori di Home Assistant smettevano di
+  rispondere fino al riavvio del servizio.
+
+### Perché il player si disegna così
+Il testo del player si compone **senza antialiasing** e, di serie, con soli
+colori pieni. Non è una scelta estetica: PIL sfuma i bordi delle lettere, e
+ogni sfumatura è un pixel a intensità intermedia — esattamente ciò che su un
+pannello S-PWM a refresh basso produce lo sfarfallio, mentre i colori saturi
+restano fermi. La maschera del testo viene quindi ridotta a due soli livelli,
+e con `safe_colors` ogni componente va a 0 o 255.
+
+Per la stessa ragione **non c'è la copertina dell'album**: a 64 pixel sarebbe
+illeggibile, ed essendo fatta quasi solo di mezzi toni significherebbe tenere
+in permanenza sullo schermo il contenuto peggiore possibile per questo
+pannello.
+
+Il font a larghezza fissa della riga dei tempi è quello di Liberation e non
+quello di DejaVu: ridotto a due livelli a quella dimensione, il monospace di
+DejaVu disegna la cifra `1` come una parentesi quadra e `13:31` si legge
+`]3:3]`.
+
+### Note tecniche
+- La posizione nel brano non arriva di continuo: AirPlay manda `prgr` al
+  cambio di traccia e dopo un salto, Spotify risponde solo quando lo si
+  interroga. Fra un aggiornamento e l'altro il tempo lo conta il DMD, con
+  `time.monotonic()` e non con l'orologio di sistema — una correzione NTP non
+  deve far saltare la barra di avanzamento.
+- L'audio di `shairport-sync` va indirizzato alla scheda fittizia del kernel
+  (`snd_dummy`) e **non** a `/dev/null` né al plugin `null` di ALSA: quelli
+  non limitano il ritmo e farebbero perdere il riferimento temporale, che in
+  un gruppo multi-room fa singhiozzare tutte le casse, non solo quella finta.
+- `paho-mqtt` è una dipendenza facoltativa: se manca, la pagina Musica lo dice
+  e il servizio resta spento, senza impedire l'avvio del resto.
+- I token di Spotify vivono in `/var/lib/dmd/spotify.json` con permessi
+  `0600`, fuori dalla configurazione.
+
 ## [1.9.4]
 
 ### Aggiunto

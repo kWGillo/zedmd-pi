@@ -99,6 +99,49 @@ DEFAULTS = {
         "callsign_color": "#00d0ff",
         "info_color": "#ff8c1a",
     },
+    "mqtt": {
+        # Predefinito: un Mosquitto sul Raspberry stesso. Cosi' la funzione
+        # lavora senza Home Assistant. Chi ha gia' un broker sotto Home
+        # Assistant mette qui quell'indirizzo e ottiene le due cose insieme.
+        "enabled": False,
+        "host": "127.0.0.1",
+        "port": 1883,
+        "username": "",
+        "password": "",
+        "client_id": "dmd",
+        "base_topic": "dmd",
+        # Topic su cui shairport-sync pubblica i metadati AirPlay.
+        "shairport_topic": "shairport",
+        # Topic facoltativo su cui qualsiasi altra cosa (tipicamente
+        # un'automazione di Home Assistant) puo' scrivere un JSON con il
+        # brano corrente. Vuoto = non si ascolta nulla.
+        "external_topic": "dmd/external/nowplaying",
+        # Entita' create automaticamente in Home Assistant.
+        "discovery": True,
+        "discovery_prefix": "homeassistant",
+        "node_id": "dmd",
+        "device_name": "DMD Controller",
+    },
+    "nowplaying": {
+        # Quanto resta a schermo un brano in pausa prima di lasciare il posto.
+        "hold_seconds": 90,
+        "title_color": "#ffffff",
+        "artist_color": "#00ffff",
+        "album_color": "#0000ff",
+        "bar_color": "#ffff00",
+        # Ogni componente portata a 0 o 255: restano gli otto colori pieni,
+        # gli unici che su questo pannello non producono sfarfallio.
+        "safe_colors": True,
+    },
+    "spotify": {
+        # Copre la musica che non passa da AirPlay: Spotify Connect verso
+        # casse vere, il computer, un Echo. I token non stanno qui ma in
+        # /var/lib/dmd/spotify.json, per non finire in un export condiviso.
+        "enabled": False,
+        "client_id": "",
+        "redirect_uri": "http://127.0.0.1:8080/api/spotify/callback",
+        "poll_interval": 8,
+    },
     "time": {
         "ntp_server": "pool.ntp.org",
         "timezone": "Europe/Rome",
@@ -123,6 +166,7 @@ DEFAULTS = {
         "clock": True,
         "mediaplayer": False,
         "banner": False,
+        "nowplaying": False,
         "status_player": False,
         "air_radar": False,
     },
@@ -157,7 +201,7 @@ def _merge(base, override):
 
 def _migrate(raw):
     """Adegua configurazioni scritte da versioni precedenti."""
-    services = raw.get("services", {})
+    services = raw.setdefault("services", {})
     # 1.0 aveva un unico servizio "mediaplayer_clock".
     if "mediaplayer_clock" in services:
         legacy = bool(services.pop("mediaplayer_clock"))
@@ -173,6 +217,11 @@ def _migrate(raw):
     from sources.banner import normalize_list
     banner = raw.setdefault("banner", {})
     banner["items"] = normalize_list(banner.get("items"))
+
+    # 1.10: il servizio Now Playing deve comparire fra i toggle anche in una
+    # configurazione salvata prima che esistesse, altrimenti la pagina Servizi
+    # non lo mostra e non lo si puo' accendere.
+    services.setdefault("nowplaying", False)
     return raw
 
 
@@ -248,12 +297,20 @@ def snapshot(include_position=True):
     Senza `include_position` le coordinate del radar tornano a zero: un file
     di configurazione condiviso o allegato a una segnalazione non deve
     portarsi dietro l'indirizzo di casa.
+
+    La password del broker MQTT viene tolta sempre, senza opzione. Un file di
+    configurazione gira: finisce in un backup, in un allegato, in una
+    segnalazione. Chi lo reimporta riscrive la password una volta sola; se
+    invece fosse dentro, basterebbe una disattenzione per regalarla. I token
+    di Spotify non compaiono qui affatto: vivono in un file loro.
     """
     import copy
     data = copy.deepcopy(load())
     if not include_position:
         data["air_radar"]["latitude"] = 0.0
         data["air_radar"]["longitude"] = 0.0
+    if isinstance(data.get("mqtt"), dict):
+        data["mqtt"]["password"] = ""
     return data
 
 

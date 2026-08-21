@@ -30,13 +30,14 @@ da Raspberry Pi Imager. In tutto il documento l'utente è `gillo` e l'hostname
 9. Configurazione iniziale
 10. Avvio e interfaccia web
 11. Collegamento a Batocera
-12. Aggiornamenti
-13. Installazione resistente all'usura
-14. Righe bianche, rallentamenti e blocchi
-15. Risoluzione problemi
-16. Comandi utili e struttura dei file
-17. Appendice A — diagnostica del pannello
-18. Appendice B — pubblicare una nuova versione su GitHub
+12. Musica: il brano in ascolto sul pannello
+13. Aggiornamenti
+14. Installazione resistente all'usura
+15. Righe bianche, rallentamenti e blocchi
+16. Risoluzione problemi
+17. Comandi utili e struttura dei file
+18. Appendice A — diagnostica del pannello
+19. Appendice B — pubblicare una nuova versione su GitHub
 
 ---
 
@@ -87,7 +88,7 @@ Prima di procedere, una raccomandazione che nasce da un guasto reale: usa una
 scheda della linea **high endurance** (SanDisk High Endurance o Max Endurance,
 Samsung PRO Endurance). Le sigle V10, V30, A1 e "100 MB/s" misurano la
 velocità, non la durata, e un Raspberry acceso sempre logora una scheda comune
-nel giro di mesi. Bastano 32 GB. La sezione 13 spiega come ridurre l'usura.
+nel giro di mesi. Bastano 32 GB. La sezione 14 spiega come ridurre l'usura.
 
 ---
 
@@ -539,7 +540,71 @@ non riesce ad aprire lo stream: verifica che `zedmd.http_port` sia 80 e
 
 ---
 
-## 12. Aggiornamenti
+## 12. Musica: il brano in ascolto sul pannello
+
+Funzione facoltativa, da fare solo quando il resto funziona. Il Raspberry
+diventa una cassa AirPlay che non suona: compare fra i dispositivi audio
+dell'iPhone, accetta il flusso, scarta l'audio e tiene i metadati. Sul
+pannello compaiono titolo, artista, album e avanzamento del brano. Quello che
+esce dalle casse vere non cambia.
+
+Siccome al ricevitore AirPlay non importa quale applicazione stia suonando,
+funzionano allo stesso modo Apple Music, Spotify, Amazon Music e YouTube,
+senza niente da configurare per ciascuna. Spotify Connect verso casse vere è
+coperto a parte, tramite l'API di Spotify.
+
+### Perché sta qui e non prima
+
+Richiede di compilare `shairport-sync`, che sul Pi 4 porta via un quarto
+d'ora, e di installare un broker MQTT. Nessuna di queste cose serve ad avere
+un pannello funzionante: se il DMD non è ancora a posto, torna alla sezione 10
+e occupati prima di quello.
+
+### Come si fa
+
+Dalla cartella del pacchetto scompattato, la stessa da cui hai lanciato
+`update.sh`:
+
+```bash
+sudo ./setup_nowplaying.sh
+```
+
+Chiede quattro cose — il nome con cui comparire fra le casse, e dove sta il
+broker MQTT (lascia vuoto per installarne uno qui) — e fa tutto il resto:
+Mosquitto, le dipendenze, `nqptp`, `shairport-sync` compilato con AirPlay 2 e
+i metadati, la scheda audio fittizia, il file di configurazione, il
+confinamento ai core 0-2 per non disturbare il pannello, e la sezione MQTT
+del DMD. In chiusura resta trenta secondi in ascolto: metti musica dal
+telefono e ti dice se i metadati arrivano davvero.
+
+Lo script è ripetibile. Se una cosa è già fatta lo dice e passa oltre — in
+particolare, se `shairport-sync` è già compilato a dovere salta del tutto il
+quarto d'ora di compilazione. Per controllare lo stato senza toccare niente:
+
+```bash
+sudo ./setup_nowplaying.sh --verifica
+```
+
+### Che cosa resta da fare a mano
+
+- Sul telefono, scegliere il DMD fra le casse: nessuno può farlo al posto tuo.
+- Collegare l'account Spotify, se ti serve: richiede un browser e
+  un'applicazione registrata su `developer.spotify.com`. Si fa dalla pagina
+  **Musica** dell'interfaccia web.
+- Le automazioni di Home Assistant, se vuoi coprire anche un HomePod avviato a
+  voce o un Echo — cioè i casi in cui la musica non attraversa il DMD.
+
+### Documentazione dedicata
+
+Tutto il resto — che cosa fa lo script passo per passo, la configurazione di
+Home Assistant, la procedura per Spotify, e una tabella di diagnosi quando i
+metadati non arrivano — sta in **`docs/now-playing.it.md`**, disponibile anche
+come PDF. Sono le pagine da aprire se qualcosa non torna; per l'installazione
+normale bastano i due comandi qui sopra.
+
+---
+
+## 13. Aggiornamenti
 
 ### 12.1 Il software DMD, dall'interfaccia web
 
@@ -648,7 +713,7 @@ sudo raspi-config nonint enable_overlayfs && sudo reboot
 
 ---
 
-## 13. Installazione resistente all'usura
+## 14. Installazione resistente all'usura
 
 Questa sezione nasce da un guasto reale: una scheda SD che ha cominciato ad
 accettare scritture e a restituire dati diversi. Nessun comando segnalava
@@ -749,7 +814,7 @@ senza, si ricomincia la campagna di prove sul pannello.
 
 ---
 
-## 14. Righe bianche, rallentamenti e blocchi
+## 15. Righe bianche, rallentamenti e blocchi
 
 Gli stessi sintomi hanno due cause diverse, da distinguere prima di cambiare
 hardware.
@@ -840,7 +905,7 @@ sudo systemctl start dmd
 
 ---
 
-## 15. Risoluzione problemi
+## 16. Risoluzione problemi
 
 ### 15.1 Pannello
 
@@ -875,7 +940,7 @@ sudo systemctl start dmd
 
 ---
 
-## 16. Comandi utili e struttura dei file
+## 17. Comandi utili e struttura dei file
 
 ```bash
 sudo systemctl start dmd        # avvia
@@ -910,7 +975,7 @@ cd ~/dmd && git pull            # scarica l'ultima versione
 
 ---
 
-## 17. Appendice A — diagnostica del pannello
+## 18. Appendice A — diagnostica del pannello
 
 Serve solo se il quadrato rotante di §7.2 non funziona, o se in futuro cambiano
 i pannelli.
@@ -1029,7 +1094,7 @@ una sola volta.**
 
 ---
 
-## 18. Appendice B — pubblicare una nuova versione su GitHub
+## 19. Appendice B — pubblicare una nuova versione su GitHub
 
 Da eseguire **sul Mac**, non sul Raspberry. Incolla **un comando alla volta**:
 quando un `cd` fallisce in una sequenza incollata tutta insieme, i comandi
@@ -1109,7 +1174,7 @@ Le volte successive `zedmd-pi-repo` resta sul Mac con il suo `.git`: bastano
 
 ---
 
-## 19. Riferimenti
+## 20. Riferimenti
 
 - Progetto: https://github.com/kWGillo/zedmd-pi
 - Fork con supporto S-PWM: https://github.com/kingdo9/rpi-rgb-led-matrix_pwm_experiment
