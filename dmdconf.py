@@ -25,6 +25,13 @@ DEFAULTS = {
         "spwm_register_config": 2,
         "limit_refresh": 60,
         "pwm_bits": 11,
+        # Durata del bit meno significativo. Accorciarla riduce il tempo di
+        # un frame intero, quindi alza il refresh senza togliere profondita'.
+        "pwm_lsb_nanoseconds": 130,
+        # Bit bassi resi con dithering temporale invece che con tempo di
+        # accensione: 1 bit di dithering raddoppia il refresh a parita' di
+        # profondita' dichiarata.
+        "pwm_dither_bits": 0,
         "profile_dir": "/home/gillo/rpi-rgb-led-matrix_pwm_experiment/lib/spwm/registertest/data",
         "show_refresh": False,
         # Cartella del fork della libreria matrice. Vuoto = dedotta da

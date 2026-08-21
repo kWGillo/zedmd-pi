@@ -120,6 +120,16 @@
                value="{{ cfg.panel.slowdown }}"></div>
     </div>
 
+    <div class="row2">
+      <div><label for="pwm_lsb_nanoseconds">{{ t('settings.panel.lsb') }}</label>
+        <input type="number" id="pwm_lsb_nanoseconds" name="pwm_lsb_nanoseconds"
+               min="50" max="3000" value="{{ cfg.panel.pwm_lsb_nanoseconds }}"></div>
+      <div><label for="pwm_dither_bits">{{ t('settings.panel.dither') }}</label>
+        <input type="number" id="pwm_dither_bits" name="pwm_dither_bits"
+               min="0" max="2" value="{{ cfg.panel.pwm_dither_bits }}"></div>
+    </div>
+    <p class="hint">{{ t('settings.panel.depth.hint') | safe }}</p>
+
     <label for="spwm_register_config">{{ t('settings.panel.profile') }}</label>
     <input type="number" id="spwm_register_config" name="spwm_register_config" min="0" max="77"
            value="{{ cfg.panel.spwm_register_config }}">

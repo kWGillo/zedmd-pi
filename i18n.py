@@ -148,7 +148,33 @@ STRINGS = {
     "settings.panel.sleep": ("Pausa tra frame (µs)", "Pause between frames (µs)"),
     "settings.panel.refresh": ("Refresh massimo (Hz)", "Maximum refresh (Hz)"),
     "settings.panel.pwm": ("Profondità PWM", "PWM depth"),
+    "settings.panel.lsb": ("Durata bit minimo (ns)", "Least significant bit (ns)"),
+    "settings.panel.dither": ("Bit con dithering", "Dithered bits"),
     "settings.panel.slowdown": ("Rallentamento GPIO", "GPIO slowdown"),
+    "settings.panel.depth.hint": (
+        "Se le immagini con mezzi toni tremolano mentre i colori pieni restano "
+        "fermi, il refresh reale è troppo basso: i pixel a intensità "
+        "intermedia vengono accesi e spenti a una frequenza che l'occhio "
+        "percepisce. Abbassare la <em>profondità PWM</em> risolve ma toglie "
+        "sfumature. Questi due campi alzano il refresh <strong>tenendo</strong> "
+        "la profondità: <em>durata bit minimo</em> accorcia ogni sotto-frame "
+        "(130 ns è il predefinito, 100 dà circa un terzo di refresh in più, "
+        "sotto gli 80 i toni scuri diventano imprecisi); <em>bit con "
+        "dithering</em> rende i bit più bassi alternandoli nel tempo invece "
+        "che con la durata — 1 bit raddoppia il refresh a parità di "
+        "profondità dichiarata, al prezzo di un po' di brulichio sulle "
+        "sfumature più fini.",
+        "If images with mid-tones shimmer while solid colours stay still, the "
+        "real refresh rate is too low: pixels at intermediate intensity are "
+        "switched on and off at a rate the eye can follow. Lowering the "
+        "<em>PWM depth</em> fixes it but costs shades. These two fields raise "
+        "the refresh while <strong>keeping</strong> the depth: <em>least "
+        "significant bit</em> shortens every sub-frame (130 ns is the "
+        "default, 100 gives about a third more refresh, below 80 dark tones "
+        "become inaccurate); <em>dithered bits</em> renders the lowest bits by "
+        "alternating them over time instead of by duration — 1 bit doubles the "
+        "refresh at the same nominal depth, at the cost of some shimmer on the "
+        "finest gradients."),
     "settings.panel.profile": ("Profilo di registro del chip", "Chip register profile"),
     "settings.panel.showrefresh": ("Scrivi il refresh rate nel log — utile durante la taratura",
                                    "Write the refresh rate to the log — useful while tuning"),

@@ -369,6 +369,8 @@ def create_app(runtime):
         panel = cfg["panel"]
         for key, low, high, default in (("limit_refresh", 0, 300, 60),
                                         ("pwm_bits", 1, 11, 11),
+                                        ("pwm_lsb_nanoseconds", 50, 3000, 130),
+                                        ("pwm_dither_bits", 0, 2, 0),
                                         ("slowdown", 0, 6, 3),
                                         ("spwm_register_config", 0, 77, 2)):
             try:

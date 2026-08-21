@@ -2,6 +2,33 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.9.4]
+
+### Aggiunto
+- Due campi nella **regolazione fine del pannello**, entrambi già presenti
+  nella libreria ma non esposti finora:
+  - **Durata bit minimo (ns)** — `pwm_lsb_nanoseconds`, predefinito 130.
+    Accorcia ogni sotto-frame, quindi accorcia il frame intero: a 100 ns si
+    guadagna circa un terzo di refresh. Sotto gli 80 ns gli impulsi più brevi
+    diventano troppo corti perché il pannello li renda con precisione, e i
+    toni scuri sbagliano.
+  - **Bit con dithering** — `pwm_dither_bits`, predefinito 0. Rende i bit più
+    bassi alternandoli nel tempo invece che con la durata di accensione: 1 bit
+    raddoppia il refresh a parità di profondità dichiarata, al prezzo di un
+    lieve brulichio sulle sfumature più fini.
+
+### Perché
+Su un pannello S-PWM le immagini con mezzi toni tremolavano mentre i colori
+pieni restavano fermi: un pixel a intensità intermedia viene acceso e spento a
+ciclo, e se il refresh reale è basso l'occhio lo segue. L'unico rimedio
+disponibile era abbassare la profondità PWM da 11 a 10 bit — che dimezza il
+tempo di frame e quindi raddoppia il refresh, ma costa metà delle sfumature.
+Queste due leve ottengono lo stesso guadagno di refresh **tenendo** la
+profondità.
+
+I valori predefiniti coincidono con quelli della libreria: chi non li tocca non
+vede alcun cambiamento.
+
 ## [1.9.3]
 
 ### Modificato

@@ -70,6 +70,10 @@ if "banner" not in services:
 cfg.setdefault("banner", {})
 cfg.setdefault("panel", {}).setdefault("library_dir", "")
 
+# 1.9.4: leve per alzare il refresh senza perdere profondita' di colore.
+cfg.setdefault("panel", {}).setdefault("pwm_lsb_nanoseconds", 130)
+cfg["panel"].setdefault("pwm_dither_bits", 0)
+
 with open(path, "w") as handle:
     json.dump(cfg, handle, indent=2)
 print("    configurazione aggiornata")

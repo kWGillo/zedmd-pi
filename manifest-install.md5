@@ -1,7 +1,7 @@
-64753aea9e75cd173fc4afa6135df22f  display.py
-653d5cad9799df9824d47f0b5e262181  dmdconf.py
+f9a19df7caa1b28f9cdebade3fd62905  display.py
+eee23b05645c96a34c1e22e4d43087a5  dmdconf.py
 9849b9b2c04f69aed4c037e84a824829  dmdd.py
-1354b4edb0cf002a480a432028fdeccd  i18n.py
+9dfda2d0575ce850813d151a87039153  i18n.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 051eee5dd30e347600da2a1ba665bee7  ota.py
 36588993e8e6eff9289a124bcd008e18  sources/__init__.py
@@ -18,7 +18,7 @@ e7cbc43ed729a6fc7f71dc5d266d5a98  templates/banner.html
 de9753df82063c2bfbc9bfb357776c37  templates/media.html
 106bbbc4f8dde513e3241f8c00545e25  templates/radar.html
 fc820c3435f5edea162ed83ce33fb964  templates/services.html
-aacc263fcb953dc18e75422b0c194234  templates/settings.html
-dfd0967d1a4594400dfca3e499cdd271  version.py
-4063fc1132284b729e398a211b67cdf5  webui.py
+8151f3bab9ae148c25a3fd7298f14479  templates/settings.html
+530841f31c3809c29d268419b9eb5bed  version.py
+2ab4497b72e49d1de4e58c1aa6a0f283  webui.py
 e7b708e4959cc839675a02d9ff481d81  zedmd_http.py

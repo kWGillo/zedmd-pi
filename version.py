@@ -52,6 +52,10 @@ Storico:
   1.9.3 Il riquadro "Ora e sincronizzazione" passa dalla pagina Impostazioni
         a quella dell'Orologio, sotto le impostazioni di aspetto: le due cose
         si regolano insieme.
+  1.9.4 Due leve nuove nella regolazione fine: durata del bit meno
+        significativo e bit resi con dithering temporale. Alzano il refresh
+        reale senza abbassare la profondita' PWM, che era l'unico rimedio
+        allo sfarfallio dei mezzi toni.
 """
 
-__version__ = "1.9.3"
+__version__ = "1.9.4"

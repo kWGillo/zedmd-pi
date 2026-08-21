@@ -42,6 +42,11 @@ class Display:
         options.spwm_register_config = panel["spwm_register_config"]
         options.limit_refresh_rate_hz = panel["limit_refresh"]
         options.pwm_bits = panel["pwm_bits"]
+        # Le due leve che permettono di tenere la profondita' alta senza
+        # pagarla in refresh. Assenti nelle configurazioni precedenti la
+        # 1.9.4, da cui i valori predefiniti della libreria.
+        options.pwm_lsb_nanoseconds = int(panel.get("pwm_lsb_nanoseconds", 130))
+        options.pwm_dither_bits = int(panel.get("pwm_dither_bits", 0))
         options.brightness = cfg["display"]["brightness"]
         options.show_refresh_rate = bool(panel.get("show_refresh", False))
         # Senza questo la libreria perde l'accesso al catalogo profili.
