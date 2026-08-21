@@ -104,6 +104,30 @@ Storico:
         fermo per la finestra di permanenza. Le sottoscrizioni non prendono
         piu' l'intero ramo: le copertine non attraversano piu' la rete per
         essere buttate.
+  1.10.7 L'applicazione si chiama kWGillo DMD Server. Il menu parte
+        dall'Orologio e finisce con le Impostazioni, che restano comunque la
+        pagina di ingresso.
+  1.11  Air Radar: due tabelle CSV modificabili traducono i codici in nomi
+        leggibili — designatori ICAO degli aeromobili e codici IATA degli
+        aeroporti. Un codice che non e' in tabella viene mostrato com'e', e
+        il sistema tiene il conto di quelli che incontra senza saper
+        tradurre, cosi' la pagina Radar dice che cosa conviene aggiungere per
+        primo. I file vivono in /var/lib/dmd e non vengono mai sovrascritti
+        dagli aggiornamenti.
+  1.11.1 Air Radar su tre fasce: identificativo, rotta al centro, dettagli in
+        basso. Fra il numero di volo e la riga dei dettagli restava una banda
+        vuota, e su una riga sola i nomi lunghi facevano scartare modello e
+        quota per far entrare tutto. Se la rotta tradotta non ci sta si
+        mostrano i codici, invece di tagliarla a meta'.
+  1.11.2 Le due tabelle di conversione arrivano anche con l'aggiornamento via
+        rete. Nella 1.11 erano in una sottocartella nuova, e l'aggiornamento
+        lo esegue il codice della versione precedente, che l'elenco dei file
+        lo legge dall'archivio ma le cartelle da copiare le ha cablate: la
+        cartella non veniva creata e le tabelle sarebbero rimaste vuote. Ora i
+        modelli stanno in cima all'installazione, dove il codice vecchio li
+        vede, e la scelta delle cartelle e' dichiarata dall'archivio come gia'
+        avviene per i file, cosi' la prossima cartella nuova non ripetera' la
+        storia. I file gia' presenti in /var/lib/dmd non vengono toccati.
 """
 
-__version__ = "1.10.6"
+__version__ = "1.11.2"

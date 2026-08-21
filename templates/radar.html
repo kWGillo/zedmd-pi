@@ -102,7 +102,14 @@
                  value="{{ cfg.air_radar.info_color }}">
           <span class="mono">{{ cfg.air_radar.info_color }}</span>
         </div></div>
+      <div><label for="route_color">{{ t('radar.route_color') }}</label>
+        <div class="color-row">
+          <input type="color" id="route_color" name="route_color"
+                 value="{{ cfg.air_radar.route_color or cfg.air_radar.info_color }}">
+          <span class="mono">{{ cfg.air_radar.route_color or t('common.default') }}</span>
+        </div></div>
     </div>
+    <p class="hint">{{ t('radar.route_color.hint') }}</p>
 
     <button type="submit">{{ t('common.save') }}</button>
   </form>
@@ -128,6 +135,73 @@
   <h2>{{ t('radar.notes') }}</h2>
   <p class="hint">{{ t('radar.notes.coverage') }}</p>
   <p class="hint">{{ t('radar.notes.radius') }}</p>
+</section>
+
+<section class="card">
+  <h2>{{ t('lookup.title') }}</h2>
+  <p class="hint">{{ t('lookup.intro') }}</p>
+  <p class="hint">{{ t('lookup.persist', dir=data_dir) }}</p>
+
+  {% if lookup_result %}
+  <p class="status">{{ lookup_result }}</p>
+  {% endif %}
+  {% if lookup_errors %}
+  <p class="hint"><strong>{{ t('lookup.errors') }}</strong></p>
+  <ul class="hint">
+    {% for e in lookup_errors %}
+    <li>{{ t('lookup.error.row', row=e.row, reason=e.reason) }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <h3>{{ t('lookup.unknown') }}</h3>
+  <p class="hint">{{ t('lookup.unknown.hint') }}</p>
+  {% if unknown %}
+  <table class="grid">
+    {% for item in unknown[:40] %}
+    <tr>
+      <th><code>{{ item.code }}</code></th>
+      <td>{{ t('lookup.' ~ item.kind) }}</td>
+      <td>{{ t('lookup.unknown.times', count=item.count) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p class="hint">{{ t('lookup.add.hint') }}</p>
+  <form method="post" action="{{ url_for('api_radar_lookup_add') }}">
+    <button type="submit">{{ t('lookup.add') }}</button>
+  </form>
+  <form method="post" action="{{ url_for('api_radar_lookup_forget') }}">
+    <button type="submit" class="ghost">{{ t('lookup.forget') }}</button>
+  </form>
+  {% else %}
+  <p class="hint">{{ t('lookup.unknown.none') }}</p>
+  {% endif %}
+</section>
+
+{% for tabella in tables %}
+<section class="card">
+  <h2>{{ t('lookup.' ~ tabella.kind) }}
+    <span class="version">{{ t('lookup.count', count=tabella.count) }}</span></h2>
+  {% if tabella.kind == 'airport' %}
+  <p class="hint">{{ t('lookup.iata.warning') }}</p>
+  {% endif %}
+  <p class="hint">{{ t('lookup.format') }}</p>
+  <form method="post" action="{{ url_for('api_radar_lookup') }}">
+    <input type="hidden" name="kind" value="{{ tabella.kind }}">
+    <textarea name="text" rows="18" spellcheck="false"
+              class="mono">{{ table_text[tabella.kind] }}</textarea>
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+  <p class="hint"><code>{{ tabella.path }}</code></p>
+</section>
+{% endfor %}
+
+<section class="card">
+  <h2>{{ t('lookup.reload') }}</h2>
+  <p class="hint">{{ t('lookup.reload.hint') }}</p>
+  <form method="post" action="{{ url_for('api_radar_lookup_reload') }}">
+    <button type="submit" class="ghost">{{ t('lookup.reload') }}</button>
+  </form>
 </section>
 
 {% endblock %}

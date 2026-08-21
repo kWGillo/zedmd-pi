@@ -32,6 +32,8 @@ import urllib.request
 
 from PIL import Image, ImageDraw
 
+import lookup
+
 from .base import Source
 from .clock import _load_font, parse_color
 
@@ -62,7 +64,11 @@ FIELD_LIST = [
 
 CSV_COLUMNS = ["timestamp", "hex", "callsign", "registration", "type",
                "altitude_ft", "speed_kt", "track_deg", "squawk",
-               "distance_km", "latitude", "longitude", "route"]
+               "distance_km", "latitude", "longitude", "route",
+               # I codici grezzi restano dove sono: sono il dato certo, e
+               # servono per rielaborare il registro. Accanto ci si mette il
+               # nome leggibile, che e' quello che si vuole aprendo il CSV.
+               "type_name", "route_name"]
 
 
 def haversine_km(lat1, lon1, lat2, lon2):
@@ -308,6 +314,19 @@ class AirRadarSource(Source):
         try:
             os.makedirs(os.path.dirname(path), exist_ok=True)
             is_new = not os.path.exists(path) or os.path.getsize(path) == 0
+            if not is_new and self._header_changed(path):
+                # Aggiungere colonne a un file che ne ha meno produrrebbe
+                # righe disallineate, illeggibili in un foglio di calcolo.
+                # Il registro precedente si mette da parte con la data nel
+                # nome: i dati restano, e il nuovo parte pulito.
+                storico = "%s.%s.csv" % (path[:-4] if path.endswith(".csv") else path,
+                                         time.strftime("%Y%m%d-%H%M%S"))
+                try:
+                    os.rename(path, storico)
+                    print("[airradar] registro precedente conservato in %s" % storico)
+                except OSError:
+                    pass
+                is_new = True
             with open(path, "a", newline="") as handle:
                 writer = csv.writer(handle)
                 if is_new:
@@ -328,9 +347,21 @@ class AirRadarSource(Source):
                         "%.2f" % plane["distance"],
                         "%.5f" % plane.get("lat", 0.0), "%.5f" % plane.get("lon", 0.0),
                         route,
+                        lookup.full("aircraft", plane["type"]) if plane["type"] else "",
+                        lookup.route(route, 1),
                     ])
         except OSError as exc:
             print("[airradar] registro non scrivibile: %s" % exc)
+
+    @staticmethod
+    def _header_changed(path):
+        """True se il registro esistente ha un'intestazione diversa."""
+        try:
+            with open(path, newline="") as handle:
+                first = next(csv.reader(handle), [])
+        except (OSError, StopIteration):
+            return False
+        return bool(first) and first != CSV_COLUMNS
 
     def _show_all(self, aircraft, cfg):
         cooldown = max(30, int(cfg["cooldown"]))
@@ -453,9 +484,11 @@ class AirRadarSource(Source):
     def _format_field(key, plane):
         try:
             if key == "route":
-                return plane.get("route") or ""
+                # Il codice grezzo resta nel dato; qui si converte solo cio'
+                # che finisce sul pannello, dove ci stanno pochi caratteri.
+                return lookup.route(plane.get("route") or "")
             if key == "type":
-                return plane.get("type") or ""
+                return lookup.short("aircraft", plane.get("type") or "")
             if key == "reg":
                 return plane.get("reg") or ""
             if key == "hex":
@@ -475,35 +508,71 @@ class AirRadarSource(Source):
         return ""
 
     def _render(self, plane, cfg):
+        """Tre fasce: identificativo, rotta, dettagli.
+
+        Fra il numero di volo in alto e la riga dei dettagli in basso restava
+        una banda vuota di una ventina di pixel. Metterci la rotta non serve
+        solo a riempirla: le toglie di dosso la concorrenza per la larghezza.
+        Su una riga sola, "Orio al Serio->Stansted" mangiava lo spazio di
+        modello e quota, che venivano scartati per far stare tutto.
+        """
         image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
         draw = ImageDraw.Draw(image)
 
         title_color = parse_color(cfg.get("callsign_color", "#00d0ff"), (0, 208, 255))
         info_color = parse_color(cfg.get("info_color", "#ff8c1a"), (255, 140, 26))
+        # Vuoto = segue il colore dei dettagli, cosi' chi non tocca nulla non
+        # vede cambiare niente.
+        route_color = parse_color(cfg.get("route_color") or "", info_color)
+
+        def centrato(text, font, y, color):
+            box = draw.textbbox((0, 0), text, font=font)
+            draw.text(((self.width - (box[2] - box[0])) // 2 - box[0], y),
+                      text, font=font, fill=color)
+            return box[2] - box[0]
 
         title = plane["flight"] or plane["reg"] or plane["hex"] or "SCONOSCIUTO"
-        box = draw.textbbox((0, 0), title, font=self._font_big)
-        draw.text(((self.width - (box[2] - box[0])) // 2 - box[0], 2),
-                  title, font=self._font_big, fill=title_color)
+        centrato(title, self._font_big, 2, title_color)
 
         wanted = cfg.get("fields") or ["route", "type", "altitude", "speed", "distance"]
+
+        # La rotta prende la fascia centrale e lascia il fondo agli altri campi.
+        route_line = ""
+        if "route" in wanted:
+            grezza = plane.get("route") or ""
+            if grezza:
+                route_line = lookup.route(grezza)
+                box = draw.textbbox((0, 0), route_line, font=self._font_small)
+                if (box[2] - box[0]) > self.width - 4:
+                    # I nomi non ci stanno: meglio i codici, che ci stanno
+                    # sempre, che un testo tagliato a meta'.
+                    route_line = grezza
+
         details = []
         for key, _label in FIELD_LIST:
-            if key not in wanted:
+            if key not in wanted or (key == "route" and route_line):
                 continue
             value = self._format_field(key, plane)
             if value:
                 details.append(value)
-        if not details:
+        if not details and not route_line:
             details.append("%.1fkm" % plane["distance"])
 
-        line = "  ".join(details)
-        box = draw.textbbox((0, 0), line, font=self._font_small)
-        while (box[2] - box[0]) > self.width - 4 and len(details) > 2:
-            details.pop(-2)
+        # Le tre fasce si ricavano dall'altezza, non da numeri fissi: il
+        # pannello potrebbe non essere alto 64 pixel.
+        bottom = self.height - max(14, int(self.height * 0.31))
+        if route_line:
+            middle = 2 + max(14, int(self.height * 0.40)) + 1
+            # Se le due righe si toccherebbero, la rotta sale di quel poco.
+            middle = min(middle, bottom - max(9, int(self.height * 0.20)) - 1)
+            centrato(route_line, self._font_small, middle, route_color)
+
+        if details:
             line = "  ".join(details)
             box = draw.textbbox((0, 0), line, font=self._font_small)
-
-        draw.text(((self.width - (box[2] - box[0])) // 2 - box[0], self.height - 20),
-                  line, font=self._font_small, fill=info_color)
+            while (box[2] - box[0]) > self.width - 4 and len(details) > 1:
+                details.pop(-2 if len(details) > 2 else -1)
+                line = "  ".join(details)
+                box = draw.textbbox((0, 0), line, font=self._font_small)
+            centrato(line, self._font_small, bottom, info_color)
         return image

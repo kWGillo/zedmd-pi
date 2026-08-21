@@ -98,6 +98,10 @@ DEFAULTS = {
         "log_path": "/var/lib/dmd/flights.csv",
         "callsign_color": "#00d0ff",
         "info_color": "#ff8c1a",
+        # Colore della rotta, che ora ha una riga sua al centro. Vuoto =
+        # segue il colore dei dettagli: chi non tocca nulla non vede
+        # cambiare niente.
+        "route_color": "",
     },
     "mqtt": {
         # Predefinito: un Mosquitto sul Raspberry stesso. Cosi' la funzione
@@ -120,7 +124,7 @@ DEFAULTS = {
         "discovery": True,
         "discovery_prefix": "homeassistant",
         "node_id": "dmd",
-        "device_name": "DMD Controller",
+        "device_name": "kWGillo DMD Server",
     },
     "nowplaying": {
         # Quanto resta a schermo un brano in pausa prima di lasciare il posto.

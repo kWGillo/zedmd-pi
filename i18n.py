@@ -30,7 +30,7 @@ GITHUB_URL = "https://github.com/kWGillo/zedmd-pi"
 STRINGS = {
 
     # ---------------------------------------------------------------- comuni
-    "app.title": ("DMD Controller", "DMD Controller"),
+    "app.title": ("kWGillo DMD Server", "kWGillo DMD Server"),
     "nav.settings": ("Impostazioni", "Settings"),
     "nav.clock": ("Orologio", "Clock"),
     "nav.media": ("Media", "Media"),
@@ -692,6 +692,91 @@ STRINGS = {
         "the worst possible content for this panel."),
     "nowplaying.panel.playing": ("in riproduzione", "playing"),
     "nowplaying.panel.paused": ("in pausa", "paused"),
+
+    "radar.route_color": ("Colore della rotta", "Route colour"),
+    "radar.route_color.hint": (
+        "La rotta ha una riga sua, al centro, fra il numero di volo e i "
+        "dettagli: quello spazio prima restava vuoto, e su una riga sola i "
+        "nomi lunghi facevano scartare modello e quota. Lascia il colore "
+        "vuoto per usare lo stesso dei dettagli.",
+        "The route has its own line, in the middle, between the flight number "
+        "and the details: that space used to be empty, and on a single line "
+        "long names pushed the model and altitude out. Leave the colour empty "
+        "to use the same as the details."),
+
+    # ------------------------------------------------------ conversioni codici
+    "lookup.title": ("Conversioni dei codici", "Code translations"),
+    "lookup.intro": (
+        "Il radar riceve sigle: il modello arriva come designatore ICAO "
+        "(B738), gli aeroporti delle rotte come codici IATA (MXP). Queste "
+        "due tabelle li trasformano in nomi leggibili. Un codice che non è "
+        "in tabella viene mostrato com'è: non è un errore.",
+        "The radar receives codes: the aircraft model as an ICAO designator "
+        "(B738), route airports as IATA codes (MXP). These two tables turn "
+        "them into readable names. A code that is not in the table is shown "
+        "as it is: that is not an error."),
+    "lookup.iata.warning": (
+        "Per gli aeroporti servono i codici IATA di tre lettere (MXP, FCO), "
+        "non quelli ICAO di quattro (LIMC, LIRF): le rotte arrivano da "
+        "adsb.lol, che restituisce IATA. Una riga scritta con il codice ICAO "
+        "non verrà mai usata.",
+        "Airports need the three-letter IATA codes (MXP, FCO), not the "
+        "four-letter ICAO ones (LIMC, LIRF): routes come from adsb.lol, which "
+        "returns IATA. A row written with the ICAO code will never be used."),
+    "lookup.format": (
+        "Una riga per voce: codice, forma breve, nome completo. La forma "
+        "breve va sul pannello, dove lo spazio è poco; il nome completo nella "
+        "web UI e nel registro. Le righe che iniziano con # sono commenti, e "
+        "una riga sbagliata si perde da sola senza compromettere le altre.",
+        "One row per entry: code, short form, full name. The short form goes "
+        "on the panel, where space is tight; the full name in the web "
+        "interface and the log. Rows starting with # are comments, and a "
+        "broken row is dropped on its own without affecting the others."),
+    "lookup.persist": (
+        "I file vivono in %(dir)s e non vengono mai sovrascritti dagli "
+        "aggiornamenti: le tue aggiunte restano.",
+        "The files live in %(dir)s and are never overwritten by updates: your "
+        "additions stay."),
+    "lookup.aircraft": ("Modelli di aeromobile", "Aircraft models"),
+    "lookup.airport": ("Aeroporti", "Airports"),
+    "lookup.count": ("%(count)d voci in tabella", "%(count)d entries in the table"),
+    "lookup.saved": ("Salvato: %(count)d voci valide.",
+                     "Saved: %(count)d valid entries."),
+    "lookup.saved.errors": (
+        "Salvato: %(count)d voci valide, %(errors)d righe scartate.",
+        "Saved: %(count)d valid entries, %(errors)d rows dropped."),
+    "lookup.errors": ("Righe scartate", "Dropped rows"),
+    "lookup.error.row": ("riga %(row)d: %(reason)s", "row %(row)d: %(reason)s"),
+    "lookup.reload": ("Rileggi i file dal disco", "Re-read the files from disk"),
+    "lookup.reload.hint": (
+        "Serve solo se hai modificato i file da fuori e vuoi vedere subito "
+        "l'effetto: normalmente il sistema si accorge da sé che sono cambiati.",
+        "Only needed if you edited the files elsewhere and want to see the "
+        "effect immediately: normally the system notices the change by itself."),
+    "lookup.reloaded": ("File riletti.", "Files re-read."),
+    "lookup.unknown": ("Codici incontrati e non tradotti",
+                       "Codes seen and not translated"),
+    "lookup.unknown.hint": (
+        "Ordinati per quante volte sono passati davvero: è la lista di cosa "
+        "conviene aggiungere per primo, invece di doverlo indovinare.",
+        "Sorted by how often they actually appeared: this is the list of what "
+        "is worth adding first, instead of having to guess."),
+    "lookup.unknown.none": ("Nessuno: tutto quello che è passato era in tabella.",
+                            "None: everything seen so far was in the table."),
+    "lookup.unknown.times": ("%(count)d volte", "%(count)d times"),
+    "lookup.add": ("Aggiungi in coda al file", "Append them to the file"),
+    "lookup.add.hint": (
+        "Aggiunge i codici come righe da completare, con le due colonne del "
+        "nome vuote. Finché restano vuote non traducono nulla, ma il codice è "
+        "lì e non devi più andarlo a cercare.",
+        "Adds the codes as rows to fill in, with the two name columns empty. "
+        "While empty they translate nothing, but the code is there and you no "
+        "longer have to hunt for it."),
+    "lookup.added": ("Aggiunti %(count)d codici da completare.",
+                     "Added %(count)d codes to fill in."),
+    "lookup.added.none": ("Nessun codice nuovo da aggiungere.",
+                          "No new code to add."),
+    "lookup.forget": ("Azzera l'elenco", "Clear the list"),
 
     # --------------------------------------------------------------------- radar
     "radar.title": ("Air Radar", "Air Radar"),

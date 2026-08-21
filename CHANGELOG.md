@@ -2,6 +2,91 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.11.2]
+
+### Corretto
+- **Le due tabelle di conversione arrivano anche con l'aggiornamento via
+  rete.** Nella 1.11 stavano in una sottocartella nuova, `data/`.
+  L'aggiornamento pero' lo esegue il codice della versione *precedente*, che
+  l'elenco dei file da installare lo legge dall'archivio scaricato — e
+  quindi conosce anche i file nuovi — ma l'elenco delle *cartelle* ce l'ha
+  cablato dentro. Quella cartella non veniva creata, le tabelle non
+  arrivavano e il controllo finale dell'aggiornamento le dichiarava mancanti,
+  facendo tornare indietro tutto. Chi installa dal pacchetto scompattato non
+  ha mai visto il problema.
+- I due modelli ora stanno **in cima all'installazione**, dove anche il
+  codice vecchio li vede: `/opt/dmd/aerei.csv` e `/opt/dmd/aeroporti.csv`.
+- Anche la scelta delle **cartelle** e' ora dichiarata dall'archivio, come
+  gia' avveniva per i file: la prossima cartella nuova non ripetera' la
+  storia. L'elenco cablato resta come rete di sicurezza per un archivio
+  senza manifest.
+- Una tabella **vuota** in `/var/lib/dmd` viene ricreata dal modello. Non c'e'
+  niente da salvare in un file senza nemmeno una riga valida, e lasciarlo li'
+  avrebbe significato non tradurre piu' nulla per sempre. Una tabella con
+  anche una sola voce dell'utente non viene toccata, come prima.
+
+## [1.11.1]
+
+### Modificato
+- **Air Radar disegnato su tre fasce**: identificativo in alto, rotta al
+  centro, dettagli in basso. Fra il numero di volo e la riga dei dettagli
+  restava una banda vuota di una ventina di pixel, mentre in basso i nomi
+  lunghi delle rotte facevano scartare modello e quota per far entrare la
+  riga. Ora ci stanno tutti e cinque i campi.
+- Se la rotta tradotta e' comunque piu' larga del pannello si tornano a
+  mostrare i codici IATA, che ci stanno sempre: meglio un'informazione
+  completa e stringata che una tagliata a meta'.
+- Senza rotta il disegno resta a due fasce, come prima.
+- Nuovo colore facoltativo per la rotta. Lasciato vuoto segue quello dei
+  dettagli: chi non tocca nulla non vede cambiare niente.
+- Le posizioni delle tre fasce si ricavano dall'altezza del pannello, non da
+  numeri fissi.
+
+## [1.11]
+
+### Aggiunto
+- **Conversioni dei codici del radar.** Due file CSV modificabili traducono
+  le sigle in nomi leggibili: `/var/lib/dmd/aerei.csv` (designatori ICAO dei
+  tipi di aeromobile) e `/var/lib/dmd/aeroporti.csv` (codici **IATA** degli
+  aeroporti — non ICAO: le rotte arrivano dal routeset di adsb.lol, che
+  restituisce IATA, quindi una riga scritta `LIMC` non verrebbe mai usata).
+  Distribuiti gia' pieni: 177 tipi e 326 scali.
+- Ogni voce ha **due forme**, breve e completa. Il pannello e' largo 256 px e
+  la riga del radar porta gia' rotta, quota, velocita' e distanza: `737-800`
+  ci sta, `Boeing 737-800` no. Il nome esteso va nella web UI e nelle due
+  colonne nuove del registro, `type_name` e `route_name`.
+- **Elenco dei codici incontrati e non tradotti**, nella pagina Radar,
+  ordinato per quante volte sono passati davvero: e' la lista di cosa
+  conviene aggiungere per primo invece di doverlo indovinare. Un pulsante li
+  aggiunge in coda al file come righe da completare.
+- Le tabelle si modificano **dalla pagina Radar**, con indicazione della riga
+  quando qualcosa non va, oppure a mano: una modifica fatta via SSH o SMB
+  viene raccolta senza riavviare il servizio.
+
+### Note di progetto
+- I file vivono in `/var/lib/dmd` e **non vengono mai sovrascritti dagli
+  aggiornamenti**. `/opt/dmd` viene riscritto a ogni installazione: tenerli
+  li' avrebbe fatto sparire le aggiunte a mano al primo aggiornamento via
+  rete, senza che l'utente se ne accorgesse. Al primo avvio si creano da un
+  modello contenuto nel pacchetto.
+- Il formato e' CSV e non XML di proposito: una riga sbagliata si perde da
+  sola, mentre in un XML un tag non chiuso porta via l'intero file.
+- Il registro dei passaggi con l'intestazione vecchia viene messo da parte
+  con la data nel nome invece di ricevere righe con un numero di colonne
+  diverso, che sarebbero disallineate e illeggibili.
+
+## [1.10.7]
+
+### Modificato
+- L'applicazione si chiama **kWGillo DMD Server**. Cambia il titolo
+  nell'intestazione della web UI, la riga di avvio nel log e il nome
+  predefinito del dispositivo in Home Assistant. Chi ha gia' una
+  configurazione salvata tiene il nome che aveva: in Home Assistant
+  l'identita' sta in `node_id`, quindi anche cambiandolo a mano non nasce un
+  dispositivo nuovo.
+- Il menu parte dall'**Orologio** e finisce con le **Impostazioni**. La
+  pagina di ingresso resta quella delle impostazioni.
+
 ## [1.10.6]
 
 ### Corretto

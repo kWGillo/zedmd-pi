@@ -1,0 +1,202 @@
+# Tipi di aeromobile: da designatore ICAO a nome commerciale.
+#
+#   codice ICAO,forma breve,nome completo
+#
+# La forma breve va sul pannello, dove lo spazio e' poco. Il nome completo
+# compare nella web UI e nel registro dei passaggi.
+#
+# Un codice che non e' qui dentro viene mostrato com'e': non e' un errore.
+# La pagina Radar elenca quelli incontrati e non tradotti, ordinati per
+# frequenza: quella e' la lista di cosa conviene aggiungere per primo.
+#
+# Righe che iniziano con # sono commenti. Una riga sbagliata si perde da
+# sola, le altre restano valide.
+#
+# Questo elenco e' un punto di partenza: se trovi un errore, correggilo,
+# e' una riga. Il file non viene mai sovrascritto dagli aggiornamenti.
+# --- Airbus ---
+A19N,A319neo,Airbus A319neo
+A20N,A320neo,Airbus A320neo
+A21N,A321neo,Airbus A321neo
+A318,A318,Airbus A318
+A319,A319,Airbus A319
+A320,A320,Airbus A320
+A321,A321,Airbus A321
+A30B,A300,Airbus A300
+A306,A300-600,Airbus A300-600
+A310,A310,Airbus A310
+A332,A330-200,Airbus A330-200
+A333,A330-300,Airbus A330-300
+A338,A330-800,Airbus A330-800neo
+A339,A330-900,Airbus A330-900neo
+A342,A340-200,Airbus A340-200
+A343,A340-300,Airbus A340-300
+A345,A340-500,Airbus A340-500
+A346,A340-600,Airbus A340-600
+A359,A350-900,Airbus A350-900
+A35K,A350-1000,Airbus A350-1000
+A388,A380,Airbus A380-800
+A3ST,Beluga,Airbus A300-600ST Beluga
+A337,Beluga XL,Airbus A330-700 Beluga XL
+BCS1,A220-100,Airbus A220-100
+BCS3,A220-300,Airbus A220-300
+A400,A400M,Airbus A400M Atlas
+# --- Boeing ---
+B37M,737 MAX 7,Boeing 737 MAX 7
+B38M,737 MAX 8,Boeing 737 MAX 8
+B39M,737 MAX 9,Boeing 737 MAX 9
+B3XM,737 MAX 10,Boeing 737 MAX 10
+B712,717,Boeing 717-200
+B722,727-200,Boeing 727-200
+B732,737-200,Boeing 737-200
+B733,737-300,Boeing 737-300
+B734,737-400,Boeing 737-400
+B735,737-500,Boeing 737-500
+B736,737-600,Boeing 737-600
+B737,737-700,Boeing 737-700
+B738,737-800,Boeing 737-800
+B739,737-900,Boeing 737-900
+B741,747-100,Boeing 747-100
+B742,747-200,Boeing 747-200
+B743,747-300,Boeing 747-300
+B744,747-400,Boeing 747-400
+B748,747-8,Boeing 747-8
+B752,757-200,Boeing 757-200
+B753,757-300,Boeing 757-300
+B762,767-200,Boeing 767-200
+B763,767-300,Boeing 767-300
+B764,767-400,Boeing 767-400
+B772,777-200,Boeing 777-200
+B77L,777-200LR,Boeing 777-200LR
+B773,777-300,Boeing 777-300
+B77W,777-300ER,Boeing 777-300ER
+B778,777-8,Boeing 777-8
+B779,777-9,Boeing 777-9
+B788,787-8,Boeing 787-8 Dreamliner
+B789,787-9,Boeing 787-9 Dreamliner
+B78X,787-10,Boeing 787-10 Dreamliner
+B703,707,Boeing 707
+C17,C-17,Boeing C-17 Globemaster III
+# --- Embraer ---
+E135,ERJ-135,Embraer ERJ-135
+E145,ERJ-145,Embraer ERJ-145
+E170,E170,Embraer E170
+E75L,E175,Embraer E175
+E75S,E175,Embraer E175
+E190,E190,Embraer E190
+E195,E195,Embraer E195
+E290,E190-E2,Embraer E190-E2
+E295,E195-E2,Embraer E195-E2
+E50P,Phenom 100,Embraer Phenom 100
+E55P,Phenom 300,Embraer Phenom 300
+E545,Legacy 450,Embraer Legacy 450
+E550,Legacy 500,Embraer Legacy 500
+# --- Regionali e turboelica ---
+AT43,ATR 42-300,ATR 42-300
+AT45,ATR 42-500,ATR 42-500
+AT46,ATR 42-600,ATR 42-600
+AT72,ATR 72,ATR 72
+AT75,ATR 72-500,ATR 72-500
+AT76,ATR 72-600,ATR 72-600
+CRJ1,CRJ100,Bombardier CRJ100
+CRJ2,CRJ200,Bombardier CRJ200
+CRJ7,CRJ700,Bombardier CRJ700
+CRJ9,CRJ900,Bombardier CRJ900
+CRJX,CRJ1000,Bombardier CRJ1000
+DH8A,Dash 8-100,De Havilland Dash 8-100
+DH8B,Dash 8-200,De Havilland Dash 8-200
+DH8C,Dash 8-300,De Havilland Dash 8-300
+DH8D,Dash 8-400,De Havilland Dash 8-400
+SF34,Saab 340,Saab 340
+SB20,Saab 2000,Saab 2000
+F70,Fokker 70,Fokker 70
+F100,Fokker 100,Fokker 100
+RJ85,Avro RJ85,Avro RJ85
+RJ1H,Avro RJ100,Avro RJ100
+B462,BAe 146-200,British Aerospace 146-200
+B463,BAe 146-300,British Aerospace 146-300
+SU95,Superjet 100,Sukhoi Superjet 100
+JS32,Jetstream 32,British Aerospace Jetstream 32
+# --- McDonnell Douglas e storici ---
+MD11,MD-11,McDonnell Douglas MD-11
+MD82,MD-82,McDonnell Douglas MD-82
+MD83,MD-83,McDonnell Douglas MD-83
+MD87,MD-87,McDonnell Douglas MD-87
+MD88,MD-88,McDonnell Douglas MD-88
+MD90,MD-90,McDonnell Douglas MD-90
+DC10,DC-10,McDonnell Douglas DC-10
+L101,TriStar,Lockheed L-1011 TriStar
+# --- Aviazione d'affari ---
+GLF4,Gulfstream IV,Gulfstream IV
+GLF5,Gulfstream V,Gulfstream V
+GLF6,G650,Gulfstream G650
+GLEX,Global Express,Bombardier Global Express
+GL5T,Global 5000,Bombardier Global 5000
+GL7T,Global 7500,Bombardier Global 7500
+CL30,Challenger 300,Bombardier Challenger 300
+CL35,Challenger 350,Bombardier Challenger 350
+CL60,Challenger 600,Bombardier Challenger 600
+C25A,CJ2,Cessna Citation CJ2
+C25B,CJ3,Cessna Citation CJ3
+C25C,CJ4,Cessna Citation CJ4
+C510,Mustang,Cessna Citation Mustang
+C550,Citation II,Cessna Citation II
+C56X,Citation Excel,Cessna Citation Excel
+C680,Sovereign,Cessna Citation Sovereign
+C68A,Latitude,Cessna Citation Latitude
+C700,Longitude,Cessna Citation Longitude
+F2TH,Falcon 2000,Dassault Falcon 2000
+F900,Falcon 900,Dassault Falcon 900
+FA7X,Falcon 7X,Dassault Falcon 7X
+FA8X,Falcon 8X,Dassault Falcon 8X
+LJ35,Learjet 35,Learjet 35
+LJ45,Learjet 45,Learjet 45
+LJ60,Learjet 60,Learjet 60
+PC12,PC-12,Pilatus PC-12
+PC24,PC-24,Pilatus PC-24
+BE20,King Air 200,Beechcraft King Air 200
+BE9L,King Air 90,Beechcraft King Air 90
+B350,King Air 350,Beechcraft King Air 350
+TBM7,TBM 700,Daher TBM 700
+TBM8,TBM 850,Daher TBM 850
+TBM9,TBM 900,Daher TBM 900
+# --- Aviazione generale ---
+C152,Cessna 152,Cessna 152
+C172,Cessna 172,Cessna 172 Skyhawk
+C182,Cessna 182,Cessna 182 Skylane
+C206,Cessna 206,Cessna 206 Stationair
+C208,Caravan,Cessna 208 Caravan
+P28A,PA-28,Piper PA-28 Cherokee
+P28R,PA-28R,Piper PA-28R Arrow
+PA34,Seneca,Piper PA-34 Seneca
+PA46,Malibu,Piper PA-46 Malibu
+SR20,Cirrus SR20,Cirrus SR20
+SR22,Cirrus SR22,Cirrus SR22
+DA40,DA40,Diamond DA40
+DA42,DA42,Diamond DA42 Twin Star
+DA62,DA62,Diamond DA62
+DV20,DV20,Diamond DV20 Katana
+AT8T,Air Tractor,Air Tractor AT-802
+# --- Elicotteri ---
+R44,Robinson R44,Robinson R44
+R66,Robinson R66,Robinson R66
+EC35,H135,Airbus H135
+EC45,H145,Airbus H145
+EC30,H130,Airbus H130
+AS50,Ecureuil,Airbus AS350 Ecureuil
+A139,AW139,Leonardo AW139
+A169,AW169,Leonardo AW169
+A189,AW189,Leonardo AW189
+B06,Bell 206,Bell 206 JetRanger
+B429,Bell 429,Bell 429
+S76,S-76,Sikorsky S-76
+# --- Militari e cargo ---
+C130,C-130,Lockheed C-130 Hercules
+C30J,C-130J,Lockheed C-130J Super Hercules
+K35R,KC-135,Boeing KC-135 Stratotanker
+E3TF,E-3 Sentry,Boeing E-3 Sentry AWACS
+P8,P-8 Poseidon,Boeing P-8 Poseidon
+EUFI,Eurofighter,Eurofighter Typhoon
+F16,F-16,General Dynamics F-16
+A124,An-124,Antonov An-124 Ruslan
+C27J,C-27J,Leonardo C-27J Spartan

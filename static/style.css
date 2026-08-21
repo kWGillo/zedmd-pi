@@ -326,3 +326,25 @@ hr.sep {
 .slot-head strong { color: var(--muted); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
 
 .check.inline { margin: 0; font-size: 13px; }
+
+/* Tabelle di conversione: modificabili direttamente dalla pagina Radar.
+   Stessi colori e bordi degli altri campi, ma a larghezza fissa e senza
+   ritorno a capo: una riga del CSV deve restare una riga. */
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  background: #0d1117;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  tab-size: 4;
+}
+textarea:focus { outline: none; border-color: var(--accent); }

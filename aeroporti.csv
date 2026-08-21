@@ -1,0 +1,360 @@
+# Aeroporti: da codice IATA a nome leggibile.
+#
+#   codice IATA,forma breve,nome completo
+#
+# ATTENZIONE: qui servono i codici IATA di tre lettere (MXP, FCO), non quelli
+# ICAO di quattro (LIMC, LIRF). Le rotte arrivano dal servizio routeset di
+# adsb.lol, che restituisce IATA: una riga scritta con il codice ICAO non
+# verra' mai usata.
+#
+# La forma breve va sul pannello, dove lo spazio e' poco. Il nome completo
+# compare nella web UI e nel registro dei passaggi.
+#
+# Un codice che non e' qui dentro viene mostrato com'e': non e' un errore.
+# La pagina Radar elenca quelli incontrati e non tradotti, ordinati per
+# frequenza: quella e' la lista di cosa conviene aggiungere per primo.
+#
+# Questo elenco e' un punto di partenza: se trovi un errore, correggilo,
+# e' una riga. Il file non viene mai sovrascritto dagli aggiornamenti.
+# --- Italia ---
+FCO,Fiumicino,Roma Fiumicino
+CIA,Ciampino,Roma Ciampino
+MXP,Malpensa,Milano Malpensa
+LIN,Linate,Milano Linate
+BGY,Orio al Serio,Bergamo Orio al Serio
+VCE,Venezia,Venezia Marco Polo
+TSF,Treviso,Treviso Canova
+VRN,Verona,Verona Villafranca
+BLQ,Bologna,Bologna Marconi
+FLR,Firenze,Firenze Peretola
+PSA,Pisa,Pisa Galilei
+TRN,Torino,Torino Caselle
+GOA,Genova,Genova Colombo
+NAP,Napoli,Napoli Capodichino
+BRI,Bari,Bari Palese
+BDS,Brindisi,Brindisi Salento
+CTA,Catania,Catania Fontanarossa
+PMO,Palermo,Palermo Punta Raisi
+CAG,Cagliari,Cagliari Elmas
+OLB,Olbia,Olbia Costa Smeralda
+AHO,Alghero,Alghero Fertilia
+TPS,Trapani,Trapani Birgi
+SUF,Lamezia,Lamezia Terme
+REG,Reggio Cal.,Reggio Calabria
+PSR,Pescara,Pescara Abruzzo
+AOI,Ancona,Ancona Falconara
+TRS,Trieste,Trieste Ronchi dei Legionari
+PMF,Parma,Parma
+RMI,Rimini,Rimini Federico Fellini
+CUF,Cuneo,Cuneo Levaldigi
+PEG,Perugia,Perugia San Francesco
+FOG,Foggia,Foggia Gino Lisa
+QSR,Salerno,Salerno Costa d'Amalfi
+BZO,Bolzano,Bolzano
+CRV,Crotone,Crotone
+TAR,Grottaglie,Taranto Grottaglie
+PNL,Pantelleria,Pantelleria
+LMP,Lampedusa,Lampedusa
+EBA,Elba,Marina di Campo
+CIY,Comiso,Comiso
+# --- Regno Unito e Irlanda ---
+LHR,Heathrow,Londra Heathrow
+LGW,Gatwick,Londra Gatwick
+LTN,Luton,Londra Luton
+STN,Stansted,Londra Stansted
+LCY,London City,Londra City
+SEN,Southend,Londra Southend
+MAN,Manchester,Manchester
+BHX,Birmingham,Birmingham
+EDI,Edimburgo,Edimburgo
+GLA,Glasgow,Glasgow
+BRS,Bristol,Bristol
+LPL,Liverpool,Liverpool
+NCL,Newcastle,Newcastle
+LBA,Leeds,Leeds Bradford
+DUB,Dublino,Dublino
+ORK,Cork,Cork
+SNN,Shannon,Shannon
+# --- Francia ---
+CDG,Charles de Gaulle,Parigi Charles de Gaulle
+ORY,Orly,Parigi Orly
+BVA,Beauvais,Parigi Beauvais
+NCE,Nizza,Nizza Costa Azzurra
+MRS,Marsiglia,Marsiglia Provenza
+LYS,Lione,Lione Saint-Exupery
+TLS,Tolosa,Tolosa Blagnac
+BOD,Bordeaux,Bordeaux Merignac
+NTE,Nantes,Nantes Atlantique
+MPL,Montpellier,Montpellier
+AJA,Ajaccio,Ajaccio
+BIA,Bastia,Bastia
+FSC,Figari,Figari Sud Corse
+# --- Benelux, Germania, Austria, Svizzera ---
+AMS,Schiphol,Amsterdam Schiphol
+EIN,Eindhoven,Eindhoven
+RTM,Rotterdam,Rotterdam L'Aia
+BRU,Bruxelles,Bruxelles Zaventem
+CRL,Charleroi,Bruxelles Charleroi
+LUX,Lussemburgo,Lussemburgo
+FRA,Francoforte,Francoforte sul Meno
+MUC,Monaco,Monaco di Baviera
+BER,Berlino,Berlino Brandeburgo
+DUS,Dusseldorf,Dusseldorf
+HAM,Amburgo,Amburgo
+STR,Stoccarda,Stoccarda
+CGN,Colonia,Colonia Bonn
+HAJ,Hannover,Hannover
+NUE,Norimberga,Norimberga
+LEJ,Lipsia,Lipsia Halle
+BRE,Brema,Brema
+FMM,Memmingen,Memmingen
+DTM,Dortmund,Dortmund
+FDH,Friedrichshafen,Friedrichshafen
+VIE,Vienna,Vienna Schwechat
+SZG,Salisburgo,Salisburgo
+INN,Innsbruck,Innsbruck
+GRZ,Graz,Graz
+ZRH,Zurigo,Zurigo
+GVA,Ginevra,Ginevra
+BSL,Basilea,Basilea Mulhouse
+LUG,Lugano,Lugano
+BRN,Berna,Berna
+# --- Spagna e Portogallo ---
+MAD,Madrid,Madrid Barajas
+BCN,Barcellona,Barcellona El Prat
+AGP,Malaga,Malaga
+PMI,Palma,Palma di Maiorca
+IBZ,Ibiza,Ibiza
+MAH,Minorca,Minorca
+VLC,Valencia,Valencia
+SVQ,Siviglia,Siviglia
+BIO,Bilbao,Bilbao
+ALC,Alicante,Alicante Elche
+SCQ,Santiago,Santiago de Compostela
+LPA,Gran Canaria,Las Palmas Gran Canaria
+TFS,Tenerife Sud,Tenerife Sud
+TFN,Tenerife Nord,Tenerife Nord
+ACE,Lanzarote,Lanzarote
+FUE,Fuerteventura,Fuerteventura
+LIS,Lisbona,Lisbona
+OPO,Porto,Porto
+FAO,Faro,Faro
+FNC,Madeira,Funchal Madeira
+PDL,Ponta Delgada,Ponta Delgada Azzorre
+# --- Scandinavia e Baltico ---
+CPH,Copenaghen,Copenaghen Kastrup
+BLL,Billund,Billund
+ARN,Arlanda,Stoccolma Arlanda
+NYO,Skavsta,Stoccolma Skavsta
+GOT,Goteborg,Goteborg Landvetter
+OSL,Oslo,Oslo Gardermoen
+TRF,Torp,Sandefjord Torp
+BGO,Bergen,Bergen
+TRD,Trondheim,Trondheim
+SVG,Stavanger,Stavanger
+HEL,Helsinki,Helsinki Vantaa
+KEF,Reykjavik,Reykjavik Keflavik
+RIX,Riga,Riga
+TLL,Tallinn,Tallinn
+VNO,Vilnius,Vilnius
+KUN,Kaunas,Kaunas
+# --- Europa centrale e orientale ---
+WAW,Varsavia,Varsavia Chopin
+WMI,Modlin,Varsavia Modlin
+KRK,Cracovia,Cracovia
+KTW,Katowice,Katowice
+GDN,Danzica,Danzica
+WRO,Breslavia,Breslavia
+POZ,Poznan,Poznan
+PRG,Praga,Praga
+BRQ,Brno,Brno
+BTS,Bratislava,Bratislava
+BUD,Budapest,Budapest Ferenc Liszt
+DEB,Debrecen,Debrecen
+OTP,Bucarest,Bucarest Otopeni
+CLJ,Cluj,Cluj-Napoca
+TSR,Timisoara,Timisoara
+SOF,Sofia,Sofia
+VAR,Varna,Varna
+BOJ,Burgas,Burgas
+# --- Balcani ---
+BEG,Belgrado,Belgrado Nikola Tesla
+ZAG,Zagabria,Zagabria
+SPU,Spalato,Spalato
+DBV,Dubrovnik,Dubrovnik
+PUY,Pola,Pola
+ZAD,Zara,Zara
+RJK,Fiume,Fiume
+LJU,Lubiana,Lubiana
+SJJ,Sarajevo,Sarajevo
+TGD,Podgorica,Podgorica
+TIV,Tivat,Tivat
+TIA,Tirana,Tirana
+SKP,Skopje,Skopje
+OHD,Ohrid,Ohrid
+PRN,Pristina,Pristina
+# --- Grecia, Turchia, Cipro, Malta ---
+ATH,Atene,Atene
+SKG,Salonicco,Salonicco
+HER,Heraklion,Creta Heraklion
+CHQ,Chania,Creta Chania
+RHO,Rodi,Rodi
+CFU,Corfu,Corfu
+JMK,Mykonos,Mykonos
+JTR,Santorini,Santorini
+KGS,Kos,Kos
+ZTH,Zante,Zante
+IST,Istanbul,Istanbul
+SAW,Sabiha,Istanbul Sabiha Gokcen
+AYT,Antalya,Antalya
+ADB,Izmir,Izmir
+ESB,Ankara,Ankara Esenboga
+DLM,Dalaman,Dalaman
+BJV,Bodrum,Bodrum
+LCA,Larnaca,Larnaca
+PFO,Paphos,Paphos
+MLA,Malta,Malta
+# --- Russia e Ucraina ---
+SVO,Sheremetyevo,Mosca Sheremetyevo
+DME,Domodedovo,Mosca Domodedovo
+VKO,Vnukovo,Mosca Vnukovo
+LED,San Pietroburgo,San Pietroburgo Pulkovo
+KBP,Kiev,Kiev Boryspil
+# --- Medio Oriente e Golfo ---
+TLV,Tel Aviv,Tel Aviv Ben Gurion
+AMM,Amman,Amman
+BEY,Beirut,Beirut
+DXB,Dubai,Dubai
+DWC,Dubai Al Maktoum,Dubai World Central
+AUH,Abu Dhabi,Abu Dhabi
+DOH,Doha,Doha Hamad
+KWI,Kuwait,Kuwait
+BAH,Bahrein,Bahrein
+MCT,Mascate,Mascate
+RUH,Riyadh,Riyadh
+JED,Gedda,Gedda
+# --- Africa ---
+CAI,Il Cairo,Il Cairo
+HRG,Hurghada,Hurghada
+SSH,Sharm,Sharm el Sheikh
+TUN,Tunisi,Tunisi Cartagine
+DJE,Djerba,Djerba
+MIR,Monastir,Monastir
+CMN,Casablanca,Casablanca Mohammed V
+RAK,Marrakech,Marrakech
+AGA,Agadir,Agadir
+TNG,Tangeri,Tangeri
+ALG,Algeri,Algeri
+ORN,Orano,Orano
+TIP,Tripoli,Tripoli
+JNB,Johannesburg,Johannesburg
+CPT,Citta del Capo,Citta del Capo
+NBO,Nairobi,Nairobi
+ADD,Addis Abeba,Addis Abeba
+LOS,Lagos,Lagos
+ACC,Accra,Accra
+DKR,Dakar,Dakar
+MRU,Mauritius,Mauritius
+SEZ,Seychelles,Seychelles
+ZNZ,Zanzibar,Zanzibar
+# --- Asia ---
+DEL,Delhi,Nuova Delhi
+BOM,Mumbai,Mumbai
+BLR,Bangalore,Bangalore
+MAA,Chennai,Chennai
+HYD,Hyderabad,Hyderabad
+CCU,Calcutta,Calcutta
+COK,Kochi,Kochi
+MLE,Maldive,Male Maldive
+CMB,Colombo,Colombo
+KTM,Kathmandu,Kathmandu
+BKK,Bangkok,Bangkok Suvarnabhumi
+DMK,Don Mueang,Bangkok Don Mueang
+HKT,Phuket,Phuket
+SIN,Singapore,Singapore Changi
+KUL,Kuala Lumpur,Kuala Lumpur
+CGK,Giacarta,Giacarta
+DPS,Bali,Denpasar Bali
+MNL,Manila,Manila
+HAN,Hanoi,Hanoi
+SGN,Ho Chi Minh,Ho Chi Minh
+HKG,Hong Kong,Hong Kong
+TPE,Taipei,Taipei Taoyuan
+ICN,Seul,Seul Incheon
+NRT,Narita,Tokyo Narita
+HND,Haneda,Tokyo Haneda
+KIX,Kansai,Osaka Kansai
+NGO,Nagoya,Nagoya Chubu
+PEK,Pechino,Pechino Capital
+PKX,Daxing,Pechino Daxing
+PVG,Shanghai,Shanghai Pudong
+SHA,Hongqiao,Shanghai Hongqiao
+CAN,Canton,Canton Baiyun
+SZX,Shenzhen,Shenzhen
+CTU,Chengdu,Chengdu
+XIY,Xi'an,Xi'an
+# --- Nord America ---
+JFK,New York JFK,New York John F. Kennedy
+EWR,Newark,New York Newark
+LGA,LaGuardia,New York LaGuardia
+BOS,Boston,Boston Logan
+PHL,Filadelfia,Filadelfia
+IAD,Washington Dulles,Washington Dulles
+DCA,Washington Reagan,Washington Reagan
+BWI,Baltimora,Baltimora
+ATL,Atlanta,Atlanta Hartsfield-Jackson
+MIA,Miami,Miami
+FLL,Fort Lauderdale,Fort Lauderdale
+MCO,Orlando,Orlando
+TPA,Tampa,Tampa
+ORD,Chicago O'Hare,Chicago O'Hare
+MDW,Chicago Midway,Chicago Midway
+DTW,Detroit,Detroit
+MSP,Minneapolis,Minneapolis Saint Paul
+CLT,Charlotte,Charlotte
+DEN,Denver,Denver
+LAX,Los Angeles,Los Angeles
+SFO,San Francisco,San Francisco
+SJC,San Jose,San Jose
+SEA,Seattle,Seattle Tacoma
+PDX,Portland,Portland
+LAS,Las Vegas,Las Vegas Harry Reid
+PHX,Phoenix,Phoenix Sky Harbor
+SLC,Salt Lake City,Salt Lake City
+DFW,Dallas,Dallas Fort Worth
+IAH,Houston,Houston Intercontinental
+AUS,Austin,Austin
+SAN,San Diego,San Diego
+HNL,Honolulu,Honolulu
+YYZ,Toronto,Toronto Pearson
+YUL,Montreal,Montreal Trudeau
+YVR,Vancouver,Vancouver
+YYC,Calgary,Calgary
+YOW,Ottawa,Ottawa
+# --- America centrale e meridionale ---
+MEX,Citta del Messico,Citta del Messico
+CUN,Cancun,Cancun
+GDL,Guadalajara,Guadalajara
+GRU,San Paolo,San Paolo Guarulhos
+GIG,Rio de Janeiro,Rio de Janeiro Galeao
+BSB,Brasilia,Brasilia
+EZE,Buenos Aires,Buenos Aires Ezeiza
+AEP,Aeroparque,Buenos Aires Aeroparque
+SCL,Santiago,Santiago del Cile
+LIM,Lima,Lima
+BOG,Bogota,Bogota
+UIO,Quito,Quito
+PTY,Panama,Panama Tocumen
+HAV,L'Avana,L'Avana
+PUJ,Punta Cana,Punta Cana
+SJU,San Juan,San Juan Porto Rico
+MBJ,Montego Bay,Montego Bay
+# --- Oceania ---
+SYD,Sydney,Sydney
+MEL,Melbourne,Melbourne
+BNE,Brisbane,Brisbane
+PER,Perth,Perth
+ADL,Adelaide,Adelaide
+AKL,Auckland,Auckland
+CHC,Christchurch,Christchurch
+NAN,Nadi,Nadi Figi

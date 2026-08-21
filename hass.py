@@ -88,7 +88,7 @@ class HassBridge:
     def _device(self):
         return {
             "identifiers": [self.node()],
-            "name": str(self.settings().get("device_name") or "DMD Controller"),
+            "name": str(self.settings().get("device_name") or "kWGillo DMD Server"),
             "manufacturer": "kWGillo",
             "model": "zedmd-pi",
             "sw_version": __version__,

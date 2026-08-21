@@ -446,3 +446,57 @@ Non dipende da nessun altro file, quindi si può anche scaricare da solo.
 spento; il resto del DMD non se ne accorge.
 
 Guida completa, anche per farlo a mano: `docs/now-playing.it.md`.
+
+---
+
+## Conversioni dei codici del radar
+
+Il radar riceve sigle. Il modello arriva come **designatore ICAO** (`B738`),
+gli aeroporti delle rotte come **codici IATA** (`MXP`) — non ICAO, perché il
+servizio routeset di adsb.lol restituisce quelli. È una distinzione che
+conta: una riga scritta con `LIMC` non verrà mai usata, perché quel codice
+non arriva.
+
+Due file CSV modificabili traducono le sigle in nomi leggibili:
+
+```
+/var/lib/dmd/aerei.csv       177 tipi di aeromobile
+/var/lib/dmd/aeroporti.csv   326 aeroporti
+```
+
+Ogni riga ha tre campi — `codice,forma breve,nome completo`. Servono due
+forme perché il pannello è largo 256 px e la riga del radar porta già rotta,
+quota, velocità e distanza: `737-800` ci sta, `Boeing 737-800` no. Il nome
+completo va nella web UI e nelle due colonne nuove del registro
+(`type_name`, `route_name`), dove lo spazio non manca.
+
+**Un codice che non è in tabella viene mostrato com'è.** Non è un errore, è
+il comportamento previsto. Il sistema tiene il conto dei codici che incontra
+senza saper tradurre e li elenca nella pagina Radar, ordinati per frequenza:
+è la lista di cosa conviene aggiungere per primo, invece di doverlo
+indovinare. Un pulsante li aggiunge in coda al file come righe da
+completare.
+
+I file si modificano dalla pagina Radar oppure a mano via SSH o SMB: una
+modifica esterna viene raccolta senza riavviare il servizio, perché la
+rilettura è legata a data e dimensione del file.
+
+**Non vengono mai sovrascritti dagli aggiornamenti.** Vivono in
+`/var/lib/dmd` proprio per questo: `/opt/dmd` viene riscritto a ogni
+installazione, e le aggiunte fatte a mano sparirebbero. Al primo avvio i file
+si creano da un modello contenuto nel pacchetto; da quel momento sono
+dell'utente.
+
+### Le tre fasce
+
+Dalla 1.11.1 la rotta ha una riga sua, al centro, fra l'identificativo e i
+dettagli: quello spazio prima restava vuoto, e su una riga sola i nomi lunghi
+facevano scartare modello e quota per far entrare tutto. Ora ci stanno
+`Orio al Serio→Stansted` sopra e `737-800  34000ft  450kt  3.2km` sotto.
+
+Se la rotta tradotta è comunque troppo larga si tornano a mostrare i codici,
+che ci stanno sempre: meglio un'informazione completa e stringata che una
+tagliata a metà. Senza rotta il disegno resta a due fasce, come prima.
+
+Il colore della rotta è regolabile a parte; lasciato vuoto segue quello dei
+dettagli, così chi non tocca nulla non vede cambiare niente.

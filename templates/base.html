@@ -14,13 +14,13 @@
       <span class="version">v{{ version }}</span>
     </div>
     <nav>
-      <a href="{{ url_for('page_settings') }}" class="{{ 'on' if page == 'settings' }}">{{ t('nav.settings') }}</a>
       <a href="{{ url_for('page_clock') }}" class="{{ 'on' if page == 'clock' }}">{{ t('nav.clock') }}</a>
       <a href="{{ url_for('page_media') }}" class="{{ 'on' if page == 'media' }}">{{ t('nav.media') }}</a>
       <a href="{{ url_for('page_banner') }}" class="{{ 'on' if page == 'banner' }}">{{ t('nav.banner') }}</a>
       <a href="{{ url_for('page_nowplaying') }}" class="{{ 'on' if page == 'nowplaying' }}">{{ t('nav.nowplaying') }}</a>
       <a href="{{ url_for('page_radar') }}" class="{{ 'on' if page == 'radar' }}">{{ t('nav.radar') }}</a>
       <a href="{{ url_for('page_services') }}" class="{{ 'on' if page == 'services' }}">{{ t('nav.services') }}</a>
+      <a href="{{ url_for('page_settings') }}" class="{{ 'on' if page == 'settings' }}">{{ t('nav.settings') }}</a>
     </nav>
     <form method="post" action="{{ url_for('api_language') }}" class="langpick">
       <input type="hidden" name="next" value="{{ request.path }}">

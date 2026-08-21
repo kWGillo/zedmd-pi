@@ -17,6 +17,7 @@ from werkzeug.utils import secure_filename
 import dmdconf
 import i18n
 import libcheck
+import lookup
 import nowplaying
 import ota
 import spotifyapi
@@ -247,7 +248,26 @@ def create_app(runtime):
                                fields=FIELD_LIST, log=runtime.radar.log_info(),
                                status=runtime.radar.status(current_language()),
                                probe_callsign=request.args.get("callsign", ""),
-                               probe_result=request.args.get("result"), page="radar")
+                               probe_result=request.args.get("result"),
+                               tables=[lookup.stats(k) for k in ("aircraft", "airport")],
+                               table_text={k: lookup.read_text(k)
+                                           for k in ("aircraft", "airport")},
+                               unknown=lookup.unknown(),
+                               data_dir=lookup.DATA_DIR,
+                               lookup_result=request.args.get("lookup_result", ""),
+                               lookup_errors=_lookup_errors(),
+                               page="radar")
+
+    def _lookup_errors():
+        """Righe scartate all'ultimo salvataggio, passate via query string."""
+        raw = request.args.get("lookup_bad", "")
+        out = []
+        for pezzo in raw.split("|"):
+            if ":" in pezzo:
+                numero, motivo = pezzo.split(":", 1)
+                if numero.strip().isdigit():
+                    out.append({"row": int(numero), "reason": motivo})
+        return out
 
     @app.route("/services")
     def page_services():
@@ -495,7 +515,7 @@ def create_app(runtime):
                              ("external_topic", ""),
                              ("discovery_prefix", "homeassistant"),
                              ("node_id", "dmd"),
-                             ("device_name", "DMD Controller")):
+                             ("device_name", "kWGillo DMD Server")):
             conf[key] = request.form.get(key, default).strip()
         try:
             conf["port"] = max(1, min(65535, int(request.form.get("port", 1883))))
@@ -699,8 +719,54 @@ def create_app(runtime):
         radar["log_enabled"] = request.form.get("log_enabled") == "on"
         radar["callsign_color"] = request.form.get("callsign_color", "#00d0ff")
         radar["info_color"] = request.form.get("info_color", "#ff8c1a")
+        # Una casella lasciata vuota fa seguire alla rotta il colore dei
+        # dettagli: e' il comportamento di prima, quando la rotta stava in
+        # quella riga.
+        radar["route_color"] = request.form.get("route_color", "").strip()
         dmdconf.save()
         runtime.radar.poll_now()
+        return redirect(url_for("page_radar"))
+
+    @app.route("/api/radar/lookup", methods=["POST"])
+    def api_radar_lookup():
+        kind = request.form.get("kind", "")
+        if kind not in lookup.KINDS:
+            return redirect(url_for("page_radar"))
+        entries, errors = lookup.save(kind, request.form.get("text", ""))
+        lang = current_language()
+        if errors:
+            messaggio = i18n.translate("lookup.saved.errors", lang,
+                                       count=len(entries), errors=len(errors))
+            # Le prime righe scartate viaggiano nella query string: sono
+            # l'unica cosa che serve davvero per correggere.
+            bad = "|".join("%d:%s" % (n, motivo) for n, motivo, _ in errors[:8])
+            return redirect(url_for("page_radar", lookup_result=messaggio,
+                                    lookup_bad=bad))
+        return redirect(url_for("page_radar", lookup_result=i18n.translate(
+            "lookup.saved", lang, count=len(entries))))
+
+    @app.route("/api/radar/lookup/reload", methods=["POST"])
+    def api_radar_lookup_reload():
+        lookup.invalidate()
+        return redirect(url_for("page_radar", lookup_result=i18n.translate(
+            "lookup.reloaded", current_language())))
+
+    @app.route("/api/radar/lookup/add", methods=["POST"])
+    def api_radar_lookup_add():
+        lang = current_language()
+        aggiunti = 0
+        for kind in lookup.KINDS:
+            codici = [item["code"] for item in lookup.unknown(kind)]
+            aggiunti += lookup.append_missing(kind, codici)
+        chiave = "lookup.added" if aggiunti else "lookup.added.none"
+        if aggiunti:
+            lookup.forget_unknown()
+        return redirect(url_for("page_radar", lookup_result=i18n.translate(
+            chiave, lang, count=aggiunti)))
+
+    @app.route("/api/radar/lookup/forget", methods=["POST"])
+    def api_radar_lookup_forget():
+        lookup.forget_unknown()
         return redirect(url_for("page_radar"))
 
     @app.route("/api/radar/poll", methods=["POST"])

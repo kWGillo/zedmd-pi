@@ -225,8 +225,35 @@ def payload_files(source):
                 for line in handle:
                     parts = line.split()
                     if len(parts) == 2 and "/" not in parts[1]:
-                        # Solo la radice: le sottocartelle le copia PAYLOAD_DIRS.
+                        # Solo la radice: le sottocartelle le copia payload_dirs().
                         names.add(parts[1])
+        except OSError:
+            pass
+    return sorted(names)
+
+
+def payload_dirs(source):
+    """Le sottocartelle da installare, dichiarate dall'archivio.
+
+    Stesso ragionamento di `payload_files`, applicato alle cartelle: se una
+    versione nuova ne introduce una, l'elenco cablato qui — che appartiene
+    alla versione vecchia, quella che sta eseguendo l'aggiornamento — non la
+    conterrebbe, e i file resterebbero indietro. Il manifest dell'archivio
+    invece la nomina, perche' lo scrive la versione nuova.
+
+    La cablatura resta come rete di sicurezza per un archivio senza manifest.
+    """
+    names = set(PAYLOAD_DIRS)
+    manifest = os.path.join(source, "manifest-install.md5")
+    if os.path.exists(manifest):
+        try:
+            with open(manifest) as handle:
+                for line in handle:
+                    parts = line.split()
+                    if len(parts) == 2 and "/" in parts[1]:
+                        top = parts[1].split("/", 1)[0]
+                        if top and os.path.isdir(os.path.join(source, top)):
+                            names.add(top)
         except OSError:
             pass
     return sorted(names)
@@ -240,7 +267,7 @@ def install_files(source, destination=None):
         src = os.path.join(source, name)
         if os.path.exists(src):
             shutil.copy2(src, os.path.join(destination, name))
-    for name in PAYLOAD_DIRS:
+    for name in payload_dirs(source):
         src = os.path.join(source, name)
         if not os.path.isdir(src):
             continue

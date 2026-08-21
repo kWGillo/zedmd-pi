@@ -354,7 +354,7 @@ class Runtime:
 
 
 def main():
-    print("[dmd] DMD Controller %s" % __version__)
+    print("[dmd] kWGillo DMD Server %s" % __version__)
     runtime = Runtime()
 
     signal.signal(signal.SIGTERM, runtime.shutdown)
