@@ -1,6 +1,6 @@
 # DMD su Raspberry Pi — Manuale completo
 
-**Versione del software: 1.8** · Repository: **https://github.com/kWGillo/zedmd-pi**
+**Versione del software: 1.12.5** · Repository: **https://github.com/kWGillo/zedmd-pi**
 
 Pannelli LED P2.5 128×64 con chip **FM6373** (S-PWM), due moduli in cascata →
 **256×64 px**, pilotati da un Raspberry Pi che si presenta a Batocera come un

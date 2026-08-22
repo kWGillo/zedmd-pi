@@ -1,7 +1,7 @@
 ---
 title: "DMD Controller — Now Playing"
 subtitle: "Titolo, artista e avanzamento del brano sul pannello, da AirPlay 2, Spotify e Home Assistant"
-author: "zedmd-pi 1.10 — github.com/kWGillo/zedmd-pi"
+author: "zedmd-pi 1.12.5 — github.com/kWGillo/zedmd-pi"
 lang: it
 ---
 
