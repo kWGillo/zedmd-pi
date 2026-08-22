@@ -7,7 +7,7 @@ f9a19df7caa1b28f9cdebade3fd62905  display.py
 f3b696dd15e63ed24d8747c544b9d229  dmdconf.py
 3d47573ee0a89e804471159f2e6e303c  dmdd.py
 63fb7b8f1dc85f611a31839d74d8bb84  hass.py
-ab60204ab51a075ce20ad4a157cec55b  i18n.py
+4e7112bbe4e589c6763b19f511f805d2  i18n.py
 4ae095e9d491ef0324c99fc106ae8d20  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 6c3ce2542e82e2e087d3c24e5689e263  lookup.py
@@ -23,7 +23,7 @@ ce34b7916936b8b98bf2db8900b565a4  setup_share.sh
 3b39b30dc72152ecb2bd37b0704fefcb  sources/clock.py
 2230f5ed387f0eacb47aca431b3b7569  sources/media.py
 4939bc6965d8132298fdbe783bc0b04f  sources/nowplaying.py
-8e436962423420c88837e76f3cf11205  sources/zedmd.py
+7da59ff07f96672278b3e3289284bd41  sources/zedmd.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 f5aca805fd2998ee04499867e8b49a82  static/style.css
 e7cbc43ed729a6fc7f71dc5d266d5a98  templates/banner.html
@@ -36,6 +36,6 @@ fc820c3435f5edea162ed83ce33fb964  templates/services.html
 8151f3bab9ae148c25a3fd7298f14479  templates/settings.html
 7a1af5e1fdc1940d480ff7460bb1ff5b  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-15733dd5878793577947a749ed3e0914  version.py
+218f33b0b38a33be6dce861168c7e1a5  version.py
 bd3386d672f6314e69f749c8c46abef3  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

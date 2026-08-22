@@ -2,6 +2,26 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.12.2]
+
+### Corretto
+- **Un client ZeDMD collegato non si prende piu' il pannello per sempre.** Su
+  Batocera dmdserver e' un servizio permanente: si aggancia all'avvio e resta
+  li' anche a menu fermo, mandando keep-alive ogni 100 ms. La sola
+  connessione bastava a dare la precedenza a ZeDMD, che senza partita non
+  manda niente: il pannello sarebbe rimasto nero e orologio, radar e banner
+  non sarebbero piu' ricomparsi. Ora conta l'arrivo dei **fotogrammi**, non
+  la connessione e nemmeno il traffico — i keep-alive non sono contenuto.
+- La connessione appena aperta vale come segnale di vita per la stessa
+  finestra di cortesia (60 s), cosi' il primo fotogramma di una partita non
+  arriva su un pannello che ha appena ceduto il posto all'orologio.
+- Lo stato del servizio distingue i tre casi che prima si somigliavano:
+  nessuno collegato, collegato ma senza un solo fotogramma, in trasmissione.
+- Corretto un errore della 1.12.1: i contatori dell'handshake venivano
+  inizializzati solo allo spegnimento, quindi la pagina dei servizi andava in
+  errore fino al primo handshake. Un test nuovo legge lo stato di **tutte** le
+  sorgenti appena costruite, che e' la prova che mancava.
+
 ## [1.12.1]
 
 ### Aggiunto

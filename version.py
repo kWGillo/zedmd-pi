@@ -162,6 +162,17 @@ Storico:
         servizio. "Nessun client" confondeva due guasti diversi: il client che
         non ha mai raggiunto il Pi, e il client che si e' presentato ma non ha
         aperto il flusso. Ora si distinguono senza indovinare.
+  1.12.2 Un client ZeDMD collegato non si prende piu' il pannello per sempre.
+        Su Batocera dmdserver e' un servizio permanente: resta agganciato
+        anche a menu fermo, mandando keep-alive ogni 100 ms, e la connessione
+        da sola bastava a dare la precedenza a ZeDMD — che senza partita non
+        manda niente. Il pannello sarebbe rimasto nero e orologio, radar e
+        banner non sarebbero piu' ricomparsi. Ora contano i fotogrammi, non la
+        connessione ne' il traffico. Lo stato del servizio distingue i tre
+        casi che prima si somigliavano: nessuno collegato, collegato e muto,
+        collegato e in trasmissione. Corretto anche un errore della 1.12.1,
+        che inizializzava i contatori dell'handshake solo allo spegnimento:
+        la pagina dei servizi andava in errore fino al primo handshake.
 """
 
-__version__ = "1.12.1"
+__version__ = "1.12.2"

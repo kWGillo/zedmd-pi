@@ -95,6 +95,7 @@ class ZeDMDSource(Source):
         self._last_activity = 0.0
         self._frames = 0
         self._transport = None
+        self._azzera_contatti()
 
     # ------------------------------------------------------------------ ciclo di vita
 
@@ -122,6 +123,17 @@ class ZeDMDSource(Source):
         self._client_addr = None
         self._transport = None
         self._last_activity = 0.0
+        self._azzera_contatti()
+
+    def _azzera_contatti(self):
+        """Gli istanti che raccontano il rapporto con il client.
+
+        Stanno insieme in un metodo perche' vanno azzerati negli stessi due
+        momenti — alla costruzione e allo spegnimento — e tenerli allineati a
+        mano e' esattamente il genere di cosa che si dimentica: nella 1.12.1
+        li avevo messi solo nello spegnimento, e la pagina dei servizi andava
+        in errore finche' non arrivava il primo handshake.
+        """
         # Il colloquio HTTP che precede il flusso. Tenerne traccia separa due
         # guasti che da fuori si somigliano: "il client non ha mai parlato con
         # il Pi" e "si sono parlati, ma il flusso non e' partito". Senza questo
@@ -129,16 +141,34 @@ class ZeDMDSource(Source):
         self._last_handshake = 0.0
         self._handshake_addr = None
         self._handshakes = 0
+        self._connected_at = 0.0
+        # Ultimo *fotogramma* ricevuto, che non e' l'ultimo byte: il protocollo
+        # manda keep-alive ogni 100 ms, quindi un client collegato e fermo
+        # sembra vivissimo se si guarda il traffico.
+        self._last_frame = 0.0
 
     # ------------------------------------------------------------------ arbitro
 
     def active(self):
+        """Il display spetta a ZeDMD finche' arrivano fotogrammi.
+
+        Non basta che un client sia collegato. Su Batocera dmdserver e' un
+        servizio permanente: si aggancia all'avvio del sistema e resta li'
+        anche a menu fermo, mandando keep-alive ogni 100 ms. Trattare la
+        connessione come "sorgente attiva" significava consegnargli il
+        pannello per sempre — nero, perche' senza partita non manda niente —
+        e orologio, radar e banner non sarebbero piu' ricomparsi.
+
+        Si guardano quindi i fotogrammi. La connessione appena aperta vale
+        come segnale di vita per la stessa finestra di cortesia, cosi' il
+        primo fotogramma di una partita non arriva su un pannello che ha
+        appena ceduto il posto all'orologio.
+        """
         if not self._running:
             return False
-        if self._client_addr is not None:
-            return True
         grace = self.cfg["zedmd"]["grace_seconds"]
-        return (time.time() - self._last_activity) < grace
+        recente = max(self._last_frame, self._connected_at)
+        return (time.time() - recente) < grace
 
     def frame(self):
         with self._lock:
@@ -152,10 +182,18 @@ class ZeDMDSource(Source):
         if not self._running:
             return self.t("status.disabled", lang)
         if self._client_addr:
+            if not self._frames:
+                # Collegato ma muto: e' lo stato di dmdserver a menu fermo, e
+                # senza dirlo si vede solo un pannello nero.
+                return self.t("status.zedmd.connected.silent", lang,
+                              addr=self._client_addr[0],
+                              transport=self._transport or "TCP",
+                              since=int(time.time() - self._connected_at))
             return self.t("status.zedmd.connected", lang,
                           addr=self._client_addr[0],
                           transport=self._transport or "TCP",
-                          frames=self._frames)
+                          frames=self._frames,
+                          idle=int(time.time() - self._last_frame))
         if self._last_activity:
             return self.t("status.zedmd.idle", lang,
                           idle=int(time.time() - self._last_activity),
@@ -235,6 +273,7 @@ class ZeDMDSource(Source):
                 break
             print("[zedmd] client connesso via TCP: %s" % (addr,))
             self._client_addr = addr
+            self._connected_at = time.time()
             self._transport = "TCP"
             self._last_activity = time.time()
             try:
@@ -283,6 +322,7 @@ class ZeDMDSource(Source):
             if not announced:
                 print("[zedmd] frame in arrivo via UDP da %s" % (addr,))
                 announced = True
+                self._connected_at = time.time()
             self._transport = "UDP"
             self._last_activity = time.time()
             self._udp_pending.extend(data)
@@ -357,6 +397,7 @@ class ZeDMDSource(Source):
             with self._lock:
                 self._dirty = True
                 self._frames += 1
+                self._last_frame = time.time()
             return
 
         if command == CMD_CLEAR_SCREEN:
@@ -442,6 +483,7 @@ class ZeDMDSource(Source):
             self._buffer[:] = pixels
             self._dirty = True
             self._frames += 1
+            self._last_frame = time.time()
 
     def _led_test(self):
         with self._lock:
