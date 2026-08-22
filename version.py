@@ -157,6 +157,11 @@ Storico:
         l'aviazione generale che usa l'immatricolazione, non mostra nulla in
         quel campo invece di inventarsi una sigla. Il registro dei passaggi
         guadagna la colonna airline_name.
+  1.12.1 Il colloquio HTTP che precede il flusso ZeDMD finisce nel registro,
+        con l'indirizzo di chi lo ha chiesto, e compare nello stato del
+        servizio. "Nessun client" confondeva due guasti diversi: il client che
+        non ha mai raggiunto il Pi, e il client che si e' presentato ma non ha
+        aperto il flusso. Ora si distinguono senza indovinare.
 """
 
-__version__ = "1.12"
+__version__ = "1.12.1"

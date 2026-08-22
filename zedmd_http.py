@@ -84,6 +84,16 @@ class ZeDMDHttpServer:
             if "?" in path:
                 path = path.split("?", 1)[0]
 
+            # Chi ha chiesto che cosa. Sono poche richieste per connessione e
+            # succedono solo all'aggancio: nel registro valgono molto piu' di
+            # quanto costino, perche' quando il pannello resta nero e' l'unica
+            # prova che il client abbia davvero raggiunto il Pi.
+            print("[zedmd-http] %s %s" % (addr[0], path))
+            try:
+                self.runtime.zedmd.note_handshake(addr[0], path)
+            except Exception:
+                pass
+
             body = self._route(path)
             if body is None:
                 response = self._redirect(addr)

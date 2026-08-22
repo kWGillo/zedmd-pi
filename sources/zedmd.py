@@ -122,6 +122,13 @@ class ZeDMDSource(Source):
         self._client_addr = None
         self._transport = None
         self._last_activity = 0.0
+        # Il colloquio HTTP che precede il flusso. Tenerne traccia separa due
+        # guasti che da fuori si somigliano: "il client non ha mai parlato con
+        # il Pi" e "si sono parlati, ma il flusso non e' partito". Senza questo
+        # dato restava solo "nessun client", che li confonde.
+        self._last_handshake = 0.0
+        self._handshake_addr = None
+        self._handshakes = 0
 
     # ------------------------------------------------------------------ arbitro
 
@@ -153,8 +160,20 @@ class ZeDMDSource(Source):
             return self.t("status.zedmd.idle", lang,
                           idle=int(time.time() - self._last_activity),
                           frames=self._frames)
+        if self._last_handshake:
+            return self.t("status.zedmd.handshake", lang,
+                          addr=self._handshake_addr or "?",
+                          ago=int(time.time() - self._last_handshake),
+                          count=self._handshakes,
+                          port=self.cfg["zedmd"]["stream_port"])
         return self.t("status.zedmd.listening", lang,
                       port=self.cfg["zedmd"]["stream_port"])
+
+    def note_handshake(self, addr, path):
+        """Registra una richiesta HTTP del client, per poterla raccontare."""
+        self._last_handshake = time.time()
+        self._handshake_addr = addr
+        self._handshakes += 1
 
     # ------------------------------------------------------------------ handshake HTTP
 

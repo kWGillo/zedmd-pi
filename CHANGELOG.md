@@ -2,6 +2,17 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.12.1]
+
+### Aggiunto
+- **Il colloquio HTTP che precede il flusso ZeDMD finisce nel registro**, con
+  l'indirizzo di chi lo ha chiesto (`[zedmd-http] 192.168.0.112 /handshake`),
+  e l'ultimo contatto compare nello stato del servizio.
+- Lo stato "in ascolto, nessun client" confondeva due guasti che da fuori si
+  somigliano: il client che non ha mai raggiunto il Pi — indirizzo sbagliato,
+  rete diversa — e il client che si e' presentato ma non ha aperto il flusso
+  sulla 3333. Ora lo stato dice quale dei due.
+
 ## [1.12]
 
 ### Aggiunto

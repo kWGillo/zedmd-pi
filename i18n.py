@@ -65,6 +65,11 @@ STRINGS = {
                                "connected from %(addr)s over %(transport)s (%(frames)d frames)"),
     "status.zedmd.idle": ("in attesa, ultimo frame %(idle)d s fa (%(frames)d totali)",
                           "idle, last frame %(idle)d s ago (%(frames)d total)"),
+    "status.zedmd.handshake": (
+        "handshake da %(addr)s %(ago)d s fa (%(count)d richieste), "
+        "ma nessun flusso sulla porta %(port)d",
+        "handshake from %(addr)s %(ago)d s ago (%(count)d requests), "
+        "but no stream on port %(port)d"),
     "status.zedmd.listening": ("in ascolto su TCP/UDP %(port)d, nessun client",
                                "listening on TCP/UDP %(port)d, no client"),
     "status.clock.active": ("attivo, formato %(format)s, giorni in %(language)s",
