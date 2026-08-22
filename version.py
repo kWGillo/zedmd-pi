@@ -173,6 +173,18 @@ Storico:
         collegato e in trasmissione. Corretto anche un errore della 1.12.1,
         che inizializzava i contatori dell'handshake solo allo spegnimento:
         la pagina dei servizi andava in errore fino al primo handshake.
+  1.12.3 Due difetti dello stesso tipo, entrambi sul pannello che non si
+        aggiorna. Gli aggiornamenti a zone scrivevano i pixel ma non
+        chiedevano di ridisegnare: aspettavano un comando RenderFrame che non
+        sempre arriva, e l'immagine restava indietro finche' un aggiornamento
+        successivo non la sbloccava per caso — si vedeva come "cambio gioco e
+        il DMD resta fermo, ne cambio un altro e allora si aggiorna". Ora le
+        zone rimaste in sospeso si mostrano comunque dopo 120 ms, che durante
+        il gioco non scattano mai. E per la stessa ragione il pannello tornava
+        all'orologio dopo un minuto di menu fermo: la 1.12.2 misurava la
+        vitalita' sull'ultimo fotogramma, ma un client collegato che ha gia'
+        mandato qualcosa tiene il pannello finche' resta collegato — l'immagine
+        del tavolo selezionato deve poter restare ferma per minuti.
 """
 
-__version__ = "1.12.2"
+__version__ = "1.12.3"

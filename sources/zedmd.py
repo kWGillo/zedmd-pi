@@ -59,6 +59,15 @@ CMD_RGB_ORDER = 0x17
 ZONES_PER_ROW = 16
 ZONE_ROWS = 8
 
+# Quanto si aspetta un RenderFrame prima di mostrare comunque le zone gia'
+# scritte. Le zone sono aggiornamenti parziali: il protocollo prevede che sia
+# RenderFrame a dire "adesso e' completo", e pubblicare subito rischierebbe di
+# far vedere mezza immagine. Ma se quel comando non arriva — e non sempre
+# arriva — il pannello resta indietro finche' non cambia qualcos'altro.
+# Un ottavo di secondo non si nota durante il gioco, dove RenderFrame arriva a
+# ogni fotogramma e questa rete di sicurezza non scatta mai.
+PENDING_FLUSH = 0.12
+
 
 def rgb565_to_rgb888(raw):
     """Converte un blocco di pixel RGB565 little-endian in un array (n, 3)."""
@@ -146,37 +155,72 @@ class ZeDMDSource(Source):
         # manda keep-alive ogni 100 ms, quindi un client collegato e fermo
         # sembra vivissimo se si guarda il traffico.
         self._last_frame = 0.0
+        # Zone scritte in attesa del RenderFrame che le renda visibili.
+        self._pending_since = 0.0
+        self._flushed = 0
 
     # ------------------------------------------------------------------ arbitro
 
     def active(self):
-        """Il display spetta a ZeDMD finche' arrivano fotogrammi.
+        """Chi ha diritto al pannello, fra ZeDMD e le sorgenti locali.
 
-        Non basta che un client sia collegato. Su Batocera dmdserver e' un
-        servizio permanente: si aggancia all'avvio del sistema e resta li'
-        anche a menu fermo, mandando keep-alive ogni 100 ms. Trattare la
-        connessione come "sorgente attiva" significava consegnargli il
-        pannello per sempre — nero, perche' senza partita non manda niente —
-        e orologio, radar e banner non sarebbero piu' ricomparsi.
+        La regola e' in due parti, e ciascuna nasce da un guasto vero.
 
-        Si guardano quindi i fotogrammi. La connessione appena aperta vale
-        come segnale di vita per la stessa finestra di cortesia, cosi' il
-        primo fotogramma di una partita non arriva su un pannello che ha
-        appena ceduto il posto all'orologio.
+        **Client collegato.** Su Batocera dmdserver e' un servizio permanente:
+        si aggancia all'avvio e resta li' anche a menu fermo, mandando
+        keep-alive ogni 100 ms. Se la sola connessione bastasse, il pannello
+        gli resterebbe assegnato per sempre — nero, perche' prima che
+        qualcuno selezioni qualcosa non manda niente — e orologio, radar e
+        banner non ricomparirebbero mai. Quindi un client collegato che non ha
+        **mai** mandato un fotogramma tiene il pannello solo per la finestra
+        di cortesia, poi lo cede.
+
+        Ma una volta che ha mandato qualcosa, il pannello e' suo finche' resta
+        collegato. Sul cabinato l'immagine del tavolo selezionato puo' restare
+        ferma per minuti: farla sparire dopo un minuto perche' "non arriva
+        niente di nuovo" sarebbe un guasto, non un risparmio. E' l'errore che
+        ho commesso nella 1.12.2 legando tutto all'ultimo fotogramma.
+
+        **Client scollegato.** Qui vale la finestra di cortesia sull'ultimo
+        fotogramma: copre le riconnessioni brevi senza far lampeggiare
+        l'orologio fra una partita e l'altra.
         """
         if not self._running:
             return False
         grace = self.cfg["zedmd"]["grace_seconds"]
-        recente = max(self._last_frame, self._connected_at)
-        return (time.time() - recente) < grace
+        if self._client_addr is not None:
+            if self._frames:
+                return True
+            return (time.time() - self._connected_at) < grace
+        return (time.time() - self._last_frame) < grace
 
     def frame(self):
         with self._lock:
-            if not self._dirty:
+            if not self._dirty and not self._scaduta_l_attesa():
                 return None
             self._dirty = False
+            self._pending_since = 0.0
             # fromarray copia già: una seconda copia sarebbe sprecata.
             return Image.fromarray(self._buffer, "RGB")
+
+    def _scaduta_l_attesa(self):
+        """Vero se ci sono zone scritte e il RenderFrame non e' mai arrivato.
+
+        Va chiamata con il lock gia' preso. Il conteggio separato serve a
+        distinguere, guardando lo stato, un client che segue il protocollo da
+        uno che si affida al dispositivo per decidere quando disegnare.
+        """
+        if not self._pending_since:
+            return False
+        if (time.time() - self._pending_since) < PENDING_FLUSH:
+            return False
+        self._flushed += 1
+        self._frames += 1
+        self._last_frame = time.time()
+        if self._flushed == 1:
+            print("[zedmd] zone senza RenderFrame: pubblicate dopo %d ms"
+                  % int(PENDING_FLUSH * 1000))
+        return True
 
     def status(self, lang=None):
         if not self._running:
@@ -396,6 +440,7 @@ class ZeDMDSource(Source):
         if command == CMD_RENDER_FRAME:
             with self._lock:
                 self._dirty = True
+                self._pending_since = 0.0
                 self._frames += 1
                 self._last_frame = time.time()
             return
@@ -404,6 +449,7 @@ class ZeDMDSource(Source):
             with self._lock:
                 self._buffer[:] = 0
                 self._dirty = True
+                self._pending_since = 0.0
             return
 
         if command == CMD_BRIGHTNESS and payload:
@@ -444,6 +490,7 @@ class ZeDMDSource(Source):
         length = len(payload)
 
         with self._lock:
+            scritto = False
             while pos < length:
                 index = payload[pos]
                 pos += 1
@@ -452,6 +499,7 @@ class ZeDMDSource(Source):
                     zone = index - 128
                     x0, y0 = self._zone_origin(zone)
                     self._buffer[y0:y0 + zh, x0:x0 + zw] = 0
+                    scritto = True
                     continue
 
                 if pos + zone_bytes > length:
@@ -466,6 +514,16 @@ class ZeDMDSource(Source):
 
                 x0, y0 = self._zone_origin(index)
                 self._buffer[y0:y0 + zh, x0:x0 + zw] = pixels
+                scritto = True
+
+            if scritto:
+                # Contenuto arrivato: vale come segno di vita anche se il
+                # RenderFrame non si vedra' mai, altrimenti dopo un minuto
+                # l'arbitro toglierebbe il pannello a una sorgente che sta
+                # trasmettendo.
+                self._last_frame = time.time()
+                if not self._pending_since:
+                    self._pending_since = self._last_frame
 
     def _zone_origin(self, index):
         return (index % ZONES_PER_ROW) * self.zone_width, (index // ZONES_PER_ROW) * self.zone_height
@@ -482,6 +540,7 @@ class ZeDMDSource(Source):
         with self._lock:
             self._buffer[:] = pixels
             self._dirty = True
+            self._pending_since = 0.0
             self._frames += 1
             self._last_frame = time.time()
 

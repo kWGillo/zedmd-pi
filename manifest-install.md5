@@ -19,7 +19,7 @@ c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 3b39b30dc72152ecb2bd37b0704fefcb  sources/clock.py
 2230f5ed387f0eacb47aca431b3b7569  sources/media.py
 4939bc6965d8132298fdbe783bc0b04f  sources/nowplaying.py
-7da59ff07f96672278b3e3289284bd41  sources/zedmd.py
+1373da9c83e7fec62530cb31e9988db2  sources/zedmd.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 f5aca805fd2998ee04499867e8b49a82  static/style.css
 e7cbc43ed729a6fc7f71dc5d266d5a98  templates/banner.html
@@ -30,6 +30,6 @@ de9753df82063c2bfbc9bfb357776c37  templates/media.html
 7c1896fe748f44bc6bd851dc96a37a83  templates/radar.html
 fc820c3435f5edea162ed83ce33fb964  templates/services.html
 8151f3bab9ae148c25a3fd7298f14479  templates/settings.html
-218f33b0b38a33be6dce861168c7e1a5  version.py
+c970cd74eac8c1f41c44e24a6a47cd6a  version.py
 bd3386d672f6314e69f749c8c46abef3  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

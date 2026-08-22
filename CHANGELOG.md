@@ -2,6 +2,28 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.12.3]
+
+### Corretto
+- **Gli aggiornamenti a zone non facevano ridisegnare il pannello.** Il
+  protocollo prevede che sia il comando `RenderFrame` a dire "adesso
+  l'immagine e' completa", e le zone si limitavano a scrivere i pixel. Quel
+  comando pero' non arriva sempre: l'immagine restava nel buffer, invisibile,
+  finche' un aggiornamento successivo non la sbloccava per caso. Si vedeva
+  come "cambio gioco selezionato e il DMD resta fermo, ne cambio un altro e
+  allora si aggiorna". Ora le zone rimaste in sospeso vengono mostrate
+  comunque dopo 120 ms — durante il gioco `RenderFrame` arriva a ogni
+  fotogramma e questa rete di sicurezza non scatta mai.
+- **Il pannello tornava all'orologio dopo un minuto a menu fermo.** E' una
+  regressione della 1.12.2, che misurava la vitalita' sull'ultimo fotogramma
+  ricevuto. Sul cabinato l'immagine del tavolo selezionato resta ferma per
+  minuti: farla sparire non e' un risparmio, e' un guasto. La regola ora e'
+  in due parti: un client collegato che non ha **mai** mandato un fotogramma
+  cede il pannello dopo la finestra di cortesia — cosi' dmdserver, che si
+  aggancia all'avvio, non lo tiene nero per sempre — mentre uno che ha gia'
+  mandato qualcosa lo tiene finche' resta collegato. A connessione caduta
+  vale la cortesia sull'ultimo fotogramma, che copre le riconnessioni brevi.
+
 ## [1.12.2]
 
 ### Corretto
