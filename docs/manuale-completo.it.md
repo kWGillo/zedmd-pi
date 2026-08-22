@@ -522,8 +522,22 @@ pagina Impostazioni dell'interfaccia web.
 `[ZeDMD] Enabled = 0` disattiva la ricerca del dispositivo su porta seriale:
 con il collegamento di rete attivo non serve ed eviterebbe conflitti.
 
-Poi, nel menu di Batocera, attiva il servizio **DMD reale** — non "DMD Web",
-che è il simulatore su browser.
+Poi attiva il servizio **DMD reale** — non "DMD Web", che è il simulatore su
+browser. Si chiama `dmd_real`, e dal menu o da riga di comando è lo stesso:
+
+```bash
+batocera-services enable dmd_real
+batocera-services start dmd_real
+```
+
+Controlla che sia partito, perché il `config.ini` da solo non avvia niente:
+
+```bash
+ps aux | grep dmdserver | grep -v grep
+```
+
+Deve comparire un `dmdserver` con l'argomento `-c /userdata/system/...`. Se
+non c'è, il file che hai appena scritto non lo legge nessuno.
 
 ### Verifica
 
@@ -534,9 +548,26 @@ Batocera. Deve comparire:
 [zedmd] client connesso via TCP: ('192.168.0.XXX', ...)
 ```
 
-Se invece vedi ripetutamente solo `GET /handshake` senza connessione, il client
-non riesce ad aprire lo stream: verifica che `zedmd.http_port` sia 80 e
-`web.port` sia 8080.
+Se invece vedi ripetutamente solo `[zedmd-http] ... /handshake` senza la riga
+della connessione, il client raggiunge il Raspberry ma non apre lo stream:
+verifica che `zedmd.http_port` sia 80 e `web.port` sia 8080.
+
+Se non vedi **nemmeno** la riga dell'handshake, il client non ha mai parlato
+con il Raspberry: o `dmdserver` non è in esecuzione, o `WiFiAddr` punta a un
+indirizzo sbagliato — succede tipicamente dopo aver cambiato scheda SD o
+Raspberry. Lo si distingue in un secondo provando dal cabinato:
+
+```bash
+curl -s http://192.168.0.XXX/handshake; echo
+```
+
+Una risposta con 22 campi separati da `|` assolve rete e Raspberry.
+
+Un ultimo comportamento da conoscere, che non è un guasto: **tenendo premuto il
+tasto di scorrimento l'immagine non si aggiorna**, e non si aggiorna nemmeno al
+rilascio. EmulationStation apre una connessione verso `dmdserver` a ogni
+cambio di selezione, ma durante la ripetizione automatica non ne apre nessuna.
+Un tocco in più sul pad riallinea il pannello.
 
 ---
 

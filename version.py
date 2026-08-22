@@ -192,6 +192,15 @@ Storico:
         se ne riceve tanti e ne mostra pochi, che sarebbe un limite del ciclo
         di disegno. Senza questa distinzione ogni ottimizzazione sarebbe a
         occhio.
+  1.12.5 Documentazione: attivare il servizio dmd_real su Batocera era una riga
+        sola ("attiva DMD reale"), e nessuna spiegava come accorgersi che non
+        fosse partito. Il config.ini da solo non avvia niente, e il sintomo —
+        Raspberry in ascolto, nessun client — e' identico a quello di un
+        indirizzo sbagliato. Ora le due cause si distinguono in un comando, e
+        sono documentate le trappole viste sul campo: la chiave lasciata da
+        Pixelcade, l'indirizzo rimasto al Raspberry precedente, e il fatto che
+        tenendo premuto il tasto di scorrimento EmulationStation non pubblica
+        nessuna immagine.
 """
 
-__version__ = "1.12.4"
+__version__ = "1.12.5"

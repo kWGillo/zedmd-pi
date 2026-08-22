@@ -205,8 +205,35 @@ WiFiAddr = 192.168.0.XXX
 EOF
 ```
 
-Then enable the **DMD reale** service. Restart Batocera after any update of
-`zedmd-pi`: the client caches connection state and per-zone bookkeeping.
+Then enable the **DMD reale** service — `dmd_real`, from the menu or from the
+shell:
+
+```bash
+batocera-services enable dmd_real
+batocera-services start dmd_real
+```
+
+Check that it actually started, because the config file on its own starts
+nothing:
+
+```bash
+ps aux | grep dmdserver | grep -v grep
+```
+
+You must see a `dmdserver` process carrying `-c /userdata/system/...`. If it is
+missing, nobody is reading the file you just wrote, and the Pi will keep
+listening without ever seeing a client. From the Pi side, `journalctl -u dmd`
+tells the two failures apart: a `[zedmd-http] <ip> /handshake` line means the
+client reached the Pi, no such line means it never did — typically a stale
+`WiFiAddr` after swapping SD card or Pi.
+
+Restart Batocera after any update of `zedmd-pi`: the client caches connection
+state and per-zone bookkeeping.
+
+Known EmulationStation behaviour, not a fault: holding the scroll button does
+not update the panel, and neither does releasing it. ES opens a fresh
+connection to `dmdserver` on every selection change, but opens none during key
+auto-repeat. One extra press realigns the panel.
 
 ---
 

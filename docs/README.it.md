@@ -125,7 +125,21 @@ Enabled = 1
 WiFiAddr = 192.168.0.XXX
 ```
 
-Poi va riavviato il servizio `dmd_real`.
+Poi va attivato il servizio `dmd_real` — dal menu di Batocera oppure:
+
+```bash
+batocera-services enable dmd_real
+batocera-services start dmd_real
+```
+
+**Il `config.ini` da solo non avvia niente**: senza quel servizio non c'è
+nessun processo che lo legga, e il Raspberry resta in ascolto senza mai vedere
+un client. Si controlla così, e deve comparire un `dmdserver` con l'argomento
+`-c /userdata/system/...`:
+
+```bash
+ps aux | grep dmdserver | grep -v grep
+```
 
 Verifica rapida dell'handshake:
 
@@ -135,6 +149,17 @@ curl http://dmdpi.local/handshake
 
 Deve rispondere con 22 campi separati da `|`, i primi due sono larghezza e
 altezza del display.
+
+Dal lato Raspberry, `journalctl -u dmd` distingue i due guasti che da fuori si
+somigliano: la riga `[zedmd-http] <ip> /handshake` dice che il client ha
+raggiunto il Pi, la sua assenza che non ci ha mai provato — tipicamente un
+`WiFiAddr` rimasto al vecchio indirizzo dopo aver cambiato scheda o Raspberry.
+
+Un comportamento noto di EmulationStation, che non è un guasto: **tenendo
+premuto il tasto di scorrimento l'immagine non si aggiorna**, e non si aggiorna
+nemmeno al rilascio. ES apre una connessione verso `dmdserver` a ogni cambio di
+selezione, ma durante la ripetizione automatica del tasto non ne apre nessuna.
+Un tocco in più riallinea il pannello.
 
 ---
 

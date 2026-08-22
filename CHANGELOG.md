@@ -2,6 +2,21 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.12.5]
+
+### Modificato
+- **Documentazione del collegamento a Batocera.** Attivare il servizio
+  `dmd_real` era una riga sola, e non c'era modo di accorgersi che non fosse
+  partito: il `config.ini` da solo non avvia niente, e il sintomo — Raspberry
+  in ascolto, nessun client — e' identico a quello di un indirizzo sbagliato.
+  Ora i due casi si distinguono con un comando, e la verifica (`ps aux | grep
+  dmdserver`, che deve mostrare l'argomento `-c ...`) e' scritta accanto.
+- Documentate le trappole incontrate sul campo: la chiave
+  `dmd.pixelcade.dmdserver` lasciata da Pixelcade, che non e' l'interruttore di
+  `dmd_real`; l'indirizzo rimasto a un Raspberry precedente; e il fatto che
+  tenendo premuto il tasto di scorrimento EmulationStation non pubblica nessuna
+  immagine, nemmeno al rilascio — comportamento suo, non del collegamento.
+
 ## [1.12.4]
 
 ### Aggiunto

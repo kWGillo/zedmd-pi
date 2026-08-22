@@ -30,6 +30,6 @@ de9753df82063c2bfbc9bfb357776c37  templates/media.html
 7c1896fe748f44bc6bd851dc96a37a83  templates/radar.html
 fc820c3435f5edea162ed83ce33fb964  templates/services.html
 8151f3bab9ae148c25a3fd7298f14479  templates/settings.html
-c5bb967c3dc7acd24775f4852716b76d  version.py
+86d3d283331cb8475a95bea31f0c1498  version.py
 bd3386d672f6314e69f749c8c46abef3  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

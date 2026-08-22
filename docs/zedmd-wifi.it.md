@@ -176,7 +176,59 @@ Nel menu di Batocera, attiva **DMD reale**.
 > Non confonderlo con **DMD Web**, che è il simulatore su browser: è una cosa
 > diversa e non parla con il tuo pannello.
 
-### 4.3 Dopo ogni aggiornamento del DMD Controller
+Il servizio si chiama `dmd_real`, e da riga di comando si attiva così:
+
+```bash
+batocera-services enable dmd_real
+batocera-services start dmd_real
+```
+
+**Verifica che sia partito davvero**, perché è il punto in cui si perde più
+tempo:
+
+```bash
+ps aux | grep dmdserver | grep -v grep
+```
+
+Deve comparire un processo `dmdserver` **con l'argomento
+`-c /userdata/system/configs/dmdserver/config.ini`**. Se non compare niente, il
+file di configurazione che hai appena scritto non lo sta leggendo nessuno: il
+`config.ini` da solo non avvia nulla, e il Raspberry resterà in ascolto senza
+mai vedere un client. Se provi a lanciare `dmdserver` a mano senza `-c`, muore
+dopo pochi secondi con codice 2: senza configurazione non trova display e
+termina, che è il suo comportamento normale.
+
+Due trappole viste sul campo:
+
+- **Installare Pixelcade** aggiunge una propria gestione del DMD e la chiave
+  `dmd.pixelcade.dmdserver` in `batocera.conf`. Quella chiave la legge solo lo
+  script di Pixelcade: non è l'interruttore di `dmd_real`, e cambiarla non
+  avvia niente.
+- **Cambiando il Raspberry cambia l'indirizzo IP.** `WiFiAddr` punta ancora al
+  vecchio, e il sintomo è identico a "il servizio non parte". Il modo più
+  rapido per distinguerli è provare l'handshake dal cabinato:
+
+  ```bash
+  curl -s http://192.168.0.XXX/handshake; echo
+  ```
+
+  Se risponde con i 22 campi separati da `|`, la rete e il Raspberry sono a
+  posto e il problema è solo di chi deve avviare `dmdserver`.
+
+### 4.3 Un limite di EmulationStation, non del DMD
+
+Tenendo premuto il tasto di scorrimento, l'immagine sul pannello **non si
+aggiorna**, e non si aggiorna nemmeno quando rilasci: resta quella
+dell'elemento da cui sei partito. Basta un tocco in più per allinearla.
+
+Non è un difetto del collegamento. EmulationStation apre una connessione nuova
+verso `dmdserver` a ogni cambio di selezione, ma durante la ripetizione
+automatica del tasto non ne apre nessuna, e non ne apre una finale al rilascio:
+il pannello mostra correttamente l'ultima immagine che gli è stata mandata.
+Lo si verifica con `dmdserver -c ... -v`, che durante la pressione non stampa
+nulla.
+
+### 4.4 Dopo ogni aggiornamento del DMD Controller
 
 **Riavvia Batocera.** Il client tiene in memoria lo stato della connessione e la
 contabilità delle zone dell'immagine già inviate. Quando il servizio sul
