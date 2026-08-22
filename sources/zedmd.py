@@ -158,6 +158,16 @@ class ZeDMDSource(Source):
         # Zone scritte in attesa del RenderFrame che le renda visibili.
         self._pending_since = 0.0
         self._flushed = 0
+        # Ritmo. Serve a rispondere all'unica domanda che conta quando
+        # l'immagine arriva in ritardo: se il Pi riceve poco, il collo di
+        # bottiglia e' a monte — rete o client — e ottimizzare qui non
+        # servirebbe a niente. `_shown` conta i fotogrammi finiti davvero sul
+        # pannello: se e' molto minore di quelli ricevuti, il limite e' il
+        # ciclo di disegno, non il flusso.
+        self._shown = 0
+        self._fps_value = 0.0
+        self._fps_count = 0
+        self._fps_since = 0.0
 
     # ------------------------------------------------------------------ arbitro
 
@@ -200,8 +210,24 @@ class ZeDMDSource(Source):
                 return None
             self._dirty = False
             self._pending_since = 0.0
+            self._shown += 1
             # fromarray copia già: una seconda copia sarebbe sprecata.
             return Image.fromarray(self._buffer, "RGB")
+
+    def _nota_ritmo(self):
+        """Un fotogramma completo in piu'. Va chiamata con il lock preso."""
+        now = time.time()
+        self._frames += 1
+        self._last_frame = now
+        self._fps_count += 1
+        if not self._fps_since:
+            self._fps_since = now
+            return
+        span = now - self._fps_since
+        if span >= 3.0:
+            self._fps_value = self._fps_count / span
+            self._fps_count = 0
+            self._fps_since = now
 
     def _scaduta_l_attesa(self):
         """Vero se ci sono zone scritte e il RenderFrame non e' mai arrivato.
@@ -215,8 +241,7 @@ class ZeDMDSource(Source):
         if (time.time() - self._pending_since) < PENDING_FLUSH:
             return False
         self._flushed += 1
-        self._frames += 1
-        self._last_frame = time.time()
+        self._nota_ritmo()
         if self._flushed == 1:
             print("[zedmd] zone senza RenderFrame: pubblicate dopo %d ms"
                   % int(PENDING_FLUSH * 1000))
@@ -237,6 +262,8 @@ class ZeDMDSource(Source):
                           addr=self._client_addr[0],
                           transport=self._transport or "TCP",
                           frames=self._frames,
+                          fps=self._fps_value,
+                          shown=self._shown,
                           idle=int(time.time() - self._last_frame))
         if self._last_activity:
             return self.t("status.zedmd.idle", lang,
@@ -441,8 +468,7 @@ class ZeDMDSource(Source):
             with self._lock:
                 self._dirty = True
                 self._pending_since = 0.0
-                self._frames += 1
-                self._last_frame = time.time()
+                self._nota_ritmo()
             return
 
         if command == CMD_CLEAR_SCREEN:
@@ -541,8 +567,7 @@ class ZeDMDSource(Source):
             self._buffer[:] = pixels
             self._dirty = True
             self._pending_since = 0.0
-            self._frames += 1
-            self._last_frame = time.time()
+            self._nota_ritmo()
 
     def _led_test(self):
         with self._lock:

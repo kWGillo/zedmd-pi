@@ -62,10 +62,10 @@ STRINGS = {
     # ------------------------------------------------------------ stati servizi
     "status.disabled": ("disabilitato", "disabled"),
     "status.zedmd.connected": (
-        "connesso da %(addr)s via %(transport)s, %(frames)d frame, "
-        "ultimo %(idle)d s fa",
-        "connected from %(addr)s over %(transport)s, %(frames)d frames, "
-        "last one %(idle)d s ago"),
+        "connesso da %(addr)s via %(transport)s, %(frames)d frame ricevuti "
+        "(%(fps).1f/s), %(shown)d mostrati, ultimo %(idle)d s fa",
+        "connected from %(addr)s over %(transport)s, %(frames)d frames "
+        "received (%(fps).1f/s), %(shown)d shown, last one %(idle)d s ago"),
     "status.zedmd.connected.silent": (
         "connesso da %(addr)s via %(transport)s da %(since)d s, "
         "ma non ha ancora mandato nessun fotogramma",

@@ -2,6 +2,19 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [1.12.4]
+
+### Aggiunto
+- Lo stato di ZeDMD riporta i **fotogrammi ricevuti al secondo** e quanti ne
+  sono finiti davvero sul pannello: *"connesso da 192.168.0.112 via TCP, 1240
+  frame ricevuti (28.4/s), 980 mostrati, ultimo 0 s fa"*.
+- Servono a separare due cause che dall'esterno si somigliano. Se durante uno
+  scorrimento veloce il Pi riceve pochi fotogrammi al secondo, il limite e' a
+  monte — rete o client — e ottimizzare la decodifica non servirebbe a nulla.
+  Se ne riceve molti e ne mostra pochi, il limite e' il ciclo di disegno.
+  Misurato qui, digerire un fotogramma costa 1,6 ms: il decodificatore regge
+  centinaia di fotogrammi al secondo, quindi il sospetto e' altrove.
+
 ## [1.12.3]
 
 ### Corretto

@@ -185,6 +185,13 @@ Storico:
         vitalita' sull'ultimo fotogramma, ma un client collegato che ha gia'
         mandato qualcosa tiene il pannello finche' resta collegato — l'immagine
         del tavolo selezionato deve poter restare ferma per minuti.
+  1.12.4 Lo stato di ZeDMD conta i fotogrammi ricevuti al secondo e quelli
+        finiti davvero sul pannello. Sono numeri di diagnosi, non una
+        correzione: quando l'immagine arriva in ritardo dicono se il Pi ne
+        riceve pochi — e allora il limite e' a monte, rete o client — oppure
+        se ne riceve tanti e ne mostra pochi, che sarebbe un limite del ciclo
+        di disegno. Senza questa distinzione ogni ottimizzazione sarebbe a
+        occhio.
 """
 
-__version__ = "1.12.3"
+__version__ = "1.12.4"
