@@ -27,7 +27,7 @@ import spotifyapi
 from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      ClockSource, MediaPlayerSource, NowPlayingSource,
-                     ZeDMDSource)
+                     PreviewSource, ZeDMDSource)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -69,6 +69,12 @@ class Arbiter:
         """Allinea lo stato di avvio delle sorgenti ai toggle di configurazione."""
         services = self.cfg["services"]
         for name, source in self.sources.items():
+            # Una sorgente che non compare fra i servizi non si accende e non
+            # si spegne: e' sempre disponibile. E' il caso dell'anteprima, che
+            # non fa niente finche' nessuno la chiama e non ha senso come
+            # interruttore in una pagina.
+            if name not in services:
+                continue
             wanted = bool(services.get(name, False))
             if wanted and not source.enabled:
                 source.enabled = True
@@ -112,6 +118,10 @@ class Runtime:
         self.banner = BannerSource(self.cfg, self.display.width, self.display.height)
         self.birthdays = BirthdaysSource(self.cfg, self.display.width,
                                          self.display.height)
+        # L'anteprima ha la precedenza su tutto tranne ZeDMD: chi ha appena
+        # premuto "Vedi" sta guardando il pannello adesso.
+        self.preview = PreviewSource(self.cfg, self.display.width,
+                                     self.display.height, self.media)
         self.radar = AirRadarSource(self.cfg, self.display.width, self.display.height)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
@@ -125,8 +135,8 @@ class Runtime:
         self.spotify = spotifyapi.SpotifyPoller(self.cfg, self.nowplaying)
         self.hass = hass.HassBridge(self.cfg, self.mqtt, self)
 
-        for source in (self.zedmd, self.radar, self.player, self.birthdays,
-                       self.banner, self.media, self.clock):
+        for source in (self.zedmd, self.preview, self.radar, self.player,
+                       self.birthdays, self.banner, self.media, self.clock):
             self.arbiter.register(source)
         self.arbiter.apply_services()
 

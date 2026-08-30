@@ -83,6 +83,12 @@
 
 <section class="card">
   <h2>{{ t('media.files') }}</h2>
+  <p class="hint">{{ t('media.view.hint') }}</p>
+  {% if anteprima and anteprima != 'error' %}
+  <p class="status">{{ t('media.view.now', name=anteprima) }}</p>
+  {% elif anteprima == 'error' %}
+  <p class="status">{{ t('media.view.failed') }}</p>
+  {% endif %}
   {% if files %}
   <table class="files">
     {% for f in files %}
@@ -90,8 +96,11 @@
       <td class="mono">{{ f.rel }}</td>
       <td class="size">{{ f.size }}</td>
       <td class="act">
-        <a class="ghost small" target="_blank" rel="noopener"
-           href="{{ url_for('media_file', rel=f.rel) }}">{{ t('media.view') }}</a>
+        <form method="post" action="{{ url_for('api_media_show') }}">
+          <input type="hidden" name="rel" value="{{ f.rel }}">
+          <input type="hidden" name="p" value="{{ pagina }}">
+          <button type="submit" class="ghost small">{{ t('media.view') }}</button>
+        </form>
         <form method="post" action="{{ url_for('api_media_delete') }}">
           <input type="hidden" name="rel" value="{{ f.rel }}">
           <button type="submit" class="ghost small">{{ t('common.delete') }}</button>

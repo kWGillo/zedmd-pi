@@ -1109,6 +1109,22 @@ STRINGS = {
         "that change the installed software rather than tune it, which is "
         "why they live outside Settings."),
     "media.view": ("Vedi", "View"),
+    "media.view.hint": (
+        "«Vedi» manda il file sul pannello, non nel browser: quello che conta "
+        "è come viene lì, con quella scala e quei colori. Ha la precedenza su "
+        "tutto tranne ZeDMD, e dopo una decina di secondi il pannello torna a "
+        "quello che stava facendo.",
+        "“View” sends the file to the panel, not to the browser: what matters "
+        "is how it looks there, at that scale and with those colours. It takes "
+        "precedence over everything except ZeDMD, and after about ten seconds "
+        "the panel goes back to what it was doing."),
+    "media.view.now": ("Sul pannello: %(name)s", "On the panel: %(name)s"),
+    "media.view.failed": ("File non mostrabile.", "File cannot be shown."),
+    "status.preview.showing": ("sul pannello: %(name)s", "on the panel: %(name)s"),
+    "status.preview.idle": ("in attesa (%(count)d anteprime mostrate)",
+                            "idle (%(count)d previews shown)"),
+    "status.preview.error": ("ultima anteprima fallita: %(error)s",
+                             "last preview failed: %(error)s"),
     "media.page": (
         "File da %(first)d a %(last)d di %(total)d — pagina %(page)d di %(pages)d",
         "Files %(first)d to %(last)d of %(total)d — page %(page)d of %(pages)d"),

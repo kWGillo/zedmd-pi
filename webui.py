@@ -23,8 +23,8 @@ import nowplaying
 import presets
 import ota
 import spotifyapi
-from sources import (FIELD_LIST, LANGUAGES, OVERFLOW_MODES, PROVIDER_LIST,
-                     SIZE_KEYS, SLOTS, UNIT_KEYS,
+from sources import (FIELD_LIST, LANGUAGES, OVERFLOW_MODES,
+                     PROVIDER_LIST, SIZE_KEYS, SLOTS, UNIT_KEYS,
                      invalidate_scan, is_supported, normalize_list, scan_media,
                      have_ffmpeg, usable)
 from version import __version__
@@ -324,7 +324,33 @@ def create_app(runtime):
             pagina=pagina, pagine=pagine, primo=inizio + 1,
             ultimo=inizio + len(listing),
             media_dir=media_dir, ffmpeg=have_ffmpeg(),
+            anteprima=request.args.get("anteprima", ""),
             status=runtime.media.status(current_language()), page="media")
+
+    @app.route("/api/media/show", methods=["POST"])
+    def api_media_show():
+        """Mostra un file *preciso* della libreria sul pannello.
+
+        Da non confondere con /api/media/preview, che fa avanzare il Media
+        Player al contenuto successivo: qui si sceglie quale.
+
+        Guardarlo sul computer non risponde alla domanda vera: come viene su
+        *quel* pannello, con quella scala e quei colori. L'anteprima ha la
+        precedenza su tutto tranne ZeDMD.
+        """
+        media_dir = os.path.realpath(cfg["mediaplayer"]["media_dir"])
+        rel = request.form.get("rel", "")
+        percorso = os.path.realpath(os.path.join(media_dir, rel))
+        pagina = request.form.get("p", "1")
+        if not percorso.startswith(media_dir + os.sep) \
+                or not os.path.isfile(percorso) or not is_supported(percorso):
+            return redirect(url_for("page_media", p=pagina, anteprima="error"))
+        try:
+            secondi = int(request.form.get("seconds", 0))
+        except ValueError:
+            secondi = 0
+        runtime.preview.show(percorso, rel, secondi or None)
+        return redirect(url_for("page_media", p=pagina, anteprima=rel))
 
     @app.route("/media/file/<path:rel>")
     def media_file(rel):

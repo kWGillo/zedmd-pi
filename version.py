@@ -227,6 +227,17 @@ Storico:
         libreria media si sfoglia a pagine da 200 invece di fermarsi ai primi
         400 file, e accanto a Elimina c'e' Vedi: prima di cancellare qualcosa
         bisogna poter guardare che cos'e'.
+  2.0.2 Il pulsante "Vedi" della libreria media mostra il file **sul
+        pannello**, non nel browser: quello che conta e' come viene li', con
+        quella scala e quei colori. L'anteprima e' una sorgente a se', con
+        priorita' 90: sotto ZeDMD e sopra tutto il resto, perche' chi ha
+        appena premuto sta guardando il pannello adesso. Nella stessa pagina
+        il pulsante non si sovrappone piu' al peso del file. Air Radar mostra
+        i codici della rotta nella forma IATA di tre lettere anche quando il
+        servizio ha risposto in ICAO: MXP invece di LIMC. La frase
+        dell'anniversario dice "Domani e' l'anniversario di", non "Domani
+        l'anniversario di". Tolte dalle tre tabelle dieci righe con codici
+        ripetuti.
 """
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"

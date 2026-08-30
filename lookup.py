@@ -227,11 +227,16 @@ def parse(text):
             # Riga segnaposto: il codice c'e' ma la traduzione no. Non e' un
             # errore, e' un promemoria lasciato in sospeso.
             continue
+        # Forma preferita per il pannello: la sigla di tre lettere, cioe' la
+        # IATA. Sul display "MXP" dice quanto "LIMC" in tre caratteri invece
+        # di quattro, e la si riconosce dal biglietto. Se la riga non ne ha
+        # una da tre, resta il primo codice scritto.
+        preferito = next((c for c in codes if len(c) == 3), codes[0])
         for code in codes:
             if code in entries:
                 errors.append((number, "codice ripetuto: %s" % code, short_form))
                 continue
-            entries[code] = (short_form, full_form)
+            entries[code] = (short_form, full_form, preferito)
     return entries, errors
 
 
@@ -293,6 +298,21 @@ def _lookup(kind, code, index):
 def short(kind, code):
     """Forma breve per il pannello, o il codice stesso se non e' in tabella."""
     return _lookup(kind, code, 0)
+
+
+def preferred(kind, code):
+    """La sigla da mostrare: quella di tre lettere se la tabella la conosce.
+
+    Il servizio delle rotte risponde a volte in IATA e a volte in ICAO, e non
+    si puo' scegliere. Qui si sceglie come *mostrarla*, e la forma corta e'
+    quella che si legge sul biglietto.
+    """
+    return _lookup(kind, code, 2)
+
+
+def codes(text, kind="airport"):
+    """Traduce una rotta gia' composta nelle sole sigle preferite."""
+    return route(text, index=2)
 
 
 def full(kind, code):

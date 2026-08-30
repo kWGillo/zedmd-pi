@@ -2,6 +2,28 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [2.0.2]
+
+### Modificato
+- **«Vedi» mostra il file sul pannello, non nel browser.** Guardarlo sul
+  computer non risponde alla domanda vera — come viene su *quel* pannello, con
+  quella scala e quei colori — ed è per rispondere a quella che si preme il
+  pulsante prima di cancellare. L'anteprima è una sorgente a sé con priorità
+  **90**: sotto ZeDMD, sopra tutto il resto. Chi ha appena premuto sta
+  guardando il pannello adesso, e un aereo di passaggio non ha motivo di
+  scavalcarlo; una partita in corso sì.
+- **Air Radar: codici della rotta nella forma IATA di tre lettere** anche
+  quando il servizio ha risposto in ICAO — `MXP` invece di `LIMC`. Sono le
+  sigle stampate sul biglietto, e occupano un carattere in meno.
+- **La frase dell'anniversario**: «Domani **è** l'anniversario di …».
+
+### Corretto
+- Nella libreria media il pulsante Elimina si sovrapponeva al peso del file:
+  `display:flex` su una cella toglie la cella dal calcolo della tabella.
+- **Tolte dieci righe con codici ripetuti** dalle tre tabelle di conversione:
+  due negli aerei, due negli aeroporti, sei nelle compagnie. Erano innocue —
+  vinceva la prima occorrenza — ma facevano un avviso nel log a ogni lettura.
+
 ## [2.0.1]
 
 ### Corretto

@@ -717,11 +717,12 @@ class AirRadarSource(Source):
 
         return {
             "title": plane["flight"] or plane["reg"] or plane["hex"] or "SCONOSCIUTO",
-            # I codici della rotta accanto all'identificativo: sono corti,
-            # sempre della stessa lunghezza, e dicono in un colpo d'occhio da
-            # dove a dove — cosa che il nome esteso dice meglio ma piu' in
-            # basso e con molti piu' pixel.
-            "codes": (plane.get("route") or "").strip(),
+            # I codici della rotta accanto all'identificativo: corti, sempre
+            # della stessa lunghezza, dicono in un colpo d'occhio da dove a
+            # dove. Si mostrano nella forma **IATA** anche quando il servizio
+            # ha risposto in ICAO: tre lettere invece di quattro, e sono
+            # quelle stampate sul biglietto.
+            "codes": lookup.route((plane.get("route") or "").strip(), index=2),
             "title_color": parse_color(cfg.get("callsign_color", "#00d0ff"),
                                        (0, 208, 255)),
             "route": route_line,

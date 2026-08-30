@@ -50,7 +50,7 @@ def frase(voce, mostra_eta=True, lang="it"):
 
     if anniversario:
         quando = {0: "Oggi", 1: "Domani"}.get(mancano, "Fra %d giorni" % mancano)
-        testo = "%s l'anniversario di %s" % (quando, nome)
+        testo = "%s \u00e8 l'anniversario di %s" % (quando, nome)
         if anni:
             testo += " - %d anni" % anni
         return testo
