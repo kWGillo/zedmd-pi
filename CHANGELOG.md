@@ -2,6 +2,128 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [3.4]
+
+### Aggiunto
+- **Calendario della raccolta rifiuti, nella colonna libera dell'orologio.**
+  A sinistra dell'ora c'è sempre stato uno spazio vuoto; ora ci compaiono i
+  nomi di quello che va esposto stasera, uno sotto l'altro, ciascuno con il
+  proprio colore.
+
+  Non c'è nessun portale da interrogare e nessuna credenziale da custodire.
+  La raccolta ha una cadenza fissa: la si descrive **una volta** — quali
+  giorni della settimana, con che cadenza — e il calendario si calcola da sé,
+  per sempre, senza rete e senza dipendere da un servizio che domani cambia
+  l'API o chiude. Le cadenze previste sono quattro: settimanale, quindicinale,
+  prima e terza occorrenza del mese, seconda e quarta.
+
+  La quindicinale è ancorata a una **data di riferimento**, non alla parità
+  della settimana ISO. Sembra un dettaglio ed è invece la differenza fra un
+  calendario che funziona e uno che sbaglia: un anno ha 52 o 53 settimane, e
+  chi conta la parità salta silenziosamente un turno a ogni Capodanno. Con la
+  data di riferimento l'intervallo resta di 14 giorni esatti attraverso il
+  cambio d'anno — verificato su tre Capodanni consecutivi.
+
+- **Due tabelle di eccezioni, perché sono due cose diverse**: i giorni di
+  **mancato servizio** e quelli di **servizio straordinario**. Ogni comune fa
+  storia a sé, e la festività che sposta il giro si scrive come due righe — la
+  soppressione del giorno saltato e il recupero del giorno aggiunto — che
+  funzionano insieme. Una riga scritta male viene scartata da sola, con il
+  numero di riga nel log, senza portarsi via il resto del calendario.
+
+- **Attività comunali accanto ai rifiuti, con una fascia oraria propria.** Il
+  lavaggio strada che vieta la sosta dalle 00:00 alle 06:00 non è un bidone da
+  esporre: l'avviso resta finché il divieto è in vigore, non fino alle 8. Il
+  tipo di voce si sceglie per voce, e le due caselle dell'orario compaiono
+  solo dove hanno senso.
+
+- **L'evento su Home Assistant, non il calendario.** Per ogni voce un
+  `binary_sensor` che dice se in questo momento va esposta e un `sensor` con
+  la data della prossima raccolta (`device_class: date`). Con quei due si
+  scrive un'automazione in tre righe, senza integrazioni aggiuntive e senza un
+  secondo posto in cui i dati possano divergere da quello che si legge sul
+  pannello. Una voce rinominata o tolta si porta via le proprie entità, invece
+  di lasciarne in giro una che non si aggiorna più e che nessuno sa da dove
+  venga.
+
+### Modificato
+- **L'orologio resta centrato.** La colonna non sposta l'ora per farsi posto:
+  sceglie il carattere più grande fra cinque in cui *tutti* i nomi stanno
+  nello spazio libero, e solo se nemmeno il più piccolo basta accorcia i nomi.
+  Il promemoria si accende alle 18 della sera prima e si spegne al passaggio,
+  con gli orari regolabili.
+- **«Gestione media» esce dal menu in alto.** Era un doppione del collegamento
+  già presente nella pagina Media, che diventa un pulsante.
+
+## [3.3]
+
+### Aggiunto
+- **Joystick: pad PS4 e compatibili, e pad da PC.** Sotto Linux sono
+  dispositivi di `/dev/input` come le tastiere, quindi si leggono con lo stesso
+  codice e senza librerie in più. Il lavoro vero è negli assi: le levette non
+  sono premute o rilasciate, hanno un valore dentro un intervallo che cambia da
+  pad a pad — 0..255 su un DualShock 4, -32768..32767 su molti pad da PC — e
+  l'intervallo **si chiede al kernel** invece di darlo per scontato.
+
+  La conversione in premuto/rilasciato ha una zona morta al 40% e rilascia al
+  28%: senza due soglie diverse una levetta tenuta appena oltre il limite fa
+  scattare il personaggio invece di farlo camminare.
+
+  Il tasto Options può far **cominciare** una partita, al contrario della
+  tastiera: un pulsante preciso su un pad che si tiene in mano non si preme per
+  sbaglio, mentre un tasto del cabinato sfiorato per caso sì.
+
+- **Doom si accende e si spegne da Home Assistant**, come interruttore MQTT. Lo
+  stato non viene dalla configurazione — lì non c'è — ma dalla partita in
+  corso, così una chiusura per inattività o un avvio fallito riportano
+  l'interruttore a OFF da soli.
+
+### Modificato
+- **Il gamma predefinito passa da 0.70 a 1.15.** Lo 0.70 schiariva, ed era un
+  ragionamento fatto a tavolino: sul pannello vero sbiancava e rendeva
+  illeggibili i menu. Chi ha ancora il vecchio predefinito **esatto** viene
+  corretto dalla migrazione; chi ha tarato a mano non viene toccato.
+
+## [3.2]
+
+### Modificato
+- **Doom non è più un servizio: è una partita.** Si preme «Gioca», tutti i
+  servizi si fermano, si gioca; si esce, e tutto riprende da dove stava.
+
+  L'interruttore nella pagina Servizi non c'è più, e con lui se ne vanno
+  l'attract mode della 3.0 e la deroga nell'arbitro della 3.1 — tre meccanismi
+  per una funzione che nessuno aveva chiesto e che non ha mai funzionato:
+  prima Doom non si vedeva mai, poi restava a schermo dopo l'uscita da una
+  partita, con il Media Player che spuntava ogni tanto perché aveva la
+  priorità più alta.
+
+  Ora il processo esiste **solo mentre si gioca**, e per tutta la partita il
+  pannello è suo per presa esclusiva. La tastiera del cabinato comanda il gioco
+  ma non lo fa *cominciare*, a meno che non lo si chieda esplicitamente: il DMD
+  sta in mezzo a un flipper, e un tasto sfiorato per caso non deve portarsi via
+  il pannello a metà partita.
+
+## [3.1.1]
+
+### Corretto
+- **Le migrazioni della configurazione non venivano eseguite.** Stavano in
+  `update.sh`, e l'aggiornamento via rete non lo esegue: copia i file e riavvia.
+  Le chiavi nuove sopravvivevano lo stesso, perché i valori predefiniti si
+  fondono a ogni caricamento, ma una **trasformazione di valore** no — e il
+  percorso del WAD restava quello vecchio mentre la preparazione spostava i
+  file. Doom si rifiutava di partire. Le trasformazioni ora stanno in
+  `dmdconf`, l'unico punto attraversato da qualunque strada di aggiornamento.
+- **Scegliere il WAD non faceva ripartire niente** se il processo era già
+  morto — cioè proprio nel caso in cui quel pulsante serve.
+- **Una sorgente che non riesce ad avviarsi non ci riprovava mai**: `start()`
+  si considerava già avviata. Ora il ciclo ritenta ogni 30 s, così correggere
+  un percorso sbagliato basta a rimettere in moto.
+- **I file di servizio di macOS** (`._*`, `.DS_Store`) sono vietati sulle
+  condivisioni SMB: il Finder non li crea più, quelli già copiati vengono
+  tolti, e non compaiono più fra i WAD.
+- **`setup_share.sh` ora viene installato in `/opt/dmd`**, altrimenti
+  `setup_doom.sh` non lo trovava e la condivisione dei WAD non nasceva.
+
 ## [3.1]
 
 ### Corretto

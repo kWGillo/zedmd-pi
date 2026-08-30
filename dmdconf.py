@@ -102,6 +102,37 @@ DEFAULTS = {
         # Mostra anche l'eta' compiuta, quando l'anno di nascita c'e'.
         "show_age": True,
     },
+    "rifiuti": {
+        # Il promemoria compare alle 18 della sera prima e sparisce alle 8 del
+        # giorno di raccolta: si espone il bidone la sera, e dopo il passaggio
+        # ricordarlo ancora sarebbe rumore. Per le attivita' comunali la fine
+        # e' quella del divieto, che ogni comune fissa a modo suo.
+        "ora_avviso": 18,
+        "ora_fine": 8,
+        # Le frazioni che quasi ogni comune ha. Nascono senza giorni: finche'
+        # non se ne spunta almeno uno la voce non compare da nessuna parte, e
+        # un pannello che ricorda raccolte inventate sarebbe peggio di niente.
+        "voci": [
+            {"nome": "Carta", "colore": "#ffffff", "tipo": "rifiuto",
+             "giorni": [], "cadenza": "settimanale", "riferimento": "",
+             "attiva": True, "ora_inizio": 0, "ora_fine": 6},
+            {"nome": "Plastica", "colore": "#2060ff", "tipo": "rifiuto",
+             "giorni": [], "cadenza": "settimanale", "riferimento": "",
+             "attiva": True, "ora_inizio": 0, "ora_fine": 6},
+            {"nome": "Vetro", "colore": "#ff8c1a", "tipo": "rifiuto",
+             "giorni": [], "cadenza": "settimanale", "riferimento": "",
+             "attiva": True, "ora_inizio": 0, "ora_fine": 6},
+            {"nome": "Umido", "colore": "#20c040", "tipo": "rifiuto",
+             "giorni": [], "cadenza": "settimanale", "riferimento": "",
+             "attiva": True, "ora_inizio": 0, "ora_fine": 6},
+            {"nome": "Secco", "colore": "#c07830", "tipo": "rifiuto",
+             "giorni": [], "cadenza": "settimanale", "riferimento": "",
+             "attiva": True, "ora_inizio": 0, "ora_fine": 6},
+            {"nome": "Sosta", "colore": "#ff2020", "tipo": "attivita",
+             "giorni": [], "cadenza": "settimanale", "riferimento": "",
+             "attiva": True, "ora_inizio": 0, "ora_fine": 6},
+        ],
+    },
     "doom": {
         # Il binario lo compila doom/setup_doom.sh: non arriva gia' fatto
         # perche' i sorgenti di doomgeneric sono GPL2 e questo progetto e'

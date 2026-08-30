@@ -391,3 +391,20 @@ table.files tr.now td.mono { color: #6cc8f0; }
 }
 .dpad .tasto:active { background: var(--accent); color: #1a0f00; }
 .dpad .tasto.grande { font-size: 15px; }
+
+/* ---- versione 3.4: raccolta rifiuti ---- */
+
+.voce { border: 1px solid var(--line); border-radius: 8px;
+        padding: 10px 12px; margin: 12px 0; }
+.voce .prossima { margin-bottom: 0; }
+
+/* I sette giorni in fila. Su un telefono vanno a capo invece di stringersi
+   fino a diventare illeggibili. */
+.giorni { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+.giorni .giorno { display: flex; align-items: center; gap: 4px;
+                  font-size: 13px; margin: 0; }
+.giorni .giorno input { margin: 0; }
+
+/* Il pallino del colore accanto al nome, nella riga di stato. */
+.pallino { display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+           margin: 0 4px 0 8px; vertical-align: middle; }

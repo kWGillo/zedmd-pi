@@ -1108,6 +1108,81 @@ STRINGS = {
         "repository and the matrix library. They are the only two things "
         "that change the installed software rather than tune it, which is "
         "why they live outside Settings."),
+    # ----------------------------------------------------------------- rifiuti
+    "nav.rifiuti": ("Rifiuti", "Waste"),
+    "rifiuti.title": ("Raccolta rifiuti e attività comunali",
+                      "Waste collection and municipal activities"),
+    "rifiuti.intro": (
+        "La raccolta non è un elenco di date, è una regola: due o tre giorni "
+        "fissi alla settimana per ogni frazione, e qualche eccezione all'anno "
+        "per le feste. Scritta la regola, le date si calcolano da sole — "
+        "senza dipendere da nessun servizio esterno e senza niente che si "
+        "possa rompere. Le voci compaiono a sinistra dell'orologio, ciascuna "
+        "col suo colore.",
+        "Collection is not a list of dates, it is a rule: two or three fixed "
+        "days a week per stream, plus a handful of exceptions a year for "
+        "holidays. Write the rule and the dates follow — with no external "
+        "service to depend on and nothing that can break. The entries appear "
+        "to the left of the clock, each in its own colour."),
+    "rifiuti.now": ("Da esporre adesso:", "To put out now:"),
+    "rifiuti.now.none": ("Adesso non c'è niente da esporre.",
+                         "Nothing to put out right now."),
+    "rifiuti.voci": ("Frazioni e attività", "Streams and activities"),
+    "rifiuti.voci.hint": (
+        "Una voce senza nessun giorno spuntato non compare da nessuna parte: "
+        "è così che si spegne quello che il tuo comune non raccoglie.",
+        "An entry with no day ticked appears nowhere: that is how you switch "
+        "off what your municipality does not collect."),
+    "rifiuti.nome": ("Nome", "Name"),
+    "rifiuti.colore": ("Colore", "Colour"),
+    "rifiuti.tipo": ("Tipo", "Kind"),
+    "rifiuti.tipo.rifiuto": ("Rifiuto da esporre", "Waste to put out"),
+    "rifiuti.tipo.attivita": ("Attività comunale (divieto)",
+                              "Municipal activity (restriction)"),
+    "rifiuti.cadenza": ("Cadenza", "Frequency"),
+    "rifiuti.cadenza.settimanale": ("Ogni settimana", "Every week"),
+    "rifiuti.cadenza.quindicinale": ("Ogni due settimane", "Every two weeks"),
+    "rifiuti.cadenza.mensile_1_3": ("1° e 3° del mese", "1st and 3rd of the month"),
+    "rifiuti.cadenza.mensile_2_4": ("2° e 4° del mese", "2nd and 4th of the month"),
+    "rifiuti.riferimento": ("Data di riferimento", "Reference date"),
+    "rifiuti.attiva": ("Attiva", "Active"),
+    "rifiuti.ora_inizio": ("Divieto dalle", "Restriction from"),
+    "rifiuti.ora_fine_divieto": ("Divieto fino alle", "Restriction until"),
+    "rifiuti.prossima": ("Prossima: %(data)s", "Next: %(data)s"),
+    "rifiuti.prossima.mai": ("Nessuna data nei prossimi mesi.",
+                             "No date in the coming months."),
+    "rifiuti.avviso": ("Avvisa dalle ore", "Warn from"),
+    "rifiuti.fine": ("Togli l'avviso alle ore", "Clear the warning at"),
+    "rifiuti.orari.hint": (
+        "Il promemoria compare alle 18 della sera prima e sparisce alle 8 del "
+        "giorno di raccolta: si espone il bidone la sera, e dopo il passaggio "
+        "ricordarlo ancora sarebbe rumore. Per le attività comunali la fine è "
+        "quella del divieto, che si imposta sulla singola voce.",
+        "The reminder appears at 18:00 the evening before and clears at 08:00 "
+        "on collection day: you put the bin out in the evening, and after the "
+        "truck has been, still showing it would be noise. For municipal "
+        "activities the end is the end of the restriction, set per entry."),
+    "rifiuti.soppressioni": ("Giorni di mancato servizio", "Days with no service"),
+    "rifiuti.soppressioni.hint": (
+        "Una data per riga, «gg/mm/aaaa,voce,nota». La voce è facoltativa: "
+        "lasciata vuota vale per tutte, che è il caso normale — quando la "
+        "raccolta salta per una festività di solito salta tutta.",
+        "One date per line, “dd/mm/yyyy,entry,note”. The entry is optional: "
+        "left empty it applies to all, which is the normal case — when "
+        "collection is skipped for a holiday it is usually skipped for all."),
+    "rifiuti.straordinari": ("Giorni di servizio straordinario",
+                             "Days with extra service"),
+    "rifiuti.straordinari.hint": (
+        "Stessa forma. Serve ai recuperi dopo una festività: «non si fa lunedì "
+        "25, si recupera mercoledì 27» sono due righe, una per tabella. Uno "
+        "straordinario vale anche in un giorno soppresso — è esattamente il "
+        "caso del recupero, e sarebbe assurdo che si annullassero a vicenda.",
+        "Same shape. It is for catch-ups after a holiday: “skipped on Monday "
+        "the 25th, caught up on Wednesday the 27th” is two lines, one per "
+        "table. An extra service counts even on a suppressed day — that is "
+        "exactly what a catch-up is, and it would be absurd for the two to "
+        "cancel out."),
+
     # -------------------------------------------------------------------- doom
     "nav.doom": ("Doom", "Doom"),
     "doom.title": ("Doom", "Doom"),

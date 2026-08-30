@@ -140,6 +140,24 @@ if doom.get("wad") == "/var/lib/dmd/doom/freedoom1.wad":
     doom["wad"] = "/srv/dmd/doom/freedoom1.wad"
     print("    doom: i WAD passano alla cartella condivisa /srv/dmd/doom")
 
+# 3.4: calendario della raccolta rifiuti. Le voci nascono senza giorni: finche'
+# non se ne spunta almeno uno non compare niente sul pannello.
+rifiuti = cfg.setdefault("rifiuti", {})
+rifiuti.setdefault("ora_avviso", 18)
+rifiuti.setdefault("ora_fine", 8)
+if "voci" not in rifiuti:
+    rifiuti["voci"] = [
+        {"nome": n, "colore": c, "tipo": t, "giorni": [],
+         "cadenza": "settimanale", "riferimento": "", "attiva": True,
+         "ora_inizio": 0, "ora_fine": 6}
+        for n, c, t in (("Carta", "#ffffff", "rifiuto"),
+                        ("Plastica", "#2060ff", "rifiuto"),
+                        ("Vetro", "#ff8c1a", "rifiuto"),
+                        ("Umido", "#20c040", "rifiuto"),
+                        ("Secco", "#c07830", "rifiuto"),
+                        ("Sosta", "#ff2020", "attivita"))]
+    print("    rifiuti: aggiunte le sei voci predefinite, senza giorni")
+
 # 3.2: Doom non e' piu' un servizio ma una sessione. L'interruttore e la
 # deroga dell'attract mode non servono piu' e vanno tolti, altrimenti restano
 # a confondere chi guarda la configurazione.

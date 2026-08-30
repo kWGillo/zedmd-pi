@@ -54,6 +54,25 @@ AZIONI = [
     ("doom", "Doom", "mdi:pistol"),
 ]
 
+# Icone delle voci del calendario rifiuti, per nome noto. Chi ne inventa una
+# sua si prende il cassonetto generico: meglio un'icona banale che nessuna.
+ICONE_RIFIUTI = {
+    "carta": "mdi:newspaper-variant",
+    "plastica": "mdi:bottle-soda-classic-outline",
+    "vetro": "mdi:bottle-wine-outline",
+    "umido": "mdi:leaf",
+    "secco": "mdi:trash-can-outline",
+    "sosta": "mdi:car-off",
+}
+
+
+def slug(nome):
+    """Nome della voce -> identificativo buono per un topic MQTT."""
+    pulito = "".join(c.lower() if c.isalnum() else "_" for c in (nome or ""))
+    while "__" in pulito:
+        pulito = pulito.replace("__", "_")
+    return pulito.strip("_") or "voce"
+
 # Ogni quanto si ripubblica lo stato anche se non e' cambiato nulla: serve a
 # ripopolare Home Assistant dopo un suo riavvio.
 HEARTBEAT = 30
@@ -85,6 +104,11 @@ class HassBridge:
         self._last = {}
         self._last_publish = 0.0
         self.announced = False
+        # Le voci del calendario rifiuti gia' dichiarate. Le voci le decide
+        # l'utente, quindi l'elenco delle entita' cambia nel tempo e va
+        # ricordato: una voce rinominata lascerebbe in Home Assistant
+        # un'entita' orfana che non si aggiorna piu'.
+        self._rifiuti_noti = []
 
     # ------------------------------------------------------------------ topic
 
@@ -171,6 +195,8 @@ class HassBridge:
             })
             self._config("switch", key, entity)
 
+        self._annuncia_rifiuti(common, base, node)
+
         for key, label in MODES:
             entity = dict(common)
             entity.update({
@@ -210,14 +236,21 @@ class HassBridge:
 
     def remove(self):
         """Cancella le entita' da Home Assistant (payload vuoto e ritenuto)."""
+        # Le voci del calendario si prendono da _rifiuti_noti e non dalla
+        # configurazione di adesso: da cancellare e' quello che e' stato
+        # davvero dichiarato, anche se nel frattempo una voce e' sparita.
+        noti = list(self._rifiuti_noti)
         for component, object_id in ([("sensor", "nowplaying"),
                                       ("number", "brightness")] +
                                      [("switch", key) for key, _ in SWITCHES] +
                                      [("switch", key) for key, _ in MODES] +
-                                     [("switch", key) for key, _, _ in AZIONI]):
+                                     [("switch", key) for key, _, _ in AZIONI] +
+                                     [("binary_sensor", "rif_%s" % c) for c in noti] +
+                                     [("sensor", "rifdata_%s" % c) for c in noti]):
             topic = "%s/%s/%s/%s/config" % (self.prefix(), component,
                                             self.node(), object_id)
             self.bus.publish(topic, "", retain=True)
+        self._rifiuti_noti = []
         self.announced = False
 
     # ------------------------------------------------------------------ stato
@@ -252,6 +285,8 @@ class HassBridge:
         for key, _label, _icona in AZIONI:
             self._send("%s/service/%s/state" % (base, key),
                        "ON" if self._azione_accesa(key) else "OFF", force)
+
+        self._pubblica_rifiuti(base, force)
 
         self._send("%s/brightness/state" % base,
                    str(self.cfg["display"]["brightness"]), force)
@@ -301,6 +336,76 @@ class HassBridge:
             return False
         self.publish_state(force=True)
         return True
+
+    # ------------------------------------------------------------- rifiuti
+
+    def _rifiuti(self):
+        """Lo stato del calendario, o una lista vuota se qualcosa non va.
+
+        Home Assistant e' un accessorio: un file delle eccezioni scritto male
+        non deve far cadere il ponte e portarsi via anche la musica.
+        """
+        try:
+            import rifiuti
+            return rifiuti.stato(self.cfg)
+        except Exception as exc:
+            print("[hass] calendario rifiuti: %s" % exc)
+            return []
+
+    def _annuncia_rifiuti(self, common, base, node):
+        """Un binary_sensor e un sensor per ogni voce del calendario.
+
+        Non si manda il calendario, si manda **l'evento**: il binary_sensor
+        dice se in questo momento va esposto, il sensor quando tocca la
+        prossima volta. Con quei due si scrive un'automazione in tre righe,
+        senza integrazioni aggiuntive e senza un secondo posto in cui i dati
+        possano divergere dal pannello.
+        """
+        visti = []
+        for voce in self._rifiuti():
+            chiave = slug(voce["nome"])
+            visti.append(chiave)
+            icona = ICONE_RIFIUTI.get(voce["nome"].strip().lower(),
+                                      "mdi:trash-can-outline")
+            esposizione = dict(common)
+            esposizione.update({
+                "name": voce["nome"],
+                "unique_id": "%s_rif_%s" % (node, chiave),
+                "object_id": "%s_rif_%s" % (node, chiave),
+                "state_topic": "%s/rifiuti/%s/state" % (base, chiave),
+                "payload_on": "ON", "payload_off": "OFF",
+                "icon": icona,
+            })
+            self._config("binary_sensor", "rif_%s" % chiave, esposizione)
+
+            prossima = dict(common)
+            prossima.update({
+                "name": "%s prossima" % voce["nome"],
+                "unique_id": "%s_rifdata_%s" % (node, chiave),
+                "object_id": "%s_rifdata_%s" % (node, chiave),
+                "state_topic": "%s/rifiuti/%s/prossima" % (base, chiave),
+                "device_class": "date",
+                "icon": icona,
+            })
+            self._config("sensor", "rifdata_%s" % chiave, prossima)
+        # Una voce rinominata o tolta lascerebbe in Home Assistant un'entita'
+        # che non si aggiorna piu' e che nessuno sa da dove viene.
+        for vecchia in [c for c in self._rifiuti_noti if c not in visti]:
+            for componente, prefisso in (("binary_sensor", "rif_"),
+                                         ("sensor", "rifdata_")):
+                self.bus.publish("%s/%s/%s/%s%s/config"
+                                 % (self.prefix(), componente, self.node(),
+                                    prefisso, vecchia), "", retain=True)
+        self._rifiuti_noti = visti
+
+    def _pubblica_rifiuti(self, base, force):
+        for voce in self._rifiuti():
+            chiave = slug(voce["nome"])
+            self._send("%s/rifiuti/%s/state" % (base, chiave),
+                       "ON" if voce["esposizione"] else "OFF", force)
+            self._send("%s/rifiuti/%s/prossima" % (base, chiave),
+                       voce["prossima"].isoformat() if voce["prossima"] else "",
+                       force)
 
     def _azione_accesa(self, key):
         """Stato di un'azione, chiesto a chi la sta facendo."""

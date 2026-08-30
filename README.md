@@ -1,208 +1,128 @@
-# zedmd-pi
+# DMD Controller 3.4
 
-**A ZeDMD-compatible DMD for LED panels that ZeDMD cannot drive.**
+Servizio unico che possiede il pannello LED (256x64, FM6373) e lo condivide fra
+più sorgenti di contenuto, con interfaccia web di controllo.
 
-`zedmd-pi` turns a Raspberry Pi into a network DMD display. It speaks the
-ZeDMD-WiFi protocol, so Batocera, `dmdserver`, dmd-extensions and Visual
-Pinball talk to it believing it is a real ZeDMD device — but the panel is
-driven by the Pi itself, which means **S-PWM panels work**.
+Servizi implementati:
 
-When the DMD is idle it becomes a clock and a media player.
+- **ZeDMD** — ricevitore del protocollo ZeDMD-WiFi: Batocera, `dmdserver`,
+  dmd-extensions o VPX possono inviare frame a questo Raspberry credendo di
+  parlare con un ZeDMD reale.
+- **Media Player** — foto e video a rotazione dalla libreria, con intervallo
+  casuale. Libreria raggiungibile via SMB e via upload dalla web UI. Supporta
+  anche il materiale Pixelcade, utilizzabile a prescindere da Batocera.
+- **Clock** — orologio e data, con colori indipendenti, formato 12/24 ore e
+  nomi dei giorni in italiano, francese o inglese.
+- **Air Radar** — informazioni degli aerei in transito entro un raggio dato da
+  una coordinata GPS, tramite le API pubbliche ADS-B della comunità.
+- **Now Playing** — brano in ascolto da AirPlay 2 (shairport-sync), dall'API di
+  Spotify o da un topic MQTT libero.
+- **Rolling Banner** — dieci testi scorrevoli a comparsa periodica, ciascuno
+  con colore, dimensione, velocità e lampeggio propri.
+- **Compleanni** — l'augurio compare da solo nel giorno giusto.
+- **Rifiuti** — il calendario della raccolta nella colonna libera accanto
+  all'orologio, calcolato da una cadenza fissa senza interrogare nessun
+  portale.
+- **Doom** — non è un servizio ma una partita: si preme «Gioca», i servizi si
+  fermano, il pannello è del gioco finché non si esce. Tastiera o pad.
 
----
-
-## Why this exists
-
-ZeDMD runs on an ESP32 and uses
-[ESP32-HUB75-MatrixPanel-DMA](https://github.com/mrcodetastic/ESP32-HUB75-MatrixPanel-DMA),
-which supports "dumb" HUB75 panels: shift registers plus a handful of address
-lines. It explicitly does **not** support S-PWM driver chips — panels with an
-internal framebuffer that generate their own PWM, such as FM6373, FM6353,
-SM16380, ICN2053, MBI5153.
-
-Those chips are increasingly what you actually receive when you order a P2.5
-panel, and sellers rarely declare the driver IC. A panel that looks identical
-on the listing can be either perfectly supported or completely dead on arrival,
-and you only find out after wiring it up.
-
-There is exactly one piece of software that drives S-PWM panels today:
-[kingdo9/rpi-rgb-led-matrix_pwm_experiment](https://github.com/kingdo9/rpi-rgb-led-matrix_pwm_experiment),
-a Raspberry Pi fork of hzeller's library. `zedmd-pi` puts that fork behind the
-ZeDMD network protocol, so an S-PWM panel can finally be used as a virtual
-pinball DMD.
-
-Developed and tested with two 128×64 P2.5 panels (FM6373 driver, DP32020B row
-driver, A/B/C address lines only) chained to 256×64.
+Fasce orarie: **Night mode** abbassa la luminosità, **Sleep mode** spegne il
+display. Sleep ha la precedenza su Night.
 
 ---
 
-## Features
+## Requisiti
 
-- **ZeDMD-WiFi receiver** — full protocol implementation: HTTP handshake,
-  TCP and UDP frame streams, zone streaming, deflate compression, RGB565 and
-  RGB888, brightness and clear-screen commands.
-- **Clock** — independent colours for time and date, 12/24-hour format,
-  weekday names in Italian, French or English.
-- **Media player** — random photos and videos from a library folder, shown at
-  random intervals. Works with Pixelcade artwork, with or without Batocera.
-  Files arrive over SMB or through the web interface; ffmpeg does the
-  conversion, so most formats work without preparation.
-- **Air radar** — aircraft passing within a radius of a GPS position, from the
-  community ADS-B APIs (adsb.fi, adsb.one, adsb.lol — free, no key). Selectable
-  flight fields, origin/destination lookup, and a downloadable CSV log of every
-  pass.
-- **Rolling banner** — up to ten scrolling texts, each with its own colour,
-  size, speed and blinking, appearing at random intervals.
-- **Now playing** — title, artist, album and progress of whatever you are
-  listening to. The Pi runs `shairport-sync` and appears on the network as an
-  AirPlay 2 speaker that throws the audio away and keeps only the metadata, so
-  any app on an iPhone, iPad or Mac works — Apple Music, Spotify, Amazon
-  Music, YouTube alike. Spotify Connect playing elsewhere is covered through
-  Spotify's own API, and anything else through a free MQTT topic. See
-  [Now playing](#now-playing).
-- **Home Assistant** — the DMD announces itself over MQTT Discovery: current
-  track, a switch per service and brightness, all controllable. Entirely
-  optional; the default broker is a local Mosquitto.
-- **Doom** — yes, really. It runs as a program of its own (doomgeneric, output
-  cropped to 256×64) talking to the service over a pipe: frames one way, keys
-  the other. The hard part was never the CPU — it is 1993 software — but the
-  shape of the screen: Doom draws 1.6:1 and the panel is 4:1, so a **band
-  around the horizon** is cropped, where the enemies are, and floor and
-  ceiling are thrown away. While nobody touches anything it plays its own
-  built-in demos and yields the panel to everything else; at the first command
-  a game starts and the panel is its own, Batocera included. Controlled from a
-  keyboard plugged into the Pi, or from the web page. See
-  [Doom on the panel](#doom-on-the-panel).
-- **Night mode / Sleep mode** — scheduled dimming and scheduled blackout.
-- **Over-the-air updates** — checks this repository, verifies the archive
-  before installing, and rolls back automatically if the service does not come
-  back up.
-- **Web interface** — brightness, NTP, timezone, DST, S-PWM fine tuning,
-  services, media upload, radar configuration, updates. Available in **English
-  and Italian**: the language is picked from the browser's `Accept-Language` on
-  first visit and can be switched from any page. The weekday names shown on the
-  panel are a separate setting, since whoever looks at the cabinet is not
-  necessarily whoever configures it.
-- **Single owner of the panel** — one process, several content sources, one
-  arbiter with pre-emption and a grace period.
+Un Raspberry Pi già preparato secondo la procedura del progetto:
 
-No GPS coordinates ship with this repository: the radar starts at 0/0 and does
-nothing until a position is entered locally. Your location stays in
-`/etc/dmd/config.json` on your own machine.
+- audio integrato disattivato (`dtparam=audio=off`)
+- `isolcpus=3` sui modelli quad-core
+- libreria `rpi-rgb-led-matrix_pwm_experiment` clonata e compilata
+- pannelli cablati e verificati con la demo
 
 ---
 
-## Hardware
+## Installazione
 
-| Component | Notes |
-|---|---|
-| Raspberry Pi | Zero W, Zero 2 W, 3 or 4. **Raspberry Pi only** — the matrix library writes directly to Broadcom/RP1 registers, so Orange Pi and similar boards cannot work. |
-| HUB75 panels | Any resolution the fork can drive. S-PWM panels need a matching register profile. |
-| Power | Separate 5 V supply for the panels. **Grounds must be common** with the Pi. |
-
-### Wiring (hzeller "regular" mapping)
-
-| Panel | GPIO (BCM) | Physical pin |
-|---|---|---|
-| R1 | 11 | 23 |
-| G1 | 27 | 13 |
-| B1 | 7 | 26 |
-| R2 | 8 | 24 |
-| G2 | 9 | 21 |
-| B2 | 10 | 19 |
-| A | 22 | 15 |
-| B | 23 | 16 |
-| C | 24 | 18 |
-| CLK | 17 | 11 |
-| LAT | 4 | 7 |
-| OE | 18 | 12 |
-| GND | — | 6 and 14 |
-
-D and E are left unconnected on panels that mark them NC.
-
----
-
-## Installation
-
-Prepare the Pi first: disable onboard audio (it shares the PWM peripheral the
-panel needs), isolate a CPU core on quad-core models, then build the matrix
-library.
+Dal Mac, copia la cartella sul Raspberry:
 
 ```bash
-sudo sed -i 's/^dtparam=audio=on/dtparam=audio=off/' /boot/firmware/config.txt
-echo "blacklist snd_bcm2835" | sudo tee /etc/modprobe.d/blacklist-audio.conf
-sudo sed -i '1s/$/ isolcpus=3/' /boot/firmware/cmdline.txt   # skip on Pi Zero W
-sudo reboot
+scp -r dmd gillo@dmdpi.local:~/
 ```
 
-```bash
-sudo apt install -y git build-essential
-git clone https://github.com/kingdo9/rpi-rgb-led-matrix_pwm_experiment.git
-cd rpi-rgb-led-matrix_pwm_experiment && make && cd examples-api-use && make
-```
-
-Then install `zedmd-pi`:
+Poi via SSH:
 
 ```bash
-git clone https://github.com/kWGillo/zedmd-pi.git ~/dmd
 cd ~/dmd
-chmod +x install.sh update.sh setup_share.sh
+chmod +x install.sh
 sudo ./install.sh
 ```
 
-Review `/etc/dmd/config.json` — at minimum `panel.slowdown` (1 for Pi Zero W,
-3 for Zero 2 W and Pi 3, 5 for Pi 4) and `panel.chain` — then:
+Lo script installa le dipendenze, compila i binding Python della libreria
+matrice, copia i file in `/opt/dmd`, crea `/etc/dmd/config.json` e registra il
+servizio systemd.
+
+Se la libreria matrice non è nella home dell'utente:
+
+```bash
+sudo MATRIX_DIR=/percorso/della/libreria ./install.sh
+```
+
+---
+
+## Configurazione iniziale
+
+Prima del primo avvio controlla `/etc/dmd/config.json`, in particolare:
+
+| Chiave | Valore |
+|---|---|
+| `panel.slowdown` | `1` Zero W · `3` Zero 2 W e Pi 3 · `5` Pi 4 |
+| `panel.chain` | numero di pannelli in cascata |
+| `panel.profile_dir` | impostato automaticamente dall'installer |
+| `web.port` | `8080`, porta dell'interfaccia web |
+| `zedmd.http_port` | `80`, riservata all'handshake ZeDMD |
+
+Avvio e log:
 
 ```bash
 sudo systemctl start dmd
 journalctl -u dmd -f
 ```
 
-The web interface is on port **8080**. Port 80 redirects to it.
+L'interfaccia è su `http://dmdpi.local:8080/`. Aprendo l'indirizzo senza porta
+si viene rediretti automaticamente.
 
-### Updating
-
-From the web interface: the *Settings* page compares the installed version
-with the one published here and offers a button when a newer one exists. The
-update downloads the branch archive, checks that every expected file is present
-and that all Python compiles, backs up the current installation, swaps the
-files, restarts the service, and then polls `/api/status`. If the service does
-not answer, the backup is restored automatically. The installer runs detached
-so it survives the restart of the service that launched it.
-
-From the command line:
+### Aggiornare un'installazione esistente
 
 ```bash
-cd ~/dmd && git pull && sudo ./update.sh
+cd ~/dmd && chmod +x update.sh && sudo ./update.sh
 ```
-
-Either way, restart Batocera afterwards.
-
-### Finding the right panel profile
-
-S-PWM panels need a register profile that matches the specific panel. The fork
-ships a catalogue and an interactive browser:
-
-```bash
-sudo SPWM_PROFILE_DIR=<repo>/lib/spwm/registertest/data \
-  <repo>/examples-api-use/demo -D15 --led-no-drop-privs \
-  --led-rows=64 --led-cols=128 --led-chain=1 --led-panel-type=fm6373 \
-  --led-spwm-row-addr-type=1 --led-spwm-scan=64 --led-slowdown-gpio=3
-```
-
-Arrow keys cycle profiles. Put the working number in `panel.spwm_register_config`.
-Power-cycle the panel between attempts: S-PWM chips keep configuration in
-internal registers and a bad profile can leave them stuck.
 
 ---
 
-## Connecting Batocera
+## Le tre porte
 
-Batocera drives real DMDs through `dmdserver` (libdmdutil). There is no field
-in the UI for a network address — it lives in a config file:
+| Porta | Chi la usa | Servita da |
+|---|---|---|
+| 80 | handshake ZeDMD (cablata nel client) | server HTTP dedicato |
+| 3333 | frame DMD, TCP e UDP | ricevitore ZeDMD |
+| 8080 | interfaccia web | Flask |
 
-```bash
-cat > /userdata/system/configs/dmdserver/config.ini << 'EOF'
+L'handshake **non** passa da Flask, e non è un dettaglio estetico: il client di
+libzedmd legge la risposta con una sola `recv()` e si ferma appena riceve meno
+di 1024 byte. Flask invia header e corpo con due scritture separate, che sulla
+rete diventano due pacchetti: il client leggerebbe solo gli header, vedrebbe un
+corpo vuoto, e con tutti i campi a zero non riconoscerebbe il trasporto TCP,
+ripiegando su UDP. Il server dedicato invia tutto in una sola `sendall()`.
+
+## Collegare un client ZeDMD
+
+Il servizio si presenta come un ZeDMD-WiFi. Nel client indica solo l'indirizzo
+IP del Raspberry: userà da sé la porta 80 per l'handshake e la 3333 per i frame.
+
+Su Batocera si configura in `/userdata/system/configs/dmdserver/config.ini`:
+
+```ini
 [DMDServer]
 AltColor = 1
 
@@ -212,378 +132,461 @@ Enabled = 0
 [ZeDMD-WiFi]
 Enabled = 1
 WiFiAddr = 192.168.0.XXX
-EOF
 ```
 
-Then enable the **DMD reale** service — `dmd_real`, from the menu or from the
-shell:
+Poi va attivato il servizio `dmd_real` — dal menu di Batocera oppure:
 
 ```bash
 batocera-services enable dmd_real
 batocera-services start dmd_real
 ```
 
-Check that it actually started, because the config file on its own starts
-nothing:
+**Il `config.ini` da solo non avvia niente**: senza quel servizio non c'è
+nessun processo che lo legga, e il Raspberry resta in ascolto senza mai vedere
+un client. Si controlla così, e deve comparire un `dmdserver` con l'argomento
+`-c /userdata/system/...`:
 
 ```bash
 ps aux | grep dmdserver | grep -v grep
 ```
 
-You must see a `dmdserver` process carrying `-c /userdata/system/...`. If it is
-missing, nobody is reading the file you just wrote, and the Pi will keep
-listening without ever seeing a client. From the Pi side, `journalctl -u dmd`
-tells the two failures apart: a `[zedmd-http] <ip> /handshake` line means the
-client reached the Pi, no such line means it never did — typically a stale
-`WiFiAddr` after swapping SD card or Pi.
+Verifica rapida dell'handshake:
 
-Restart Batocera after any update of `zedmd-pi`: the client caches connection
-state and per-zone bookkeeping.
+```bash
+curl http://dmdpi.local/handshake
+```
 
-Known EmulationStation behaviour, not a fault: holding the scroll button does
-not update the panel, and neither does releasing it. ES opens a fresh
-connection to `dmdserver` on every selection change, but opens none during key
-auto-repeat. One extra press realigns the panel.
+Deve rispondere con 22 campi separati da `|`, i primi due sono larghezza e
+altezza del display.
+
+Dal lato Raspberry, `journalctl -u dmd` distingue i due guasti che da fuori si
+somigliano: la riga `[zedmd-http] <ip> /handshake` dice che il client ha
+raggiunto il Pi, la sua assenza che non ci ha mai provato — tipicamente un
+`WiFiAddr` rimasto al vecchio indirizzo dopo aver cambiato scheda o Raspberry.
+
+Un comportamento noto di EmulationStation, che non è un guasto: **tenendo
+premuto il tasto di scorrimento l'immagine non si aggiorna**, e non si aggiorna
+nemmeno al rilascio. ES apre una connessione verso `dmdserver` a ogni cambio di
+selezione, ma durante la ripetizione automatica del tasto non ne apre nessuna.
+Un tocco in più riallinea il pannello.
 
 ---
 
-## The ZeDMD-WiFi protocol
+## Interfaccia web
 
-Reconstructed from the [libzedmd](https://github.com/PPUC/libzedmd) source.
-Documented here because it does not appear to be written down anywhere else.
+**Impostazioni** — luminosità con applicazione immediata, server NTP, fuso
+orario, ora legale automatica o scostamento UTC manuale, indirizzo IP locale e
+stato della sincronizzazione oraria.
 
-**Discovery — HTTP, port 80 (hardcoded in the client)**
+**Servizi** — attivazione dei servizi, indicazione della sorgente attualmente
+a schermo e possibilità di forzare manualmente una sorgente invece di lasciar
+decidere l'arbitro.
 
-`GET /handshake` returns 22 pipe-separated fields:
+**Aggiornamenti** — controllo e installazione della nuova versione dal
+repository GitHub, con verifica dell'archivio e ripristino automatico se il
+servizio non riparte.
 
-```
-width|height|firmware|s3|protocol|port|udpDelay|writeAtOnce|brightness|rgbMode|
-clkphase|driver|i2sspeed|latchBlanking|minRefresh|yOffset|ssid|half|id|power|
-deviceType|lineDecoder
-```
+**Rifiuti** — le voci del calendario, i giorni della settimana e la cadenza di
+ciascuna, e le due tabelle delle eccezioni.
 
-Single-value endpoints exist as a fallback: `/get_width`, `/get_height`,
-`/get_version`, `/get_s3`, `/get_protocol`, `/get_port`, `/get_udp_delay`.
-
-> **Implementation note.** The client reads the HTTP response with a single
-> `recv()` and stops as soon as it gets fewer than 1024 bytes. A server that
-> writes headers and body separately — as most WSGI servers do — will be read
-> as headers only: the client sees an empty body, parses every field as zero,
-> fails to detect the TCP transport and silently falls back to UDP. This is why
-> the handshake here is served by a dedicated socket server that emits the whole
-> response in one `sendall()`, while the web UI lives on another port.
-
-**Frames — TCP or UDP, port 3333**
-
-```
-b"FRAME" + [ b"ZeDMD" + cmd(1) + size_hi(1) + size_lo(1) + compressed(1) + data ]*
-```
-
-Compressed payloads are deflate. Commands:
-
-| Code | Meaning |
-|---|---|
-| `0x04` / `0x05` | RGB888 / RGB565 zone stream |
-| `0x06` | render frame |
-| `0x07` / `0x08` | RGB888 / RGB565 full frame |
-| `0x0a` | clear screen |
-| `0x0b` | keep-alive |
-| `0x16` | brightness (0–15) |
-
-Zone streams use a fixed 16×8 grid of 128 zones; zone width is `width/16` and
-zone height is `height/8`. Each zone is preceded by its index; an index ≥ 128
-means "zone index−128 is entirely black" with no pixel data following. Only
-changed zones are transmitted.
-
-Advertising `TCP` in the handshake avoids UDP fragmentation entirely — the
-client's own comments note that rapid UDP bursts crash real ESP32 hardware.
+**Doom** — preparazione, scelta del WAD, avvio e uscita dalla partita.
 
 ---
 
-## Architecture
+## Come viene deciso chi va sul display
 
-Only one process can drive the GPIO, so every content source lives in one
-service and an arbiter decides who owns the display.
+Un solo processo può pilotare i GPIO, quindi tutte le sorgenti convivono nello
+stesso servizio e un arbitro sceglie chi vince:
 
-| Priority | Source |
+| Priorità | Sorgente |
 |---|---|
 | 100 | ZeDMD |
-| 60 | Air radar |
-| 58 | Now playing |
-| 55 | Rolling banner |
-| 50 | Media player |
+| 60 | Air Radar |
+| 58 | Now Playing |
+| 55 | Rolling Banner |
+| 50 | Media Player |
 | 10 | Clock |
 
-ZeDMD pre-empts immediately on connection or incoming frame and holds the
-display for `grace_seconds` after the last signal — without that hysteresis the
-clock would flash in during Batocera's menu pauses. An abrupt power-off leaves
-the TCP connection open, so an application-level timeout treats prolonged
-silence as a dead client.
+Sopra a tutto agiscono le fasce orarie: durante lo Sleep il display resta
+spento qualunque sia la sorgente vincente (salvo il risveglio su frame ZeDMD,
+se abilitato).
 
-Sleep mode overrides everything; night mode only changes brightness.
-
-```
-dmdd.py        main service, arbiter, render loop
-display.py     exclusive owner of the panel
-zedmd_http.py  ZeDMD handshake server (port 80)
-webui.py       Flask web interface (port 8080)
-ota.py         over-the-air update from this repository
-i18n.py        English/Italian strings for the web interface
-mqttbus.py     shared MQTT client: metadata in, Home Assistant entities out
-nowplaying.py  current-track state, independent of where it came from
-spotifyapi.py  Spotify Web API, OAuth with PKCE
-hass.py        Home Assistant entities over MQTT Discovery
-sources/       zedmd.py, airradar.py, media.py, banner.py, nowplaying.py, clock.py
-```
-
-Adding a language means adding a column to the tuples in `i18n.py` and a code
-to `LANGUAGES` — there are no `.po` files to compile and no build step.
-
-Adding a service means writing a new source in `sources/`, registering it in
-`Runtime`, and adding an entry to the services page.
+ZeDMD prende il controllo **immediatamente** appena un client si connette o
+arriva un frame, e lo mantiene per `zedmd.grace_seconds` secondi dopo l'ultimo
+segnale. Il tempo di grazia evita che l'orologio si intrometta durante le pause
+di Batocera (menu, caricamenti); alzalo se vedi passaggi indesiderati.
 
 ---
 
-## Timing, or: why white lines appear
+## Struttura dei file
 
-The matrix library generates the panel signal in software, timing GPIO
-transitions to the microsecond. Anything that preempts the process — another
-program, disk I/O, network traffic — stretches one row's on-time, and that row
-shows up brighter. **Horizontal white lines are a load indicator, not a panel
-fault.**
+```
+/opt/dmd/dmdd.py          servizio principale, arbitro e ciclo di rendering
+/opt/dmd/display.py       proprietario esclusivo del pannello
+/opt/dmd/dmdconf.py       configurazione persistente
+/opt/dmd/webui.py         Flask: pagine + endpoint del protocollo ZeDMD
+/opt/dmd/sources/         sorgenti di contenuto
+/opt/dmd/mqttbus.py       client MQTT condiviso (ingresso metadati, uscita HA)
+/opt/dmd/nowplaying.py    stato del brano corrente, indipendente dalla sorgente
+/opt/dmd/spotifyapi.py    API web di Spotify (OAuth con PKCE)
+/opt/dmd/hass.py          entità di Home Assistant via MQTT Discovery
+/opt/dmd/rifiuti.py       calendario della raccolta: cadenze ed eccezioni
+/opt/dmd/doom/            preparazione e ponte verso doomgeneric
+/srv/dmd/media            libreria media, condivisa come \\<ip>\dmd-media
+/srv/dmd/doom             WAD di Doom, condivisi come \\<ip>\dmd-doom
+/var/lib/dmd/soppressioni.csv, straordinari.csv  eccezioni del calendario
+/etc/dmd/config.json      configurazione
+/var/lib/dmd/spotify.json token di Spotify, permessi 0600, fuori dall'export
+```
 
-This has practical consequences for the rest of the system:
-
-- Keep `isolcpus=3` and `dtparam=audio=off`. They are not optional.
-- Lower `panel.pwm_bits` before lowering anything else: 8 bits instead of 11
-  cuts the work substantially and the difference is hard to see on a DMD.
-- Avoid repeated filesystem walks. A full Pixelcade collection is tens of
-  thousands of files; since 1.6 the library listing is cached rather than
-  re-read on every content change and every status request, because that scan
-  alone was enough to produce visible lines.
-- Prefer a USB stick over the SD card for the media library, and stop the
-  service before bulk-copying into it.
-
-If instead you see `Bus error` or `Input/output error` on system binaries, that
-is not a timing problem — the machine has lost the ability to read its own
-executables. Check `vcgencmd get_throttled` for undervoltage (panels and Pi on
-one supply is the usual cause) and `dmesg` for `mmc`/`ext4` errors before
-blaming the CPU.
+Aggiungere un servizio significa scrivere una nuova sorgente in `sources/`,
+registrarla nel `Runtime` e aggiungere una voce alla pagina Servizi.
 
 ---
 
-## Doom on the panel
+## Il protocollo ZeDMD, in breve
 
-### The shape of the screen
+Ricostruito dal sorgente di `PPUC/libzedmd`.
 
-Doom on a Pi is not a performance question. It is software from 1993 and the
-Pi decodes it without noticing. The problem is geometry: Doom draws 320×200 —
-1.6:1 — and the panel is 256×64 — 4:1. Scale the whole frame down to 64 rows
-and an imp is eight pixels tall, indistinguishable from a barrel.
+**HTTP porta 80** — `GET /handshake` risponde con 22 campi separati da `|`:
+larghezza, altezza, versione firmware, flag S3, protocollo, porta, ritardo UDP,
+write-at-once, luminosità, ordine RGB, parametri del pannello, SSID, id,
+potenza, tipo dispositivo, line decoder. Esistono anche gli endpoint singoli di
+fallback (`/get_width`, `/get_height`, …).
 
-So the frame is not squashed, it is **cropped**. A band is taken around the
-horizon and the rest is discarded. In Doom the floor and the ceiling are
-exactly where nothing happens, while enemies sit on the line of sight; the
-status bar, which starts at row 168, does not fit and is not needed. The band
-is scaled 5:4 horizontally (320 → 256) and by whatever it takes vertically,
-with a box average — at this size antialiasing is what makes a figure legible,
-not a luxury. The defaults are row 36 for 96 rows and gamma 0.70 (Doom is a
-dark game and an LED panel has none of a CRT's black); both are tunable from
-the Doom page, because the only place that question has a real answer is in
-front of the panel.
-
-### Two processes, not a library
-
-`doom/doom-dmd` is doomgeneric compiled with our own output function. It talks
-to the DMD service over a pipe: raw fixed-size frames on stdout, `[state, key]`
-pairs on stdin. It is a separate process for three reasons, in order of
-importance:
-
-1. **Licence.** doomgeneric descends from the Doom sources, which are GPL
-   version 2. This project is GPLv3, and GPL2-only inside a GPLv3 work does not
-   fit. Two processes talking over a pipe are not linked: they stay two
-   programs, each under its own licence.
-2. **Isolation.** If Doom falls over, Doom falls over; the panel goes back to
-   the clock and the service does not notice.
-3. **Simplicity.** No bindings, no GIL to contend for. Read a frame, publish it.
-
-The sources are not vendored here — `doom/setup_doom.sh` fetches and builds
-them. The compiled binary lands in `/var/lib/dmd/doom`, not in `/opt/dmd`,
-because an OTA update wipes and re-copies the program's subdirectories and a
-binary in there would vanish on every update.
-
-### Attract mode, and a game
-
-While nobody touches anything, Doom plays its own built-in demos — that is
-what it has always done when left alone, so attract mode costs nothing. There
-it is an ordinary source with a low priority: an aircraft, a birthday and
-above all Batocera all outrank it.
-
-At the first command a **game** starts and the panel becomes its own, Batocera
-included, until you leave or let it sit idle (three minutes by default). The
-game begins by restarting Doom straight into the level rather than pressing a
-key to abort the demo and then navigating the menu with arrow keys on a panel
-sixty-four pixels tall.
-
-Holding the panel is the same mechanism the media manager uses, generalised: a
-named hold, either with a deadline (the library page, kept alive by a
-heartbeat, so a closed tab releases it) or without one (the game, so standing
-still in front of a door does not send the panel back to the clock). One page
-cannot release another's hold.
-
-### Controls
-
-No GPIO. On the SM16380SC panels D and E are wired and the pins that would
-have been used are gone, so both routes are software:
-
-- **A keyboard plugged into the Pi**, read straight from `/dev/input` with no
-  extra library — the events are a 24-byte (or 16-byte, on 32-bit) struct and
-  `struct` is always there. Arrows or WASD, ctrl fires, space opens, shift
-  runs. This is the direct route: it does not go through the network.
-- **The web page**, with on-screen buttons that hold down properly, plus the
-  keyboard of whatever computer is looking at the page. Same key queue, only a
-  different way in.
-
-### Setting it up
+**TCP porta 3333** — flusso di payload:
 
 ```
-sudo /opt/dmd/doom/setup_doom.sh
+b"FRAME" + [ b"ZeDMD" + cmd(1) + size_hi(1) + size_lo(1) + compresso(1) + dati ]*
 ```
 
-It installs the build tools if missing, clones and compiles doomgeneric
-(a couple of minutes on a Pi 3B+), and downloads **Freedoom**, which is freely
-licensed. Commercial WADs cannot be redistributed: if you own one, put it
-where you like and correct the path on the Doom page. Then turn the Doom
-service on from the Services page.
+I dati compressi usano deflate. Comandi principali: `0x05` zone RGB565,
+`0x04` zone RGB888, `0x06` render, `0x08` frame intero RGB565,
+`0x07` frame intero RGB888, `0x0a` clear, `0x0b` keep-alive, `0x16` luminosità.
+
+Le zone sono una griglia fissa 16 × 8 (128 zone): ogni zona è preceduta dal suo
+indice, e un indice ≥ 128 significa "zona interamente nera" senza pixel a
+seguire. Dichiarando `TCP` nell'handshake si evita la frammentazione UDP e il
+flusso arriva ordinato.
 
 ---
 
-## Now playing
+## Risoluzione problemi
 
-The panel shows what you are listening to: title, artist, album, playing or
-paused, and how far into the track you are. The DMD plays no audio and never
-sits between the music and your speakers — it only listens for the metadata.
+| Sintomo | Causa probabile | Rimedio |
+|---|---|---|
+| Il servizio non parte, errore su `rgbmatrix` | binding Python non compilati | rilanciare `install.sh`, oppure `pip install . --break-system-packages` dalla cartella della libreria |
+| Pannello nero ma servizio attivo | nessuna sorgente abilitata | attivare Media Player - Clock dalla pagina Servizi |
+| L'handshake risponde 200 ma non arriva nessun frame, e il client riprova all'infinito | la porta 80 è servita da Flask invece che dal server dedicato | verificare `zedmd.http_port = 80` e `web.port = 8080`, poi riavviare |
+| `Address already in use` sulla porta 80 | altro web server attivo | `sudo systemctl stop lighttpd` (o simili) |
+| Immagine a scatti | `panel.slowdown` errato per il modello | correggere il valore e riavviare il servizio |
+| L'orologio interrompe Batocera | tempo di grazia troppo corto | alzare `zedmd.grace_seconds` |
 
-### Where the metadata comes from
 
-**AirPlay 2.** `shairport-sync` runs on the Pi and advertises itself as an
-AirPlay speaker. The audio goes into the kernel's `snd_dummy` card — which
-has a real clock, unlike `/dev/null` or ALSA's `null` plugin, and that
-difference is what keeps a multi-room group in sync — while the metadata goes
-out over MQTT. The AirPlay receiver does not care which app is playing, so
-Apple Music, Spotify, Amazon Music and YouTube all work with nothing to
-configure per app.
+---
 
-**Spotify.** Covers music that does *not* go through AirPlay: Spotify Connect
-to real speakers, a computer, an Echo. OAuth with PKCE, so no application
-secret is stored; tokens live in `/var/lib/dmd/spotify.json` with mode `0600`
-and never appear in an exported configuration.
+## Libreria media
 
-**A free MQTT topic.** Anything else can publish a JSON with `title`,
-`artist`, `album`, `duration`, `position` and `playing` — Home Assistant's own
-names (`media_title`, `media_artist`, …) are accepted too. This is how you
-cover a HomePod started by voice or an Echo, which the DMD cannot see on its
-own.
+Cartella predefinita: `/srv/dmd/media`, condivisa in rete come `\\<ip>\dmd-media`.
 
-When several sources have something to say, AirPlay wins: if an audio stream
-is arriving here, that is what is being listened to. Otherwise a playing
-source beats a paused one.
+Si possono caricare i principali formati di immagine (jpg, png, bmp, webp, tif)
+e di video o animazione (gif, mp4, mkv, avi, mov, webm, mpg). L'adattamento a
+256×64 avviene al momento della riproduzione: le immagini con Pillow, i video
+con ffmpeg. Le animazioni brevi vengono ripetute fino a coprire la durata
+impostata, comportamento pensato per le GIF di Pixelcade.
 
-### Passive sniffing does not work, and cannot
+Le sottocartelle sono esplorate ricorsivamente: una raccolta Pixelcade si può
+copiare così com'è.
 
-AirPlay 2 encrypts the stream end to end with keys derived from pairing. A
-port mirror shows you device names in mDNS and nothing else. Being a paired
-endpoint is the supported way to read the metadata, and that is what this is.
+---
 
-### Without Home Assistant
+## Storico versioni
 
-The default broker is `127.0.0.1` — a Mosquitto on the Pi itself. Home
-Assistant is an option, not a requirement.
+| Versione | Contenuto |
+|---|---|
+| 1.0 | Ricevitore ZeDMD-WiFi, orologio, web UI |
+| 1.1 | Colori di ora e data separati, formato 12/24h, lingua dei giorni, Media Player separato con foto e video, Night mode e Sleep mode, condivisione SMB e upload da web |
+| 1.1.1 | `update.sh` installa ffmpeg e samba in modo indipendente |
+| 1.2 | Regolazione fine del driver S-PWM dalla web UI, riavvio del servizio dall'interfaccia |
+| 1.3 | Air Radar: aerei in transito da coordinate GPS e raggio, via API pubbliche ADS-B |
+| 1.3.1 | Nessuna coordinata preimpostata nel software distribuito |
+| 1.4 | Air Radar: scelta dei parametri di volo mostrati e registro CSV scaricabile |
+| 1.5 | Aggiornamento via rete da GitHub, con verifica preventiva e ripristino automatico |
+| 1.5.1 | Corretta la ricerca della rotta: era subordinata a una seconda casella, ora rimossa |
+| 1.5.2 | Rotte dal servizio routeset di adsb.lol, in blocco e con codici IATA; prova diagnostica |
+| 1.6 | Elenco della libreria media tenuto in memoria invece di rileggere il disco a ogni contenuto |
+| 1.7 | Interfaccia web in italiano e inglese, lingua rilevata dal browser, link al progetto |
+| 1.7.1 | Un errore della web UI non ferma più il servizio: il pannello resta acceso |
+| 1.7.2 | Impronte md5 di tutti i file e verifica automatica prima e dopo la copia |
+| 1.8 | Esportazione e importazione della configurazione, con esclusione delle coordinate |
+| 1.9 | Rolling banner (dieci testi scorrevoli) e controllo aggiornamenti della libreria matrice |
+| 1.9.1 | L'aggiornamento installa i file dichiarati dall'archivio scaricato, non quelli del codice già installato |
+| 1.9.2 | Controllo della libreria anche quando la cartella appartiene all'utente e il servizio gira come root |
+| 1.9.3 | "Ora e sincronizzazione" spostato nella pagina Orologio |
+| 1.9.4 | Durata del bit minimo e bit con dithering: alzano il refresh senza perdere profondità PWM |
+| 1.10 | Now Playing: brano in ascolto da AirPlay 2, Spotify o MQTT; entità in Home Assistant |
+| 1.11 | Radar: due tabelle CSV modificabili traducono i codici degli aeromobili e degli aeroporti in nomi leggibili |
+| 1.12 | Radar: compagnia aerea fra i parametri mostrabili, con la sua tabella di conversione |
+| 2.0 | Compleanni, profili hardware del pannello, unità di misura del radar, Night e Sleep mode da Home Assistant |
+| 2.0.3 | Gestione media: entrando nella libreria i servizi si fermano, così l'anteprima mostra davvero il file scelto |
+| 3.0 | Doom sul pannello, con doomgeneric in un processo separato |
+| 3.2 | Doom non è un servizio ma una partita: «Gioca» ferma i servizi, l'uscita li ripristina |
+| 3.3 | Pad PS4 e da PC per Doom, avvio da Home Assistant, gamma predefinito a 1.15 |
+| 3.4 | Calendario della raccolta rifiuti accanto all'orologio, con eccezioni ed entità in Home Assistant |
 
-### With Home Assistant
 
-With `mqtt.discovery` on, the DMD announces itself. A device appears carrying
-the current track (title as the state, the rest as attributes), a switch per
-service and brightness as a `number`. They are controllable, not just
-readable. Everything is tied to the MQTT will, so if the service stops the
-entities go *unavailable* instead of freezing on a value that looks live.
+---
 
-Nothing watches Home Assistant, and the DMD never needs to know where it is.
-Discovery is published retained, so the broker replays it to whoever
-subscribes later; and Home Assistant publishes `online` to
-`homeassistant/status` when it starts, which the DMD subscribes to and treats
-as the trigger to re-declare — after a random delay, so every MQTT device in
-the house does not answer the same announcement in the same instant. The
-Music page also has a manual re-declare button and one to remove the
-entities.
+## Air Radar
 
-### Track position
+Interroga a intervalli regolari le reti ADS-B comunitarie e mostra i voli entro
+il raggio impostato. Servizi supportati, tutti gratuiti e senza chiave:
 
-AirPlay sends `prgr` — three RTP timestamps at 44100 Hz — only on track
-change and after a seek; Spotify answers only when polled. Between updates the
-DMD counts the time itself from the last known-good value, using
-`time.monotonic()` rather than the system clock: an NTP correction must not
-make the progress bar jump.
+| Servizio | Endpoint |
+|---|---|
+| adsb.fi | `https://opendata.adsb.fi/api/v3/lat/{lat}/lon/{lon}/dist/{nm}` |
+| adsb.one | `https://api.adsb.one/v2/point/{lat}/{lon}/{nm}` |
+| adsb.lol | `https://api.adsb.lol/v2/point/{lat}/{lon}/{nm}` |
 
-### No album artwork, on purpose
+Sono compatibili tra loro (formato ADSBexchange v2): se quello scelto non
+risponde, gli altri vengono usati automaticamente come riserva. Il raggio si
+indica in chilometri e viene convertito in miglia nautiche; la distanza di ogni
+aereo viene poi ricalcolata con l'emisenoverso perché il filtro dell'API è
+approssimativo.
 
-At 64 pixels it would be unreadable, but more importantly it is made almost
-entirely of mid-tones — the worst possible content for an S-PWM panel at a low
-refresh rate. For the same reason the text is drawn **without antialiasing**
-(edge shading is mid-tones too) and, with *fully saturated colours only*, in
-eight colours: hierarchy between lines comes from changing hue rather than
-brightness. See [Timing](#timing-or-why-white-lines-appear).
+La rotta origine → destinazione arriva dal servizio `routeset` di adsb.lol
+(`POST https://api.adsb.lol/api/0/routeset`), che accetta fino a 100 voli per
+richiesta: tutte le rotte di un giro si ottengono con una sola chiamata.
+Vengono preferiti i codici IATA, più corti e leggibili su un pannello stretto,
+con ricaduta sugli ICAO quando mancano — cosa che succede spesso, ed è il
+motivo per cui la tabella di conversione conosce entrambe le grafie. Se il servizio non risponde si ripiega
+su hexdb.io, volo per volo.
 
-### Installation
+La ricerca avviene solo se il campo è selezionato o se la si vuole nel registro
+CSV. È disponibile per i voli di linea, molto meno per cargo, aviazione
+generale e voli di Stato: la riga di stato riporta quante rotte sono state
+trovate e quante no, e la pagina Radar ha una prova diagnostica per un singolo
+codice volo.
+
+I parametri mostrati sul pannello si scelgono dalla pagina Radar: rotta,
+modello, immatricolazione, quota, velocità, direzione, transponder, distanza e
+codice Mode S. Il codice volo compare sempre in grande.
+
+Ogni passaggio viene registrato in `/var/lib/dmd/flights.csv`, scaricabile
+dalla web UI. Colonne: `timestamp, hex, callsign, registration, type,
+altitude_ft, speed_kt, track_deg, squawk, distance_km, latitude, longitude,
+route`. Lo stesso aereo non viene riscritto finché resta nel raggio, quindi c'è
+una riga per passaggio.
+
+Le coordinate impostate restano solo in `/etc/dmd/config.json` su questo
+Raspberry: non fanno parte del software distribuito.
+
+Non essendoci un'antenna locale la copertura dipende dai riceventi volontari
+della zona: il traffico commerciale compare quasi sempre, aviazione generale e
+voli militari spesso no.
+
+
+---
+
+## Aggiornamento via rete
+
+Il servizio confronta la propria versione con il `version.py` del repository
+GitHub configurato e, se ne trova una più recente, la può installare da solo
+dalla pagina Impostazioni.
+
+L'installazione procede in quest'ordine, e si ferma al primo intoppo:
+
+1. scarica l'archivio del ramo in una cartella temporanea
+2. rifiuta archivi con percorsi assoluti o risalite di cartella
+3. verifica la presenza dei file attesi e compila tutto il Python
+4. salva una copia dell'installazione corrente in `/var/lib/dmd/backup`
+5. sostituisce i file e riavvia il servizio
+6. interroga `/api/status` per verificare che sia davvero ripartito
+7. se non risponde, ripristina la copia e riavvia di nuovo
+
+L'ultimo passo è il motivo per cui l'aggiornamento gira in un processo
+staccato: deve sopravvivere al riavvio del servizio che lo ha avviato.
+
+La configurazione in `/etc/dmd/config.json` non viene mai toccata, e il diario
+delle operazioni resta in `/var/lib/dmd/ota.log`, consultabile dalla web UI.
+
+---
+
+## Now Playing
+
+Il pannello mostra che cosa stai ascoltando: titolo, artista, album, stato e
+avanzamento del brano. Il DMD non riproduce audio e non si mette fra la
+musica e le casse — si limita ad ascoltare i metadati.
+
+### Come arrivano i metadati
+
+**AirPlay 2.** `shairport-sync` gira sul Raspberry e si presenta in rete come
+una cassa AirPlay. L'audio finisce nella scheda fittizia `snd_dummy` (che ha
+un orologio vero, a differenza di `/dev/null`), i metadati escono su MQTT. Al
+ricevitore AirPlay non importa quale applicazione stia suonando: Apple Music,
+Spotify, Amazon Music e YouTube funzionano tutte allo stesso modo, senza
+niente da configurare per ciascuna.
+
+**Spotify.** Copre la musica che *non* passa da AirPlay: Spotify Connect
+verso casse vere, il computer, un Echo. Autenticazione OAuth con PKCE, senza
+segreto dell'applicazione; i token stanno in `/var/lib/dmd/spotify.json` con
+permessi `0600` e non compaiono mai in una configurazione esportata.
+
+**Topic MQTT libero.** Qualsiasi altra cosa può pubblicare un JSON con
+`title`, `artist`, `album`, `duration`, `position` e `playing` — sono
+accettati anche i nomi di Home Assistant (`media_title`, `media_artist`, …).
+È il modo di coprire un HomePod avviato a voce o un Echo, che il DMD non
+vedrebbe altrimenti.
+
+Quando più sorgenti hanno qualcosa da dire comanda AirPlay: se sta arrivando
+un flusso audio qui, quello è ciò che si sta ascoltando. A parità, vince chi
+suona su chi è in pausa.
+
+### Senza Home Assistant
+
+Il broker predefinito è `127.0.0.1`, cioè un Mosquitto installato sul
+Raspberry stesso. Home Assistant è una possibilità, non un requisito.
+
+### Con Home Assistant
+
+Con `mqtt.discovery` attivo il DMD si presenta da solo via MQTT Discovery. In
+Home Assistant compare un dispositivo con il brano corrente (titolo come
+stato, il resto come attributi), un interruttore per ogni servizio e la
+luminosità come `number`. Sono comandabili, non solo leggibili. Le entità
+sono legate al testamento MQTT: se il servizio si ferma diventano *non
+disponibili* invece di restare congelate.
+
+Quando Home Assistant riparte non serve sorvegliarlo, e il DMD non ha bisogno
+di sapere dove sia: le dichiarazioni sono pubblicate con `retain`, quindi il
+broker le riconsegna a chi si iscrive dopo, e in più Home Assistant pubblica
+`online` su `homeassistant/status` all'avvio — il DMD è iscritto a quel topic
+e si ridichiara, con un ritardo casuale per non sommare la propria risposta a
+quella di tutti gli altri dispositivi della casa. La pagina Musica ha
+comunque un pulsante per ridichiarare a mano e uno per rimuovere le entità.
+
+### La posizione nel brano
+
+AirPlay manda `prgr` — tre timestamp RTP a 44100 Hz — solo al cambio di
+traccia e dopo un salto; Spotify risponde solo quando lo si interroga. Fra un
+aggiornamento e l'altro il tempo lo conta il DMD, ripartendo dall'ultimo
+valore certo. Il conteggio usa `time.monotonic()` e non l'orologio di
+sistema: una correzione NTP non deve far saltare la barra.
+
+### Perché non c'è la copertina
+
+A 64 pixel di lato sarebbe illeggibile, ma soprattutto è fatta quasi solo di
+mezzi toni — il contenuto peggiore possibile per un pannello S-PWM a refresh
+basso. Per la stessa ragione il testo si disegna **senza antialiasing**
+(le sfumature dei bordi sono anch'esse mezzi toni) e, con l'opzione *Solo
+colori pieni*, in otto soli colori saturi: la gerarchia fra le righe si
+ottiene cambiando tinta invece che luminosità.
+
+### Installazione
 
 ```bash
 sudo /opt/dmd/setup_nowplaying.sh
 ```
 
-It asks for the speaker name and where the broker is, then does the rest:
-Mosquitto, build dependencies, `nqptp`, `shairport-sync` built with AirPlay 2
-and metadata, the dummy sound card, the configuration file, confinement to
-cores 0-2 so core 3 stays with the panel, and the DMD's own MQTT section. It
-is re-runnable and skips whatever is already done — including the fifteen
-minute build. `--verifica` reports the state without changing anything.
+Chiede il nome della cassa e dove sta il broker, poi fa tutto: Mosquitto,
+dipendenze, `nqptp`, `shairport-sync` compilato con AirPlay 2 e metadati,
+scheda audio fittizia, file di configurazione, confinamento ai core 0-2 e
+sezione MQTT del DMD. Ripetibile: salta i passi già fatti, compresa la
+compilazione. `--verifica` controlla lo stato senza toccare niente.
 
-It is installed with everything else but never run automatically: it is
-optional, and the build alone takes a quarter of an hour. It depends on no
-other file, so it can also be downloaded on its own.
+Viene installato insieme al resto ma non viene mai lanciato in
+automatico: è facoltativo, e la sola compilazione porta via un quarto d'ora.
+Non dipende da nessun altro file, quindi si può anche scaricare da solo.
 
-### Dependency
+### Dipendenze
 
-`python3-paho-mqtt`. If it is missing, the Music page says so and Now playing
-stays off; the rest of the DMD does not notice.
+`python3-paho-mqtt`. Se manca, la pagina Musica lo dice e Now Playing resta
+spento; il resto del DMD non se ne accorge.
 
-Full setup guide, including doing it by hand (in Italian):
-[`docs/now-playing.it.md`](docs/now-playing.it.md).
+Guida completa, anche per farlo a mano: `docs/now-playing.it.md`.
+
+
+### Quando i parametri non stanno su una riga
+
+La fascia bassa è larga 256 pixel: oltre i quattro o cinque campi qualcosa
+deve cedere. Con nove parametri selezionati la riga misura circa 400 pixel.
+La pagina Radar decide come comportarsi:
+
+| Modalità | Che cosa fa |
+|---|---|
+| **A pagine** (predefinita) | I campi si dividono in gruppi che ci stanno per intero e si alternano ogni `page_seconds` secondi. Non se ne perde nessuno, e il testo resta fermo. |
+| **Scorrevole** | La riga passa da destra a sinistra a `scroll_speed` pixel al secondo. Si legge senza attese, ma è l'unica parte del pannello in movimento continuo: su una matrice a 38 Hz lascia una scia leggera. Qui `display_seconds` diventa un **minimo**: una passata iniziata arriva in fondo, e si cambia aereo quando il testo è uscito del tutto da sinistra. |
+| **Accorcia la riga** | Il comportamento fino alla 1.11.3: i campi in eccesso vengono scartati dal fondo. |
+
+Identificativo e rotta non si muovono mai: cambia solo la fascia bassa, così
+l'aereo non salta mentre lo stai leggendo. Finché i campi ci stanno tutti le
+tre scelte si comportano allo stesso modo.
 
 ---
 
-## Credits
+## Conversioni dei codici del radar
 
-- [hzeller/rpi-rgb-led-matrix](https://github.com/hzeller/rpi-rgb-led-matrix) — the LED matrix library
-- [kingdo9/rpi-rgb-led-matrix_pwm_experiment](https://github.com/kingdo9/rpi-rgb-led-matrix_pwm_experiment) — S-PWM panel support, without which none of this would be possible
-- [PPUC/ZeDMD](https://github.com/PPUC/ZeDMD) and [PPUC/libzedmd](https://github.com/PPUC/libzedmd) — the protocol
-- [vpinball/libdmdutil](https://github.com/vpinball/libdmdutil) — `dmdserver`, the Batocera side
+Il radar riceve sigle. Il modello arriva come **designatore ICAO** (`B738`).
+Gli aeroporti delle rotte arrivano invece **in due grafie**: il servizio
+routeset di adsb.lol è documentato per rispondere con i codici IATA di tre
+lettere (`MXP`), ma quel campo spesso non c'è e sia routeset sia hexdb.io
+ripiegano sui codici ICAO di quattro (`LIMC`). Le tabelle conoscono entrambe.
 
-## Documentation in Italian
+Due file CSV modificabili traducono le sigle in nomi leggibili:
 
-- [`docs/manuale-completo.it.md`](docs/manuale-completo.it.md) — the full
-  manual: first boot, system updates, wiring, panel tuning, installation from
-  this repository, Batocera, updates, wear-resistant setup, troubleshooting.
-  Also available as [PDF](docs/DMD_manuale_completo.pdf).
-- [`docs/zedmd-wifi.it.md`](docs/zedmd-wifi.it.md) — connecting a ZeDMD-WiFi
-  client (Batocera, Visual Pinball) to the display, and the Pi's own Wi-Fi.
-  Also available as [PDF](docs/DMD_zedmd_wifi.pdf).
-- [`docs/now-playing.it.md`](docs/now-playing.it.md) — installing
-  shairport-sync, nqptp and Mosquitto, linking Spotify, and wiring the whole
-  thing into Home Assistant. Also available as
-  [PDF](docs/DMD_now_playing.pdf).
-- [`docs/README.it.md`](docs/README.it.md) — service documentation
-- [`docs/pubblicazione.it.md`](docs/pubblicazione.it.md) — release procedure
+```
+/var/lib/dmd/aerei.csv       177 tipi di aeromobile
+/var/lib/dmd/aeroporti.csv   326 aeroporti
+/var/lib/dmd/compagnie.csv   129 compagnie aeree
+```
 
-## License
+La compagnia non arriva come campo a sé: sta nelle **prime tre lettere del
+nominativo di volo**. In `AFR1732` la compagnia è `AFR`, Air France — il
+designatore ICAO, non la sigla IATA di due lettere del biglietto. Un
+nominativo che non ha quella forma non ha una compagnia da mostrare:
+l'aviazione generale usa l'immatricolazione (`I-ABCD`), e quel campo resta
+vuoto invece di inventarsi una sigla.
 
-GPLv3 — see [LICENSE](LICENSE).
+Ogni riga ha tre campi — `codice,forma breve,nome completo`. Nella prima
+colonna possono stare **più codici separati da `/`**, e la riga risponde a
+tutti: è così che un aeroporto porta le due grafie senza doverne tenere
+allineate due righe.
+
+```
+MXP/LIMC,Malpensa,Milano Malpensa
+```
+
+Servono due forme perché il pannello è largo 256 px e la riga del radar porta già rotta,
+quota, velocità e distanza: `737-800` ci sta, `Boeing 737-800` no. Il nome
+completo va nella web UI e nelle due colonne nuove del registro
+(`type_name`, `route_name`), dove lo spazio non manca.
+
+**Un codice che non è in tabella viene mostrato com'è.** Non è un errore, è
+il comportamento previsto. Il sistema tiene il conto dei codici che incontra
+senza saper tradurre e li elenca nella pagina Radar, ordinati per frequenza:
+è la lista di cosa conviene aggiungere per primo, invece di doverlo
+indovinare. Un pulsante li aggiunge in coda al file come righe da
+completare.
+
+I file si modificano dalla pagina Radar oppure a mano via SSH o SMB: una
+modifica esterna viene raccolta senza riavviare il servizio, perché la
+rilettura è legata a data e dimensione del file.
+
+**Non vengono mai sovrascritti dagli aggiornamenti.** Vivono in
+`/var/lib/dmd` proprio per questo: `/opt/dmd` viene riscritto a ogni
+installazione, e le aggiunte fatte a mano sparirebbero. Al primo avvio i file
+si creano da un modello contenuto nel pacchetto; da quel momento sono
+dell'utente.
+
+### Le tre fasce
+
+Dalla 1.11.1 la rotta ha una riga sua, al centro, fra l'identificativo e i
+dettagli: quello spazio prima restava vuoto, e su una riga sola i nomi lunghi
+facevano scartare modello e quota per far entrare tutto. Ora ci stanno
+`Orio al Serio→Stansted` sopra e `737-800  34000ft  450kt  3.2km` sotto.
+
+Se la rotta tradotta è comunque troppo larga si tornano a mostrare i codici,
+che ci stanno sempre: meglio un'informazione completa e stringata che una
+tagliata a metà. Senza rotta il disegno resta a due fasce, come prima.
+
+Il colore della rotta è regolabile a parte; lasciato vuoto segue quello dei
+dettagli, così chi non tocca nulla non vede cambiare niente.

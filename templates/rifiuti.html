@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}{{ t('rifiuti.title') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('rifiuti.title') }}</h2>
+  <p class="hint">{{ t('rifiuti.intro') }}</p>
+  {% if attive %}
+  <p class="status">{{ t('rifiuti.now') }}
+    {% for v in attive %}<span class="pallino" style="background:{{ v.colore }}"></span>{{ v.nome }}{{ ", " if not loop.last }}{% endfor %}
+  </p>
+  {% else %}
+  <p class="status">{{ t('rifiuti.now.none') }}</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ t('rifiuti.voci') }}</h2>
+  <p class="hint">{{ t('rifiuti.voci.hint') }}</p>
+  <form method="post" action="{{ url_for('api_rifiuti') }}">
+
+    {% for v in voci %}
+    <div class="voce">
+      <div class="row3">
+        <div><label for="nome{{ loop.index0 }}">{{ t('rifiuti.nome') }}</label>
+          <input type="text" id="nome{{ loop.index0 }}" name="nome{{ loop.index0 }}"
+                 value="{{ v.nome }}"></div>
+        <div><label for="colore{{ loop.index0 }}">{{ t('rifiuti.colore') }}</label>
+          <input type="color" id="colore{{ loop.index0 }}" name="colore{{ loop.index0 }}"
+                 value="{{ v.colore }}"></div>
+        <div><label for="tipo{{ loop.index0 }}">{{ t('rifiuti.tipo') }}</label>
+          <select id="tipo{{ loop.index0 }}" name="tipo{{ loop.index0 }}">
+            <option value="rifiuto" {{ 'selected' if v.tipo == 'rifiuto' }}>{{ t('rifiuti.tipo.rifiuto') }}</option>
+            <option value="attivita" {{ 'selected' if v.tipo == 'attivita' }}>{{ t('rifiuti.tipo.attivita') }}</option>
+          </select></div>
+      </div>
+
+      <div class="giorni">
+        {% for g in giorni %}
+        <label class="giorno">
+          <input type="checkbox" name="g{{ loop.parent.loop.index0 }}_{{ loop.index0 }}"
+                 {{ 'checked' if loop.index0 in v.giorni }}>
+          <span>{{ g }}</span>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="row3">
+        <div><label for="cadenza{{ loop.index0 }}">{{ t('rifiuti.cadenza') }}</label>
+          <select id="cadenza{{ loop.index0 }}" name="cadenza{{ loop.index0 }}">
+            {% for c in cadenze %}
+            <option value="{{ c }}" {{ 'selected' if v.cadenza == c }}>{{ t('rifiuti.cadenza.' + c) }}</option>
+            {% endfor %}
+          </select></div>
+        <div><label for="riferimento{{ loop.index0 }}">{{ t('rifiuti.riferimento') }}</label>
+          <input type="text" id="riferimento{{ loop.index0 }}" name="riferimento{{ loop.index0 }}"
+                 value="{{ v.riferimento.strftime('%d/%m/%Y') if v.riferimento else '' }}"
+                 placeholder="gg/mm/aaaa"></div>
+        <div><label class="check" style="margin-top:22px">
+            <input type="checkbox" name="attiva{{ loop.index0 }}" {{ 'checked' if v.attiva }}>
+            {{ t('rifiuti.attiva') }}</label></div>
+      </div>
+
+      <div class="row2 fascia" {{ 'hidden' if v.tipo != 'attivita' }}>
+        <div><label for="oi{{ loop.index0 }}">{{ t('rifiuti.ora_inizio') }}</label>
+          <input type="number" id="oi{{ loop.index0 }}" name="oi{{ loop.index0 }}"
+                 min="0" max="23" value="{{ v.ora_inizio }}"></div>
+        <div><label for="of{{ loop.index0 }}">{{ t('rifiuti.ora_fine_divieto') }}</label>
+          <input type="number" id="of{{ loop.index0 }}" name="of{{ loop.index0 }}"
+                 min="0" max="23" value="{{ v.ora_fine }}"></div>
+      </div>
+      <p class="hint prossima">
+        {% if v.prossima %}{{ t('rifiuti.prossima', data=v.prossima.strftime('%d/%m/%Y')) }}
+        {% else %}{{ t('rifiuti.prossima.mai') }}{% endif %}
+      </p>
+    </div>
+    {% endfor %}
+
+    <div class="row2">
+      <div><label for="ora_avviso">{{ t('rifiuti.avviso') }}</label>
+        <input type="number" id="ora_avviso" name="ora_avviso" min="0" max="23"
+               value="{{ cfg.rifiuti.ora_avviso }}"></div>
+      <div><label for="ora_fine">{{ t('rifiuti.fine') }}</label>
+        <input type="number" id="ora_fine" name="ora_fine" min="0" max="23"
+               value="{{ cfg.rifiuti.ora_fine }}"></div>
+    </div>
+    <p class="hint">{{ t('rifiuti.orari.hint') }}</p>
+
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('rifiuti.soppressioni') }}</h2>
+  <p class="hint">{{ t('rifiuti.soppressioni.hint') }}</p>
+  <form method="post" action="{{ url_for('api_rifiuti_eccezioni') }}">
+    <input type="hidden" name="quale" value="soppressioni">
+    <textarea name="testo" rows="6" spellcheck="false">{{ soppressioni }}</textarea>
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('rifiuti.straordinari') }}</h2>
+  <p class="hint">{{ t('rifiuti.straordinari.hint') }}</p>
+  <form method="post" action="{{ url_for('api_rifiuti_eccezioni') }}">
+    <input type="hidden" name="quale" value="straordinari">
+    <textarea name="testo" rows="6" spellcheck="false">{{ straordinari }}</textarea>
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+</section>
+
+<script>
+// La fascia oraria ha senso solo per le attivita' comunali: mostrarla anche
+// per la carta vuol dire due caselle che non fanno niente.
+(function () {
+  var scelte = document.querySelectorAll("select[name^='tipo']");
+  for (var i = 0; i < scelte.length; i++) {
+    (function (s) {
+      function aggiorna() {
+        var fascia = s.closest(".voce").querySelector(".fascia");
+        if (fascia) { fascia.hidden = (s.value !== "attivita"); }
+      }
+      s.addEventListener("change", aggiorna);
+      aggiorna();
+    })(scelte[i]);
+  }
+})();
+</script>
+
+{% endblock %}

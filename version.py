@@ -341,6 +341,32 @@ Storico:
        ragionamento fatto a tavolino: sul pannello vero sbiancava e rendeva
        illeggibili i menu. Chi ha ancora il vecchio predefinito esatto viene
        corretto; chi ha tarato non viene toccato.
+  3.4  Calendario della raccolta rifiuti nella colonna libera dell'orologio.
+       Nessun portale da interrogare e nessuna credenziale da custodire: la
+       raccolta ha una cadenza fissa, quindi si descrive una volta — quali
+       giorni della settimana, con che cadenza (settimanale, quindicinale,
+       prima e terza o seconda e quarta del mese) — e il calendario si
+       calcola da solo, per sempre e senza rete. La cadenza quindicinale e'
+       ancorata a una data di riferimento e non alla parita' della settimana
+       ISO: un anno ha 52 o 53 settimane, e chi conta le settimane salta un
+       turno a ogni Capodanno.
+       Le eccezioni sono due tabelle separate, perche' sono due cose diverse:
+       i giorni di mancato servizio e quelli di servizio straordinario. Una
+       festivita' che sposta il giro si scrive come due righe, la soppressione
+       e il recupero, e le due funzionano insieme.
+       Accanto ai rifiuti stanno le attivita' comunali con una fascia oraria
+       propria — il lavaggio strada che vieta la sosta dalle 00:00 alle 06:00
+       vale finche' il divieto e' in vigore, non fino alle 8 come un bidone.
+       Sul pannello i nomi compaiono a sinistra dell'orologio, che resta
+       centrato: la colonna sceglie il carattere piu' grande in cui tutti i
+       nomi ci stanno, invece di spostare l'ora per farsi posto. Il promemoria
+       si accende alle 18 della sera prima e si spegne al passaggio.
+       Home Assistant riceve l'evento, non il calendario: per ogni voce un
+       binary_sensor che dice se stasera si espone e un sensore con la data
+       della prossima raccolta. Con quei due si scrive un'automazione in tre
+       righe.
+       La voce "Gestione media" esce dal menu in alto: era un doppione del
+       link che sta gia' nella pagina Media, ora un pulsante.
 """
 
-__version__ = "3.3"
+__version__ = "3.4"

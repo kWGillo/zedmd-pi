@@ -59,6 +59,11 @@ class ClockSource(Source):
         self._signature = None
         self._font = _load_font(max(12, int(height * 0.60)))
         self._font_small = _load_font(max(8, int(height * 0.20)))
+        # Font della colonna dei rifiuti, dal piu' grande al piu' piccolo. Si
+        # sceglie il primo in cui il nome piu' lungo sta nello spazio libero:
+        # i nomi li scrive l'utente, e "Indifferenziato" non e' "Carta".
+        self._font_rifiuti = [_load_font(max(6, int(height * f)))
+                              for f in (0.170, 0.155, 0.140, 0.125, 0.110)]
 
     def start(self):
         self._running = True
@@ -81,6 +86,57 @@ class ClockSource(Source):
     def invalidate(self):
         """Forza il ridisegno, ad esempio dopo un cambio di impostazioni."""
         self._signature = None
+
+    # ------------------------------------------------------------- rifiuti
+
+    def _colonna(self):
+        """Le voci da ricordare adesso. Mai un'eccezione fino al pannello.
+
+        L'orologio e' la sorgente che si vede quasi sempre: un errore nel
+        calendario dei rifiuti — un file scritto male, una data assurda — non
+        deve portarsi via anche l'ora.
+        """
+        try:
+            import rifiuti
+            return rifiuti.attive(self.cfg)
+        except Exception as exc:
+            print("[clock] calendario rifiuti non leggibile: %s" % exc)
+            return []
+
+    def _disegna_colonna(self, draw, voci, limite):
+        """Disegna le voci impilate a sinistra, dentro `limite` pixel.
+
+        Impilate e non affiancate: i nomi hanno lunghezze diverse e in
+        orizzontale si leggerebbero come una parola sola. In verticale ognuna
+        ha la sua riga e il suo colore, che e' l'informazione vera — a colpo
+        d'occhio si riconosce il colore prima ancora della parola.
+
+        Lo spazio disponibile e' quello che l'ora lascia libero, e non e'
+        negoziabile: se i nomi non ci stanno si rimpicciolisce il testo, e
+        se non basta si taglia. Meglio "INDIFFERENZ" leggibile che una parola
+        intera sopra le cifre dell'ora.
+        """
+        if not voci or limite < 12:
+            return
+        testi = [v["nome"].upper() for v in voci[:5]]
+        larghezza_utile = limite - 2
+
+        font = self._font_rifiuti[-1]
+        for candidato in self._font_rifiuti:
+            if all(draw.textlength(t, font=candidato) <= larghezza_utile
+                   for t in testi):
+                font = candidato
+                break
+
+        passo = max(7, self.height // max(len(testi), 4))
+        box = draw.textbbox((0, 0), "AG", font=font)
+        alto = box[3] - box[1]
+        for indice, (testo, voce) in enumerate(zip(testi, voci)):
+            while testo and draw.textlength(testo, font=font) > larghezza_utile:
+                testo = testo[:-1]
+            y = indice * passo + max(0, (passo - alto) // 2)
+            draw.text((2, y), testo, font=font,
+                      fill=parse_color(voce.get("colore"), (255, 255, 255)))
 
     def frame(self):
         if not self._running:
@@ -106,9 +162,12 @@ class ClockSource(Source):
         days = DAY_NAMES.get(clock["language"], DAY_NAMES["it"])
         date = "%s %02d/%02d" % (days[now.tm_wday], now.tm_mday, now.tm_mon)
 
+        colonna = self._colonna()
+
         # Ridisegna solo quando cambia qualcosa di visibile.
         signature = (shown, date if clock["show_date"] else "", meridiem,
-                     clock["time_color"], clock["date_color"])
+                     clock["time_color"], clock["date_color"],
+                     tuple((v["nome"], v["colore"]) for v in colonna))
         if signature == self._signature:
             return None
         self._signature = signature
@@ -123,6 +182,12 @@ class ClockSource(Source):
         x = (self.width - (box[2] - box[0])) // 2 - box[0]
         y = (self.height - (box[3] - box[1])) // 2 - box[1]
         draw.text((x, y), shown, font=self._font, fill=time_color)
+
+        # L'ora resta al centro, sempre: la colonna vive nello spazio che
+        # avanza alla sua sinistra e si adatta a quello. Un orologio che si
+        # sposta quando arriva un promemoria e torna indietro quando se ne va
+        # e' un orologio che si muove per conto suo.
+        self._disegna_colonna(draw, colonna, limite=x - 3)
 
         if clock["show_date"]:
             box = draw.textbbox((0, 0), date, font=self._font_small)

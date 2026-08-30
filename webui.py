@@ -20,6 +20,7 @@ import libcheck
 import compleanni
 import doomsetup
 import lookup
+import rifiuti
 import nowplaying
 import presets
 import ota
@@ -358,6 +359,68 @@ def create_app(runtime):
             anteprima=request.args.get("anteprima", ""),
             battito=MANAGER_BEAT, stato=runtime.manager_state(),
             page="manager", **elenco)
+
+    # --------------------------------------------------------------- rifiuti
+
+    @app.route("/rifiuti")
+    def page_rifiuti():
+        elenco = []
+        for voce in rifiuti.voci(cfg):
+            elenco.append(dict(voce, prossima=rifiuti.prossima(voce)))
+        return render_template(
+            "rifiuti.html", cfg=cfg, voci=elenco,
+            giorni=rifiuti.GIORNI_LUNGHI, cadenze=rifiuti.CADENZE,
+            attive=rifiuti.attive(cfg),
+            soppressioni=rifiuti.leggi_testo(rifiuti.SOPPRESSIONI),
+            straordinari=rifiuti.leggi_testo(rifiuti.STRAORDINARI),
+            page="rifiuti")
+
+    @app.route("/api/rifiuti", methods=["POST"])
+    def api_rifiuti():
+        conf = cfg.setdefault("rifiuti", {})
+        for chiave, predefinito in (("ora_avviso", 18), ("ora_fine", 8)):
+            try:
+                conf[chiave] = max(0, min(23, int(request.form.get(chiave, predefinito))))
+            except ValueError:
+                conf[chiave] = predefinito
+
+        nuove = []
+        for indice, vecchia in enumerate(rifiuti.voci(cfg)):
+            voce = dict(vecchia)
+            voce["nome"] = request.form.get("nome%d" % indice, voce["nome"]).strip()                 or voce["nome"]
+            voce["colore"] = request.form.get("colore%d" % indice, voce["colore"]).strip()
+            tipo = request.form.get("tipo%d" % indice, voce["tipo"])
+            voce["tipo"] = tipo if tipo in rifiuti.TIPI else rifiuti.TIPO_PREDEFINITO
+            cadenza = request.form.get("cadenza%d" % indice, voce["cadenza"])
+            voce["cadenza"] = cadenza if cadenza in rifiuti.CADENZE                 else rifiuti.CADENZA_PREDEFINITA
+            voce["attiva"] = request.form.get("attiva%d" % indice) == "on"
+            voce["giorni"] = [g for g in range(7)
+                              if request.form.get("g%d_%d" % (indice, g)) == "on"]
+            # La data si conserva come testo: e' quello che l'utente ha
+            # scritto, e riscriverlo normalizzato gli farebbe credere di aver
+            # sbagliato quando invece era giusto.
+            voce["riferimento"] = request.form.get("riferimento%d" % indice, "").strip()
+            for campo, chiave in (("oi", "ora_inizio"), ("of", "ora_fine")):
+                try:
+                    voce[chiave] = max(0, min(23, int(
+                        request.form.get("%s%d" % (campo, indice), voce[chiave]))))
+                except ValueError:
+                    pass
+            nuove.append(voce)
+        conf["voci"] = nuove
+        dmdconf.save()
+        runtime.clock.invalidate()
+        return redirect(url_for("page_rifiuti"))
+
+    @app.route("/api/rifiuti/eccezioni", methods=["POST"])
+    def api_rifiuti_eccezioni():
+        quale = request.form.get("quale", "")
+        nome = {"soppressioni": rifiuti.SOPPRESSIONI,
+                "straordinari": rifiuti.STRAORDINARI}.get(quale)
+        if nome:
+            rifiuti.salva_testo(nome, request.form.get("testo", ""))
+            runtime.clock.invalidate()
+        return redirect(url_for("page_rifiuti"))
 
     # ------------------------------------------------------------------ doom
 
