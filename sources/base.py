@@ -12,13 +12,6 @@ class Source:
     label = "Base"
     priority = 0
 
-    # Un "riempitivo" e' una sorgente che sta li' quando non c'e' di meglio e
-    # che puo' subentrare a una sorgente rimasta **ferma**, pur avendo questa
-    # una priorita' piu' alta. Doom in attract mode e' l'unico, per ora: senza
-    # questa deroga non comparirebbe mai su un cabinato acceso, perche' ZeDMD
-    # resta legittimamente padrone del pannello finche' Batocera e' collegato.
-    riempitivo = False
-
     def __init__(self, cfg, width, height):
         self.cfg = cfg
         self.width = width
@@ -46,17 +39,6 @@ class Source:
 
     def active(self):
         """True se in questo momento la sorgente ha qualcosa da mostrare."""
-        return False
-
-    def cede_a_riempitivo(self):
-        """True se ha diritto al pannello ma e' ferma da abbastanza tempo.
-
-        Avere diritto al pannello e avere qualcosa da dire non sono la stessa
-        cosa: una sorgente che mostra la stessa identica immagine da minuti
-        puo' lasciare il posto a un riempitivo, e riprenderselo al primo
-        contenuto nuovo. Solo ZeDMD lo fa; per tutte le altre e' `False`, e il
-        comportamento non cambia di una virgola.
-        """
         return False
 
     def frame(self):

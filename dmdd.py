@@ -170,27 +170,7 @@ class Arbiter:
                 return source
             return None
 
-        best = self._migliore()
-        if best is None:
-            return None
-
-        # Deroga per i riempitivi. Se chi ha vinto e' fermo da abbastanza
-        # tempo e c'e' un riempitivo pronto, si rifa' la scelta senza di lui.
-        # Si esclude *solo* il vincitore fermo, non si promuove d'ufficio il
-        # riempitivo: se intanto e' passato un aereo, l'aereo vale di piu' di
-        # Doom che gioca da solo. E la deroga esiste solo finche' un
-        # riempitivo c'e': senza, nessuno prende il posto di un ZeDMD fermo, e
-        # l'immagine del tavolo resta dov'e' invece di lasciare il campo
-        # all'orologio — che era il guasto della 1.12.2.
-        riempitivo = next((s for s in self.sources.values()
-                           if getattr(s, "riempitivo", False)
-                           and s.enabled and s.active()), None)
-        if riempitivo is None or riempitivo is best:
-            return best
-        cede = getattr(best, "cede_a_riempitivo", None)
-        if not cede or not cede():
-            return best
-        return self._migliore(escluso=best) or riempitivo
+        return self._migliore()
 
     def _migliore(self, escluso=None):
         best = None
@@ -225,9 +205,10 @@ class Runtime:
         self.preview = PreviewSource(self.cfg, self.display.width,
                                      self.display.height, self.media)
         self.radar = AirRadarSource(self.cfg, self.display.width, self.display.height)
-        # Doom deve poter prendere e restituire il pannello da solo, quindi
-        # conosce l'arbitro: e' l'unica sorgente che lo fa, e la ragione e'
-        # che la sessione comincia da un tasto premuto, non da una pagina.
+        # Doom prende e restituisce il pannello da solo, quindi conosce
+        # l'arbitro: e' l'unica sorgente che lo fa. Non e' un servizio e non
+        # compare fra gli interruttori — `enabled` resta False per sempre — e
+        # va a schermo solo quando ha la presa, cioe' solo durante una partita.
         self.doom = DoomSource(self.cfg, self.display.width,
                                self.display.height, self.arbiter)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
@@ -247,6 +228,9 @@ class Runtime:
                        self.clock):
             self.arbiter.register(source)
         self.arbiter.apply_services()
+        # Doom non passa da apply_services: non e' un servizio. Qui parte solo
+        # la lettura della tastiera, se e' stata chiesta.
+        self.doom.start()
 
         self._start_audio()
 
@@ -368,8 +352,7 @@ class Runtime:
     # -------------------------------------------------------------------- doom
 
     def doom_state(self):
-        return {"enabled": bool(self.cfg["services"].get("doom")),
-                "running": self.doom.active(),
+        return {"running": self.doom.active(),
                 "session": self.doom.in_sessione(),
                 "idle": int(self.doom.inattivita()),
                 "keys": self.doom.premuti(),
@@ -477,8 +460,9 @@ class Runtime:
                 # numeri, e non merita un thread suo.
                 try:
                     self.doom.controlla_inattivita()
-                    # E se doveva girare e non gira, ci si riprova: correggere
-                    # un percorso sbagliato dalla pagina deve bastare.
+                    # E se una partita e' aperta ma il processo e' morto, si
+                    # ritenta: correggere un percorso sbagliato dalla pagina
+                    # deve bastare a rimettere in moto.
                     self.doom.mantieni()
                 except Exception:
                     pass

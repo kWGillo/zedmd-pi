@@ -121,11 +121,15 @@ DEFAULTS = {
         # Tastiera USB collegata al Pi. Vuoto = tutte quelle che trova.
         "keyboard": True,
         "keyboard_device": "",
-        # Dopo quanti secondi senza comandi la sessione si chiude e si torna
-        # ai demo. Zero = mai.
+        # Se un tasto sul cabinato puo' *far cominciare* una partita. Spento:
+        # il DMD sta in mezzo a un flipper, e un tasto sfiorato per caso non
+        # deve portarsi via il pannello a meta' partita. A sessione aperta la
+        # tastiera comanda comunque il gioco.
+        "keyboard_starts": False,
+        # Dopo quanti secondi senza comandi la partita si chiude da sola e i
+        # servizi riprendono. Zero = mai.
         "session_timeout": 180,
-        # Difficolta' (1-5) e livello da cui parte una partita. Servono solo
-        # alla sessione: l'attract mode fa i suoi demo e non li guarda.
+        # Difficolta' (1-5) e livello da cui parte una partita.
         "skill": 3,
         "start_map": "1 1",
     },
@@ -241,17 +245,12 @@ DEFAULTS = {
         "birthdays": False,
         "status_player": False,
         "air_radar": False,
-        "doom": False,
     },
     "zedmd": {
         "stream_port": 3333,
         "http_port": 80,
         "transport": "TCP",
         "grace_seconds": 60,
-        # Dopo quanti secondi di immagine ferma ZeDMD lascia il pannello a un
-        # riempitivo (Doom in attract mode), riprendendoselo al primo
-        # fotogramma nuovo. Zero disattiva la deroga.
-        "idle_seconds": 60,
         "client_timeout": 10,
         "device_name": "ZeDMD-Pi",
         "firmware_version": "6.0.0",

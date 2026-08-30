@@ -309,6 +309,18 @@ Storico:
         tolti, e non compaiono piu' fra i WAD. setup_share.sh ora viene
         installato in /opt/dmd, altrimenti setup_doom.sh non lo trovava e la
         condivisione dei WAD non nasceva.
+  3.2  Doom non e' piu' un servizio: e' una partita. Si preme "Gioca", tutti i
+       servizi si fermano, si gioca; si esce, e tutto riprende da dove stava.
+       L'interruttore nella pagina Servizi non c'e' piu', e con lui se ne
+       vanno l'attract mode della 3.0 e la deroga nell'arbitro della 3.1 —
+       tre meccanismi per una funzione che nessuno aveva chiesto e che non ha
+       mai funzionato: prima Doom non si vedeva mai, poi restava a schermo
+       dopo l'uscita da una partita, con il Media Player che spuntava ogni
+       tanto perche' aveva la priorita' piu' alta. Ora il processo esiste solo
+       mentre si gioca, e il pannello e' suo per presa esclusiva.
+       La tastiera del cabinato comanda il gioco ma non lo fa *cominciare*, a
+       meno che non lo si chieda: il DMD sta in mezzo a un flipper, e un tasto
+       sfiorato per caso non deve portarsi via il pannello a meta' partita.
 """
 
-__version__ = "3.1.1"
+__version__ = "3.2"

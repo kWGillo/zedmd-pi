@@ -1112,18 +1112,14 @@ STRINGS = {
     "nav.doom": ("Doom", "Doom"),
     "doom.title": ("Doom", "Doom"),
     "doom.intro": (
-        "Doom gira come programma a sé e manda i fotogrammi al pannello. "
-        "Quando nessuno tocca niente gioca da solo, con i demo che ha sempre "
-        "avuto dentro, e cede il pannello a un aereo, a un compleanno e "
-        "soprattutto a Batocera. Al primo comando comincia una partita e il "
-        "pannello diventa suo, finché non esci o finché non lo lasci fermo "
-        "abbastanza a lungo.",
-        "Doom runs as a program of its own and sends frames to the panel. "
-        "When nobody touches anything it plays by itself, using the demos it "
-        "has always carried, and yields the panel to an aircraft, a birthday "
-        "and above all to Batocera. At the first command a game starts and "
-        "the panel becomes its own, until you leave or let it sit idle long "
-        "enough."),
+        "Doom non è un servizio che gira in sottofondo: è una partita. "
+        "Premendo «Gioca» tutti i servizi si fermano e il pannello diventa "
+        "suo — Batocera compreso — finché non esci o finché non lo lasci "
+        "fermo abbastanza a lungo. Uscendo, tutto riprende da dove stava.",
+        "Doom is not a service running in the background: it is a game. "
+        "Press “Play” and every service stops, the panel becomes its own — "
+        "Batocera included — until you leave or let it sit idle long enough. "
+        "On leaving, everything resumes where it was."),
     "doom.play": ("Gioca", "Play"),
     "doom.leave": ("Esci dalla partita", "Leave the game"),
     "doom.pad": ("Comandi", "Controls"),
@@ -1241,19 +1237,18 @@ STRINGS = {
         "copy yours there."),
     "doom.wad.dir": ("Cartella dei WAD", "WAD folder"),
     "doom.wad.share": ("Condivisione di rete", "Network share"),
-    "doom.idle": ("Doom subentra a Batocera fermo da (s)",
-                  "Doom takes over from Batocera idle for (s)"),
-    "doom.idle.hint": (
-        "Finché Batocera è collegato il pannello è suo, ed è giusto così: "
-        "l'immagine del tavolo selezionato resta ferma per minuti mentre "
-        "scorri il menu. Ma passato questo tempo un gioco che si muove vale "
-        "più di un fermo immagine, e al primo fotogramma nuovo il pannello "
-        "torna a Batocera all'istante. Zero = Doom non subentra mai.",
-        "While Batocera is connected the panel is its own, and rightly so: "
-        "the artwork of the selected table sits still for minutes while you "
-        "scroll the menu. But past this time a game that moves is worth more "
-        "than a freeze frame, and at the first new frame the panel goes back "
-        "to Batocera at once. Zero = Doom never takes over."),
+    "doom.keyboard.starts": (
+        "Un tasto sulla tastiera può far cominciare una partita",
+        "A key on the keyboard can start a game"),
+    "doom.keyboard.starts.hint": (
+        "Spento, la partita comincia solo da «Gioca». Il DMD sta in mezzo a "
+        "un flipper: un tasto sfiorato per caso non deve portarsi via il "
+        "pannello a metà partita. A partita aperta la tastiera comanda "
+        "comunque il gioco.",
+        "Off, a game starts only from “Play”. The DMD sits in the middle of a "
+        "pinball cabinet: a key brushed by accident must not take the panel "
+        "away mid-game. Once a game is running the keyboard controls it "
+        "regardless."),
     "doom.wad.free": ("libero", "free"),
     "doom.wad.use": ("Usa questo", "Use this one"),
     "doom.nowad": (
@@ -1261,17 +1256,12 @@ STRINGS = {
         "oppure mettine uno tuo e correggi il percorso qui sotto.",
         "The WAD %(path)s is missing. “sudo /opt/dmd/doom/setup_doom.sh” "
         "downloads it, or put one of your own there and fix the path below."),
-    "status.doom.attract": ("gioca da solo (%(frames)d fotogrammi)",
-                            "playing by itself (%(frames)d frames)"),
+    "status.doom.idle": ("fermo: si comincia da «Gioca»",
+                         "stopped: start it with “Play”"),
     "status.doom.playing": ("partita in corso, fermo da %(seconds)d s",
                             "game in progress, idle for %(seconds)d s"),
     "status.doom.stopped": ("programma non in esecuzione", "program not running"),
     "status.doom.error": ("Doom non parte: %(error)s", "Doom does not start: %(error)s"),
-    "services.desc.doom": (
-        "Doom sul pannello: gioca da solo quando il cabinato è fermo, e si "
-        "prende il pannello quando qualcuno tocca un comando.",
-        "Doom on the panel: it plays by itself while the cabinet is idle, and "
-        "takes the panel when somebody touches a control."),
 
     "media.view": ("Vedi", "View"),
     # ---------------------------------------------------------- gestione media

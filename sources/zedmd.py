@@ -204,44 +204,6 @@ class ZeDMDSource(Source):
             return (time.time() - self._connected_at) < grace
         return (time.time() - self._last_frame) < grace
 
-    def cede_a_riempitivo(self):
-        """Batocera e' collegato ma non manda niente di nuovo da un pezzo.
-
-        La 3.0 aveva un difetto che si vedeva solo su un cabinato vero: Doom
-        in attract mode non compariva **mai**. La ragione non era Doom ma
-        questa sorgente — finche' Batocera e' collegato e ha mandato almeno un
-        fotogramma il pannello e' suo, e su un cabinato acceso quella
-        condizione e' sempre vera. La funzione era descritta come "quando
-        nessuno tocca niente Doom gioca da solo" e nella pratica non esisteva.
-
-        Il rimedio non e' alzare la priorita' di Doom: cosi' vincerebbe anche
-        durante una partita, che e' molto peggio. E non e' nemmeno tornare
-        alla regola della 1.12.2, che faceva sparire l'immagine del tavolo
-        dopo un minuto per lasciare il posto all'**orologio** — quello era un
-        guasto, ed e' stato corretto apposta.
-
-        La distinzione giusta e' fra *avere diritto al pannello* e *avere
-        qualcosa da dire*. L'immagine del tavolo selezionato resta ferma per
-        minuti mentre si scorre il menu: passato quel tempo, un riempitivo che
-        si muove vale piu' di un fermo immagine, e al primo fotogramma nuovo
-        il pannello torna qui immediatamente. Zero disattiva la deroga.
-        """
-        if not self._running or self._client_addr is None or not self._frames:
-            return False
-        try:
-            limite = int(self.cfg["zedmd"].get("idle_seconds", 60))
-        except (TypeError, ValueError):
-            limite = 60
-        if limite <= 0:
-            return False
-        return (time.time() - self._last_frame) > limite
-
-    def fermo_da(self):
-        """Secondi dall'ultimo fotogramma ricevuto, per la web UI."""
-        if not self._frames:
-            return 0
-        return max(0, int(time.time() - self._last_frame))
-
     def frame(self):
         with self._lock:
             if not self._dirty and not self._scaduta_l_attesa():

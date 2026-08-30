@@ -121,9 +121,6 @@ radar.setdefault("unit_distance", "km")
 
 # 3.0: Doom. Il servizio nasce spento: prima va compilato, e finche' non c'e'
 # il binario accenderlo non servirebbe a niente.
-if "doom" not in services:
-    services["doom"] = False
-    print("    servizi: aggiunto Doom")
 doom = cfg.setdefault("doom", {})
 for chiave, valore in (("binary", "/var/lib/dmd/doom/doom-dmd"),
                        ("wad", "/srv/dmd/doom/freedoom1.wad"),
@@ -131,7 +128,8 @@ for chiave, valore in (("binary", "/var/lib/dmd/doom/doom-dmd"),
                        ("band_top", 36), ("band_height", 96),
                        ("gamma", 0.70), ("keyboard", True),
                        ("keyboard_device", ""), ("session_timeout", 180),
-                       ("skill", 3), ("start_map", "1 1")):
+                       ("skill", 3), ("start_map", "1 1"),
+                       ("keyboard_starts", False)):
     doom.setdefault(chiave, valore)
 
 # 3.0.2: i WAD traslocano in una cartella condivisa in rete. Si corregge solo
@@ -141,11 +139,11 @@ if doom.get("wad") == "/var/lib/dmd/doom/freedoom1.wad":
     doom["wad"] = "/srv/dmd/doom/freedoom1.wad"
     print("    doom: i WAD passano alla cartella condivisa /srv/dmd/doom")
 
-# 3.1: ZeDMD lascia il pannello a Doom quando Batocera e' fermo da un pezzo.
-# Senza, l'attract mode non compariva mai su un cabinato acceso.
-if "idle_seconds" not in zedmd:
-    zedmd["idle_seconds"] = 60
-    print("    zedmd: Doom subentra dopo 60 s di immagine ferma")
+# 3.2: Doom non e' piu' un servizio ma una sessione. L'interruttore e la
+# deroga dell'attract mode non servono piu' e vanno tolti, altrimenti restano
+# a confondere chi guarda la configurazione.
+services.pop("doom", None)
+zedmd.pop("idle_seconds", None)
 
 with open(path, "w") as handle:
     json.dump(cfg, handle, indent=2)

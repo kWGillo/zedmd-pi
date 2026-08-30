@@ -1,6 +1,6 @@
 # Doom sul DMD — preparazione e attivazione
 
-Guida rapida per la versione **3.1** del kWGillo DMD Server. Copre solo
+Guida rapida per la versione **3.2** del kWGillo DMD Server. Copre solo
 Doom: preparazione, accensione, comandi e taratura. Per tutto il resto vale il
 manuale completo.
 
@@ -8,17 +8,16 @@ manuale completo.
 
 ## In breve
 
-Quattro passi, una volta sola. Il primo è facoltativo.
+Tre passi, una volta sola. Il primo è facoltativo.
 
 1. *(facoltativo)* Copia il **tuo WAD** nella cartella condivisa
    `\\<ip-del-pi>\dmd-doom`, se hai comprato Doom.
 2. Apri la pagina **Doom** della web UI e premi **Prepara Doom**. Un paio di
    minuti.
 3. Nella stessa pagina scegli il **WAD** da usare.
-4. Nella pagina **Servizi** accendi **Doom**.
 
-Da quel momento, quando il cabinato è fermo, Doom gioca da solo sul pannello.
-Al primo comando comincia una partita.
+Da quel momento si gioca premendo **Gioca**. Non c'è nessun servizio da
+accendere: Doom non gira in sottofondo.
 
 ---
 
@@ -26,7 +25,7 @@ Al primo comando comincia una partita.
 
 | | |
 |---|---|
-| **Versione** | DMD Server 3.1 o successiva |
+| **Versione** | DMD Server 3.2 o successiva |
 | **Rete** | serve alla preparazione: scarica i sorgenti di Doom e, se non hai un WAD tuo, Freedoom (~55 MB) |
 | **Spazio** | circa 150 MB fra `/var/lib/dmd/doom` e `/srv/dmd/doom` |
 | **Tempo** | un paio di minuti di compilazione su un Raspberry 3B+ |
@@ -138,51 +137,34 @@ correggere, non a nasconderlo.
 
 ---
 
-## 5. Accendi il servizio
+## 5. Come funziona
 
-Vai nella pagina **Servizi** e accendi **Doom**. È l'ultimo passo: da qui in
-poi il programma parte da solo a ogni avvio del DMD.
+**Doom non è un servizio: è una partita.** Non gira in sottofondo, non compare
+fra gli interruttori, e finché non premi «Gioca» sul Raspberry non c'è nessun
+processo di Doom in esecuzione.
 
----
+### Quando premi «Gioca»
 
-## 6. Come funziona
+Tutti i servizi si fermano e il pannello diventa suo — **Batocera compreso** —
+finché non esci o finché non lo lasci fermo abbastanza a lungo. Non è una
+questione di priorità: è una *presa*, lo stesso meccanismo della Gestione
+media, e non si discute.
 
-### Quando nessuno tocca niente
+La partita comincia avviando Doom direttamente dentro il livello. Ci vuole un
+secondo di nero: è normale. È il modo affidabile di entrare in gioco, invece
+di interrompere un demo e poi navigare il menu a colpi di frecce su un
+pannello alto sessantaquattro pixel.
 
-Doom **gioca da solo**, mandando in onda i demo che ha sempre avuto dentro. Non
-è un video registrato: è il motore che gioca.
+### Quando esci
 
-In questo stato Doom è una sorgente a **priorità bassa**: cede il pannello a
-un aereo del radar, a un promemoria di compleanno, al Media Player. Se stai
-giocando a flipper, sul DMD c'è il flipper.
+Il processo si chiude e le sorgenti riprendono il loro giro senza essersi
+accorte di niente: orologio, radar, banner, Media Player, Batocera.
 
-Con Batocera però c'è una regola in più, e senza di quella Doom non lo vedresti
-mai. Finché Batocera è collegato il pannello è suo, ed è giusto: l'immagine del
-tavolo selezionato deve restare ferma per minuti mentre scorri il menu. Ma
-**passata la soglia** — un minuto, regolabile — un gioco che si muove vale più
-di un fermo immagine, e Doom subentra. Al **primo fotogramma nuovo** da
-Batocera il pannello torna suo all'istante.
-
-Due cose che questa regola *non* fa, di proposito:
-
-- non promuove Doom sopra chi ha davvero qualcosa da dire: se intanto passa un
-  aereo, si vede l'aereo;
-- non esiste se Doom è spento. Senza un riempitivo pronto, l'immagine del
-  tavolo resta dov'è invece di lasciare il campo all'orologio.
-
-La soglia si regola nella pagina Doom, alla voce *«Doom subentra a Batocera
-fermo da»*. **Zero** disattiva la deroga: Doom in attract mode non prenderà mai
-il posto di Batocera.
-
-### Quando qualcuno preme un comando
-
-Comincia una **partita**, e il pannello diventa suo — **Batocera compreso** —
-finché non esci o finché non lo lasci fermo abbastanza a lungo.
-
-La partita comincia facendo ripartire Doom direttamente dentro il livello.
-Ci vuole un secondo di nero: è normale. È il modo affidabile di entrare in
-gioco, invece di interrompere un demo e poi navigare il menu a colpi di frecce
-su un pannello alto sessantaquattro pixel.
+> **Nelle versioni 3.0 e 3.1** c'era anche un *attract mode*: Doom che giocava
+> da solo quando nessuno toccava niente. Non ha mai funzionato — prima non si
+> vedeva mai perché Batocera non molla il pannello, poi restava a schermo dopo
+> l'uscita da una partita, con il Media Player che spuntava ogni tanto. È
+> stato tolto insieme ai due meccanismi che lo sostenevano.
 
 ### Come finisce
 
@@ -190,13 +172,12 @@ su un pannello alto sessantaquattro pixel.
 |---|---|
 | **Esci dalla partita** | il pulsante nella pagina Doom, subito |
 | **Inattività** | dopo 180 secondi senza comandi (modificabile) |
-| **Servizio spento** | dalla pagina Servizi |
 
-Finita la partita Doom riparte e torna ai suoi demo.
+Finita la partita il processo si chiude e i servizi riprendono.
 
 ---
 
-## 7. I comandi
+## 6. I comandi
 
 Due strade, la stessa coda di tasti. Nessun GPIO.
 
@@ -219,8 +200,14 @@ scritto nella pagina Doom.
 | Mappa | Tab |
 | Cambia arma | da 1 a 7 |
 
-Se non vuoi che il DMD legga la tastiera, togli la spunta a *«Leggi la
-tastiera collegata al Raspberry»* nella pagina Doom.
+La tastiera **comanda** il gioco ma non lo fa *cominciare*: la partita si apre
+da «Gioca». Se preferisci poterla cominciare premendo un tasto sul cabinato,
+c'è la spunta *«Un tasto sulla tastiera può far cominciare una partita»* — è
+spenta di proposito, perché il DMD sta in mezzo a un flipper e un tasto
+sfiorato per caso non deve portarsi via il pannello a metà partita.
+
+Se non vuoi che il DMD legga affatto la tastiera, togli la spunta a *«Leggi la
+tastiera collegata al Raspberry»*.
 
 ### Pagina web
 
@@ -236,7 +223,7 @@ gli stessi tasti della tabella qui sopra.
 
 ---
 
-## 8. Taratura dell'immagine
+## 7. Taratura dell'immagine
 
 Doom disegna **320×200**, cioè 1,6:1. Il pannello è **256×64**, cioè 4:1.
 Schiacciando il fotogramma intero su 64 righe un nemico diventa alto otto
@@ -258,19 +245,28 @@ risposta vera si trova guardando **il tuo** pannello. Salvando, Doom riparte
 da solo — fascia e gamma stanno nella riga di comando del programma, non in un
 file che rilegge.
 
+**Se vuoi provare a vedere tutto lo schermo**, non serve nessuna funzione
+nuova: metti *prima riga* a **0** e *altezza* a **200**, e il ritaglio diventa
+un riproporzionamento dell'intero fotogramma. Sappi però cosa aspettarti — la
+compressione verticale è 2,5 volte quella orizzontale, quindi tutto diventa
+basso e largo, e un terzo del pannello se ne va nella barra di stato. Una via
+di mezzo utile è **0 per 168 righe**: tutta la scena senza la barra di stato.
+
+E un numero che vale la pena conoscere: con la larghezza che passa da 320 a
+256 il fattore è 0,8, quindi le proporzioni sono **esatte** con una fascia di
+**80 righe** (0,8 × 80 = 64). Il valore predefinito, 96, schiaccia in verticale
+del 17% — si vede più scena in cambio di una leggera deformazione. Più la
+fascia è alta, più si vede e più si schiaccia.
+
 ---
 
-## 9. Impostazioni della partita
+## 8. Impostazioni della partita
 
 | Parametro | Predefinito | Cosa fa |
 |---|---|---|
 | **Difficoltà** | 3 | da 1 a 5, la scala di Doom |
 | **Livello iniziale** | `1 1` | episodio e mappa da cui parte una partita |
-| **Fine partita dopo** | 180 s | secondi senza comandi prima di tornare ai demo. `0` = mai |
-| **Doom subentra a Batocera fermo da** | 60 s | quanto deve restare ferma l'immagine di Batocera prima che l'attract mode possa prendere il pannello. `0` = mai |
-
-Difficoltà e livello valgono solo per le partite: l'attract mode fa i suoi
-demo e non li guarda.
+| **Fine partita dopo** | 180 s | secondi senza comandi prima che la partita si chiuda e i servizi riprendano. `0` = mai |
 
 **Il suono è spento di proposito.** Sul cabinato l'audio è di Batocera, e un
 secondo canale sonoro sarebbe soltanto rumore sopra al gioco vero.
@@ -281,7 +277,7 @@ proprie impronte per gli aggiornamenti.
 
 ---
 
-## 10. Se qualcosa non va
+## 9. Se qualcosa non va
 
 | Sintomo | Causa probabile | Rimedio |
 |---|---|---|
@@ -289,8 +285,8 @@ proprie impronte per gli aggiornamenti.
 | «non è un WAD» | file rinominato, o non è un WAD | usa un file che comincia per `IWAD` |
 | «è un'estensione, non un gioco completo» | è un PWAD, cioè una modifica | serve un gioco completo: Freedoom o un WAD di id Software |
 | «troppo piccolo, forse scaricato a metà» | scaricamento interrotto | ricopia il file e ricontrolla la dimensione |
-| Doom non compare sul pannello | servizio spento | accendilo nella pagina Servizi |
-| Doom non compare, ma il servizio è acceso | Batocera sta mandando fotogrammi *nuovi*: allora ha ragione lui | premi **Gioca** per prendere il pannello subito. Se il DMD di Batocera è fermo, controlla la soglia in *«Doom subentra a Batocera fermo da»*: se è a zero la deroga è disattivata |
+| Doom non compare sul pannello | non hai premuto **Gioca** | Doom non gira in sottofondo: si vede solo durante una partita |
+| Premo «Gioca» e non succede niente | il WAD o il programma non vanno | guarda l'avviso in cima alla pagina Doom, che dice quale dei due |
 | Un secondo di nero entrando in partita | Doom sta ripartendo dentro il livello | è normale |
 | La tastiera del Raspberry non risponde | l'opzione è spenta, o la tastiera non è vista | controlla la spunta e l'elenco dei dispositivi nella pagina Doom |
 | Il pannello resta su Doom dopo che hai finito | la partita è ancora aperta | **Esci dalla partita**, oppure aspetta il tempo di inattività |
@@ -304,7 +300,7 @@ journalctl -u dmd -f | grep doom
 
 ---
 
-## 11. Licenze, in due righe
+## 10. Licenze, in due righe
 
 - Il **DMD Server** è GPLv3.
 - **doomgeneric** discende dai sorgenti di Doom, che sono GPL2. Per questo non

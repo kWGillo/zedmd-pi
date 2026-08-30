@@ -18,13 +18,21 @@ Il protocollo e' volutamente stupido — stdout porta fotogrammi grezzi di
 dimensione fissa, stdin porta coppie [stato, tasto] — ed e' descritto per
 esteso in `doom/doomgeneric_dmd.c`.
 
-**Due modi, un solo processo.** Doom in attract mode gioca da solo: e' cio'
-che fa da sempre quando nessuno tocca niente, mandando in onda i propri demo.
-Li' e' una sorgente come le altre, con priorita' bassa: cede a un aereo, a un
-compleanno e soprattutto a Batocera. Quando qualcuno preme un tasto comincia
-una **sessione**, e allora il pannello e' suo — stesso meccanismo della
-gestione media. Finita la sessione il processo riparte e si torna ai demo, che
-e' esattamente come si comporta un cabinato da sala.
+**Doom non e' un servizio: e' una sessione.** Si preme "Gioca", tutto il resto
+si ferma, si gioca; si esce, e tutto riprende da dove stava. Fine.
+
+Nella 3.0 c'era anche un attract mode — Doom che gioca da solo con i propri
+demo quando nessuno tocca niente — e nella 3.1 una deroga apposta nell'arbitro
+per farlo comparire su un cabinato acceso, dove ZeDMD non molla mai il
+pannello. Non ha funzionato in nessuna delle due versioni: prima non si vedeva
+mai, poi restava a schermo dopo l'uscita da una partita, con il Media Player
+che spuntava ogni tanto perche' aveva la priorita' piu' alta. Tre meccanismi
+per una funzione che nessuno aveva chiesto.
+
+Tolti tutti. Il processo esiste **solo mentre si gioca**, e in quel periodo il
+pannello e' suo per presa esclusiva — lo stesso meccanismo della gestione
+media — non per punteggio di priorita'. Chiusa la sessione il processo muore e
+le sorgenti riprendono il loro giro senza essersi accorte di niente.
 """
 
 import os
@@ -156,17 +164,11 @@ def tastiere():
 class DoomSource(Source):
     name = "doom"
     label = "Doom"
-    # Sotto a tutto quello che ha qualcosa da dire: in attract mode Doom e' un
-    # riempitivo, e un compleanno o un aereo valgono di piu'. Durante una
-    # sessione non e' la priorita' a farlo vincere ma la presa del pannello.
-    priority = 40
-
-    # ...e "riempitivo" ha un significato preciso per l'arbitro: puo'
-    # subentrare a una sorgente che ha diritto al pannello ma e' rimasta
-    # ferma. Senza questa deroga, su un cabinato acceso Doom non comparirebbe
-    # mai, perche' ZeDMD e' padrone del pannello finche' Batocera e'
-    # collegato — e la funzione promessa non esisterebbe.
-    riempitivo = True
+    # La priorita' non serve a niente e resta a zero: Doom non partecipa alla
+    # gara. O e' in sessione, e allora il pannello e' preso — e la presa non
+    # si discute — oppure non esiste proprio. `enabled` resta False per
+    # sempre, cosi' non c'e' nessuna strada per cui possa comparire per sbaglio.
+    priority = 0
 
     def __init__(self, cfg, width, height, arbiter=None):
         super().__init__(cfg, width, height)
@@ -186,8 +188,8 @@ class DoomSource(Source):
         self._ultimo_frame = 0.0
         self._errore = ""
 
-        # Sessione: quando e' aperta i tasti arrivano a Doom e il pannello e'
-        # suo. Chiusa, Doom gioca da solo e i tasti si buttano via.
+        # Sessione: o e' aperta — processo vivo, pannello preso, tasti che
+        # arrivano a Doom — oppure non c'e' niente di Doom in esecuzione.
         self._sessione = False
         self._ultimo_tasto = 0.0
         self._premuti = set()
@@ -196,23 +198,33 @@ class DoomSource(Source):
     # ------------------------------------------------------------ ciclo di vita
 
     def start(self):
-        if self._running:
-            return
+        """Rende Doom *disponibile*, non lo avvia.
+
+        Non e' un servizio e non compare fra gli interruttori: finche' nessuno
+        preme "Gioca" non gira niente. L'unica cosa che parte qui e' la lettura
+        della tastiera, e solo se e' stato chiesto di poter cominciare una
+        partita premendo un tasto sul cabinato.
+        """
         self._stop.clear()
-        self._running = True
         self._errore = ""
-        self._ultimo_tentativo = time.time()
-        self._avvia_processo()
-        if self.cfg["doom"].get("keyboard", True):
+        if (self.cfg["doom"].get("keyboard", True)
+                and self._tastiera_thread is None):
             self._tastiera_thread = threading.Thread(
                 target=self._leggi_tastiere, name="doom-tastiera", daemon=True)
             self._tastiera_thread.start()
 
     def stop(self):
-        self._running = False
         self._stop.set()
-        self.chiudi_sessione(riavvia=False)
-        self._ferma_processo()
+        self.chiudi_sessione()
+        self._tastiera_thread = None
+
+    def avvia_da_tastiera(self):
+        """Se un tasto sul cabinato puo' far cominciare una partita.
+
+        Predefinito spento: il DMD sta in mezzo a un flipper, e un tasto
+        sfiorato per caso non deve portarsi via il pannello a meta' partita.
+        """
+        return bool(self.cfg["doom"].get("keyboard_starts", False))
 
     # ------------------------------------------------------------------ processo
 
@@ -355,7 +367,7 @@ class DoomSource(Source):
     # ------------------------------------------------------------------ arbitro
 
     def active(self):
-        if not self._running or self._proc is None:
+        if not self._sessione or self._proc is None:
             return False
         if self._proc.poll() is not None:
             return False
@@ -379,14 +391,12 @@ class DoomSource(Source):
     def status(self, lang=None):
         if self._errore:
             return self.t("status.doom.error", lang, error=self._errore)
-        if not self._running:
-            return self.t("status.disabled", lang)
+        if not self._sessione:
+            return self.t("status.doom.idle", lang)
         if self._proc is None or self._proc.poll() is not None:
             return self.t("status.doom.stopped", lang)
-        if self._sessione:
-            return self.t("status.doom.playing", lang,
-                          seconds=int(self.inattivita()))
-        return self.t("status.doom.attract", lang, frames=self._fotogrammi)
+        return self.t("status.doom.playing", lang,
+                      seconds=int(self.inattivita()))
 
     # ---------------------------------------------------------------- sessione
 
@@ -399,39 +409,48 @@ class DoomSource(Source):
         return time.time() - self._ultimo_tasto
 
     def apri_sessione(self):
-        """Prende il pannello, entra nel livello e passa i tasti a Doom."""
-        if not self._running:
-            return False
+        """Avvia Doom, prende il pannello e comincia a passargli i tasti.
+
+        E' l'unico modo in cui Doom finisce a schermo. Prima di questo momento
+        non c'e' nessun processo in esecuzione: non e' un servizio in attesa,
+        e' un programma che parte quando lo chiedi.
+        """
         self._ultimo_tasto = time.time()
         if self._sessione:
             return True
-        # Si riparte dentro il livello invece di aprire il menu: vedi
-        # `_comando`. Costa un secondo di nero e non sbaglia mai.
+        self._running = True
+        self._errore = ""
+        self._ultimo_tentativo = time.time()
+        # Si parte dentro il livello invece che dal menu: vedi `_comando`.
         if not self.riavvia(gioca=True):
+            self._running = False
             return False
         self._sessione = True
         if self.arbiter is not None:
-            # Senza scadenza: chi gioca puo' stare fermo un minuto a guardare
+            # Senza scadenza: chi gioca puo' stare fermo un minuto davanti a
             # una porta senza che il pannello gli torni all'orologio. A
-            # chiudere ci pensa il tempo di inattivita', che e' molto piu'
-            # lungo, o il pulsante.
+            # chiudere ci pensa il tempo di inattivita', o il pulsante.
             self.arbiter.hold_on(self.name)
         return True
 
-    def chiudi_sessione(self, riavvia=True):
-        """Restituisce il pannello e torna ai demo."""
-        if not self._sessione:
-            return False
+    def chiudi_sessione(self, riavvia=False):
+        """Spegne Doom e restituisce il pannello alle sorgenti.
+
+        `riavvia` esiste solo per non rompere i richiami esistenti: non si
+        riparte mai. Fuori da una sessione Doom non deve esistere — restare
+        acceso a priorita' bassa voleva dire, dopo l'uscita, un pannello che
+        continuava a mostrare Doom con il Media Player che spuntava ogni
+        tanto. Era il difetto segnalato, ed era la conseguenza diretta di
+        tenere in piedi un attract mode che nessuno aveva chiesto.
+        """
+        aperta = self._sessione
         self._sessione = False
+        self._running = False
         self._premuti.clear()
         if self.arbiter is not None:
             self.arbiter.hold_off(self.name)
-        if riavvia and self._running:
-            # Ripartire e' l'unico modo onesto di tornare all'attract: Doom
-            # resterebbe fermo nel menu o in mezzo a un livello, e un cabinato
-            # che mostra una schermata di pausa per ore non e' un attract.
-            self.riavvia()
-        return True
+        self._ferma_processo()
+        return aperta
 
     # Ogni quanto si riprova ad avviare Doom quando l'avvio e' fallito. Non
     # troppo spesso: se manca il binario, riprovare dieci volte al secondo
@@ -439,15 +458,14 @@ class DoomSource(Source):
     RIPROVA_OGNI = 30
 
     def mantieni(self):
-        """Riavvia Doom se doveva girare e non gira. La chiama il ciclo.
+        """Rimette in piedi Doom se e' morto durante una partita.
 
-        Senza, una sorgente che non riesce a partire non ci riprova **mai**:
-        `start()` esce subito perche' si considera gia' avviata, e l'unico
-        modo di rimetterla in moto era spegnere e riaccendere il servizio.
-        Correggendo un percorso sbagliato dalla pagina non succedeva niente, e
-        sembrava che la pagina non funzionasse.
+        Vale solo a sessione aperta: fuori non c'e' niente da mantenere. Se il
+        processo cade da solo — o non e' mai partito perche' un percorso era
+        sbagliato — si ritenta, cosi' correggere l'errore dalla pagina basta a
+        rimettere in moto senza uscire e rientrare.
         """
-        if not self._running or self._sessione:
+        if not self._sessione:
             return False
         if self._proc is not None and self._proc.poll() is None:
             return False
@@ -455,7 +473,7 @@ class DoomSource(Source):
         if adesso - self._ultimo_tentativo < self.RIPROVA_OGNI:
             return False
         self._ultimo_tentativo = adesso
-        return self._avvia_processo()
+        return self._avvia_processo(gioca=True)
 
     def controlla_inattivita(self):
         """Chiude la sessione se non tocca nessuno da abbastanza tempo.
@@ -475,18 +493,21 @@ class DoomSource(Source):
 
     # ------------------------------------------------------------------ tasti
 
-    def premi(self, azione, giu=True):
-        """Manda un tasto a Doom. Apre la sessione se non c'e' gia'.
+    def premi(self, azione, giu=True, apri=True):
+        """Manda un tasto a Doom.
 
-        Premere un tasto mentre Doom gioca da solo *e'* il modo di entrare:
-        e' cosi' che si prende in mano un cabinato in sala, senza cercare
-        prima un pulsante "gioca".
+        `apri` decide se un tasto puo' *cominciare* una partita. Dai pulsanti
+        della pagina Doom si', perche' chi li preme sta guardando quella
+        pagina. Dalla tastiera del cabinato solo se e' stato chiesto: il DMD
+        sta in mezzo a un flipper, e un tasto sfiorato per caso non deve
+        portarsi via il pannello a meta' partita.
         """
         codice = DOOM_TASTI.get(azione)
         if codice is None:
             return False
-        if not self.apri_sessione():
-            return False
+        if not self._sessione:
+            if not apri or not self.apri_sessione():
+                return False
         self._ultimo_tasto = time.time()
 
         if giu:
@@ -533,7 +554,7 @@ class DoomSource(Source):
         `struct`, che c'e' sempre.
         """
         aperti = {}
-        while self._running and not self._stop.is_set():
+        while not self._stop.is_set():
             voluti = self._dispositivi()
             for percorso in voluti:
                 if percorso in aperti:
@@ -602,4 +623,4 @@ class DoomSource(Source):
                 continue
             azione = LINUX_TASTI.get(codice)
             if azione:
-                self.premi(azione, valore == 1)
+                self.premi(azione, valore == 1, apri=self.avvia_da_tastiera())
