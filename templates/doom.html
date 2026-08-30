@@ -37,6 +37,8 @@
     <dd class="mono">{{ prep.binary }}
       {% if prep.binary_ready %}&#10003;{% else %}&mdash;{% endif %}</dd>
     <dt>{{ t('doom.wad.dir') }}</dt><dd class="mono">{{ prep.wad_dir }}</dd>
+    <dt>{{ t('doom.wad.share') }}</dt>
+    <dd class="mono">\\{{ request.host.split(':')[0] }}\{{ prep.share }}</dd>
   </dl>
 
   <div class="actions">
@@ -133,9 +135,16 @@
     <p class="hint">{{ t('doom.gamma.hint') }}</p>
 
     <div class="row2">
+      <div><label for="idle_seconds">{{ t('doom.idle') }}</label>
+        <input type="number" id="idle_seconds" name="idle_seconds" min="0" max="3600"
+               value="{{ cfg.zedmd.idle_seconds }}"></div>
       <div><label for="session_timeout">{{ t('doom.timeout') }}</label>
         <input type="number" id="session_timeout" name="session_timeout" min="0" max="3600"
                value="{{ doom.session_timeout }}"></div>
+    </div>
+    <p class="hint">{{ t('doom.idle.hint') }}</p>
+
+    <div class="row2">
       <div><label for="keyboard_device">{{ t('doom.device') }}</label>
         <input type="text" id="keyboard_device" name="keyboard_device"
                value="{{ doom.keyboard_device }}" placeholder="{{ t('doom.device.auto') }}"></div>

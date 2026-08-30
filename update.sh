@@ -126,13 +126,26 @@ if "doom" not in services:
     print("    servizi: aggiunto Doom")
 doom = cfg.setdefault("doom", {})
 for chiave, valore in (("binary", "/var/lib/dmd/doom/doom-dmd"),
-                       ("wad", "/var/lib/dmd/doom/freedoom1.wad"),
+                       ("wad", "/srv/dmd/doom/freedoom1.wad"),
                        ("work_dir", "/var/lib/dmd/doom/stato"),
                        ("band_top", 36), ("band_height", 96),
                        ("gamma", 0.70), ("keyboard", True),
                        ("keyboard_device", ""), ("session_timeout", 180),
                        ("skill", 3), ("start_map", "1 1")):
     doom.setdefault(chiave, valore)
+
+# 3.0.2: i WAD traslocano in una cartella condivisa in rete. Si corregge solo
+# chi ha ancora il percorso predefinito della 3.0/3.0.1: un percorso scelto
+# dall'utente non si tocca, e a spostare i file ci pensa setup_doom.sh.
+if doom.get("wad") == "/var/lib/dmd/doom/freedoom1.wad":
+    doom["wad"] = "/srv/dmd/doom/freedoom1.wad"
+    print("    doom: i WAD passano alla cartella condivisa /srv/dmd/doom")
+
+# 3.1: ZeDMD lascia il pannello a Doom quando Batocera e' fermo da un pezzo.
+# Senza, l'attract mode non compariva mai su un cabinato acceso.
+if "idle_seconds" not in zedmd:
+    zedmd["idle_seconds"] = 60
+    print("    zedmd: Doom subentra dopo 60 s di immagine ferma")
 
 with open(path, "w") as handle:
     json.dump(cfg, handle, indent=2)

@@ -170,9 +170,32 @@ class Arbiter:
                 return source
             return None
 
+        best = self._migliore()
+        if best is None:
+            return None
+
+        # Deroga per i riempitivi. Se chi ha vinto e' fermo da abbastanza
+        # tempo e c'e' un riempitivo pronto, si rifa' la scelta senza di lui.
+        # Si esclude *solo* il vincitore fermo, non si promuove d'ufficio il
+        # riempitivo: se intanto e' passato un aereo, l'aereo vale di piu' di
+        # Doom che gioca da solo. E la deroga esiste solo finche' un
+        # riempitivo c'e': senza, nessuno prende il posto di un ZeDMD fermo, e
+        # l'immagine del tavolo resta dov'e' invece di lasciare il campo
+        # all'orologio — che era il guasto della 1.12.2.
+        riempitivo = next((s for s in self.sources.values()
+                           if getattr(s, "riempitivo", False)
+                           and s.enabled and s.active()), None)
+        if riempitivo is None or riempitivo is best:
+            return best
+        cede = getattr(best, "cede_a_riempitivo", None)
+        if not cede or not cede():
+            return best
+        return self._migliore(escluso=best) or riempitivo
+
+    def _migliore(self, escluso=None):
         best = None
         for source in self.sources.values():
-            if not source.enabled or not source.active():
+            if source is escluso or not source.enabled or not source.active():
                 continue
             if best is None or source.priority > best.priority:
                 best = source

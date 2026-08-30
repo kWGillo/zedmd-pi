@@ -2,6 +2,51 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [3.1]
+
+### Corretto
+- **L'attract mode di Doom non compariva mai su un cabinato acceso.** La
+  funzione era descritta come «quando nessuno tocca niente Doom gioca da solo»
+  e nella pratica non esisteva: Doom girava benissimo, non arrivava mai a
+  schermo. La colpa non era sua ma di ZeDMD — finché Batocera è collegato e ha
+  mandato almeno un fotogramma il pannello è suo, e su un cabinato acceso
+  quella condizione è sempre vera.
+
+  Il rimedio non è alzare la priorità di Doom, che così vincerebbe anche
+  durante una partita, e non è tornare alla regola della 1.12.2, che faceva
+  sparire l'immagine del tavolo dopo un minuto per lasciare il posto
+  all'**orologio** — quello era un guasto ed era stato corretto apposta.
+
+  La distinzione giusta è fra **avere diritto al pannello** e **avere qualcosa
+  da dire**. L'arbitro conosce ora i *riempitivi*: sorgenti che possono
+  subentrare a chi è rimasto fermo oltre una soglia (60 s, regolabile, zero
+  per disattivare) e che restituiscono il pannello al primo fotogramma nuovo.
+  Tre guardie perché il rimedio non diventi peggiore del male:
+  - la deroga esiste **solo finché un riempitivo è pronto**, quindi senza Doom
+    acceso nulla cambia rispetto a prima e la 1.12.2 non torna;
+  - si esclude **solo** il vincitore fermo e si rifà la scelta, invece di
+    promuovere d'ufficio il riempitivo: un aereo di passaggio vale più di Doom
+    che gioca da solo;
+  - durante una **partita** non c'entra nulla: lì il pannello è preso, non
+    vinto ai punti.
+
+### Aggiunto
+- **Condivisione di rete per i WAD.** `/srv/dmd/doom`, esposta come
+  `\\<ip-del-pi>\dmd-doom` accanto a `dmd-media`. I WAD sono l'unica cosa di
+  Doom che si mette e si toglie a mano, e chiedere una sessione SSH per
+  copiare un file non è un modo di lavorare. La cartella contiene **solo** i
+  WAD: il binario e i salvataggi restano in `/var/lib/dmd/doom`, dove non si
+  possono cancellare per sbaglio.
+- Chi arriva dalla 3.0.1 se li ritrova spostati lì dalla preparazione, e la
+  configurazione si riallinea da sola — nel processo che possiede la
+  configurazione, non riscrivendo il file JSON sotto il naso del servizio.
+- I WAD si cercano ora in **due** posti, la cartella condivisa e quella del
+  file configurato, così un percorso personale continua a comparire
+  nell'elenco. L'ordine di preferenza è quello dei nomi, non quello delle
+  cartelle: un `doom2.wad` tuo viene prima di un `freedoom1.wad` condiviso.
+- `setup_share.sh` accetta percorso, nome e descrizione della condivisione:
+  era cablato su `dmd-media`.
+
 ## [3.0.1]
 
 ### Aggiunto

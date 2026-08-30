@@ -161,6 +161,13 @@ class DoomSource(Source):
     # sessione non e' la priorita' a farlo vincere ma la presa del pannello.
     priority = 40
 
+    # ...e "riempitivo" ha un significato preciso per l'arbitro: puo'
+    # subentrare a una sorgente che ha diritto al pannello ma e' rimasta
+    # ferma. Senza questa deroga, su un cabinato acceso Doom non comparirebbe
+    # mai, perche' ZeDMD e' padrone del pannello finche' Batocera e'
+    # collegato — e la funzione promessa non esisterebbe.
+    riempitivo = True
+
     def __init__(self, cfg, width, height, arbiter=None):
         super().__init__(cfg, width, height)
         self.arbiter = arbiter

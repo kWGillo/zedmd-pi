@@ -107,7 +107,7 @@ DEFAULTS = {
         # perche' i sorgenti di doomgeneric sono GPL2 e questo progetto e'
         # GPLv3 (vedi doom/setup_doom.sh).
         "binary": "/var/lib/dmd/doom/doom-dmd",
-        "wad": "/var/lib/dmd/doom/freedoom1.wad",
+        "wad": "/srv/dmd/doom/freedoom1.wad",
         # Doom scrive configurazione e salvataggi nella cartella di lavoro:
         # fuori da /opt/dmd, che deve restare uguale alle sue impronte.
         "work_dir": "/var/lib/dmd/doom/stato",
@@ -248,6 +248,10 @@ DEFAULTS = {
         "http_port": 80,
         "transport": "TCP",
         "grace_seconds": 60,
+        # Dopo quanti secondi di immagine ferma ZeDMD lascia il pannello a un
+        # riempitivo (Doom in attract mode), riprendendoselo al primo
+        # fotogramma nuovo. Zero disattiva la deroga.
+        "idle_seconds": 60,
         "client_timeout": 10,
         "device_name": "ZeDMD-Pi",
         "firmware_version": "6.0.0",

@@ -1240,6 +1240,20 @@ STRINGS = {
         "No WAD in %(dir)s. Press “Prepare Doom” to download Freedoom, or "
         "copy yours there."),
     "doom.wad.dir": ("Cartella dei WAD", "WAD folder"),
+    "doom.wad.share": ("Condivisione di rete", "Network share"),
+    "doom.idle": ("Doom subentra a Batocera fermo da (s)",
+                  "Doom takes over from Batocera idle for (s)"),
+    "doom.idle.hint": (
+        "Finché Batocera è collegato il pannello è suo, ed è giusto così: "
+        "l'immagine del tavolo selezionato resta ferma per minuti mentre "
+        "scorri il menu. Ma passato questo tempo un gioco che si muove vale "
+        "più di un fermo immagine, e al primo fotogramma nuovo il pannello "
+        "torna a Batocera all'istante. Zero = Doom non subentra mai.",
+        "While Batocera is connected the panel is its own, and rightly so: "
+        "the artwork of the selected table sits still for minutes while you "
+        "scroll the menu. But past this time a game that moves is worth more "
+        "than a freeze frame, and at the first new frame the panel goes back "
+        "to Batocera at once. Zero = Doom never takes over."),
     "doom.wad.free": ("libero", "free"),
     "doom.wad.use": ("Usa questo", "Use this one"),
     "doom.nowad": (

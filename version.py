@@ -274,6 +274,22 @@ Storico:
         completo, un'estensione o un file scaricato a meta', e la pagina
         elenca quelli trovati. Un WAD proprio, se c'e', viene prima di
         Freedoom, e la preparazione non lo scarica per niente.
+  3.1  Corretto il difetto che rendeva Doom in attract mode una funzione
+       inesistente: su un cabinato acceso non compariva mai. La colpa non era
+       di Doom ma di ZeDMD, che resta padrone del pannello finche' Batocera e'
+       collegato — e su un cabinato acceso quella condizione e' sempre vera.
+       Ora l'arbitro distingue *avere diritto al pannello* da *avere qualcosa
+       da dire*: una sorgente ferma da oltre un minuto lascia il posto a un
+       riempitivo, e se lo riprende al primo fotogramma nuovo. La deroga vale
+       solo finche' un riempitivo c'e', quindi l'orologio non torna a rubare
+       il posto all'immagine del tavolo — che era il guasto della 1.12.2 — e
+       un aereo di passaggio vale comunque piu' di Doom che gioca da solo.
+       I WAD hanno una cartella condivisa in rete tutta loro, /srv/dmd/doom,
+       esposta come \\<ip>\dmd-doom accanto a quella dei media: sono l'unica
+       cosa di Doom che si mette e si toglie a mano, e chiedere una sessione
+       SSH per copiare un file non e' un modo di lavorare. Chi arriva dalla
+       3.0.1 se li ritrova spostati li' dalla preparazione, e la
+       configurazione si riallinea da sola.
 """
 
-__version__ = "3.0.1"
+__version__ = "3.1"

@@ -27,6 +27,18 @@ import time
 
 LOG_PATH = "/var/lib/dmd/doom-setup.log"
 
+# Nome della condivisione SMB creata da setup_doom.sh. I WAD sono l'unica cosa
+# di Doom che si mette e si toglie a mano, e chiedere una sessione SSH per
+# copiare un file non e' un modo di lavorare: stanno in una cartella
+# condivisa in rete, come la libreria dei media.
+CONDIVISIONE = "dmd-doom"
+
+# La cartella che la condivisione espone. E' anche il posto dove si cercano i
+# WAD *oltre* a quello scritto in configurazione: dopo un aggiornamento che
+# sposta i file, il percorso configurato punta ancora alla vecchia posizione,
+# e cercare solo li' vorrebbe dire non trovare niente proprio quando serve.
+CARTELLA_CONDIVISA = "/srv/dmd/doom"
+
 # I WAD che sappiamo riconoscere, dal piu' completo al piu' piccolo. L'ordine
 # conta: e' quello con cui si propone il predefinito a chi non ha ancora
 # scelto. Il gioco vero, se c'e', viene prima di Freedoom.
@@ -93,30 +105,54 @@ def descrivi_wad(percorso):
 
 
 def cartella_wad(cfg):
-    return os.path.dirname(cfg["doom"].get("wad") or "") or "/var/lib/dmd/doom"
+    """Dove si copiano i WAD: la cartella condivisa in rete."""
+    return CARTELLA_CONDIVISA
+
+
+def cartelle(cfg):
+    """Tutte le cartelle in cui cercare, senza ripetizioni.
+
+    Prima quella condivisa, che e' il posto giusto; poi quella del WAD
+    configurato, se e' un'altra — chi ha scelto un percorso suo deve
+    continuare a vederlo elencato.
+    """
+    elenco = [CARTELLA_CONDIVISA]
+    configurata = os.path.dirname(cfg["doom"].get("wad") or "")
+    if configurata and configurata not in elenco:
+        elenco.append(configurata)
+    return [c for c in elenco if os.path.isdir(c)]
 
 
 def wad_disponibili(cfg):
-    """I WAD presenti nella cartella, in ordine di preferenza.
+    """I WAD trovati, in ordine di preferenza.
 
     Si guardano prima i nomi noti, poi tutto il resto: chi ha rinominato il
     proprio WAD deve poterlo comunque scegliere.
     """
-    cartella = cartella_wad(cfg)
     trovati = []
     visti = set()
+    elenco = cartelle(cfg)
+    # Il nome nel giro esterno e la cartella in quello interno: cosi' l'ordine
+    # e' quello della preferenza — il gioco vero prima di Freedoom — e non
+    # quello delle cartelle. Un doom2.wad in una cartella tua deve venire
+    # prima di un freedoom1.wad in quella condivisa, non dopo.
     for nome, _, _ in WAD_NOTI:
-        percorso = os.path.join(cartella, nome)
-        if os.path.isfile(percorso):
-            trovati.append(descrivi_wad(percorso))
-            visti.add(nome.lower())
-    try:
-        for nome in sorted(os.listdir(cartella)):
-            if not nome.lower().endswith(".wad") or nome.lower() in visti:
+        for cartella in elenco:
+            percorso = os.path.join(cartella, nome)
+            if os.path.isfile(percorso) and percorso not in visti:
+                trovati.append(descrivi_wad(percorso))
+                visti.add(percorso)
+    for cartella in cartelle(cfg):
+        try:
+            nomi = sorted(os.listdir(cartella))
+        except OSError:
+            continue
+        for nome in nomi:
+            percorso = os.path.join(cartella, nome)
+            if not nome.lower().endswith(".wad") or percorso in visti:
                 continue
-            trovati.append(descrivi_wad(os.path.join(cartella, nome)))
-    except OSError:
-        pass
+            trovati.append(descrivi_wad(percorso))
+            visti.add(percorso)
     return trovati
 
 
@@ -210,7 +246,48 @@ def avvia(cfg):
         except OSError as exc:
             handle.close()
             return str(exc)
+        atteso = _proc
+
+    # La preparazione puo' spostare i WAD — chi arriva dalla 3.0.1 li ha
+    # insieme al binario — e a quel punto il percorso in configurazione punta
+    # a un file che non c'e' piu'. Si riallinea qui, nel processo che possiede
+    # davvero la configurazione: farlo dallo script vorrebbe dire scrivere il
+    # file JSON sotto il naso del servizio, che lo tiene in memoria e lo
+    # risalverebbe com'era al primo salvataggio successivo.
+    threading.Thread(target=_al_termine, args=(atteso, cfg),
+                     name="doom-setup", daemon=True).start()
     return ""
+
+
+def _al_termine(proc, cfg):
+    proc.wait()
+    if proc.returncode != 0:
+        log("preparazione fallita (codice %s)" % proc.returncode)
+        return
+    if riallinea(cfg):
+        log("WAD in configurazione aggiornato: %s" % cfg["doom"]["wad"])
+    log("preparazione conclusa")
+
+
+def riallinea(cfg):
+    """Fa puntare la configurazione a un WAD che esiste davvero.
+
+    Restituisce True se ha cambiato qualcosa. Non si tocca niente se il WAD
+    configurato e' a posto: la scelta dell'utente vale piu' della nostra.
+    """
+    corrente = cfg["doom"].get("wad") or ""
+    if corrente and descrivi_wad(corrente)["ok"]:
+        return False        # quello scelto va bene: la scelta dell'utente vale
+    scelto = wad_consigliato(cfg)
+    if not scelto or scelto == corrente:
+        return False
+    cfg["doom"]["wad"] = scelto
+    try:
+        import dmdconf
+        dmdconf.save()
+    except Exception as exc:      # pragma: no cover
+        log("configurazione non salvata: %s" % exc)
+    return True
 
 
 def stato(cfg):
@@ -226,6 +303,7 @@ def stato(cfg):
         "binary_ready": binario_pronto(cfg),
         "binary_stale": binario_vecchio(cfg),
         "wad_dir": cartella_wad(cfg),
+        "share": CONDIVISIONE,
         "wads": wad,
         "wad_current": cfg["doom"].get("wad", ""),
         "wad_ok": any(w["ok"] and w["path"] == cfg["doom"].get("wad")

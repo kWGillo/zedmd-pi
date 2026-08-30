@@ -22,6 +22,14 @@ DOOM_DIR=${DOOM_DIR:-/opt/doomgeneric}
 # un binario li' dentro sparirebbe a ogni aggiornamento e si dovrebbero
 # aspettare due minuti di compilazione per riaverlo.
 STATO=${STATO:-/var/lib/dmd/doom}
+
+# I WAD invece stanno per conto loro, in una cartella condivisa in rete come
+# quella dei media. Sono l'unica cosa qui dentro che si mette e si toglie a
+# mano, e non si puo' chiedere a nessuno di aprire una sessione SSH per
+# copiare un file. Tenerli separati dal binario e dai salvataggi vuol dire
+# anche che nella cartella condivisa non c'e' niente che si possa cancellare
+# per sbaglio.
+WADDIR=${WADDIR:-/srv/dmd/doom}
 FREEDOOM_VER=${FREEDOOM_VER:-0.13.0}
 
 echo "==> Strumenti di compilazione"
@@ -58,13 +66,28 @@ make -C "$SRC_DIR" DOOMGENERIC="$DOOM_DIR/doomgeneric" \
      OUT="$STATO/doom-dmd" OBJDIR="$STATO/build" -j"$CORES"
 echo "    fatto: $STATO/doom-dmd"
 
-echo "==> WAD in $STATO"
+echo "==> Cartella condivisa dei WAD: $WADDIR"
+bash "$SRC_DIR/../setup_share.sh" "$WADDIR" dmd-doom "WAD di Doom" \
+    || echo "    condivisione non creata: i WAD si copiano a mano in $WADDIR"
+
+# Chi arriva dalla 3.0.1 ha i WAD insieme al binario: si spostano nella
+# cartella condivisa invece di lasciarli dov'erano, altrimenti la condivisione
+# nuova nascerebbe vuota e sembrerebbe non funzionare.
+for vecchio in "$STATO"/*.[wW][aA][dD]; do
+    [ -f "$vecchio" ] || continue
+    if [ ! -f "$WADDIR/$(basename "$vecchio")" ]; then
+        echo "    sposto $(basename "$vecchio") nella cartella condivisa"
+        mv "$vecchio" "$WADDIR/"
+    fi
+done
+
+echo "==> WAD"
 # Chi ha comprato Doom copia il suo WAD qui e non deve ritrovarsi cinquanta
 # megabyte di Freedoom scaricati per niente. I nomi sono quelli di id
 # Software; Freedoom e' il ripiego, non la prima scelta.
 PROPRIO=""
 for nome in doom.wad doom2.wad plutonia.wad tnt.wad doom1.wad; do
-    for trovato in "$STATO/$nome" "$STATO/$(echo "$nome" | tr 'a-z' 'A-Z')"; do
+    for trovato in "$WADDIR/$nome" "$WADDIR/$(echo "$nome" | tr 'a-z' 'A-Z')"; do
         [ -f "$trovato" ] && PROPRIO="$trovato" && break 2
     done
 done
@@ -73,7 +96,7 @@ if [ -n "$PROPRIO" ]; then
     echo "    trovato un WAD tuo: $PROPRIO"
     echo "    non scarico Freedoom. Se vuoi anche quello, cancella questo file"
     echo "    e rilancia, oppure scaricalo da freedoom.github.io"
-elif [ -f "$STATO/freedoom1.wad" ]; then
+elif [ -f "$WADDIR/freedoom1.wad" ]; then
     echo "    freedoom1.wad gia' presente"
 else
     TMP=$(mktemp -d)
@@ -81,10 +104,10 @@ else
     echo "    scarico $URL"
     curl -sL -o "$TMP/freedoom.zip" "$URL"
     unzip -o -q "$TMP/freedoom.zip" -d "$TMP"
-    find "$TMP" -name 'freedoom*.wad' -exec cp {} "$STATO/" \;
+    find "$TMP" -name 'freedoom*.wad' -exec cp {} "$WADDIR/" \;
     rm -rf "$TMP"
-    ls -l "$STATO"/*.wad
 fi
+chmod 0666 "$WADDIR"/*.[wW][aA][dD] 2>/dev/null || true
 
 # Doom scrive la configurazione e i salvataggi nella cartella di lavoro: se
 # fosse /opt/dmd si sporcherebbe l'installazione e la verifica delle impronte
@@ -96,7 +119,7 @@ mkdir -p "$STATO/stato"
 # si fermerebbe con un errore che non spiega niente.
 echo "==> Controllo dei WAD"
 BUONI=0
-for f in "$STATO"/*.[wW][aA][dD]; do
+for f in "$WADDIR"/*.[wW][aA][dD]; do
     [ -f "$f" ] || continue
     TIPO=$(head -c 4 "$f" 2>/dev/null || true)
     DIM=$(stat -c%s "$f" 2>/dev/null || echo 0)
@@ -113,14 +136,16 @@ for f in "$STATO"/*.[wW][aA][dD]; do
 done
 if [ "$BUONI" -eq 0 ]; then
     echo
-    echo "Nessun WAD utilizzabile in $STATO."
+    echo "Nessun WAD utilizzabile in $WADDIR."
     echo "Copiane uno li' dentro (doom.wad, doom1.wad, doom2.wad...) e rilancia."
+    echo "Dalla rete: \\\\<ip-del-pi>\\dmd-doom"
     exit 1
 fi
 
 echo
 echo "Fatto: $BUONI WAD utilizzabili."
 echo "  programma:  $STATO/doom-dmd"
+echo "  WAD:        $WADDIR   (in rete: \\\\<ip-del-pi>\\dmd-doom)"
 echo
 echo "Nella pagina Doom scegli il WAD, poi accendi il servizio nella pagina"
 echo "Servizi."

@@ -459,6 +459,14 @@ def create_app(runtime):
         if conf["band_top"] + conf["band_height"] > 200:
             conf["band_height"] = 200 - conf["band_top"]
         conf["keyboard"] = request.form.get("keyboard") == "on"
+        # Vive in `zedmd` perche' e' una proprieta' di ZeDMD — dopo quanto
+        # cede il pannello — ma si regola da qui, che e' l'unico posto in cui
+        # quel numero significa qualcosa per chi legge.
+        try:
+            cfg["zedmd"]["idle_seconds"] = max(
+                0, min(3600, int(request.form.get("idle_seconds", 60))))
+        except ValueError:
+            cfg["zedmd"]["idle_seconds"] = 60
         dmdconf.save()
         # La fascia e la gamma stanno nella riga di comando del processo:
         # cambiarle in configurazione non basta, va fatto ripartire.
