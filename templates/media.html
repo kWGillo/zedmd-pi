@@ -16,17 +16,8 @@
   </dl>
   <p class="status">{{ status }}</p>
 
-  <form method="post" action="{{ url_for('api_media_upload') }}" enctype="multipart/form-data">
-    <label for="files">{{ t('media.upload') }}</label>
-    <input type="file" id="files" name="files" multiple
-           accept="image/*,video/*,.gif,.mp4,.mkv,.avi,.mov,.webm">
-    <button type="submit">{{ t('media.upload.button') }}</button>
-  </form>
-
-  <p class="hint">{{ t('media.rescan.hint') }}</p>
-  <form method="post" action="{{ url_for('api_media_rescan') }}">
-    <button type="submit" class="ghost">{{ t('media.rescan.button') }}</button>
-  </form>
+  <p class="hint">{{ t('media.manager.hint') }}</p>
+  <p><a class="ghost small" href="{{ url_for('page_manager') }}">{{ t('nav.manager') }}</a></p>
 </section>
 
 <section class="card">
@@ -79,56 +70,6 @@
 
     <button type="submit">{{ t('common.save') }}</button>
   </form>
-</section>
-
-<section class="card">
-  <h2>{{ t('media.files') }}</h2>
-  <p class="hint">{{ t('media.view.hint') }}</p>
-  {% if anteprima and anteprima != 'error' %}
-  <p class="status">{{ t('media.view.now', name=anteprima) }}</p>
-  {% elif anteprima == 'error' %}
-  <p class="status">{{ t('media.view.failed') }}</p>
-  {% endif %}
-  {% if files %}
-  <table class="files">
-    {% for f in files %}
-    <tr>
-      <td class="mono">{{ f.rel }}</td>
-      <td class="size">{{ f.size }}</td>
-      <td class="act">
-        <form method="post" action="{{ url_for('api_media_show') }}">
-          <input type="hidden" name="rel" value="{{ f.rel }}">
-          <input type="hidden" name="p" value="{{ pagina }}">
-          <button type="submit" class="ghost small">{{ t('media.view') }}</button>
-        </form>
-        <form method="post" action="{{ url_for('api_media_delete') }}">
-          <input type="hidden" name="rel" value="{{ f.rel }}">
-          <button type="submit" class="ghost small">{{ t('common.delete') }}</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% if pagine > 1 %}
-  <p class="hint">{{ t('media.page', page=pagina, pages=pagine,
-                       first=primo, last=ultimo, total=total) }}</p>
-  <p class="pager">
-    {% if pagina > 1 %}
-    <a class="ghost small" href="{{ url_for('page_media', p=1) }}">&laquo;</a>
-    <a class="ghost small" href="{{ url_for('page_media', p=pagina-1) }}">&lsaquo;</a>
-    {% endif %}
-    {% if pagina < pagine %}
-    <a class="ghost small" href="{{ url_for('page_media', p=pagina+1) }}">&rsaquo;</a>
-    <a class="ghost small" href="{{ url_for('page_media', p=pagine) }}">&raquo;</a>
-    {% endif %}
-  </p>
-  {% endif %}
-  {% if total > files|length %}
-  <p class="hint">{{ t('media.files.shown', shown=files|length, total=total) }}</p>
-  {% endif %}
-  {% else %}
-  <p class="hint">{{ t('media.files.empty') }}</p>
-  {% endif %}
 </section>
 
 {% endblock %}

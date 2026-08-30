@@ -1109,15 +1109,39 @@ STRINGS = {
         "that change the installed software rather than tune it, which is "
         "why they live outside Settings."),
     "media.view": ("Vedi", "View"),
-    "media.view.hint": (
+    # ---------------------------------------------------------- gestione media
+    "nav.manager": ("Gestione media", "Media manager"),
+    "manager.title": ("Gestione media", "Media manager"),
+    "manager.hold": (
+        "Pannello riservato alla gestione media: tutte le sorgenti sono "
+        "sospese, ZeDMD compreso.",
+        "The panel is reserved for the media manager: every source is on "
+        "hold, ZeDMD included."),
+    "manager.hint": (
+        "Finché questa pagina resta aperta il pannello è tuo: nessun aereo, "
+        "nessun compleanno e nessuna partita possono prendere il posto del "
+        "file che stai guardando. Chiudendo la scheda il pannello torna al "
+        "suo lavoro entro %(seconds)d secondi.",
+        "While this page stays open the panel is yours: no aircraft, no "
+        "birthday and no game can take the place of the file you are looking "
+        "at. Close the tab and the panel goes back to work within "
+        "%(seconds)d seconds."),
+    "manager.exit": ("Esci dalla gestione", "Leave the manager"),
+    "manager.view.hint": (
         "«Vedi» manda il file sul pannello, non nel browser: quello che conta "
-        "è come viene lì, con quella scala e quei colori. Ha la precedenza su "
-        "tutto tranne ZeDMD, e dopo una decina di secondi il pannello torna a "
-        "quello che stava facendo.",
+        "è come viene lì, con quella scala e quei colori. Il file resta a "
+        "schermo finché non ne scegli un altro.",
         "“View” sends the file to the panel, not to the browser: what matters "
-        "is how it looks there, at that scale and with those colours. It takes "
-        "precedence over everything except ZeDMD, and after about ten seconds "
-        "the panel goes back to what it was doing."),
+        "is how it looks there, at that scale and with those colours. It stays "
+        "on screen until you pick another one."),
+    "media.manager.hint": (
+        "L'elenco dei file, il caricamento e le anteprime sul pannello stanno "
+        "nella Gestione media: entrandoci le sorgenti si fermano, così quello "
+        "che guardi non viene scavalcato da un aereo o da una partita.",
+        "The file list, uploads and panel previews live in the Media manager: "
+        "entering it puts every source on hold, so what you are looking at is "
+        "not pushed aside by an aircraft or a game."),
+    "panel.manager": ("Gestione media", "Media manager"),
     "media.view.now": ("Sul pannello: %(name)s", "On the panel: %(name)s"),
     "media.view.failed": ("File non mostrabile.", "File cannot be shown."),
     "status.preview.showing": ("sul pannello: %(name)s", "on the panel: %(name)s"),

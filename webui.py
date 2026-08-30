@@ -23,11 +23,16 @@ import nowplaying
 import presets
 import ota
 import spotifyapi
-from sources import (FIELD_LIST, LANGUAGES, OVERFLOW_MODES,
+from sources import (FIELD_LIST, HOLD_SECONDS, LANGUAGES, OVERFLOW_MODES,
                      PROVIDER_LIST, SIZE_KEYS, SLOTS, UNIT_KEYS,
                      invalidate_scan, is_supported, normalize_list, scan_media,
                      have_ffmpeg, usable)
 from version import __version__
+
+# Ogni quanto la pagina della gestione media dice che c'e' ancora qualcuno.
+# Tre battiti stanno dentro il tempo di attesa dell'arbitro: uno perso per un
+# wifi lento non fa cadere la modalita'.
+MANAGER_BEAT = 10
 
 # Dove finiscono le copie della configurazione prima di un'importazione.
 BACKUP_DIR = "/var/lib/dmd"
@@ -294,12 +299,14 @@ def create_app(runtime):
     # Quanti file per pagina nell'elenco della libreria.
     MEDIA_PER_PAGINA = 200
 
-    @app.route("/media")
-    def page_media():
+    def _elenco_libreria():
+        """Una pagina dell'elenco della libreria, con il peso di ogni file.
+
+        Una libreria vera supera facilmente le poche centinaia di file:
+        mostrarne solo i primi voleva dire non poter cancellare gli altri.
+        """
         media_dir = cfg["mediaplayer"]["media_dir"]
         files = scan_media(media_dir)
-        # Una libreria vera supera facilmente le poche centinaia di file:
-        # mostrarne solo i primi voleva dire non poter cancellare gli altri.
         try:
             pagina = max(1, int(request.args.get("p", 1)))
         except ValueError:
@@ -319,13 +326,52 @@ def create_app(runtime):
                 "size": "%.1f MB" % (size / 1048576) if size >= 1048576
                         else "%d kB" % max(1, size // 1024),
             })
+        return {"media_dir": media_dir, "files": listing, "total": len(files),
+                "pagina": pagina, "pagine": pagine, "primo": inizio + 1,
+                "ultimo": inizio + len(listing)}
+
+    @app.route("/media")
+    def page_media():
+        elenco = _elenco_libreria()
         return render_template(
-            "media.html", cfg=cfg, files=listing, total=len(files),
-            pagina=pagina, pagine=pagine, primo=inizio + 1,
-            ultimo=inizio + len(listing),
-            media_dir=media_dir, ffmpeg=have_ffmpeg(),
-            anteprima=request.args.get("anteprima", ""),
+            "media.html", cfg=cfg, total=elenco["total"],
+            media_dir=elenco["media_dir"], ffmpeg=have_ffmpeg(),
             status=runtime.media.status(current_language()), page="media")
+
+    @app.route("/manager")
+    def page_manager():
+        """Gestione della libreria, con il pannello riservato a chi guarda.
+
+        Entrare qui sospende tutte le sorgenti — ZeDMD compreso — perche' il
+        problema dell'anteprima non era di priorita' ma di tempi: fra un file
+        e l'altro c'e' sempre una finestra in cui qualcun altro puo'
+        infilarsi, e allora si guarda un aereo invece della GIF su cui si e'
+        appena premuto. Qui la domanda e' una sola — che cos'e' questo file —
+        e finche' resta aperta il pannello non risponde ad altri.
+        """
+        runtime.manager_enter()
+        elenco = _elenco_libreria()
+        return render_template(
+            "manager.html", cfg=cfg, ffmpeg=have_ffmpeg(),
+            anteprima=request.args.get("anteprima", ""),
+            battito=MANAGER_BEAT, stato=runtime.manager_state(),
+            page="manager", **elenco)
+
+    @app.route("/api/manager/beat", methods=["POST"])
+    def api_manager_beat():
+        """Battito della pagina: rinnova la gestione e riferisce lo stato.
+
+        Senza, una scheda chiusa lascerebbe il pannello fermo per sempre.
+        """
+        runtime.manager_enter()
+        return jsonify(runtime.manager_state())
+
+    @app.route("/api/manager/exit", methods=["POST"])
+    def api_manager_exit():
+        runtime.manager_leave()
+        if request.form.get("beacon") or request.headers.get("X-Beacon"):
+            return "", 204
+        return redirect(url_for("page_media"))
 
     @app.route("/api/media/show", methods=["POST"])
     def api_media_show():
@@ -335,8 +381,7 @@ def create_app(runtime):
         Player al contenuto successivo: qui si sceglie quale.
 
         Guardarlo sul computer non risponde alla domanda vera: come viene su
-        *quel* pannello, con quella scala e quei colori. L'anteprima ha la
-        precedenza su tutto tranne ZeDMD.
+        *quel* pannello, con quella scala e quei colori.
         """
         media_dir = os.path.realpath(cfg["mediaplayer"]["media_dir"])
         rel = request.form.get("rel", "")
@@ -344,13 +389,16 @@ def create_app(runtime):
         pagina = request.form.get("p", "1")
         if not percorso.startswith(media_dir + os.sep) \
                 or not os.path.isfile(percorso) or not is_supported(percorso):
-            return redirect(url_for("page_media", p=pagina, anteprima="error"))
+            return redirect(url_for("page_manager", p=pagina, anteprima="error"))
         try:
             secondi = int(request.form.get("seconds", 0))
         except ValueError:
             secondi = 0
-        runtime.preview.show(percorso, rel, secondi or None)
-        return redirect(url_for("page_media", p=pagina, anteprima=rel))
+        # In gestione il file resta finche' non se ne chiede un altro: una GIF
+        # continua a girare invece di fermarsi dopo dieci secondi.
+        runtime.manager_enter()
+        runtime.preview.show(percorso, rel, secondi or HOLD_SECONDS)
+        return redirect(url_for("page_manager", p=pagina, anteprima=rel))
 
     @app.route("/media/file/<path:rel>")
     def media_file(rel):
@@ -540,7 +588,7 @@ def create_app(runtime):
                 continue
             storage.save(os.path.join(media_dir, name))
         invalidate_scan(media_dir)
-        return redirect(url_for("page_media"))
+        return redirect(url_for("page_manager"))
 
     @app.route("/api/media/delete", methods=["POST"])
     def api_media_delete():
@@ -553,14 +601,20 @@ def create_app(runtime):
             except OSError:
                 pass
             invalidate_scan(cfg["mediaplayer"]["media_dir"])
-        return redirect(url_for("page_media"))
+        # Cancellare il file che si sta guardando lascerebbe a schermo
+        # l'anteprima di una cosa che non c'e' piu'.
+        if runtime.preview.current == request.form.get("rel", ""):
+            runtime.preview.cancel()
+            runtime.manager_enter()
+            runtime.preview.hold()
+        return redirect(url_for("page_manager", p=request.form.get("p", "1")))
 
     @app.route("/api/media/rescan", methods=["POST"])
     def api_media_rescan():
         # I file copiati via SMB non passano da qui: questo pulsante forza la
         # rilettura senza aspettare la scadenza della cache.
         scan_media(cfg["mediaplayer"]["media_dir"], force=True)
-        return redirect(url_for("page_media"))
+        return redirect(url_for("page_manager"))
 
     @app.route("/api/media/preview", methods=["POST"])
     def api_media_preview():
@@ -1035,6 +1089,10 @@ def create_app(runtime):
     def api_status():
         current = runtime.arbiter.current
         lang = current_language()
+        # Lo stato e' una fotografia, non un comando: una voce che manca non
+        # deve far cadere la risposta intera. E' la lezione della 1.7.1
+        # applicata a un campo alla volta.
+        stato_gestione = getattr(runtime, "manager_state", None)
         return jsonify(
             version=__version__,
             current=current.name if current else None,
@@ -1046,6 +1104,7 @@ def create_app(runtime):
             banner=runtime.banner.status(lang),
             radar=runtime.radar.status(lang),
             nowplaying=runtime.nowplaying.snapshot(),
+            manager=stato_gestione() if stato_gestione else {"on": False},
             mqtt=runtime.mqtt.status(),
             time=time.strftime("%H:%M:%S"),
             update=runtime.update_info,

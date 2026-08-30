@@ -238,6 +238,15 @@ Storico:
         dell'anniversario dice "Domani e' l'anniversario di", non "Domani
         l'anniversario di". Tolte dalle tre tabelle dieci righe con codici
         ripetuti.
+  2.0.3 Gestione media: una pagina propria per la libreria, e finche' resta
+        aperta il pannello e' di chi guarda — tutte le sorgenti sospese,
+        ZeDMD compreso. La priorita' alta della 2.0.2 non bastava: fra un file
+        e l'altro restava sempre una finestra in cui qualcun altro si
+        infilava. Corretti due difetti dell'anteprima, che erano lo stesso
+        difetto: "Vedi" mostrava il file *precedente*, e una GIF in corso si
+        bloccava. L'anteprima riusava il ciclo video del Media Player
+        dirottandogli il buffer di uscita, e quel ciclo non si puo' fermare da
+        fuori; ora ne ha uno suo, interrompibile a ogni fotogramma.
 """
 
-__version__ = "2.0.2"
+__version__ = "2.0.3"

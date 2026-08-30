@@ -54,6 +54,12 @@ def in_window(minute, start, end):
     return minute >= start or minute < end
 
 
+# Quanto dura la gestione media senza notizie dal browser. La pagina manda un
+# battito ogni dieci secondi: se ne saltano tre, la scheda e' stata chiusa (o
+# il wifi e' caduto) e il pannello deve tornare al suo lavoro da solo.
+MANAGER_TIMEOUT = 30
+
+
 class Arbiter:
     """Sceglie quale sorgente ha diritto al display in questo istante."""
 
@@ -61,6 +67,10 @@ class Arbiter:
         self.cfg = cfg
         self.sources = {}
         self.current = None
+        # Scadenza della gestione media, non un semplice acceso/spento: se la
+        # web UI smette di parlare, la modalita' finisce senza che nessuno
+        # debba ricordarsi di chiuderla.
+        self.manager_until = 0.0
 
     def register(self, source):
         self.sources[source.name] = source
@@ -83,7 +93,31 @@ class Arbiter:
                 source.enabled = False
                 source.stop()
 
+    # ------------------------------------------------------------ gestione media
+
+    def manager(self):
+        return time.time() < self.manager_until
+
+    def manager_on(self):
+        """Prolunga la gestione media. Ogni battito della pagina la rinnova."""
+        self.manager_until = time.time() + MANAGER_TIMEOUT
+
+    def manager_off(self):
+        self.manager_until = 0.0
+
+    def manager_left(self):
+        """Secondi che mancano al rientro automatico, per la web UI."""
+        return max(0, int(self.manager_until - time.time()))
+
     def pick(self):
+        # In gestione media il pannello e' di chi sta guardando la libreria, e
+        # non c'e' nessuna gara di priorita' da vincere: le sorgenti restano
+        # accese e continuano a lavorare, semplicemente non vanno a schermo.
+        # Nemmeno ZeDMD: sospendere tutto tranne uno vuol dire che con una
+        # partita aperta le anteprime non si vedrebbero mai.
+        if self.manager():
+            return self.sources.get("preview")
+
         forced = self.cfg["arbiter"]["force_source"]
         if forced != "auto":
             source = self.sources.get(forced)
@@ -220,6 +254,43 @@ class Runtime:
             print("[mqtt] riconnessione fallita: %s" % exc)
             return False
 
+    # ------------------------------------------------------------ gestione media
+
+    def manager_enter(self):
+        """Entra (o resta) in gestione media. La chiama la pagina, e il battito.
+
+        Sospendere davvero le sorgenti — fermarne i thread — costerebbe la
+        riconnessione di ZeDMD e la ripartenza del radar per due minuti di
+        libreria. Qui si sospende solo l'accesso al pannello: chi lavora
+        continua a lavorare, e quando si esce riprende il suo posto senza
+        essersi accorto di niente.
+        """
+        primo = not self.arbiter.manager()
+        self.arbiter.manager_on()
+        if primo:
+            # Un pannello nero e muto sembra guasto: meglio dire perche'.
+            self.preview.hold()
+        return primo
+
+    def manager_leave(self):
+        """Esce dalla gestione e restituisce il pannello alle sorgenti."""
+        if not self.arbiter.manager():
+            return False
+        self.arbiter.manager_off()
+        self.preview.cancel()
+        # Chi subentra ridisegna: senza questo l'ultima anteprima resterebbe
+        # a schermo finche' il vincitore non ha qualcosa di nuovo da dire.
+        self.arbiter.current = None
+        self._blank_shown = False
+        return True
+
+    def manager_state(self):
+        return {"on": self.arbiter.manager(),
+                "timeout": MANAGER_TIMEOUT,
+                "left": self.arbiter.manager_left(),
+                "showing": self.preview.current,
+                "status": self.preview.status()}
+
     # ------------------------------------------------------------------ aggiornamenti
 
     def check_library(self):
@@ -285,6 +356,11 @@ class Runtime:
         if sleeping and display["sleep_wake_on_zedmd"]:
             if self.zedmd.enabled and self.zedmd.active():
                 sleeping = False
+
+        # Chi ha appena aperto la gestione media sta guardando il pannello: se
+        # capita nella fascia notturna, spegnerglielo in faccia non aiuta.
+        if self.arbiter.manager():
+            sleeping = False
 
         night = display["night_enabled"] and in_window(
             minute, parse_hhmm(display["night_start"]), parse_hhmm(display["night_end"]))

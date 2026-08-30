@@ -3,7 +3,7 @@ from .airradar import (AirRadarSource, CSV_COLUMNS, FIELD_LIST, FRECCIA,
                         convert, haversine_km)
 from .banner import (BannerSource, SIZES, SIZE_KEYS, SLOTS, default_banner,
                      default_list, normalize, normalize_list, usable)
-from .anteprima import PreviewSource
+from .anteprima import PreviewSource, HOLD_SECONDS
 from .compleanni import BirthdaysSource
 from .base import Source
 from .clock import ClockSource, DAY_NAMES, LANGUAGES, parse_color
@@ -15,7 +15,7 @@ from .zedmd import ZeDMDSource
 
 __all__ = [
     "Source", "ClockSource", "MediaPlayerSource", "ZeDMDSource", "AirRadarSource",
-    "BirthdaysSource", "PreviewSource",
+    "BirthdaysSource", "PreviewSource", "HOLD_SECONDS",
     "BannerSource", "NowPlayingSource", "SIZES", "SIZE_KEYS", "SLOTS",
     "default_banner", "DEFAULT_COLORS", "draw_text", "snap_color", "text_width",
     "default_list", "normalize", "normalize_list", "usable",

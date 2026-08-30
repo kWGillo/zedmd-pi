@@ -2,6 +2,40 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [2.0.3]
+
+### Aggiunto
+- **Gestione media**, voce propria del menu accanto a Media. Ci vivono
+  l'elenco della libreria, il caricamento dei file e il pulsante «Vedi».
+  Entrandoci il pannello passa a chi sta guardando: **tutte le sorgenti sono
+  sospese, ZeDMD compreso**. Non è una priorità più alta — quella c'era già
+  nella 2.0.2 e non bastava — è una modalità: finché la pagina resta aperta
+  nessuno può prendere il posto del file che stai guardando, e fra un file e
+  l'altro non subentra nessuno.
+- La pagina manda un battito ogni dieci secondi. Se la scheda viene chiusa il
+  pannello torna al suo lavoro entro trenta secondi, senza che nessuno debba
+  ricordarsi di uscire; il pulsante «Esci dalla gestione» lo restituisce
+  subito. Le sorgenti non vengono fermate davvero, solo tenute lontane dal
+  pannello: ZeDMD non si disconnette e il radar non riparte da zero.
+- Sul pannello, entrando in gestione, compare la scritta «Gestione media». Un
+  pannello nero e muto sembrerebbe guasto, e si andrebbe a cercare il problema
+  dove non c'è.
+
+### Corretto
+- **«Vedi» mostrava il file precedente**, e una **GIF in corso si bloccava**.
+  Era lo stesso difetto. L'anteprima riusava `media._show_video` dirottando il
+  buffer di uscita del Media Player, e quel ciclo guarda solo i flag del Media
+  Player: da fuori non lo si poteva fermare. La richiesta nuova aspettava tre
+  secondi, si arrendeva, e il thread vecchio continuava a pubblicare sopra al
+  file appena scelto; con due dirottamenti annidati il ripristino finale
+  lasciava per sempre il Media Player a disegnare dentro l'anteprima. Ora
+  l'anteprima ha il suo ffmpeg e controlla la richiesta di stop a ogni
+  fotogramma: l'interruzione avviene in centesimi di secondo invece che mai.
+- Premendo «Vedi» il pannello si svuota subito, invece di tenere a schermo il
+  file precedente per tutto il tempo del caricamento: quel buco si legge come
+  «non ha funzionato».
+- Cancellare il file che si sta guardando toglie l'anteprima dal pannello.
+
 ## [2.0.2]
 
 ### Modificato

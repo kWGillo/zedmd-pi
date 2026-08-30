@@ -16,6 +16,7 @@
     <nav>
       <a href="{{ url_for('page_clock') }}" class="{{ 'on' if page == 'clock' }}">{{ t('nav.clock') }}</a>
       <a href="{{ url_for('page_media') }}" class="{{ 'on' if page == 'media' }}">{{ t('nav.media') }}</a>
+      <a href="{{ url_for('page_manager') }}" class="{{ 'on' if page == 'manager' }}">{{ t('nav.manager') }}</a>
       <a href="{{ url_for('page_banner') }}" class="{{ 'on' if page == 'banner' }}">{{ t('nav.banner') }}</a>
       <a href="{{ url_for('page_nowplaying') }}" class="{{ 'on' if page == 'nowplaying' }}">{{ t('nav.nowplaying') }}</a>
       <a href="{{ url_for('page_birthdays') }}" class="{{ 'on' if page == 'birthdays' }}">{{ t('nav.birthdays') }}</a>

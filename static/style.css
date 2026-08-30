@@ -362,3 +362,13 @@ table.files td.act form { display: inline-block; margin: 0; vertical-align: midd
 table.files td.act a.ghost { display: inline-block; margin-right: .5rem;
                              padding: .25rem .6rem; vertical-align: middle; }
 table.files td.size { white-space: nowrap; padding-right: 1rem; }
+
+/* ---- versione 2.0.3: gestione media ---- */
+
+/* Il pannello e' sospeso finche' questa pagina resta aperta: va detto in alto,
+   con un colore diverso dagli avvisi di errore — non c'e' niente che non va. */
+.banner.hold { background: rgba(0,140,200,.12); border-color: #16506e; color: #6cc8f0; }
+
+/* La riga del file che si sta guardando adesso. */
+table.files tr.now td { background: rgba(0,140,200,.10); }
+table.files tr.now td.mono { color: #6cc8f0; }

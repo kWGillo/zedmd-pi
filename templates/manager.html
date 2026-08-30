@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}{{ t('manager.title') }}{% endblock %}
+
+{% block content %}
+
+{% if not ffmpeg %}
+<div class="banner warn">{{ t('media.noffmpeg') }}</div>
+{% endif %}
+
+<div class="banner hold" id="hold">{{ t('manager.hold') }}</div>
+
+<section class="card">
+  <h2>{{ t('manager.title') }}</h2>
+  <p class="hint">{{ t('manager.hint', seconds=stato.timeout) }}</p>
+  {% if anteprima and anteprima != 'error' %}
+  <p class="status">{{ t('media.view.now', name=anteprima) }}</p>
+  {% elif anteprima == 'error' %}
+  <p class="status">{{ t('media.view.failed') }}</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('api_manager_exit') }}">
+    <button type="submit">{{ t('manager.exit') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('media.library') }}</h2>
+  <dl class="info">
+    <dt>{{ t('media.folder') }}</dt><dd class="mono">{{ media_dir }}</dd>
+    <dt>{{ t('media.usable') }}</dt><dd>{{ total }}</dd>
+  </dl>
+
+  <form method="post" action="{{ url_for('api_media_upload') }}" enctype="multipart/form-data">
+    <label for="files">{{ t('media.upload') }}</label>
+    <input type="file" id="files" name="files" multiple
+           accept="image/*,video/*,.gif,.mp4,.mkv,.avi,.mov,.webm">
+    <button type="submit">{{ t('media.upload.button') }}</button>
+  </form>
+
+  <p class="hint">{{ t('media.rescan.hint') }}</p>
+  <form method="post" action="{{ url_for('api_media_rescan') }}">
+    <button type="submit" class="ghost">{{ t('media.rescan.button') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('media.files') }}</h2>
+  <p class="hint">{{ t('manager.view.hint') }}</p>
+  {% if files %}
+  <table class="files">
+    {% for f in files %}
+    <tr{% if f.rel == anteprima %} class="now"{% endif %}>
+      <td class="mono">{{ f.rel }}</td>
+      <td class="size">{{ f.size }}</td>
+      <td class="act">
+        <form method="post" action="{{ url_for('api_media_show') }}">
+          <input type="hidden" name="rel" value="{{ f.rel }}">
+          <input type="hidden" name="p" value="{{ pagina }}">
+          <button type="submit" class="ghost small">{{ t('media.view') }}</button>
+        </form>
+        <form method="post" action="{{ url_for('api_media_delete') }}">
+          <input type="hidden" name="rel" value="{{ f.rel }}">
+          <input type="hidden" name="p" value="{{ pagina }}">
+          <button type="submit" class="ghost small">{{ t('common.delete') }}</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% if pagine > 1 %}
+  <p class="hint">{{ t('media.page', page=pagina, pages=pagine,
+                       first=primo, last=ultimo, total=total) }}</p>
+  <p class="pager">
+    {% if pagina > 1 %}
+    <a class="ghost small" href="{{ url_for('page_manager', p=1) }}">&laquo;</a>
+    <a class="ghost small" href="{{ url_for('page_manager', p=pagina-1) }}">&lsaquo;</a>
+    {% endif %}
+    {% if pagina < pagine %}
+    <a class="ghost small" href="{{ url_for('page_manager', p=pagina+1) }}">&rsaquo;</a>
+    <a class="ghost small" href="{{ url_for('page_manager', p=pagine) }}">&raquo;</a>
+    {% endif %}
+  </p>
+  {% endif %}
+  {% else %}
+  <p class="hint">{{ t('media.files.empty') }}</p>
+  {% endif %}
+</section>
+
+<script>
+// Il battito e' quello che tiene viva la gestione. Senza, una scheda chiusa
+// lascerebbe il pannello fermo su un'anteprima finche' qualcuno non se ne
+// accorge; con, l'arbitro riprende da solo dopo {{ stato.timeout }} secondi.
+(function () {
+  var beat = {{ battito }} * 1000;
+  function battito() {
+    fetch("{{ url_for('api_manager_beat') }}", {method: "POST"})
+      .catch(function () {});
+  }
+  setInterval(battito, beat);
+
+  // Premere "Vedi", cancellare, sfogliare: si resta in gestione. Solo l'uscita
+  // vera restituisce il pannello, e va segnalata subito invece di aspettare il
+  // timeout — che resta come rete di sicurezza per la scheda chiusa male.
+  var interno = false;
+  function resta() { interno = true; }
+  var moduli = document.querySelectorAll("form");
+  for (var i = 0; i < moduli.length; i++) {
+    if (moduli[i].getAttribute("action") !== "{{ url_for('api_manager_exit') }}") {
+      moduli[i].addEventListener("submit", resta);
+    }
+  }
+  var link = document.querySelectorAll(".pager a");
+  for (var j = 0; j < link.length; j++) { link[j].addEventListener("click", resta); }
+
+  window.addEventListener("pagehide", function () {
+    if (interno || !navigator.sendBeacon) { return; }
+    var dati = new FormData();
+    dati.append("beacon", "1");
+    navigator.sendBeacon("{{ url_for('api_manager_exit') }}", dati);
+  });
+})();
+</script>
+
+{% endblock %}
