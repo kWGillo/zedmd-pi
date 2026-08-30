@@ -17,12 +17,14 @@ from werkzeug.utils import secure_filename
 import dmdconf
 import i18n
 import libcheck
+import compleanni
 import lookup
 import nowplaying
+import presets
 import ota
 import spotifyapi
 from sources import (FIELD_LIST, LANGUAGES, OVERFLOW_MODES, PROVIDER_LIST,
-                     SIZE_KEYS, SLOTS,
+                     SIZE_KEYS, SLOTS, UNIT_KEYS,
                      invalidate_scan, is_supported, normalize_list, scan_media,
                      have_ffmpeg, usable)
 from version import __version__
@@ -192,7 +194,80 @@ def create_app(runtime):
             update=runtime.update_info, ota_log=ota.tail_log(12),
             lib=runtime.lib_info,
             lib_commands=libcheck.update_commands(libcheck.library_dir(cfg)),
+            presets=presets.choices(), preset_now=presets.detect(cfg["panel"]),
             config_result=request.args.get("config_result"), page="settings")
+
+    @app.route("/birthdays")
+    def page_birthdays():
+        return render_template(
+            "birthdays.html", cfg=cfg,
+            elenco=compleanni.imminenti(cfg["birthdays"]["lead_hours"]),
+            testo=compleanni.read_text(), info=compleanni.stats(),
+            sizes=SIZE_KEYS,
+            risultato=request.args.get("risultato", ""),
+            errori=_birthday_errors(), page="birthdays")
+
+    @app.route("/api/birthdays", methods=["POST"])
+    def api_birthdays():
+        conf = cfg["birthdays"]
+        for key, low, high, default in (("lead_hours", 1, 720, 48),
+                                        ("interval_minutes", 1, 1440, 20),
+                                        ("seconds", 3, 120, 12),
+                                        ("speed", 10, 200, 40)):
+            try:
+                conf[key] = max(low, min(high, int(request.form.get(key, default))))
+            except ValueError:
+                conf[key] = default
+        misura = request.form.get("size", "medium")
+        conf["size"] = misura if misura in SIZE_KEYS else "medium"
+        conf["color"] = request.form.get("color", "#ff40a0")
+        conf["blink"] = request.form.get("blink") == "on"
+        conf["show_age"] = request.form.get("show_age") == "on"
+        dmdconf.save()
+        return redirect(url_for("page_birthdays"))
+
+    @app.route("/api/birthdays/text", methods=["POST"])
+    def api_birthdays_text():
+        voci, errori = compleanni.save(request.form.get("text", ""))
+        _birthday_errors(errori)
+        runtime.birthdays.trigger_now()
+        return redirect(url_for("page_birthdays",
+                                risultato="saved:%d" % len(voci)))
+
+    @app.route("/api/birthdays/add", methods=["POST"])
+    def api_birthdays_add():
+        errore = compleanni.aggiungi(request.form.get("data", ""),
+                                     request.form.get("nome", ""))
+        runtime.birthdays.trigger_now()
+        return redirect(url_for("page_birthdays",
+                                risultato="error:%s" % errore if errore else "added"))
+
+    @app.route("/api/birthdays/upload", methods=["POST"])
+    def api_birthdays_upload():
+        """Carica un CSV: lo aggiunge in coda invece di sostituire.
+
+        Sostituire sarebbe piu' semplice ma cancellerebbe senza avviso quello
+        che c'e' gia'. Chi vuole ripartire da zero svuota la casella di testo,
+        che e' un gesto esplicito.
+        """
+        upload = request.files.get("file")
+        if upload is None or not upload.filename:
+            return redirect(url_for("page_birthdays", risultato="error:nofile"))
+        try:
+            grezzo = upload.read().decode("utf-8", "replace")
+        except Exception:
+            return redirect(url_for("page_birthdays", risultato="error:read"))
+        voci, errori = compleanni.parse(grezzo)
+        esistenti = compleanni.read_text()
+        righe = ["%02d/%02d%s,%s" % (v["giorno"], v["mese"],
+                                     "/%d" % v["anno"] if v["anno"] else "",
+                                     v["nome"]) for v in voci]
+        nuovo = esistenti.rstrip("\n") + "\n" + "\n".join(righe) + "\n"
+        _, errori_scrittura = compleanni.save(nuovo)
+        _birthday_errors(errori + errori_scrittura)
+        runtime.birthdays.trigger_now()
+        return redirect(url_for("page_birthdays",
+                                risultato="imported:%d" % len(voci)))
 
     @app.route("/clock")
     def page_clock():
@@ -247,6 +322,7 @@ def create_app(runtime):
     def page_radar():
         return render_template("radar.html", cfg=cfg, providers=PROVIDER_LIST,
                                fields=FIELD_LIST, overflow_modes=OVERFLOW_MODES,
+                               unit_keys=UNIT_KEYS,
                                log=runtime.radar.log_info(),
                                status=runtime.radar.status(current_language()),
                                probe_callsign=request.args.get("callsign", ""),
@@ -420,11 +496,23 @@ def create_app(runtime):
                 panel[key] = default
         panel["show_refresh"] = request.form.get("show_refresh") == "on"
 
+
         env = panel.setdefault("spwm_env", {})
         for name in list(env.keys()):
             raw = request.form.get(name, "").strip()
             # Un campo vuoto rimuove l'override e ripristina il predefinito.
             env[name] = str(int(raw)) if raw.lstrip("-").isdigit() else ""
+
+        # Il profilo si applica *dopo* i campi: scegliendone uno noto si
+        # vuole tornare ai suoi valori, non salvare quelli che erano nella
+        # pagina. Sceglierne uno solo per sbaglio non e' un rischio: la
+        # configurazione precedente si riottiene riapplicando il profilo.
+        scelto = request.form.get("preset", "")
+        if scelto and (presets.known(scelto) or scelto == presets.CUSTOM):
+            presets.apply(panel, scelto)
+        else:
+            panel["preset"] = presets.detect(panel)
+
         dmdconf.save()
 
         if request.form.get("restart") == "1":
@@ -731,9 +819,25 @@ def create_app(runtime):
         # Come comportarsi quando i campi scelti non stanno su una riga.
         modo = request.form.get("overflow", "pages")
         radar["overflow"] = modo if modo in OVERFLOW_MODES else "pages"
+        for campo, ammessi in (("unit_altitude", UNIT_KEYS["altitude"]),
+                               ("unit_speed", UNIT_KEYS["speed"]),
+                               ("unit_distance", UNIT_KEYS["distance"])):
+            scelta = request.form.get(campo, "")
+            radar[campo] = scelta if scelta in ammessi else ammessi[0]
         dmdconf.save()
         runtime.radar.poll_now()
         return redirect(url_for("page_radar"))
+
+    _birthday_state = {"errors": []}
+
+    def _birthday_errors(nuovi=None):
+        """Errori dell'ultimo salvataggio, da mostrare una volta sola."""
+        if nuovi is not None:
+            _birthday_state["errors"] = nuovi
+            return nuovi
+        fuori = _birthday_state["errors"]
+        _birthday_state["errors"] = []
+        return fuori
 
     @app.route("/api/radar/lookup", methods=["POST"])
     def api_radar_lookup():

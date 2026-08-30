@@ -17,31 +17,40 @@ DEFAULTS = {
         "chain": 2,
         "parallel": 1,
         "hardware_mapping": "regular",
-        "slowdown": 3,
+        # Taratura trovata sul campo con i pannelli FM6373 + DP32020B: sono i
+        # valori che il pannello vuole davvero, non quelli generici della
+        # libreria. Chi installa da zero parte da qui invece di ripercorrere
+        # la campagna di prove.
+        "slowdown": 5,
         "panel_type": "fm6373",
         "spwm_row_address_type": 1,
         "spwm_scan_rows": 64,
         "spwm_data_layout": 0,
         "spwm_register_config": 2,
-        "limit_refresh": 60,
-        "pwm_bits": 11,
+        "limit_refresh": 0,
+        "pwm_bits": 10,
         # Durata del bit meno significativo. Accorciarla riduce il tempo di
         # un frame intero, quindi alza il refresh senza togliere profondita'.
-        "pwm_lsb_nanoseconds": 130,
+        "pwm_lsb_nanoseconds": 200,
         # Bit bassi resi con dithering temporale invece che con tempo di
         # accensione: 1 bit di dithering raddoppia il refresh a parita' di
         # profondita' dichiarata.
-        "pwm_dither_bits": 0,
+        "pwm_dither_bits": 1,
         "profile_dir": "/home/gillo/rpi-rgb-led-matrix_pwm_experiment/lib/spwm/registertest/data",
         "show_refresh": False,
         # Cartella del fork della libreria matrice. Vuoto = dedotta da
         # profile_dir, che ne e' una sottocartella.
         "library_dir": "",
+        # Profilo hardware. Un nome noto applica in blocco tutti i parametri
+        # di quel tipo di pannello; "custom" li lascia come sono. Serve a
+        # tornare indietro dopo una configurazione sbagliata senza dover
+        # ricordare venti numeri.
+        "preset": "fm6373_dp32020b",
         # Regolazioni fini del driver S-PWM, applicate come variabili d'ambiente.
         # Vuoto = valore predefinito della libreria.
         "spwm_env": {
-            "SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES": "",
-            "SPWM_FRAME_END_SLEEP_US": "",
+            "SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES": "1",
+            "SPWM_FRAME_END_SLEEP_US": "300",
         },
     },
     "display": {
@@ -81,6 +90,19 @@ DEFAULTS = {
         # Dieci caselle, riempite al primo caricamento da sources.banner.
         "items": [],
     },
+    "birthdays": {
+        # Con quanto anticipo comincia il promemoria, e ogni quanto ricompare.
+        "lead_hours": 48,
+        "interval_minutes": 20,
+        "seconds": 12,
+        "speed": 40,
+        "color": "#ff40a0",
+        "size": "medium",
+        "blink": False,
+        # Mostra anche l'eta' compiuta, quando l'anno di nascita c'e'.
+        "show_age": True,
+    },
+
     "air_radar": {
         # Nessuna posizione preimpostata: va indicata dall'utente nella web UI.
         # Il servizio non interroga nulla finche' le coordinate sono a zero.
@@ -106,6 +128,11 @@ DEFAULTS = {
         #   crop   la riga viene accorciata buttando via campi (com'era)
         #   pages  i campi si alternano a gruppi, senza perderne nessuno
         #   scroll la riga scorre da destra a sinistra
+        # Unita' di misura dei parametri di volo. I dati arrivano sempre in
+        # piedi e nodi: la conversione e' solo per la lettura.
+        "unit_altitude": "ft",     # ft | m
+        "unit_speed": "kt",        # kt | kmh | mph
+        "unit_distance": "km",     # km | mi | nm
         "overflow": "pages",
         "page_seconds": 3,
         "scroll_speed": 40,
@@ -184,6 +211,7 @@ DEFAULTS = {
         "mediaplayer": False,
         "banner": False,
         "nowplaying": False,
+        "birthdays": False,
         "status_player": False,
         "air_radar": False,
     },

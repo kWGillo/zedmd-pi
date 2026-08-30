@@ -201,6 +201,20 @@ Storico:
         Pixelcade, l'indirizzo rimasto al Raspberry precedente, e il fatto che
         tenendo premuto il tasto di scorrimento EmulationStation non pubblica
         nessuna immagine.
+  2.0  Compleanni: un elenco di date e nomi, caricabile da CSV o scritto a
+       mano, e il pannello ricorda chi compie gli anni con un messaggio
+       scorrevole a partire da due giorni prima. Profili hardware del
+       pannello: un menu applica in blocco i venti parametri di un tipo di
+       pannello, e soprattutto permette di tornare indietro dopo una
+       configurazione sbagliata — che non da' un errore, da' un display
+       illeggibile. La taratura trovata sul campo diventa il valore
+       predefinito dell'installazione, invece di essere qualcosa da
+       reimpostare a ogni scheda nuova. Night mode e Sleep mode si accendono
+       da Home Assistant come i servizi. Air Radar: unita' di misura
+       scegliibili per quota, velocita' e distanza; identificativo del volo
+       allineato a destra con i codici della rotta accanto; freccia spaziata
+       fra origine e destinazione. Tabelle di aerei, aeroporti e compagnie
+       aggiornate.
 """
 
-__version__ = "1.12.5"
+__version__ = "2.0"

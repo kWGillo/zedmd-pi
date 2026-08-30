@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}{{ t('birthdays.title') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('birthdays.title') }}</h2>
+  <p class="hint">{{ t('birthdays.intro') }}</p>
+  {% if risultato.startswith('saved:') %}
+  <p class="status">{{ t('birthdays.saved', count=risultato.split(':')[1]|int) }}</p>
+  {% elif risultato.startswith('imported:') %}
+  <p class="status">{{ t('birthdays.imported', count=risultato.split(':')[1]|int) }}</p>
+  {% elif risultato == 'added' %}
+  <p class="status">{{ t('birthdays.added') }}</p>
+  {% elif risultato.startswith('error:') %}
+  <p class="status">{{ t('birthdays.error', reason=risultato.split(':', 1)[1]) }}</p>
+  {% endif %}
+  {% if errori %}
+  <h3>{{ t('birthdays.errors') }}</h3>
+  <table class="grid">
+    {% for numero, motivo, estratto in errori[:20] %}
+    <tr><th>{{ t('lookup.error.row', row=numero, reason=motivo) }}</th>
+        <td><code>{{ estratto }}</code></td></tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ t('birthdays.upcoming') }}</h2>
+  <p class="hint">{{ t('birthdays.upcoming.hint', hours=cfg.birthdays.lead_hours) }}</p>
+  {% if elenco %}
+  <table class="grid">
+    {% for voce in elenco %}
+    <tr>
+      <th>{{ voce.nome }}</th>
+      <td>{{ '%02d/%02d'|format(voce.giorno, voce.mese) }}</td>
+      <td>
+        {% if voce.mancano == 0 %}{{ t('birthdays.today') }}
+        {% elif voce.mancano == 1 %}{{ t('birthdays.tomorrow') }}
+        {% else %}{{ t('birthdays.in.days', days=voce.mancano) }}{% endif %}
+      </td>
+      <td>{% if voce.eta %}{{ t('birthdays.age', years=voce.eta) }}{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="hint">{{ t('birthdays.upcoming.none') }}</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ t('birthdays.add') }}</h2>
+  <p class="hint">{{ t('birthdays.add.hint') }}</p>
+  <form method="post" action="{{ url_for('api_birthdays_add') }}">
+    <div class="row3">
+      <div><label for="data">{{ t('birthdays.date') }}</label>
+        <input type="text" id="data" name="data" placeholder="30/03/1976"></div>
+      <div><label for="nome">{{ t('birthdays.name') }}</label>
+        <input type="text" id="nome" name="nome" maxlength="60"></div>
+      <div><label>&nbsp;</label>
+        <button type="submit">{{ t('birthdays.add.button') }}</button></div>
+    </div>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('birthdays.import') }}</h2>
+  <p class="hint">{{ t('birthdays.import.hint') }}</p>
+  <form method="post" action="{{ url_for('api_birthdays_upload') }}"
+        enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv,text/csv">
+    <button type="submit">{{ t('birthdays.import.button') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('birthdays.file') }}
+    <span class="version">{{ t('birthdays.count', count=info.count) }}</span></h2>
+  <p class="hint">{{ t('birthdays.file.hint') }}</p>
+  <form method="post" action="{{ url_for('api_birthdays_text') }}">
+    <textarea name="text" rows="16" spellcheck="false"
+              class="mono">{{ testo }}</textarea>
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+  <p class="hint"><code>{{ info.path }}</code></p>
+</section>
+
+<section class="card">
+  <h2>{{ t('birthdays.settings') }}</h2>
+  <form method="post" action="{{ url_for('api_birthdays') }}">
+    <div class="row3">
+      <div><label for="lead_hours">{{ t('birthdays.lead') }}</label>
+        <input type="number" id="lead_hours" name="lead_hours" min="1" max="720"
+               value="{{ cfg.birthdays.lead_hours }}"></div>
+      <div><label for="interval_minutes">{{ t('birthdays.interval') }}</label>
+        <input type="number" id="interval_minutes" name="interval_minutes"
+               min="1" max="1440" value="{{ cfg.birthdays.interval_minutes }}"></div>
+      <div><label for="seconds">{{ t('birthdays.seconds') }}</label>
+        <input type="number" id="seconds" name="seconds" min="3" max="120"
+               value="{{ cfg.birthdays.seconds }}"></div>
+    </div>
+    <p class="hint">{{ t('birthdays.lead.hint') }}</p>
+    <div class="row3">
+      <div><label for="size">{{ t('birthdays.size') }}</label>
+        <select id="size" name="size">
+          {% for key in sizes %}
+          <option value="{{ key }}" {{ 'selected' if cfg.birthdays.size == key }}>
+            {{ t('banner.size.' ~ key) }}</option>
+          {% endfor %}
+        </select></div>
+      <div><label for="speed">{{ t('birthdays.speed') }}</label>
+        <input type="number" id="speed" name="speed" min="10" max="200"
+               value="{{ cfg.birthdays.speed }}"></div>
+      <div><label for="color">{{ t('birthdays.color') }}</label>
+        <input type="text" id="color" name="color" maxlength="7"
+               value="{{ cfg.birthdays.color }}"></div>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="show_age" {{ 'checked' if cfg.birthdays.show_age }}>
+      {{ t('birthdays.show_age') }}</label>
+    <label class="check">
+      <input type="checkbox" name="blink" {{ 'checked' if cfg.birthdays.blink }}>
+      {{ t('birthdays.blink') }}</label>
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+</section>
+
+{% endblock %}

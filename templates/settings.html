@@ -95,6 +95,15 @@
   <p class="hint">{{ t('settings.panel.hint') | safe }}</p>
 
   <form method="post" action="{{ url_for('api_panel') }}">
+    <label for="preset">{{ t('preset.label') }}</label>
+    <select id="preset" name="preset">
+      {% for key, etichetta in presets %}
+      <option value="{{ key }}" {{ 'selected' if preset_now == key }}>
+        {{ etichetta if key != 'custom' else t('preset.custom') }}</option>
+      {% endfor %}
+    </select>
+    <p class="hint">{{ t('preset.hint') }}</p>
+
     <div class="row2">
       <div><label for="SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES">{{ t('settings.panel.extra') }}</label>
         <input type="number" min="0" max="16"

@@ -4,7 +4,7 @@ Guida complementare al *Manuale completo*. Riguarda il momento in cui il DMD,
 già funzionante di suo, deve iniziare a ricevere le immagini da Batocera o da
 Visual Pinball.
 
-Software di riferimento: **kWGillo DMD Server 1.12.5** ·
+Software di riferimento: **kWGillo DMD Server 2.0** ·
 https://github.com/kWGillo/zedmd-pi
 
 ---

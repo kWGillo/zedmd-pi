@@ -98,6 +98,18 @@ for section, values in (
     for key, value in values.items():
         branch.setdefault(key, value)
 
+# 2.0: compleanni, profilo hardware, unita' di misura del radar.
+if "birthdays" not in services:
+    services["birthdays"] = False
+    print("    servizi: aggiunto Compleanni")
+cfg.setdefault("birthdays", {})
+panel = cfg.setdefault("panel", {})
+panel.setdefault("preset", "custom")
+radar = cfg.setdefault("air_radar", {})
+radar.setdefault("unit_altitude", "ft")
+radar.setdefault("unit_speed", "kt")
+radar.setdefault("unit_distance", "km")
+
 with open(path, "w") as handle:
     json.dump(cfg, handle, indent=2)
 print("    configurazione aggiornata")

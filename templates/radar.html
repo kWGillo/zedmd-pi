@@ -96,6 +96,35 @@
                value="{{ cfg.air_radar.scroll_speed }}"></div>
     </div>
     <p class="hint">{{ t('radar.overflow.hint') }}</p>
+
+    <label>{{ t('radar.units') }}</label>
+    <div class="row3">
+      <div><label for="unit_altitude">{{ t('radar.field.altitude') }}</label>
+        <select id="unit_altitude" name="unit_altitude">
+          {% for key in unit_keys.altitude %}
+          <option value="{{ key }}"
+                  {{ 'selected' if cfg.air_radar.unit_altitude == key }}>
+            {{ t('radar.unit.' ~ key) }}</option>
+          {% endfor %}
+        </select></div>
+      <div><label for="unit_speed">{{ t('radar.field.speed') }}</label>
+        <select id="unit_speed" name="unit_speed">
+          {% for key in unit_keys.speed %}
+          <option value="{{ key }}"
+                  {{ 'selected' if cfg.air_radar.unit_speed == key }}>
+            {{ t('radar.unit.' ~ key) }}</option>
+          {% endfor %}
+        </select></div>
+      <div><label for="unit_distance">{{ t('radar.field.distance') }}</label>
+        <select id="unit_distance" name="unit_distance">
+          {% for key in unit_keys.distance %}
+          <option value="{{ key }}"
+                  {{ 'selected' if cfg.air_radar.unit_distance == key }}>
+            {{ t('radar.unit.' ~ key) }}</option>
+          {% endfor %}
+        </select></div>
+    </div>
+    <p class="hint">{{ t('radar.units.hint') }}</p>
     <input type="hidden" name="scroll_fps" value="{{ cfg.air_radar.scroll_fps }}">
 
     <label class="check">

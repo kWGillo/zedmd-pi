@@ -304,6 +304,7 @@ copiare così com'è.
 | 1.10 | Now Playing: brano in ascolto da AirPlay 2, Spotify o MQTT; entità in Home Assistant |
 | 1.11 | Radar: due tabelle CSV modificabili traducono i codici degli aeromobili e degli aeroporti in nomi leggibili |
 | 1.12 | Radar: compagnia aerea fra i parametri mostrabili, con la sua tabella di conversione |
+| 2.0 | Compleanni, profili hardware del pannello, unità di misura del radar, Night e Sleep mode da Home Assistant |
 
 
 ---

@@ -30,8 +30,18 @@ SWITCHES = [
     ("mediaplayer", "Media Player"),
     ("banner", "Rolling Banner"),
     ("nowplaying", "Now Playing"),
+    ("birthdays", "Compleanni"),
     ("air_radar", "Air Radar"),
     ("clock", "Orologio"),
+]
+
+# Night mode e Sleep mode non sono servizi: sono modi del display, e stanno in
+# un'altra sezione della configurazione. Da Home Assistant pero' si comandano
+# allo stesso modo, quindi hanno gli stessi topic e la stessa forma — cambia
+# solo dove va scritto il valore.
+MODES = [
+    ("night_enabled", "Night mode"),
+    ("sleep_enabled", "Sleep mode"),
 ]
 
 # Ogni quanto si ripubblica lo stato anche se non e' cambiato nulla: serve a
@@ -137,6 +147,21 @@ class HassBridge:
             })
             self._config("switch", key, entity)
 
+        for key, label in MODES:
+            entity = dict(common)
+            entity.update({
+                "name": label,
+                "unique_id": "%s_%s" % (node, key),
+                "object_id": "%s_%s" % (node, key),
+                "state_topic": "%s/service/%s/state" % (base, key),
+                "command_topic": "%s/service/%s/set" % (base, key),
+                "payload_on": "ON",
+                "payload_off": "OFF",
+                "icon": "mdi:weather-night" if key.startswith("night")
+                        else "mdi:power-sleep",
+            })
+            self._config("switch", key, entity)
+
         brightness = dict(common)
         brightness.update({
             "name": "Luminosità",
@@ -163,7 +188,8 @@ class HassBridge:
         """Cancella le entita' da Home Assistant (payload vuoto e ritenuto)."""
         for component, object_id in ([("sensor", "nowplaying"),
                                       ("number", "brightness")] +
-                                     [("switch", key) for key, _ in SWITCHES]):
+                                     [("switch", key) for key, _ in SWITCHES] +
+                                     [("switch", key) for key, _ in MODES]):
             topic = "%s/%s/%s/%s/config" % (self.prefix(), component,
                                             self.node(), object_id)
             self.bus.publish(topic, "", retain=True)
@@ -191,6 +217,11 @@ class HassBridge:
         services = self.cfg.get("services") or {}
         for key, _label in SWITCHES:
             value = "ON" if services.get(key) else "OFF"
+            self._send("%s/service/%s/state" % (base, key), value, force)
+
+        display = self.cfg.get("display") or {}
+        for key, _label in MODES:
+            value = "ON" if display.get(key) else "OFF"
             self._send("%s/service/%s/state" % (base, key), value, force)
 
         self._send("%s/brightness/state" % base,
@@ -247,15 +278,26 @@ class HassBridge:
         if len(parts) < 3:
             return
         key = parts[-2]
-        if key not in self.cfg.get("services", {}):
-            return
         wanted = payload.decode("utf-8", "replace").strip().upper() \
             if isinstance(payload, bytes) else str(payload).strip().upper()
-        self.cfg["services"][key] = wanted in ("ON", "1", "TRUE")
+        acceso = wanted in ("ON", "1", "TRUE")
+
+        modi = dict(MODES)
+        if key in modi:
+            # Night e Sleep non sono servizi da avviare o fermare: sono modi
+            # del display, che il ciclo di rendering rilegge da solo a ogni
+            # secondo. Qui basta scrivere il valore.
+            self.cfg["display"][key] = acceso
+        elif key in self.cfg.get("services", {}):
+            self.cfg["services"][key] = acceso
+        else:
+            return
+
         try:
             import dmdconf
             dmdconf.save()
-            self.runtime.arbiter.apply_services()
+            if key not in modi:
+                self.runtime.arbiter.apply_services()
         except Exception as exc:
             print("[hass] comando su %s non applicato: %s" % (key, exc))
         self.publish_state(force=True)

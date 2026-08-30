@@ -36,6 +36,118 @@ STRINGS = {
     "nav.media": ("Media", "Media"),
     "nav.banner": ("Banner", "Banner"),
     "nav.nowplaying": ("Musica", "Music"),
+    # ------------------------------------------------------------- compleanni
+    "nav.birthdays": ("Compleanni", "Birthdays"),
+    "birthdays.title": ("Compleanni", "Birthdays"),
+    "birthdays.intro": (
+        "Un elenco di date e nomi. Quando un compleanno si avvicina, il "
+        "pannello lo ricorda con un messaggio che scorre, come i banner. La "
+        "data si scrive giorno/mese/anno; l'anno si può omettere, ma senza "
+        "non si può mostrare l'età.",
+        "A list of dates and names. When a birthday approaches, the panel "
+        "reminds you with a scrolling message, like the banners. Dates are "
+        "day/month/year; the year is optional, but without it the age cannot "
+        "be shown."),
+    "birthdays.upcoming": ("In arrivo", "Coming up"),
+    "birthdays.upcoming.hint": (
+        "Chi compie gli anni entro le prossime %(hours)s ore.",
+        "Whose birthday falls within the next %(hours)s hours."),
+    "birthdays.upcoming.none": ("Nessuno in vista.", "Nobody in sight."),
+    "birthdays.today": ("oggi", "today"),
+    "birthdays.tomorrow": ("domani", "tomorrow"),
+    "birthdays.in.days": ("fra %(days)d giorni", "in %(days)d days"),
+    "birthdays.age": ("compie %(years)d anni", "turns %(years)d"),
+    "birthdays.add": ("Aggiungi una persona", "Add a person"),
+    "birthdays.add.hint": (
+        "La data si scrive 30/03/1976. Va bene anche senza anno: 30/03.",
+        "Write the date as 30/03/1976. Without the year is fine too: 30/03."),
+    "birthdays.date": ("Data", "Date"),
+    "birthdays.name": ("Nome", "Name"),
+    "birthdays.add.button": ("Aggiungi", "Add"),
+    "birthdays.import": ("Importa un CSV", "Import a CSV"),
+    "birthdays.import.hint": (
+        "Due colonne, data e nome. Le righe vengono aggiunte in coda a quelle "
+        "già presenti, non le sostituiscono: per ripartire da zero svuota "
+        "prima la casella qui sotto.",
+        "Two columns, date and name. Rows are appended to the existing ones "
+        "rather than replacing them: to start over, empty the box below "
+        "first."),
+    "birthdays.import.button": ("Importa", "Import"),
+    "birthdays.file": ("Elenco completo", "Full list"),
+    "birthdays.file.hint": (
+        "Si modifica anche a mano, da qui o via SSH. Le righe che iniziano "
+        "con # sono commenti, e una riga sbagliata si perde da sola senza "
+        "compromettere le altre.",
+        "It can also be edited by hand, here or over SSH. Rows starting with "
+        "# are comments, and a broken row is dropped on its own without "
+        "affecting the others."),
+    "birthdays.count": ("%(count)d persone", "%(count)d people"),
+    "birthdays.settings": ("Impostazioni", "Settings"),
+    "birthdays.lead": ("Anticipo (ore)", "Lead time (hours)"),
+    "birthdays.lead.hint": (
+        "L'anticipo dice quanto prima comincia il promemoria: 48 ore vuol "
+        "dire da due giorni prima. L'intervallo è ogni quanto ricompare; "
+        "se ci sono più compleanni insieme si alternano nello stesso giro.",
+        "The lead time says how early the reminder starts: 48 hours means "
+        "two days ahead. The interval is how often it comes back; when "
+        "several birthdays fall together they alternate within the same "
+        "round."),
+    "birthdays.interval": ("Intervallo (minuti)", "Interval (minutes)"),
+    "birthdays.seconds": ("Durata (s)", "Duration (s)"),
+    "birthdays.size": ("Dimensione", "Size"),
+    "birthdays.speed": ("Velocità (px/s)", "Speed (px/s)"),
+    "birthdays.color": ("Colore", "Colour"),
+    "birthdays.show_age": ("Mostra l'età compiuta", "Show the age reached"),
+    "birthdays.blink": ("Lampeggiante", "Blinking"),
+    "birthdays.saved": ("Salvato: %(count)d persone.", "Saved: %(count)d people."),
+    "birthdays.imported": ("Importate %(count)d persone.",
+                           "Imported %(count)d people."),
+    "birthdays.added": ("Persona aggiunta.", "Person added."),
+    "birthdays.error": ("Non riuscito: %(reason)s", "Failed: %(reason)s"),
+    "birthdays.errors": ("Righe scartate", "Dropped rows"),
+    "status.birthdays.next": (
+        "prossimo: %(name)s fra %(days)d giorni (%(count)d in vista, "
+        "%(shown)d promemoria mostrati)",
+        "next: %(name)s in %(days)d days (%(count)d coming up, %(shown)d "
+        "reminders shown)"),
+    "status.birthdays.none": (
+        "nessun compleanno nelle prossime %(hours)d ore",
+        "no birthday in the next %(hours)d hours"),
+
+    # ---------------------------------------------------------- profili pannello
+    "preset.label": ("Profilo del pannello", "Panel profile"),
+    "preset.custom": ("Personalizzata", "Custom"),
+    "preset.hint": (
+        "Un profilo applica in blocco tutti i parametri di quel tipo di "
+        "pannello: geometria, driver, indirizzamento e taratura fine. Serve "
+        "soprattutto a tornare indietro — un parametro sbagliato non dà un "
+        "errore, dà un display illeggibile, e da lì non si torna a memoria. "
+        "Scegliendo un profilo noto i campi qui sotto vengono sovrascritti "
+        "al salvataggio; scegliendo Personalizzata restano quelli che vedi.",
+        "A profile applies every parameter of that panel type at once: "
+        "geometry, driver, addressing and fine tuning. Its main use is going "
+        "back — a wrong parameter gives no error, it gives an unreadable "
+        "display, and from there memory is no help. Picking a known profile "
+        "overwrites the fields below on save; picking Custom keeps what you "
+        "see."),
+
+    # ------------------------------------------------------- unita' del radar
+    "radar.units": ("Unità di misura", "Units"),
+    "radar.units.hint": (
+        "I dati arrivano sempre in piedi e nodi: la conversione riguarda "
+        "solo come vengono scritti sul pannello. Il registro CSV resta nelle "
+        "unità originali, così i passaggi vecchi e nuovi restano confrontabili.",
+        "The data always arrives in feet and knots: the conversion only "
+        "affects how it is written on the panel. The CSV log stays in the "
+        "original units, so old and new passes remain comparable."),
+    "radar.unit.ft": ("piedi (ft)", "feet (ft)"),
+    "radar.unit.m": ("metri (m)", "metres (m)"),
+    "radar.unit.kt": ("nodi (kt)", "knots (kt)"),
+    "radar.unit.kmh": ("km/h", "km/h"),
+    "radar.unit.mph": ("mph", "mph"),
+    "radar.unit.km": ("chilometri (km)", "kilometres (km)"),
+    "radar.unit.mi": ("miglia (mi)", "miles (mi)"),
+    "radar.unit.nm": ("miglia nautiche (nm)", "nautical miles (nm)"),
     "nav.radar": ("Radar", "Radar"),
     "nav.services": ("Servizi", "Services"),
     "nav.language": ("Lingua", "Language"),

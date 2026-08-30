@@ -95,14 +95,16 @@ def template(kind):
 # configurazione. Ogni versione che cambia un modello aggiunge qui l'impronta
 # di quello che sostituisce, mai togliendo le precedenti.
 DISTRIBUITI = {
-    # La tabella delle compagnie nasce con la 1.12: non c'e' ancora nessun
-    # modello precedente da sostituire.
-    "airline": set(),
+    "airline": {
+        "485c739df2710e5f1e03b4ec71276031",   # 1.12 - 1.12.5
+    },
     "aircraft": {
         "0d763ff25342351827c349175789dcc4",   # 1.11 - 1.11.2
+        "7a3e43b60e5e98ec2f8698fc02b4d959",   # 1.11.3 - 1.12.5
     },
     "airport": {
         "96678004b56af040372199f37aa1c08b",   # 1.11 - 1.11.2, solo codici IATA
+        "8407e93552b46e74af88f19e1312626c",   # 1.11.3 - 1.12.5
     },
 }
 

@@ -46,6 +46,49 @@ _SCRATCH = Image.new("RGB", (1, 1))
 
 # Che cosa fare quando la riga dei dettagli e' piu' larga del pannello.
 OVERFLOW_MODES = ("crop", "pages", "scroll")
+
+# Separatore fra origine e destinazione. Gli spazi ci sono di proposito: su un
+# pannello a LED due nomi attaccati alla freccia si leggono come una parola
+# sola, e un po' di respiro costa meno di un fraintendimento.
+FRECCIA = " \u2192 "
+
+# Margine dal bordo e distanza fra identificativo e codici della rotta.
+MARGINE = 2
+SPAZIO = 5
+
+# ------------------------------------------------------------ unita' di misura
+#
+# I dati arrivano sempre in piedi e nodi, e la distanza la calcoliamo in
+# chilometri: la conversione riguarda solo la lettura. Ogni voce porta fattore
+# e simbolo, cosi' aggiungerne una non tocca il codice che disegna.
+UNITS = {
+    "altitude": {
+        "ft": (1.0, "ft"),
+        "m": (0.3048, "m"),
+    },
+    "speed": {
+        "kt": (1.0, "kt"),
+        "kmh": (1.852, "km/h"),
+        "mph": (1.15078, "mph"),
+    },
+    "distance": {
+        "km": (1.0, "km"),
+        "mi": (1.0 / 1.609344, "mi"),
+        "nm": (1.0 / KM_PER_NM, "nm"),
+    },
+}
+
+UNIT_KEYS = {kind: tuple(scelte) for kind, scelte in UNITS.items()}
+
+
+def convert(kind, valore, scelta):
+    """(numero, simbolo) nell'unita' scelta, o (None, '') se il dato manca."""
+    if valore is None:
+        return None, ""
+    tabella = UNITS[kind]
+    fattore, simbolo = tabella.get(scelta) or tabella[next(iter(tabella))]
+    return float(valore) * fattore, simbolo
+
 USER_AGENT = "zedmd-pi AirRadar"
 
 PROVIDERS = {
@@ -535,7 +578,7 @@ class AirRadarSource(Source):
                 self._route_cache[callsign] = ""
                 self._routes_missing += 1
                 continue
-            route = "→".join(part.strip() for part in codes.split("-") if part.strip())
+            route = FRECCIA.join(part.strip() for part in codes.split("-") if part.strip())
             self._route_cache[callsign] = route
             self._routes_found += 1
 
@@ -567,7 +610,7 @@ class AirRadarSource(Source):
                 text = (text or "").strip().strip('"')
                 # Formato atteso: "LIMC-EGLL". Scali multipli restano tali.
                 if "-" in text and len(text) <= 40 and "unknown" not in text.lower():
-                    route = "→".join(part.strip() for part in text.split("-") if part.strip())
+                    route = FRECCIA.join(part.strip() for part in text.split("-") if part.strip())
                     break
             except Exception:
                 continue
@@ -582,7 +625,14 @@ class AirRadarSource(Source):
     # ------------------------------------------------------------------ disegno
 
     @staticmethod
-    def _format_field(key, plane):
+    def _format_field(key, plane, cfg=None):
+        """Il valore di un campo, gia' formattato per il pannello.
+
+        `cfg` porta le unita' di misura scelte. E' facoltativo perche' questa
+        funzione la chiamano anche il registro e le prove, dove le unita'
+        predefinite vanno benissimo.
+        """
+        scelte = cfg or {}
         try:
             if key == "route":
                 # Il codice grezzo resta nel dato; qui si converte solo cio'
@@ -601,13 +651,21 @@ class AirRadarSource(Source):
             if key == "squawk":
                 return plane.get("squawk") or ""
             if key == "altitude":
-                return "%dft" % plane["altitude"] if plane.get("altitude") is not None else ""
+                if plane.get("altitude") is None:
+                    return ""
+                valore, simbolo = convert("altitude", plane["altitude"],
+                                          scelte.get("unit_altitude", "ft"))
+                return "%d%s" % (round(valore), simbolo)
             if key == "speed":
-                return "%dkt" % int(plane["speed"])
+                valore, simbolo = convert("speed", plane["speed"],
+                                          scelte.get("unit_speed", "kt"))
+                return "%d%s" % (round(valore), simbolo)
             if key == "track":
                 return "%d°" % int(plane["track"])
             if key == "distance":
-                return "%.1fkm" % plane["distance"]
+                valore, simbolo = convert("distance", plane["distance"],
+                                          scelte.get("unit_distance", "km"))
+                return "%.1f%s" % (valore, simbolo)
         except (TypeError, ValueError, KeyError):
             return ""
         return ""
@@ -642,7 +700,7 @@ class AirRadarSource(Source):
         for key, _label in FIELD_LIST:
             if key not in wanted or (key == "route" and route_line):
                 continue
-            value = self._format_field(key, plane)
+            value = self._format_field(key, plane, cfg)
             if value:
                 details.append(value)
         if not details and not route_line:
@@ -659,6 +717,11 @@ class AirRadarSource(Source):
 
         return {
             "title": plane["flight"] or plane["reg"] or plane["hex"] or "SCONOSCIUTO",
+            # I codici della rotta accanto all'identificativo: sono corti,
+            # sempre della stessa lunghezza, e dicono in un colpo d'occhio da
+            # dove a dove — cosa che il nome esteso dice meglio ma piu' in
+            # basso e con molti piu' pixel.
+            "codes": (plane.get("route") or "").strip(),
             "title_color": parse_color(cfg.get("callsign_color", "#00d0ff"),
                                        (0, 208, 255)),
             "route": route_line,
@@ -672,16 +735,45 @@ class AirRadarSource(Source):
         }
 
     def _base(self, layout):
-        """Le due fasce che non cambiano mai: identificativo e rotta."""
+        """Le due fasce che non cambiano mai: identificativo e rotta.
+
+        L'identificativo sta a **destra**, non al centro, e alla sua sinistra
+        trovano posto i codici della rotta in caratteri piccoli. Il numero di
+        volo ha lunghezza variabile: centrarlo lo faceva ballare da un aereo
+        all'altro, mentre allineato a destra resta fermo e lascia libera una
+        fascia di larghezza prevedibile per l'informazione che gli sta
+        accanto.
+        """
         image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
         draw = ImageDraw.Draw(image)
 
-        def centrato(text, font, y, color):
+        def larghezza(text, font):
             box = draw.textbbox((0, 0), text, font=font)
-            draw.text(((self.width - (box[2] - box[0])) // 2 - box[0], y),
-                      text, font=font, fill=color)
+            return box[2] - box[0], box[0]
 
-        centrato(layout["title"], self._font_big, 2, layout["title_color"])
+        def centrato(text, font, y, color):
+            w, off = larghezza(text, font)
+            draw.text(((self.width - w) // 2 - off, y), text, font=font, fill=color)
+
+        titolo = layout["title"]
+        w_titolo, off_titolo = larghezza(titolo, self._font_big)
+        x_titolo = self.width - w_titolo - off_titolo - MARGINE
+        draw.text((x_titolo, 2), titolo, font=self._font_big,
+                  fill=layout["title_color"])
+
+        codici = layout.get("codes") or ""
+        if codici:
+            w_codici, off_codici = larghezza(codici, self._font_small)
+            x_codici = x_titolo + off_titolo - SPAZIO - w_codici - off_codici
+            if x_codici >= MARGINE:
+                # Allineati al piede dell'identificativo: due dimensioni
+                # diverse sulla stessa riga si leggono come una cosa sola solo
+                # se poggiano sulla stessa base.
+                base_titolo = 2 + max(14, int(self.height * 0.40))
+                y_codici = max(2, base_titolo - max(9, int(self.height * 0.20)))
+                draw.text((x_codici, y_codici), codici, font=self._font_small,
+                          fill=layout["route_color"])
+
         if layout["route"]:
             centrato(layout["route"], self._font_small,
                      layout["middle"], layout["route_color"])

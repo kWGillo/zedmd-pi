@@ -2,6 +2,47 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [2.0]
+
+### Aggiunto
+- **Compleanni.** Un elenco di date e nomi — importabile da CSV, scrivibile a
+  mano dalla pagina, modificabile come testo — e il pannello ricorda chi
+  compie gli anni con un messaggio scorrevole, a partire da **48 ore prima**
+  di default. L'anticipo, l'intervallo di ricomparsa, durata, colore e
+  dimensione si regolano; l'età compare quando l'anno di nascita c'è.
+  Priorità 56: sopra il Rolling banner, sotto Now Playing, Radar e ZeDMD —
+  un compleanno è un evento datato, non del momento, e può aspettare il giro
+  successivo. L'importazione **aggiunge** invece di sostituire: cancellare
+  senza avviso quello che c'è già sarebbe la cosa peggiore che possa fare.
+- **Profili hardware del pannello.** Un menu nella pagina Impostazioni
+  applica in blocco tutti i parametri di un tipo di pannello — geometria,
+  driver, indirizzamento, taratura fine. Serve soprattutto a **tornare
+  indietro**: un parametro sbagliato non dà un errore, dà un display
+  illeggibile, e da lì la memoria non aiuta. Per ora c'è
+  `FM6373 & DP32020B` e la voce `Personalizzata`, che lascia i valori come
+  sono; quando i pannelli SM16380 funzioneranno si aggiungerà una voce.
+- **Night mode e Sleep mode comandabili da Home Assistant**, con gli stessi
+  topic e la stessa forma degli altri interruttori.
+- **Unità di misura del radar**: quota in piedi o metri, velocità in nodi,
+  km/h o mph, distanza in km, miglia o miglia nautiche. Il registro CSV resta
+  nelle unità originali, così i passaggi vecchi e nuovi restano confrontabili.
+
+### Modificato
+- **La taratura del pannello trovata sul campo diventa il valore predefinito
+  dell'installazione**: profondità PWM 10, bit minimo 200 ns, un bit di
+  dithering, rallentamento GPIO 5, refresh senza tetto, un ciclo extra a fine
+  frame e 300 µs di pausa. Chi installa da zero parte da lì invece di
+  ripercorrere la campagna di prove.
+- **Air Radar, fascia alta**: l'identificativo del volo è allineato a
+  **destra** e alla sua sinistra compaiono i codici della rotta in caratteri
+  piccoli. Il numero di volo ha lunghezza variabile: centrato ballava da un
+  aereo all'altro, allineato a destra resta fermo.
+- **Freccia della rotta con uno spazio per lato** (`Malpensa → Fiumicino`):
+  due nomi attaccati alla freccia si leggevano come una parola sola.
+- Tabelle di **aerei, aeroporti e compagnie aggiornate** con le versioni
+  fornite dall'utente. Chi non ha mai modificato le proprie le riceve
+  automaticamente; chi le ha modificate se le tiene.
+
 ## [1.12.5]
 
 ### Modificato

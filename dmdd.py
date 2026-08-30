@@ -25,8 +25,9 @@ import nowplaying
 import ota
 import spotifyapi
 from display import Display
-from sources import (AirRadarSource, BannerSource, ClockSource,
-                     MediaPlayerSource, NowPlayingSource, ZeDMDSource)
+from sources import (AirRadarSource, BannerSource, BirthdaysSource,
+                     ClockSource, MediaPlayerSource, NowPlayingSource,
+                     ZeDMDSource)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -109,6 +110,8 @@ class Runtime:
         )
         self.media = MediaPlayerSource(self.cfg, self.display.width, self.display.height)
         self.banner = BannerSource(self.cfg, self.display.width, self.display.height)
+        self.birthdays = BirthdaysSource(self.cfg, self.display.width,
+                                         self.display.height)
         self.radar = AirRadarSource(self.cfg, self.display.width, self.display.height)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
@@ -122,8 +125,8 @@ class Runtime:
         self.spotify = spotifyapi.SpotifyPoller(self.cfg, self.nowplaying)
         self.hass = hass.HassBridge(self.cfg, self.mqtt, self)
 
-        for source in (self.zedmd, self.radar, self.player, self.banner,
-                       self.media, self.clock):
+        for source in (self.zedmd, self.radar, self.player, self.birthdays,
+                       self.banner, self.media, self.clock):
             self.arbiter.register(source)
         self.arbiter.apply_services()
 
