@@ -27,8 +27,8 @@ import spotifyapi
 from sources import (DOOM_PULSANTI, DOOM_TASTI, FIELD_LIST, HOLD_SECONDS,
                      LANGUAGES, OVERFLOW_MODES,
                      PROVIDER_LIST, SIZE_KEYS, SLOTS, UNIT_KEYS,
-                     invalidate_scan, is_supported, normalize_list, scan_media,
-                     have_ffmpeg, tastiere, usable)
+                     invalidate_scan, is_supported, joystick, normalize_list,
+                     scan_media, have_ffmpeg, tastiere, usable)
 from version import __version__
 
 # Ogni quanto la pagina della gestione media dice che c'e' ancora qualcuno.
@@ -366,8 +366,8 @@ def create_app(runtime):
         return render_template(
             "doom.html", cfg=cfg, doom=cfg["doom"],
             stato=runtime.doom_state(), pulsanti=DOOM_PULSANTI,
-            tastiere=tastiere(), prep=doomsetup.stato(cfg),
-            page="doom")
+            tastiere=tastiere(), pad=joystick(con_nome=True),
+            prep=doomsetup.stato(cfg), page="doom")
 
     @app.route("/api/doom/setup", methods=["POST"])
     def api_doom_setup():
@@ -444,7 +444,7 @@ def create_app(runtime):
     def api_doom():
         conf = cfg["doom"]
         for chiave in ("binary", "wad", "work_dir", "keyboard_device",
-                       "start_map"):
+                       "joystick_device", "start_map"):
             if chiave in request.form:
                 conf[chiave] = request.form.get(chiave, "").strip()
         for chiave, basso, alto, default in (("band_top", 0, 190, 36),
@@ -456,14 +456,15 @@ def create_app(runtime):
             except ValueError:
                 conf[chiave] = default
         try:
-            conf["gamma"] = max(0.2, min(2.0, float(request.form.get("gamma", 0.7))))
+            conf["gamma"] = max(0.2, min(2.0, float(request.form.get("gamma", 1.15))))
         except ValueError:
-            conf["gamma"] = 0.7
+            conf["gamma"] = 1.15
         # La fascia non puo' sporgere dai 200 righe di Doom.
         if conf["band_top"] + conf["band_height"] > 200:
             conf["band_height"] = 200 - conf["band_top"]
-        conf["keyboard"] = request.form.get("keyboard") == "on"
-        conf["keyboard_starts"] = request.form.get("keyboard_starts") == "on"
+        for chiave in ("keyboard", "keyboard_starts",
+                       "joystick", "joystick_starts"):
+            conf[chiave] = request.form.get(chiave) == "on"
         dmdconf.save()
         # La fascia e la gamma stanno nella riga di comando del processo:
         # cambiarle in configurazione non basta, va fatto ripartire. E si

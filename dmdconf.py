@@ -116,8 +116,9 @@ DEFAULTS = {
         # pixel. La taratura vera si fa guardando il pannello.
         "band_top": 36,
         "band_height": 96,
-        # Doom e' un gioco buio e un LED non ha il nero di un CRT.
-        "gamma": 0.70,
+        # Sotto 1 schiarisce, sopra 1 scurisce. Trovato sul pannello vero:
+        # schiarire sbiancava e rendeva illeggibili i menu.
+        "gamma": 1.15,
         # Tastiera USB collegata al Pi. Vuoto = tutte quelle che trova.
         "keyboard": True,
         "keyboard_device": "",
@@ -126,6 +127,13 @@ DEFAULTS = {
         # deve portarsi via il pannello a meta' partita. A sessione aperta la
         # tastiera comanda comunque il gioco.
         "keyboard_starts": False,
+        # Joystick: PS4 e compatibili, o un pad da PC. Sotto Linux sono
+        # dispositivi di /dev/input come le tastiere, quindi si leggono con lo
+        # stesso codice. Qui l'avvio della partita e' **acceso**: un pulsante
+        # preciso su un pad che si tiene in mano non si preme per sbaglio.
+        "joystick": True,
+        "joystick_device": "",
+        "joystick_starts": True,
         # Dopo quanti secondi senza comandi la partita si chiude da sola e i
         # servizi riprendono. Zero = mai.
         "session_timeout": 180,
@@ -311,6 +319,13 @@ def _migrate(raw):
     # rotto. Le trasformazioni vanno qui, che e' l'unico punto attraversato da
     # qualunque strada di aggiornamento.
     doom = raw.setdefault("doom", {})
+
+    # 3.3: il gamma predefinito passa da 0.70 a 1.15. Si corregge **solo** chi
+    # ha ancora il vecchio predefinito esatto: se qualcuno ha tarato il proprio
+    # pannello, quel numero vale piu' del nostro e non si tocca.
+    if doom.get("gamma") == 0.70:
+        doom["gamma"] = 1.15
+
     wad = doom.get("wad") or ""
     if wad and not os.path.exists(wad):
         candidato = os.path.join("/srv/dmd/doom", os.path.basename(wad))

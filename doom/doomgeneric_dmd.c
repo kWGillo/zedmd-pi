@@ -67,9 +67,14 @@
 static int fascia_alto = 36;
 static int fascia_altezza = 96;
 
-/* Doom e' un gioco buio, e un pannello LED non ha il nero di un CRT: senza
- * una correzione di gamma sul DMD si vede una macchia scura. */
-static double gamma_valore = 0.70;
+/* Correzione di gamma. Sotto 1 schiarisce, sopra 1 scurisce.
+ *
+ * Il valore predefinito era 0.70, scelto ragionando che "Doom e' buio e un LED
+ * non ha il nero di un CRT". Sbagliato, e provato sul pannello vero: un P2.5
+ * al 50% di luminosita' con 10 bit di PWM ha molta risoluzione nella parte
+ * scura, e sollevare le ombre non aggiunge dettaglio — sbianca, e i menu
+ * diventano illeggibili. 1.15 scurisce appena e rimette il contrasto. */
+static double gamma_valore = 1.15;
 static unsigned char gamma_tabella[256];
 
 static unsigned char uscita[USCITA_BYTE];

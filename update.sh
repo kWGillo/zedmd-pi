@@ -126,10 +126,11 @@ for chiave, valore in (("binary", "/var/lib/dmd/doom/doom-dmd"),
                        ("wad", "/srv/dmd/doom/freedoom1.wad"),
                        ("work_dir", "/var/lib/dmd/doom/stato"),
                        ("band_top", 36), ("band_height", 96),
-                       ("gamma", 0.70), ("keyboard", True),
+                       ("gamma", 1.15), ("keyboard", True),
                        ("keyboard_device", ""), ("session_timeout", 180),
                        ("skill", 3), ("start_map", "1 1"),
-                       ("keyboard_starts", False)):
+                       ("keyboard_starts", False), ("joystick", True),
+                       ("joystick_device", ""), ("joystick_starts", True)):
     doom.setdefault(chiave, valore)
 
 # 3.0.2: i WAD traslocano in una cartella condivisa in rete. Si corregge solo
@@ -144,6 +145,12 @@ if doom.get("wad") == "/var/lib/dmd/doom/freedoom1.wad":
 # a confondere chi guarda la configurazione.
 services.pop("doom", None)
 zedmd.pop("idle_seconds", None)
+
+# 3.3: il gamma predefinito passa da 0.70 a 1.15. Solo chi ha ancora il vecchio
+# predefinito esatto: una taratura vale piu' del nostro numero.
+if doom.get("gamma") == 0.70:
+    doom["gamma"] = 1.15
+    print("    doom: gamma 0.70 -> 1.15")
 
 with open(path, "w") as handle:
     json.dump(cfg, handle, indent=2)

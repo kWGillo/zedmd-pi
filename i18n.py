@@ -1183,6 +1183,32 @@ STRINGS = {
         "play from this page."),
     "doom.keyboard": ("Leggi la tastiera collegata al Raspberry",
                       "Read the keyboard plugged into the Raspberry Pi"),
+    "doom.pad.device": ("Joystick da usare", "Joystick to use"),
+    "doom.pad.read": ("Leggi i joystick collegati al Raspberry",
+                      "Read the joysticks plugged into the Raspberry Pi"),
+    "doom.pad.starts": ("Options sul pad può far cominciare una partita",
+                        "Options on the pad can start a game"),
+    "doom.pad.starts.hint": (
+        "Qui è acceso, al contrario della tastiera, e la differenza non è un "
+        "capriccio: un tasto qualunque su una tastiera si preme per sbaglio, "
+        "un pulsante preciso su un pad che si tiene in mano no. Ed è il gesto "
+        "che uno fa istintivamente — prendi il pad, premi Options.",
+        "This one is on, unlike the keyboard, and the difference is not a "
+        "whim: any key on a keyboard gets pressed by accident, one specific "
+        "button on a pad you are holding does not. And it is the gesture "
+        "people make instinctively — pick up the pad, press Options."),
+    "doom.pad.found": ("Joystick trovati: %(list)s", "Joysticks found: %(list)s"),
+    "doom.pad.none": (
+        "Nessun joystick collegato al Raspberry in questo momento.",
+        "No joystick connected to the Raspberry Pi right now."),
+    "doom.pad.hint2": (
+        "Con un pad PS4 o compatibile: levetta sinistra per camminare e per "
+        "il passo laterale, levetta destra per girare, croce direzionale per "
+        "camminare e girare. R2 o croce sparano, cerchio e quadrato aprono, "
+        "L1 corre, triangolo è la mappa, Options il menu.",
+        "With a PS4 or compatible pad: left stick to walk and strafe, right "
+        "stick to turn, D-pad to walk and turn. R2 or cross fire, circle and "
+        "square open, L1 runs, triangle is the map, Options the menu."),
     "doom.binary": ("Programma", "Program"),
     "doom.wad": ("WAD", "WAD"),
     "doom.nobinary": (

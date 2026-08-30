@@ -1,6 +1,6 @@
 # Doom sul DMD — preparazione e attivazione
 
-Guida rapida per la versione **3.2** del kWGillo DMD Server. Copre solo
+Guida rapida per la versione **3.3** del kWGillo DMD Server. Copre solo
 Doom: preparazione, accensione, comandi e taratura. Per tutto il resto vale il
 manuale completo.
 
@@ -25,11 +25,11 @@ accendere: Doom non gira in sottofondo.
 
 | | |
 |---|---|
-| **Versione** | DMD Server 3.2 o successiva |
+| **Versione** | DMD Server 3.3 o successiva |
 | **Rete** | serve alla preparazione: scarica i sorgenti di Doom e, se non hai un WAD tuo, Freedoom (~55 MB) |
 | **Spazio** | circa 150 MB fra `/var/lib/dmd/doom` e `/srv/dmd/doom` |
 | **Tempo** | un paio di minuti di compilazione su un Raspberry 3B+ |
-| **Tastiera** | facoltativa: una tastiera USB nel Raspberry è il modo più diretto di giocare |
+| **Comandi** | facoltativi: una tastiera USB o un joystick (PS4 e compatibili, o pad da PC) nel Raspberry. Altrimenti si gioca dalla pagina web |
 | **WAD** | facoltativo: il tuo, se hai comprato Doom. Altrimenti si usa Freedoom, che è libero |
 
 Non serve nessun collegamento nuovo: **i GPIO non si toccano**. I comandi
@@ -209,6 +209,34 @@ sfiorato per caso non deve portarsi via il pannello a metà partita.
 Se non vuoi che il DMD legga affatto la tastiera, togli la spunta a *«Leggi la
 tastiera collegata al Raspberry»*.
 
+### Joystick
+
+Un pad PS4, o un pad da PC come il Nacon, si collega al Raspberry e viene
+riconosciuto da solo — via USB o via Bluetooth, purché il sistema lo veda.
+L'elenco di quelli visti in questo momento è scritto nella pagina Doom.
+
+| Comando | Pad |
+|---|---|
+| Cammina, passo laterale | levetta sinistra |
+| Gira | levetta destra |
+| Cammina e gira | croce direzionale |
+| Fuoco | R2, R1 o croce (X) |
+| Apri porte, usa interruttori | cerchio o quadrato |
+| Corri | L1 o L2 |
+| Mappa | triangolo |
+| Menu | Options o tasto PS |
+| Conferma | Share |
+
+**Options fa cominciare una partita**, anche a Doom fermo: prendi il pad,
+premi Options, giochi. Qui è acceso al contrario della tastiera, e la
+differenza non è un capriccio — un tasto qualunque su una tastiera si preme
+per sbaglio, un pulsante preciso su un pad che si tiene in mano no.
+
+> I nomi sulle plastiche cambiano da un pad all'altro, e qualche versione del
+> kernel ha scambiato triangolo e quadrato: per questo le azioni importanti
+> stanno su più pulsanti. Se sul tuo pad qualcosa finisce dove non te
+> l'aspetti, è per questo.
+
 ### Pagina web
 
 Nel riquadro **Comandi** ci sono i pulsanti. Si **tengono premuti**: tenendo
@@ -238,7 +266,7 @@ sguardo.
 |---|---|---|
 | **Prima riga della fascia** | 36 | dove comincia il ritaglio, contando dall'alto delle 200 righe di Doom |
 | **Altezza della fascia** | 96 | quante righe prendere. Più alta = si vede più scena ma tutto è più schiacciato |
-| **Gamma** | 0,70 | sotto 1 schiarisce. Doom è un gioco buio e un LED non ha il nero di un CRT |
+| **Gamma** | 1,15 | sotto 1 schiarisce, sopra 1 scurisce |
 
 Questi valori sono un punto di partenza ragionevole, non una verità: la
 risposta vera si trova guardando **il tuo** pannello. Salvando, Doom riparte
@@ -267,6 +295,11 @@ fascia è alta, più si vede e più si schiaccia.
 | **Difficoltà** | 3 | da 1 a 5, la scala di Doom |
 | **Livello iniziale** | `1 1` | episodio e mappa da cui parte una partita |
 | **Fine partita dopo** | 180 s | secondi senza comandi prima che la partita si chiuda e i servizi riprendano. `0` = mai |
+
+**Doom si accende anche da Home Assistant.** Se hai configurato MQTT, fra le
+entità del DMD compare un interruttore **Doom**: acceso apre la partita,
+spento la chiude. Lo stato segue la partita vera, quindi se finisce da sola
+per inattività l'interruttore torna a OFF da solo.
 
 **Il suono è spento di proposito.** Sul cabinato l'audio è di Batocera, e un
 secondo canale sonoro sarebbe soltanto rumore sopra al gioco vero.

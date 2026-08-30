@@ -105,6 +105,7 @@
   </div>
 
   <p class="hint">{{ t('doom.keyboard.hint') }}</p>
+  <p class="hint">{{ t('doom.pad.hint2') }}</p>
 </section>
 
 <section class="card">
@@ -155,6 +156,27 @@
     <p class="hint">{{ t('doom.device.found', list=tastiere|join(', ')) }}</p>
     {% else %}
     <p class="hint">{{ t('doom.device.none') }}</p>
+    {% endif %}
+
+    <div class="row2">
+      <div><label for="joystick_device">{{ t('doom.pad.device') }}</label>
+        <input type="text" id="joystick_device" name="joystick_device"
+               value="{{ doom.joystick_device }}" placeholder="{{ t('doom.device.auto') }}"></div>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="joystick" {{ 'checked' if doom.joystick }}>
+      {{ t('doom.pad.read') }}
+    </label>
+    <label class="check">
+      <input type="checkbox" name="joystick_starts" {{ 'checked' if doom.joystick_starts }}>
+      {{ t('doom.pad.starts') }}
+    </label>
+    <p class="hint">{{ t('doom.pad.starts.hint') }}</p>
+    {% if pad %}
+    <p class="hint">{{ t('doom.pad.found',
+                         list=pad|map('join', ' — ')|join('; ')) }}</p>
+    {% else %}
+    <p class="hint">{{ t('doom.pad.none') }}</p>
     {% endif %}
 
     <div class="row2">

@@ -44,6 +44,16 @@ MODES = [
     ("sleep_enabled", "Sleep mode"),
 ]
 
+# Interruttori che non corrispondono a una voce di configurazione ma a
+# **qualcosa che sta succedendo**. Doom non e' un servizio da accendere: e' una
+# partita che comincia e finisce, e puo' finire da sola per inattivita'. Lo
+# stato quindi non si legge dalla configurazione — li' non c'e' — ma dal
+# runtime, e va ripubblicato quando cambia da solo, altrimenti Home Assistant
+# resta convinto che si stia ancora giocando.
+AZIONI = [
+    ("doom", "Doom", "mdi:pistol"),
+]
+
 # Ogni quanto si ripubblica lo stato anche se non e' cambiato nulla: serve a
 # ripopolare Home Assistant dopo un suo riavvio.
 HEARTBEAT = 30
@@ -147,6 +157,20 @@ class HassBridge:
             })
             self._config("switch", key, entity)
 
+        for key, label, icona in AZIONI:
+            entity = dict(common)
+            entity.update({
+                "name": label,
+                "unique_id": "%s_%s" % (node, key),
+                "object_id": "%s_%s" % (node, key),
+                "state_topic": "%s/service/%s/state" % (base, key),
+                "command_topic": "%s/service/%s/set" % (base, key),
+                "payload_on": "ON",
+                "payload_off": "OFF",
+                "icon": icona,
+            })
+            self._config("switch", key, entity)
+
         for key, label in MODES:
             entity = dict(common)
             entity.update({
@@ -189,7 +213,8 @@ class HassBridge:
         for component, object_id in ([("sensor", "nowplaying"),
                                       ("number", "brightness")] +
                                      [("switch", key) for key, _ in SWITCHES] +
-                                     [("switch", key) for key, _ in MODES]):
+                                     [("switch", key) for key, _ in MODES] +
+                                     [("switch", key) for key, _, _ in AZIONI]):
             topic = "%s/%s/%s/%s/config" % (self.prefix(), component,
                                             self.node(), object_id)
             self.bus.publish(topic, "", retain=True)
@@ -223,6 +248,10 @@ class HassBridge:
         for key, _label in MODES:
             value = "ON" if display.get(key) else "OFF"
             self._send("%s/service/%s/state" % (base, key), value, force)
+
+        for key, _label, _icona in AZIONI:
+            self._send("%s/service/%s/state" % (base, key),
+                       "ON" if self._azione_accesa(key) else "OFF", force)
 
         self._send("%s/brightness/state" % base,
                    str(self.cfg["display"]["brightness"]), force)
@@ -273,6 +302,36 @@ class HassBridge:
         self.publish_state(force=True)
         return True
 
+    def _azione_accesa(self, key):
+        """Stato di un'azione, chiesto a chi la sta facendo."""
+        if key == "doom":
+            doom = getattr(self.runtime, "doom", None)
+            try:
+                return bool(doom and doom.in_sessione())
+            except Exception:
+                return False
+        return False
+
+    def _azione(self, key, acceso):
+        """Esegue un'azione. Restituisce True se e' stata gestita."""
+        if key != "doom":
+            return False
+        doom = getattr(self.runtime, "doom", None)
+        if doom is None:
+            return False
+        try:
+            if acceso:
+                doom.apri_sessione()
+            else:
+                doom.chiudi_sessione()
+        except Exception as exc:
+            print("[hass] doom: %s" % exc)
+        # Lo stato vero lo dice la sorgente, non il comando: se la partita non
+        # e' partita — WAD sbagliato, programma non compilato — Home Assistant
+        # deve tornare a OFF da solo invece di restare acceso a vuoto.
+        self.publish_state(force=True)
+        return True
+
     def _on_service(self, topic, payload):
         parts = topic.split("/")
         if len(parts) < 3:
@@ -281,6 +340,9 @@ class HassBridge:
         wanted = payload.decode("utf-8", "replace").strip().upper() \
             if isinstance(payload, bytes) else str(payload).strip().upper()
         acceso = wanted in ("ON", "1", "TRUE")
+
+        if self._azione(key, acceso):
+            return
 
         modi = dict(MODES)
         if key in modi:

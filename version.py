@@ -321,6 +321,26 @@ Storico:
        La tastiera del cabinato comanda il gioco ma non lo fa *cominciare*, a
        meno che non lo si chieda: il DMD sta in mezzo a un flipper, e un tasto
        sfiorato per caso non deve portarsi via il pannello a meta' partita.
+  3.3  Joystick: pad PS4 e compatibili, e pad da PC. Sotto Linux sono
+       dispositivi di /dev/input come le tastiere, quindi si leggono con lo
+       stesso codice e senza librerie in piu'. Il lavoro vero e' negli assi:
+       le levette non sono premute o rilasciate, hanno un valore dentro un
+       intervallo che cambia da pad a pad — 0..255 su un DualShock 4,
+       -32768..32767 su molti pad da PC — e l'intervallo si chiede al kernel
+       invece di darlo per scontato. La conversione in premuto/rilasciato ha
+       una zona morta al 40% e rilascia al 28%: senza due soglie diverse una
+       levetta tenuta appena oltre il limite fa scattare il personaggio invece
+       di farlo camminare. Options sul pad puo' far cominciare una partita, al
+       contrario della tastiera: un pulsante preciso su un pad che si tiene in
+       mano non si preme per sbaglio.
+       Doom si accende e si spegne anche da Home Assistant, come interruttore
+       MQTT. Lo stato non viene dalla configurazione — li' non c'e' — ma dalla
+       partita in corso, cosi' una chiusura per inattivita' o un avvio fallito
+       riportano l'interruttore a OFF da soli.
+       Il gamma predefinito passa da 0.70 a 1.15. Lo 0.70 schiariva, ed era un
+       ragionamento fatto a tavolino: sul pannello vero sbiancava e rendeva
+       illeggibili i menu. Chi ha ancora il vecchio predefinito esatto viene
+       corretto; chi ha tarato non viene toccato.
 """
 
-__version__ = "3.2"
+__version__ = "3.3"
