@@ -102,6 +102,33 @@ DEFAULTS = {
         # Mostra anche l'eta' compiuta, quando l'anno di nascita c'e'.
         "show_age": True,
     },
+    "doom": {
+        # Il binario lo compila doom/setup_doom.sh: non arriva gia' fatto
+        # perche' i sorgenti di doomgeneric sono GPL2 e questo progetto e'
+        # GPLv3 (vedi doom/setup_doom.sh).
+        "binary": "/var/lib/dmd/doom/doom-dmd",
+        "wad": "/var/lib/dmd/doom/freedoom1.wad",
+        # Doom scrive configurazione e salvataggi nella cartella di lavoro:
+        # fuori da /opt/dmd, che deve restare uguale alle sue impronte.
+        "work_dir": "/var/lib/dmd/doom/stato",
+        # La fascia ritagliata dai 200 righe di Doom. Doom e' 1,6:1 e il
+        # pannello e' 4:1: schiacciare tutto renderebbe un nemico alto otto
+        # pixel. La taratura vera si fa guardando il pannello.
+        "band_top": 36,
+        "band_height": 96,
+        # Doom e' un gioco buio e un LED non ha il nero di un CRT.
+        "gamma": 0.70,
+        # Tastiera USB collegata al Pi. Vuoto = tutte quelle che trova.
+        "keyboard": True,
+        "keyboard_device": "",
+        # Dopo quanti secondi senza comandi la sessione si chiude e si torna
+        # ai demo. Zero = mai.
+        "session_timeout": 180,
+        # Difficolta' (1-5) e livello da cui parte una partita. Servono solo
+        # alla sessione: l'attract mode fa i suoi demo e non li guarda.
+        "skill": 3,
+        "start_map": "1 1",
+    },
 
     "air_radar": {
         # Nessuna posizione preimpostata: va indicata dall'utente nella web UI.
@@ -214,6 +241,7 @@ DEFAULTS = {
         "birthdays": False,
         "status_player": False,
         "air_radar": False,
+        "doom": False,
     },
     "zedmd": {
         "stream_port": 3333,

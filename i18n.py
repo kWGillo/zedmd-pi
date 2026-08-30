@@ -1108,6 +1108,157 @@ STRINGS = {
         "repository and the matrix library. They are the only two things "
         "that change the installed software rather than tune it, which is "
         "why they live outside Settings."),
+    # -------------------------------------------------------------------- doom
+    "nav.doom": ("Doom", "Doom"),
+    "doom.title": ("Doom", "Doom"),
+    "doom.intro": (
+        "Doom gira come programma a sé e manda i fotogrammi al pannello. "
+        "Quando nessuno tocca niente gioca da solo, con i demo che ha sempre "
+        "avuto dentro, e cede il pannello a un aereo, a un compleanno e "
+        "soprattutto a Batocera. Al primo comando comincia una partita e il "
+        "pannello diventa suo, finché non esci o finché non lo lasci fermo "
+        "abbastanza a lungo.",
+        "Doom runs as a program of its own and sends frames to the panel. "
+        "When nobody touches anything it plays by itself, using the demos it "
+        "has always carried, and yields the panel to an aircraft, a birthday "
+        "and above all to Batocera. At the first command a game starts and "
+        "the panel becomes its own, until you leave or let it sit idle long "
+        "enough."),
+    "doom.play": ("Gioca", "Play"),
+    "doom.leave": ("Esci dalla partita", "Leave the game"),
+    "doom.pad": ("Comandi", "Controls"),
+    "doom.pad.hint": (
+        "I pulsanti si tengono premuti: tenendo il dito su una freccia si "
+        "cammina davvero, invece di fare un passo alla volta.",
+        "The buttons are held down: keeping your finger on an arrow really "
+        "walks, instead of taking one step at a time."),
+    "doom.keyboard.hint": (
+        "Funziona anche la tastiera di questo computer — frecce o WASD, ctrl "
+        "spara, spazio apre, shift corre — e quella collegata al Raspberry, "
+        "che è la via più diretta: non passa dalla rete.",
+        "The keyboard of this computer works too — arrows or WASD, ctrl "
+        "fires, space opens, shift runs — and so does the one plugged into "
+        "the Raspberry Pi, which is the most direct route: it does not go "
+        "through the network."),
+    "doom.key.fire": ("Fuoco", "Fire"),
+    "doom.key.use": ("Apri", "Use"),
+    "doom.key.run": ("Corri", "Run"),
+    "doom.key.menu": ("Menu", "Menu"),
+    "doom.key.enter": ("Invio", "Enter"),
+    "doom.key.map": ("Mappa", "Map"),
+    "doom.tuning": ("Immagine e partita", "Picture and game"),
+    "doom.tuning.hint": (
+        "Salvando si fa ripartire Doom: la fascia e la gamma stanno nella "
+        "riga di comando del programma, non in un file che rilegge.",
+        "Saving restarts Doom: the band and the gamma live on the program's "
+        "command line, not in a file it re-reads."),
+    "doom.band.top": ("Prima riga della fascia", "First row of the band"),
+    "doom.band.height": ("Altezza della fascia", "Height of the band"),
+    "doom.band.hint": (
+        "Doom disegna 320×200, il pannello è 256×64: schiacciando tutto un "
+        "nemico sarebbe alto otto pixel. Si ritaglia una fascia attorno "
+        "all'orizzonte, dove stanno i nemici, e si buttano via pavimento e "
+        "soffitto. Da riga 36 per 96 righe è il punto di partenza; la "
+        "taratura vera si fa guardando il pannello.",
+        "Doom draws 320×200 while the panel is 256×64: squashing it all would "
+        "make an enemy eight pixels tall. A band around the horizon is cropped "
+        "instead — that is where the enemies are — and floor and ceiling are "
+        "thrown away. Row 36 for 96 rows is the starting point; the real "
+        "tuning is done by looking at the panel."),
+    "doom.gamma": ("Gamma", "Gamma"),
+    "doom.gamma.hint": (
+        "Doom è un gioco buio e un LED non ha il nero di un CRT: sotto 1 "
+        "schiarisce. La difficoltà va da 1 a 5, e il livello si scrive "
+        "«episodio mappa», per esempio «1 1».",
+        "Doom is a dark game and an LED has none of a CRT's black: below 1 "
+        "brightens it. Skill goes from 1 to 5, and the level is written "
+        "“episode map”, for example “1 1”."),
+    "doom.skill": ("Difficoltà", "Skill"),
+    "doom.map": ("Livello iniziale", "Starting level"),
+    "doom.timeout": ("Fine partita dopo (s)", "End game after (s)"),
+    "doom.device": ("Tastiera da usare", "Keyboard to use"),
+    "doom.device.auto": ("tutte quelle collegate", "every one connected"),
+    "doom.device.found": ("Tastiere trovate: %(list)s",
+                          "Keyboards found: %(list)s"),
+    "doom.device.none": (
+        "Nessuna tastiera collegata al Raspberry in questo momento. Si gioca "
+        "lo stesso da questa pagina.",
+        "No keyboard connected to the Raspberry Pi right now. You can still "
+        "play from this page."),
+    "doom.keyboard": ("Leggi la tastiera collegata al Raspberry",
+                      "Read the keyboard plugged into the Raspberry Pi"),
+    "doom.binary": ("Programma", "Program"),
+    "doom.wad": ("WAD", "WAD"),
+    "doom.nobinary": (
+        "Doom non è ancora pronto: va preparato una volta sola, con il "
+        "pulsante qui sotto.",
+        "Doom is not ready yet: it has to be prepared once, with the button "
+        "below."),
+    "doom.stale": (
+        "Il programma è stato compilato prima dell'ultimo aggiornamento: "
+        "funziona, ma non è quello che dice il sorgente installato. "
+        "Ricompilalo quando ti fa comodo.",
+        "The program was compiled before the last update: it works, but it is "
+        "not what the installed source says. Rebuild it whenever you like."),
+    "doom.prep": ("Preparazione", "Preparation"),
+    "doom.prep.hint": (
+        "Doom ha bisogno di due cose che non arrivano con il pacchetto: il "
+        "programma, che va compilato (i sorgenti sono GPL2 e questo progetto "
+        "è GPLv3, quindi si scaricano al momento invece di essere inclusi), e "
+        "un WAD, cioè il file con i livelli. Il pulsante fa entrambe le cose "
+        "e ci mette un paio di minuti su un Raspberry 3B+.",
+        "Doom needs two things the package does not carry: the program, which "
+        "has to be compiled (the sources are GPL2 while this project is "
+        "GPLv3, so they are fetched rather than bundled), and a WAD, the file "
+        "with the levels. The button does both, and takes a couple of minutes "
+        "on a Raspberry Pi 3B+."),
+    "doom.prep.button": ("Prepara Doom", "Prepare Doom"),
+    "doom.prep.again": ("Ricompila", "Rebuild"),
+    "doom.prep.running": (
+        "Preparazione in corso: scaricamento e compilazione. Un paio di "
+        "minuti, e la pagina si aggiorna da sola quando ha finito.",
+        "Preparation in progress: downloading and compiling. A couple of "
+        "minutes, and the page refreshes itself when it is done."),
+    "doom.prep.nolog": ("Mai preparato su questa macchina.",
+                        "Never prepared on this machine."),
+    "doom.wads": ("WAD trovati", "WADs found"),
+    "doom.wads.hint": (
+        "Il WAD è il file con i livelli, la grafica e i suoni. Freedoom è "
+        "libero e lo scarica la preparazione. Quelli di id Software non si "
+        "possono ridistribuire: se hai comprato Doom, copia il tuo "
+        "(doom.wad, doom1.wad, doom2.wad…) nella cartella qui sopra e "
+        "sceglilo da qui — la preparazione lo riconosce e non scarica "
+        "Freedoom.",
+        "The WAD is the file with the levels, artwork and sounds. Freedoom is "
+        "free and the preparation downloads it. The id Software ones cannot "
+        "be redistributed: if you bought Doom, copy yours (doom.wad, "
+        "doom1.wad, doom2.wad…) into the folder above and pick it here — the "
+        "preparation recognises it and skips the Freedoom download."),
+    "doom.wads.none": (
+        "Nessun WAD in %(dir)s. Premi «Prepara Doom» per scaricare Freedoom, "
+        "oppure copia lì il tuo.",
+        "No WAD in %(dir)s. Press “Prepare Doom” to download Freedoom, or "
+        "copy yours there."),
+    "doom.wad.dir": ("Cartella dei WAD", "WAD folder"),
+    "doom.wad.free": ("libero", "free"),
+    "doom.wad.use": ("Usa questo", "Use this one"),
+    "doom.nowad": (
+        "Manca il WAD %(path)s. Lo scarica «sudo /opt/dmd/doom/setup_doom.sh», "
+        "oppure mettine uno tuo e correggi il percorso qui sotto.",
+        "The WAD %(path)s is missing. “sudo /opt/dmd/doom/setup_doom.sh” "
+        "downloads it, or put one of your own there and fix the path below."),
+    "status.doom.attract": ("gioca da solo (%(frames)d fotogrammi)",
+                            "playing by itself (%(frames)d frames)"),
+    "status.doom.playing": ("partita in corso, fermo da %(seconds)d s",
+                            "game in progress, idle for %(seconds)d s"),
+    "status.doom.stopped": ("programma non in esecuzione", "program not running"),
+    "status.doom.error": ("Doom non parte: %(error)s", "Doom does not start: %(error)s"),
+    "services.desc.doom": (
+        "Doom sul pannello: gioca da solo quando il cabinato è fermo, e si "
+        "prende il pannello quando qualcuno tocca un comando.",
+        "Doom on the panel: it plays by itself while the cabinet is idle, and "
+        "takes the panel when somebody touches a control."),
+
     "media.view": ("Vedi", "View"),
     # ---------------------------------------------------------- gestione media
     "nav.manager": ("Gestione media", "Media manager"),

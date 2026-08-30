@@ -372,3 +372,22 @@ table.files td.size { white-space: nowrap; padding-right: 1rem; }
 /* La riga del file che si sta guardando adesso. */
 table.files tr.now td { background: rgba(0,140,200,.10); }
 table.files tr.now td.mono { color: #6cc8f0; }
+
+/* ---- versione 3.0: Doom ---- */
+
+/* Il pad. Tre colonne perche' il pollice destro trova sempre il centro, e
+   pulsanti grandi perche' su un telefono si gioca con i polpastrelli, non
+   con un puntatore. `touch-action: none` toglie di mezzo lo scorrimento
+   della pagina: tenere premuto per camminare non deve trascinare la vista. */
+.dpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+        max-width: 420px; margin: 10px 0; }
+.dpad.azioni { grid-template-columns: repeat(3, 1fr); }
+.dpad .tasto {
+  padding: 18px 0; font-size: 18px; font-weight: 600;
+  background: var(--card); color: var(--fg);
+  border: 1px solid var(--line); border-radius: 10px;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  cursor: pointer;
+}
+.dpad .tasto:active { background: var(--accent); color: #1a0f00; }
+.dpad .tasto.grande { font-size: 15px; }

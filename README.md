@@ -63,6 +63,16 @@ driver, A/B/C address lines only) chained to 256×64.
 - **Home Assistant** — the DMD announces itself over MQTT Discovery: current
   track, a switch per service and brightness, all controllable. Entirely
   optional; the default broker is a local Mosquitto.
+- **Doom** — yes, really. It runs as a program of its own (doomgeneric, output
+  cropped to 256×64) talking to the service over a pipe: frames one way, keys
+  the other. The hard part was never the CPU — it is 1993 software — but the
+  shape of the screen: Doom draws 1.6:1 and the panel is 4:1, so a **band
+  around the horizon** is cropped, where the enemies are, and floor and
+  ceiling are thrown away. While nobody touches anything it plays its own
+  built-in demos and yields the panel to everything else; at the first command
+  a game starts and the panel is its own, Batocera included. Controlled from a
+  keyboard plugged into the Pi, or from the web page. See
+  [Doom on the panel](#doom-on-the-panel).
 - **Night mode / Sleep mode** — scheduled dimming and scheduled blackout.
 - **Over-the-air updates** — checks this repository, verifies the archive
   before installing, and rolls back automatically if the service does not come
@@ -359,6 +369,92 @@ is not a timing problem — the machine has lost the ability to read its own
 executables. Check `vcgencmd get_throttled` for undervoltage (panels and Pi on
 one supply is the usual cause) and `dmesg` for `mmc`/`ext4` errors before
 blaming the CPU.
+
+---
+
+## Doom on the panel
+
+### The shape of the screen
+
+Doom on a Pi is not a performance question. It is software from 1993 and the
+Pi decodes it without noticing. The problem is geometry: Doom draws 320×200 —
+1.6:1 — and the panel is 256×64 — 4:1. Scale the whole frame down to 64 rows
+and an imp is eight pixels tall, indistinguishable from a barrel.
+
+So the frame is not squashed, it is **cropped**. A band is taken around the
+horizon and the rest is discarded. In Doom the floor and the ceiling are
+exactly where nothing happens, while enemies sit on the line of sight; the
+status bar, which starts at row 168, does not fit and is not needed. The band
+is scaled 5:4 horizontally (320 → 256) and by whatever it takes vertically,
+with a box average — at this size antialiasing is what makes a figure legible,
+not a luxury. The defaults are row 36 for 96 rows and gamma 0.70 (Doom is a
+dark game and an LED panel has none of a CRT's black); both are tunable from
+the Doom page, because the only place that question has a real answer is in
+front of the panel.
+
+### Two processes, not a library
+
+`doom/doom-dmd` is doomgeneric compiled with our own output function. It talks
+to the DMD service over a pipe: raw fixed-size frames on stdout, `[state, key]`
+pairs on stdin. It is a separate process for three reasons, in order of
+importance:
+
+1. **Licence.** doomgeneric descends from the Doom sources, which are GPL
+   version 2. This project is GPLv3, and GPL2-only inside a GPLv3 work does not
+   fit. Two processes talking over a pipe are not linked: they stay two
+   programs, each under its own licence.
+2. **Isolation.** If Doom falls over, Doom falls over; the panel goes back to
+   the clock and the service does not notice.
+3. **Simplicity.** No bindings, no GIL to contend for. Read a frame, publish it.
+
+The sources are not vendored here — `doom/setup_doom.sh` fetches and builds
+them. The compiled binary lands in `/var/lib/dmd/doom`, not in `/opt/dmd`,
+because an OTA update wipes and re-copies the program's subdirectories and a
+binary in there would vanish on every update.
+
+### Attract mode, and a game
+
+While nobody touches anything, Doom plays its own built-in demos — that is
+what it has always done when left alone, so attract mode costs nothing. There
+it is an ordinary source with a low priority: an aircraft, a birthday and
+above all Batocera all outrank it.
+
+At the first command a **game** starts and the panel becomes its own, Batocera
+included, until you leave or let it sit idle (three minutes by default). The
+game begins by restarting Doom straight into the level rather than pressing a
+key to abort the demo and then navigating the menu with arrow keys on a panel
+sixty-four pixels tall.
+
+Holding the panel is the same mechanism the media manager uses, generalised: a
+named hold, either with a deadline (the library page, kept alive by a
+heartbeat, so a closed tab releases it) or without one (the game, so standing
+still in front of a door does not send the panel back to the clock). One page
+cannot release another's hold.
+
+### Controls
+
+No GPIO. On the SM16380SC panels D and E are wired and the pins that would
+have been used are gone, so both routes are software:
+
+- **A keyboard plugged into the Pi**, read straight from `/dev/input` with no
+  extra library — the events are a 24-byte (or 16-byte, on 32-bit) struct and
+  `struct` is always there. Arrows or WASD, ctrl fires, space opens, shift
+  runs. This is the direct route: it does not go through the network.
+- **The web page**, with on-screen buttons that hold down properly, plus the
+  keyboard of whatever computer is looking at the page. Same key queue, only a
+  different way in.
+
+### Setting it up
+
+```
+sudo /opt/dmd/doom/setup_doom.sh
+```
+
+It installs the build tools if missing, clones and compiles doomgeneric
+(a couple of minutes on a Pi 3B+), and downloads **Freedoom**, which is freely
+licensed. Commercial WADs cannot be redistributed: if you own one, put it
+where you like and correct the path on the Doom page. Then turn the Doom
+service on from the Services page.
 
 ---
 

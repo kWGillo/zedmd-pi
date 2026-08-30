@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% block title %}{{ t('doom.title') }}{% endblock %}
+
+{% block content %}
+
+{% if prep.running %}
+<div class="banner hold">{{ t('doom.prep.running') }}</div>
+{% elif not prep.binary_ready %}
+<div class="banner warn">{{ t('doom.nobinary') }}</div>
+{% elif not prep.wad_ok %}
+<div class="banner warn">{{ t('doom.nowad', path=doom.wad) }}</div>
+{% elif prep.binary_stale %}
+<div class="banner warn">{{ t('doom.stale') }}</div>
+{% endif %}
+
+<section class="card">
+  <h2>{{ t('doom.title') }}</h2>
+  <p class="hint">{{ t('doom.intro') }}</p>
+  <p class="status" id="stato">{{ stato.status }}</p>
+
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_doom_play') }}">
+      <button type="submit">{{ t('doom.play') }}</button>
+    </form>
+    <form method="post" action="{{ url_for('api_doom_stop') }}">
+      <button type="submit" class="ghost">{{ t('doom.leave') }}</button>
+    </form>
+  </div>
+</section>
+
+<section class="card">
+  <h2>{{ t('doom.prep') }}</h2>
+  <p class="hint">{{ t('doom.prep.hint') }}</p>
+
+  <dl class="info">
+    <dt>{{ t('doom.binary') }}</dt>
+    <dd class="mono">{{ prep.binary }}
+      {% if prep.binary_ready %}&#10003;{% else %}&mdash;{% endif %}</dd>
+    <dt>{{ t('doom.wad.dir') }}</dt><dd class="mono">{{ prep.wad_dir }}</dd>
+  </dl>
+
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_doom_setup') }}">
+      <button type="submit" {{ 'disabled' if prep.running }}>
+        {{ t('doom.prep.again') if prep.binary_ready else t('doom.prep.button') }}
+      </button>
+    </form>
+  </div>
+
+  <pre class="log" id="preplog">{{ prep.log or t('doom.prep.nolog') }}</pre>
+</section>
+
+<section class="card">
+  <h2>{{ t('doom.wads') }}</h2>
+  <p class="hint">{{ t('doom.wads.hint') }}</p>
+  {% if prep.wads %}
+  <form method="post" action="{{ url_for('api_doom_wad') }}">
+    <table class="files">
+      {% for w in prep.wads %}
+      <tr>
+        <td>
+          <label class="check">
+            <input type="radio" name="wad" value="{{ w.path }}"
+                   {{ 'checked' if w.path == prep.wad_current }}
+                   {{ 'disabled' if not w.ok }}>
+            <span class="mono">{{ w.name }}</span>
+            {% if w.label %} — {{ w.label }}{% endif %}
+            {% if w.free %} <span class="hint">({{ t('doom.wad.free') }})</span>{% endif %}
+          </label>
+        </td>
+        <td class="size">{{ (w.size / 1048576)|round(1) }} MB</td>
+        <td class="act">{% if w.ok %}{{ w.kind }}{% else %}{{ w.problem }}{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <button type="submit">{{ t('doom.wad.use') }}</button>
+  </form>
+  {% else %}
+  <p class="hint">{{ t('doom.wads.none', dir=prep.wad_dir) }}</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ t('doom.pad') }}</h2>
+  <p class="hint">{{ t('doom.pad.hint') }}</p>
+
+  <div class="dpad">
+    <button class="tasto" data-azione="lato_sx">&#8676;</button>
+    <button class="tasto" data-azione="su">&#9650;</button>
+    <button class="tasto" data-azione="lato_dx">&#8677;</button>
+    <button class="tasto" data-azione="sinistra">&#9664;</button>
+    <button class="tasto" data-azione="giu">&#9660;</button>
+    <button class="tasto" data-azione="destra">&#9654;</button>
+  </div>
+
+  <div class="dpad azioni">
+    <button class="tasto grande" data-azione="fuoco">{{ t('doom.key.fire') }}</button>
+    <button class="tasto grande" data-azione="usa">{{ t('doom.key.use') }}</button>
+    <button class="tasto" data-azione="corsa">{{ t('doom.key.run') }}</button>
+    <button class="tasto" data-azione="menu">{{ t('doom.key.menu') }}</button>
+    <button class="tasto" data-azione="invio">{{ t('doom.key.enter') }}</button>
+    <button class="tasto" data-azione="mappa">{{ t('doom.key.map') }}</button>
+  </div>
+
+  <p class="hint">{{ t('doom.keyboard.hint') }}</p>
+</section>
+
+<section class="card">
+  <h2>{{ t('doom.tuning') }}</h2>
+  <p class="hint">{{ t('doom.tuning.hint') }}</p>
+  <form method="post" action="{{ url_for('api_doom') }}">
+
+    <div class="row2">
+      <div><label for="band_top">{{ t('doom.band.top') }}</label>
+        <input type="number" id="band_top" name="band_top" min="0" max="190"
+               value="{{ doom.band_top }}"></div>
+      <div><label for="band_height">{{ t('doom.band.height') }}</label>
+        <input type="number" id="band_height" name="band_height" min="8" max="200"
+               value="{{ doom.band_height }}"></div>
+    </div>
+    <p class="hint">{{ t('doom.band.hint') }}</p>
+
+    <div class="row3">
+      <div><label for="gamma">{{ t('doom.gamma') }}</label>
+        <input type="number" id="gamma" name="gamma" min="0.2" max="2" step="0.05"
+               value="{{ '%.2f'|format(doom.gamma) }}"></div>
+      <div><label for="skill">{{ t('doom.skill') }}</label>
+        <input type="number" id="skill" name="skill" min="1" max="5"
+               value="{{ doom.skill }}"></div>
+      <div><label for="start_map">{{ t('doom.map') }}</label>
+        <input type="text" id="start_map" name="start_map" value="{{ doom.start_map }}"></div>
+    </div>
+    <p class="hint">{{ t('doom.gamma.hint') }}</p>
+
+    <div class="row2">
+      <div><label for="session_timeout">{{ t('doom.timeout') }}</label>
+        <input type="number" id="session_timeout" name="session_timeout" min="0" max="3600"
+               value="{{ doom.session_timeout }}"></div>
+      <div><label for="keyboard_device">{{ t('doom.device') }}</label>
+        <input type="text" id="keyboard_device" name="keyboard_device"
+               value="{{ doom.keyboard_device }}" placeholder="{{ t('doom.device.auto') }}"></div>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="keyboard" {{ 'checked' if doom.keyboard }}>
+      {{ t('doom.keyboard') }}
+    </label>
+    {% if tastiere %}
+    <p class="hint">{{ t('doom.device.found', list=tastiere|join(', ')) }}</p>
+    {% else %}
+    <p class="hint">{{ t('doom.device.none') }}</p>
+    {% endif %}
+
+    <div class="row2">
+      <div><label for="binary">{{ t('doom.binary') }}</label>
+        <input type="text" id="binary" name="binary" value="{{ doom.binary }}"></div>
+      <div><label for="wad">{{ t('doom.wad') }}</label>
+        <input type="text" id="wad" name="wad" value="{{ doom.wad }}"></div>
+    </div>
+
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+</section>
+
+<script>
+(function () {
+  var url = "{{ url_for('api_doom_key') }}";
+  var stato = document.getElementById("stato");
+
+  function manda(azione, s) {
+    var dati = new FormData();
+    dati.append("azione", azione);
+    dati.append("stato", s);
+    fetch(url, {method: "POST", body: dati})
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (j && j.status) { stato.textContent = j.status; } })
+      .catch(function () {});
+  }
+
+  // I pulsanti mandano premuto e rilasciato separatamente, cosi' tenendo il
+  // dito si cammina davvero. `pointercancel` e `pointerleave` sono la rete di
+  // sicurezza: un dito che scivola via non lascia il tasto premuto per sempre.
+  var tasti = document.querySelectorAll(".tasto");
+  for (var i = 0; i < tasti.length; i++) {
+    (function (b) {
+      var azione = b.getAttribute("data-azione");
+      var giu = false;
+      function premi(e) { e.preventDefault(); if (!giu) { giu = true; manda(azione, "down"); } }
+      function molla(e) { if (giu) { giu = false; manda(azione, "up"); } }
+      b.addEventListener("pointerdown", premi);
+      b.addEventListener("pointerup", molla);
+      b.addEventListener("pointerleave", molla);
+      b.addEventListener("pointercancel", molla);
+      b.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+    })(tasti[i]);
+  }
+
+  // La tastiera del computer che sta guardando questa pagina. E' la stessa
+  // coda di tasti dei pulsanti e della tastiera attaccata al Pi: cambia solo
+  // da dove arrivano.
+  var DA_BROWSER = {
+    ArrowUp: "su", ArrowDown: "giu", ArrowLeft: "sinistra", ArrowRight: "destra",
+    KeyW: "su", KeyS: "giu", KeyA: "lato_sx", KeyD: "lato_dx",
+    ControlLeft: "fuoco", ControlRight: "fuoco", Space: "usa",
+    ShiftLeft: "corsa", ShiftRight: "corsa",
+    Escape: "menu", Enter: "invio", Tab: "mappa",
+    Digit1: "arma1", Digit2: "arma2", Digit3: "arma3", Digit4: "arma4",
+    Digit5: "arma5", Digit6: "arma6", Digit7: "arma7"
+  };
+  var attivi = {};
+  function dentro_a_un_campo(e) {
+    var n = e.target && e.target.tagName;
+    return n === "INPUT" || n === "TEXTAREA" || n === "SELECT";
+  }
+  document.addEventListener("keydown", function (e) {
+    var azione = DA_BROWSER[e.code];
+    if (!azione || dentro_a_un_campo(e)) { return; }
+    e.preventDefault();
+    if (attivi[e.code]) { return; }   // la ripetizione la fa Doom
+    attivi[e.code] = true;
+    manda(azione, "down");
+  });
+  document.addEventListener("keyup", function (e) {
+    var azione = DA_BROWSER[e.code];
+    if (!azione || !attivi[e.code]) { return; }
+    delete attivi[e.code];
+    manda(azione, "up");
+  });
+  // Cambiando finestra con un tasto premuto il keyup non arriva mai.
+  window.addEventListener("blur", function () {
+    for (var code in attivi) {
+      if (DA_BROWSER[code]) { manda(DA_BROWSER[code], "up"); }
+    }
+    attivi = {};
+  });
+
+  setInterval(function () {
+    fetch("{{ url_for('api_doom_state') }}")
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (j && j.status) { stato.textContent = j.status; } })
+      .catch(function () {});
+  }, 5000);
+
+  // Compilare Doom prende un paio di minuti su un Pi 3B+: la pagina guarda il
+  // log mentre va, invece di lasciare un pulsante premuto e nessuna notizia.
+  // Quando finisce si ricarica una volta sola, per mostrare i WAD trovati.
+  var preplog = document.getElementById("preplog");
+  var eraInCorso = {{ 'true' if prep.running else 'false' }};
+  setInterval(function () {
+    fetch("{{ url_for('api_doom_setup_state') }}")
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j) { return; }
+        if (j.log) { preplog.textContent = j.log; preplog.scrollTop = preplog.scrollHeight; }
+        if (eraInCorso && !j.running) { location.reload(); }
+        eraInCorso = j.running;
+      })
+      .catch(function () {});
+  }, 3000);
+})();
+</script>
+
+{% endblock %}

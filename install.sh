@@ -47,6 +47,16 @@ mkdir -p /opt/dmd
 cp -r "$SRC_DIR"/*.py "$SRC_DIR"/*.csv "$SRC_DIR"/templates \
       "$SRC_DIR"/static /opt/dmd/
 cp -r "$SRC_DIR"/sources /opt/dmd/
+# Doom: qui arrivano solo i sorgenti e lo script. Compilare richiede di
+# scaricare doomgeneric e un paio di minuti di CPU, e non e' detto che chi
+# installa il DMD voglia anche giocare: lo fa lui quando vuole, con
+# `sudo /opt/dmd/doom/setup_doom.sh`.
+if [ -d "$SRC_DIR/doom" ]; then
+    mkdir -p /opt/dmd/doom
+    cp "$SRC_DIR"/doom/doomgeneric_dmd.c "$SRC_DIR"/doom/Makefile \
+       "$SRC_DIR"/doom/setup_doom.sh /opt/dmd/doom/
+    chmod +x /opt/dmd/doom/setup_doom.sh
+fi
 mkdir -p /var/lib/dmd
 
 echo "==> Configurazione iniziale in /etc/dmd/config.json"

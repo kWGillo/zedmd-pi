@@ -26,8 +26,8 @@ import ota
 import spotifyapi
 from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
-                     ClockSource, MediaPlayerSource, NowPlayingSource,
-                     PreviewSource, ZeDMDSource)
+                     ClockSource, DoomSource, MediaPlayerSource,
+                     NowPlayingSource, PreviewSource, ZeDMDSource)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -67,10 +67,18 @@ class Arbiter:
         self.cfg = cfg
         self.sources = {}
         self.current = None
-        # Scadenza della gestione media, non un semplice acceso/spento: se la
-        # web UI smette di parlare, la modalita' finisce senza che nessuno
-        # debba ricordarsi di chiuderla.
-        self.manager_until = 0.0
+        # Presa del pannello: il nome della sorgente che se l'e' preso, e fino
+        # a quando. Nata per la gestione media, serve identica a una sessione
+        # di Doom — sono la stessa cosa, "questa cosa qui tiene il pannello
+        # finche' non ha finito".
+        #
+        # Due sapori. **A scadenza** (gestione media): la pagina web manda un
+        # battito e se tace la presa cade da sola, cosi' una scheda chiusa non
+        # lascia il pannello fermo per sempre. **Senza scadenza** (Doom): chi
+        # gioca puo' stare fermo a guardare una porta senza che il pannello
+        # gli torni all'orologio, e a chiudere ci pensa la sorgente.
+        self.hold_name = ""
+        self.hold_until = 0.0
 
     def register(self, source):
         self.sources[source.name] = source
@@ -93,30 +101,67 @@ class Arbiter:
                 source.enabled = False
                 source.stop()
 
-    # ------------------------------------------------------------ gestione media
+    # ------------------------------------------------------- presa del pannello
 
+    def holding(self, name=None):
+        if not self.hold_name:
+            return False
+        if self.hold_until and time.time() >= self.hold_until:
+            return False
+        return name is None or self.hold_name == name
+
+    def hold_on(self, name, seconds=None):
+        """Assegna il pannello a una sorgente. `seconds=None` = senza scadenza."""
+        self.hold_name = name
+        self.hold_until = time.time() + seconds if seconds else 0.0
+
+    def hold_off(self, name=None):
+        """Rilascia la presa. Con un nome, solo se e' di quella sorgente.
+
+        Il nome serve a non far chiudere a una pagina la presa di un'altra:
+        uscendo dalla gestione media mentre qualcuno gioca a Doom, il gioco
+        non si deve spegnere.
+        """
+        if name is not None and self.hold_name != name:
+            return False
+        self.hold_name = ""
+        self.hold_until = 0.0
+        return True
+
+    def hold_left(self):
+        """Secondi che mancano al rilascio automatico, per la web UI."""
+        if not self.hold_until:
+            return 0
+        return max(0, int(self.hold_until - time.time()))
+
+    # La gestione media e' il primo cliente della presa, e la web UI la
+    # chiama con il suo nome: questi tre nomi restano quelli.
     def manager(self):
-        return time.time() < self.manager_until
+        return self.holding("preview")
 
     def manager_on(self):
-        """Prolunga la gestione media. Ogni battito della pagina la rinnova."""
-        self.manager_until = time.time() + MANAGER_TIMEOUT
+        self.hold_on("preview", MANAGER_TIMEOUT)
 
     def manager_off(self):
-        self.manager_until = 0.0
+        return self.hold_off("preview")
 
     def manager_left(self):
-        """Secondi che mancano al rientro automatico, per la web UI."""
-        return max(0, int(self.manager_until - time.time()))
+        return self.hold_left() if self.manager() else 0
 
     def pick(self):
-        # In gestione media il pannello e' di chi sta guardando la libreria, e
-        # non c'e' nessuna gara di priorita' da vincere: le sorgenti restano
-        # accese e continuano a lavorare, semplicemente non vanno a schermo.
-        # Nemmeno ZeDMD: sospendere tutto tranne uno vuol dire che con una
-        # partita aperta le anteprime non si vedrebbero mai.
-        if self.manager():
-            return self.sources.get("preview")
+        # Chi ha preso il pannello lo tiene, e non c'e' nessuna gara di
+        # priorita' da vincere: le sorgenti restano accese e continuano a
+        # lavorare, semplicemente non vanno a schermo. Nemmeno ZeDMD —
+        # sospendere tutto tranne uno vuol dire che con una partita aperta le
+        # anteprime non si vedrebbero mai, e che una sessione di Doom
+        # sparirebbe appena Batocera manda un fotogramma.
+        if self.holding():
+            preso = self.sources.get(self.hold_name)
+            if preso is not None:
+                return preso
+            # La sorgente non c'e' piu': meglio lasciar perdere la presa che
+            # tenere il pannello nero in attesa di nessuno.
+            self.hold_off()
 
         forced = self.cfg["arbiter"]["force_source"]
         if forced != "auto":
@@ -157,6 +202,11 @@ class Runtime:
         self.preview = PreviewSource(self.cfg, self.display.width,
                                      self.display.height, self.media)
         self.radar = AirRadarSource(self.cfg, self.display.width, self.display.height)
+        # Doom deve poter prendere e restituire il pannello da solo, quindi
+        # conosce l'arbitro: e' l'unica sorgente che lo fa, e la ragione e'
+        # che la sessione comincia da un tasto premuto, non da una pagina.
+        self.doom = DoomSource(self.cfg, self.display.width,
+                               self.display.height, self.arbiter)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
         # Il brano corrente e chi lo disegna sono due cose distinte: lo stato
@@ -170,7 +220,8 @@ class Runtime:
         self.hass = hass.HassBridge(self.cfg, self.mqtt, self)
 
         for source in (self.zedmd, self.preview, self.radar, self.player,
-                       self.birthdays, self.banner, self.media, self.clock):
+                       self.birthdays, self.banner, self.media, self.doom,
+                       self.clock):
             self.arbiter.register(source)
         self.arbiter.apply_services()
 
@@ -291,6 +342,16 @@ class Runtime:
                 "showing": self.preview.current,
                 "status": self.preview.status()}
 
+    # -------------------------------------------------------------------- doom
+
+    def doom_state(self):
+        return {"enabled": bool(self.cfg["services"].get("doom")),
+                "running": self.doom.active(),
+                "session": self.doom.in_sessione(),
+                "idle": int(self.doom.inattivita()),
+                "keys": self.doom.premuti(),
+                "status": self.doom.status()}
+
     # ------------------------------------------------------------------ aggiornamenti
 
     def check_library(self):
@@ -357,9 +418,10 @@ class Runtime:
             if self.zedmd.enabled and self.zedmd.active():
                 sleeping = False
 
-        # Chi ha appena aperto la gestione media sta guardando il pannello: se
-        # capita nella fascia notturna, spegnerglielo in faccia non aiuta.
-        if self.arbiter.manager():
+        # Chi ha preso il pannello lo sta guardando adesso — sta scegliendo un
+        # file o sta giocando: se capita nella fascia notturna, spegnerglielo
+        # in faccia non aiuta.
+        if self.arbiter.holding():
             sleeping = False
 
         night = display["night_enabled"] and in_window(
@@ -387,6 +449,13 @@ class Runtime:
 
             if started - last_mode_check >= 1.0:
                 self._update_modes()
+                # Una sessione di Doom lasciata a meta' non deve tenersi il
+                # pannello per sempre: il controllo e' un confronto fra due
+                # numeri, e non merita un thread suo.
+                try:
+                    self.doom.controlla_inattivita()
+                except Exception:
+                    pass
                 last_mode_check = started
 
             if self.sleeping:

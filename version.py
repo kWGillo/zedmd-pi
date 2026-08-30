@@ -247,6 +247,33 @@ Storico:
         bloccava. L'anteprima riusava il ciclo video del Media Player
         dirottandogli il buffer di uscita, e quel ciclo non si puo' fermare da
         fuori; ora ne ha uno suo, interrompibile a ogni fotogramma.
+  3.0  Doom sul pannello. Gira come programma a se' — doomgeneric con l'uscita
+       ritagliata a 256x64 — e parla con il servizio da una pipe: fotogrammi
+       da una parte, tasti dall'altra. Due processi e non una libreria perche'
+       i sorgenti di Doom sono GPL2 e questo progetto e' GPLv3, e perche' se
+       cade cade lui.
+       Il problema non era la potenza di calcolo — e' software del 1993 — ma
+       la forma dello schermo: Doom disegna 1,6:1 e il pannello e' 4:1, quindi
+       si ritaglia una fascia attorno all'orizzonte, dove stanno i nemici, e
+       si buttano via pavimento e soffitto.
+       Quando nessuno tocca niente Doom gioca da solo, con i demo che ha
+       sempre avuto dentro, e cede il pannello a chiunque abbia qualcosa da
+       dire. Al primo comando comincia una partita e il pannello e' suo,
+       Batocera compreso, finche' non si esce o non lo si lascia fermo. La
+       presa del pannello e' quella della gestione media, generalizzata: sono
+       la stessa cosa.
+       Si comanda dalla tastiera collegata al Raspberry, letta da /dev/input
+       senza librerie in piu', e dalla pagina web — pulsanti e tastiera del
+       browser, stessa coda di tasti. Niente GPIO: sui pannelli nuovi D ed E
+       sono collegati e i pin liberi non ci sono piu'.
+  3.0.1 Doom si prepara dalla pagina web invece che da SSH: un pulsante lancia
+        la compilazione in sottofondo e ne mostra il log. Serviva sia
+        all'installazione pulita sia dopo un aggiornamento via rete, dove non
+        c'e' nessuna cartella scompattata da cui lanciare lo script. I WAD si
+        controllano davvero: i primi quattro byte dicono se e' un gioco
+        completo, un'estensione o un file scaricato a meta', e la pagina
+        elenca quelli trovati. Un WAD proprio, se c'e', viene prima di
+        Freedoom, e la preparazione non lo scarica per niente.
 """
 
-__version__ = "2.0.3"
+__version__ = "3.0.1"

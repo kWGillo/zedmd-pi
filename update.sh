@@ -24,6 +24,15 @@ mkdir -p /opt/dmd
 cp -r "$SRC_DIR"/*.py "$SRC_DIR"/*.csv "$SRC_DIR"/templates \
       "$SRC_DIR"/static /opt/dmd/
 cp -r "$SRC_DIR"/sources /opt/dmd/
+# 3.0: sorgenti e script di Doom. Il binario compilato non si tocca — sta
+# nella stessa cartella ma non e' nostro, e ricompilarlo a ogni aggiornamento
+# vorrebbe dire due minuti di attesa per niente.
+if [ -d "$SRC_DIR/doom" ]; then
+    mkdir -p /opt/dmd/doom
+    cp "$SRC_DIR"/doom/doomgeneric_dmd.c "$SRC_DIR"/doom/Makefile \
+       "$SRC_DIR"/doom/setup_doom.sh /opt/dmd/doom/
+    chmod +x /opt/dmd/doom/setup_doom.sh
+fi
 mkdir -p /var/lib/dmd
 
 echo "==> Adeguamento della configurazione"
@@ -109,6 +118,21 @@ radar = cfg.setdefault("air_radar", {})
 radar.setdefault("unit_altitude", "ft")
 radar.setdefault("unit_speed", "kt")
 radar.setdefault("unit_distance", "km")
+
+# 3.0: Doom. Il servizio nasce spento: prima va compilato, e finche' non c'e'
+# il binario accenderlo non servirebbe a niente.
+if "doom" not in services:
+    services["doom"] = False
+    print("    servizi: aggiunto Doom")
+doom = cfg.setdefault("doom", {})
+for chiave, valore in (("binary", "/var/lib/dmd/doom/doom-dmd"),
+                       ("wad", "/var/lib/dmd/doom/freedoom1.wad"),
+                       ("work_dir", "/var/lib/dmd/doom/stato"),
+                       ("band_top", 36), ("band_height", 96),
+                       ("gamma", 0.70), ("keyboard", True),
+                       ("keyboard_device", ""), ("session_timeout", 180),
+                       ("skill", 3), ("start_map", "1 1")):
+    doom.setdefault(chiave, valore)
 
 with open(path, "w") as handle:
     json.dump(cfg, handle, indent=2)

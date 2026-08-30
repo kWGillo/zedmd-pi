@@ -2,6 +2,77 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [3.0.1]
+
+### Aggiunto
+- **«Prepara Doom» dalla pagina web.** Nella 3.0 la compilazione andava
+  lanciata a mano da SSH, sempre, anche partendo da un'installazione pulita —
+  e dopo un aggiornamento via rete non c'è nemmeno una cartella scompattata da
+  cui lanciare lo script. Ora un pulsante fa partire la stessa preparazione in
+  sottofondo e la pagina ne mostra il log mentre va, come già fa
+  l'aggiornamento OTA; quando finisce si aggiorna da sola. Lo script a riga di
+  comando resta, per chi lo preferisce.
+- **Controllo vero dei WAD.** Che il file esista non basta: i primi quattro
+  byte dicono se è un gioco completo (`IWAD`), un'estensione che da sola non
+  parte (`PWAD`) o tutt'altro, e la dimensione dice se è stato scaricato a
+  metà. Prima un file rinominato per sbaglio faceva fermare Doom con un
+  messaggio che non aiutava nessuno. Il controllo c'è in tre posti: nello
+  script, nella pagina e nella sorgente prima di avviare il processo.
+- **La pagina elenca i WAD trovati** nella cartella, con nome, dimensione e
+  motivo per cui uno non va bene, e permette di sceglierlo. Il WAD si sceglie
+  fra quelli trovati, non scrivendo un percorso a mano.
+- **Un WAD tuo viene prima di Freedoom.** Chi ha comprato Doom copia il suo
+  (`doom.wad`, `doom1.wad`, `doom2.wad`, `plutonia.wad`, `tnt.wad`) nella
+  cartella: la preparazione lo riconosce, non scarica Freedoom per niente, e
+  la pagina lo propone come predefinito.
+- La pagina avvisa se il programma è stato compilato **prima** dell'ultimo
+  aggiornamento del sorgente C: funziona, ma non è quello che dice il sorgente
+  installato, e cercare una modifica che non si vede fa perdere un pomeriggio.
+
+## [3.0]
+
+### Aggiunto
+- **Doom sul pannello.** Gira come programma a sé — doomgeneric con l'uscita
+  ritagliata a 256×64 — e parla con il servizio da una pipe: fotogrammi da una
+  parte, tasti dall'altra. Due processi e non una libreria per tre ragioni, in
+  ordine: i sorgenti di Doom sono GPL2 e questo progetto è GPLv3, e due
+  programmi che si parlano da una pipe non si collegano; se cade, cade lui e
+  il pannello torna all'orologio; e non serve nessun binding.
+- Il problema non era la potenza di calcolo — è software del 1993 — ma **la
+  forma dello schermo**: Doom disegna 320×200, cioè 1,6:1, e il pannello è
+  256×64, cioè 4:1. Schiacciando tutto un nemico sarebbe alto otto pixel. Si
+  ritaglia invece una **fascia attorno all'orizzonte**, che è dove stanno i
+  nemici, e si buttano via pavimento e soffitto, che è dove non succede
+  niente. Fascia e gamma si tarano dalla pagina Doom guardando il pannello.
+- **Attract mode gratis.** Quando nessuno tocca niente Doom gioca da solo, con
+  i demo che ha sempre avuto dentro. Lì è una sorgente come le altre, con
+  priorità bassa: cede a un aereo, a un compleanno e soprattutto a Batocera.
+- **Partita.** Al primo comando il pannello diventa suo — Batocera compreso —
+  finché non si esce o non lo si lascia fermo abbastanza a lungo. La partita
+  comincia facendo ripartire Doom dentro il livello invece di navigare il menu
+  a colpi di frecce su un pannello alto sessantaquattro pixel.
+- **Due modi di comandarlo, una sola coda di tasti.** La tastiera collegata al
+  Raspberry, letta direttamente da `/dev/input` senza librerie in più — è la
+  via più diretta, non passa dalla rete — e la pagina web, con i pulsanti e
+  con la tastiera del browser. Niente GPIO: sui pannelli SM16380SC D ed E sono
+  collegati e i pin che si sarebbero usati non ci sono più.
+- `doom/setup_doom.sh` prepara tutto una volta sola: scarica doomgeneric, lo
+  compila e prende Freedoom, che è libero. I WAD commerciali non si
+  ridistribuiscono: chi ne ha uno suo cambia il percorso nella pagina.
+
+### Modificato
+- **La presa del pannello è ora un meccanismo generale.** Era nata nella 2.0.3
+  per la gestione media; una sessione di Doom è la stessa cosa — «questo qui
+  tiene il pannello finché non ha finito» — quindi invece di scriverla due
+  volte se ne è fatta una sola, con due sapori: *a scadenza* per la libreria,
+  dove il battito del browser la tiene viva e una scheda chiusa la lascia
+  cadere, e *senza scadenza* per il gioco, dove chi gioca può fermarsi a
+  guardare una porta senza che il pannello torni all'orologio. Una pagina non
+  può chiudere la presa di un'altra.
+- Il binario compilato di Doom sta in `/var/lib/dmd/doom`, non in `/opt/dmd`:
+  l'aggiornamento OTA cancella e ricopia le sottocartelle del programma, e un
+  binario lì dentro sparirebbe a ogni aggiornamento.
+
 ## [2.0.3]
 
 ### Aggiunto

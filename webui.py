@@ -18,15 +18,17 @@ import dmdconf
 import i18n
 import libcheck
 import compleanni
+import doomsetup
 import lookup
 import nowplaying
 import presets
 import ota
 import spotifyapi
-from sources import (FIELD_LIST, HOLD_SECONDS, LANGUAGES, OVERFLOW_MODES,
+from sources import (DOOM_PULSANTI, DOOM_TASTI, FIELD_LIST, HOLD_SECONDS,
+                     LANGUAGES, OVERFLOW_MODES,
                      PROVIDER_LIST, SIZE_KEYS, SLOTS, UNIT_KEYS,
                      invalidate_scan, is_supported, normalize_list, scan_media,
-                     have_ffmpeg, usable)
+                     have_ffmpeg, tastiere, usable)
 from version import __version__
 
 # Ogni quanto la pagina della gestione media dice che c'e' ancora qualcuno.
@@ -357,6 +359,114 @@ def create_app(runtime):
             battito=MANAGER_BEAT, stato=runtime.manager_state(),
             page="manager", **elenco)
 
+    # ------------------------------------------------------------------ doom
+
+    @app.route("/doom")
+    def page_doom():
+        return render_template(
+            "doom.html", cfg=cfg, doom=cfg["doom"],
+            stato=runtime.doom_state(), pulsanti=DOOM_PULSANTI,
+            tastiere=tastiere(), prep=doomsetup.stato(cfg),
+            page="doom")
+
+    @app.route("/api/doom/setup", methods=["POST"])
+    def api_doom_setup():
+        """Compila Doom e prende i WAD, in sottofondo.
+
+        Senza questo pulsante, per accendere una funzione bisognava aprire una
+        sessione SSH — e dopo un aggiornamento via rete non c'e' nemmeno una
+        cartella scompattata da cui lanciare lo script.
+        """
+        errore = doomsetup.avvia(cfg)
+        return redirect(url_for("page_doom", prep="errore" if errore else "avviata"))
+
+    @app.route("/api/doom/setup/state")
+    def api_doom_setup_state():
+        return jsonify(doomsetup.stato(cfg))
+
+    @app.route("/api/doom/wad", methods=["POST"])
+    def api_doom_wad():
+        """Sceglie quale WAD usare fra quelli trovati."""
+        scelto = request.form.get("wad", "").strip()
+        disponibili = {w["path"] for w in doomsetup.wad_disponibili(cfg)}
+        # Solo fra quelli trovati nella cartella: un percorso arbitrario da un
+        # form e' un percorso che qualcuno puo' scrivere a mano.
+        if scelto and scelto in disponibili:
+            cfg["doom"]["wad"] = scelto
+            dmdconf.save()
+            if runtime.doom.active() or runtime.doom.in_sessione():
+                runtime.doom.chiudi_sessione(riavvia=False)
+                runtime.doom.riavvia()
+        return redirect(url_for("page_doom"))
+
+    @app.route("/api/doom/key", methods=["POST"])
+    def api_doom_key():
+        """Un tasto verso Doom, dalla tastiera del browser o da un pulsante.
+
+        `stato` vale `down`, `up` oppure `tap`. Il terzo esiste per i
+        pulsanti sul telefono: un dito che scivola fuori dal pulsante non
+        genera nessun rilascio, e un tasto rimasto premuto in Doom vuol dire
+        camminare dentro un muro per sempre.
+        """
+        azione = request.form.get("azione", "")
+        stato = request.form.get("stato", "tap")
+        if azione not in DOOM_TASTI:
+            return jsonify(ok=False, error="tasto sconosciuto"), 400
+        if stato == "tap":
+            ok = runtime.doom.tocca(azione)
+        else:
+            ok = runtime.doom.premi(azione, stato == "down")
+        return jsonify(ok=bool(ok), **runtime.doom_state())
+
+    @app.route("/api/doom/state")
+    def api_doom_state():
+        return jsonify(runtime.doom_state())
+
+    @app.route("/api/doom/play", methods=["POST"])
+    def api_doom_play():
+        runtime.doom.apri_sessione()
+        if request.form.get("ajax"):
+            return jsonify(runtime.doom_state())
+        return redirect(url_for("page_doom"))
+
+    @app.route("/api/doom/stop", methods=["POST"])
+    def api_doom_stop():
+        runtime.doom.chiudi_sessione()
+        if request.form.get("ajax"):
+            return jsonify(runtime.doom_state())
+        return redirect(url_for("page_doom"))
+
+    @app.route("/api/doom", methods=["POST"])
+    def api_doom():
+        conf = cfg["doom"]
+        for chiave in ("binary", "wad", "work_dir", "keyboard_device",
+                       "start_map"):
+            if chiave in request.form:
+                conf[chiave] = request.form.get(chiave, "").strip()
+        for chiave, basso, alto, default in (("band_top", 0, 190, 36),
+                                             ("band_height", 8, 200, 96),
+                                             ("skill", 1, 5, 3),
+                                             ("session_timeout", 0, 3600, 180)):
+            try:
+                conf[chiave] = max(basso, min(alto, int(request.form.get(chiave, default))))
+            except ValueError:
+                conf[chiave] = default
+        try:
+            conf["gamma"] = max(0.2, min(2.0, float(request.form.get("gamma", 0.7))))
+        except ValueError:
+            conf["gamma"] = 0.7
+        # La fascia non puo' sporgere dai 200 righe di Doom.
+        if conf["band_top"] + conf["band_height"] > 200:
+            conf["band_height"] = 200 - conf["band_top"]
+        conf["keyboard"] = request.form.get("keyboard") == "on"
+        dmdconf.save()
+        # La fascia e la gamma stanno nella riga di comando del processo:
+        # cambiarle in configurazione non basta, va fatto ripartire.
+        if runtime.doom.active() or runtime.doom.in_sessione():
+            runtime.doom.chiudi_sessione(riavvia=False)
+            runtime.doom.riavvia()
+        return redirect(url_for("page_doom"))
+
     @app.route("/api/manager/beat", methods=["POST"])
     def api_manager_beat():
         """Battito della pagina: rinnova la gestione e riferisce lo stato.
@@ -499,6 +609,8 @@ def create_app(runtime):
              "status": ""},
             {"key": "air_radar", "label": "Air Radar", "ready": True,
              "status": stato("radar")},
+            {"key": "doom", "label": "Doom", "ready": True,
+             "status": stato("doom")},
         ]
         current = runtime.arbiter.current
         return render_template(
@@ -1105,6 +1217,8 @@ def create_app(runtime):
             radar=runtime.radar.status(lang),
             nowplaying=runtime.nowplaying.snapshot(),
             manager=stato_gestione() if stato_gestione else {"on": False},
+            doom=(runtime.doom_state()
+                  if getattr(runtime, "doom_state", None) else {"enabled": False}),
             mqtt=runtime.mqtt.status(),
             time=time.strftime("%H:%M:%S"),
             update=runtime.update_info,
