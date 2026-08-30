@@ -367,6 +367,16 @@ Storico:
        righe.
        La voce "Gestione media" esce dal menu in alto: era un doppione del
        link che sta gia' nella pagina Media, ora un pulsante.
+  3.4.1 La pagina Rifiuti rispondeva Internal Server Error. Dentro il ciclo dei
+        sette giorni della settimana, "loop" e' quello interno, e in Jinja non
+        esiste nessun modo di risalire a quello esterno: la casella non sapeva
+        a quale voce apparteneva e la pagina cadeva prima di disegnarsi.
+        L'indice della voce ora si lega una volta sola, all'inizio del blocco.
+        Il difetto e' arrivato al browser perche' il giro di prova delle pagine
+        web era rimasto fermo a otto indirizzi e non comprendeva ne' Rifiuti
+        ne' Doom: ora le pagine provate sono dodici, e non basta piu' che
+        rispondano — si controlla che i campi ci siano davvero, con i nomi che
+        l'API rilegge, e che quello che si salva torni indietro intero.
 """
 
-__version__ = "3.4"
+__version__ = "3.4.1"

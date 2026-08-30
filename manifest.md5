@@ -45,12 +45,12 @@ c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
 b5d92364a84e9d55445e9661ebec7d0b  templates/media.html
 3a7dc0f319c053a6f1f6bbd9c1416bb5  templates/nowplaying.html
 b07c92e34dc3053d7fbd3a2499c746f8  templates/radar.html
-326d28eb8fadf659f3c7a7748a7e08ea  templates/rifiuti.html
+f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 fc820c3435f5edea162ed83ce33fb964  templates/services.html
 e26f8c8216ec08b2d827eeee0c87407b  templates/settings.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 28a4efdea0a0d0279dab9985edb2ac1a  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-cebbcdc8489f4bd0be49248c0a534283  version.py
+c94c457771b9c5b7c7f62d6552b7c81e  version.py
 ebe61e0f99547dc79e99a0ed410fac19  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

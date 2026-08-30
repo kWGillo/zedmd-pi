@@ -2,6 +2,23 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [3.4.1]
+
+### Corretto
+- **La pagina Rifiuti rispondeva Internal Server Error.** Dentro il ciclo dei
+  sette giorni della settimana `loop` è quello **interno**, e in Jinja non
+  esiste nessun modo di risalire a quello esterno: la casella del giorno non
+  sapeva a quale voce apparteneva, e la pagina cadeva prima ancora di
+  disegnarsi. L'indice della voce ora si lega una volta sola, all'inizio del
+  blocco, e vale in tutto il blocco — annidato o no.
+- **Il giro di prova delle pagine web era rimasto fermo a otto indirizzi** e
+  non comprendeva né Rifiuti né Doom: è per questo che un errore di template è
+  arrivato fino al browser invece di fermarsi qui. Ora le pagine provate sono
+  dodici, e non basta più che rispondano: si controlla che i campi ci siano
+  davvero — 6 voci per 7 giorni, con gli indici giusti — che i loro nomi siano
+  quelli che l'API rilegge, e che giorni, cadenza, data di riferimento e fascia
+  oraria tornino indietro interi dopo un salvataggio.
+
 ## [3.4]
 
 ### Aggiunto

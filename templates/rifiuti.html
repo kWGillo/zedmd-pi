@@ -20,17 +20,20 @@
   <p class="hint">{{ t('rifiuti.voci.hint') }}</p>
   <form method="post" action="{{ url_for('api_rifiuti') }}">
 
-    {% for v in voci %}
+    {# L'indice della voce si lega qui: dentro il ciclo dei giorni "loop" e'
+       quello interno, e in Jinja non esiste nessun modo di risalire a quello
+       esterno. Legandolo una volta vale in tutto il blocco, annidato o no. #}
+    {% for v in voci %}{% set i = loop.index0 %}
     <div class="voce">
       <div class="row3">
-        <div><label for="nome{{ loop.index0 }}">{{ t('rifiuti.nome') }}</label>
-          <input type="text" id="nome{{ loop.index0 }}" name="nome{{ loop.index0 }}"
+        <div><label for="nome{{ i }}">{{ t('rifiuti.nome') }}</label>
+          <input type="text" id="nome{{ i }}" name="nome{{ i }}"
                  value="{{ v.nome }}"></div>
-        <div><label for="colore{{ loop.index0 }}">{{ t('rifiuti.colore') }}</label>
-          <input type="color" id="colore{{ loop.index0 }}" name="colore{{ loop.index0 }}"
+        <div><label for="colore{{ i }}">{{ t('rifiuti.colore') }}</label>
+          <input type="color" id="colore{{ i }}" name="colore{{ i }}"
                  value="{{ v.colore }}"></div>
-        <div><label for="tipo{{ loop.index0 }}">{{ t('rifiuti.tipo') }}</label>
-          <select id="tipo{{ loop.index0 }}" name="tipo{{ loop.index0 }}">
+        <div><label for="tipo{{ i }}">{{ t('rifiuti.tipo') }}</label>
+          <select id="tipo{{ i }}" name="tipo{{ i }}">
             <option value="rifiuto" {{ 'selected' if v.tipo == 'rifiuto' }}>{{ t('rifiuti.tipo.rifiuto') }}</option>
             <option value="attivita" {{ 'selected' if v.tipo == 'attivita' }}>{{ t('rifiuti.tipo.attivita') }}</option>
           </select></div>
@@ -39,7 +42,7 @@
       <div class="giorni">
         {% for g in giorni %}
         <label class="giorno">
-          <input type="checkbox" name="g{{ loop.parent.loop.index0 }}_{{ loop.index0 }}"
+          <input type="checkbox" name="g{{ i }}_{{ loop.index0 }}"
                  {{ 'checked' if loop.index0 in v.giorni }}>
           <span>{{ g }}</span>
         </label>
@@ -47,27 +50,27 @@
       </div>
 
       <div class="row3">
-        <div><label for="cadenza{{ loop.index0 }}">{{ t('rifiuti.cadenza') }}</label>
-          <select id="cadenza{{ loop.index0 }}" name="cadenza{{ loop.index0 }}">
+        <div><label for="cadenza{{ i }}">{{ t('rifiuti.cadenza') }}</label>
+          <select id="cadenza{{ i }}" name="cadenza{{ i }}">
             {% for c in cadenze %}
             <option value="{{ c }}" {{ 'selected' if v.cadenza == c }}>{{ t('rifiuti.cadenza.' + c) }}</option>
             {% endfor %}
           </select></div>
-        <div><label for="riferimento{{ loop.index0 }}">{{ t('rifiuti.riferimento') }}</label>
-          <input type="text" id="riferimento{{ loop.index0 }}" name="riferimento{{ loop.index0 }}"
+        <div><label for="riferimento{{ i }}">{{ t('rifiuti.riferimento') }}</label>
+          <input type="text" id="riferimento{{ i }}" name="riferimento{{ i }}"
                  value="{{ v.riferimento.strftime('%d/%m/%Y') if v.riferimento else '' }}"
                  placeholder="gg/mm/aaaa"></div>
         <div><label class="check" style="margin-top:22px">
-            <input type="checkbox" name="attiva{{ loop.index0 }}" {{ 'checked' if v.attiva }}>
+            <input type="checkbox" name="attiva{{ i }}" {{ 'checked' if v.attiva }}>
             {{ t('rifiuti.attiva') }}</label></div>
       </div>
 
       <div class="row2 fascia" {{ 'hidden' if v.tipo != 'attivita' }}>
-        <div><label for="oi{{ loop.index0 }}">{{ t('rifiuti.ora_inizio') }}</label>
-          <input type="number" id="oi{{ loop.index0 }}" name="oi{{ loop.index0 }}"
+        <div><label for="oi{{ i }}">{{ t('rifiuti.ora_inizio') }}</label>
+          <input type="number" id="oi{{ i }}" name="oi{{ i }}"
                  min="0" max="23" value="{{ v.ora_inizio }}"></div>
-        <div><label for="of{{ loop.index0 }}">{{ t('rifiuti.ora_fine_divieto') }}</label>
-          <input type="number" id="of{{ loop.index0 }}" name="of{{ loop.index0 }}"
+        <div><label for="of{{ i }}">{{ t('rifiuti.ora_fine_divieto') }}</label>
+          <input type="number" id="of{{ i }}" name="of{{ i }}"
                  min="0" max="23" value="{{ v.ora_fine }}"></div>
       </div>
       <p class="hint prossima">
