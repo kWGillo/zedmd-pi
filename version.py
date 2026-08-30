@@ -290,6 +290,25 @@ Storico:
        SSH per copiare un file non e' un modo di lavorare. Chi arriva dalla
        3.0.1 se li ritrova spostati li' dalla preparazione, e la
        configurazione si riallinea da sola.
+  3.1.1 Tre difetti che insieme facevano sembrare Doom rotto.
+        **Le migrazioni della configurazione non venivano eseguite.** Stavano
+        in update.sh, e l'aggiornamento via rete non lo esegue: copia i file e
+        riavvia. Le chiavi nuove sopravvivevano lo stesso, perche' i default
+        si fondono a ogni caricamento, ma una *trasformazione di valore* no —
+        e il percorso del WAD restava quello vecchio mentre la ricompilazione
+        spostava i file. Doom si rifiutava di partire. Le trasformazioni ora
+        stanno in dmdconf, l'unico punto attraversato da qualunque strada di
+        aggiornamento.
+        **Scegliere il WAD non faceva ripartire niente** se il processo era
+        gia' morto — cioe' proprio nel caso in cui quel pulsante serve.
+        **Una sorgente che non riesce ad avviarsi non ci riprovava mai**:
+        `start()` si considerava gia' avviata. Ora il ciclo ritenta ogni 30 s,
+        cosi' correggere un percorso sbagliato basta a rimettere in moto.
+        Vietati sulle condivisioni SMB i file di servizio di macOS (`._*`,
+        `.DS_Store`): il Finder non li crea piu', quelli gia' copiati vengono
+        tolti, e non compaiono piu' fra i WAD. setup_share.sh ora viene
+        installato in /opt/dmd, altrimenti setup_doom.sh non lo trovava e la
+        condivisione dei WAD non nasceva.
 """
 
-__version__ = "3.1"
+__version__ = "3.1.1"

@@ -299,6 +299,24 @@ def _migrate(raw):
     # configurazione salvata prima che esistesse, altrimenti la pagina Servizi
     # non lo mostra e non lo si puo' accendere.
     services.setdefault("nowplaying", False)
+
+    # 3.1: i WAD sono passati a una cartella condivisa in rete, e il percorso
+    # salvato punta ancora alla vecchia posizione.
+    #
+    # Questa migrazione stava in update.sh, ed e' stato un errore: **l'OTA non
+    # esegue update.sh**. Copia i file e riavvia il servizio, e basta. Le
+    # aggiunte di chiavi nuove sopravvivono lo stesso, perche' `_merge` fonde
+    # i default a ogni caricamento — ma una *trasformazione di valore* come
+    # questa no, e chi aggiorna via rete, cioe' tutti, restava con un WAD che
+    # puntava a un file spostato. Doom si rifiutava di partire e sembrava
+    # rotto. Le trasformazioni vanno qui, che e' l'unico punto attraversato da
+    # qualunque strada di aggiornamento.
+    doom = raw.setdefault("doom", {})
+    wad = doom.get("wad") or ""
+    if wad and not os.path.exists(wad):
+        candidato = os.path.join("/srv/dmd/doom", os.path.basename(wad))
+        if os.path.exists(candidato):
+            doom["wad"] = candidato
     return raw
 
 

@@ -191,6 +191,7 @@ class DoomSource(Source):
         self._sessione = False
         self._ultimo_tasto = 0.0
         self._premuti = set()
+        self._ultimo_tentativo = 0.0
 
     # ------------------------------------------------------------ ciclo di vita
 
@@ -200,6 +201,7 @@ class DoomSource(Source):
         self._stop.clear()
         self._running = True
         self._errore = ""
+        self._ultimo_tentativo = time.time()
         self._avvia_processo()
         if self.cfg["doom"].get("keyboard", True):
             self._tastiera_thread = threading.Thread(
@@ -430,6 +432,30 @@ class DoomSource(Source):
             # che mostra una schermata di pausa per ore non e' un attract.
             self.riavvia()
         return True
+
+    # Ogni quanto si riprova ad avviare Doom quando l'avvio e' fallito. Non
+    # troppo spesso: se manca il binario, riprovare dieci volte al secondo
+    # riempie il log e non risolve niente.
+    RIPROVA_OGNI = 30
+
+    def mantieni(self):
+        """Riavvia Doom se doveva girare e non gira. La chiama il ciclo.
+
+        Senza, una sorgente che non riesce a partire non ci riprova **mai**:
+        `start()` esce subito perche' si considera gia' avviata, e l'unico
+        modo di rimetterla in moto era spegnere e riaccendere il servizio.
+        Correggendo un percorso sbagliato dalla pagina non succedeva niente, e
+        sembrava che la pagina non funzionasse.
+        """
+        if not self._running or self._sessione:
+            return False
+        if self._proc is not None and self._proc.poll() is None:
+            return False
+        adesso = time.time()
+        if adesso - self._ultimo_tentativo < self.RIPROVA_OGNI:
+            return False
+        self._ultimo_tentativo = adesso
+        return self._avvia_processo()
 
     def controlla_inattivita(self):
         """Chiude la sessione se non tocca nessuno da abbastanza tempo.

@@ -394,9 +394,13 @@ def create_app(runtime):
         if scelto and scelto in disponibili:
             cfg["doom"]["wad"] = scelto
             dmdconf.save()
-            if runtime.doom.active() or runtime.doom.in_sessione():
-                runtime.doom.chiudi_sessione(riavvia=False)
-                runtime.doom.riavvia()
+            # Si riavvia **sempre**, non solo se stava girando. Prima si
+            # riavviava a condizione che il processo fosse vivo, e quella
+            # condizione era falsa proprio nel caso in cui questo pulsante
+            # serve: il WAD sbagliato aveva impedito l'avvio, si sceglieva
+            # quello giusto e non succedeva niente.
+            runtime.doom.chiudi_sessione(riavvia=False)
+            runtime.doom.riavvia()
         return redirect(url_for("page_doom"))
 
     @app.route("/api/doom/key", methods=["POST"])
@@ -469,10 +473,11 @@ def create_app(runtime):
             cfg["zedmd"]["idle_seconds"] = 60
         dmdconf.save()
         # La fascia e la gamma stanno nella riga di comando del processo:
-        # cambiarle in configurazione non basta, va fatto ripartire.
-        if runtime.doom.active() or runtime.doom.in_sessione():
-            runtime.doom.chiudi_sessione(riavvia=False)
-            runtime.doom.riavvia()
+        # cambiarle in configurazione non basta, va fatto ripartire. E si
+        # riparte anche da fermo: se il processo era morto per un percorso
+        # sbagliato, correggerlo qui deve bastare a rimetterlo in moto.
+        runtime.doom.chiudi_sessione(riavvia=False)
+        runtime.doom.riavvia()
         return redirect(url_for("page_doom"))
 
     @app.route("/api/manager/beat", methods=["POST"])

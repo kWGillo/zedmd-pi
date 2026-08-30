@@ -149,6 +149,13 @@ def wad_disponibili(cfg):
             continue
         for nome in nomi:
             percorso = os.path.join(cartella, nome)
+            # I file che cominciano per punto non sono roba dell'utente: sono
+            # gli scarti che macOS semina copiando su una condivisione di rete
+            # (`._nome.wad`, `.DS_Store`). Elencarli come "non e' un WAD" vuol
+            # dire riempire la pagina di righe rosse che non si possono
+            # correggere. Il Media Player li ignora dalla 1.6, qui no.
+            if nome.startswith("."):
+                continue
             if not nome.lower().endswith(".wad") or percorso in visti:
                 continue
             trovati.append(descrivi_wad(percorso))

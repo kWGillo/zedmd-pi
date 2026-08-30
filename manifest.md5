@@ -5,12 +5,12 @@ d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 112957993893543e06c2302cfb040d28  config.json
 f9a19df7caa1b28f9cdebade3fd62905  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
-af71e911209148507f21cbdf9a34f201  dmdconf.py
-72ccd382dc6e5372ccc6b667c231e266  dmdd.py
+478cd2eb81046eed6ef9e95f7fbd7751  dmdconf.py
+423e3a55697393a076d6fd43012e0ccc  dmdd.py
 397862a19501abc030946d1b6c39463c  doom/Makefile
 abc2726b169ef45c06a4987bbfa66018  doom/doomgeneric_dmd.c
 b400dff8b86e25ebd1057e666e53f9e5  doom/setup_doom.sh
-1e54187615d2f794a92cba4fd1a8b034  doomsetup.py
+2b22f30cde5ff93be13a04007867dad4  doomsetup.py
 9d8cef2bd5785ef5efe210a59b872ed6  hass.py
 8f441029369c16f0fb73eb42ea0d6b6b  i18n.py
 ff5eec4acd57660cfe5961046a038b7d  install.sh
@@ -21,7 +21,7 @@ ff5eec4acd57660cfe5961046a038b7d  install.sh
 13a2c974c1a6079f37d5ad43a74c36a2  ota.py
 0afcfe34999b47b873e469ff71d85991  presets.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
-9cd071247fd041455c2996d327ea052a  setup_share.sh
+7ee163e5c89f7ac983b26ae09a1a4b92  setup_share.sh
 681aab501efdef131f73970236e13795  sources/__init__.py
 a9cc678c5e2734cb68e9729a60b2b1b7  sources/airradar.py
 4839d9f4d5cbf59bfe83a946f7c272ee  sources/anteprima.py
@@ -29,7 +29,7 @@ a9cc678c5e2734cb68e9729a60b2b1b7  sources/airradar.py
 7f474f26fd6a20561de4af4a9018bd72  sources/base.py
 3b39b30dc72152ecb2bd37b0704fefcb  sources/clock.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
-4aacad9b6e76df5607c86b093bba4aa7  sources/doom.py
+4f71fee3eef14573bb623b740fae15ed  sources/doom.py
 2230f5ed387f0eacb47aca431b3b7569  sources/media.py
 4939bc6965d8132298fdbe783bc0b04f  sources/nowplaying.py
 00bbe1ad65b37771dab891eb85d23a22  sources/zedmd.py
@@ -49,6 +49,6 @@ e26f8c8216ec08b2d827eeee0c87407b  templates/settings.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 78240211c7fbd3571ad3af14c649c4cf  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-683b7a3d34cbeec843edca99e005fbaf  version.py
-abe833ff59d066efad247d857542bae3  webui.py
+5adb9b65599ff14bc09bc341302fad8c  version.py
+cb93e9386ed7718e59d200fa0ad5530f  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

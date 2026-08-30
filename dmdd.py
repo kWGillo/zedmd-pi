@@ -477,6 +477,9 @@ class Runtime:
                 # numeri, e non merita un thread suo.
                 try:
                     self.doom.controlla_inattivita()
+                    # E se doveva girare e non gira, ci si riprova: correggere
+                    # un percorso sbagliato dalla pagina deve bastare.
+                    self.doom.mantieni()
                 except Exception:
                     pass
                 last_mode_check = started
