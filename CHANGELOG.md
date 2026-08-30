@@ -2,6 +2,34 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [2.0.1]
+
+### Corretto
+- **Il servizio Compleanni non compariva nella pagina Servizi.** La sorgente
+  funzionava, ma l'elenco dei servizi è cablato nel codice e me n'ero
+  dimenticato: senza interruttore il servizio non partiva mai, e sul pannello
+  non si vedeva niente per quanto si abbassasse l'intervallo.
+
+### Aggiunto
+- **Tipo di ricorrenza: compleanno o anniversario.** Terza colonna facoltativa
+  del CSV e menu nella pagina; senza tipo vale compleanno, così gli elenchi
+  scritti prima continuano a funzionare. La frase cambia di conseguenza — di
+  un anniversario non si dice che *compie gli anni*.
+- **Pagina Aggiornamenti**, dopo Impostazioni: aggiornamento del programma e
+  controllo della libreria della matrice. Sono le uniche due cose che
+  cambiano il software installato invece di regolarlo, ed è la ragione per
+  cui non stanno più insieme ai colori e agli orari.
+- **Libreria media sfogliabile** a pagine da 200: prima si vedevano i primi
+  400 file e gli altri non si potevano nemmeno cancellare.
+- **Pulsante Vedi** accanto a Elimina: apre il PNG o la GIF in una scheda
+  nuova. Prima di cancellare qualcosa bisogna poter guardare che cos'è, e il
+  nome del file raramente basta.
+
+### Modificato
+- **Air Radar, fascia alta**: numero di volo tutto a sinistra e codici della
+  rotta a destra, centrati sull'asse del numero invece che appoggiati alla
+  sua base.
+
 ## [2.0]
 
 ### Aggiunto

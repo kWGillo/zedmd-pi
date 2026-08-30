@@ -737,42 +737,41 @@ class AirRadarSource(Source):
     def _base(self, layout):
         """Le due fasce che non cambiano mai: identificativo e rotta.
 
-        L'identificativo sta a **destra**, non al centro, e alla sua sinistra
-        trovano posto i codici della rotta in caratteri piccoli. Il numero di
-        volo ha lunghezza variabile: centrarlo lo faceva ballare da un aereo
-        all'altro, mentre allineato a destra resta fermo e lascia libera una
-        fascia di larghezza prevedibile per l'informazione che gli sta
-        accanto.
+        L'identificativo sta a **sinistra**, non al centro, e i codici della
+        rotta all'estremita' opposta, in caratteri piccoli e centrati
+        verticalmente rispetto a lui. Il numero di volo ha lunghezza
+        variabile: centrarlo lo faceva ballare da un aereo all'altro, mentre
+        ancorato al bordo resta fermo e lo sguardo lo trova sempre nello
+        stesso punto.
         """
         image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
         draw = ImageDraw.Draw(image)
 
-        def larghezza(text, font):
+        def misura(text, font):
             box = draw.textbbox((0, 0), text, font=font)
-            return box[2] - box[0], box[0]
+            return box[2] - box[0], box[3] - box[1], box[0], box[1]
 
         def centrato(text, font, y, color):
-            w, off = larghezza(text, font)
-            draw.text(((self.width - w) // 2 - off, y), text, font=font, fill=color)
+            w, _h, off_x, _off_y = misura(text, font)
+            draw.text(((self.width - w) // 2 - off_x, y), text, font=font, fill=color)
 
         titolo = layout["title"]
-        w_titolo, off_titolo = larghezza(titolo, self._font_big)
-        x_titolo = self.width - w_titolo - off_titolo - MARGINE
-        draw.text((x_titolo, 2), titolo, font=self._font_big,
+        w_titolo, h_titolo, off_x, off_y = misura(titolo, self._font_big)
+        draw.text((MARGINE - off_x, 2), titolo, font=self._font_big,
                   fill=layout["title_color"])
 
         codici = layout.get("codes") or ""
         if codici:
-            w_codici, off_codici = larghezza(codici, self._font_small)
-            x_codici = x_titolo + off_titolo - SPAZIO - w_codici - off_codici
-            if x_codici >= MARGINE:
-                # Allineati al piede dell'identificativo: due dimensioni
-                # diverse sulla stessa riga si leggono come una cosa sola solo
-                # se poggiano sulla stessa base.
-                base_titolo = 2 + max(14, int(self.height * 0.40))
-                y_codici = max(2, base_titolo - max(9, int(self.height * 0.20)))
-                draw.text((x_codici, y_codici), codici, font=self._font_small,
-                          fill=layout["route_color"])
+            w_cod, h_cod, off_cx, off_cy = misura(codici, self._font_small)
+            x_codici = self.width - MARGINE - w_cod - off_cx
+            if x_codici >= MARGINE + w_titolo + SPAZIO:
+                # Centrati sull'altezza dell'identificativo: due corpi diversi
+                # sulla stessa riga si leggono come una cosa sola quando
+                # condividono l'asse, non la base.
+                centro = 2 + off_y + h_titolo / 2.0
+                y_codici = int(round(centro - h_cod / 2.0)) - off_cy
+                draw.text((x_codici, max(0, y_codici)), codici,
+                          font=self._font_small, fill=layout["route_color"])
 
         if layout["route"]:
             centrato(layout["route"], self._font_small,

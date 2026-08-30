@@ -25,24 +25,34 @@ SIZES = {"small": 0.34, "medium": 0.50, "large": 0.72}
 
 
 def frase(voce, mostra_eta=True, lang="it"):
-    """Il testo del promemoria, che dipende da quanto manca.
+    """Il testo del promemoria: dipende da quanto manca e da che cosa si festeggia.
 
     "Oggi" e "domani" si dicono cosi': scrivere "fra 0 giorni" sarebbe
-    corretto e illeggibile.
+    corretto e illeggibile. E di un anniversario non si dice che "compie gli
+    anni": si dice che lo festeggia.
     """
     nome = voce["nome"]
     mancano = voce.get("mancano", 0)
     anni = voce.get("eta") if mostra_eta else None
+    anniversario = voce.get("tipo") == "anniversario"
 
     if lang == "en":
+        cosa = "anniversary" if anniversario else "birthday"
         if mancano == 0:
-            testo = "Today %s's birthday" % nome
+            testo = "Today %s's %s" % (nome, cosa)
         elif mancano == 1:
-            testo = "Tomorrow %s's birthday" % nome
+            testo = "Tomorrow %s's %s" % (nome, cosa)
         else:
-            testo = "%s's birthday in %d days" % (nome, mancano)
+            testo = "%s's %s in %d days" % (nome, cosa, mancano)
         if anni:
-            testo += " - turns %d" % anni
+            testo += " - %d years" % anni if anniversario else " - turns %d" % anni
+        return testo
+
+    if anniversario:
+        quando = {0: "Oggi", 1: "Domani"}.get(mancano, "Fra %d giorni" % mancano)
+        testo = "%s l'anniversario di %s" % (quando, nome)
+        if anni:
+            testo += " - %d anni" % anni
         return testo
 
     if mancano == 0:

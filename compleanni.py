@@ -1,12 +1,20 @@
-"""Promemoria dei compleanni.
+"""Promemoria di compleanni e anniversari.
 
-Un elenco di date e nomi, e la domanda a cui rispondere e' una sola: chi
-compie gli anni abbastanza presto perche' valga la pena ricordarlo adesso.
+Un elenco di date e nomi, e la domanda a cui rispondere e' una sola: quale
+ricorrenza e' abbastanza vicina perche' valga la pena ricordarla adesso.
 
-Il file vive in /var/lib/dmd/compleanni.csv e ha due campi:
+Il file vive in /var/lib/dmd/compleanni.csv e ha tre campi, l'ultimo
+facoltativo:
 
-    data,nome
+    data,nome,tipo
     30/03/1976,Mario Rossi
+    12/06/2005,Anna e Luca,anniversario
+
+Il tipo distingue che cosa si festeggia, perche' cambia la frase: di un
+compleanno si dice che *compie gli anni*, di un anniversario che lo
+*festeggia*, e dire "compie gli anni" di un matrimonio sarebbe sbagliato.
+Manca il tipo? E' un compleanno: e' il caso di gran lunga piu' frequente, e
+un elenco scritto prima che questo campo esistesse continua a funzionare.
 
 L'anno e' facoltativo: `30/03` funziona, ma senza anno non si puo' dire
 quanti anni compie. Il giorno viene prima del mese, come si scrive in
@@ -28,14 +36,21 @@ import threading
 DATA_DIR = os.environ.get("DMD_DATA", "/var/lib/dmd")
 FILE_NAME = "compleanni.csv"
 
+# Tipi di ricorrenza. La chiave e' quella che si scrive nel file; il valore e'
+# solo per l'ordine nei menu.
+TIPI = ("compleanno", "anniversario")
+TIPO_PREDEFINITO = "compleanno"
+
 INTESTAZIONE = (
-    "# Compleanni: una riga per persona.\n"
+    "# Compleanni e anniversari: una riga per ricorrenza.\n"
     "#\n"
-    "#   data,nome\n"
+    "#   data,nome,tipo\n"
     "#   30/03/1976,Mario Rossi\n"
+    "#   12/06/2005,Anna e Luca,anniversario\n"
     "#\n"
     "# La data e' giorno/mese/anno. L'anno si puo' omettere (30/03), ma senza\n"
-    "# non si puo' mostrare l'eta'. Righe che iniziano con # sono commenti.\n"
+    "# non si puo' mostrare quanti anni sono. Il tipo e' facoltativo: senza,\n"
+    "# vale compleanno. Righe che iniziano con # sono commenti.\n"
 )
 
 _lock = threading.Lock()
@@ -116,7 +131,15 @@ def parse(testo):
         if not nome:
             errori.append((numero, "nome mancante", riga[0].strip()[:40]))
             continue
-        voci.append({"giorno": data[0], "mese": data[1], "anno": data[2], "nome": nome})
+        tipo = (riga[2].strip().lower() if len(riga) > 2 else "") or TIPO_PREDEFINITO
+        if tipo not in TIPI:
+            # Un tipo sconosciuto non fa scartare la riga: la ricorrenza c'e'
+            # comunque, e perderla per una parola scritta male sarebbe un
+            # pessimo scambio.
+            errori.append((numero, "tipo sconosciuto, uso compleanno", tipo[:20]))
+            tipo = TIPO_PREDEFINITO
+        voci.append({"giorno": data[0], "mese": data[1], "anno": data[2],
+                     "nome": nome, "tipo": tipo})
     return voci, errori
 
 
@@ -178,7 +201,11 @@ def giorni_mancanti(voce, oggi=None):
 
 
 def eta(voce, oggi=None):
-    """Anni che compie alla prossima ricorrenza, o None senza anno di nascita."""
+    """Anni alla prossima ricorrenza, o None se l'anno non c'e'.
+
+    Per un compleanno sono gli anni che compie, per un anniversario quelli
+    che si festeggiano: il conto e' lo stesso, cambia solo come lo si dice.
+    """
     if not voce.get("anno"):
         return None
     oggi = oggi or datetime.date.today()
@@ -236,8 +263,8 @@ def save(testo):
     return voci, errori
 
 
-def aggiungi(data, nome):
-    """Aggiunge una persona in coda. Restituisce un messaggio di errore o ''."""
+def aggiungi(data, nome, tipo=TIPO_PREDEFINITO):
+    """Aggiunge una ricorrenza in coda. Restituisce un errore o ''."""
     if parse_data(data) is None:
         return "data non valida"
     nome = (nome or "").strip()
@@ -248,7 +275,8 @@ def aggiungi(data, nome):
     target = ensure()
     try:
         with open(target, "a", encoding="utf-8") as handle:
-            handle.write("%s,%s\n" % (data.strip(), nome))
+            tipo = tipo if tipo in TIPI else TIPO_PREDEFINITO
+            handle.write("%s,%s,%s\n" % (data.strip(), nome, tipo))
     except OSError as exc:
         return "scrittura non riuscita: %s" % exc
     invalidate()

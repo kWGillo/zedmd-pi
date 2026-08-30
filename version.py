@@ -215,6 +215,18 @@ Storico:
        allineato a destra con i codici della rotta accanto; freccia spaziata
        fra origine e destinazione. Tabelle di aerei, aeroporti e compagnie
        aggiornate.
+  2.0.1 Il servizio Compleanni non compariva nella pagina Servizi: la
+        sorgente funzionava, ma senza interruttore non partiva mai e sul
+        pannello non si vedeva niente. L'elenco dei servizi era cablato nel
+        codice e me ne ero dimenticato. Aggiunto anche il tipo di ricorrenza,
+        compleanno o anniversario, perche' di un anniversario non si dice che
+        compie gli anni. Aggiornamenti del programma e della libreria in una
+        pagina propria, dopo le Impostazioni: sono le uniche due cose che
+        cambiano il software invece di regolarlo. Air Radar: numero di volo a
+        sinistra e codici della rotta a destra, centrati sul suo asse. La
+        libreria media si sfoglia a pagine da 200 invece di fermarsi ai primi
+        400 file, e accanto a Elimina c'e' Vedi: prima di cancellare qualcosa
+        bisogna poter guardare che cos'e'.
 """
 
-__version__ = "2.0"
+__version__ = "2.0.1"

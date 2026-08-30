@@ -191,11 +191,23 @@ def create_app(runtime):
             "settings.html", cfg=cfg, ips=local_ips(),
             hostname=socket.gethostname(),
             sleeping=runtime.sleeping, night=runtime.night,
+            presets=presets.choices(), preset_now=presets.detect(cfg["panel"]),
+            config_result=request.args.get("config_result"), page="settings")
+
+    @app.route("/updates")
+    def page_updates():
+        """Aggiornamenti del programma e della libreria della matrice.
+
+        Stanno insieme e fuori dalle Impostazioni perche' sono l'unica parte
+        che *cambia il sistema* invece di regolarlo: ci si entra quando si
+        vuole aggiornare, non mentre si cerca un colore o un orario.
+        """
+        return render_template(
+            "updates.html", cfg=cfg,
             update=runtime.update_info, ota_log=ota.tail_log(12),
             lib=runtime.lib_info,
             lib_commands=libcheck.update_commands(libcheck.library_dir(cfg)),
-            presets=presets.choices(), preset_now=presets.detect(cfg["panel"]),
-            config_result=request.args.get("config_result"), page="settings")
+            page="updates")
 
     @app.route("/birthdays")
     def page_birthdays():
@@ -203,7 +215,7 @@ def create_app(runtime):
             "birthdays.html", cfg=cfg,
             elenco=compleanni.imminenti(cfg["birthdays"]["lead_hours"]),
             testo=compleanni.read_text(), info=compleanni.stats(),
-            sizes=SIZE_KEYS,
+            sizes=SIZE_KEYS, tipi=compleanni.TIPI,
             risultato=request.args.get("risultato", ""),
             errori=_birthday_errors(), page="birthdays")
 
@@ -237,7 +249,8 @@ def create_app(runtime):
     @app.route("/api/birthdays/add", methods=["POST"])
     def api_birthdays_add():
         errore = compleanni.aggiungi(request.form.get("data", ""),
-                                     request.form.get("nome", ""))
+                                     request.form.get("nome", ""),
+                                     request.form.get("tipo", ""))
         runtime.birthdays.trigger_now()
         return redirect(url_for("page_birthdays",
                                 risultato="error:%s" % errore if errore else "added"))
@@ -259,9 +272,9 @@ def create_app(runtime):
             return redirect(url_for("page_birthdays", risultato="error:read"))
         voci, errori = compleanni.parse(grezzo)
         esistenti = compleanni.read_text()
-        righe = ["%02d/%02d%s,%s" % (v["giorno"], v["mese"],
-                                     "/%d" % v["anno"] if v["anno"] else "",
-                                     v["nome"]) for v in voci]
+        righe = ["%02d/%02d%s,%s,%s" % (v["giorno"], v["mese"],
+                                        "/%d" % v["anno"] if v["anno"] else "",
+                                        v["nome"], v["tipo"]) for v in voci]
         nuovo = esistenti.rstrip("\n") + "\n" + "\n".join(righe) + "\n"
         _, errori_scrittura = compleanni.save(nuovo)
         _birthday_errors(errori + errori_scrittura)
@@ -278,12 +291,25 @@ def create_app(runtime):
             timezones=all_timezones(), ntp=ntp_status(),
             now=time.strftime("%d/%m/%Y %H:%M:%S"), page="clock")
 
+    # Quanti file per pagina nell'elenco della libreria.
+    MEDIA_PER_PAGINA = 200
+
     @app.route("/media")
     def page_media():
         media_dir = cfg["mediaplayer"]["media_dir"]
         files = scan_media(media_dir)
+        # Una libreria vera supera facilmente le poche centinaia di file:
+        # mostrarne solo i primi voleva dire non poter cancellare gli altri.
+        try:
+            pagina = max(1, int(request.args.get("p", 1)))
+        except ValueError:
+            pagina = 1
+        pagine = max(1, (len(files) + MEDIA_PER_PAGINA - 1) // MEDIA_PER_PAGINA)
+        pagina = min(pagina, pagine)
+        inizio = (pagina - 1) * MEDIA_PER_PAGINA
+
         listing = []
-        for path in files[:400]:
+        for path in files[inizio:inizio + MEDIA_PER_PAGINA]:
             try:
                 size = os.path.getsize(path)
             except OSError:
@@ -295,8 +321,26 @@ def create_app(runtime):
             })
         return render_template(
             "media.html", cfg=cfg, files=listing, total=len(files),
+            pagina=pagina, pagine=pagine, primo=inizio + 1,
+            ultimo=inizio + len(listing),
             media_dir=media_dir, ffmpeg=have_ffmpeg(),
             status=runtime.media.status(current_language()), page="media")
+
+    @app.route("/media/file/<path:rel>")
+    def media_file(rel):
+        """Restituisce un file della libreria, per l'anteprima nella pagina.
+
+        Prima di cancellare qualcosa serve vedere che cos'e': il nome del file
+        raramente basta. Il percorso viene risolto e confrontato con la
+        cartella della libreria, cosi' un `../` non porta da nessuna parte.
+        """
+        media_dir = os.path.realpath(cfg["mediaplayer"]["media_dir"])
+        percorso = os.path.realpath(os.path.join(media_dir, rel))
+        if not percorso.startswith(media_dir + os.sep):
+            return "", 404
+        if not os.path.isfile(percorso) or not is_supported(percorso):
+            return "", 404
+        return send_file(percorso)
 
     @app.route("/banner")
     def page_banner():
@@ -350,21 +394,37 @@ def create_app(runtime):
     @app.route("/services")
     def page_services():
         lang = current_language()
+
+        def stato(nome):
+            """Stato di una sorgente, vuoto se quella sorgente non c'e'.
+
+            Questa e' la pagina dove si va quando qualcosa non funziona: deve
+            aprirsi sempre. Una sorgente assente e' un caso da segnalare, non
+            un motivo per far fallire l'unica pagina da cui si puo' rimediare.
+            """
+            sorgente = getattr(runtime, nome, None)
+            try:
+                return sorgente.status(lang) if sorgente else ""
+            except Exception as exc:
+                return str(exc)
+
         services = [
             {"key": "zedmd", "label": "ZeDMD", "ready": True,
-             "status": runtime.zedmd.status(lang)},
+             "status": stato("zedmd")},
             {"key": "mediaplayer", "label": "Media Player", "ready": True,
-             "status": runtime.media.status(lang)},
+             "status": stato("media")},
             {"key": "banner", "label": "Rolling Banner", "ready": True,
-             "status": runtime.banner.status(lang)},
+             "status": stato("banner")},
             {"key": "nowplaying", "label": "Now Playing", "ready": True,
-             "status": runtime.player.status(lang)},
+             "status": stato("player")},
+            {"key": "birthdays", "label": "Compleanni", "ready": True,
+             "status": stato("birthdays")},
             {"key": "clock", "label": "Clock", "ready": True,
-             "status": runtime.clock.status(lang)},
+             "status": stato("clock")},
             {"key": "status_player", "label": "Status Player", "ready": False,
              "status": ""},
             {"key": "air_radar", "label": "Air Radar", "ready": True,
-             "status": runtime.radar.status(lang)},
+             "status": stato("radar")},
         ]
         current = runtime.arbiter.current
         return render_template(
@@ -522,7 +582,7 @@ def create_app(runtime):
     @app.route("/api/update/check", methods=["POST"])
     def api_update_check():
         runtime.check_update()
-        return redirect(url_for("page_settings"))
+        return redirect(url_for("page_updates"))
 
     @app.route("/api/update/settings", methods=["POST"])
     def api_update_settings():
@@ -537,12 +597,12 @@ def create_app(runtime):
             conf["check_interval_hours"] = 24
         dmdconf.save()
         runtime.check_update()
-        return redirect(url_for("page_settings"))
+        return redirect(url_for("page_updates"))
 
     @app.route("/api/update/install", methods=["POST"])
     def api_update_install():
         ota.start_update(cfg)
-        return redirect(url_for("page_settings"))
+        return redirect(url_for("page_updates"))
 
     @app.route("/api/restart", methods=["POST"])
     def api_restart():
@@ -726,7 +786,7 @@ def create_app(runtime):
     @app.route("/api/library/check", methods=["POST"])
     def api_library_check():
         runtime.check_library()
-        return redirect(url_for("page_settings"))
+        return redirect(url_for("page_updates"))
 
     # ------------------------------------------------------------ configurazione
 

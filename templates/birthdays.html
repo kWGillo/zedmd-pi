@@ -40,6 +40,7 @@
         {% elif voce.mancano == 1 %}{{ t('birthdays.tomorrow') }}
         {% else %}{{ t('birthdays.in.days', days=voce.mancano) }}{% endif %}
       </td>
+      <td>{{ t('birthdays.kind.' ~ voce.tipo) }}</td>
       <td>{% if voce.eta %}{{ t('birthdays.age', years=voce.eta) }}{% endif %}</td>
     </tr>
     {% endfor %}
@@ -58,9 +59,14 @@
         <input type="text" id="data" name="data" placeholder="30/03/1976"></div>
       <div><label for="nome">{{ t('birthdays.name') }}</label>
         <input type="text" id="nome" name="nome" maxlength="60"></div>
-      <div><label>&nbsp;</label>
-        <button type="submit">{{ t('birthdays.add.button') }}</button></div>
+      <div><label for="tipo">{{ t('birthdays.kind') }}</label>
+        <select id="tipo" name="tipo">
+          {% for key in tipi %}
+          <option value="{{ key }}">{{ t('birthdays.kind.' ~ key) }}</option>
+          {% endfor %}
+        </select></div>
     </div>
+    <button type="submit">{{ t('birthdays.add.button') }}</button>
   </form>
 </section>
 

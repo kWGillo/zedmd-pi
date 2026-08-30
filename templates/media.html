@@ -90,6 +90,8 @@
       <td class="mono">{{ f.rel }}</td>
       <td class="size">{{ f.size }}</td>
       <td class="act">
+        <a class="ghost small" target="_blank" rel="noopener"
+           href="{{ url_for('media_file', rel=f.rel) }}">{{ t('media.view') }}</a>
         <form method="post" action="{{ url_for('api_media_delete') }}">
           <input type="hidden" name="rel" value="{{ f.rel }}">
           <button type="submit" class="ghost small">{{ t('common.delete') }}</button>
@@ -98,6 +100,20 @@
     </tr>
     {% endfor %}
   </table>
+  {% if pagine > 1 %}
+  <p class="hint">{{ t('media.page', page=pagina, pages=pagine,
+                       first=primo, last=ultimo, total=total) }}</p>
+  <p class="pager">
+    {% if pagina > 1 %}
+    <a class="ghost small" href="{{ url_for('page_media', p=1) }}">&laquo;</a>
+    <a class="ghost small" href="{{ url_for('page_media', p=pagina-1) }}">&lsaquo;</a>
+    {% endif %}
+    {% if pagina < pagine %}
+    <a class="ghost small" href="{{ url_for('page_media', p=pagina+1) }}">&rsaquo;</a>
+    <a class="ghost small" href="{{ url_for('page_media', p=pagine) }}">&raquo;</a>
+    {% endif %}
+  </p>
+  {% endif %}
   {% if total > files|length %}
   <p class="hint">{{ t('media.files.shown', shown=files|length, total=total) }}</p>
   {% endif %}

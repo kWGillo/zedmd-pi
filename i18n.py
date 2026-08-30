@@ -38,9 +38,10 @@ STRINGS = {
     "nav.nowplaying": ("Musica", "Music"),
     # ------------------------------------------------------------- compleanni
     "nav.birthdays": ("Compleanni", "Birthdays"),
-    "birthdays.title": ("Compleanni", "Birthdays"),
+    "birthdays.title": ("Compleanni e anniversari", "Birthdays and anniversaries"),
     "birthdays.intro": (
-        "Un elenco di date e nomi. Quando un compleanno si avvicina, il "
+        "Un elenco di date e nomi, compleanni o anniversari. Quando la "
+        "ricorrenza si avvicina, il "
         "pannello lo ricorda con un messaggio che scorre, come i banner. La "
         "data si scrive giorno/mese/anno; l'anno si può omettere, ma senza "
         "non si può mostrare l'età.",
@@ -61,6 +62,9 @@ STRINGS = {
     "birthdays.add.hint": (
         "La data si scrive 30/03/1976. Va bene anche senza anno: 30/03.",
         "Write the date as 30/03/1976. Without the year is fine too: 30/03."),
+    "birthdays.kind": ("Tipo", "Kind"),
+    "birthdays.kind.compleanno": ("Compleanno", "Birthday"),
+    "birthdays.kind.anniversario": ("Anniversario", "Anniversary"),
     "birthdays.date": ("Data", "Date"),
     "birthdays.name": ("Nome", "Name"),
     "birthdays.add.button": ("Aggiungi", "Add"),
@@ -1094,6 +1098,25 @@ STRINGS = {
         "Title, artist and progress of the current track, from AirPlay or Spotify."),
     "services.desc.status_player": ("Notifiche sui giochi avviati dagli amici su Batocera.",
                                     "Notifications about games your friends launch on Batocera."),
+    "nav.updates": ("Aggiornamenti", "Updates"),
+    "updates.intro": (
+        "Qui si aggiorna il sistema: il programma dal repository e la "
+        "libreria della matrice. Sono le uniche due cose che cambiano il "
+        "software installato invece di regolarlo, ed è la ragione per cui "
+        "stanno fuori dalle Impostazioni.",
+        "This is where the system gets updated: the program from the "
+        "repository and the matrix library. They are the only two things "
+        "that change the installed software rather than tune it, which is "
+        "why they live outside Settings."),
+    "media.view": ("Vedi", "View"),
+    "media.page": (
+        "File da %(first)d a %(last)d di %(total)d — pagina %(page)d di %(pages)d",
+        "Files %(first)d to %(last)d of %(total)d — page %(page)d of %(pages)d"),
+    "services.desc.birthdays": (
+        "Promemoria di compleanni e anniversari, a scorrimento, nei giorni "
+        "precedenti la ricorrenza.",
+        "Reminders for birthdays and anniversaries, scrolling, in the days "
+        "before the date."),
     "services.desc.air_radar": ("Aerei in transito entro un raggio dalla posizione indicata.",
                                 "Aircraft passing within a radius of the given position."),
 }
