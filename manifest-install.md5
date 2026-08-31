@@ -3,7 +3,7 @@
 d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 f9a19df7caa1b28f9cdebade3fd62905  display.py
-4d2fe40f5127452d0cf7a6363d6fbae1  dmdconf.py
+1098a3194b86823f53667119b3b1300a  dmdconf.py
 3f8467d031e90bad6408c2dd713cd216  dmdd.py
 397862a19501abc030946d1b6c39463c  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
@@ -30,7 +30,7 @@ a9cc678c5e2734cb68e9729a60b2b1b7  sources/airradar.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 6d3f097de4b253df01dee962c1d6cf19  sources/doom.py
-0477256cae24c65ec0145572deae6cbe  sources/giochi/__init__.py
+af3dcad5826dae183cec697ddb6a50e5  sources/giochi/__init__.py
 b67ccb69dc4ad86f99ff787319a273e8  sources/giochi/base.py
 e8d848a784cc0877be25075128962688  sources/giochi/invasori.py
 13f6314aed0e6c7c3ccd724f0aca3e8e  sources/giochi/mattoni.py
@@ -53,6 +53,6 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 fc820c3435f5edea162ed83ce33fb964  templates/services.html
 e26f8c8216ec08b2d827eeee0c87407b  templates/settings.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-ede10a9369d695f76a11d8142192d934  version.py
-e65d0e7f8363c4f06dee30a7a36e8bbf  webui.py
+9036a462b64294e56cdb39146e33affd  version.py
+65f046c105adc90c80d12865947f48d0  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

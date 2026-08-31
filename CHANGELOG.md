@@ -2,6 +2,28 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [3.8.3]
+
+### Corretto
+- **Doom non si avviava più.** Colpa della correzione precedente: la 3.8.2 ha
+  tolto a Doom l'unica porta che aveva dal pad — Options, che ora scorre i
+  giochi — senza accendere quella che doveva sostituirla. La casella «Doom nel
+  giro» nasceva **spenta**, e dal cabinato Doom era diventato irraggiungibile.
+
+  Ora è accesa di serie, e chi aggiorna se la ritrova accesa **una volta sola**:
+  da lì in poi la scelta è sua e la migrazione non ci rimette le mani.
+
+### Corretto (trovati guardando, non segnalati)
+- **Il giro non chiedeva se Doom fosse pronto**: controllava solo che qualcuno
+  *sapesse rispondere*. Un Doom senza WAD valido sarebbe rimasto nel giro come
+  una casella su cui premere Start non fa niente. Ora si chiede davvero, e una
+  domanda che solleva vale come un no — meglio un giro corto che uno con un
+  buco.
+- **Se una casella non parte, il giro passa alla successiva** invece di lasciare
+  il pannello a nessuno. Premere Start e vedere il nero è il peggio dei mondi. E
+  se non parte proprio nessuno, dopo un giro completo si smette invece di
+  provare all'infinito.
+
 ## [3.8.2]
 
 ### Corretto

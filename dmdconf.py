@@ -162,9 +162,15 @@ DEFAULTS = {
         # flipper sono altri, e si imparano dalla pagina premendo il pulsante.
         "tasto_ciclo": 28,
         "tasto_esci": 1,
-        # Doom nel giro: spento, perche' parte in qualche secondo e vuole un
-        # WAD preparato. Finirci dentro per sbaglio cercando Breakout stona.
-        "ciclo_doom": False,
+        # Doom nel giro del tasto Start. **Acceso**: dalla 3.8.2 il pad non
+        # apre piu' Doom da solo, quindi il giro e' l'unica strada che resta
+        # dal cabinato, e nascere spenta la rendeva irraggiungibile. Non c'e'
+        # il rischio di finirci dentro per sbaglio con un Doom non preparato:
+        # senza un WAD valido Doom non entra proprio nel giro.
+        "ciclo_doom": True,
+        # Marca che la scelta l'ha fatta una persona: serve solo alla
+        # migrazione, per non sovrascrivere due volte una decisione altrui.
+        "ciclo_scelto": False,
     },
     "doom": {
         # Il binario lo compila doom/setup_doom.sh: non arriva gia' fatto
@@ -370,6 +376,16 @@ def _migrate(raw):
     # configurazione salvata prima che esistesse, altrimenti la pagina Servizi
     # non lo mostra e non lo si puo' accendere.
     services.setdefault("nowplaying", False)
+
+    # 3.8.3: fino alla 3.8.2 Doom si apriva premendo Options, perche' era il
+    # suo lettore ad aprirlo. Quella strada e' stata tolta — Options ora scorre
+    # i giochi — e chi aggiorna con "Doom nel giro" spento se lo ritroverebbe
+    # irraggiungibile dal cabinato. Lo si mette nel giro una volta sola; da li'
+    # in poi la casella e' sua e non la tocca piu' nessuno.
+    giochi = raw.setdefault("giochi", {})
+    if not giochi.get("ciclo_scelto"):
+        giochi["ciclo_doom"] = True
+        giochi["ciclo_scelto"] = True
 
     # 3.1: i WAD sono passati a una cartella condivisa in rete, e il percorso
     # salvato punta ancora alla vecchia posizione.

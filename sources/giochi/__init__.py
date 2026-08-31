@@ -229,7 +229,16 @@ class GiochiSource(Source):
         preme.
         """
         giro = list(NOMI)
-        if self.conf().get("ciclo_doom") and self.doom_pronto is not None:
+        if not self.conf().get("ciclo_doom"):
+            return giro
+        # Si **chiede** se Doom e' pronto, non ci si limita a controllare che
+        # qualcuno sappia rispondere: un Doom senza WAD dentro al giro sarebbe
+        # una casella su cui il tasto Start non fa niente.
+        try:
+            pronto = bool(self.doom_pronto and self.doom_pronto())
+        except Exception:
+            pronto = False
+        if pronto:
             giro.append("doom")
         return giro
 
@@ -268,26 +277,35 @@ class GiochiSource(Source):
             # prima volta vuole giocare, non scegliere.
             ripresa = self.conf().get("ultimo") or ""
             self._giro = ripresa if ripresa in giro else giro[0]
-            prossimo = self._giro
-            if prossimo == "doom":
-                self.chiudi_sessione()
-                return bool(self.apri_doom()) if callable(self.apri_doom) else False
-            if callable(self.apri_partita):
-                return bool(self.apri_partita("giochi", prossimo))
-            return self.apri_sessione(prossimo)
+            return self._apri(self._giro, giro)
         indice = giro.index(corrente) if corrente in giro else -1
         prossimo = giro[(indice + 1) % len(giro)] if indice >= 0 else giro[0]
         self._giro = prossimo
-        if prossimo == "doom":
-            self.chiudi_sessione()
-            if callable(self.apri_doom):
-                return bool(self.apri_doom())
-            return False
-        # Non `apri_sessione` diretta: aprire un gioco deve poter **chiudere
-        # Doom**, e quella regola sta nel runtime.
-        if callable(self.apri_partita):
-            return bool(self.apri_partita("giochi", prossimo))
-        return self.apri_sessione(prossimo)
+        return self._apri(prossimo, giro)
+
+    def _apri(self, prossimo, giro):
+        """Apre la casella scelta; se non ci riesce, passa alla successiva.
+
+        Doom puo' non partire — WAD sbagliato, binario non compilato — e in
+        quel caso lasciare il pannello a nessuno sarebbe il peggio dei mondi:
+        si e' premuto Start e non succede niente. Meglio tirare dritto.
+        """
+        for _ in range(len(giro)):
+            if prossimo == "doom":
+                self.chiudi_sessione()
+                fatto = bool(self.apri_doom()) if callable(self.apri_doom) else False
+            elif callable(self.apri_partita):
+                # Non `apri_sessione` diretta: aprire un gioco deve poter
+                # **chiudere Doom**, e quella regola sta nel runtime.
+                fatto = bool(self.apri_partita("giochi", prossimo))
+            else:
+                fatto = bool(self.apri_sessione(prossimo))
+            if fatto:
+                return True
+            print("[giochi] %s non e' partito: passo al successivo" % prossimo)
+            prossimo = giro[(giro.index(prossimo) + 1) % len(giro)]
+            self._giro = prossimo
+        return False
 
     def apri_sessione(self, nome=""):
         """Comincia una partita e prende il pannello."""

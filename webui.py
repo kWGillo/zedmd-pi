@@ -511,6 +511,9 @@ def create_app(runtime):
         for chiave in ("keyboard", "keyboard_starts",
                        "joystick", "joystick_starts", "ciclo_doom"):
             conf[chiave] = request.form.get(chiave) == "on"
+        # Da adesso la casella "Doom nel giro" e' una scelta dell'utente: la
+        # migrazione non deve piu' rimetterci le mani.
+        conf["ciclo_scelto"] = True
         for chiave, predefinito in (("tasto_ciclo", 28), ("tasto_esci", 1)):
             try:
                 conf[chiave] = max(0, min(767, int(
