@@ -1203,6 +1203,33 @@ STRINGS = {
         "Naming one is only needed if automatic detection gets it wrong: the "
         "path looks like /dev/input/event3, and «cat /proc/bus/input/devices» "
         "lists them."),
+    "giochi.ciclo.hint": (
+        "Il tasto Start del pad scorre i giochi: premuto una volta si gioca, "
+        "premuto ancora si passa al successivo. Select esce. Sulla tastiera "
+        "del cabinato fanno lo stesso i due tasti qui sotto.",
+        "The Start button on the pad cycles through the games: press once to "
+        "play, press again for the next one. Select quits. On the cabinet "
+        "keyboard the two keys below do the same."),
+    "giochi.tasto.ciclo": ("Tasto che scorre i giochi",
+                           "Key that cycles the games"),
+    "giochi.tasto.esci": ("Tasto che esce dalla partita",
+                          "Key that quits the game"),
+    "giochi.impara": ("Impara", "Learn"),
+    "giochi.impara.hint": (
+        "I codici predefiniti sono quelli di invio ed escape. Una pulsantiera "
+        "da flipper ne manda altri: premi «Impara» e poi il pulsante sul "
+        "cabinato.",
+        "The defaults are the codes for Enter and Escape. A pinball button "
+        "panel sends different ones: press \u00abLearn\u00bb and then the "
+        "button on the cabinet."),
+    "giochi.impara.premi": ("In ascolto: premi ora il pulsante sul cabinato.",
+                            "Listening: press the button on the cabinet now."),
+    "giochi.impara.fatto": ("Riconosciuto, codice", "Recognised, code"),
+    "giochi.ciclo_doom": (
+        "Comprendi anche Doom nel giro dei giochi (parte in qualche secondo e "
+        "vuole un WAD preparato)",
+        "Include Doom in the game cycle too (it takes a few seconds to start "
+        "and needs a prepared WAD)"),
     "giochi.timeout": ("Chiudi la partita dopo (secondi senza comandi)",
                        "Close the game after (seconds with no input)"),
     "giochi.timeout.hint": (

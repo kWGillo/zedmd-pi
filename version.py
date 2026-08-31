@@ -440,6 +440,34 @@ Storico:
        ora passa da un punto solo, il runtime, che e' l'unico a conoscerle
        entrambe — e ci passa anche la web UI, altrimenti la regola varrebbe
        solo per MQTT.
+  3.7.1 In formato 12 ore "AM"/"PM" veniva scritto nell'angolo in alto a
+        sinistra, che dalla 3.4 e' la prima riga della colonna dei rifiuti: le
+        due scritte finivano una sopra l'altra. Ora sta attaccato alle cifre
+        dell'ora, allineato in basso, che e' anche il posto in cui un orologio
+        se lo aspetta. La colonna resta l'unica padrona dei suoi 68 pixel.
+  3.8  Now Playing: le righe si impilano dalle **metriche dei font** invece
+       che da frazioni fisse dell'altezza. Con le frazioni (0,33 e 0,56) su
+       sessantaquattro righe l'artista finiva dove cominciava l'album — zero
+       pixel di spazio — e la `g` di "D'Agostino" entrava nel titolo del
+       disco. Non era un pixel da spostare a mano: era che nessuno aveva
+       chiesto ai font quanto spazio volessero. Ora fra le righe ci sono tre
+       pixel, uguali a qualunque altezza di pannello, e c'e' una prova che
+       rende ogni riga da sola e verifica che l'inchiostro non tocchi quello
+       della vicina — con i discendenti, che sono il caso peggiore.
+       Il tasto **Start del pad scorre i giochi**: premuto una volta si gioca,
+       premuto ancora si passa al successivo, e Select esce. Non c'e' un menu
+       da attraversare, perche' su un pannello alto 64 pixel un menu costa
+       piu' di quello che risolve. Doom entra nel giro solo se lo si chiede:
+       parte in qualche secondo e vuole un WAD preparato, e finirci dentro per
+       sbaglio cercando Breakout stona.
+       Sulla tastiera del cabinato fanno lo stesso due tasti scelti, e non si
+       cercano con evtest: si preme "Impara" nella pagina e poi il pulsante
+       sul cabinato, e il codice arriva da solo. Le pulsantiere da flipper
+       mandano codici che non stanno su nessuna tastiera da ufficio.
+       Il tasto dedicato e' l'unico esente dalla casella "un tasto puo' far
+       cominciare una partita", che resta spenta: quella protegge dai tasti
+       sfiorati per caso, ma Start e' un gesto deliberato — se ci passasse
+       sotto anche lui, la funzione nascerebbe spenta e sembrerebbe rotta.
 """
 
-__version__ = "3.7"
+__version__ = "3.8"

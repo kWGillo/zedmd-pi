@@ -88,6 +88,29 @@
     </div>
     <p class="hint">{{ t('giochi.device.hint') }}</p>
 
+    <hr class="sep">
+    <p class="hint">{{ t('giochi.ciclo.hint') }}</p>
+    <div class="row2">
+      <div><label for="tasto_ciclo">{{ t('giochi.tasto.ciclo') }}</label>
+        <div class="color-row">
+          <input type="number" id="tasto_ciclo" name="tasto_ciclo" min="0" max="767"
+                 value="{{ cfg.giochi.tasto_ciclo }}">
+          <button type="button" class="ghost small impara" data-campo="tasto_ciclo">{{ t('giochi.impara') }}</button>
+        </div></div>
+      <div><label for="tasto_esci">{{ t('giochi.tasto.esci') }}</label>
+        <div class="color-row">
+          <input type="number" id="tasto_esci" name="tasto_esci" min="0" max="767"
+                 value="{{ cfg.giochi.tasto_esci }}">
+          <button type="button" class="ghost small impara" data-campo="tasto_esci">{{ t('giochi.impara') }}</button>
+        </div></div>
+    </div>
+    <p class="hint" id="impara_stato">{{ t('giochi.impara.hint') }}</p>
+
+    <label class="check">
+      <input type="checkbox" name="ciclo_doom" {{ 'checked' if cfg.giochi.ciclo_doom }}>
+      {{ t('giochi.ciclo_doom') }}
+    </label>
+
     <div class="row2">
       <div><label for="session_timeout">{{ t('giochi.timeout') }}</label>
         <input type="number" id="session_timeout" name="session_timeout" min="0" max="3600"
@@ -120,6 +143,37 @@
       b.addEventListener("touchend", function (e) { e.preventDefault(); manda(azione, false); });
     })(tasti[i]);
   }
+  // «Impara»: si preme il pulsante sul cabinato e il codice arriva da solo.
+  var messaggio = document.getElementById("impara_stato");
+  var attesa = messaggio ? messaggio.textContent : "";
+  var imparanti = document.querySelectorAll(".impara");
+  for (var k = 0; k < imparanti.length; k++) {
+    (function (b) {
+      b.addEventListener("click", function () {
+        var campo = document.getElementById(b.getAttribute("data-campo"));
+        if (messaggio) { messaggio.textContent = {{ t('giochi.impara.premi') | tojson }}; }
+        fetch("{{ url_for('api_giochi_impara') }}", {method: "POST"});
+        var giri = 0;
+        var orologio = setInterval(function () {
+          giri++;
+          fetch("{{ url_for('api_giochi_impara') }}")
+            .then(function (r) { return r.json(); })
+            .then(function (s) {
+              if (s.codice) {
+                clearInterval(orologio);
+                campo.value = s.codice;
+                if (messaggio) { messaggio.textContent = {{ t('giochi.impara.fatto') | tojson }} + " " + s.codice; }
+              } else if (!s.attivo || giri > 40) {
+                clearInterval(orologio);
+                if (messaggio) { messaggio.textContent = attesa; }
+              }
+            })
+            .catch(function () { clearInterval(orologio); });
+        }, 400);
+      });
+    })(imparanti[k]);
+  }
+
   var stato = document.getElementById("stato");
   if (stato) {
     setInterval(function () {

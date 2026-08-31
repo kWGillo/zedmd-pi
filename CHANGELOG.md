@@ -2,6 +2,51 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [3.8]
+
+### Corretto
+- **In Now Playing l'artista e l'album si toccavano.** Le righe nascevano da
+  frazioni fisse dell'altezza (0,33 e 0,56): su sessantaquattro righe l'artista
+  finiva esattamente dove cominciava l'album — zero pixel di spazio — e la `g`
+  di «D'Agostino» entrava nel titolo del disco.
+
+  Non era un pixel da spostare a mano. Era che nessuno aveva chiesto ai font
+  quanto spazio volessero: ora le righe si impilano dalle **metriche** —
+  ascendente più discendente, che non dipendono dal testo — con uno spazio
+  garantito fra l'una e l'altra. Su 64 righe sono tre pixel, e restano tre a
+  qualunque altezza di pannello.
+
+  La prova rende ogni riga da sola e verifica che il suo inchiostro non tocchi
+  quello della vicina, usando stringhe piene di discendenti, che sono il caso
+  peggiore. Rimettendo il layout vecchio la prova fallisce, come deve.
+
+### Aggiunto
+- **Il tasto Start del pad scorre i giochi.** Premuto una volta si gioca,
+  premuto ancora si passa al successivo; **Select** esce (e cerchio resta una
+  via d'uscita, per chi ce l'ha nelle dita da Doom). Non c'è un menu da
+  attraversare: su un pannello alto 64 pixel un menu costa più di quello che
+  risolve.
+
+  **Doom entra nel giro solo se lo si chiede** — parte in qualche secondo e
+  vuole un WAD preparato, e finirci dentro per sbaglio mentre si cerca Breakout
+  stona. La sorgente dei giochi però non conosce Doom: il runtime le passa due
+  funzioni, «è pronto?» e «aprilo», e tanto le basta.
+
+- **I due tasti del cabinato si imparano, non si indovinano.** Una pulsantiera
+  da flipper manda codici che non stanno su nessuna tastiera da ufficio, e
+  cercarli con `evtest` è una serata persa: si preme **Impara** nella pagina e
+  poi il pulsante sul cabinato, e il codice arriva da solo. Il lettore di
+  `/dev/input` ha ora un aggancio che consegna i codici grezzi prima di
+  tradurli, e mentre si impara l'evento viene ingoiato invece di fare anche il
+  suo mestiere.
+
+### Modificato
+- **Il tasto dedicato è l'unico esente dalla casella «un tasto può far
+  cominciare una partita»**, che resta spenta di serie. Quella casella protegge
+  dal tasto sfiorato per caso, ed è giusta; ma Start è un gesto deliberato, e se
+  ci passasse sotto anche lui la funzione nascerebbe spenta e sembrerebbe rotta.
+  È la stessa distinzione che vale da sempre per Options sul pad.
+
 ## [3.7]
 
 ### Aggiunto

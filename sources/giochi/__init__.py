@@ -22,8 +22,8 @@ from PIL import Image
 
 from ..base import Source
 from ..comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_X, BTN_EAST,
-                       BTN_MODE, BTN_SOUTH, BTN_START, BTN_TR, BTN_TR2,
-                       BTN_WEST, Lettore, joystick, tastiere)
+                       BTN_MODE, BTN_SELECT, BTN_SOUTH, BTN_START, BTN_TR,
+                       BTN_TR2, BTN_WEST, Lettore, joystick, tastiere)
 from .base import ALTEZZA, CAMPO, LARGHEZZA, Gioco, centra, scrivi
 from .invasori import Invasori
 from .mattoni import Mattoni
@@ -51,13 +51,21 @@ TASTI = {
     105: "sinistra", 106: "destra", 103: "su", 108: "giu",
     30: "sinistra", 32: "destra", 17: "su", 31: "giu",     # A D W S
     57: "fuoco", 29: "fuoco", 56: "fuoco",                 # spazio, ctrl, alt
-    28: "avvia", 1: "esci",                                # invio, escape
 }
+
+# I due tasti "di servizio" della tastiera sono configurabili: su una
+# pulsantiera da flipper i codici non sono quelli di una tastiera da ufficio,
+# e indovinarli con evtest e' una serata persa. Questi sono solo i predefiniti.
+TASTO_CICLO = 28        # invio
+TASTO_ESCI = 1          # escape
 
 PULSANTI = {
     BTN_SOUTH: "fuoco", BTN_TR2: "fuoco", BTN_TR: "fuoco",
-    BTN_EAST: "esci", BTN_WEST: "fuoco",
-    BTN_START: "avvia", BTN_MODE: "avvia",
+    BTN_WEST: "fuoco",
+    # Start scorre l'elenco dei giochi, Select esce. Cerchio resta una via
+    # d'uscita: chi ce l'ha nelle dita da Doom non deve reimpararla.
+    BTN_START: "ciclo", BTN_MODE: "ciclo",
+    BTN_SELECT: "esci", BTN_EAST: "esci",
 }
 
 ASSI = {
@@ -97,16 +105,20 @@ class GiochiSource(Source):
         self._ultimo_comando = 0.0
 
         self._lettore = Lettore(self._dispositivi, self._da_comando,
-                                tasti=TASTI, pulsanti=PULSANTI, assi=ASSI,
-                                etichetta="giochi")
+                                tasti=self._tasti(), pulsanti=PULSANTI,
+                                assi=ASSI, etichetta="giochi")
+        # Il codice del tasto imparato dalla pagina web, quando si sta
+        # imparando: il lettore lo consegna qui prima di tradurlo.
+        self._impara = None
+        self._imparato = 0
 
     # ------------------------------------------------------------ ciclo di vita
 
     def start(self):
         """Rende i giochi *disponibili*, non ne avvia nessuno."""
         self._stop.clear()
-        if self.conf().get("keyboard", True):
-            self._lettore.start()
+        if self.conf().get("keyboard", True) or self.conf().get("joystick", True):
+            self.ricarica_comandi()
 
     def stop(self):
         self._stop.set()
@@ -115,6 +127,72 @@ class GiochiSource(Source):
 
     def conf(self):
         return self.cfg.get("giochi") or {}
+
+    def _tasti(self):
+        """La tabella della tastiera, con i due tasti di servizio scelti."""
+        tabella = dict(TASTI)
+        conf = self.conf()
+        try:
+            ciclo = int(conf.get("tasto_ciclo") or TASTO_CICLO)
+        except (TypeError, ValueError):
+            ciclo = TASTO_CICLO
+        try:
+            esci = int(conf.get("tasto_esci") or TASTO_ESCI)
+        except (TypeError, ValueError):
+            esci = TASTO_ESCI
+        # Prima esci e poi ciclo: se per errore sono lo stesso codice, vince
+        # far cominciare una partita, che e' l'azione che serve piu' spesso.
+        tabella[esci] = "esci"
+        tabella[ciclo] = "ciclo"
+        return tabella
+
+    def ricarica_comandi(self):
+        """Rilegge i tasti scelti. La chiama la pagina dopo un salvataggio."""
+        self._lettore.stop()
+        self._lettore = Lettore(self._dispositivi, self._da_comando,
+                                tasti=self._tasti(), pulsanti=PULSANTI,
+                                assi=ASSI, etichetta="giochi",
+                                su_codice=self._codice_grezzo)
+        if self.conf().get("keyboard", True) or self.conf().get("joystick", True):
+            self._lettore.start()
+
+    # ------------------------------------------------------ imparare un tasto
+
+    def impara_tasto(self, attesa=15.0):
+        """Mette in ascolto: il prossimo tasto premuto viene registrato.
+
+        Le pulsantiere da flipper mandano codici che non stanno su nessuna
+        tastiera da ufficio. Farli indovinare all'utente con evtest e' una
+        serata persa: si preme il pulsante e il sistema lo riconosce.
+        """
+        self._imparato = 0
+        self._impara = time.time() + max(1.0, attesa)
+        return True
+
+    def stato_impara(self):
+        if self._imparato:
+            codice, self._imparato = self._imparato, 0
+            self._impara = None
+            return {"attivo": False, "codice": codice}
+        attivo = bool(self._impara and time.time() < self._impara)
+        if not attivo:
+            self._impara = None
+        return {"attivo": attivo, "codice": 0}
+
+    def _codice_grezzo(self, codice, giu):
+        """Il lettore consegna qui ogni tasto prima di tradurlo.
+
+        Restituendo True l'evento viene ingoiato: mentre si impara un tasto
+        non deve anche fare quello che farebbe normalmente.
+        """
+        if not (self._impara and giu):
+            return False
+        if time.time() >= self._impara:
+            self._impara = None
+            return False
+        self._imparato = int(codice)
+        self._impara = None
+        return True
 
     def _dispositivi(self):
         conf = self.conf()
@@ -138,6 +216,49 @@ class GiochiSource(Source):
 
     def gioco_corrente(self):
         return self._gioco.nome if self._gioco else ""
+
+    def elenco_ciclo(self):
+        """I giochi che il tasto Start scorre, nell'ordine.
+
+        Doom sta fuori a meno che non lo si chieda: parte in qualche secondo,
+        vuole un WAD preparato, e finirci dentro per sbaglio mentre si cerca
+        Breakout e' sgradevole. Gli altri due partono nell'istante in cui si
+        preme.
+        """
+        giro = list(NOMI)
+        if self.conf().get("ciclo_doom") and self.doom_pronto is not None:
+            giro.append("doom")
+        return giro
+
+    # Chi sa dire se Doom e' preparato. Lo assegna il runtime: la sorgente dei
+    # giochi non deve conoscere Doom, deve solo saper chiedere.
+    doom_pronto = None
+    apri_doom = None
+
+    def ciclo(self):
+        """Passa al gioco successivo. Da fermo, apre il primo.
+
+        E' il tasto Start del cabinato: premuto una volta si gioca, premuto
+        ancora si cambia gioco. Non c'e' un menu da attraversare, perche' su
+        un pannello alto 64 pixel un menu costa piu' di quello che risolve.
+        """
+        giro = self.elenco_ciclo()
+        if not giro:
+            return False
+        if not self._sessione:
+            prossimo = self.conf().get("ultimo") or giro[0]
+            if prossimo not in giro:
+                prossimo = giro[0]
+        else:
+            corrente = self.gioco_corrente()
+            indice = giro.index(corrente) if corrente in giro else -1
+            prossimo = giro[(indice + 1) % len(giro)]
+        if prossimo == "doom":
+            self.chiudi_sessione()
+            if callable(self.apri_doom):
+                return bool(self.apri_doom())
+            return False
+        return self.apri_sessione(prossimo)
 
     def apri_sessione(self, nome=""):
         """Comincia una partita e prende il pannello."""
@@ -221,6 +342,13 @@ class GiochiSource(Source):
         if azione == "esci" and giu:
             self.chiudi_sessione()
             return True
+        if azione == "ciclo":
+            # Solo alla pressione: sul rilascio si passerebbe al gioco dopo.
+            if not giu:
+                return True
+            if not apri:
+                return False
+            return self.ciclo()
         if azione == "avvia" and giu and not self._sessione:
             if not apri:
                 return False
@@ -249,10 +377,19 @@ class GiochiSource(Source):
         return True
 
     def _da_comando(self, azione, giu, avvio):
-        # Come per Doom: il pad puo' far cominciare una partita con Options,
-        # la tastiera del cabinato solo se lo si e' chiesto. Un tasto sfiorato
-        # per caso non deve portarsi via il pannello a meta' partita.
-        if avvio:
+        """Un comando letto da tastiera o da pad.
+
+        Il permesso di *far cominciare* una partita non e' lo stesso per
+        tutti. Un tasto qualunque del cabinato non ce l'ha, perche' il DMD sta
+        in mezzo a un flipper e un tasto sfiorato per caso non deve portarsi
+        via il pannello. Ma il **tasto dedicato** — Start sul pad, o quello
+        scelto sulla pulsantiera — ce l'ha sempre: e' un gesto deliberato, e
+        se glielo si negasse la funzione nascerebbe spenta e sembrerebbe
+        rotta.
+        """
+        if azione == "ciclo":
+            apri = True
+        elif avvio:
             apri = bool(self.conf().get("joystick_starts", True))
         else:
             apri = bool(self.conf().get("keyboard_starts", False))

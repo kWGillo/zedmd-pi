@@ -156,6 +156,15 @@ DEFAULTS = {
         "session_timeout": 180,
         "ultimo": "breakout",
         "record": {},
+        # Il tasto Start del cabinato scorre i giochi: premuto una volta si
+        # gioca, premuto ancora si passa al successivo. I codici sono quelli
+        # di una tastiera normale (invio, escape) ma su una pulsantiera da
+        # flipper sono altri, e si imparano dalla pagina premendo il pulsante.
+        "tasto_ciclo": 28,
+        "tasto_esci": 1,
+        # Doom nel giro: spento, perche' parte in qualche secondo e vuole un
+        # WAD preparato. Finirci dentro per sbaglio cercando Breakout stona.
+        "ciclo_doom": False,
     },
     "doom": {
         # Il binario lo compila doom/setup_doom.sh: non arriva gia' fatto

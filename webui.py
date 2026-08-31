@@ -484,12 +484,39 @@ def create_app(runtime):
             runtime.giochi.tocca(azione)
         return jsonify(_giochi_stato())
 
+    @app.route("/api/giochi/impara", methods=["GET", "POST"])
+    def api_giochi_impara():
+        """Impara quale codice manda un pulsante del cabinato.
+
+        POST mette in ascolto, GET chiede se e' arrivato qualcosa. Le
+        pulsantiere da flipper mandano codici che non stanno su nessuna
+        tastiera da ufficio: si preme il pulsante invece di cercarli.
+        """
+        if request.method == "POST":
+            runtime.giochi.impara_tasto()
+            return jsonify({"attivo": True, "codice": 0})
+        return jsonify(runtime.giochi.stato_impara())
+
+    @app.route("/api/giochi/ciclo", methods=["POST"])
+    def api_giochi_ciclo():
+        """Il tasto Start, ma dalla pagina: passa al gioco successivo."""
+        runtime.giochi.ciclo()
+        if request.form.get("ajax"):
+            return jsonify(_giochi_stato())
+        return redirect(url_for("page_giochi"))
+
     @app.route("/api/giochi", methods=["POST"])
     def api_giochi():
         conf = cfg.setdefault("giochi", {})
         for chiave in ("keyboard", "keyboard_starts",
-                       "joystick", "joystick_starts"):
+                       "joystick", "joystick_starts", "ciclo_doom"):
             conf[chiave] = request.form.get(chiave) == "on"
+        for chiave, predefinito in (("tasto_ciclo", 28), ("tasto_esci", 1)):
+            try:
+                conf[chiave] = max(0, min(767, int(
+                    request.form.get(chiave, predefinito))))
+            except (TypeError, ValueError):
+                conf[chiave] = predefinito
         for chiave in ("keyboard_device", "joystick_device"):
             if chiave in request.form:
                 conf[chiave] = request.form.get(chiave, "").strip()
@@ -499,10 +526,10 @@ def create_app(runtime):
         except ValueError:
             conf["session_timeout"] = 180
         dmdconf.save()
-        # La lettura dei comandi dipende da queste caselle: senza far ripartire
-        # il lettore, spegnere la tastiera non avrebbe effetto fino al riavvio.
-        runtime.giochi.stop()
-        runtime.giochi.start()
+        # La lettura dei comandi dipende da queste caselle e dai due codici
+        # scelti: senza rileggerli, cambiare il tasto Start non avrebbe
+        # effetto fino al riavvio del servizio.
+        runtime.giochi.ricarica_comandi()
         return redirect(url_for("page_giochi"))
 
     # ------------------------------------------------------------------ doom

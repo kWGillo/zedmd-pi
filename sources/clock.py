@@ -182,6 +182,8 @@ class ClockSource(Source):
         x = (self.width - (box[2] - box[0])) // 2 - box[0]
         y = (self.height - (box[3] - box[1])) // 2 - box[1]
         draw.text((x, y), shown, font=self._font, fill=time_color)
+        ora_destra = x + box[2]
+        ora_sotto = y + box[3]
 
         # L'ora resta al centro, sempre: la colonna vive nello spazio che
         # avanza alla sua sinistra e si adatta a quello. Un orologio che si
@@ -195,6 +197,14 @@ class ClockSource(Source):
                       font=self._font_small, fill=date_color)
 
         if meridiem:
-            draw.text((3, 2), meridiem, font=self._font_small, fill=date_color)
+            # Attaccato alle cifre, non nell'angolo in alto a sinistra: li'
+            # ci va la colonna dei rifiuti, e in formato 12 ore "AM" finiva
+            # scritto sopra la prima voce. Accanto all'ora, oltretutto, e'
+            # dove un orologio se lo aspetta.
+            riquadro = draw.textbbox((0, 0), meridiem, font=self._font_small)
+            alto = riquadro[3] - riquadro[1]
+            draw.text((min(ora_destra + 3, self.width - (riquadro[2] - riquadro[0]) - 1),
+                       max(0, ora_sotto - alto - riquadro[1])),
+                      meridiem, font=self._font_small, fill=date_color)
 
         return image

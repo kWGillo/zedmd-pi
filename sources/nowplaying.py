@@ -211,17 +211,61 @@ class NowPlayingSource(Source):
         self._draw_transport(image, draw, track, margin, rows)
         return image
 
+    @staticmethod
+    def _riga_alta(font):
+        """Quanto spazio verticale occupa davvero una riga di questo font.
+
+        `getmetrics()` da' ascendente e discendente, cioe' lo spazio che il
+        font si riserva sopra e sotto la linea di base. E' la misura giusta
+        perche' non dipende dal testo: una riga senza discendenti non deve
+        avere un'altezza diversa da una con la `g` di Agostino, altrimenti il
+        layout cambia da un brano all'altro.
+        """
+        try:
+            ascendente, discendente = font.getmetrics()
+            return max(1, ascendente + discendente)
+        except Exception:
+            return max(1, getattr(font, "size", 8))
+
     def _layout(self):
-        """Righe disponibili in base all'altezza del pannello."""
+        """Righe disponibili in base all'altezza del pannello.
+
+        Le righe si impilano a partire dalle **metriche dei font**, non da
+        frazioni fisse dell'altezza. Con le frazioni (0,33 e 0,56) su un
+        pannello da 64 righe l'artista finiva a y=37 e l'album cominciava a
+        y=37: si toccavano esattamente, e la `g` di "D'Agostino" entrava nel
+        titolo dell'album. Non era un errore di un pixel da correggere a mano:
+        era che nessuno aveva chiesto ai font quanto spazio volessero.
+        """
         height = self.height
         if height < MINIMAL_HEIGHT:
             return {"title": 0, "artist": None, "album": None,
                     "transport": height - max(5, int(height * 0.30))}
-        if height < COMPACT_HEIGHT:
-            return {"title": 0, "artist": int(height * 0.38), "album": None,
-                    "transport": int(height * 0.74)}
-        return {"title": 0, "artist": int(height * 0.33),
-                "album": int(height * 0.56), "transport": int(height * 0.78)}
+
+        # Lo spazio che serve alla barra in fondo, e quello di ogni riga.
+        barra = max(6, int(height * TIME_RATIO) + 2)
+        alte = {"title": self._riga_alta(self._font_title),
+                "artist": self._riga_alta(self._font_artist),
+                "album": self._riga_alta(self._font_album)}
+        righe = ["title", "artist"] + ([] if height < COMPACT_HEIGHT else ["album"])
+
+        # Si parte con un pixel di respiro fra le righe e si stringe solo se
+        # non ci sta: meglio righe attaccate che una riga tagliata via.
+        for spazio in (2, 1, 0):
+            totale = sum(alte[r] for r in righe) + spazio * len(righe)
+            if totale + barra <= height:
+                break
+
+        posizioni, y = {}, 0
+        for nome in righe:
+            posizioni[nome] = y
+            y += alte[nome] + spazio
+        for nome in ("artist", "album"):
+            posizioni.setdefault(nome, None)
+        # La barra sta in fondo, non subito sotto l'ultima riga: se avanza
+        # spazio lo si lascia in mezzo invece che sotto la barra.
+        posizioni["transport"] = max(y, height - barra)
+        return posizioni
 
     # ------------------------------------------------------------------ titolo
 

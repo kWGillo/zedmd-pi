@@ -184,9 +184,14 @@ class Lettore:
     """
 
     def __init__(self, dispositivi, azione, tasti=None, pulsanti=None,
-                 assi=None, avvio=PAD_AVVIO, etichetta="comandi"):
+                 assi=None, avvio=PAD_AVVIO, etichetta="comandi",
+                 su_codice=None):
         self._dispositivi = dispositivi
         self._azione = azione
+        # Chi vuole vedere i codici **prima** che diventino azioni: serve a
+        # imparare quale tasto e' un pulsante del cabinato. Restituendo True
+        # si ingoia l'evento, che altrimenti farebbe anche il suo mestiere.
+        self._su_codice = su_codice
         self._tasti = tasti or {}
         self._pulsanti = pulsanti or {}
         self._assi = assi or {}
@@ -301,6 +306,12 @@ class Lettore:
         # se la fa da solo, e sommarle vuol dire un comando che scatta.
         if valore not in (0, 1):
             return
+        if self._su_codice is not None:
+            try:
+                if self._su_codice(codice, valore == 1):
+                    return
+            except Exception:
+                pass
         pulsante = self._pulsanti.get(codice)
         if pulsante is not None:
             self._azione(pulsante, valore == 1, codice in self._avvio)

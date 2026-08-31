@@ -29,7 +29,7 @@ from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      ClockSource, DoomSource, GiochiSource,
                      MediaPlayerSource, NowPlayingSource, PreviewSource,
-                     ZeDMDSource)
+                     ZeDMDSource, controlla_wad)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -221,6 +221,11 @@ class Runtime:
         # servizio. Prendono la presa allo stesso modo e con lo stesso arbitro.
         self.giochi = GiochiSource(self.cfg, self.display.width,
                                    self.display.height, self.arbiter)
+        # Il giro dei giochi puo' comprendere Doom, ma la sorgente dei giochi
+        # non deve conoscerlo: le si danno due funzioni e le basta.
+        self.giochi.doom_pronto = lambda: not controlla_wad(
+            self.cfg["doom"].get("wad", ""))
+        self.giochi.apri_doom = lambda: self.gioca("doom")
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
         # Il brano corrente e chi lo disegna sono due cose distinte: lo stato
