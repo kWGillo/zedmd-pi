@@ -139,6 +139,22 @@ DEFAULTS = {
              "attiva": True, "ora_inizio": 0, "ora_fine": 6},
         ],
     },
+    "scadenze": {
+        # Soglie del semaforo, in giorni. Sopra la verde il semaforo resta
+        # spento: una scadenza fra un mese non e' una notizia, e un pannello
+        # che segnala sempre qualcosa non segnala piu' niente.
+        "soglia_verde": 10,
+        "soglia_giallo": 7,
+        "soglia_rosso": 3,
+        # Mostra le tre lampade anche quando sono tutte spente. Spento: il
+        # pannello resta pulito quando non c'e' niente in scadenza.
+        "semaforo_sempre": False,
+        # L'avviso periodico sul pannello, con la stessa forma di quello del
+        # radar: ogni quanto compare, e quanto resta.
+        "interval_minutes": 20,
+        "seconds": 10,
+        "speed": 40,
+    },
     # I giochi scritti per il pannello. Non sono un servizio e non compaiono
     # fra gli interruttori: sono una partita che comincia e finisce, come Doom
     # dalla 3.2. Qui stanno solo i comandi e i record.
@@ -321,6 +337,7 @@ DEFAULTS = {
         "banner": False,
         "nowplaying": False,
         "birthdays": False,
+        "scadenze": False,
         "status_player": False,
         "air_radar": False,
     },

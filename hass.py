@@ -217,6 +217,7 @@ class HassBridge:
             self._config("switch", key, entity)
 
         self._annuncia_rifiuti(common, base, node)
+        self._annuncia_scadenze(common, base, node)
 
         for key, label in MODES:
             entity = dict(common)
@@ -261,13 +262,15 @@ class HassBridge:
         # configurazione di adesso: da cancellare e' quello che e' stato
         # davvero dichiarato, anche se nel frattempo una voce e' sparita.
         noti = list(self._rifiuti_noti)
+        scad = [("sensor", "scad_%s" % k) for k, _, _, _ in self.SCADENZE]
         for component, object_id in ([("sensor", "nowplaying"),
                                       ("number", "brightness")] +
                                      [("switch", key) for key, _ in SWITCHES] +
                                      [("switch", key) for key, _ in MODES] +
                                      [("switch", key) for key, _, _ in AZIONI] +
                                      [("binary_sensor", "rif_%s" % c) for c in noti] +
-                                     [("sensor", "rifdata_%s" % c) for c in noti]):
+                                     [("sensor", "rifdata_%s" % c) for c in noti] +
+                                     scad):
             topic = "%s/%s/%s/%s/config" % (self.prefix(), component,
                                             self.node(), object_id)
             self.bus.publish(topic, "", retain=True)
@@ -308,6 +311,7 @@ class HassBridge:
                        "ON" if self._azione_accesa(key) else "OFF", force)
 
         self._pubblica_rifiuti(base, force)
+        self._pubblica_scadenze(base, force)
 
         self._send("%s/brightness/state" % base,
                    str(self.cfg["display"]["brightness"]), force)
@@ -329,6 +333,10 @@ class HassBridge:
         base = self.base()
         self.bus.subscribe("%s/service/+/set" % base, self._on_service)
         self.bus.subscribe("%s/brightness/set" % base, self._on_brightness)
+        # Le scadenze si possono anche **inserire** da Home Assistant: e' la
+        # sola parte del progetto in cui i dati viaggiano anche all'indietro.
+        self.bus.subscribe("%s/scadenze/aggiungi" % base, self._on_scadenza)
+        self.bus.subscribe("%s/scadenze/completa" % base, self._on_scadenza_fatta)
         # Home Assistant annuncia da solo quando riparte: pubblica "online"
         # su <prefisso>/status. E' il segnale esatto per ridichiarare le
         # entita', e non richiede di sapere dove sia ne' di sorvegliarlo.
@@ -372,6 +380,119 @@ class HassBridge:
         except Exception as exc:
             print("[hass] calendario rifiuti: %s" % exc)
             return []
+
+    # ------------------------------------------------------------- scadenze
+    #
+    # Qui la scelta e' l'opposto di quella dei rifiuti. Le frazioni sono sei e
+    # non cambiano mai, quindi hanno un'entita' ciascuna. Le scadenze nascono e
+    # muoiono, e una entita' per scadenza vorrebbe dire un elenco che si
+    # sporca di entita' orfane a ogni bolletta pagata.
+    #
+    # Quindi: **poche entita' fisse piu' un attributo JSON con l'elenco**. E'
+    # il modo con cui Home Assistant fa queste cose, e permette a una card o a
+    # un template di leggere tutto senza che noi si debba indovinare in
+    # anticipo che cosa serve.
+    SCADENZE = (
+        ("prossima", "Prossima scadenza", "mdi:calendar-clock", "date"),
+        ("titolo", "Prossima scadenza (titolo)", "mdi:label-outline", ""),
+        ("giorni", "Giorni alla scadenza", "mdi:calendar-range", ""),
+        ("semaforo", "Semaforo scadenze", "mdi:traffic-light", ""),
+        ("aperte", "Scadenze aperte", "mdi:format-list-checks", ""),
+    )
+
+    def _annuncia_scadenze(self, common, base, node):
+        for chiave, etichetta, icona, classe in self.SCADENZE:
+            entita = dict(common)
+            entita.update({
+                "name": etichetta,
+                "unique_id": "%s_scad_%s" % (node, chiave),
+                "object_id": "%s_scad_%s" % (node, chiave),
+                "state_topic": "%s/scadenze/%s" % (base, chiave),
+                "icon": icona,
+            })
+            if classe:
+                entita["device_class"] = classe
+            if chiave == "aperte":
+                # L'elenco completo viaggia come attributi di questa entita':
+                # un solo topic, e in Home Assistant si legge con
+                # state_attr('sensor.dmd_scad_aperte', 'elenco').
+                entita["json_attributes_topic"] = "%s/scadenze/elenco" % base
+                entita["unit_of_measurement"] = ""
+            self._config("sensor", "scad_%s" % chiave, entita)
+
+    def _pubblica_scadenze(self, base, force):
+        try:
+            import json as _json
+            import scadenze
+            elenco = scadenze.elenco(self.cfg)
+            stato = scadenze.semaforo(self.cfg)
+        except Exception as exc:
+            print("[hass] scadenze non leggibili: %s" % exc)
+            return
+        prima = elenco[0] if elenco else None
+        # In ISO, non nel formato italiano: e' quello che Home Assistant si
+        # aspetta da un sensore con device_class "date".
+        self._send("%s/scadenze/prossima" % base,
+                   prima["data"].isoformat() if prima else "", force)
+        self._send("%s/scadenze/titolo" % base,
+                   prima["titolo"] if prima else "", force)
+        self._send("%s/scadenze/giorni" % base,
+                   str(prima["giorni"]) if prima else "", force)
+        self._send("%s/scadenze/semaforo" % base, stato, force)
+        self._send("%s/scadenze/aperte" % base, str(len(elenco)), force)
+        self._send("%s/scadenze/elenco" % base, _json.dumps({
+            "elenco": [{
+                "id": v["id"], "titolo": v["titolo"],
+                "descrizione": v["descrizione"],
+                "data": v["data"].isoformat(), "giorni": v["giorni"],
+                "stato": v["stato"], "cadenza": v["cadenza"],
+            } for v in elenco],
+        }, ensure_ascii=False), force)
+
+    def _on_scadenza(self, topic, payload):
+        """Una scadenza che arriva **da** Home Assistant.
+
+        Il payload e' JSON: {"titolo": ..., "data": "gg/mm/aaaa",
+        "cadenza": "mensile", "descrizione": ...}. Serve a creare una scadenza
+        da un'automazione o da un assistente vocale, senza aprire la pagina.
+
+        Tutto avvolto: un payload sbagliato non deve fermare il ponte, e
+        nemmeno finire in configurazione come una scadenza senza data.
+        """
+        try:
+            import json as _json
+            import scadenze
+            grezzo = payload.decode("utf-8", "replace") if isinstance(payload, bytes) \
+                else str(payload)
+            dati = _json.loads(grezzo)
+            if not isinstance(dati, dict):
+                raise ValueError("payload non e' un oggetto")
+            voce = scadenze.aggiungi(dati.get("titolo", ""), dati.get("data", ""),
+                                     dati.get("cadenza", ""),
+                                     dati.get("descrizione", ""),
+                                     str(dati.get("id", "")))
+            if voce is None:
+                print("[hass] scadenza rifiutata: data mancante o illeggibile")
+            else:
+                print("[hass] scadenza aggiunta da Home Assistant: %s" % voce["titolo"])
+        except Exception as exc:
+            print("[hass] scadenza non aggiunta: %s" % exc)
+        self.publish_state(force=True)
+
+    def _on_scadenza_fatta(self, topic, payload):
+        """Segna completata una scadenza, dal suo id."""
+        try:
+            import scadenze
+            identificativo = payload.decode("utf-8", "replace").strip() \
+                if isinstance(payload, bytes) else str(payload).strip()
+            if scadenze.completa(identificativo):
+                print("[hass] scadenza completata da Home Assistant: %s"
+                      % identificativo)
+            else:
+                print("[hass] scadenza %r non trovata" % identificativo)
+        except Exception as exc:
+            print("[hass] completamento non riuscito: %s" % exc)
+        self.publish_state(force=True)
 
     def _annuncia_rifiuti(self, common, base, node):
         """Un binary_sensor e un sensor per ogni voce del calendario.

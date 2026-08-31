@@ -103,6 +103,54 @@ class ClockSource(Source):
             print("[clock] calendario rifiuti non leggibile: %s" % exc)
             return []
 
+    # Il semaforo delle scadenze sta a destra dell'ora, sotto la data: sono i
+    # 68 pixel che avanzano da quel lato, come i 68 di sinistra sono della
+    # colonna dei rifiuti. Tre cerchi da 13 con 4 di distacco fanno 47 pixel
+    # esatti, che e' quello che resta sotto la data.
+    SEM_RAGGIO = 6
+    SEM_PASSO = 17
+
+    def _semaforo(self):
+        """Lo stato del semaforo, o 'spento' se qualcosa non va.
+
+        Le scadenze stanno in un CSV che l'utente puo' modificare a mano: un
+        file scritto male non deve portarsi via l'orologio.
+        """
+        try:
+            import scadenze
+            return scadenze.semaforo(self.cfg)
+        except Exception as exc:
+            print("[clock] scadenze non leggibili: %s" % exc)
+            return "spento"
+
+    def _disegna_semaforo(self, draw, stato, sinistra, alto, acceso=True):
+        """Tre lampade in colonna, come un semaforo vero: solo una accesa.
+
+        Non un cerchio solo che cambia colore: con tre lampade la posizione
+        dice gia' l'urgenza, e da lontano si legge prima il *dove* del *che
+        colore* — che per chi non distingue bene i colori e' l'unica cosa che
+        funziona.
+        """
+        import scadenze
+        centro_x = sinistra + 34
+        for indice, quale in enumerate((scadenze.ROSSO, scadenze.GIALLO,
+                                        scadenze.VERDE)):
+            centro_y = alto + self.SEM_RAGGIO + indice * self.SEM_PASSO
+            colpita = (quale == stato
+                       or (quale == scadenze.ROSSO and stato == scadenze.SCADUTA))
+            if colpita and acceso:
+                colore = scadenze.COLORI[quale]
+                riempi = colore
+            else:
+                # Le lampade spente restano disegnate, fioche: un semaforo con
+                # una lampada sola sembra un puntino, con tre si capisce che
+                # cos'e' anche quando e' verde.
+                riempi = None
+                colore = tuple(max(6, c // 9) for c in scadenze.COLORI[quale])
+            draw.ellipse([centro_x - self.SEM_RAGGIO, centro_y - self.SEM_RAGGIO,
+                          centro_x + self.SEM_RAGGIO, centro_y + self.SEM_RAGGIO],
+                         fill=riempi, outline=colore)
+
     def _disegna_colonna(self, draw, voci, limite):
         """Disegna le voci impilate a sinistra, dentro `limite` pixel.
 
@@ -163,11 +211,18 @@ class ClockSource(Source):
         date = "%s %02d/%02d" % (days[now.tm_wday], now.tm_mday, now.tm_mon)
 
         colonna = self._colonna()
+        stato_sem = self._semaforo()
+        # Una scadenza passata lampeggia. La fase e' quella del secondo pari,
+        # la stessa dei due punti dell'ora: due cose che lampeggiano insieme
+        # sembrano un battito, due che lampeggiano sfasate sembrano un guasto.
+        import scadenze as _sc
+        sem_acceso = second_even or stato_sem != _sc.SCADUTA
 
         # Ridisegna solo quando cambia qualcosa di visibile.
         signature = (shown, date if clock["show_date"] else "", meridiem,
                      clock["time_color"], clock["date_color"],
-                     tuple((v["nome"], v["colore"]) for v in colonna))
+                     tuple((v["nome"], v["colore"]) for v in colonna),
+                     stato_sem, sem_acceso)
         if signature == self._signature:
             return None
         self._signature = signature
@@ -195,6 +250,12 @@ class ClockSource(Source):
             box = draw.textbbox((0, 0), date, font=self._font_small)
             draw.text((self.width - (box[2] - box[0]) - 3, 2), date,
                       font=self._font_small, fill=date_color)
+
+        # Il semaforo occupa quello che avanza a destra dell'ora, sotto la
+        # data: dal bordo destro dell'ora al bordo del pannello.
+        if stato_sem != "spento" or self.cfg.get("scadenze", {}).get("semaforo_sempre"):
+            self._disegna_semaforo(draw, stato_sem, ora_destra + 3, 17,
+                                   acceso=sem_acceso)
 
         if meridiem:
             # Attaccato alle cifre, non nell'angolo in alto a sinistra: li'

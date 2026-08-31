@@ -472,3 +472,24 @@ table.files tr.now td.mono { color: #6cc8f0; }
 }
 
 .pad .tasto:active { background: var(--accent); color: #1a0f00; }
+
+/* ---- versione 4.0: le scadenze ---- */
+
+.semaforo-riga { display: flex; align-items: center; gap: 8px; margin: 14px 0 4px; }
+
+.lampada {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1px solid var(--line); background: #0d1117;
+}
+.lampada.rosso.on  { background: #ff2828; box-shadow: 0 0 8px #ff2828; border-color: #ff2828; }
+.lampada.giallo.on { background: #ffc81e; box-shadow: 0 0 8px #ffc81e; border-color: #ffc81e; }
+.lampada.verde.on  { background: #28dc46; box-shadow: 0 0 8px #28dc46; border-color: #28dc46; }
+.semaforo-riga .status { margin-left: 6px; text-transform: uppercase; letter-spacing: .5px; }
+
+table.scadenze td { vertical-align: top; }
+table.scadenze .giorni { color: var(--muted); font-size: 11px; }
+table.scadenze tr.stato-rosso .giorni,
+table.scadenze tr.stato-scaduta .giorni { color: #ff8080; }
+table.scadenze tr.stato-giallo .giorni { color: #ffc81e; }
+table.scadenze tr.stato-verde .giorni { color: #28dc46; }
+table.scadenze tr.stato-scaduta b { color: #ff8080; }

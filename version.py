@@ -524,6 +524,42 @@ Storico:
         lasciare il pannello a nessuno. Premere Start e vedere il nero e'
         il peggio dei mondi; e se non parte proprio nessuno, dopo un giro
         completo si smette invece di provare all'infinito.
+  4.0  Scadenze: appuntamenti e pagamenti, con un semaforo a destra
+       dell'orologio. Assomiglia al calendario dei rifiuti, ma le differenze
+       contano piu' delle somiglianze.
+       **Le cadenze sono altre.** I rifiuti hanno un ritmo settimanale; una
+       bolletta e' mensile, trimestrale, annuale — multipli di mesi, ancorati
+       a una data di partenza. Il 31 gennaio piu' un mese e' il 28 febbraio e
+       non il 3 marzo: una rata che scade il 31 non deve spostarsi di tre
+       giorni ogni febbraio.
+       **Una scadenza si chiude.** Un bidone si espone e basta; una bolletta
+       si paga, e da quel momento quell'occorrenza e' storia. Chiudere una
+       periodica apre da sola la successiva.
+       **Il semaforo e' tre lampade, non un cerchio che cambia colore.** Con
+       tre lampade la posizione dice gia' l'urgenza, e da lontano si legge
+       prima il *dove* del *che colore* — che per chi non distingue bene i
+       colori e' l'unica cosa che funziona. Spento oltre dieci giorni, verde
+       da otto a dieci, giallo da quattro a sette, rosso da zero a tre, rosso
+       lampeggiante quando la data e' passata. Le soglie si cambiano, e il
+       lampeggio e' in fase con i due punti dell'ora: due cose che lampeggiano
+       insieme sembrano un battito, sfasate sembrano un guasto.
+       Ogni tanto il pannello mostra **che cosa**: titolo che scorre se e'
+       lungo, data del colore del semaforo, descrizione. Scorre solo il
+       titolo — far scorrere tre righe darebbe un pannello che si muove tutto
+       e non si legge niente.
+       **Il registro non si cancella mai.** Ogni occorrenza con l'ora in cui
+       e' stata inserita e quella in cui e' stata completata, in un CSV a
+       parte: e' l'unica parte del progetto in cui serve sapere *quando* e'
+       successo qualcosa. Sopravvive alla cancellazione della scadenza, e se
+       la riga aperta non c'e' piu' il completamento si scrive lo stesso —
+       meglio una riga senza ora di inserimento che un pagamento senza traccia.
+       Le scadenze si scrivono nella pagina, si incollano come CSV (separatore
+       riconosciuto da solo), **e arrivano da Home Assistant**: cinque entita'
+       fisse piu' l'elenco completo come attributi JSON, e due topic di
+       comando per aggiungere e completare. Non un'entita' per scadenza: le
+       scadenze nascono e muoiono, e ne resterebbero di orfane a ogni bolletta
+       pagata. E' la prima parte del progetto in cui i dati viaggiano anche
+       all'indietro.
 """
 
-__version__ = "3.8.3"
+__version__ = "4.0"

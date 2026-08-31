@@ -1130,6 +1130,83 @@ STRINGS = {
         "that change the installed software rather than tune it, which is "
         "why they live outside Settings."),
     # ----------------------------------------------------------------- rifiuti
+    "nav.scadenze": ("Scadenze", "Deadlines"),
+    "scadenze.title": ("Scadenze e appuntamenti", "Deadlines and appointments"),
+    "scadenze.intro": (
+        "Un semaforo a destra dell\u2019orologio dice se c\u2019\u00e8 qualcosa "
+        "in arrivo, e ogni tanto il pannello mostra che cosa. Le scadenze si "
+        "scrivono qui, si importano da un CSV, o arrivano da Home Assistant.",
+        "A traffic light to the right of the clock says whether something is "
+        "due, and now and then the panel shows what. Deadlines are written "
+        "here, imported from a CSV, or sent from Home Assistant."),
+    "scadenze.aperte": ("Scadenze aperte", "Open deadlines"),
+    "scadenze.nessuna": ("Nessuna scadenza aperta.", "No open deadlines."),
+    "scadenze.nuova": ("Aggiungi una scadenza", "Add a deadline"),
+    "scadenze.titolo": ("Titolo", "Title"),
+    "scadenze.data": ("Scadenza", "Due date"),
+    "scadenze.cadenza": ("Ricorrenza", "Recurrence"),
+    "scadenze.descrizione": ("Descrizione", "Description"),
+    "scadenze.aggiungi": ("Aggiungi", "Add"),
+    "scadenze.completa": ("Fatto", "Done"),
+    "scadenze.riapri": ("Annulla", "Undo"),
+    "scadenze.elimina": ("Elimina", "Delete"),
+    "scadenze.giorni": ("giorni", "days"),
+    "scadenze.cadenza.una_tantum": ("Una tantum", "One-off"),
+    "scadenze.cadenza.mensile": ("Mensile", "Monthly"),
+    "scadenze.cadenza.bimestrale": ("Bimestrale", "Every two months"),
+    "scadenze.cadenza.trimestrale": ("Trimestrale", "Quarterly"),
+    "scadenze.cadenza.semestrale": ("Semestrale", "Every six months"),
+    "scadenze.cadenza.annuale": ("Annuale", "Yearly"),
+    "scadenze.stato.spento": ("lontana", "far off"),
+    "scadenze.stato.verde": ("in avvicinamento", "approaching"),
+    "scadenze.stato.giallo": ("vicina", "close"),
+    "scadenze.stato.rosso": ("imminente", "imminent"),
+    "scadenze.stato.scaduta": ("SCADUTA", "OVERDUE"),
+    "scadenze.csv": ("Elenco in formato CSV", "List in CSV format"),
+    "scadenze.csv.hint": (
+        "Una riga per scadenza: id;titolo;data;ricorrenza;descrizione;attiva;"
+        "completate. Si pu\u00f2 incollare quello che esce da un foglio di "
+        "calcolo \u2014 il separatore, punto e virgola o virgola, viene "
+        "riconosciuto da solo, e le righe senza una data valida si saltano.",
+        "One row per deadline: id;title;date;recurrence;description;active;"
+        "completed. You can paste what a spreadsheet exports \u2014 the "
+        "separator, semicolon or comma, is detected automatically, and rows "
+        "without a valid date are skipped."),
+    "scadenze.soglie": ("Semaforo", "Traffic light"),
+    "scadenze.soglie.hint": (
+        "Giorni che mancano alla scadenza. Oltre la soglia verde il semaforo "
+        "resta spento: una scadenza fra un mese non \u00e8 una notizia, e un "
+        "pannello che segnala sempre qualcosa non segnala pi\u00f9 niente. "
+        "Superata la data, il rosso lampeggia.",
+        "Days remaining. Beyond the green threshold the light stays off: "
+        "something due in a month is not news, and a panel that always signals "
+        "something signals nothing. Past the date, red blinks."),
+    "scadenze.soglia_verde": ("Verde entro", "Green within"),
+    "scadenze.soglia_giallo": ("Giallo entro", "Yellow within"),
+    "scadenze.soglia_rosso": ("Rosso entro", "Red within"),
+    "scadenze.sempre": ("Mostra le lampade anche quando sono tutte spente",
+                        "Show the lamps even when they are all off"),
+    "scadenze.avviso": ("Avviso sul pannello", "Panel reminder"),
+    "scadenze.interval": ("Ogni (minuti)", "Every (minutes)"),
+    "scadenze.seconds": ("Durata (secondi)", "Duration (seconds)"),
+    "scadenze.speed": ("Velocit\u00e0 dello scorrimento", "Scroll speed"),
+    "scadenze.registro": ("Registro", "Log"),
+    "scadenze.registro.hint": (
+        "Ogni occorrenza con l\u2019ora in cui \u00e8 stata inserita e quella "
+        "in cui \u00e8 stata completata. Non si cancella mai: \u00e8 l\u2019unico "
+        "posto in cui resta traccia di che cosa \u00e8 stato pagato e quando.",
+        "Every occurrence with the time it was created and the time it was "
+        "completed. Never erased: it is the only place where a record of what "
+        "was paid, and when, survives."),
+    "scadenze.registro.scarica": ("Scarica il registro CSV", "Download the CSV log"),
+    "scadenze.panel.mancano": ("- %(giorni)dgg", "- %(giorni)dd"),
+    "scadenze.panel.oggi": ("OGGI", "TODAY"),
+    "scadenze.panel.scaduta": ("+%(giorni)dgg", "+%(giorni)dd"),
+    "status.scadenze.nessuna": ("nessuna scadenza in vista", "no deadlines in sight"),
+    "status.scadenze.attesa": ("%(count)d in scadenza, %(shown)d avvisi mostrati",
+                               "%(count)d due, %(shown)d reminders shown"),
+    "status.scadenze.mostra": ("in mostra: %(titolo)s", "showing: %(titolo)s"),
+    "status.scadenze.errore": ("errore: %(error)s", "error: %(error)s"),
     "nav.giochi": ("Giochi", "Games"),
     "giochi.title": ("Giochi sul pannello", "Games on the panel"),
     "giochi.intro": (

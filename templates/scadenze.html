@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.scadenze') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('scadenze.title') }}</h2>
+  <p class="hint">{{ t('scadenze.intro') }}</p>
+
+  <div class="semaforo-riga">
+    <span class="lampada {{ 'on' if semaforo in ('rosso', 'scaduta') }} rosso"></span>
+    <span class="lampada {{ 'on' if semaforo == 'giallo' }} giallo"></span>
+    <span class="lampada {{ 'on' if semaforo == 'verde' }} verde"></span>
+    <span class="status">{{ t('scadenze.stato.' + semaforo) }}</span>
+  </div>
+
+  {% if aperte %}
+  <table class="files scadenze">
+    {% for v in aperte %}
+    <tr class="stato-{{ v.stato }}">
+      <td><b>{{ v.titolo }}</b>
+        {% if v.descrizione %}<br><span class="hint">{{ v.descrizione }}</span>{% endif %}</td>
+      <td class="size">{{ v.data.strftime('%d/%m/%Y') }}<br>
+        <span class="giorni">{{ v.giorni }} {{ t('scadenze.giorni') }}</span></td>
+      <td class="size">{{ t('scadenze.cadenza.' + v.cadenza) }}</td>
+      <td class="act">
+        <form method="post" action="{{ url_for('api_scadenze_completa') }}">
+          <input type="hidden" name="id" value="{{ v.id }}">
+          <button type="submit" class="small">{{ t('scadenze.completa') }}</button>
+        </form>
+      </td>
+      <td class="act">
+        <form method="post" action="{{ url_for('api_scadenze_elimina') }}">
+          <input type="hidden" name="id" value="{{ v.id }}">
+          <button type="submit" class="small ghost">{{ t('scadenze.elimina') }}</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="status">{{ t('scadenze.nessuna') }}</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ t('scadenze.nuova') }}</h2>
+  <form method="post" action="{{ url_for('api_scadenze_aggiungi') }}">
+    <div class="row3">
+      <div><label for="titolo">{{ t('scadenze.titolo') }}</label>
+        <input type="text" id="titolo" name="titolo" maxlength="{{ max_titolo }}"></div>
+      <div><label for="data">{{ t('scadenze.data') }}</label>
+        <input type="text" id="data" name="data" placeholder="gg/mm/aaaa"></div>
+      <div><label for="cadenza">{{ t('scadenze.cadenza') }}</label>
+        <select id="cadenza" name="cadenza">
+          {% for c in cadenze %}
+          <option value="{{ c }}">{{ t('scadenze.cadenza.' + c) }}</option>
+          {% endfor %}
+        </select></div>
+    </div>
+    <label for="descrizione">{{ t('scadenze.descrizione') }}</label>
+    <input type="text" id="descrizione" name="descrizione" maxlength="{{ max_descr }}">
+    <button type="submit">{{ t('scadenze.aggiungi') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('scadenze.csv') }}</h2>
+  <p class="hint">{{ t('scadenze.csv.hint') }}</p>
+  <form method="post" action="{{ url_for('api_scadenze_csv') }}">
+    <textarea name="testo" rows="8" spellcheck="false">{{ csv_testo }}</textarea>
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('scadenze.soglie') }}</h2>
+  <p class="hint">{{ t('scadenze.soglie.hint') }}</p>
+  <form method="post" action="{{ url_for('api_scadenze') }}">
+    <div class="row3">
+      <div><label for="soglia_verde">{{ t('scadenze.soglia_verde') }}</label>
+        <input type="number" id="soglia_verde" name="soglia_verde" min="1" max="365"
+               value="{{ cfg.scadenze.soglia_verde }}"></div>
+      <div><label for="soglia_giallo">{{ t('scadenze.soglia_giallo') }}</label>
+        <input type="number" id="soglia_giallo" name="soglia_giallo" min="1" max="365"
+               value="{{ cfg.scadenze.soglia_giallo }}"></div>
+      <div><label for="soglia_rosso">{{ t('scadenze.soglia_rosso') }}</label>
+        <input type="number" id="soglia_rosso" name="soglia_rosso" min="0" max="365"
+               value="{{ cfg.scadenze.soglia_rosso }}"></div>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="semaforo_sempre" {{ 'checked' if cfg.scadenze.semaforo_sempre }}>
+      {{ t('scadenze.sempre') }}
+    </label>
+
+    <hr class="sep">
+    <h3>{{ t('scadenze.avviso') }}</h3>
+    <div class="row3">
+      <div><label for="interval_minutes">{{ t('scadenze.interval') }}</label>
+        <input type="number" id="interval_minutes" name="interval_minutes" min="1" max="720"
+               value="{{ cfg.scadenze.interval_minutes }}"></div>
+      <div><label for="seconds">{{ t('scadenze.seconds') }}</label>
+        <input type="number" id="seconds" name="seconds" min="2" max="60"
+               value="{{ cfg.scadenze.seconds }}"></div>
+      <div><label for="speed">{{ t('scadenze.speed') }}</label>
+        <input type="number" id="speed" name="speed" min="5" max="120"
+               value="{{ cfg.scadenze.speed }}"></div>
+    </div>
+
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('scadenze.registro') }}</h2>
+  <p class="hint">{{ t('scadenze.registro.hint') }}</p>
+  {% if registro %}
+  <table class="files">
+    {% for r in registro %}
+    <tr>
+      <td>{{ r.titolo }}</td>
+      <td class="size">{{ r.scadenza }}</td>
+      <td class="size">{{ r.inserita or '—' }}</td>
+      <td class="size">{{ r.completata or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+  <p class="actions"><a class="btn" href="{{ url_for('api_scadenze_registro') }}">{{ t('scadenze.registro.scarica') }}</a></p>
+</section>
+
+{% endblock %}

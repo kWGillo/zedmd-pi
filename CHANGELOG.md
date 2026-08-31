@@ -2,6 +2,73 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.0]
+
+### Aggiunto
+- **Scadenze: appuntamenti e pagamenti, con un semaforo a destra dell'orologio.**
+  Assomiglia al calendario dei rifiuti, ma le differenze contano più delle
+  somiglianze.
+
+  **Le cadenze sono altre.** I rifiuti hanno un ritmo settimanale — quali giorni,
+  ogni quante settimane. Una bolletta no: è mensile, trimestrale, annuale.
+  Multipli di mesi, ancorati a una data di partenza. Il 31 gennaio più un mese è
+  il 28 febbraio e non il 3 marzo: una rata che scade il 31 non deve spostarsi di
+  tre giorni ogni febbraio.
+
+  **Una scadenza si chiude.** Un bidone si espone e basta; una bolletta si paga,
+  e da quel momento quell'occorrenza è storia. Chiudere una periodica apre da
+  sola la successiva; una una tantum sparisce dall'elenco ma la voce resta, così
+  la si può riaprire se si è spuntata per sbaglio.
+
+- **Il semaforo è tre lampade, non un cerchio che cambia colore.** Con tre
+  lampade la posizione dice già l'urgenza, e da lontano si legge prima il *dove*
+  del *che colore* — che per chi non distingue bene i colori è l'unica cosa che
+  funziona. Occupa i 68 pixel che avanzano a destra dell'ora, sotto la data,
+  come i 68 di sinistra sono della colonna dei rifiuti.
+
+  | Giorni | Lampada |
+  |---|---|
+  | oltre 10 | spento |
+  | da 8 a 10 | verde |
+  | da 4 a 7 | giallo |
+  | da 0 a 3 | rosso |
+  | data passata | rosso lampeggiante |
+
+  Le soglie si cambiano dalla pagina. Il 7 sta nel giallo e non nel verde: fra
+  due letture possibili si è scelta la più prudente. Il lampeggio è **in fase con
+  i due punti dell'ora**: due cose che lampeggiano insieme sembrano un battito,
+  sfasate sembrano un guasto.
+
+- **Un avviso periodico sul pannello**, con la forma di quello del radar: titolo
+  in alto che scorre se è lungo, data del colore del semaforo, descrizione sotto.
+  Scorre solo il titolo — far scorrere tre righe darebbe un pannello che si muove
+  tutto e non si legge niente. Sul pannello vanno solo le scadenze su cui il
+  semaforo si è già acceso; le altre restano nella pagina, dove c'è spazio per
+  leggerle.
+
+- **Un registro che non si cancella mai.** Ogni occorrenza con l'ora in cui è
+  stata inserita e quella in cui è stata completata, in un CSV a parte. È l'unica
+  parte del progetto in cui serve sapere *quando* è successo qualcosa e non solo
+  che cosa succede adesso. Sopravvive alla cancellazione della scadenza, e se la
+  riga aperta non c'è più il completamento si scrive lo stesso: meglio una riga
+  senza ora di inserimento che un pagamento senza traccia.
+
+- **Le scadenze arrivano anche da Home Assistant, e ci tornano.** Cinque entità
+  fisse — prossima data (`device_class: date`), titolo, giorni mancanti, stato
+  del semaforo, numero di aperte — più **l'elenco completo come attributi JSON**
+  su un topic solo. Non un'entità per scadenza: nascono e muoiono, e ne
+  resterebbero di orfane a ogni bolletta pagata.
+
+  Due topic di comando (`dmd/scadenze/aggiungi` con un payload JSON,
+  `dmd/scadenze/completa` con un id) permettono di **creare e chiudere scadenze
+  da un'automazione**. È la prima parte del progetto in cui i dati viaggiano
+  anche all'indietro; un payload sbagliato viene rifiutato senza fermare il
+  ponte.
+
+- **Inserimento a mano, o incollando un CSV.** Il separatore — punto e virgola o
+  virgola — viene riconosciuto da solo, e le righe senza una data valida si
+  saltano dicendo quante sono, invece di far fallire tutto il file.
+
 ## [3.8.3]
 
 ### Corretto

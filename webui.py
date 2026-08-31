@@ -22,6 +22,7 @@ import compleanni
 import doomsetup
 import lookup
 import rifiuti
+import scadenze
 import nowplaying
 import presets
 import ota
@@ -423,6 +424,89 @@ def create_app(runtime):
             rifiuti.salva_testo(nome, request.form.get("testo", ""))
             runtime.clock.invalidate()
         return redirect(url_for("page_rifiuti"))
+
+    # -------------------------------------------------------------- scadenze
+
+    @app.route("/scadenze")
+    def page_scadenze():
+        return render_template(
+            "scadenze.html", cfg=cfg,
+            aperte=scadenze.elenco(cfg), semaforo=scadenze.semaforo(cfg),
+            cadenze=list(scadenze.CADENZE), csv_testo=scadenze.leggi_testo(),
+            registro=list(reversed(scadenze.registro(20))),
+            max_titolo=scadenze.MAX_TITOLO, max_descr=scadenze.MAX_DESCRIZIONE,
+            page="scadenze")
+
+    def _dopo_scadenze():
+        """Il pannello deve accorgersene subito, non al prossimo minuto."""
+        try:
+            runtime.clock.invalidate()
+        except Exception:
+            pass
+        try:
+            runtime.hass.publish_state(force=True)
+        except Exception:
+            pass
+
+    @app.route("/api/scadenze/aggiungi", methods=["POST"])
+    def api_scadenze_aggiungi():
+        scadenze.aggiungi(request.form.get("titolo", ""),
+                          request.form.get("data", ""),
+                          request.form.get("cadenza", ""),
+                          request.form.get("descrizione", ""))
+        _dopo_scadenze()
+        return redirect(url_for("page_scadenze"))
+
+    @app.route("/api/scadenze/completa", methods=["POST"])
+    def api_scadenze_completa():
+        scadenze.completa(request.form.get("id", ""))
+        _dopo_scadenze()
+        if request.form.get("ajax"):
+            return jsonify({"ok": True})
+        return redirect(url_for("page_scadenze"))
+
+    @app.route("/api/scadenze/elimina", methods=["POST"])
+    def api_scadenze_elimina():
+        scadenze.elimina(request.form.get("id", ""))
+        _dopo_scadenze()
+        return redirect(url_for("page_scadenze"))
+
+    @app.route("/api/scadenze/csv", methods=["POST"])
+    def api_scadenze_csv():
+        scadenze.salva_testo(request.form.get("testo", ""))
+        _dopo_scadenze()
+        return redirect(url_for("page_scadenze"))
+
+    @app.route("/api/scadenze/registro")
+    def api_scadenze_registro():
+        percorso = scadenze.percorso(scadenze.FILE_LOG)
+        if not os.path.exists(percorso):
+            return app.response_class(
+                ";".join(scadenze.CAMPI_LOG) + "\n", mimetype="text/csv")
+        return send_file(percorso, mimetype="text/csv", as_attachment=True,
+                         download_name="scadenze_log.csv")
+
+    @app.route("/api/scadenze", methods=["POST"])
+    def api_scadenze():
+        conf = cfg.setdefault("scadenze", {})
+        for chiave, basso, alto, predefinito in (
+                ("soglia_verde", 1, 365, 10), ("soglia_giallo", 1, 365, 7),
+                ("soglia_rosso", 0, 365, 3),
+                ("interval_minutes", 1, 720, 20), ("seconds", 2, 60, 10),
+                ("speed", 5, 120, 40)):
+            try:
+                conf[chiave] = max(basso, min(alto, int(
+                    request.form.get(chiave, predefinito))))
+            except (TypeError, ValueError):
+                conf[chiave] = predefinito
+        # Le soglie devono restare in ordine: una gialla piu' larga della verde
+        # vorrebbe dire un semaforo che salta il verde, e non lo direbbe.
+        conf["soglia_giallo"] = min(conf["soglia_giallo"], conf["soglia_verde"])
+        conf["soglia_rosso"] = min(conf["soglia_rosso"], conf["soglia_giallo"])
+        conf["semaforo_sempre"] = request.form.get("semaforo_sempre") == "on"
+        dmdconf.save()
+        _dopo_scadenze()
+        return redirect(url_for("page_scadenze"))
 
     # ---------------------------------------------------------------- giochi
 

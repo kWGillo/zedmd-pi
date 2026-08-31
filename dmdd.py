@@ -29,7 +29,7 @@ from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      ClockSource, DoomSource, GiochiSource,
                      MediaPlayerSource, NowPlayingSource, PreviewSource,
-                     ZeDMDSource, controlla_wad)
+                     ScadenzeSource, ZeDMDSource, controlla_wad)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -231,6 +231,8 @@ class Runtime:
         self.giochi.apri_partita = self.gioca
         # Select esce da qualunque partita, Doom compreso.
         self.giochi.chiudi_partita = self.smetti
+        self.scadenze = ScadenzeSource(self.cfg, self.display.width,
+                                       self.display.height)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
         # Il brano corrente e chi lo disegna sono due cose distinte: lo stato
@@ -244,8 +246,8 @@ class Runtime:
         self.hass = hass.HassBridge(self.cfg, self.mqtt, self)
 
         for source in (self.zedmd, self.preview, self.radar, self.player,
-                       self.birthdays, self.banner, self.media, self.doom,
-                       self.giochi, self.clock):
+                       self.birthdays, self.scadenze, self.banner, self.media,
+                       self.doom, self.giochi, self.clock):
             self.arbiter.register(source)
         self.arbiter.apply_services()
         # Doom non passa da apply_services: non e' un servizio. Qui parte solo
