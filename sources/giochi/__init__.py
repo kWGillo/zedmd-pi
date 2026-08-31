@@ -241,6 +241,7 @@ class GiochiSource(Source):
     doom_pronto = None
     apri_doom = None
     apri_partita = None
+    chiudi_partita = None
 
     def ciclo(self):
         """Passa al gioco successivo. Da fermo, riprende da dove era rimasto.
@@ -368,7 +369,13 @@ class GiochiSource(Source):
     def premi(self, azione, giu=True, apri=True):
         """Un comando, da qualunque parte arrivi: pagina web, tastiera o pad."""
         if azione == "esci" and giu:
-            self.chiudi_sessione()
+            # Select esce da **qualunque** partita, anche da Doom: e' un
+            # pulsante globale come Start, e chi lo preme vuole tornare
+            # all'orologio, non sapere quale sorgente stesse girando.
+            if callable(self.chiudi_partita):
+                self.chiudi_partita()
+            else:
+                self.chiudi_sessione()
             return True
         if azione == "ciclo":
             # Solo alla pressione: sul rilascio si passerebbe al gioco dopo.

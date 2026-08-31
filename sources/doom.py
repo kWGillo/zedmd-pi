@@ -109,14 +109,23 @@ from .comandi import (BTN_EAST, BTN_MODE, BTN_NORTH, BTN_SELECT, BTN_SOUTH,
 # kernel ha scambiato triangolo e quadrato: per questo le azioni importanti
 # stanno su piu' pulsanti. Sparare con R2 *e* con la croce non da' fastidio a
 # nessuno, e salva chi ha un pad che si dichiara diversamente.
+# **Start, PS e Select non sono di Doom.** Dalla 3.8.2 sono globali: Start e PS
+# scorrono i giochi, Select esce da qualunque partita. Prima erano di entrambi
+# — Doom li leggeva come "menu" e i giochi come "ciclo" — e siccome i due
+# lettori ricevono lo stesso evento, una pressione sola apriva un gioco e
+# subito dopo Doom: si vedeva il gioco per un attimo e poi Doom se lo mangiava.
+# Un pulsante deve avere un significato solo.
+#
+# Menu e invio si spostano sulle levette premute (L3 e R3), che nessun altro
+# usa. Ci perdono arma1 e arma2, che restano sui tasti numerici della tastiera
+# e sui pulsanti della pagina: cambiare arma si puo' fare in altri modi, uscire
+# da un menu con il pad no.
 PAD_PULSANTI = {
     BTN_SOUTH: "fuoco", BTN_TR2: "fuoco", BTN_TR: "fuoco",
     BTN_EAST: "usa", BTN_WEST: "usa",
     BTN_TL: "corsa", BTN_TL2: "corsa",
     BTN_NORTH: "mappa",
-    BTN_START: "menu", BTN_MODE: "menu",
-    BTN_SELECT: "invio",
-    BTN_THUMBL: "arma1", BTN_THUMBR: "arma2",
+    BTN_THUMBL: "menu", BTN_THUMBR: "invio",
 }
 
 # Assi -> coppia di azioni (valore negativo, valore positivo). Levetta
@@ -210,7 +219,7 @@ class DoomSource(Source):
         self._lettore = Lettore(
             self._dispositivi, self._da_comando,
             tasti=LINUX_TASTI, pulsanti=PAD_PULSANTI, assi=PAD_ASSI,
-            etichetta="doom")
+            avvio=(), etichetta="doom")
 
     # ------------------------------------------------------------ ciclo di vita
 
@@ -596,18 +605,44 @@ class DoomSource(Source):
                 senza_ripetizioni.append(percorso)
         return senza_ripetizioni
 
+    def pannello_di_altri(self):
+        """True se in questo momento il pannello e' preso da qualcun altro.
+
+        Serve a una regola sola ma importante: **da un comando non si apre una
+        partita mentre qualcun altro sta usando il pannello.** I lettori di
+        Doom e dei giochi ricevono gli stessi eventi, e senza questa guardia
+        un pulsante premuto durante una partita altrui poteva far partire Doom
+        di sorpresa. La presa e' l'unica cosa che sa chi sta lavorando.
+        """
+        arbitro = self.arbiter
+        if arbitro is None:
+            return False
+        try:
+            return bool(arbitro.holding()) and not arbitro.holding(self.name)
+        except Exception:
+            return False
+
     def _da_comando(self, azione, giu, avvio):
         """Un comando letto da tastiera o da pad diventa un tasto di Doom.
 
-        La distinzione fra i due sta tutta qui: la tastiera del cabinato puo'
-        far cominciare una partita solo se lo si e' chiesto, mentre Options
-        sul pad si', perche' un pulsante preciso su un pad che si tiene in
-        mano non si preme per sbaglio come un tasto sfiorato per caso.
+        Dalla 3.8.2 **nessun pulsante del pad puo' far cominciare Doom**:
+        Start e PS appartengono al giro dei giochi, e Doom ci si raggiunge
+        dal giro (se lo si e' incluso), dalla sua pagina o da Home Assistant.
+        Prima Options apriva Doom *e* faceva scorrere i giochi, perche' i due
+        lettori ricevono lo stesso evento: si vedeva un gioco per un attimo e
+        poi Doom se lo mangiava.
+
+        Dalla tastiera del cabinato resta possibile, se lo si e' chiesto — ma
+        mai mentre il pannello e' di un'altra partita.
         """
-        if avvio:
-            apri = self.avvia_da_pad()
-        elif azione in PAD_PULSANTI.values() and azione not in LINUX_TASTI.values():
+        if avvio or (azione in PAD_PULSANTI.values()
+                     and azione not in LINUX_TASTI.values()):
+            # Nessun pulsante del pad apre Doom. La regola sta scritta qui e
+            # non solo nella tabella dei pulsanti: cosi' resta vera anche se
+            # domani qualcuno rimette Options fra quelli di avvio.
             apri = False
         else:
             apri = self.avvia_da_tastiera()
+        if apri and self.pannello_di_altri():
+            apri = False
         self.premi(azione, giu, apri=apri)

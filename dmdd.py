@@ -229,6 +229,8 @@ class Runtime:
         # Anche aprire un gioco passa di qui: e' l'unico punto che sa che
         # Doom e i giochi si contendono la stessa presa del pannello.
         self.giochi.apri_partita = self.gioca
+        # Select esce da qualunque partita, Doom compreso.
+        self.giochi.chiudi_partita = self.smetti
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
         # Il brano corrente e chi lo disegna sono due cose distinte: lo stato

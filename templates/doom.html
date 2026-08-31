@@ -167,10 +167,6 @@
       <input type="checkbox" name="joystick" {{ 'checked' if doom.joystick }}>
       {{ t('doom.pad.read') }}
     </label>
-    <label class="check">
-      <input type="checkbox" name="joystick_starts" {{ 'checked' if doom.joystick_starts }}>
-      {{ t('doom.pad.starts') }}
-    </label>
     <p class="hint">{{ t('doom.pad.starts.hint') }}</p>
     {% if pad %}
     <p class="hint">{{ t('doom.pad.found',

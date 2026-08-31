@@ -489,6 +489,25 @@ Storico:
         doom.py e comandi.py — quella locale, definita dopo l'import, vinceva
         sull'originale. Erano proprio la duplicazione che lo spostamento della
         3.6 doveva togliere.
+  3.8.2 Premendo Start o PS si vedeva un gioco per un attimo e poi Doom se lo
+        mangiava. I lettori di Doom e dei giochi ricevono **lo stesso evento**,
+        e quei due pulsanti erano di entrambi: "menu" per Doom, con il permesso
+        di aprire una partita, e "ciclo" per i giochi. Una pressione sola
+        faceva due cose, e vinceva l'ultima.
+        Un pulsante deve avere un significato solo. Start, PS e Select ora sono
+        **globali** e appartengono ai giochi: i primi due scorrono il giro,
+        Select esce da qualunque partita, Doom compreso. Doom li perde, e in
+        cambio menu e invio si spostano sulle levette premute (L3 e R3), che
+        nessun altro usa: ci rimettono arma1 e arma2, che restano sui tasti
+        numerici e sui pulsanti della pagina.
+        **Nessun pulsante del pad puo' piu' far cominciare Doom**, e la regola
+        e' scritta nel codice e non solo nella tabella dei pulsanti. A Doom ci
+        si arriva dal giro — se lo si e' incluso — dalla sua pagina o da Home
+        Assistant. La casella "il pad puo' far cominciare una partita" nella
+        pagina Doom era diventata una promessa non mantenuta ed e' stata tolta.
+        In piu' una guardia buona per il futuro: da un comando non si apre una
+        partita **mentre il pannello e' di qualcun altro**. La presa e' l'unica
+        cosa che sa chi sta lavorando, e adesso le si chiede.
 """
 
-__version__ = "3.8.1"
+__version__ = "3.8.2"

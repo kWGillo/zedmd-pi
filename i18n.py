@@ -1396,14 +1396,16 @@ STRINGS = {
     "doom.pad.starts": ("Options sul pad può far cominciare una partita",
                         "Options on the pad can start a game"),
     "doom.pad.starts.hint": (
-        "Qui è acceso, al contrario della tastiera, e la differenza non è un "
-        "capriccio: un tasto qualunque su una tastiera si preme per sbaglio, "
-        "un pulsante preciso su un pad che si tiene in mano no. Ed è il gesto "
-        "che uno fa istintivamente — prendi il pad, premi Options.",
-        "This one is on, unlike the keyboard, and the difference is not a "
-        "whim: any key on a keyboard gets pressed by accident, one specific "
-        "button on a pad you are holding does not. And it is the gesture "
-        "people make instinctively — pick up the pad, press Options."),
+        "Nessun pulsante del pad fa cominciare Doom: Start e PS scorrono i "
+        "giochi e Select esce, e sono gli stessi ovunque. A Doom ci si arriva "
+        "dal giro dei giochi — se lo si \u00e8 incluso nella pagina Giochi — "
+        "dal pulsante Gioca qui sopra, o da Home Assistant. Sul pad, durante "
+        "la partita, L3 apre il menu di Doom e R3 conferma.",
+        "No pad button starts Doom: Start and PS cycle the games and Select "
+        "quits, and they mean the same everywhere. Doom is reached from the "
+        "game cycle \u2014 if you included it on the Games page \u2014 from "
+        "the Play button above, or from Home Assistant. On the pad, during a "
+        "game, L3 opens Doom's menu and R3 confirms."),
     "doom.pad.found": ("Joystick trovati: %(list)s", "Joysticks found: %(list)s"),
     "doom.pad.none": (
         "Nessun joystick collegato al Raspberry in questo momento.",

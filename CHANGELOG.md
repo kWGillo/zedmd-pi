@@ -2,6 +2,37 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [3.8.2]
+
+### Corretto
+- **Premendo Start o PS si vedeva un gioco per un attimo, poi Doom se lo
+  mangiava.** I lettori di Doom e dei giochi ricevono **lo stesso evento**, e
+  quei due pulsanti erano di entrambi: `menu` per Doom — con il permesso di
+  aprire una partita — e `ciclo` per i giochi. Una pressione sola faceva due
+  cose, e vinceva l'ultima. Da qui anche le sequenze che sembravano casuali:
+  dipendevano da chi arrivava per primo.
+
+  **Un pulsante deve avere un significato solo.** Start, PS e Select sono ora
+  *globali* e appartengono ai giochi: i primi due scorrono il giro, Select esce
+  da qualunque partita — Doom compreso, che prima non si chiudeva così.
+
+  Doom li perde. In cambio `menu` e `invio` si spostano sulle levette premute
+  (L3 e R3), che nessun altro usa: ci rimettono `arma1` e `arma2`, che restano
+  sui tasti numerici della tastiera e sui pulsanti della pagina. Cambiare arma
+  si può fare in altri modi; uscire da un menu con il pad no.
+
+- **Nessun pulsante del pad può più far cominciare Doom**, e la regola è scritta
+  nel codice, non solo nella tabella dei pulsanti: resta vera anche se domani
+  qualcuno rimettesse Options fra quelli di avvio. A Doom ci si arriva dal giro
+  dei giochi (se lo si è incluso), dalla sua pagina, o da Home Assistant. La
+  casella «il pad può far cominciare una partita» nella pagina Doom era
+  diventata una promessa non mantenuta ed è stata tolta.
+
+- **Una guardia buona anche per il futuro:** da un comando non si apre una
+  partita **mentre il pannello è di qualcun altro**. La presa è l'unica cosa che
+  sappia chi sta lavorando in questo momento, e adesso le si chiede prima di
+  aprire. Vale per qualunque sorgente, non solo per queste due.
+
 ## [3.8.1]
 
 ### Corretto
