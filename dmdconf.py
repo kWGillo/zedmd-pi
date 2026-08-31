@@ -149,6 +149,10 @@ DEFAULTS = {
         # Mostra le tre lampade anche quando sono tutte spente. Spento: il
         # pannello resta pulito quando non c'e' niente in scadenza.
         "semaforo_sempre": False,
+        # Segnaposto della migrazione 4.1: dice che l'interruttore del
+        # servizio e' stato deciso una volta, cosi' chi lo spegne lo trova
+        # ancora spento al prossimo aggiornamento.
+        "servizio_scelto": False,
         # L'avviso periodico sul pannello, con la stessa forma di quello del
         # radar: ogni quanto compare, e quanto resta.
         "interval_minutes": 20,
@@ -337,7 +341,10 @@ DEFAULTS = {
         "banner": False,
         "nowplaying": False,
         "birthdays": False,
-        "scadenze": False,
+        # Acceso di suo: senza scadenze inserite non disegna niente, quindi
+        # non ruba spazio a nessuno, e chi inserisce una scadenza si aspetta
+        # di vederla senza dover accendere un secondo interruttore.
+        "scadenze": True,
         "status_player": False,
         "air_radar": False,
     },
@@ -393,6 +400,14 @@ def _migrate(raw):
     # configurazione salvata prima che esistesse, altrimenti la pagina Servizi
     # non lo mostra e non lo si puo' accendere.
     services.setdefault("nowplaying", False)
+
+    # 4.1: la 4.0 scriveva services.scadenze = False perche' l'interruttore
+    # non c'era ancora in pagina, ma il semaforo si disegnava lo stesso. Ora
+    # l'interruttore comanda anche il semaforo: lasciare quel False vorrebbe
+    # dire spegnere, aggiornando, una cosa che l'utente sta gia' vedendo.
+    if not raw.get("scadenze", {}).get("servizio_scelto"):
+        services["scadenze"] = True
+        raw.setdefault("scadenze", {})["servizio_scelto"] = True
 
     # 3.8.3: fino alla 3.8.2 Doom si apriva premendo Options, perche' era il
     # suo lettore ad aprirlo. Quella strada e' stata tolta — Options ora scorre

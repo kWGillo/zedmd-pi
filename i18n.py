@@ -1626,6 +1626,9 @@ STRINGS = {
         "before the date."),
     "services.desc.air_radar": ("Aerei in transito entro un raggio dalla posizione indicata.",
                                 "Aircraft passing within a radius of the given position."),
+    "services.desc.scadenze": (
+        "Avviso periodico delle scadenze aperte e semaforo accanto all'orologio.",
+        "Periodic notice of open deadlines, plus the traffic light next to the clock."),
 }
 
 

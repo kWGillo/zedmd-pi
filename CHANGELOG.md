@@ -2,6 +2,31 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.1]
+
+### Corretto
+- **Le Scadenze non si potevano accendere o spegnere dalla pagina Servizi.**
+  La chiave c'era in configurazione, ma l'elenco dei servizi della pagina è
+  scritto a mano nel codice: una chiave nuova non compare da sola. Ora c'è
+  anche l'interruttore, e una prova nuova chiede la regola invece del caso —
+  ogni chiave di `services` deve avere il suo interruttore in pagina.
+
+### Aggiunto
+- **Interruttore delle Scadenze anche in Home Assistant**, come gli altri
+  servizi.
+- **Spegnere il servizio spegne anche il semaforo.** Il semaforo lo disegna
+  l'orologio, non la sorgente Scadenze: senza un controllo esplicito
+  l'interruttore avrebbe fermato l'avviso lasciando le lampade accese, cioè
+  un interruttore che obbedisce a metà.
+
+### Modificato
+- **Lampade del semaforo dimezzate**: cerchi da 7 pixel invece di 13, con 2
+  di distacco, centrati nella banda sotto la data invece che appoggiati in
+  alto.
+- Aggiornando dalla 4.0 il servizio Scadenze resta **acceso**: era attivo di
+  fatto, e un aggiornamento non deve spegnere una cosa che si sta guardando.
+  Da lì in poi vale quello che si sceglie in pagina.
+
 ## [4.0]
 
 ### Aggiunto

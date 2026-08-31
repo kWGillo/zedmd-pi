@@ -33,6 +33,7 @@ SWITCHES = [
     ("birthdays", "Compleanni"),
     ("air_radar", "Air Radar"),
     ("clock", "Orologio"),
+    ("scadenze", "Scadenze"),
 ]
 
 # Night mode e Sleep mode non sono servizi: sono modi del display, e stanno in

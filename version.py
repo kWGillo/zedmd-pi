@@ -560,6 +560,13 @@ Storico:
        scadenze nascono e muoiono, e ne resterebbero di orfane a ogni bolletta
        pagata. E' la prima parte del progetto in cui i dati viaggiano anche
        all'indietro.
+  4.1  L'interruttore delle Scadenze c'era in configurazione ma non in
+       pagina: la lista dei servizi era scritta a mano nel codice, quindi la
+       chiave nuova non compariva. Ora c'e' anche in Home Assistant, e
+       spegnere il servizio spegne pure il semaforo — lo disegna l'orologio,
+       non la sorgente, e un interruttore che obbedisce a meta' e' peggio di
+       nessun interruttore. Lampade del semaforo dimezzate: cerchi da 7 pixel
+       invece di 13, centrati nella banda sotto la data.
 """
 
-__version__ = "4.0"
+__version__ = "4.1"

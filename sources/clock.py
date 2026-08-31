@@ -105,10 +105,31 @@ class ClockSource(Source):
 
     # Il semaforo delle scadenze sta a destra dell'ora, sotto la data: sono i
     # 68 pixel che avanzano da quel lato, come i 68 di sinistra sono della
-    # colonna dei rifiuti. Tre cerchi da 13 con 4 di distacco fanno 47 pixel
-    # esatti, che e' quello che resta sotto la data.
-    SEM_RAGGIO = 6
-    SEM_PASSO = 17
+    # colonna dei rifiuti, e i 47 che restano sotto la data.
+    #
+    # Le lampade sono meta' di com'erano: cerchi da 7 con 2 di distacco, 25
+    # pixel in tutto invece di 47. Avanzano 22 pixel, quindi la colonna non
+    # parte piu' dal bordo alto della banda ma si centra dentro: SEM_BANDA e'
+    # lo spazio disponibile, SEM_ALTEZZA quello che il semaforo occupa
+    # davvero, e la differenza la fa il margine.
+    SEM_RAGGIO = 3
+    SEM_PASSO = 9
+    SEM_CIMA = 17
+    SEM_BANDA = 47
+
+    @property
+    def SEM_ALTEZZA(self):
+        return 2 * self.SEM_RAGGIO + 2 * self.SEM_PASSO + 1
+
+    def _scadenze_attive(self):
+        """L'interruttore di pagina Servizi vale anche per il semaforo.
+
+        Il semaforo lo disegna l'orologio, non la sorgente Scadenze: senza
+        questo controllo spegnere il servizio farebbe sparire l'avviso ma
+        lascerebbe le lampade accese, cioe' un interruttore che obbedisce a
+        meta'.
+        """
+        return bool(self.cfg.get("services", {}).get("scadenze", False))
 
     def _semaforo(self):
         """Lo stato del semaforo, o 'spento' se qualcosa non va.
@@ -116,6 +137,8 @@ class ClockSource(Source):
         Le scadenze stanno in un CSV che l'utente puo' modificare a mano: un
         file scritto male non deve portarsi via l'orologio.
         """
+        if not self._scadenze_attive():
+            return "spento"
         try:
             import scadenze
             return scadenze.semaforo(self.cfg)
@@ -253,8 +276,12 @@ class ClockSource(Source):
 
         # Il semaforo occupa quello che avanza a destra dell'ora, sotto la
         # data: dal bordo destro dell'ora al bordo del pannello.
-        if stato_sem != "spento" or self.cfg.get("scadenze", {}).get("semaforo_sempre"):
-            self._disegna_semaforo(draw, stato_sem, ora_destra + 3, 17,
+        mostra_sem = stato_sem != "spento" or (
+            self._scadenze_attive()
+            and self.cfg.get("scadenze", {}).get("semaforo_sempre"))
+        if mostra_sem:
+            cima = self.SEM_CIMA + (self.SEM_BANDA - self.SEM_ALTEZZA) // 2
+            self._disegna_semaforo(draw, stato_sem, ora_destra + 3, cima,
                                    acceso=sem_acceso)
 
         if meridiem:

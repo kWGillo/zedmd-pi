@@ -876,6 +876,8 @@ def create_app(runtime):
              "status": ""},
             {"key": "air_radar", "label": "Air Radar", "ready": True,
              "status": stato("radar")},
+            {"key": "scadenze", "label": "Scadenze", "ready": True,
+             "status": stato("scadenze")},
         ]
         current = runtime.arbiter.current
         return render_template(
