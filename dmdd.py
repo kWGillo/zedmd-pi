@@ -364,6 +364,33 @@ class Runtime:
 
     # -------------------------------------------------------------------- doom
 
+    # ------------------------------------------------------------------ partite
+
+    def gioca(self, cosa, nome=""):
+        """Apre una partita, chiudendo quella eventualmente in corso.
+
+        Doom e i giochi si contendono **la stessa presa del pannello**, e
+        aprirne una senza chiudere l'altra non da' un errore: da' un processo
+        Doom vivo dietro le quinte che nessuno vede piu', con Home Assistant
+        convinto che si stia ancora giocando a Doom mentre sul pannello c'e'
+        Breakout. Il runtime e' l'unico punto che conosce entrambe, quindi la
+        regola sta qui e non dentro le due sorgenti.
+        """
+        if cosa == "doom":
+            self.giochi.chiudi_sessione()
+            return self.doom.apri_sessione()
+        self.doom.chiudi_sessione()
+        return self.giochi.apri_sessione(nome)
+
+    def smetti(self, cosa=""):
+        """Chiude la partita in corso. Senza argomenti, qualunque essa sia."""
+        chiuse = False
+        if cosa in ("", "giochi"):
+            chiuse = self.giochi.chiudi_sessione() or chiuse
+        if cosa in ("", "doom"):
+            chiuse = self.doom.chiudi_sessione() or chiuse
+        return chiuse
+
     def giochi_state(self):
         return self.giochi.stato()
 

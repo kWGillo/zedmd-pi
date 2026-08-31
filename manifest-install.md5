@@ -4,14 +4,14 @@ d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 f9a19df7caa1b28f9cdebade3fd62905  display.py
 9222364cffea75b18ffcd40a82b23072  dmdconf.py
-5f5210b43b92a624021ba807e17bc97c  dmdd.py
+35d2c3cd5516628d130560c417a07fe5  dmdd.py
 397862a19501abc030946d1b6c39463c  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
 b400dff8b86e25ebd1057e666e53f9e5  doom/setup_doom.sh
 2b22f30cde5ff93be13a04007867dad4  doomsetup.py
 83590a30aab47e1f24ede4c6e434edea  fasce.py
-47fd5e895c6fb2c7d17511d283984f3e  hass.py
-85beed2cfcee274bc5c158e1ed1bfa04  i18n.py
+53dfefdcf5bb1fecc4a86489033e767b  hass.py
+698ba2703c1ced1b2dbdffd5ddb9e971  i18n.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
@@ -44,7 +44,7 @@ f20603704454eabd61c797c8a58d7bf9  templates/base.html
 f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
 73c2b6f65a59fbc627244fd38ac6ca5d  templates/clock.html
 118314ed9e9abe538a7d5f24ab420945  templates/doom.html
-5f1430260c24d64c5ed31e3f2e200cf8  templates/giochi.html
+4dc07d7f4cc81031959ec5025b0a0ec8  templates/giochi.html
 c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
 3be98432e6ad1e869da824653a10975a  templates/media.html
 3a7dc0f319c053a6f1f6bbd9c1416bb5  templates/nowplaying.html
@@ -53,6 +53,6 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 fc820c3435f5edea162ed83ce33fb964  templates/services.html
 e26f8c8216ec08b2d827eeee0c87407b  templates/settings.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-29c6353802791486ba95936d027fab25  version.py
-8e49745524c535f09275a3dab3c999bd  webui.py
+ed7a323b2d85412dbfabae87bd2d62e4  version.py
+189a806c7760555c35e0afbbfd67af72  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

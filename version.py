@@ -423,6 +423,23 @@ Storico:
        `flex-wrap`, e le voci che non ci stavano sparivano a destra senza che
        niente lo lasciasse intuire. Ora vanno a capo — su un telefono le undici
        voci stanno su tre righe, e non se ne nasconde nessuna.
+  3.6.1 La pagina Giochi non aveva i campi per indicare tastiera e joystick a
+        mano: la pagina Doom si', ed e' li' che si finisce quando il
+        riconoscimento automatico sbaglia. Aggiunti, con lo stesso significato.
+  3.7  I giochi si accendono e si spengono da Home Assistant, come Doom: un
+       interruttore MQTT per gioco, costruito dall'elenco dei giochi invece
+       che scritto a mano, cosi' aggiungerne uno domani basta a farlo comparire
+       anche li'. Lo stato non viene dalla configurazione — una partita non e'
+       un valore salvato, e' qualcosa che sta succedendo — ma dalla sessione:
+       una chiusura per inattivita' riporta l'interruttore a OFF da sola.
+       Gli interruttori sono mutuamente esclusivi perche' la presa del pannello
+       e' una sola, e con essa e' emerso un difetto che c'era gia': aprire una
+       partita mentre ne girava un'altra non dava errore, dava un processo Doom
+       vivo dietro le quinte con Home Assistant convinto che si stesse ancora
+       giocando a Doom mentre sul pannello c'era Breakout. Aprire una partita
+       ora passa da un punto solo, il runtime, che e' l'unico a conoscerle
+       entrambe — e ci passa anche la web UI, altrimenti la regola varrebbe
+       solo per MQTT.
 """
 
-__version__ = "3.6"
+__version__ = "3.7"

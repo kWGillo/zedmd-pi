@@ -77,6 +77,18 @@
     {% endif %}
 
     <div class="row2">
+      <div><label for="keyboard_device">{{ t('giochi.device.tastiera') }}</label>
+        <input type="text" id="keyboard_device" name="keyboard_device"
+               value="{{ cfg.giochi.keyboard_device }}"
+               placeholder="{{ t('giochi.device.auto') }}"></div>
+      <div><label for="joystick_device">{{ t('giochi.device.pad') }}</label>
+        <input type="text" id="joystick_device" name="joystick_device"
+               value="{{ cfg.giochi.joystick_device }}"
+               placeholder="{{ t('giochi.device.auto') }}"></div>
+    </div>
+    <p class="hint">{{ t('giochi.device.hint') }}</p>
+
+    <div class="row2">
       <div><label for="session_timeout">{{ t('giochi.timeout') }}</label>
         <input type="number" id="session_timeout" name="session_timeout" min="0" max="3600"
                value="{{ cfg.giochi.session_timeout }}"></div>

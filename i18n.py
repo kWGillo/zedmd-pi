@@ -1191,6 +1191,18 @@ STRINGS = {
     "giochi.pad.trovati": ("Pad riconosciuti:", "Pads detected:"),
     "giochi.pad.nessuno": ("Nessun pad collegato in questo momento.",
                            "No pad connected right now."),
+    "giochi.device.tastiera": ("Tastiera (percorso)", "Keyboard (path)"),
+    "giochi.device.pad": ("Joystick (percorso)", "Joystick (path)"),
+    "giochi.device.auto": ("automatico", "automatic"),
+    "giochi.device.hint": (
+        "Vuoto = tutti quelli che il kernel dichiara come tastiera o come "
+        "joystick. Serve indicarne uno solo se il riconoscimento automatico "
+        "sbaglia: il percorso \u00e8 del tipo /dev/input/event3, e si trova "
+        "con «cat /proc/bus/input/devices».",
+        "Empty = every device the kernel reports as a keyboard or a joystick. "
+        "Naming one is only needed if automatic detection gets it wrong: the "
+        "path looks like /dev/input/event3, and «cat /proc/bus/input/devices» "
+        "lists them."),
     "giochi.timeout": ("Chiudi la partita dopo (secondi senza comandi)",
                        "Close the game after (seconds with no input)"),
     "giochi.timeout.hint": (

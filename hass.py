@@ -54,6 +54,27 @@ AZIONI = [
     ("doom", "Doom", "mdi:pistol"),
 ]
 
+# I giochi scritti per il pannello sono azioni come Doom: una partita che
+# comincia e finisce, non un servizio da accendere. Un interruttore per gioco,
+# costruito dall'elenco dei giochi invece che scritto a mano — aggiungerne uno
+# domani deve bastare a farlo comparire anche in Home Assistant.
+#
+# Sono mutuamente esclusivi per costruzione: la sessione e' una sola, quindi
+# accendendone uno gli altri tornano OFF da soli al primo stato pubblicato.
+GIOCO_PREFISSO = "gioco_"
+ICONE_GIOCHI = {
+    "breakout": "mdi:view-grid",
+    "invaders": "mdi:space-invaders",
+}
+
+try:
+    from sources.giochi import elenco as _elenco_giochi
+    for _nome, _etichetta in _elenco_giochi():
+        AZIONI.append((GIOCO_PREFISSO + _nome, _etichetta,
+                       ICONE_GIOCHI.get(_nome, "mdi:gamepad-variant")))
+except Exception as _exc:      # pragma: no cover - solo se manca il pacchetto
+    print("[hass] giochi non annunciati: %s" % _exc)
+
 # Icone delle voci del calendario rifiuti, per nome noto. Chi ne inventa una
 # sua si prende il cassonetto generico: meglio un'icona banale che nessuna.
 ICONE_RIFIUTI = {
@@ -408,29 +429,44 @@ class HassBridge:
                        force)
 
     def _azione_accesa(self, key):
-        """Stato di un'azione, chiesto a chi la sta facendo."""
-        if key == "doom":
-            doom = getattr(self.runtime, "doom", None)
-            try:
+        """Stato di un'azione, chiesto a chi la sta facendo.
+
+        Non si legge dalla configurazione, perche' li' non c'e' niente: una
+        partita e' qualcosa che sta succedendo. Cosi' una chiusura per
+        inattivita' o un avvio fallito riportano l'interruttore a OFF da soli.
+        """
+        try:
+            if key == "doom":
+                doom = getattr(self.runtime, "doom", None)
                 return bool(doom and doom.in_sessione())
-            except Exception:
-                return False
+            if key.startswith(GIOCO_PREFISSO):
+                giochi = getattr(self.runtime, "giochi", None)
+                if giochi is None or not giochi.in_sessione():
+                    return False
+                return giochi.gioco_corrente() == key[len(GIOCO_PREFISSO):]
+        except Exception:
+            return False
         return False
 
     def _azione(self, key, acceso):
         """Esegue un'azione. Restituisce True se e' stata gestita."""
-        if key != "doom":
-            return False
-        doom = getattr(self.runtime, "doom", None)
-        if doom is None:
+        if key == "doom":
+            cosa, nome = "doom", ""
+        elif key.startswith(GIOCO_PREFISSO):
+            cosa, nome = "giochi", key[len(GIOCO_PREFISSO):]
+        else:
             return False
         try:
             if acceso:
-                doom.apri_sessione()
+                # Non si apre la sessione direttamente: passa dal runtime, che
+                # e' l'unico a sapere che Doom e i giochi si contendono la
+                # stessa presa del pannello e che aprirne una vuol dire
+                # chiudere l'altra.
+                self.runtime.gioca(cosa, nome)
             else:
-                doom.chiudi_sessione()
+                self.runtime.smetti(cosa)
         except Exception as exc:
-            print("[hass] doom: %s" % exc)
+            print("[hass] %s: %s" % (key, exc))
         # Lo stato vero lo dice la sorgente, non il comando: se la partita non
         # e' partita — WAD sbagliato, programma non compilato — Home Assistant
         # deve tornare a OFF da solo invece di restare acceso a vuoto.

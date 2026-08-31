@@ -2,6 +2,40 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [3.7]
+
+### Aggiunto
+- **I giochi si accendono e si spengono da Home Assistant**, come Doom: un
+  interruttore MQTT per gioco (`switch.dmd_gioco_breakout`,
+  `switch.dmd_gioco_invaders`), che compare da solo con MQTT Discovery.
+  L'elenco degli interruttori è **costruito dall'elenco dei giochi**, non
+  scritto a mano: aggiungerne uno domani basta a farlo comparire anche lì.
+
+  Lo stato non viene dalla configurazione — una partita non è un valore
+  salvato, è qualcosa che sta succedendo — ma dalla sessione in corso: se si
+  chiude per inattività, l'interruttore in Home Assistant torna a OFF da solo.
+
+- **Un manuale PDF per i controller** (`docs/DMD_joypad.pdf`): collegamento del
+  DualShock 4 via USB e via Bluetooth, verifica, mappa dei comandi per i giochi
+  e per Doom, e la tabella dei guasti tipici — cavo di sola ricarica, `trust`
+  dimenticato, modulo `joydev` non caricato.
+
+### Corretto
+- **Aprire una partita mentre ne girava un'altra non dava errore: dava un
+  processo Doom vivo dietro le quinte.** Doom e i giochi si contendono la stessa
+  presa del pannello, e chi la prende per ultimo vince — ma l'altro resta
+  convinto di essere in partita, con il suo processo che si tiene in piedi da
+  solo e Home Assistant che mostra Doom acceso mentre sul pannello c'è Breakout.
+
+  Aprire una partita ora passa da un punto solo, il runtime, che è l'unico a
+  conoscerle entrambe. Ci passa anche la web UI, non solo MQTT: altrimenti la
+  regola varrebbe per Home Assistant e non per il pulsante Gioca.
+
+- **La pagina Giochi non aveva i campi per indicare tastiera e joystick a
+  mano** (3.6.1). La pagina Doom sì, ed è lì che si finisce quando il
+  riconoscimento automatico sbaglia — il caso reale è il modulo `joydev` non
+  caricato, che lascia il pad senza gestore `js` e quindi invisibile.
+
 ## [3.6]
 
 ### Aggiunto

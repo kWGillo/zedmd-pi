@@ -454,7 +454,7 @@ def create_app(runtime):
 
     @app.route("/api/giochi/play", methods=["POST"])
     def api_giochi_play():
-        runtime.giochi.apri_sessione(request.form.get("gioco", "").strip())
+        runtime.gioca("giochi", request.form.get("gioco", "").strip())
         if request.form.get("ajax"):
             return jsonify(_giochi_stato())
         return redirect(url_for("page_giochi"))
@@ -574,7 +574,7 @@ def create_app(runtime):
 
     @app.route("/api/doom/play", methods=["POST"])
     def api_doom_play():
-        runtime.doom.apri_sessione()
+        runtime.gioca("doom")
         if request.form.get("ajax"):
             return jsonify(runtime.doom_state())
         return redirect(url_for("page_doom"))
