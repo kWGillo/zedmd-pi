@@ -2,6 +2,39 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [3.8.1]
+
+### Corretto
+- **Il tasto Start apriva Doom una volta sola.** Dopo, il giro proseguiva fra
+  gli altri giochi e Doom non tornava mai più — nemmeno uscendo e ricominciando.
+  Erano **tre** difetti insieme, e nessuno dei tre si vedeva senza gli altri.
+
+  **Il giro apriva i giochi senza passare dal runtime**, quindi non chiudeva
+  Doom: il processo restava vivo dietro le quinte, in sessione per sempre. La
+  regola dell'esclusività era stata scritta nella 3.7 nel punto giusto — è il
+  giro che le passava accanto.
+
+  **Doom già in sessione usciva subito senza riprendere la presa del pannello.**
+  «Sono in partita» e «ho il pannello» sono due fatti diversi, e un gioco
+  apertosi sopra gliel'aveva portata via: si rientrava in una partita che non si
+  vedeva, e il pannello restava a *nessuno* — l'arbitro ripiegava sull'orologio.
+  È questo che rendeva il difetto definitivo invece che passeggero.
+
+  **La posizione nel giro si leggeva dalla partita in corso**, che con Doom
+  acceso non è dei giochi: la risposta era vecchia, il giro ripartiva da capo e
+  una casella spariva per sempre.
+
+  Ora la posizione si ricorda a parte e sopravvive a una partita di Doom, la
+  prima pressione **riprende** l'ultimo gioco invece di saltare al successivo, e
+  c'è una prova per ciascuno dei tre difetti: rimettendone uno qualsiasi, la
+  suite fallisce.
+
+- **Tre funzioni esistevano in due copie identiche.** `_dispositivi_input`,
+  `tastiere` e `joystick` erano sia in `comandi.py` sia in `doom.py`, e la copia
+  locale — definita dopo l'import — vinceva sull'originale. Era esattamente la
+  duplicazione che lo spostamento della 3.6 doveva togliere, sopravvissuta
+  perché nessuno l'aveva guardata: due copie identiche non danno mai errore.
+
 ## [3.8]
 
 ### Corretto

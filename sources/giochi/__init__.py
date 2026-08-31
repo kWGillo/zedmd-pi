@@ -111,6 +111,9 @@ class GiochiSource(Source):
         # imparando: il lettore lo consegna qui prima di tradurlo.
         self._impara = None
         self._imparato = 0
+        # Dove siamo arrivati nel giro del tasto Start. Sopravvive alla
+        # chiusura di una sessione, e a una partita di Doom.
+        self._giro = ""
 
     # ------------------------------------------------------------ ciclo di vita
 
@@ -230,13 +233,17 @@ class GiochiSource(Source):
             giro.append("doom")
         return giro
 
-    # Chi sa dire se Doom e' preparato. Lo assegna il runtime: la sorgente dei
-    # giochi non deve conoscere Doom, deve solo saper chiedere.
+    # Chi sa dire se Doom e' preparato, e chi apre una partita. Le assegna il
+    # runtime: la sorgente dei giochi non deve conoscere Doom, deve solo saper
+    # chiedere. `apri_partita` in particolare **deve** passare dal runtime,
+    # perche' Doom e i giochi si contendono la stessa presa del pannello e
+    # l'unico che lo sa e' lui.
     doom_pronto = None
     apri_doom = None
+    apri_partita = None
 
     def ciclo(self):
-        """Passa al gioco successivo. Da fermo, apre il primo.
+        """Passa al gioco successivo. Da fermo, riprende da dove era rimasto.
 
         E' il tasto Start del cabinato: premuto una volta si gioca, premuto
         ancora si cambia gioco. Non c'e' un menu da attraversare, perche' su
@@ -245,19 +252,40 @@ class GiochiSource(Source):
         giro = self.elenco_ciclo()
         if not giro:
             return False
-        if not self._sessione:
-            prossimo = self.conf().get("ultimo") or giro[0]
-            if prossimo not in giro:
-                prossimo = giro[0]
-        else:
+        # La posizione nel giro si ricorda a parte e non si legge dalla
+        # partita in corso: con Doom nel giro la partita in corso non e' dei
+        # giochi, e chiedere "che gioco sta girando?" dava una risposta
+        # vecchia. Il giro ripartiva sempre da capo e Doom compariva una volta
+        # sola, poi mai piu'.
+        if self._sessione:
             corrente = self.gioco_corrente()
-            indice = giro.index(corrente) if corrente in giro else -1
-            prossimo = giro[(indice + 1) % len(giro)]
+        elif self._giro:
+            corrente = self._giro
+        else:
+            # Prima pressione dopo un riavvio: si **riprende** l'ultimo gioco
+            # giocato invece di saltare al successivo. Chi preme Start la
+            # prima volta vuole giocare, non scegliere.
+            ripresa = self.conf().get("ultimo") or ""
+            self._giro = ripresa if ripresa in giro else giro[0]
+            prossimo = self._giro
+            if prossimo == "doom":
+                self.chiudi_sessione()
+                return bool(self.apri_doom()) if callable(self.apri_doom) else False
+            if callable(self.apri_partita):
+                return bool(self.apri_partita("giochi", prossimo))
+            return self.apri_sessione(prossimo)
+        indice = giro.index(corrente) if corrente in giro else -1
+        prossimo = giro[(indice + 1) % len(giro)] if indice >= 0 else giro[0]
+        self._giro = prossimo
         if prossimo == "doom":
             self.chiudi_sessione()
             if callable(self.apri_doom):
                 return bool(self.apri_doom())
             return False
+        # Non `apri_sessione` diretta: aprire un gioco deve poter **chiudere
+        # Doom**, e quella regola sta nel runtime.
+        if callable(self.apri_partita):
+            return bool(self.apri_partita("giochi", prossimo))
         return self.apri_sessione(prossimo)
 
     def apri_sessione(self, nome=""):

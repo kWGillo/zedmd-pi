@@ -164,53 +164,12 @@ def controlla_wad(percorso):
     return ""
 
 
-def _dispositivi_input(marcatore):
-    """I dispositivi di /dev/input che il kernel affida a un dato gestore.
-
-    Si legge /proc/bus/input/devices invece di aprire tutto: un mouse o un
-    sensore di temperatura hanno anch'essi degli eventi, e aprirli a caso vuol
-    dire tenere descrittori inutili su hardware che non c'entra. Il gestore
-    `kbd` sono le tastiere, `js` i joystick — lo dice il kernel, non noi, e va
-    bene per qualunque pad che lui riconosca come tale.
-    """
-    trovati = []
-    try:
-        with open("/proc/bus/input/devices") as handle:
-            testo = handle.read()
-    except OSError:
-        return trovati
-    for blocco in testo.split("\n\n"):
-        righe = [r for r in blocco.splitlines() if r.startswith("H: Handlers=")]
-        if not righe:
-            continue
-        campi = righe[0].split("=", 1)[1].split()
-        if not any(c == marcatore or c.startswith(marcatore)
-                   for c in campi if not c.startswith("event")):
-            continue
-        nome = ""
-        for riga in blocco.splitlines():
-            if riga.startswith('N: Name="'):
-                nome = riga.split('"')[1]
-        for campo in campi:
-            if campo.startswith("event"):
-                trovati.append(("/dev/input/" + campo, nome))
-    return trovati
+# `_dispositivi_input`, `tastiere` e `joystick` stanno in comandi.py e sono
+# importate qui sopra: fino alla 3.8.1 ne esisteva anche una copia locale, che
+# essendo definita dopo l'import vinceva sull'originale. Due copie identiche
+# della stessa regola sono esattamente cio' che lo spostamento doveva togliere.
 
 
-def tastiere():
-    """I percorsi delle tastiere collegate."""
-    return [percorso for percorso, _ in _dispositivi_input("kbd")]
-
-
-def joystick(con_nome=False):
-    """I joystick collegati. Con `con_nome`, coppie (percorso, nome).
-
-    Il nome serve solo alla pagina web, per far vedere che il pad e' stato
-    riconosciuto: «Wireless Controller» per un DualShock 4, il proprio nome
-    per un Nacon o un pad generico.
-    """
-    trovati = _dispositivi_input("js")
-    return trovati if con_nome else [percorso for percorso, _ in trovati]
 
 
 class DoomSource(Source):
@@ -483,6 +442,13 @@ class DoomSource(Source):
         """
         self._ultimo_tasto = time.time()
         if self._sessione:
+            # Gia' in partita, ma la presa del pannello potrebbe non essere
+            # piu' sua: un gioco che si e' aperto sopra Doom se l'e' presa, e
+            # "sono in sessione" non vuol dire "ho il pannello". Senza questa
+            # riga si rientrava in una partita che non si vedeva, e il
+            # pannello restava a nessuno.
+            if self.arbiter is not None:
+                self.arbiter.hold_on(self.name)
             return True
         self._running = True
         self._errore = ""

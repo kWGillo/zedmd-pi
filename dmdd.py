@@ -226,6 +226,9 @@ class Runtime:
         self.giochi.doom_pronto = lambda: not controlla_wad(
             self.cfg["doom"].get("wad", ""))
         self.giochi.apri_doom = lambda: self.gioca("doom")
+        # Anche aprire un gioco passa di qui: e' l'unico punto che sa che
+        # Doom e i giochi si contendono la stessa presa del pannello.
+        self.giochi.apri_partita = self.gioca
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
         # Il brano corrente e chi lo disegna sono due cose distinte: lo stato

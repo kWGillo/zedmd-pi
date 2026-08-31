@@ -468,6 +468,27 @@ Storico:
        cominciare una partita", che resta spenta: quella protegge dai tasti
        sfiorati per caso, ma Start e' un gesto deliberato — se ci passasse
        sotto anche lui, la funzione nascerebbe spenta e sembrerebbe rotta.
+  3.8.1 Il tasto Start apriva Doom una volta sola: dopo, il giro continuava
+        fra gli altri giochi e Doom non tornava mai piu'. Tre difetti insieme,
+        e nessuno dei tre si vedeva senza gli altri.
+        **Il giro apriva i giochi senza passare dal runtime**, e quindi non
+        chiudeva Doom: il processo restava vivo dietro le quinte, in sessione
+        per sempre. La regola dell'esclusivita' era stata scritta nella 3.7 nel
+        punto giusto, ma il giro le passava accanto.
+        **Doom gia' in sessione usciva subito senza riprendere la presa del
+        pannello.** "Sono in partita" e "ho il pannello" sono due fatti diversi,
+        e un gioco apertosi sopra glielo aveva portato via: si rientrava in una
+        partita che non si vedeva, e il pannello restava a nessuno.
+        **La posizione nel giro si leggeva dalla partita in corso**, che con
+        Doom acceso non e' dei giochi: la risposta era vecchia e il giro
+        ripartiva da capo, saltando una casella per sempre.
+        Ora la posizione si ricorda a parte, la prima pressione riprende
+        l'ultimo gioco invece di saltare al successivo, e c'e' una prova per
+        ciascuno dei tre: rimettendo uno qualsiasi dei difetti, fallisce.
+        Tolte anche tre funzioni che esistevano in due copie identiche in
+        doom.py e comandi.py — quella locale, definita dopo l'import, vinceva
+        sull'originale. Erano proprio la duplicazione che lo spostamento della
+        3.6 doveva togliere.
 """
 
-__version__ = "3.8"
+__version__ = "3.8.1"
