@@ -29,6 +29,7 @@ import spotifyapi
 from sources import (DOOM_PULSANTI, DOOM_TASTI, FIELD_LIST, HOLD_SECONDS,
                      LANGUAGES, OVERFLOW_MODES,
                      PROVIDER_LIST, SIZE_KEYS, SLOTS, UNIT_KEYS,
+                     controlla_wad, giochi_elenco,
                      invalidate_scan, is_supported, joystick, normalize_list,
                      scan_media, have_ffmpeg, tastiere, usable)
 from version import __version__
@@ -422,6 +423,87 @@ def create_app(runtime):
             rifiuti.salva_testo(nome, request.form.get("testo", ""))
             runtime.clock.invalidate()
         return redirect(url_for("page_rifiuti"))
+
+    # ---------------------------------------------------------------- giochi
+
+    GIOCHI_PULSANTI = (("sinistra", "\u25c0"), ("destra", "\u25b6"),
+                       ("fuoco", "FUOCO"), ("esci", "ESCI"))
+
+    def _giochi_stato():
+        stato = runtime.giochi_state()
+        stato["testo"] = runtime.giochi.status(current_language())
+        return stato
+
+    @app.route("/giochi")
+    def page_giochi():
+        stato = _giochi_stato()
+        conf = cfg.get("giochi") or {}
+        errore = controlla_wad(cfg["doom"].get("wad", ""))
+        return render_template(
+            "giochi.html", cfg=cfg, stato=stato, stato_testo=stato["testo"],
+            giochi=giochi_elenco(), record=(conf.get("record") or {}),
+            pulsanti=GIOCHI_PULSANTI, pad=joystick(con_nome=True),
+            doom_pronto=i18n.translate(
+                "giochi.doom.no" if errore else "giochi.doom.si",
+                current_language()),
+            page="giochi")
+
+    @app.route("/api/giochi/state")
+    def api_giochi_state():
+        return jsonify(_giochi_stato())
+
+    @app.route("/api/giochi/play", methods=["POST"])
+    def api_giochi_play():
+        runtime.giochi.apri_sessione(request.form.get("gioco", "").strip())
+        if request.form.get("ajax"):
+            return jsonify(_giochi_stato())
+        return redirect(url_for("page_giochi"))
+
+    @app.route("/api/giochi/stop", methods=["POST"])
+    def api_giochi_stop():
+        runtime.giochi.chiudi_sessione()
+        if request.form.get("ajax"):
+            return jsonify(_giochi_stato())
+        return redirect(url_for("page_giochi"))
+
+    @app.route("/api/giochi/tasto", methods=["POST"])
+    def api_giochi_tasto():
+        """Un comando dalla pagina web.
+
+        Premuto e rilasciato arrivano separati, come da una tastiera vera:
+        e' l'unico modo perche' tenere premuto il pulsante faccia scorrere la
+        racchetta invece di farle fare un salto solo.
+        """
+        azione = request.form.get("azione", "").strip()
+        if azione not in ("sinistra", "destra", "su", "giu", "fuoco",
+                          "avvia", "esci"):
+            return jsonify({"ok": False}), 400
+        if "giu" in request.form:
+            runtime.giochi.premi(azione, request.form.get("giu") == "1")
+        else:
+            runtime.giochi.tocca(azione)
+        return jsonify(_giochi_stato())
+
+    @app.route("/api/giochi", methods=["POST"])
+    def api_giochi():
+        conf = cfg.setdefault("giochi", {})
+        for chiave in ("keyboard", "keyboard_starts",
+                       "joystick", "joystick_starts"):
+            conf[chiave] = request.form.get(chiave) == "on"
+        for chiave in ("keyboard_device", "joystick_device"):
+            if chiave in request.form:
+                conf[chiave] = request.form.get(chiave, "").strip()
+        try:
+            conf["session_timeout"] = max(0, min(3600, int(
+                request.form.get("session_timeout", 180))))
+        except ValueError:
+            conf["session_timeout"] = 180
+        dmdconf.save()
+        # La lettura dei comandi dipende da queste caselle: senza far ripartire
+        # il lettore, spegnere la tastiera non avrebbe effetto fino al riavvio.
+        runtime.giochi.stop()
+        runtime.giochi.start()
+        return redirect(url_for("page_giochi"))
 
     # ------------------------------------------------------------------ doom
 

@@ -27,8 +27,9 @@ import ota
 import spotifyapi
 from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
-                     ClockSource, DoomSource, MediaPlayerSource,
-                     NowPlayingSource, PreviewSource, ZeDMDSource)
+                     ClockSource, DoomSource, GiochiSource,
+                     MediaPlayerSource, NowPlayingSource, PreviewSource,
+                     ZeDMDSource)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -216,6 +217,10 @@ class Runtime:
         # va a schermo solo quando ha la presa, cioe' solo durante una partita.
         self.doom = DoomSource(self.cfg, self.display.width,
                                self.display.height, self.arbiter)
+        # Stessa storia per i giochi scritti per il pannello: partita, non
+        # servizio. Prendono la presa allo stesso modo e con lo stesso arbitro.
+        self.giochi = GiochiSource(self.cfg, self.display.width,
+                                   self.display.height, self.arbiter)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
         # Il brano corrente e chi lo disegna sono due cose distinte: lo stato
@@ -230,12 +235,15 @@ class Runtime:
 
         for source in (self.zedmd, self.preview, self.radar, self.player,
                        self.birthdays, self.banner, self.media, self.doom,
-                       self.clock):
+                       self.giochi, self.clock):
             self.arbiter.register(source)
         self.arbiter.apply_services()
         # Doom non passa da apply_services: non e' un servizio. Qui parte solo
         # la lettura della tastiera, se e' stata chiesta.
         self.doom.start()
+        # Nemmeno i giochi sono un servizio: qui parte solo la lettura dei
+        # comandi, per chi ha chiesto di poter cominciare dal cabinato.
+        self.giochi.start()
 
         self._start_audio()
 
@@ -356,6 +364,9 @@ class Runtime:
 
     # -------------------------------------------------------------------- doom
 
+    def giochi_state(self):
+        return self.giochi.stato()
+
     def doom_state(self):
         return {"running": self.doom.active(),
                 "session": self.doom.in_sessione(),
@@ -473,6 +484,7 @@ class Runtime:
                 # numeri, e non merita un thread suo.
                 try:
                     self.doom.controlla_inattivita()
+                    self.giochi.controlla_inattivita()
                     # E se una partita e' aperta ma il processo e' morto, si
                     # ritenta: correggere un percorso sbagliato dalla pagina
                     # deve bastare a rimettere in moto.

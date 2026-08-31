@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.giochi') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('giochi.title') }}</h2>
+  <p class="hint">{{ t('giochi.intro') }}</p>
+  <p class="status" id="stato">{{ stato_testo }}</p>
+
+  <div class="giochi">
+    {% for nome, etichetta in giochi %}
+    <div class="gioco {{ 'on' if stato.session and stato.gioco == nome }}">
+      <h3>{{ etichetta }}</h3>
+      <p class="hint">{{ t('giochi.' + nome + '.hint') }}</p>
+      <p class="record">{{ t('giochi.record') }} <b>{{ record.get(nome, 0) }}</b></p>
+      <form method="post" action="{{ url_for('api_giochi_play') }}">
+        <input type="hidden" name="gioco" value="{{ nome }}">
+        <button type="submit">{{ t('giochi.play') }}</button>
+      </form>
+    </div>
+    {% endfor %}
+
+    <div class="gioco">
+      <h3>Doom</h3>
+      <p class="hint">{{ t('giochi.doom.hint') }}</p>
+      <p class="record">{{ t('giochi.doom.stato') }} <b>{{ doom_pronto }}</b></p>
+      <p class="actions"><a class="btn" href="{{ url_for('page_doom') }}">{{ t('giochi.doom.apri') }}</a></p>
+    </div>
+  </div>
+</section>
+
+{% if stato.session %}
+<section class="card">
+  <h2>{{ t('giochi.comandi') }}</h2>
+  <p class="hint">{{ t('giochi.comandi.hint') }}</p>
+  <div class="pad">
+    {% for azione, etichetta in pulsanti %}
+    <button class="tasto" data-azione="{{ azione }}">{{ etichetta }}</button>
+    {% endfor %}
+  </div>
+  <p class="actions">
+    <form method="post" action="{{ url_for('api_giochi_stop') }}">
+      <button type="submit" class="ghost">{{ t('giochi.esci') }}</button>
+    </form>
+  </p>
+</section>
+{% endif %}
+
+<section class="card">
+  <h2>{{ t('giochi.controlli') }}</h2>
+  <form method="post" action="{{ url_for('api_giochi') }}">
+
+    <label class="check">
+      <input type="checkbox" name="keyboard" {{ 'checked' if cfg.giochi.keyboard }}>
+      {{ t('giochi.keyboard') }}
+    </label>
+    <label class="check">
+      <input type="checkbox" name="keyboard_starts" {{ 'checked' if cfg.giochi.keyboard_starts }}>
+      {{ t('giochi.keyboard_starts') }}
+    </label>
+
+    <label class="check">
+      <input type="checkbox" name="joystick" {{ 'checked' if cfg.giochi.joystick }}>
+      {{ t('giochi.joystick') }}
+    </label>
+    <label class="check">
+      <input type="checkbox" name="joystick_starts" {{ 'checked' if cfg.giochi.joystick_starts }}>
+      {{ t('giochi.joystick_starts') }}
+    </label>
+    {% if pad %}
+    <p class="hint">{{ t('giochi.pad.trovati') }}
+      {% for percorso, nome in pad %}<span class="mono">{{ nome or percorso }}</span>{{ ", " if not loop.last }}{% endfor %}
+    </p>
+    {% else %}
+    <p class="hint">{{ t('giochi.pad.nessuno') }}</p>
+    {% endif %}
+
+    <div class="row2">
+      <div><label for="session_timeout">{{ t('giochi.timeout') }}</label>
+        <input type="number" id="session_timeout" name="session_timeout" min="0" max="3600"
+               value="{{ cfg.giochi.session_timeout }}"></div>
+    </div>
+    <p class="hint">{{ t('giochi.timeout.hint') }}</p>
+
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+</section>
+
+<script>
+// I pulsanti mandano premuto e rilasciato, come un tasto vero: senza il
+// rilascio un dito che scivola fuori lascerebbe la racchetta a correre.
+(function () {
+  var tasti = document.querySelectorAll(".tasto");
+  function manda(azione, giu) {
+    var corpo = new FormData();
+    corpo.append("azione", azione);
+    corpo.append("giu", giu ? "1" : "0");
+    fetch("{{ url_for('api_giochi_tasto') }}", {method: "POST", body: corpo});
+  }
+  for (var i = 0; i < tasti.length; i++) {
+    (function (b) {
+      var azione = b.getAttribute("data-azione");
+      b.addEventListener("mousedown", function () { manda(azione, true); });
+      b.addEventListener("mouseup", function () { manda(azione, false); });
+      b.addEventListener("mouseleave", function () { manda(azione, false); });
+      b.addEventListener("touchstart", function (e) { e.preventDefault(); manda(azione, true); });
+      b.addEventListener("touchend", function (e) { e.preventDefault(); manda(azione, false); });
+    })(tasti[i]);
+  }
+  var stato = document.getElementById("stato");
+  if (stato) {
+    setInterval(function () {
+      fetch("{{ url_for('api_giochi_state') }}")
+        .then(function (r) { return r.json(); })
+        .then(function (s) {
+          if (!s.session) { return; }
+          stato.textContent = s.testo || stato.textContent;
+        })
+        .catch(function () {});
+    }, 2000);
+  }
+})();
+</script>
+
+{% endblock %}

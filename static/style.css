@@ -39,7 +39,18 @@ header {
   box-shadow: 0 0 10px var(--accent);
 }
 
-nav { display: flex; gap: 8px; margin-top: 12px; }
+/* Le voci vanno a capo invece di uscire dalla finestra. Undici voci su un
+   telefono in una riga sola non ci stanno, e quelle di troppo sparivano a
+   destra senza che niente lo lasciasse intuire. La soluzione solida non e'
+   segnalare meglio cio' che e' nascosto: e' non nasconderlo. Su una finestra
+   larga il flex resta comunque su una riga, quindi da desktop non cambia
+   niente. */
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin-top: 12px;
+}
 
 nav a {
   color: var(--muted);
@@ -48,6 +59,14 @@ nav a {
   border-radius: 8px;
   font-size: 14px;
   border: 1px solid transparent;
+  white-space: nowrap;   /* "Now Playing" non si spezza a meta' */
+}
+
+/* Su schermi stretti le voci si stringono un po', cosi' ne entrano due o tre
+   per riga invece di una: il menu resta un menu e non diventa un elenco. */
+@media (max-width: 560px) {
+  nav { gap: 5px 6px; }
+  nav a { padding: 6px 10px; font-size: 13px; }
 }
 
 nav a.on {
@@ -408,3 +427,48 @@ table.files tr.now td.mono { color: #6cc8f0; }
 /* Il pallino del colore accanto al nome, nella riga di stato. */
 .pallino { display: inline-block; width: 9px; height: 9px; border-radius: 50%;
            margin: 0 4px 0 8px; vertical-align: middle; }
+
+/* ---- versione 3.6: la sezione Giochi ---- */
+
+.giochi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.gioco {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #0d1117;
+  display: flex;
+  flex-direction: column;
+}
+
+.gioco.on { border-color: var(--accent); background: rgba(255,140,26,.07); }
+.gioco h3 { margin: 0 0 6px; font-size: 15px; }
+.gioco .hint { flex: 1; }
+.gioco .record { font-size: 12px; color: var(--muted); margin: 8px 0; }
+.gioco form { margin: 0; }
+.gioco .actions { margin-top: 8px; }
+
+/* La pulsantiera di prova: tasti larghi, perche' si preme col dito. */
+.pad { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+
+.pad .tasto {
+  min-width: 74px;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  background: #161b22;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.pad .tasto:active { background: var(--accent); color: #1a0f00; }

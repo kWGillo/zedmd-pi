@@ -14,12 +14,14 @@ from .media import (MediaPlayerSource, cached_count, invalidate_scan,
                     scan_media, walk_media, is_supported, have_ffmpeg)
 from .nowplaying import (NowPlayingSource, DEFAULT_COLORS, draw_text,
                          snap_color, text_width)
+from .giochi import GiochiSource, elenco as giochi_elenco
 from .zedmd import ZeDMDSource
 
 __all__ = [
     "Source", "ClockSource", "MediaPlayerSource", "ZeDMDSource", "AirRadarSource",
     "BirthdaysSource", "PreviewSource", "HOLD_SECONDS",
     "DoomSource", "DOOM_TASTI", "DOOM_PULSANTI", "tastiere", "controlla_wad",
+    "GiochiSource", "giochi_elenco",
     "joystick", "posizione_asse", "direzione_asse",
     "BannerSource", "NowPlayingSource", "SIZES", "SIZE_KEYS", "SLOTS",
     "default_banner", "DEFAULT_COLORS", "draw_text", "snap_color", "text_width",

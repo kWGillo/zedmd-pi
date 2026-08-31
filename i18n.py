@@ -1130,6 +1130,78 @@ STRINGS = {
         "that change the installed software rather than tune it, which is "
         "why they live outside Settings."),
     # ----------------------------------------------------------------- rifiuti
+    "nav.giochi": ("Giochi", "Games"),
+    "giochi.title": ("Giochi sul pannello", "Games on the panel"),
+    "giochi.intro": (
+        "Scritti per 256x64, non adattati da uno schermo 4:3: il campo di "
+        "gioco prende i 200 pixel di sinistra e i 56 di destra sono il "
+        "tabellone. Non sono un servizio ma una partita \u2014 si preme "
+        "Gioca, tutti i servizi si fermano, si esce e riprendono da dove "
+        "stavano.",
+        "Written for 256x64, not adapted from a 4:3 screen: the playfield "
+        "takes the left 200 pixels and the right 56 are the scoreboard. They "
+        "are not a service but a game \u2014 press Play, every service stops, "
+        "quit and they resume where they were."),
+    "giochi.play": ("Gioca", "Play"),
+    "giochi.esci": ("Esci dalla partita", "Quit the game"),
+    "giochi.record": ("Record:", "High score:"),
+    "giochi.breakout.hint": (
+        "Il muro \u00e8 largo per natura, ed \u00e8 il gioco che soffre meno "
+        "il pannello. Fra muro e racchetta ci sono trenta pixel invece di "
+        "duecento: la palla parte lenta e accelera a ogni quattro mattoni.",
+        "The wall is wide by nature, and this is the game the panel suits "
+        "best. There are thirty pixels between wall and paddle instead of two "
+        "hundred: the ball starts slow and speeds up every four bricks."),
+    "giochi.invaders.hint": (
+        "Tre file invece di cinque: su sessantaquattro righe la discesa "
+        "originale non ci sta, e schiacciarla vorrebbe dire alieni alti due "
+        "pixel. Un colpo per volta, e la schiera accelera man mano che si "
+        "svuota.",
+        "Three rows instead of five: the original descent does not fit in "
+        "sixty-four rows, and squashing it would mean two-pixel aliens. One "
+        "shot at a time, and the swarm speeds up as it empties."),
+    "giochi.doom.hint": (
+        "Doom gira come processo separato, per una ragione di licenza, e ha "
+        "una pagina sua: preparazione, scelta del WAD e taratura della fascia.",
+        "Doom runs as a separate process, for licensing reasons, and has its "
+        "own page: setup, WAD choice and band tuning."),
+    "giochi.doom.apri": ("Apri la pagina di Doom", "Open the Doom page"),
+    "giochi.doom.stato": ("WAD:", "WAD:"),
+    "giochi.doom.si": ("pronto", "ready"),
+    "giochi.doom.no": ("da preparare", "needs setup"),
+    "giochi.comandi": ("Comandi", "Controls"),
+    "giochi.comandi.hint": (
+        "Si gioca dalla tastiera del cabinato o dal pad; questi pulsanti "
+        "servono per provare senza alzarsi.",
+        "Play from the cabinet keyboard or the pad; these buttons are for "
+        "trying it out without getting up."),
+    "giochi.controlli": ("Tastiera e joystick", "Keyboard and joystick"),
+    "giochi.keyboard": ("Accetta comandi dalla tastiera",
+                        "Accept commands from the keyboard"),
+    "giochi.keyboard_starts": (
+        "Un tasto pu\u00f2 far cominciare una partita (spento: il pannello non "
+        "se lo porta via un tasto sfiorato per caso)",
+        "A key may start a game (off: a key brushed by accident cannot take "
+        "the panel away)"),
+    "giochi.joystick": ("Accetta comandi dal joystick",
+                        "Accept commands from the joystick"),
+    "giochi.joystick_starts": (
+        "Options sul pad pu\u00f2 far cominciare una partita",
+        "Options on the pad may start a game"),
+    "giochi.pad.trovati": ("Pad riconosciuti:", "Pads detected:"),
+    "giochi.pad.nessuno": ("Nessun pad collegato in questo momento.",
+                           "No pad connected right now."),
+    "giochi.timeout": ("Chiudi la partita dopo (secondi senza comandi)",
+                       "Close the game after (seconds with no input)"),
+    "giochi.timeout.hint": (
+        "Una partita lasciata a met\u00e0 non deve tenersi il pannello per "
+        "sempre. Zero per non chiuderla mai.",
+        "A game left half-played must not keep the panel forever. Zero to "
+        "never close it."),
+    "status.giochi.ferma": ("nessuna partita in corso", "no game running"),
+    "status.giochi.partita": (
+        "%(gioco)s: %(punteggio)d punti, %(vite)d vite",
+        "%(gioco)s: %(punteggio)d points, %(vite)d lives"),
     "nav.rifiuti": ("Rifiuti", "Waste"),
     "rifiuti.title": ("Raccolta rifiuti e attività comunali",
                       "Waste collection and municipal activities"),

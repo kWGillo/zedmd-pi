@@ -94,40 +94,16 @@ LINUX_TASTI = {
     6: "arma5", 7: "arma6", 8: "arma7",
 }
 
-EV_KEY = 0x01
-EV_ABS = 0x03
-# struct input_event: due campi di timeval, poi tipo, codice e valore. Le
-# dimensioni cambiano fra 32 e 64 bit, e su un Pi capitano entrambe: si
-# lasciano calcolare a struct invece di scriverle a mano.
-FORMATO_EVENTO = "@llHHi"
-DIM_EVENTO = struct.calcsize(FORMATO_EVENTO)
-
-# ------------------------------------------------------------------ joystick
-#
-# Un pad PS4, o un pad da PC come il Nacon, sotto Linux e' un dispositivo di
-# /dev/input come una tastiera: stessi eventi, stessa struttura, nessuna
-# libreria in piu'. Cambiano due cose. I **pulsanti** hanno codici sopra 0x130
-# invece dei codici dei tasti. E ci sono gli **assi**, EV_ABS, che non sono
-# premuti o rilasciati ma hanno un valore: la croce direzionale vale -1, 0 o
-# +1, le levette un numero dentro un intervallo che cambia da pad a pad.
-#
-# Doom pero' capisce solo tasti premuti e rilasciati, e il lavoro vero e' li':
-# trasformare una posizione in un premuto/rilasciato senza che il personaggio
-# tremi quando la levetta e' quasi al centro.
-
-BTN_SOUTH = 0x130   # croce su PS4, A su un pad XInput
-BTN_EAST = 0x131    # cerchio, B
-BTN_NORTH = 0x133   # triangolo, Y
-BTN_WEST = 0x134    # quadrato, X
-BTN_TL = 0x136      # L1
-BTN_TR = 0x137      # R1
-BTN_TL2 = 0x138     # L2 digitale
-BTN_TR2 = 0x139     # R2 digitale
-BTN_SELECT = 0x13a  # Share
-BTN_START = 0x13b   # Options
-BTN_MODE = 0x13c    # tasto PS
-BTN_THUMBL = 0x13d
-BTN_THUMBR = 0x13e
+# La lettura vera di /dev/input sta in comandi.py: la usano Doom e i giochi,
+# e una regola come la zona morta di una levetta non puo' esistere in due
+# copie. Qui restano solo le tabelle, che sono di Doom e di nessun altro.
+from .comandi import (BTN_EAST, BTN_MODE, BTN_NORTH, BTN_SELECT, BTN_SOUTH,
+                      BTN_START, BTN_THUMBL, BTN_THUMBR, BTN_TL, BTN_TL2,
+                      BTN_TR, BTN_TR2, BTN_WEST, DIM_EVENTO, EV_ABS, EV_KEY,
+                      FORMATO_EVENTO, PAD_AVVIO, ZONA_MORTA, ZONA_RILASCIO,
+                      ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_RY, ABS_X, ABS_Y,
+                      Lettore, direzione_asse, intervallo_asse, joystick,
+                      posizione_asse, tastiere, _dispositivi_input)
 
 # I nomi sulle plastiche cambiano da un pad all'altro, e negli anni qualche
 # kernel ha scambiato triangolo e quadrato: per questo le azioni importanti
@@ -143,23 +119,10 @@ PAD_PULSANTI = {
     BTN_THUMBL: "arma1", BTN_THUMBR: "arma2",
 }
 
-# Il pulsante che puo' *far cominciare* una partita: Options o il tasto PS,
-# che nessuno preme per sbaglio sfiorando un pad appoggiato al cabinato.
-PAD_AVVIO = (BTN_START, BTN_MODE)
-
-ABS_X = 0x00
-ABS_Y = 0x01
-ABS_RX = 0x03
-ABS_RY = 0x04
-ABS_HAT0X = 0x10
-ABS_HAT0Y = 0x11
-
-# Assi -> coppia di azioni (valore negativo, valore positivo).
-# Levetta sinistra: camminare e passo laterale. Levetta destra: girare. E' la
-# disposizione a due levette a cui e' abituato chiunque abbia avuto un pad in
-# mano negli ultimi vent'anni. La croce direzionale fa le stesse cose della
-# levetta sinistra, ma gira invece di fare il passo laterale: su una croce il
-# passo laterale non serve, e girare si'.
+# Assi -> coppia di azioni (valore negativo, valore positivo). Levetta
+# sinistra: camminare e passo laterale. Levetta destra: girare. La croce fa le
+# stesse cose della levetta sinistra ma gira invece di fare il passo laterale:
+# su una croce il passo laterale non serve, e girare si'.
 PAD_ASSI = {
     ABS_Y: ("su", "giu"),
     ABS_X: ("lato_sx", "lato_dx"),
@@ -168,68 +131,6 @@ PAD_ASSI = {
     ABS_HAT0Y: ("su", "giu"),
     ABS_HAT0X: ("sinistra", "destra"),
 }
-
-# Zona morta come frazione della corsa, e isteresi. Si preme al 40% e si
-# rilascia al 28%: senza la differenza fra le due soglie una levetta tenuta
-# appena oltre il limite genera una raffica di premuto/rilasciato, e in Doom
-# quello si vede come un personaggio che scatta invece di camminare.
-ZONA_MORTA = 0.40
-ZONA_RILASCIO = 0.28
-
-# EVIOCGABS(asse): chiede al kernel l'intervallo vero di un asse. Serve perche'
-# un intervallo standard non esiste — un DualShock 4 riporta 0..255, molti pad
-# da PC -32768..32767 — e darne per scontato uno vuol dire che sull'altro la
-# levetta risulta sempre a fondo corsa oppure sempre ferma.
-_ABS_FORMATO = "@6i"          # value, minimum, maximum, fuzz, flat, resolution
-_EVIOCGABS_BASE = 0x40
-
-
-def _eviocgabs(asse):
-    dim = struct.calcsize(_ABS_FORMATO)
-    return (2 << 30) | (dim << 16) | (ord("E") << 8) | (_EVIOCGABS_BASE + asse)
-
-
-def intervallo_asse(fd, asse):
-    """(minimo, massimo) di un asse, chiesti al kernel. None se non si sa."""
-    try:
-        import fcntl
-        grezzo = fcntl.ioctl(fd, _eviocgabs(asse),
-                             b"\0" * struct.calcsize(_ABS_FORMATO))
-        _, minimo, massimo = struct.unpack(_ABS_FORMATO, grezzo)[:3]
-    except Exception:
-        return None
-    if massimo <= minimo:
-        return None
-    return (minimo, massimo)
-
-
-def posizione_asse(valore, intervallo):
-    """Da valore grezzo a frazione fra -1 e +1, con il centro a zero."""
-    if not intervallo:
-        # Senza intervallo noto si assume la croce direzionale, che vale
-        # -1/0/+1: e' il caso in cui l'ioctl fallisce piu' spesso.
-        return max(-1.0, min(1.0, float(valore)))
-    minimo, massimo = intervallo
-    centro = (minimo + massimo) / 2.0
-    meta = (massimo - minimo) / 2.0
-    if meta <= 0:
-        return 0.0
-    return max(-1.0, min(1.0, (valore - centro) / meta))
-
-
-def direzione_asse(posizione, precedente=0):
-    """-1, 0 o +1 dalla posizione di un asse, con isteresi.
-
-    `precedente` e' la direzione in cui l'asse gia' era: serve a decidere se si
-    sta entrando nella zona attiva (soglia alta) o uscendone (soglia bassa).
-    E' una funzione pura, quindi si prova senza un pad in mano.
-    """
-    soglia = ZONA_RILASCIO if precedente else ZONA_MORTA
-    if posizione <= -soglia:
-        return -1
-    if posizione >= soglia:
-        return 1
-    return 0
 
 
 def controlla_wad(percorso):
@@ -345,11 +246,12 @@ class DoomSource(Source):
         self._ultimo_tasto = 0.0
         self._premuti = set()
         self._ultimo_tentativo = 0.0
-        # Assi dei joystick: intervallo dichiarato dal kernel e direzione in
-        # cui l'asse si trova adesso, per dispositivo. L'isteresi ha bisogno
-        # di sapere da dove si viene.
-        self._intervalli = {}
-        self._direzioni = {}
+        # La lettura di tastiere e pad e' in comune con i giochi: qui si
+        # dichiara solo *cosa* significano i codici per Doom.
+        self._lettore = Lettore(
+            self._dispositivi, self._da_comando,
+            tasti=LINUX_TASTI, pulsanti=PAD_PULSANTI, assi=PAD_ASSI,
+            etichetta="doom")
 
     # ------------------------------------------------------------ ciclo di vita
 
@@ -363,16 +265,13 @@ class DoomSource(Source):
         """
         self._stop.clear()
         self._errore = ""
-        if (self.cfg["doom"].get("keyboard", True)
-                and self._tastiera_thread is None):
-            self._tastiera_thread = threading.Thread(
-                target=self._leggi_tastiere, name="doom-tastiera", daemon=True)
-            self._tastiera_thread.start()
+        if self.cfg["doom"].get("keyboard", True):
+            self._lettore.start()
 
     def stop(self):
         self._stop.set()
         self.chiudi_sessione()
-        self._tastiera_thread = None
+        self._lettore.stop()
 
     def avvia_da_tastiera(self):
         """Se un tasto sul cabinato puo' far cominciare una partita.
@@ -713,54 +612,6 @@ class DoomSource(Source):
 
     # ------------------------------------------------------------ tastiera vera
 
-    def _leggi_tastiere(self):
-        """Legge tastiere e joystick collegati al Pi, senza librerie in piu'.
-
-        `evdev` sarebbe piu' comodo ma e' un pacchetto da installare, e qui
-        serve solo leggere una struttura di ventiquattro byte: si fa con
-        `struct`, che c'e' sempre. Tastiere e pad passano dallo stesso ciclo
-        perche' sotto Linux sono la stessa cosa — cambia solo cosa mandano.
-        """
-        aperti = {}
-        while not self._stop.is_set():
-            voluti = self._dispositivi()
-            for percorso in voluti:
-                if percorso in aperti:
-                    continue
-                try:
-                    aperti[percorso] = os.open(percorso, os.O_RDONLY | os.O_NONBLOCK)
-                    print("[doom] comando: %s" % percorso)
-                except OSError:
-                    # Un pad staccato o senza permessi non e' un guasto: si
-                    # riprova al prossimo giro, e intanto resta il web.
-                    aperti[percorso] = None
-            for percorso in list(aperti):
-                if percorso not in voluti:
-                    fd = aperti.pop(percorso)
-                    if fd is not None:
-                        try:
-                            os.close(fd)
-                        except OSError:
-                            pass
-
-            fd_attivi = [fd for fd in aperti.values() if fd is not None]
-            if not fd_attivi:
-                self._stop.wait(3.0)
-                continue
-            try:
-                pronti, _, _ = select.select(fd_attivi, [], [], 1.0)
-            except (OSError, ValueError):
-                pronti = []
-            for fd in pronti:
-                self._svuota(fd, aperti)
-
-        for fd in aperti.values():
-            if fd is not None:
-                try:
-                    os.close(fd)
-                except OSError:
-                    pass
-
     def _dispositivi(self):
         """Tutto quello da cui accettare comandi, in questo momento."""
         elenco = []
@@ -779,64 +630,18 @@ class DoomSource(Source):
                 senza_ripetizioni.append(percorso)
         return senza_ripetizioni
 
-    def _svuota(self, fd, aperti):
-        try:
-            dati = os.read(fd, DIM_EVENTO * 64)
-        except OSError:
-            for percorso, altro in list(aperti.items()):
-                if altro == fd:
-                    aperti[percorso] = None
-                    try:
-                        os.close(fd)
-                    except OSError:
-                        pass
-            return
-        for inizio in range(0, len(dati) - DIM_EVENTO + 1, DIM_EVENTO):
-            _, _, tipo, codice, valore = struct.unpack(
-                FORMATO_EVENTO, dati[inizio:inizio + DIM_EVENTO])
-            if tipo == EV_KEY:
-                self._evento_tasto(fd, codice, valore)
-            elif tipo == EV_ABS:
-                self._evento_asse(fd, codice, valore)
+    def _da_comando(self, azione, giu, avvio):
+        """Un comando letto da tastiera o da pad diventa un tasto di Doom.
 
-    def _evento_tasto(self, fd, codice, valore):
-        # valore 2 e' la ripetizione automatica del kernel: Doom la sua se la
-        # fa da solo, e sommarle vuol dire un personaggio che scatta invece di
-        # camminare.
-        if valore not in (0, 1):
-            return
-        pulsante = PAD_PULSANTI.get(codice)
-        if pulsante is not None:
-            # Il pad puo' far cominciare una partita, ma solo con Options: e'
-            # un gesto deliberato, mentre un pad appoggiato al cabinato puo'
-            # benissimo prendere una gomitata.
-            apri = (self.avvia_da_pad() and codice in PAD_AVVIO)
-            self.premi(pulsante, valore == 1, apri=apri)
-            return
-        azione = LINUX_TASTI.get(codice)
-        if azione:
-            self.premi(azione, valore == 1, apri=self.avvia_da_tastiera())
-
-    def _evento_asse(self, fd, asse, valore):
-        """Una levetta o la croce direzionale diventano premuto/rilasciato."""
-        coppia = PAD_ASSI.get(asse)
-        if coppia is None:
-            return
-        chiave = (fd, asse)
-        if chiave not in self._intervalli:
-            self._intervalli[chiave] = intervallo_asse(fd, asse)
-        posizione = posizione_asse(valore, self._intervalli[chiave])
-        prima = self._direzioni.get(chiave, 0)
-        adesso = direzione_asse(posizione, prima)
-        if adesso == prima:
-            return
-        self._direzioni[chiave] = adesso
-        negativa, positiva = coppia
-        # Passando da un estremo all'altro senza toccare il centro va
-        # rilasciata la direzione vecchia, altrimenti resta premuta per sempre
-        # e si cammina all'indietro mentre si va avanti.
-        if prima:
-            self.premi(negativa if prima < 0 else positiva, False, apri=False)
-        if adesso:
-            self.premi(negativa if adesso < 0 else positiva, True,
-                       apri=False)
+        La distinzione fra i due sta tutta qui: la tastiera del cabinato puo'
+        far cominciare una partita solo se lo si e' chiesto, mentre Options
+        sul pad si', perche' un pulsante preciso su un pad che si tiene in
+        mano non si preme per sbaglio come un tasto sfiorato per caso.
+        """
+        if avvio:
+            apri = self.avvia_da_pad()
+        elif azione in PAD_PULSANTI.values() and azione not in LINUX_TASTI.values():
+            apri = False
+        else:
+            apri = self.avvia_da_tastiera()
+        self.premi(azione, giu, apri=apri)

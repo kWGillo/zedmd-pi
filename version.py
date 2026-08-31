@@ -395,6 +395,34 @@ Storico:
        non poteva sapere perche' era fermo. Ora la riga di stato lo dice —
        "fuori dalla fascia 08:00-23:00" invece di "disabilitato", che e'
        un'altra cosa e ha un'altra soluzione.
+  3.6  Due giochi scritti per il pannello, e una sezione Giochi che raccoglie
+       anche Doom. Non sono emulatori: su 256x64 non calza nessuna piattaforma
+       storica — la piu' vicina, il NES, andrebbe schiacciata di quasi quattro
+       volte in verticale, e a quel punto un alieno alto otto pixel ne diventa
+       due. Scriverli per il 4:1 costa meno che adattare qualcosa che 4:1 non
+       e' mai stato, e permette di usare la forma invece di subirla: il campo
+       prende i 200 pixel di sinistra, i 56 di destra diventano il tabellone
+       con punteggio, record e vite.
+       **Breakout** e' quello che soffre meno il pannello, perche' il muro e'
+       largo per natura. Fra muro e racchetta pero' ci sono trenta pixel
+       invece di duecento, quindi la palla parte lenta e accelera ogni quattro
+       mattoni. **Invaders** ha tre file invece di cinque, un colpo per volta,
+       ripari che si consumano dove vengono colpiti e la schiera che accelera
+       man mano che si svuota.
+       Come Doom dalla 3.2 sono una **partita, non un servizio**: si preme
+       Gioca, i servizi si fermano, si esce e riprendono. La differenza e' che
+       questi stanno dentro al processo — Doom sta fuori per la licenza GPL2 e
+       ne paga il prezzo in pipe, compilazione e file che un aggiornamento puo'
+       cancellare.
+       La lettura di tastiere e pad esce da doom.py e diventa un modulo suo:
+       una regola come la zona morta di una levetta non puo' esistere in due
+       copie. Doom e i giochi ora leggono con lo stesso codice, e per la prima
+       volta quel codice ha una prova che non richiede un pad in mano — gli
+       eventi sono ventiquattro byte e si costruiscono a mano.
+       Il menu andava a finire fuori dalla finestra: `nav` era un flex senza
+       `flex-wrap`, e le voci che non ci stavano sparivano a destra senza che
+       niente lo lasciasse intuire. Ora vanno a capo — su un telefono le undici
+       voci stanno su tre righe, e non se ne nasconde nessuna.
 """
 
-__version__ = "3.5"
+__version__ = "3.6"

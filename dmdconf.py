@@ -139,6 +139,24 @@ DEFAULTS = {
              "attiva": True, "ora_inizio": 0, "ora_fine": 6},
         ],
     },
+    # I giochi scritti per il pannello. Non sono un servizio e non compaiono
+    # fra gli interruttori: sono una partita che comincia e finisce, come Doom
+    # dalla 3.2. Qui stanno solo i comandi e i record.
+    "giochi": {
+        "keyboard": True,
+        "keyboard_device": "",
+        # Come per Doom: un tasto del cabinato non fa cominciare una partita a
+        # meno che non lo si chieda, Options sul pad si'.
+        "keyboard_starts": False,
+        "joystick": True,
+        "joystick_device": "",
+        "joystick_starts": True,
+        # Dopo quanti secondi senza comandi la partita si chiude da sola e il
+        # pannello torna alle sorgenti. Zero per non chiuderla mai.
+        "session_timeout": 180,
+        "ultimo": "breakout",
+        "record": {},
+    },
     "doom": {
         # Il binario lo compila doom/setup_doom.sh: non arriva gia' fatto
         # perche' i sorgenti di doomgeneric sono GPL2 e questo progetto e'

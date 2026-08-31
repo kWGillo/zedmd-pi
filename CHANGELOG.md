@@ -2,6 +2,66 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [3.6]
+
+### Aggiunto
+- **Due giochi scritti per il pannello: Breakout e Invaders.** Non sono
+  emulatori, ed è una scelta misurata: su 256×64 non calza nessuna piattaforma
+  storica. La più vicina — il NES, che almeno è largo 256 — andrebbe schiacciata
+  di 3,75 volte in verticale, e a quel punto un alieno alto otto pixel ne
+  diventa due e il testo di stato è poltiglia. Scriverli *per* il 4:1 costa meno
+  che adattare qualcosa che 4:1 non è mai stato.
+
+  E permette di **usare** la forma invece di subirla: il campo di gioco prende i
+  200 pixel di sinistra, i 56 di destra diventano un tabellone con punteggio,
+  record e vite — spazio che su uno schermo 4:3 non ci sarebbe e che qui
+  resterebbe vuoto.
+
+  **Breakout** è quello che soffre meno il pannello, perché il muro è largo per
+  natura. Fra muro e racchetta però ci sono trenta pixel invece di duecento: la
+  palla parte lenta e accelera ogni quattro mattoni, altrimenti non si capisce
+  cosa è successo. L'angolo dipende da dove si colpisce, così la racchetta è uno
+  strumento di mira e non un muro.
+
+  **Invaders** ha tre file invece di cinque — la discesa originale in
+  sessantaquattro righe non ci sta — un colpo per volta come nell'originale,
+  ripari che si consumano dove vengono colpiti, e la schiera che accelera man
+  mano che si svuota.
+
+- **Una sezione «Giochi» nel menu, che raccoglie anche Doom.** Doom mantiene la
+  sua pagina, raggiungibile da lì, perché ha impostazioni che gli altri non
+  hanno: preparazione, scelta del WAD, taratura della fascia.
+
+### Modificato
+- **Come Doom dalla 3.2, i giochi sono una partita e non un servizio**: si preme
+  Gioca, i servizi si fermano, il pannello è della partita per presa esclusiva;
+  si esce e tutto riprende. È lo stesso meccanismo già collaudato, non un
+  secondo. La differenza è che questi girano **dentro** il processo: Doom sta
+  fuori per una ragione di licenza (GPL2 dentro GPLv3 non ci sta) e ne paga il
+  prezzo in pipe, compilazione al primo avvio e un binario che l'aggiornamento
+  via rete ha già cancellato una volta.
+- **La lettura di tastiere e pad esce da `doom.py` e diventa un modulo suo.**
+  Una regola come la zona morta di una levetta, o l'intervallo di un asse chiesto
+  al kernel, non può esistere in due copie. Doom e i giochi ora leggono con lo
+  stesso codice — e per la prima volta quel codice ha una prova che non richiede
+  un pad in mano: un evento di `/dev/input` è una struttura di ventiquattro
+  byte, e si costruisce a mano.
+
+### Corretto
+- **Il menu in alto usciva dalla finestra.** `nav` era un flex senza
+  `flex-wrap`: le voci che non ci stavano sparivano a destra, senza che niente
+  lo lasciasse intuire. Ora vanno a capo — verificato con un browser vero a
+  quattro larghezze: su un telefono da 390 px le undici voci stanno su tre
+  righe, nessuna tagliata e nessuno scorrimento orizzontale. Da desktop resta
+  una riga sola, come prima.
+- **A Breakout la palla poteva restare incastrata in verticale.** Colpita
+  esattamente al centro della racchetta ripartiva a novanta gradi, saliva e
+  scendeva sulla stessa colonna all'infinito, e finita quella colonna il muro non
+  si poteva più completare. Non è un caso di scuola — un giocatore che insegue
+  bene la palla la centra quasi sempre — ed è stata la prova automatica a
+  trovarlo, non una partita a mano. Ora l'angolo ha anche un minimo, con un filo
+  di caso che impedisce alla traiettoria di diventare periodica.
+
 ## [3.5]
 
 ### Aggiunto
