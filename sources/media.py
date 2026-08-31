@@ -20,6 +20,8 @@ import time
 
 from PIL import Image
 
+import fasce
+
 from .base import Source
 
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".ppm", ".tif", ".tiff"}
@@ -153,6 +155,14 @@ class MediaPlayerSource(Source):
 
     def status(self, lang=None):
         if not self._running:
+            # Fermo per la fascia oraria non e' fermo perche' spento: senza
+            # dirlo, l'unica spiegazione visibile e' un interruttore acceso
+            # accanto a un servizio che non fa niente.
+            if self.cfg["services"].get(self.name) \
+                    and not fasce.media_consentito(self.cfg):
+                inizio, fine = fasce.fascia_media(self.cfg)
+                return self.t("status.media.offhours", lang,
+                              start=inizio, end=fine)
             return self.t("status.disabled", lang)
         if self._error:
             return self.t("status.media.error", lang,

@@ -2,6 +2,42 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [3.5]
+
+### Aggiunto
+- **Fascia oraria del Media Player**, con la stessa forma di Night mode: un
+  flag, un'ora di inizio e una di fine, passaggio di mezzanotte compreso. Sta
+  nella pagina Media, sopra l'anteprima.
+
+  **Il flag viene prima di tutto.** Spento — che è il predefinito — il Media
+  Player lavora sempre, esattamente come ha sempre fatto: chi aggiorna non si
+  accorge di niente finché non lo accende lui.
+
+  Fuori dalla fascia il servizio si ferma **davvero**. Non è una sorgente
+  accesa che perde la gara con l'orologio: è il thread che non gira. Niente
+  decodifica, niente letture dalla scheda SD nelle ore in cui nessuno guarda
+  il pannello — che è lo stesso motivo per cui nella 1.6 la libreria è passata
+  in memoria. Riparte da solo quando la fascia si riapre, senza toccare
+  l'interruttore nella pagina Servizi, che resta acceso perché è una scelta
+  dell'utente e non della fascia.
+
+- **La riga di stato distingue i due motivi.** «fuori dalla fascia
+  08:00–23:00» invece di «disabilitato»: sono due cose diverse e hanno due
+  soluzioni diverse, e senza dirlo l'unica spiegazione visibile sarebbe un
+  interruttore acceso accanto a un servizio che non fa niente.
+
+### Modificato
+- **Lo Sleep mode resta prioritario, e lo resta per costruzione.** Le due
+  fasce non si parlano: il Media Player non sa niente dello Sleep, quindi non
+  ha alcun modo di svegliare un pannello che deve stare spento. Sommare le due
+  condizioni dentro la regola della fascia avrebbe voluto dire scrivere la
+  stessa precedenza in due posti — e prima o poi in due modi diversi. La
+  precedenza resta dov'era: nel ciclo di rendering, a valle di chi ha vinto.
+- **La regola delle fasce esce da `dmdd` e diventa un modulo suo** (`fasce.py`).
+  Da dentro una sorgente `dmdd` non è importabile — è un ciclo di import — e
+  senza quello il Media Player non aveva modo di sapere perché era fermo: la
+  scelta era fra duplicare la regola e non spiegare niente.
+
 ## [3.4.1]
 
 ### Corretto

@@ -21,6 +21,29 @@
 </section>
 
 <section class="card">
+  <h2>{{ t('media.timer') }}</h2>
+  <p class="hint">{{ t('media.timer.hint') }}</p>
+  <form method="post" action="{{ url_for('api_media_timer') }}">
+
+    <label class="check">
+      <input type="checkbox" name="timer_enabled" {{ 'checked' if cfg.mediaplayer.timer_enabled }}>
+      {{ t('media.timer.enabled') }}
+    </label>
+    <div class="row2">
+      <div><label for="timer_start">{{ t('common.from') }}</label>
+        <input type="time" id="timer_start" name="timer_start"
+               value="{{ cfg.mediaplayer.timer_start }}"></div>
+      <div><label for="timer_end">{{ t('common.to') }}</label>
+        <input type="time" id="timer_end" name="timer_end"
+               value="{{ cfg.mediaplayer.timer_end }}"></div>
+    </div>
+    <p class="hint">{{ t('media.timer.sleep') }}</p>
+
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+</section>
+
+<section class="card">
   <h2>{{ t('media.preview') }}</h2>
   <p class="hint">{{ t('media.preview.hint') }}</p>
   <form method="post" action="{{ url_for('api_media_preview') }}">

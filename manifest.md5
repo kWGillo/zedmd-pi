@@ -5,14 +5,15 @@ d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 112957993893543e06c2302cfb040d28  config.json
 f9a19df7caa1b28f9cdebade3fd62905  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
-c652ad2e225b05434785137a49cb90ec  dmdconf.py
-8f40bfc6fe9e67b2a24ae0acb4cf710b  dmdd.py
+4b8df4fc58ad712099f01bf0176bbe07  dmdconf.py
+98b2bbfb82628ed28f75697095397ecc  dmdd.py
 397862a19501abc030946d1b6c39463c  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
 b400dff8b86e25ebd1057e666e53f9e5  doom/setup_doom.sh
 2b22f30cde5ff93be13a04007867dad4  doomsetup.py
+83590a30aab47e1f24ede4c6e434edea  fasce.py
 47fd5e895c6fb2c7d17511d283984f3e  hass.py
-97df9180692069c9ef0a847fe4067e13  i18n.py
+1827185e5195402a9265916abfd112f9  i18n.py
 ff5eec4acd57660cfe5961046a038b7d  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
@@ -31,7 +32,7 @@ a9cc678c5e2734cb68e9729a60b2b1b7  sources/airradar.py
 f22e43a4bf491c3f91fee791821bceb6  sources/clock.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 2eaef97a0b8bc0e469f69161d7409175  sources/doom.py
-2230f5ed387f0eacb47aca431b3b7569  sources/media.py
+8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
 4939bc6965d8132298fdbe783bc0b04f  sources/nowplaying.py
 9c78a0b718974f492c303164ac3d0dbf  sources/zedmd.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
@@ -42,7 +43,7 @@ f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
 73c2b6f65a59fbc627244fd38ac6ca5d  templates/clock.html
 118314ed9e9abe538a7d5f24ab420945  templates/doom.html
 c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
-b5d92364a84e9d55445e9661ebec7d0b  templates/media.html
+3be98432e6ad1e869da824653a10975a  templates/media.html
 3a7dc0f319c053a6f1f6bbd9c1416bb5  templates/nowplaying.html
 b07c92e34dc3053d7fbd3a2499c746f8  templates/radar.html
 f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
@@ -51,6 +52,6 @@ e26f8c8216ec08b2d827eeee0c87407b  templates/settings.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 28a4efdea0a0d0279dab9985edb2ac1a  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-c94c457771b9c5b7c7f62d6552b7c81e  version.py
-ebe61e0f99547dc79e99a0ed410fac19  webui.py
+9006918d0e6c1269b4807c53cc8bdc4a  version.py
+477dbdddbaedc8977aaa11911a13bdec  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

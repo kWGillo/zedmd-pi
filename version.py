@@ -377,6 +377,24 @@ Storico:
         ne' Doom: ora le pagine provate sono dodici, e non basta piu' che
         rispondano — si controlla che i campi ci siano davvero, con i nomi che
         l'API rilegge, e che quello che si salva torni indietro intero.
+  3.5  Fascia oraria del Media Player, con la stessa forma di Night mode: un
+       flag, un'ora di inizio e una di fine, e il passaggio di mezzanotte
+       gestito. Il flag viene prima di tutto — spento, che e' il predefinito,
+       il Media Player lavora sempre e chi aggiorna non si accorge di niente.
+       Fuori dalla fascia il servizio si ferma **davvero**: non e' una
+       sorgente accesa che perde la gara, e' il thread che non gira, quindi
+       niente decodifica e niente letture dalla scheda SD nelle ore in cui
+       nessuno guarda. Riparte da solo quando la fascia si riapre.
+       Lo Sleep resta prioritario, e lo resta perche' le due fasce non si
+       parlano: il Media Player non sa niente dello Sleep e non puo' quindi
+       svegliare un pannello che deve stare spento. Sommare le due condizioni
+       dentro la regola della fascia avrebbe voluto dire scrivere la stessa
+       precedenza in due posti, e prima o poi in due modi diversi.
+       La regola delle fasce esce da dmdd e diventa un modulo suo: da dentro
+       una sorgente dmdd non e' importabile, e senza quello il Media Player
+       non poteva sapere perche' era fermo. Ora la riga di stato lo dice —
+       "fuori dalla fascia 08:00-23:00" invece di "disabilitato", che e'
+       un'altra cosa e ha un'altra soluzione.
 """
 
-__version__ = "3.4.1"
+__version__ = "3.5"

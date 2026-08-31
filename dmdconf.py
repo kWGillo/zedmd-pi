@@ -81,6 +81,12 @@ DEFAULTS = {
         "video_fps": 20,
         "scale_mode": "fit",
         "pixel_art": True,
+        # Fascia oraria del Media Player, con la stessa forma di Night mode.
+        # Il flag spento — cioe' il predefinito — vuol dire "lavora sempre":
+        # chi aggiorna non si accorge di niente.
+        "timer_enabled": False,
+        "timer_start": "08:00",
+        "timer_end": "23:00",
     },
     "banner": {
         "min_interval": 30,

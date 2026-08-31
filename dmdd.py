@@ -18,6 +18,7 @@ import threading
 import time
 
 import dmdconf
+import fasce
 import hass
 import libcheck
 import mqttbus
@@ -36,22 +37,11 @@ from zedmd_http import ZeDMDHttpServer
 FPS = 30
 
 
-def parse_hhmm(value, fallback=0):
-    """'22:30' -> minuti dalla mezzanotte."""
-    try:
-        hours, minutes = str(value).split(":")
-        return (int(hours) % 24) * 60 + (int(minutes) % 60)
-    except (ValueError, AttributeError):
-        return fallback
-
-
-def in_window(minute, start, end):
-    """True se `minute` cade nella fascia, gestendo il passaggio di mezzanotte."""
-    if start == end:
-        return False
-    if start < end:
-        return start <= minute < end
-    return minute >= start or minute < end
+# La regola delle fasce sta in fasce.py, dove la raggiungono anche le
+# sorgenti: qui restano i nomi di sempre, cosi' il resto del file e chi li
+# importa non si accorgono dello spostamento.
+parse_hhmm = fasce.parse_hhmm
+in_window = fasce.in_window
 
 
 # Quanto dura la gestione media senza notizie dal browser. La pagina manda un
@@ -93,13 +83,28 @@ class Arbiter:
             # interruttore in una pagina.
             if name not in services:
                 continue
-            wanted = bool(services.get(name, False))
+            wanted = bool(services.get(name, False)) and self.consentito(name)
             if wanted and not source.enabled:
                 source.enabled = True
                 source.start()
             elif not wanted and source.enabled:
                 source.enabled = False
                 source.stop()
+
+    def consentito(self, name):
+        """La fascia oraria del servizio, se ne ha una.
+
+        Sta qui e non nel ciclo di rendering perche' l'interruttore e la
+        fascia sono la stessa domanda — *questo servizio deve lavorare
+        adesso?* — e chiunque chiami apply_services (la pagina web, Home
+        Assistant, l'avvio) deve ottenere la stessa risposta. La differenza
+        e' che l'interruttore lo gira una persona e la fascia scade da sola,
+        quindi il ciclo richiama apply_services una volta al secondo: e'
+        idempotente, agisce solo quando lo stato cambia davvero.
+        """
+        if name == "mediaplayer":
+            return fasce.media_consentito(self.cfg)
+        return True
 
     # ------------------------------------------------------- presa del pannello
 
@@ -413,6 +418,14 @@ class Runtime:
 
     def _update_modes(self):
         """Calcola Sleep e Night e applica la luminosita' corrispondente."""
+        # Le fasce dei servizi scadono da sole e non le gira nessuno: senza
+        # questa chiamata il Media Player resterebbe come l'ha lasciato
+        # l'ultima persona che ha toccato una pagina web. E' idempotente.
+        try:
+            self.arbiter.apply_services()
+        except Exception as exc:
+            print("[dmd] fasce dei servizi non applicate: %s" % exc)
+
         display = self.cfg["display"]
         now = time.localtime()
         minute = now.tm_hour * 60 + now.tm_min

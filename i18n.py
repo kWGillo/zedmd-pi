@@ -204,6 +204,9 @@ STRINGS = {
     "status.media.playing": ("in riproduzione: %(name)s", "playing: %(name)s"),
     "status.media.waiting": ("in attesa, %(count)d file in libreria, %(shown)d mostrati",
                              "idle, %(count)d files in library, %(shown)d shown"),
+    "status.media.offhours": (
+        "fermo: fuori dalla fascia %(start)s\u2013%(end)s",
+        "stopped: outside the %(start)s\u2013%(end)s window"),
     "status.media.error": ("errore su %(name)s: %(error)s",
                            "error on %(name)s: %(error)s"),
     "status.banner.empty": ("nessun testo attivo", "no active text"),
@@ -475,6 +478,24 @@ STRINGS = {
         "down and produces white lines on the panel. After copying files over "
         "the network share, use the button below."),
     "media.rescan.button": ("Rileggi la libreria", "Re-read the library"),
+    "media.timer": ("Fascia oraria", "Time window"),
+    "media.timer.hint": (
+        "Le ore in cui il Media Player pu\u00f2 lavorare. Fuori dalla fascia il "
+        "servizio si ferma davvero \u2014 niente decodifica, niente letture "
+        "dalla scheda SD \u2014 e riparte da solo quando la fascia si riapre.",
+        "The hours during which the Media Player may work. Outside the window "
+        "the service really stops \u2014 no decoding, no reads from the SD "
+        "card \u2014 and starts again by itself when the window reopens."),
+    "media.timer.enabled": (
+        "Rispetta la fascia oraria (spento: il Media Player lavora sempre)",
+        "Respect the time window (off: the Media Player always works)"),
+    "media.timer.sleep": (
+        "Lo Sleep mode ha comunque la precedenza: dentro la fascia di Sleep il "
+        "pannello resta spento anche se il Media Player \u00e8 nella sua. La "
+        "fascia pu\u00f2 scavalcare la mezzanotte.",
+        "Sleep mode still takes precedence: during the Sleep window the panel "
+        "stays off even if the Media Player is inside its own. The window may "
+        "cross midnight."),
     "media.preview": ("Anteprima", "Preview"),
     "media.preview.hint": (
         "Interrompe l'attesa e manda subito sul pannello un contenuto scelto "

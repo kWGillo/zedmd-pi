@@ -15,6 +15,7 @@ from flask import (Flask, has_request_context, jsonify, redirect,
 from werkzeug.utils import secure_filename
 
 import dmdconf
+import fasce
 import i18n
 import libcheck
 import compleanni
@@ -754,6 +755,34 @@ def create_app(runtime):
         media["scale_mode"] = mode if mode in ("fit", "fill") else "fit"
         media["pixel_art"] = request.form.get("pixel_art") == "on"
         dmdconf.save()
+        return redirect(url_for("page_media"))
+
+    @app.route("/api/media/timer", methods=["POST"])
+    def api_media_timer():
+        """La fascia oraria del Media Player.
+
+        Endpoint separato da quello della riproduzione perche' sono due
+        moduli distinti nella stessa pagina: salvarne uno non deve azzerare
+        i campi dell'altro, che e' quello che succederebbe leggendoli tutti
+        da una richiesta che ne contiene meta'.
+        """
+        media = cfg["mediaplayer"]
+        media["timer_enabled"] = request.form.get("timer_enabled") == "on"
+        for chiave, predefinito in (("timer_start", fasce.MEDIA_INIZIO),
+                                    ("timer_end", fasce.MEDIA_FINE)):
+            valore = (request.form.get(chiave) or "").strip() or predefinito
+            # Si riscrive normalizzato: "8:0" e "25:70" sono comunque un
+            # orario, e vale la pena salvarli come tali invece di rifiutarli.
+            minuti = fasce.parse_hhmm(valore, fasce.parse_hhmm(predefinito))
+            media[chiave] = "%02d:%02d" % (minuti // 60, minuti % 60)
+        dmdconf.save()
+        # La fascia si applica al prossimo giro del ciclo comunque, ma
+        # chiamarla qui vuol dire che la pagina che si ricarica dice gia' la
+        # verita' invece di aspettare un secondo.
+        try:
+            runtime.arbiter.apply_services()
+        except Exception:
+            pass
         return redirect(url_for("page_media"))
 
     @app.route("/api/media/upload", methods=["POST"])
