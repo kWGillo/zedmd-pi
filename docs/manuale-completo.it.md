@@ -24,7 +24,7 @@ da Raspberry Pi Imager. In tutto il documento l'utente è `gillo` e l'hostname
 3. Aggiornamento del sistema
 4. Preparazione per il pannello
 5. Libreria della matrice
-6. Cablaggio
+6. Cablaggio (FM6373 + DP32020B) — a fili o con la Adafruit Bonnet
 7. Verifica del pannello
 8. Installazione del DMD Controller da GitHub
 9. Configurazione iniziale
@@ -205,9 +205,21 @@ Zero 2 W, sensibilmente di più sulla Zero W.
 
 ## 6. Cablaggio
 
-**Tutto rigorosamente a dispositivi spenti.** Identico su tutti i modelli.
+**Tutto rigorosamente a dispositivi spenti.** Identico su tutti i modelli di
+Raspberry.
 
-### 6.1 Segnali dati
+> **Vale per i pannelli P2.5 128×64 con driver S-PWM FM6373 e row driver
+> DP32020B**, quelli con indirizzamento a shift register: usano le linee A/B/C
+> e hanno **D ed E non collegate**. Piedini, saldature e note
+> sull'alimentazione sono legati a quel pannello — su un pannello diverso
+> vanno ripresi dal suo datasheet, a partire da quante linee di indirizzo
+> vuole.
+
+### 6.1 Segnali dati — collegamento diretto ai GPIO (senza Bonnet)
+
+Questo è il cablaggio a fili, quello con cui è nato il progetto. Chi monta la
+Adafruit RGB Matrix Bonnet salta i §6.1 e 6.2 e va al §6.4: la scheda fa lo
+stesso lavoro, con piedini diversi.
 
 Mappatura "regular" della libreria hzeller. Pin fisici contati sull'header a 40
 poli: pin 1 all'angolo lato microSD, dispari sulla fila interna, pari su quella
@@ -255,6 +267,94 @@ persistenti.
 > sotto i 4,65 V il controller della scheda SD si resetta a metà scrittura. Si
 > verifica in qualsiasi momento con `vcgencmd get_throttled`: deve rispondere
 > `throttled=0x0`.
+
+### 6.4 Variante: Adafruit RGB Matrix Bonnet
+
+Il cablaggio dei paragrafi precedenti si può sostituire con una **Adafruit RGB
+Matrix Bonnet** (prodotto 3211), che porta i quindici segnali dai GPIO al
+connettore HUB75 attraverso due level-shifter 74AHCT245. È una alternativa ai
+fili, non un'aggiunta: o l'una o gli altri.
+
+> **Questo paragrafo vale per i pannelli FM6373 di questo progetto**, quelli
+> con indirizzamento a shift register (`spwm_row_address_type = 1`), che usano
+> la sola linea **A** e non hanno il segnale **E**. Su un pannello diverso —
+> per esempio un 64×64 con cinque linee di indirizzo — le istruzioni sulle
+> saldature **non valgono** e vanno riprese dal datasheet del pannello.
+
+Questa è la scheda di riferimento. Le versioni precedenti del prodotto hanno
+serigrafia e piazzole diverse: se la tua non ha questa fila di fori
+etichettati, le indicazioni qui sotto non le corrispondono.
+
+![Adafruit RGB Matrix Bonnet — lato componenti](img/bonnet-fronte.jpg)
+
+#### Le piazzole "E": non si saldano
+
+Sul retro della scheda c'è un ponticello a saldare a tre piazzole, marcate
+**16**, **E** e **8**. Serve ai pannelli 64×64 che hanno cinque linee di
+indirizzo. **I nostri non ce l'hanno: le piazzole restano vergini.**
+
+Due ragioni per non toccarle nemmeno per scrupolo:
+
+- il pad **16** metterebbe la linea E sul **GPIO 16**, che in questa mappatura
+  è il **verde della metà bassa** (`G2`): un segnale di indirizzo sopra una
+  linea dati;
+- sui pannelli senza E il piedino 8 del connettore HUB75 è spesso **massa**, e
+  pilotare un'uscita contro massa non è una svista innocua.
+
+#### La modifica PWM: l'unica saldatura da fare
+
+Con la Bonnet, l'**OE** finisce sul GPIO 4, che non è un piedino PWM: il
+generatore di impulsi hardware della libreria accetta solo GPIO 18 o 12, e
+sotto ci si ritrova la temporizzazione via software, cioè un'immagine che
+tremola. Con i fili diretti l'OE sta sul GPIO 18, quindi *passare alla Bonnet
+senza questa modifica è un passo indietro rispetto al cablaggio a mano.*
+
+La modifica è un ponticello fra i fori **4** (marcato anche `OE`) e **18**
+della fila di fori liberi lungo il bordo superiore. Sono separati da un solo
+foro, il **17**, che porta il `CLK`: la stagnatura non deve toccarlo.
+
+![Il ponticello da saldare: 4 e 18, scavalcando il 17](img/bonnet-mod-pwm.png)
+
+Basta uno spezzone di filo rigido, o un ritaglio di reoforo, saldato sul lato
+componenti e tenuto piatto. Dopo la modifica il GPIO 4 non è più utilizzabile
+per altro: è unito al 18.
+
+Serve inoltre che l'audio integrato resti disattivato (`dtparam=audio=off`,
+§4): il generatore PWM è lo stesso.
+
+#### Alimentazione
+
+Restano le tre regole del §6.3, con una precisazione: **i pannelli non si
+alimentano attraverso la Bonnet.** La morsettiera della scheda è pensata per un
+pannello solo; due P2.5 da 128×64 chiedono qualche ampere e non è corrente da
+far passare per il jack, il circuito di protezione e le piste.
+
+- 5V dall'alimentatore **direttamente ai pannelli**, con i loro cavi di potenza;
+- una derivazione dallo stesso alimentatore al **jack della Bonnet**, che serve
+  ai level-shifter;
+- il **Pi sul proprio alimentatore**. La Bonnet può alimentarlo attraverso un
+  diodo di bordo, ma è da **1 A**: insufficiente per un Pi 4, che ne vuole 3.
+
+Un alimentatore solo per pannelli e Bonnet mantiene le masse in comune senza
+doverci pensare.
+
+#### Configurazione
+
+In **Impostazioni → Collegamento del pannello** ci sono tre voci:
+
+| Voce | Quando |
+|---|---|
+| Fili diretti sui GPIO | cablaggio dei §6.1–6.3 |
+| Adafruit RGB Matrix Bonnet | Bonnet montata, **senza** la modifica PWM |
+| Adafruit Bonnet con modifica PWM | Bonnet montata **con** il ponticello 4–18 |
+
+La scelta ha effetto al riavvio del servizio, ed è indipendente dal profilo del
+pannello: riapplicare il profilo *FM6373 & DP32020B* non la tocca. Per tornare
+al cablaggio a fili si rimette la prima voce — è l'unico parametro da cambiare.
+
+La taratura fine va ricontrollata: lo `slowdown` del profilo è stato trovato
+sul cablaggio diretto, e con i level-shifter della Bonnet il valore buono può
+essere più basso.
 
 ---
 

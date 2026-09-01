@@ -2,6 +2,27 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.2]
+
+### Aggiunto
+- **Collegamento del pannello scegliibile dalla pagina Impostazioni**: fili
+  diretti sui GPIO, Adafruit RGB Matrix Bonnet, o Bonnet con la modifica PWM.
+  Erano già tre mappature della libreria, ma per cambiarle bisognava scrivere
+  nel file di configurazione.
+- **Il manuale completo ha un §6.4 sulla Bonnet**: foto della scheda di
+  riferimento, foto del ponticello 4–18 da saldare, e il perché le piazzole
+  “E” restano vergini sui pannelli FM6373 di questo progetto.
+
+### Modificato
+- **Il cablaggio esce dal profilo del pannello.** Che pannello è e come è
+  collegato sono due fatti indipendenti: tenerli insieme avrebbe significato
+  che riapplicare il profilo, con la Bonnet montata, riporta l'uscita sui
+  piedini del cablaggio a fili e spegne il display. Ora il profilo non tocca
+  la mappatura, e viceversa.
+- Una mappatura fuori elenco non viene scritta: un nome inventato non dà un
+  errore, dà un pannello nero, e la pagina da cui rimediare sta su quel
+  pannello.
+
 ## [4.1]
 
 ### Corretto

@@ -104,6 +104,20 @@
     </select>
     <p class="hint">{{ t('preset.hint') }}</p>
 
+    <label for="hardware_mapping">{{ t('cablaggio.label') }}</label>
+    <select id="hardware_mapping" name="hardware_mapping">
+      {% for key in cablaggi %}
+      <option value="{{ key }}" {{ 'selected' if cfg.panel.hardware_mapping == key }}>
+        {{ t('cablaggio.' + key) }}</option>
+      {% endfor %}
+    </select>
+    <p class="hint">{{ t('cablaggio.hint') }}</p>
+    {% if cfg.panel.hardware_mapping == 'adafruit-hat' %}
+    <p class="status">{{ t('cablaggio.avviso.soft') }}</p>
+    {% elif cfg.panel.hardware_mapping == 'adafruit-hat-pwm' %}
+    <p class="status">{{ t('cablaggio.avviso.pwm') }}</p>
+    {% endif %}
+
     <div class="row2">
       <div><label for="SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES">{{ t('settings.panel.extra') }}</label>
         <input type="number" min="0" max="16"

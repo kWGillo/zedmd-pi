@@ -24,7 +24,10 @@ PRESETS = {
             "cols": 128,
             "chain": 2,
             "parallel": 1,
-            "hardware_mapping": "regular",
+            # Il cablaggio NON sta qui: vedi CABLAGGI in fondo. Che pannello
+            # e' e come e' collegato sono due fatti indipendenti, e mescolarli
+            # vorrebbe dire che riapplicare il profilo del pannello ributta
+            # l'uscita sul cablaggio diretto con la Bonnet montata.
             "panel_type": "fm6373",
             "spwm_row_address_type": 1,
             "spwm_scan_rows": 64,
@@ -107,3 +110,30 @@ def detect(panel):
         if matches(panel, key):
             return key
     return CUSTOM
+
+
+# ------------------------------------------------------------------ cablaggio
+
+# Come i segnali arrivano al pannello. E' un fatto della macchina, non del
+# pannello: lo stesso FM6373 si pilota tal quale con i fili diretti o con la
+# Bonnet, cambiano solo i piedini. Per questo sta fuori dai profili.
+#
+# Non e' un interruttore acceso/spento perche' gli stati sono tre, e il terzo
+# non e' deducibile dal software: la Bonnet con la modifica PWM (un ponticello
+# a saldare fra GPIO 4 e GPIO 18) e quella senza sono la stessa scheda, e solo
+# chi ha in mano il saldatore sa quale delle due ha davanti.
+#
+#   regular          i fili diretti sui GPIO, com'e' nato il progetto
+#   adafruit-hat     Bonnet Adafruit cosi' com'e'. L'OE finisce sul GPIO 4,
+#                    che non e' un piedino PWM: gli impulsi li fa il software,
+#                    e si vede.
+#   adafruit-hat-pwm Bonnet con GPIO 4 e GPIO 18 uniti a saldare. L'OE torna
+#                    su un piedino PWM e il generatore di impulsi hardware si
+#                    riprende il lavoro, come con i fili diretti.
+CABLAGGIO_DIRETTO = "regular"
+CABLAGGI = (CABLAGGIO_DIRETTO, "adafruit-hat", "adafruit-hat-pwm")
+
+
+def cablaggio_valido(nome):
+    """Un nome fuori elenco non si scrive: sbagliarlo spegne il pannello."""
+    return nome in CABLAGGI

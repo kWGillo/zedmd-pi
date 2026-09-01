@@ -135,6 +135,38 @@ STRINGS = {
         "overwrites the fields below on save; picking Custom keeps what you "
         "see."),
 
+    # ------------------------------------------------------------- cablaggio
+    "cablaggio.label": ("Collegamento del pannello", "Panel wiring"),
+    "cablaggio.regular": ("Fili diretti sui GPIO", "Direct GPIO wiring"),
+    "cablaggio.adafruit-hat": ("Adafruit RGB Matrix Bonnet",
+                              "Adafruit RGB Matrix Bonnet"),
+    "cablaggio.adafruit-hat-pwm": (
+        "Adafruit Bonnet con modifica PWM (GPIO 4–18 saldati)",
+        "Adafruit Bonnet with the PWM mod (GPIO 4–18 soldered)"),
+    "cablaggio.hint": (
+        "Come i segnali arrivano al pannello. È una caratteristica della "
+        "macchina, non del pannello: il profilo qui sopra non la tocca, così "
+        "riapplicarlo non riporta l'uscita sui piedini sbagliati. Ha effetto "
+        "al riavvio del servizio.",
+        "How the signals reach the panel. It belongs to the machine, not to "
+        "the panel: the profile above never touches it, so re-applying the "
+        "profile cannot send the output back to the wrong pins. Takes effect "
+        "when the service restarts."),
+    "cablaggio.avviso.soft": (
+        "Senza la modifica PWM l'OE sta sul GPIO 4, che non è un piedino PWM: "
+        "gli impulsi li genera il software e l'immagine può tremolare. "
+        "Unendo a saldare GPIO 4 e GPIO 18 si passa alla voce con modifica.",
+        "Without the PWM mod, OE sits on GPIO 4, which is not a PWM pin: the "
+        "pulses are generated in software and the image may flicker. "
+        "Soldering GPIO 4 to GPIO 18 enables the modded option."),
+    "cablaggio.avviso.pwm": (
+        "Richiede il ponticello a saldare fra GPIO 4 e GPIO 18 sulla Bonnet e "
+        "il modulo audio snd_bcm2835 in blacklist. Senza il ponticello il "
+        "pannello resta spento.",
+        "Requires the solder bridge between GPIO 4 and GPIO 18 on the Bonnet "
+        "and the snd_bcm2835 audio module blacklisted. Without the bridge the "
+        "panel stays dark."),
+
     # ------------------------------------------------------- unita' del radar
     "radar.units": ("Unità di misura", "Units"),
     "radar.units.hint": (

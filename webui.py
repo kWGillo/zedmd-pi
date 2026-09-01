@@ -203,6 +203,7 @@ def create_app(runtime):
             hostname=socket.gethostname(),
             sleeping=runtime.sleeping, night=runtime.night,
             presets=presets.choices(), preset_now=presets.detect(cfg["panel"]),
+            cablaggi=presets.CABLAGGI,
             config_result=request.args.get("config_result"), page="settings")
 
     @app.route("/updates")
@@ -1059,6 +1060,14 @@ def create_app(runtime):
             presets.apply(panel, scelto)
         else:
             panel["preset"] = presets.detect(panel)
+
+        # Il cablaggio si scrive *dopo* il profilo, ed e' l'unico campo che il
+        # profilo non puo' toccare: che pannello e' e come e' collegato sono
+        # due fatti separati. Un nome fuori elenco si ignora, perche' scriverlo
+        # non darebbe un errore ma un pannello spento al riavvio.
+        cablaggio = request.form.get("hardware_mapping", "").strip()
+        if presets.cablaggio_valido(cablaggio):
+            panel["hardware_mapping"] = cablaggio
 
         dmdconf.save()
 

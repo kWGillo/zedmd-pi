@@ -567,6 +567,15 @@ Storico:
        non la sorgente, e un interruttore che obbedisce a meta' e' peggio di
        nessun interruttore. Lampade del semaforo dimezzate: cerchi da 7 pixel
        invece di 13, centrati nella banda sotto la data.
+  4.2  Il collegamento del pannello diventa una scelta della pagina
+       Impostazioni: fili diretti sui GPIO, Adafruit RGB Matrix Bonnet, o
+       Bonnet con la modifica PWM. Sta fuori dal profilo del pannello di
+       proposito — che pannello e' e come e' collegato sono due fatti
+       indipendenti, e tenerli insieme vorrebbe dire che riapplicare il
+       profilo, con la Bonnet montata, riporta l'uscita sui piedini sbagliati
+       e spegne il display. Nessun nome fuori elenco viene scritto: una
+       mappatura inventata non da' un errore, da' un pannello nero, e la
+       pagina per rimediare sta su quel pannello.
 """
 
-__version__ = "4.1"
+__version__ = "4.2"
