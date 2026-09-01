@@ -47,6 +47,20 @@ class Display:
         # 1.9.4, da cui i valori predefiniti della libreria.
         options.pwm_lsb_nanoseconds = int(panel.get("pwm_lsb_nanoseconds", 130))
         options.pwm_dither_bits = int(panel.get("pwm_dither_bits", 0))
+        # Registri RGB forzati. Facoltativo due volte: puo' mancare nella
+        # configurazione, e puo' mancare nella libreria — un fork piu' vecchio
+        # non ha la proprieta', e assegnarla farebbe morire il servizio
+        # all'avvio, cioe' pannello nero per una funzione che l'utente non ha
+        # nemmeno chiesto. Se non c'e', si tira dritto con il profilo.
+        registri = str(panel.get("spwm_force_register") or "").strip()
+        if registri:
+            try:
+                options.spwm_force_register = registri
+                print("[display] registri RGB forzati: %s" % registri[:60])
+            except AttributeError:
+                print("[display] la libreria non accetta registri forzati:"
+                      " si usa il profilo %s" % panel["spwm_register_config"])
+
         options.brightness = cfg["display"]["brightness"]
         options.show_refresh_rate = bool(panel.get("show_refresh", False))
         # Senza questo la libreria perde l'accesso al catalogo profili.

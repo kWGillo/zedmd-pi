@@ -346,6 +346,22 @@ STRINGS = {
         "refresh at the same nominal depth, at the cost of some shimmer on the "
         "finest gradients."),
     "settings.panel.profile": ("Profilo di registro del chip", "Chip register profile"),
+    "settings.panel.registri": ("Registri RGB forzati", "Forced RGB registers"),
+    "settings.panel.registri.vuoto": ("vuoto = quelli del profilo qui sopra",
+                                      "empty = the ones from the profile above"),
+    "settings.panel.registri.hint": (
+        "Scavalca il blocco di registro RGB del profilo. Parole esadecimali "
+        "di quattro cifre separate da virgola, uguali per i tre canali, "
+        "oppure una lista per canale nella forma R:…;G:…;B:… . Serve quando "
+        "nessun profilo del catalogo va bene del tutto e si vuole provare "
+        "una parola sola alla volta partendo da uno che funziona. Campo "
+        "vuoto = si torna al profilo, che è sempre la via d'uscita.",
+        "Overrides the profile's RGB register block. Four-digit hex words "
+        "separated by commas, the same for all three channels, or one list "
+        "per channel as R:…;G:…;B:… . Use it when no catalog profile is quite "
+        "right and you want to try a single word at a time starting from one "
+        "that works. Empty = back to the profile, which is always the way "
+        "out."),
     "settings.panel.showrefresh": ("Scrivi il refresh rate nel log — utile durante la taratura",
                                    "Write the refresh rate to the log — useful while tuning"),
     "settings.panel.button": ("Salva e riavvia il servizio", "Save and restart the service"),

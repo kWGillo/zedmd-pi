@@ -2,6 +2,47 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.4]
+
+### Corretto
+- **Il ciclo non riscrive più sul pannello un frame identico al precedente.**
+  Ogni scrittura rifà l'intero buffer dei piani di bit, e quelle scritture
+  contendono il bus di memoria alle letture del thread che aggiorna il
+  pannello riga per riga: quando la lettura di una riga si ferma per qualche
+  microsecondo, quella riga resta accesa più delle altre. È la riga chiara
+  che compare in un punto sempre diverso — misurata sul campo: peggiora
+  sotto carico di memoria, diventa sfarfallio sotto carico di disco, non si
+  vede nei contatori di interrupt e non cambia con `isolcpus`. Con
+  l'orologio fermo si passa da trenta riscritture al secondo a una.
+
+### Aggiunto
+- `/api/status` riporta i frame **mostrati** e **saltati**, così il
+  risparmio si verifica invece di crederci.
+
+## [4.3]
+
+### Aggiunto
+- **Registri RGB forzati** nella regolazione fine del pannello. Scavalca il
+  blocco di registro del profilo, per provare **una parola alla volta**
+  quando nessun profilo del catalogo va bene del tutto — ghosting, fondo non
+  nero, colori impuri sono tutti decisi lì dentro. Campo vuoto = comanda il
+  profilo, che resta sempre la via d'uscita.
+- Il valore si convalida prima di salvarlo (parole esadecimali di quattro
+  cifre, eventualmente per canale con `R:…;G:…;B:…`) e si normalizza:
+  in quel campo un errore non dà un'eccezione, dà un pannello che si comporta
+  male, e la pagina per capirlo sta su quel pannello.
+- Se la libreria installata non conosce l'opzione, il servizio parte lo stesso
+  con il profilo invece di morire all'avvio: chi aggiorna il DMD senza
+  aggiornare il fork non deve ritrovarsi il pannello nero per una funzione che
+  non ha chiesto.
+
+### Corretto
+- Due prove di Now Playing fallivano a giorni alterni: davano per scontato che
+  fra il messaggio di nascita di Home Assistant e la verifica non passasse
+  nient'altro, mentre il giro periodico del ponte pubblica rifiuti, scadenze e
+  luminosità per conto suo. Ora aspettano i topic che gli interessano e
+  ignorano gli altri.
+
 ## [4.2]
 
 ### Aggiunto

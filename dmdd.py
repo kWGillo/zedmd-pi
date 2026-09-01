@@ -281,6 +281,11 @@ class Runtime:
         self._applied_brightness = None
         self.sleeping = False
         self.night = False
+        # Impronta dell'ultimo frame mandato al pannello, e due contatori per
+        # sapere quanto lavoro ci stiamo risparmiando. Vedi _cambiato().
+        self._ultimo_frame = None
+        self.frame_mostrati = 0
+        self.frame_saltati = 0
 
     # ------------------------------------------------------------------ musica
 
@@ -506,6 +511,40 @@ class Runtime:
 
     # ------------------------------------------------------------------ rendering
 
+    def _cambiato(self, image):
+        """Vero se questa immagine e' diversa dall'ultima gia' sul pannello.
+
+        Perche' esiste. Mandare un frame al pannello non e' gratis: la
+        libreria riscrive l'intero buffer dei piani di bit, e quelle scritture
+        contendono il bus di memoria alle letture del thread che aggiorna il
+        display riga per riga. Quando il bus e' occupato la lettura di una
+        riga si ferma per qualche microsecondo, e quella riga resta accesa
+        piu' delle altre: e' la riga chiara che compare in un punto sempre
+        diverso.
+
+        L'orologio fermo cambia una volta al secondo, ma il ciclo gira a 30
+        fps: senza questo controllo scriveremmo trenta volte al secondo la
+        stessa identica immagine, creando da soli il disturbo che poi andiamo
+        a cercare. Il confronto costa un `tobytes` (49 KB per un 256x64), che
+        e' una frazione di quello che costa la riscrittura evitata.
+        """
+        impronta = image.tobytes()
+        if impronta == self._ultimo_frame:
+            self.frame_saltati += 1
+            return False
+        self._ultimo_frame = impronta
+        self.frame_mostrati += 1
+        return True
+
+    def _ridisegna(self):
+        """Dimentica l'ultimo frame: il prossimo si manda comunque.
+
+        Serve dopo ogni cosa che tocca il pannello alle spalle del ciclo —
+        cambio di sorgente, schermo nero, risveglio — perche' li' l'immagine
+        che sta sul pannello non e' piu' quella che credevamo.
+        """
+        self._ultimo_frame = None
+
     def render_loop(self):
         from PIL import Image
 
@@ -537,6 +576,7 @@ class Runtime:
                     self.display.show(blank)
                     self._blank_shown = True
                     self.arbiter.current = None
+                    self._ridisegna()
                 time.sleep(0.2)
                 continue
 
@@ -545,6 +585,7 @@ class Runtime:
             if winner is not self.arbiter.current:
                 self.arbiter.current = winner
                 self._blank_shown = False
+                self._ridisegna()
                 if winner is not None:
                     # Alla presa di controllo la sorgente deve ridisegnare tutto.
                     if hasattr(winner, "_dirty"):
@@ -556,9 +597,10 @@ class Runtime:
                 if not self._blank_shown:
                     self.display.show(blank)
                     self._blank_shown = True
+                    self._ridisegna()
             else:
                 image = winner.frame()
-                if image is not None:
+                if image is not None and self._cambiato(image):
                     self.display.show(image)
 
             elapsed = time.time() - started

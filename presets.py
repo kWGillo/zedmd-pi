@@ -12,6 +12,8 @@ Aggiungere un tipo di pannello significa aggiungere una voce a PRESETS: il
 resto — menu a tendina, applicazione, etichette — funziona da solo.
 """
 
+import re
+
 # I valori sono esattamente quelli del capitolo 7 del manuale piu' la
 # taratura fine trovata sul campo. Non toccarli senza aver riprovato sul
 # pannello: sono il risultato di una campagna di prove, non una scelta di
@@ -137,3 +139,63 @@ CABLAGGI = (CABLAGGIO_DIRETTO, "adafruit-hat", "adafruit-hat-pwm")
 def cablaggio_valido(nome):
     """Un nome fuori elenco non si scrive: sbagliarlo spegne il pannello."""
     return nome in CABLAGGI
+
+
+# ----------------------------------------------------------- registri forzati
+
+# Il blocco di registro RGB si scrive come lista di parole esadecimali di
+# quattro cifre separate da virgola — `0000,0100,023f,...` — uguale per i tre
+# canali, oppure una lista per canale con la forma `R:...;G:...;B:...`.
+#
+# La validazione e' volutamente grossolana: qui non si sa cosa significhino
+# quelle parole, si sa solo che forma hanno. Serve a fermare l'errore di
+# battitura e l'incolla sbagliato, non a giudicare i valori — quelli li
+# giudica il pannello.
+_PAROLA = re.compile(r"^[0-9a-fA-F]{4}$")
+
+
+def registri_validi(testo):
+    """Vero se il testo ha la forma di un blocco di registro (o e' vuoto).
+
+    Vuoto e' valido e significa "usa il profilo": deve poter tornare indietro
+    svuotando il campo, senza dover ricordare cosa c'era prima.
+    """
+    testo = (testo or "").strip()
+    if not testo:
+        return True
+    for pezzo in testo.split(";"):
+        pezzo = pezzo.strip()
+        if not pezzo:
+            continue
+        if ":" in pezzo:
+            etichetta, _, pezzo = pezzo.partition(":")
+            if etichetta.strip().upper() not in ("R", "G", "B"):
+                return False
+        parole = [p.strip() for p in pezzo.split(",") if p.strip()]
+        if not parole or not all(_PAROLA.match(p) for p in parole):
+            return False
+    return True
+
+
+def normalizza_registri(testo):
+    """Riscrive il blocco in forma pulita: niente spazi, niente virgole vuote.
+
+    Quello che si salva e' quello che finisce nel chip: una virgola di troppo
+    battuta per sbaglio non deve arrivare fin la' e farci poi chiedere perche'
+    il pannello si comporta in modo strano.
+    """
+    testo = (testo or "").strip()
+    if not testo:
+        return ""
+    fuori = []
+    for pezzo in testo.split(";"):
+        pezzo = pezzo.strip()
+        if not pezzo:
+            continue
+        etichetta = ""
+        if ":" in pezzo:
+            etichetta, _, pezzo = pezzo.partition(":")
+            etichetta = etichetta.strip().upper() + ":"
+        parole = [p.strip().lower() for p in pezzo.split(",") if p.strip()]
+        fuori.append(etichetta + ",".join(parole))
+    return ";".join(fuori)

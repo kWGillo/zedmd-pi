@@ -1069,6 +1069,14 @@ def create_app(runtime):
         if presets.cablaggio_valido(cablaggio):
             panel["hardware_mapping"] = cablaggio
 
+        # I registri forzati sono testo libero, ma non *qualsiasi* testo: la
+        # libreria li legge come parole esadecimali, e un carattere fuori
+        # posto la' dentro non da' un errore, da' un pannello che si comporta
+        # male. Meglio rifiutare qui, dove c'e' ancora una pagina per capirlo.
+        registri = request.form.get("spwm_force_register", "").strip()
+        if presets.registri_validi(registri):
+            panel["spwm_force_register"] = presets.normalizza_registri(registri)
+
         dmdconf.save()
 
         if request.form.get("restart") == "1":
@@ -1524,6 +1532,13 @@ def create_app(runtime):
             doom=(runtime.doom_state()
                   if getattr(runtime, "doom_state", None) else {"enabled": False}),
             mqtt=runtime.mqtt.status(),
+            # Quante immagini sono davvero finite sul pannello e quante sono
+            # state riconosciute uguali alla precedente. Serve durante la
+            # taratura: e' la misura di quanto traffico di memoria stiamo
+            # generando noi, che e' la parte di disturbo su cui abbiamo
+            # potere.
+            frame={"mostrati": getattr(runtime, "frame_mostrati", 0),
+                   "saltati": getattr(runtime, "frame_saltati", 0)},
             time=time.strftime("%H:%M:%S"),
             update=runtime.update_info,
         )

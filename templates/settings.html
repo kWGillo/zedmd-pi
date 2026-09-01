@@ -157,6 +157,12 @@
     <input type="number" id="spwm_register_config" name="spwm_register_config" min="0" max="77"
            value="{{ cfg.panel.spwm_register_config }}">
 
+    <label for="spwm_force_register">{{ t('settings.panel.registri') }}</label>
+    <textarea id="spwm_force_register" name="spwm_force_register" rows="3"
+              spellcheck="false"
+              placeholder="{{ t('settings.panel.registri.vuoto') }}">{{ cfg.panel.spwm_force_register }}</textarea>
+    <p class="hint">{{ t('settings.panel.registri.hint') }}</p>
+
     <label class="check">
       <input type="checkbox" name="show_refresh" {{ 'checked' if cfg.panel.show_refresh }}>
       {{ t('settings.panel.showrefresh') }}

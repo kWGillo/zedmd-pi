@@ -37,6 +37,11 @@ DEFAULTS = {
         # profondita' dichiarata.
         "pwm_dither_bits": 1,
         "profile_dir": "/home/gillo/rpi-rgb-led-matrix_pwm_experiment/lib/spwm/registertest/data",
+        # Blocco di registro RGB scritto a mano, che scavalca quello del
+        # profilo. Vuoto = si usa il profilo, ed e' quello che vuole il 99%
+        # dei casi: serve per provare una parola sola alla volta quando
+        # nessun profilo del catalogo va bene del tutto.
+        "spwm_force_register": "",
         "show_refresh": False,
         # Cartella del fork della libreria matrice. Vuoto = dedotta da
         # profile_dir, che ne e' una sottocartella.

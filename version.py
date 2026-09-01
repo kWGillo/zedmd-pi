@@ -576,6 +576,26 @@ Storico:
        e spegne il display. Nessun nome fuori elenco viene scritto: una
        mappatura inventata non da' un errore, da' un pannello nero, e la
        pagina per rimediare sta su quel pannello.
+  4.3  Registri RGB forzati: un campo che scavalca il blocco di registro del
+       profilo, per provare una parola alla volta quando nessun profilo del
+       catalogo va bene del tutto. Campo vuoto = comanda il profilo, che
+       resta sempre la via d'uscita. Il valore si convalida prima di salvarlo
+       (parole esadecimali di quattro cifre, eventualmente per canale) perche'
+       li' dentro un errore non da' un'eccezione, da' un pannello che si
+       comporta male; e se la libreria installata non conosce l'opzione il
+       servizio parte lo stesso col profilo, invece di lasciare il pannello
+       nero per una funzione che nessuno ha chiesto.
+  4.4  Il ciclo di rendering non riscrive piu' sul pannello un frame identico
+       al precedente. Non e' pulizia: ogni scrittura rifa' l'intero buffer dei
+       piani di bit, e quelle scritture contendono il bus di memoria alle
+       letture del thread che aggiorna il pannello riga per riga — quando la
+       lettura di una riga si ferma per qualche microsecondo, quella riga
+       resta accesa piu' delle altre. E' la riga chiara che compare in un
+       punto sempre diverso, misurata sul campo: peggiora sotto carico di
+       memoria e di disco, non si vede nei contatori di interrupt, e non
+       cambia con isolcpus. Con l'orologio fermo passiamo da trenta
+       riscritture al secondo a una. Il conteggio dei frame mostrati e
+       saltati e' in /api/status, per poterlo verificare invece di crederci.
 """
 
-__version__ = "4.2"
+__version__ = "4.4"
