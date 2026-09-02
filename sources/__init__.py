@@ -14,6 +14,8 @@ from .media import (MediaPlayerSource, cached_count, invalidate_scan,
                     scan_media, walk_media, is_supported, have_ffmpeg)
 from .nowplaying import (NowPlayingSource, DEFAULT_COLORS, draw_text,
                          snap_color, text_width)
+from .gameboy import (GameBoySource, PULSANTI as GB_PULSANTI,
+                      controlla_rom, elenco_rom)
 from .giochi import GiochiSource, elenco as giochi_elenco
 from .scadenze import ScadenzeSource
 from .zedmd import ZeDMDSource
@@ -23,6 +25,7 @@ __all__ = [
     "BirthdaysSource", "PreviewSource", "HOLD_SECONDS",
     "DoomSource", "DOOM_TASTI", "DOOM_PULSANTI", "tastiere", "controlla_wad",
     "GiochiSource", "giochi_elenco", "ScadenzeSource",
+    "GameBoySource", "GB_PULSANTI", "controlla_rom", "elenco_rom",
     "joystick", "posizione_asse", "direzione_asse",
     "BannerSource", "NowPlayingSource", "SIZES", "SIZE_KEYS", "SLOTS",
     "default_banner", "DEFAULT_COLORS", "draw_text", "snap_color", "text_width",

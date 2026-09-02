@@ -20,6 +20,7 @@ import i18n
 import libcheck
 import compleanni
 import doomsetup
+import gbsetup
 import lookup
 import rifiuti
 import scadenze
@@ -27,10 +28,10 @@ import nowplaying
 import presets
 import ota
 import spotifyapi
-from sources import (DOOM_PULSANTI, DOOM_TASTI, FIELD_LIST, HOLD_SECONDS,
-                     LANGUAGES, OVERFLOW_MODES,
+from sources import (DOOM_PULSANTI, DOOM_TASTI, FIELD_LIST, GB_PULSANTI,
+                     HOLD_SECONDS, LANGUAGES, OVERFLOW_MODES,
                      PROVIDER_LIST, SIZE_KEYS, SLOTS, UNIT_KEYS,
-                     controlla_wad, giochi_elenco,
+                     controlla_wad, elenco_rom, giochi_elenco,
                      invalidate_scan, is_supported, joystick, normalize_list,
                      scan_media, have_ffmpeg, tastiere, usable)
 from version import __version__
@@ -619,6 +620,103 @@ def create_app(runtime):
         # effetto fino al riavvio del servizio.
         runtime.giochi.ricarica_comandi()
         return redirect(url_for("page_giochi"))
+
+    # -------------------------------------------------------------- game boy
+
+    @app.route("/gameboy")
+    def page_gameboy():
+        conf = cfg["gameboy"]
+        return render_template(
+            "gameboy.html", cfg=cfg, gb=conf,
+            stato=runtime.gameboy_state(), pulsanti=GB_PULSANTI,
+            rom=elenco_rom(conf.get("rom_dir") or ""),
+            tastiere=tastiere(), pad=joystick(con_nome=True),
+            prep=gbsetup.stato(cfg), page="gameboy")
+
+    @app.route("/api/gameboy/setup", methods=["POST"])
+    def api_gameboy_setup():
+        """Installa PyBoy e apre la condivisione, in sottofondo."""
+        errore = gbsetup.avvia(cfg)
+        if request.form.get("ajax"):
+            return jsonify(ok=not errore, error=errore, **gbsetup.stato(cfg))
+        return redirect(url_for("page_gameboy"))
+
+    @app.route("/api/gameboy/setup/state")
+    def api_gameboy_setup_state():
+        return jsonify(gbsetup.stato(cfg))
+
+    @app.route("/api/gameboy/state")
+    def api_gameboy_state():
+        return jsonify(runtime.gameboy_state())
+
+    @app.route("/api/gameboy/play", methods=["POST"])
+    def api_gameboy_play():
+        scelta = request.form.get("rom", "").strip()
+        if scelta:
+            # La cartuccia scelta si ricorda: alla prossima partita non si
+            # deve ricercare in un elenco che intanto e' cresciuto.
+            cfg["gameboy"]["rom"] = scelta
+            dmdconf.save()
+        runtime.gioca("gameboy", cfg["gameboy"].get("rom", ""))
+        if request.form.get("ajax"):
+            return jsonify(runtime.gameboy_state())
+        return redirect(url_for("page_gameboy"))
+
+    @app.route("/api/gameboy/stop", methods=["POST"])
+    def api_gameboy_stop():
+        runtime.gameboy.chiudi_sessione()
+        if request.form.get("ajax"):
+            return jsonify(runtime.gameboy_state())
+        return redirect(url_for("page_gameboy"))
+
+    @app.route("/api/gameboy/key", methods=["POST"])
+    def api_gameboy_key():
+        """Un tasto verso il Game Boy, dai pulsanti della pagina o dalla tastiera.
+
+        `stato` vale `down`, `up` oppure `tap`: il terzo per i pulsanti sul
+        telefono, dove un dito che scivola fuori non genera nessun rilascio.
+        """
+        azione = request.form.get("azione", "")
+        stato = request.form.get("stato", "tap")
+        if azione not in GB_PULSANTI:
+            return jsonify(ok=False, error="tasto sconosciuto"), 400
+        if stato == "tap":
+            ok = runtime.gameboy.tocca(azione)
+        else:
+            ok = runtime.gameboy.premi(azione, stato == "down")
+        return jsonify(ok=bool(ok), **runtime.gameboy_state())
+
+    @app.route("/api/gameboy", methods=["POST"])
+    def api_gameboy():
+        conf = cfg["gameboy"]
+        for chiave in ("rom_dir", "keyboard_device", "joystick_device"):
+            if chiave in request.form:
+                conf[chiave] = request.form.get(chiave, "").strip()
+        for chiave, basso, alto, default in (("overscan", 0, 80, 0),
+                                             ("fps", 10, 60, 30),
+                                             ("session_timeout", 0, 3600, 300)):
+            try:
+                conf[chiave] = max(basso, min(alto, int(
+                    request.form.get(chiave, default))))
+            except ValueError:
+                conf[chiave] = default
+        try:
+            conf["gamma"] = max(0.2, min(2.0, float(
+                request.form.get("gamma", 1.0))))
+        except ValueError:
+            conf["gamma"] = 1.0
+        for chiave in ("keyboard", "keyboard_starts", "joystick"):
+            conf[chiave] = request.form.get(chiave) == "on"
+        dmdconf.save()
+        # Gamma, overscan e fotogrammi stanno nella riga di comando del
+        # processo: cambiarli in configurazione non basta, va fatto ripartire.
+        # E si riparte solo se si stava giocando: cambiare la gamma non deve
+        # accendere una partita che nessuno ha chiesto.
+        if runtime.gameboy.in_sessione():
+            rom = runtime.gameboy.rom_corrente()
+            runtime.gameboy.chiudi_sessione()
+            runtime.gioca("gameboy", rom)
+        return redirect(url_for("page_gameboy"))
 
     # ------------------------------------------------------------------ doom
 

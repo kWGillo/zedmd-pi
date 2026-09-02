@@ -33,6 +33,16 @@ if [ -d "$SRC_DIR/doom" ]; then
        "$SRC_DIR"/doom/setup_doom.sh /opt/dmd/doom/
     chmod +x /opt/dmd/doom/setup_doom.sh
 fi
+
+# Il Game Boy: qui si copiano solo il programma che ospita PyBoy e il suo
+# script di preparazione. PyBoy **non** si installa adesso — e' un pacchetto
+# di sistema, e chi non vuole l'emulatore non deve trovarselo installato.
+# Lo installa gb/setup_gb.sh, dal pulsante nella pagina Game Boy.
+if [ -d "$SRC_DIR/gb" ]; then
+    mkdir -p /opt/dmd/gb
+    cp "$SRC_DIR"/gb/gb_dmd.py "$SRC_DIR"/gb/setup_gb.sh /opt/dmd/gb/
+    chmod +x /opt/dmd/gb/setup_gb.sh /opt/dmd/gb/gb_dmd.py
+fi
 mkdir -p /var/lib/dmd
 
 echo "==> Adeguamento della configurazione"

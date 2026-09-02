@@ -596,6 +596,16 @@ Storico:
        cambia con isolcpus. Con l'orologio fermo passiamo da trenta
        riscritture al secondo a una. Il conteggio dei frame mostrati e
        saltati e' in /api/status, per poterlo verificare invece di crederci.
+  4.5  Game Boy sul pannello, con PyBoy. Come Doom: processo separato, pipe di
+       fotogrammi grezzi, sessione che prende il pannello e lo restituisce.
+       Lo schermo 160x144 sta in 71 pixel al centro tenendo le proporzioni, e
+       l'**overscan** toglie righe sopra e sotto per allargarlo fino a
+       riempire il pannello, perdendo cielo e terreno. Gamma regolabile come
+       in Doom. Le ROM stanno in una condivisione SMB e sono di chi le
+       possiede: qui dentro non ce n'e' nessuna. Dal pad non si apre mai una
+       sessione, e Start e Select del Game Boy stanno sulle levette premute:
+       i pulsanti con quel nome sono globali dalla 3.8.2, e un pulsante deve
+       avere un significato solo.
 """
 
-__version__ = "4.4"
+__version__ = "4.5"

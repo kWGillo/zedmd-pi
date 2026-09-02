@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.gameboy') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('gb.title') }}</h2>
+  <p class="hint">{{ t('gb.intro') }}</p>
+  <p class="status" id="stato">{{ stato.status }}</p>
+
+  {% if not prep.pyboy or not prep.cartella_c_e %}
+  <div class="card inner">
+    <h3>{{ t('gb.prep') }}</h3>
+    <p class="hint">{{ t('gb.prep.hint', cartella=prep.cartella) }}</p>
+    <form method="post" action="{{ url_for('api_gameboy_setup') }}">
+      <button type="submit" {{ 'disabled' if prep.in_corso }}>
+        {{ t('gb.prep.corso') if prep.in_corso else t('gb.prep.avvia') }}</button>
+    </form>
+    {% if prep.log %}<pre class="log" id="preplog">{{ prep.log }}</pre>{% endif %}
+  </div>
+  {% else %}
+
+  <form method="post" action="{{ url_for('api_gameboy_play') }}">
+    <label for="rom">{{ t('gb.rom') }}</label>
+    <select id="rom" name="rom">
+      {% for r in rom %}
+      <option value="{{ r.percorso }}" {{ 'selected' if gb.rom == r.percorso }}
+              {{ 'disabled' if r.problema }}>
+        {{ r.nome }}{% if r.problema %} — {{ r.problema }}{% endif %}</option>
+      {% endfor %}
+    </select>
+    {% if not rom %}
+    <p class="hint">{{ t('gb.rom.vuoto', cartella=gb.rom_dir) }}</p>
+    {% endif %}
+    <p class="actions">
+      <button type="submit" {{ 'disabled' if not rom }}>{{ t('gb.gioca') }}</button>
+    </p>
+  </form>
+
+  <form method="post" action="{{ url_for('api_gameboy_stop') }}">
+    <button type="submit" class="ghost">{{ t('gb.esci') }}</button>
+  </form>
+
+  <div class="pad">
+    {% for p in pulsanti %}
+    <button type="button" class="tasto" data-azione="{{ p }}">{{ t('gb.tasto.' + p) }}</button>
+    {% endfor %}
+  </div>
+  <p class="hint">{{ t('gb.pad.hint') }}</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ t('gb.video') }}</h2>
+  <p class="hint">{{ t('gb.video.hint') }}</p>
+  <form method="post" action="{{ url_for('api_gameboy') }}">
+    <div class="row3">
+      <div><label for="overscan">{{ t('gb.overscan') }}</label>
+        <input type="number" id="overscan" name="overscan" min="0" max="80"
+               value="{{ gb.overscan }}"></div>
+      <div><label for="gamma">{{ t('gb.gamma') }}</label>
+        <input type="number" id="gamma" name="gamma" min="0.2" max="2" step="0.05"
+               value="{{ gb.gamma }}"></div>
+      <div><label for="fps">{{ t('gb.fps') }}</label>
+        <input type="number" id="fps" name="fps" min="10" max="60"
+               value="{{ gb.fps }}"></div>
+    </div>
+    <p class="hint">{{ t('gb.overscan.hint') }}</p>
+
+    <hr class="sep">
+    <h3>{{ t('gb.comandi') }}</h3>
+    <div class="row2">
+      <div><label for="keyboard_device">{{ t('doom.keyboard.device') }}</label>
+        <input type="text" id="keyboard_device" name="keyboard_device"
+               value="{{ gb.keyboard_device }}" placeholder="{{ t('doom.device.auto') }}"></div>
+      <div><label for="joystick_device">{{ t('doom.pad.device') }}</label>
+        <input type="text" id="joystick_device" name="joystick_device"
+               value="{{ gb.joystick_device }}" placeholder="{{ t('doom.device.auto') }}"></div>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="keyboard" {{ 'checked' if gb.keyboard }}>
+      {{ t('doom.keyboard.read') }}
+    </label>
+    <label class="check">
+      <input type="checkbox" name="keyboard_starts" {{ 'checked' if gb.keyboard_starts }}>
+      {{ t('gb.keyboard.starts') }}
+    </label>
+    <label class="check">
+      <input type="checkbox" name="joystick" {{ 'checked' if gb.joystick }}>
+      {{ t('doom.pad.read') }}
+    </label>
+    <p class="hint">{{ t('gb.pad.tasti') }}</p>
+
+    <div class="row2">
+      <div><label for="rom_dir">{{ t('gb.cartella') }}</label>
+        <input type="text" id="rom_dir" name="rom_dir" value="{{ gb.rom_dir }}"></div>
+      <div><label for="session_timeout">{{ t('doom.timeout') }}</label>
+        <input type="number" id="session_timeout" name="session_timeout"
+               min="0" max="3600" value="{{ gb.session_timeout }}"></div>
+    </div>
+
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+</section>
+
+<script>
+(function () {
+  var url = "{{ url_for('api_gameboy_key') }}";
+  var stato = document.getElementById("stato");
+
+  function manda(azione, s) {
+    var dati = new FormData();
+    dati.append("azione", azione);
+    dati.append("stato", s);
+    fetch(url, {method: "POST", body: dati})
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (j && j.status) { stato.textContent = j.status; } })
+      .catch(function () {});
+  }
+
+  // Premuto e rilasciato separatamente: tenendo il dito il personaggio
+  // cammina davvero. pointercancel e pointerleave sono la rete di sicurezza,
+  // perche' un dito che scivola via non deve lasciare il tasto premuto.
+  var tasti = document.querySelectorAll(".tasto");
+  for (var i = 0; i < tasti.length; i++) {
+    (function (b) {
+      var azione = b.getAttribute("data-azione");
+      var giu = false;
+      function premi(e) { e.preventDefault(); if (!giu) { giu = true; manda(azione, "down"); } }
+      function molla(e) { if (giu) { giu = false; manda(azione, "up"); } }
+      b.addEventListener("pointerdown", premi);
+      b.addEventListener("pointerup", molla);
+      b.addEventListener("pointerleave", molla);
+      b.addEventListener("pointercancel", molla);
+    })(tasti[i]);
+  }
+
+  // Mentre la preparazione gira, la pagina guarda il log: senza, l'unico modo
+  // di sapere com'e' andata sarebbe ricaricare a caso.
+  var log = document.getElementById("preplog");
+  if (log) {
+    setInterval(function () {
+      fetch("{{ url_for('api_gameboy_setup_state') }}")
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          if (j && j.log) { log.textContent = j.log; }
+          if (j && !j.in_corso && j.pyboy) { location.reload(); }
+        })
+        .catch(function () {});
+    }, 3000);
+  }
+})();
+</script>
+
+{% endblock %}

@@ -1674,6 +1674,94 @@ STRINGS = {
         "before the date."),
     "services.desc.air_radar": ("Aerei in transito entro un raggio dalla posizione indicata.",
                                 "Aircraft passing within a radius of the given position."),
+    # -------------------------------------------------------------- game boy
+    "nav.gameboy": ("Game Boy", "Game Boy"),
+    "gb.title": ("Game Boy", "Game Boy"),
+    "gb.intro": (
+        "L'emulatore gira come processo separato e prende il pannello per il "
+        "tempo della partita, come Doom. Lo schermo del Game Boy \u00e8 160\u00d7144: "
+        "portato a 64 righe tenendo le proporzioni sta in 71 pixel al centro "
+        "del pannello, con il resto spento.",
+        "The emulator runs as a separate process and takes the panel for the "
+        "length of the session, like Doom. The Game Boy screen is 160\u00d7144: "
+        "scaled to 64 rows keeping its proportions it occupies 71 pixels in "
+        "the middle of the panel, with the rest dark."),
+    "gb.prep": ("Preparazione", "Setup"),
+    "gb.prep.hint": (
+        "Installa l'emulatore PyBoy e apre la condivisione %(cartella)s dove "
+        "mettere le ROM. Si fa una volta sola: l'aggiornamento del DMD passa "
+        "dalla rete e non tocca i pacchetti di sistema.",
+        "Installs the PyBoy emulator and opens the %(cartella)s share where "
+        "the ROMs go. Once only: DMD updates come over the network and do not "
+        "touch system packages."),
+    "gb.prep.avvia": ("Installa l'emulatore", "Install the emulator"),
+    "gb.prep.corso": ("Installazione in corso\u2026", "Installing\u2026"),
+    "gb.rom": ("Cartuccia", "Cartridge"),
+    "gb.rom.vuoto": (
+        "Nessuna ROM in %(cartella)s. Copiale nella condivisione: sono file "
+        ".gb o .gbc, e restano tue \u2014 in questo progetto non ce n'\u00e8 "
+        "nessuna e non ce ne saranno mai.",
+        "No ROMs in %(cartella)s. Copy them into the share: they are .gb or "
+        ".gbc files, and they stay yours \u2014 this project ships none and "
+        "never will."),
+    "gb.gioca": ("Gioca", "Play"),
+    "gb.esci": ("Esci dalla partita", "Leave the game"),
+    "gb.video": ("Immagine", "Picture"),
+    "gb.video.hint": (
+        "Hanno effetto alla partenza del processo: cambiandoli durante una "
+        "partita, la partita riparte.",
+        "These apply when the process starts: changing them during a session "
+        "restarts it."),
+    "gb.overscan": ("Overscan (%)", "Overscan (%)"),
+    "gb.gamma": ("Gamma", "Gamma"),
+    "gb.fps": ("Fotogrammi al secondo", "Frames per second"),
+    "gb.overscan.hint": (
+        "L'overscan toglie righe sopra e sotto allo schermo del Game Boy: si "
+        "perde una fascia di cielo e una di terreno, ma a parit\u00e0 di 64 "
+        "righe l'immagine sul pannello diventa pi\u00f9 larga \u2014 71 pixel a "
+        "zero, 88 al 20%%, 116 al 40%%. Il gamma sotto 1 schiarisce e sopra 1 "
+        "scurisce, come in Doom. Trenta fotogrammi al secondo bastano "
+        "all'occhio e dimezzano il traffico verso il pannello.",
+        "Overscan drops rows from the top and bottom of the Game Boy screen: "
+        "you lose a band of sky and a band of ground, but with the same 64 "
+        "rows the picture gets wider \u2014 71 pixels at zero, 88 at 20%%, 116 "
+        "at 40%%. Gamma below 1 brightens and above 1 darkens, as in Doom. "
+        "Thirty frames per second are enough for the eye and halve the "
+        "traffic towards the panel."),
+    "gb.comandi": ("Comandi", "Controls"),
+    "gb.cartella": ("Cartella delle ROM", "ROM folder"),
+    "gb.keyboard.starts": (
+        "Un tasto della tastiera pu\u00f2 far cominciare una partita",
+        "A keyboard key may start a session"),
+    "gb.pad.hint": (
+        "Sul pad: croce e cerchio sono A e B, la croce direzionale muove. "
+        "Start e Select del Game Boy stanno sulle levette premute (L3 e R3), "
+        "perch\u00e9 i pulsanti fisici con quel nome sono gi\u00e0 impegnati: Start "
+        "e PS scorrono i giochi, Select esce.",
+        "On the pad: cross and circle are A and B, the d-pad moves. The Game "
+        "Boy's Start and Select are on the pressed sticks (L3 and R3), "
+        "because the physical buttons with those names are already taken: "
+        "Start and PS cycle the games, Select leaves."),
+    "gb.pad.tasti": (
+        "Dal pad non si apre mai una partita: un pulsante deve avere un "
+        "significato solo. Si comincia da questa pagina, o dalla tastiera se "
+        "lo si \u00e8 chiesto qui sopra.",
+        "The pad never starts a session: a button must mean one thing only. "
+        "You start from this page, or from the keyboard if enabled above."),
+    "gb.tasto.su": ("Su", "Up"),
+    "gb.tasto.giu": ("Gi\u00f9", "Down"),
+    "gb.tasto.sinistra": ("Sinistra", "Left"),
+    "gb.tasto.destra": ("Destra", "Right"),
+    "gb.tasto.a": ("A", "A"),
+    "gb.tasto.b": ("B", "B"),
+    "gb.tasto.start": ("Start", "Start"),
+    "gb.tasto.select": ("Select", "Select"),
+    "status.gb.idle": ("In attesa \u2014 %(count)d cartucce disponibili",
+                       "Idle \u2014 %(count)d cartridges available"),
+    "status.gb.playing": ("In partita: %(name)s", "Playing: %(name)s"),
+    "status.gb.stopped": ("Emulatore fermo", "Emulator stopped"),
+    "status.gb.missing": ("PyBoy non installato", "PyBoy not installed"),
+    "status.gb.error": ("Errore: %(error)s", "Error: %(error)s"),
     "services.desc.scadenze": (
         "Avviso periodico delle scadenze aperte e semaforo accanto all'orologio.",
         "Periodic notice of open deadlines, plus the traffic light next to the clock."),

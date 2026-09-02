@@ -237,6 +237,35 @@ DEFAULTS = {
         "start_map": "1 1",
     },
 
+    "gameboy": {
+        # L'emulatore gira come processo separato: qui c'e' il programma che
+        # lo ospita, non una libreria da importare. Vedi gb/gb_dmd.py.
+        "host": "/opt/dmd/gb/gb_dmd.py",
+        # Condivisione SMB dove finiscono le ROM. La crea gb/setup_gb.sh.
+        "rom_dir": "/srv/dmd/rom",
+        # L'ultima cartuccia scelta: si riapre quella, senza doverla ricercare.
+        "rom": "",
+        # Sotto 1 schiarisce, sopra 1 scurisce. Stessa convenzione di Doom.
+        "gamma": 1.0,
+        # Percentuale di righe tolte sopra e sotto alla sorgente. A 0 lo
+        # schermo Game Boy sta in 71 pixel al centro del pannello; salendo
+        # perde cielo e terreno ma diventa piu' largo, fino a riempirlo.
+        "overscan": 0,
+        # Fotogrammi al secondo mandati al pannello. Il Game Boy ne fa 59,7:
+        # trenta bastano all'occhio e dimezzano il traffico sulla pipe.
+        "fps": 30,
+        "keyboard": True,
+        "keyboard_device": "",
+        # Se un tasto della tastiera puo' *far cominciare* una partita.
+        # Spento come in Doom: dal pad non si apre mai (vedi sources/gameboy.py).
+        "keyboard_starts": False,
+        "joystick": True,
+        "joystick_device": "",
+        # Dopo quanti secondi senza comandi la sessione si chiude da sola.
+        # Piu' lungo di Doom: a un gioco di ruolo si sta fermi a leggere.
+        "session_timeout": 300,
+    },
+
     "air_radar": {
         # Nessuna posizione preimpostata: va indicata dall'utente nella web UI.
         # Il servizio non interroga nulla finche' le coordinate sono a zero.

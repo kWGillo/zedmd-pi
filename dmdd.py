@@ -12,6 +12,7 @@ Avvio manuale:  sudo python3 /opt/dmd/dmdd.py
 Come servizio:  systemctl start dmd
 """
 
+import os
 import signal
 import sys
 import threading
@@ -27,7 +28,7 @@ import ota
 import spotifyapi
 from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
-                     ClockSource, DoomSource, GiochiSource,
+                     ClockSource, DoomSource, GameBoySource, GiochiSource,
                      MediaPlayerSource, NowPlayingSource, PreviewSource,
                      ScadenzeSource, ZeDMDSource, controlla_wad)
 from version import __version__
@@ -231,6 +232,10 @@ class Runtime:
         self.giochi.apri_partita = self.gioca
         # Select esce da qualunque partita, Doom compreso.
         self.giochi.chiudi_partita = self.smetti
+        # Il Game Boy e' la terza partita: stessa presa del pannello, stesso
+        # arbitro, stessa regola. Non e' un servizio.
+        self.gameboy = GameBoySource(self.cfg, self.display.width,
+                                     self.display.height, self.arbiter)
         self.scadenze = ScadenzeSource(self.cfg, self.display.width,
                                        self.display.height)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
@@ -247,7 +252,8 @@ class Runtime:
 
         for source in (self.zedmd, self.preview, self.radar, self.player,
                        self.birthdays, self.scadenze, self.banner, self.media,
-                       self.doom, self.giochi, self.clock):
+                       self.doom, self.giochi, self.gameboy,
+                       self.clock):
             self.arbiter.register(source)
         self.arbiter.apply_services()
         # Doom non passa da apply_services: non e' un servizio. Qui parte solo
@@ -256,6 +262,8 @@ class Runtime:
         # Nemmeno i giochi sono un servizio: qui parte solo la lettura dei
         # comandi, per chi ha chiesto di poter cominciare dal cabinato.
         self.giochi.start()
+        # E nemmeno il Game Boy: qui parte solo la lettura dei comandi.
+        self.gameboy.start()
 
         self._start_audio()
 
@@ -395,8 +403,14 @@ class Runtime:
         """
         if cosa == "doom":
             self.giochi.chiudi_sessione()
+            self.gameboy.chiudi_sessione()
             return self.doom.apri_sessione()
+        if cosa == "gameboy":
+            self.giochi.chiudi_sessione()
+            self.doom.chiudi_sessione()
+            return self.gameboy.apri_sessione(nome)
         self.doom.chiudi_sessione()
+        self.gameboy.chiudi_sessione()
         return self.giochi.apri_sessione(nome)
 
     def smetti(self, cosa=""):
@@ -406,10 +420,20 @@ class Runtime:
             chiuse = self.giochi.chiudi_sessione() or chiuse
         if cosa in ("", "doom"):
             chiuse = self.doom.chiudi_sessione() or chiuse
+        if cosa in ("", "gameboy"):
+            chiuse = self.gameboy.chiudi_sessione() or chiuse
         return chiuse
 
     def giochi_state(self):
         return self.giochi.stato()
+
+    def gameboy_state(self):
+        return {"running": self.gameboy.active(),
+                "session": self.gameboy.in_sessione(),
+                "ready": self.gameboy.pronto(),
+                "rom": os.path.basename(self.gameboy.rom_corrente() or ""),
+                "keys": self.gameboy.premuti(),
+                "status": self.gameboy.status()}
 
     def doom_state(self):
         return {"running": self.doom.active(),
@@ -563,6 +587,7 @@ class Runtime:
                 try:
                     self.doom.controlla_inattivita()
                     self.giochi.controlla_inattivita()
+                    self.gameboy.controlla_inattivita()
                     # E se una partita e' aperta ma il processo e' morto, si
                     # ritenta: correggere un percorso sbagliato dalla pagina
                     # deve bastare a rimettere in moto.

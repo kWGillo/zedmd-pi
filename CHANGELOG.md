@@ -2,6 +2,37 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.5]
+
+### Aggiunto
+- **Game Boy sul pannello**, con l'emulatore PyBoy. Stessa forma di Doom:
+  processo separato, fotogrammi grezzi su una pipe, sessione che prende il
+  pannello per presa esclusiva e lo restituisce uscendo.
+  - **Condivisione SMB `dmd-rom`** per le ROM, aperta da `gb/setup_gb.sh`
+    insieme all'installazione di PyBoy — dal pulsante nella pagina, perché
+    dopo un aggiornamento via rete non c'è nemmeno una sessione SSH aperta.
+  - **Overscan regolabile**: toglie righe sopra e sotto allo schermo del Game
+    Boy, quindi a parità di 64 righe l'immagine sul pannello diventa più
+    larga (71 px a zero, 88 al 20%, 116 al 40%).
+  - **Gamma** con la stessa convenzione di Doom, e fotogrammi al secondo
+    regolabili (30 di suo: il ciclo di rendering gira a 30, e ogni fotogramma
+    in più è traffico di memoria che compete con il pannello).
+  - Le ROM si controllano prima di aprirle: estensione, dimensione, **logo
+    Nintendo** e somma di controllo dell'intestazione. Un file copiato a metà
+    lo dice la pagina, non uno schermo nero.
+- Documento **`docs/gameboy.it.md`** e relativo PDF.
+
+### Note
+- **Dal pad non si apre mai una sessione Game Boy**, e Start e Select del
+  Game Boy stanno sulle levette premute (L3 e R3): i pulsanti fisici con quel
+  nome sono globali dalla 3.8.2. Un pulsante deve avere un significato solo.
+- Le ROM sono di chi le possiede: questo progetto non ne contiene nessuna.
+
+### Corretto
+- `mkpdf.sh` cercava le immagini dei documenti nella cartella da cui veniva
+  lanciato: le figure del capitolo 6.4 sparivano dal PDF a seconda di dove si
+  eseguiva lo script.
+
 ## [4.4]
 
 ### Corretto
