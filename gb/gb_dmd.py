@@ -69,6 +69,11 @@ def costruisci_argomenti():
     p.add_argument("--gamma", type=float, default=1.0)
     # Percentuale di righe tolte alla sorgente, meta' sopra e meta' sotto.
     p.add_argument("--overscan", type=float, default=0.0)
+    # Di quante righe spostare la finestra visibile: negativo verso l'alto,
+    # positivo verso il basso. Serve perche' l'overscan taglia simmetrico, ma
+    # i giochi non sono simmetrici — il punteggio sta in alto, la barra della
+    # vita in basso — e la meta' che interessa cambia da cartuccia a cartuccia.
+    p.add_argument("--spostamento", type=int, default=0)
     # Fotogrammi al secondo mandati al pannello. Il Game Boy ne fa 59,7: noi
     # ne mandiamo la meta', perche' il ciclo di rendering gira a 30 e ogni
     # fotogramma in piu' e' traffico di memoria che compete con il pannello.
@@ -100,6 +105,21 @@ def geometria(larghezza_pannello, altezza_pannello, overscan):
     return tolte, larghezza
 
 
+def finestra(larghezza_pannello, altezza_pannello, overscan, spostamento=0):
+    """La fascia di righe da mostrare: (prima, dopo, larghezza).
+
+    L'overscan decide *quante* righe si perdono, lo spostamento decide *da che
+    parte*. A zero il taglio e' simmetrico; spostando, la finestra scorre
+    dentro le 144 righe della sorgente senza mai uscirne — chiedere di piu' di
+    quello che c'e' non e' un errore da segnalare, e' semplicemente il fondo
+    dello schermo.
+    """
+    tolte, larghezza = geometria(larghezza_pannello, altezza_pannello, overscan)
+    prima = tolte // 2 + int(spostamento)
+    prima = max(0, min(tolte, prima))
+    return prima, 144 - (tolte - prima), larghezza
+
+
 def main():
     args = costruisci_argomenti().parse_args()
 
@@ -121,15 +141,16 @@ def main():
     pyboy = PyBoy(args.rom, window="null", sound_emulated=False)
     pyboy.set_emulation_speed(1)
 
-    tolte, larghezza = geometria(args.larghezza, args.altezza, args.overscan)
-    alto = tolte // 2
-    basso = 144 - (tolte - alto)
+    alto, basso, larghezza = finestra(args.larghezza, args.altezza,
+                                      args.overscan, args.spostamento)
     sinistra = (args.larghezza - larghezza) // 2
     tavola = tavola_gamma(args.gamma)
 
-    sys.stderr.write("[gb] %s  overscan %.0f%% -> %dx%d al centro\n"
+    sys.stderr.write("[gb] %s  overscan %.0f%% spostamento %+d -> %dx%d, "
+                     "righe %d-%d\n"
                      % (os.path.basename(args.rom), args.overscan,
-                        larghezza, args.altezza))
+                        args.spostamento, larghezza, args.altezza,
+                        alto, basso))
     sys.stderr.flush()
 
     pannello = Image.new("RGB", (args.larghezza, args.altezza), (0, 0, 0))

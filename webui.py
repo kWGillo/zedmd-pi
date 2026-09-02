@@ -695,6 +695,7 @@ def create_app(runtime):
             if chiave in request.form:
                 conf[chiave] = request.form.get(chiave, "").strip()
         for chiave, basso, alto, default in (("overscan", 0, 80, 0),
+                                             ("spostamento", -72, 72, 0),
                                              ("fps", 10, 60, 30),
                                              ("session_timeout", 0, 3600, 300)):
             try:

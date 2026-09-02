@@ -78,6 +78,12 @@
         <input type="number" id="fps" name="fps" min="10" max="60"
                value="{{ gb.fps }}"></div>
     </div>
+    <div class="row2">
+      <div><label for="spostamento">{{ t('gb.spostamento') }}</label>
+        <input type="number" id="spostamento" name="spostamento"
+               min="-72" max="72" value="{{ gb.spostamento }}"></div>
+    </div>
+    <p class="hint">{{ t('gb.spostamento.hint') }}</p>
     <p class="hint">{{ t('gb.overscan.hint') }}</p>
 
     <hr class="sep">

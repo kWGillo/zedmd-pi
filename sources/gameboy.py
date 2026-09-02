@@ -216,6 +216,7 @@ class GameBoySource(Source):
                 "--altezza", str(self.height),
                 "--gamma", "%.2f" % float(conf.get("gamma", 1.0)),
                 "--overscan", "%.0f" % float(conf.get("overscan", 0)),
+                "--spostamento", "%d" % int(conf.get("spostamento", 0)),
                 "--fps", "%.0f" % float(conf.get("fps", 30))]
 
     def _avvia_processo(self, rom):

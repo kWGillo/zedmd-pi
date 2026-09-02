@@ -1742,6 +1742,22 @@ STRINGS = {
     "gb.overscan": ("Overscan (%)", "Overscan (%)"),
     "gb.gamma": ("Gamma", "Gamma"),
     "gb.fps": ("Fotogrammi al secondo", "Frames per second"),
+    "gb.spostamento": ("Spostamento verticale (righe)",
+                       "Vertical shift (rows)"),
+    "gb.spostamento.hint": (
+        "L'overscan taglia met\u00e0 sopra e met\u00e0 sotto, ma i giochi non sono "
+        "simmetrici: il punteggio sta in alto, la barra della vita in basso. "
+        "Con un numero negativo la finestra sale e si vede la parte alta dello "
+        "schermo, con uno positivo scende e si vede quella bassa. La finestra "
+        "non esce mai dallo schermo del Game Boy: oltre il bordo il valore "
+        "smette semplicemente di avere effetto. Senza overscan non c'\u00e8 niente "
+        "da spostare.",
+        "Overscan cuts half from the top and half from the bottom, but games "
+        "are not symmetric: the score sits at the top, the health bar at the "
+        "bottom. A negative number moves the window up and shows the upper "
+        "part of the screen, a positive one moves it down. The window never "
+        "leaves the Game Boy screen: past the edge the value simply stops "
+        "having an effect. With no overscan there is nothing to shift."),
     "gb.overscan.hint": (
         "L'overscan toglie righe sopra e sotto allo schermo del Game Boy: si "
         "perde una fascia di cielo e una di terreno, ma a parit\u00e0 di 64 "

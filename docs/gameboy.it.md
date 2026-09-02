@@ -45,6 +45,17 @@ pannello diventa più larga.
 Il valore giusto dipende dal gioco: in un platform la parte alta è spesso
 cielo e si può tagliare, in un gioco di ruolo il testo sta in basso e no.
 
+### Lo spostamento verticale
+
+L'overscan decide **quante** righe si perdono; lo spostamento decide **da che
+parte**. Il taglio nasce simmetrico, ma i giochi non lo sono: il punteggio sta
+in alto, il campo di gioco in basso.
+
+Un numero **negativo** alza la finestra e mostra la parte alta dello schermo,
+uno **positivo** la abbassa. La finestra non esce mai dallo schermo del Game
+Boy: oltre il bordo il valore smette semplicemente di avere effetto, perché lì
+non c'è altro da vedere. Senza overscan non c'è niente da spostare.
+
 ### Il gamma
 
 Stessa convenzione di Doom: **sotto 1 schiarisce, sopra 1 scurisce**. Il

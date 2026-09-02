@@ -257,6 +257,11 @@ DEFAULTS = {
         # schermo Game Boy sta in 71 pixel al centro del pannello; salendo
         # perde cielo e terreno ma diventa piu' largo, fino a riempirlo.
         "overscan": 0,
+        # Di quante righe spostare la finestra visibile dentro lo schermo del
+        # Game Boy: negativo verso l'alto, positivo verso il basso. L'overscan
+        # taglia simmetrico, ma i giochi non sono simmetrici — il punteggio
+        # sta in alto, la barra della vita in basso.
+        "spostamento": 0,
         # Fotogrammi al secondo mandati al pannello. Il Game Boy ne fa 59,7:
         # trenta bastano all'occhio e dimezzano il traffico sulla pipe.
         "fps": 30,

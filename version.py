@@ -634,6 +634,12 @@ Storico:
        cioe' tutto tranne il punto in cui il programma si mette in piedi.
        Ora c'e' test_avvio.py: pannello finto, Runtime vero, e un giro di
        rendering completo.
+  4.6  Spostamento verticale dell'immagine Game Boy. L'overscan taglia meta'
+       sopra e meta' sotto, ma i giochi non sono simmetrici — il punteggio in
+       alto, il campo di gioco in basso — e quale meta' interessa cambia da
+       cartuccia a cartuccia. Un numero negativo alza la finestra, uno
+       positivo la abbassa; oltre il bordo dello schermo il valore smette
+       semplicemente di avere effetto, perche' li' non c'e' altro da vedere.
 """
 
-__version__ = "4.5.4"
+__version__ = "4.6"

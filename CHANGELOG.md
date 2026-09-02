@@ -2,6 +2,17 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.6]
+
+### Aggiunto
+- **Spostamento verticale dell'immagine Game Boy.** L'overscan taglia metà
+  sopra e metà sotto, ma i giochi non sono simmetrici: il punteggio sta in
+  alto, il campo di gioco in basso, e quale metà interessa cambia da cartuccia
+  a cartuccia. Un numero negativo alza la finestra, uno positivo la abbassa.
+  La finestra non esce mai dallo schermo del Game Boy — oltre il bordo il
+  valore smette di avere effetto — e senza overscan non c'è niente da
+  spostare.
+
 ## [4.5.4]
 
 ### Corretto
