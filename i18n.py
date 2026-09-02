@@ -1291,6 +1291,16 @@ STRINGS = {
         "Doom runs as a separate process, for licensing reasons, and has its "
         "own page: setup, WAD choice and band tuning."),
     "giochi.doom.apri": ("Apri la pagina di Doom", "Open the Doom page"),
+    "giochi.gb.apri": ("Apri la pagina di PyBoy", "Open the PyBoy page"),
+    "giochi.esterni": ("Emulatori esterni", "External emulators"),
+    "giochi.esterni.hint": (
+        "Doom e il Game Boy non sono giochi scritti per il pannello: sono "
+        "programmi che girano per conto loro e prendono il pannello per il "
+        "tempo della partita. Ognuno ha la sua pagina, con la preparazione e "
+        "la taratura dell'immagine.",
+        "Doom and the Game Boy are not games written for the panel: they are "
+        "programs that run on their own and take the panel for the length of "
+        "a session. Each has its own page, with setup and picture tuning."),
     "giochi.doom.stato": ("WAD:", "WAD:"),
     "giochi.doom.si": ("pronto", "ready"),
     "giochi.doom.no": ("da preparare", "needs setup"),
@@ -1694,7 +1704,14 @@ STRINGS = {
         "Installs the PyBoy emulator and opens the %(cartella)s share where "
         "the ROMs go. Once only: DMD updates come over the network and do not "
         "touch system packages."),
-    "gb.prep.avvia": ("Installa l'emulatore", "Install the emulator"),
+    "gb.prep.avvia": ("Installa l'emulatore e apri la condivisione",
+                      "Install the emulator and open the share"),
+    "gb.prep.ripeti": ("Ripeti la preparazione", "Run the setup again"),
+    "gb.prep.pyboy": ("Emulatore PyBoy", "PyBoy emulator"),
+    "gb.prep.cartella": ("Cartella delle ROM", "ROM folder"),
+    "gb.prep.condivisione": ("Condivisione SMB", "SMB share"),
+    "gb.si": ("presente", "present"),
+    "gb.no": ("da fare", "to do"),
     "gb.prep.corso": ("Installazione in corso\u2026", "Installing\u2026"),
     "gb.rom": ("Cartuccia", "Cartridge"),
     "gb.rom.vuoto": (

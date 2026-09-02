@@ -606,6 +606,17 @@ Storico:
        sessione, e Start e Select del Game Boy stanno sulle levette premute:
        i pulsanti con quel nome sono globali dalla 3.8.2, e un pulsante deve
        avere un significato solo.
+  4.5.1 Doom e il Game Boy escono dalla scheda dei giochi scritti per il
+       pannello e stanno in una scheda loro, "Emulatori esterni": sono
+       programmi separati che fanno la stessa cosa — prendere il pannello per
+       una partita — e mettere il Game Boy dentro Doom diceva una gerarchia
+       che non esiste.
+  4.5.2 La pagina Game Boy dice a che punto sta la preparazione: emulatore,
+       cartella e **condivisione SMB**, ognuno con il suo stato, e il nome di
+       rete scritto per esteso. Prima si poteva solo dedurlo, e la
+       condivisione mancante sembrava un pezzo non implementato invece che un
+       pulsante non ancora premuto. La condivisione ora si crea **prima**
+       dell'emulatore: se pip fallisce, le ROM si possono copiare lo stesso.
 """
 
-__version__ = "4.5"
+__version__ = "4.5.2"

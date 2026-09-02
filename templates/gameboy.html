@@ -8,17 +8,30 @@
   <p class="hint">{{ t('gb.intro') }}</p>
   <p class="status" id="stato">{{ stato.status }}</p>
 
-  {% if not prep.pyboy or not prep.cartella_c_e %}
   <div class="card inner">
     <h3>{{ t('gb.prep') }}</h3>
+    <table class="files">
+      <tr><td>{{ t('gb.prep.pyboy') }}</td>
+          <td class="size">{{ t('gb.si') if prep.pyboy else t('gb.no') }}</td></tr>
+      <tr><td>{{ t('gb.prep.cartella') }} <code>{{ prep.cartella }}</code></td>
+          <td class="size">{{ t('gb.si') if prep.cartella_c_e else t('gb.no') }}</td></tr>
+      <tr><td>{{ t('gb.prep.condivisione') }} <code>\\{{ hostname }}\{{ prep.condivisione }}</code></td>
+          <td class="size">{{ t('gb.si') if prep.condivisa else t('gb.no') }}</td></tr>
+    </table>
+    {% if not prep.pyboy or not prep.cartella_c_e or not prep.condivisa %}
     <p class="hint">{{ t('gb.prep.hint', cartella=prep.cartella) }}</p>
+    {% endif %}
     <form method="post" action="{{ url_for('api_gameboy_setup') }}">
-      <button type="submit" {{ 'disabled' if prep.in_corso }}>
-        {{ t('gb.prep.corso') if prep.in_corso else t('gb.prep.avvia') }}</button>
+      <button type="submit" class="{{ '' if not prep.condivisa else 'ghost' }}"
+              {{ 'disabled' if prep.in_corso }}>
+        {{ t('gb.prep.corso') if prep.in_corso
+           else (t('gb.prep.ripeti') if prep.condivisa and prep.pyboy
+                 else t('gb.prep.avvia')) }}</button>
     </form>
     {% if prep.log %}<pre class="log" id="preplog">{{ prep.log }}</pre>{% endif %}
   </div>
-  {% else %}
+
+  {% if prep.pyboy and prep.host %}
 
   <form method="post" action="{{ url_for('api_gameboy_play') }}">
     <label for="rom">{{ t('gb.rom') }}</label>

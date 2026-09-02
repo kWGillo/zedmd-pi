@@ -2,6 +2,28 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.5.2]
+
+### Corretto
+- **La condivisione SMB delle ROM sembrava non esistere.** Il codice per
+  crearla c'era, ma la pagina non diceva se fosse stata fatta: la cartella la
+  crea anche un `mkdir`, mentre dal computer non si vede niente finché in
+  `smb.conf` non c'è la sezione. Ora la pagina Game Boy elenca i tre passi —
+  emulatore, cartella, condivisione — ognuno con il suo stato e il nome di
+  rete scritto per esteso, e il pulsante resta disponibile per ripetere la
+  preparazione.
+- La condivisione si crea **prima** dell'emulatore: con `set -e` un `pip` che
+  fallisce fermava lo script, e la cartella condivisa in fondo non veniva mai
+  creata.
+
+## [4.5.1]
+
+### Modificato
+- Doom e il Game Boy escono dalla scheda dei giochi scritti per il pannello e
+  stanno in una scheda loro, **Emulatori esterni**: sono due programmi
+  separati che fanno la stessa cosa — prendere il pannello per una partita — e
+  mettere il Game Boy dentro Doom dichiarava una gerarchia che non esiste.
+
 ## [4.5]
 
 ### Aggiunto

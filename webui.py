@@ -631,6 +631,7 @@ def create_app(runtime):
             stato=runtime.gameboy_state(), pulsanti=GB_PULSANTI,
             rom=elenco_rom(conf.get("rom_dir") or ""),
             tastiere=tastiere(), pad=joystick(con_nome=True),
+            hostname=socket.gethostname(),
             prep=gbsetup.stato(cfg), page="gameboy")
 
     @app.route("/api/gameboy/setup", methods=["POST"])

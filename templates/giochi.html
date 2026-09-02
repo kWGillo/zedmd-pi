@@ -21,14 +21,17 @@
     </div>
     {% endfor %}
 
-    <div class="gioco">
-      <h3>Doom</h3>
-      <p class="hint">{{ t('giochi.doom.hint') }}</p>
-      <p class="record">{{ t('giochi.doom.stato') }} <b>{{ doom_pronto }}</b></p>
-      <p class="actions"><a class="btn" href="{{ url_for('page_doom') }}">{{ t('giochi.doom.apri') }}</a>
-        <a class="btn" href="{{ url_for('page_gameboy') }}">{{ t('nav.gameboy') }}</a></p>
-    </div>
   </div>
+</section>
+
+<section class="card">
+  <h2>{{ t('giochi.esterni') }}</h2>
+  <p class="hint">{{ t('giochi.esterni.hint') }}</p>
+  <p class="actions">
+    <a class="btn" href="{{ url_for('page_doom') }}">{{ t('giochi.doom.apri') }}</a>
+    <a class="btn" href="{{ url_for('page_gameboy') }}">{{ t('giochi.gb.apri') }}</a>
+  </p>
+  <p class="record">{{ t('giochi.doom.stato') }} <b>{{ doom_pronto }}</b></p>
 </section>
 
 {% if stato.session %}

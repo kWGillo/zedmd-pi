@@ -45,6 +45,28 @@ def versione_pyboy():
         return ""
 
 
+SMB_CONF = "/etc/samba/smb.conf"
+NOME_CONDIVISIONE = "dmd-rom"
+
+
+def condivisione_attiva(nome=NOME_CONDIVISIONE):
+    """Se la condivisione SMB esiste davvero.
+
+    Guardare solo la cartella non basta: la cartella la crea anche un
+    `mkdir`, ma dal Mac non si vede niente se in smb.conf non c'e' la
+    sezione. Era la differenza fra "l'ho preparato" e "non trovo la
+    condivisione", e la pagina deve saperla distinguere.
+    """
+    try:
+        with open(SMB_CONF) as handle:
+            for riga in handle:
+                if riga.strip().lower() == ("[%s]" % nome).lower():
+                    return True
+    except OSError:
+        return False
+    return False
+
+
 def log(messaggio):
     riga = "%s  %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), messaggio)
     try:
@@ -78,7 +100,8 @@ def avvia(cfg):
         if not os.path.isfile(percorso):
             return "script non trovato: %s" % percorso
         cartella = cfg.get("gameboy", {}).get("rom_dir") or "/srv/dmd/rom"
-        ambiente = dict(os.environ, ROM_DIR=cartella)
+        nome = cfg.get("gameboy", {}).get("share") or NOME_CONDIVISIONE
+        ambiente = dict(os.environ, ROM_DIR=cartella, SHARE_NAME=nome)
         log("preparazione avviata (ROM in %s)" % cartella)
         try:
             handle = open(LOG_PATH, "a")
@@ -98,12 +121,15 @@ def avvia(cfg):
 def stato(cfg):
     """Quel che serve alla pagina per decidere cosa mostrare."""
     cartella = cfg.get("gameboy", {}).get("rom_dir") or "/srv/dmd/rom"
+    nome = cfg.get("gameboy", {}).get("share") or NOME_CONDIVISIONE
     return {
         "pyboy": pyboy_pronto(),
         "versione": versione_pyboy(),
         "host": os.path.isfile(cfg.get("gameboy", {}).get("host") or ""),
         "cartella": cartella,
         "cartella_c_e": os.path.isdir(cartella),
+        "condivisione": nome,
+        "condivisa": condivisione_attiva(nome),
         "in_corso": in_corso(),
         "log": tail_log(),
         "script": os.path.isfile(script(cfg)),

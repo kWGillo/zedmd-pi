@@ -18,6 +18,22 @@ SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROM_DIR=${ROM_DIR:-/srv/dmd/rom}
 SHARE_NAME=${SHARE_NAME:-dmd-rom}
 
+# La condivisione si prepara PRIMA dell'emulatore. Con `set -e`, un pip
+# che fallisce fermerebbe lo script: se la cartella condivisa fosse in
+# fondo non verrebbe mai creata, e non si potrebbero nemmeno copiare le
+# ROM in attesa di risolvere. L'ordine e' quello che serve a chi guarda.
+echo "==> Cartella delle ROM"
+mkdir -p "$ROM_DIR"
+chmod 0775 "$ROM_DIR"
+
+CONDIVISIONE="$(dirname "$SRC_DIR")/setup_share.sh"
+if [ -x "$CONDIVISIONE" ] || [ -f "$CONDIVISIONE" ]; then
+    echo "==> Condivisione SMB '$SHARE_NAME'"
+    bash "$CONDIVISIONE" "$ROM_DIR" "$SHARE_NAME" "ROM Game Boy"
+else
+    echo "    setup_share.sh non trovato: la cartella c'e', la condivisione no"
+fi
+
 echo "==> PyBoy"
 if python3 -c "import pyboy" 2>/dev/null; then
     echo "    gia' installato: $(python3 -c 'import pyboy; print(getattr(pyboy, "__version__", "?"))')"
@@ -37,18 +53,6 @@ except Exception as exc:
     sys.exit(1)
 print("    versione %s" % getattr(pyboy, "__version__", "?"))
 EOF
-
-echo "==> Cartella delle ROM"
-mkdir -p "$ROM_DIR"
-chmod 0775 "$ROM_DIR"
-
-CONDIVISIONE="$(dirname "$SRC_DIR")/setup_share.sh"
-if [ -x "$CONDIVISIONE" ] || [ -f "$CONDIVISIONE" ]; then
-    echo "==> Condivisione SMB '$SHARE_NAME'"
-    bash "$CONDIVISIONE" "$ROM_DIR" "$SHARE_NAME" "ROM Game Boy"
-else
-    echo "    setup_share.sh non trovato: la cartella c'e', la condivisione no"
-fi
 
 echo
 echo "Fatto. Copia le ROM (.gb o .gbc) nella condivisione \\\\<indirizzo>\\$SHARE_NAME"

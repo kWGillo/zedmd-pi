@@ -243,6 +243,8 @@ DEFAULTS = {
         "host": "/opt/dmd/gb/gb_dmd.py",
         # Condivisione SMB dove finiscono le ROM. La crea gb/setup_gb.sh.
         "rom_dir": "/srv/dmd/rom",
+        # Nome con cui la condivisione compare in rete: \\<ip>\dmd-rom.
+        "share": "dmd-rom",
         # L'ultima cartuccia scelta: si riapre quella, senza doverla ricercare.
         "rom": "",
         # Sotto 1 schiarisce, sopra 1 scurisce. Stessa convenzione di Doom.
