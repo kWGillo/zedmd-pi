@@ -229,6 +229,11 @@ input[type=color] {
 
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+/* Quattro colonne: i quattro livelli della palette Game Boy. Su schermo
+   stretto scendono a due, che e' meglio di quattro riquadri di sei pixel. */
+.row4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; }
+@media (max-width: 560px) { .row4 { grid-template-columns: repeat(2, 1fr); } }
+.colori input[type=color] { width: 100%; height: 2.2rem; padding: 2px; }
 @media (max-width: 560px) {
   .row2, .row3 { grid-template-columns: 1fr; }
 }

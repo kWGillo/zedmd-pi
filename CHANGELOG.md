@@ -2,6 +2,23 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.6.1]
+
+### Aggiunto
+- **Colori dello schermo Game Boy**: verde DMG, grigio, ambra, arancione, blu
+  notte, o quattro colori scelti a mano. Il Game Boy non ha colori — ha
+  quattro gradazioni — e su un pannello LED l'ambra e l'arancione si leggono
+  spesso meglio del verde del 1989. Le cartucce Game Boy Color portano i
+  colori loro e ignorano la scelta.
+
+### Corretto
+- **I campi dell'immagine tornavano indietro da soli.** Il log della
+  preparazione faceva ricaricare la pagina ogni tre secondi *per sempre*, e
+  un valore appena scritto spariva se non si premeva subito Invio. Ora la
+  pagina guarda il log solo mentre la preparazione gira davvero.
+- Lo stato del WAD è tornato nella pagina di Doom, dove appartiene: nella
+  scheda degli emulatori esterni parlava di uno dei due soltanto.
+
 ## [4.6]
 
 ### Aggiunto

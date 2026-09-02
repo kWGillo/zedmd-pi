@@ -1742,6 +1742,22 @@ STRINGS = {
     "gb.overscan": ("Overscan (%)", "Overscan (%)"),
     "gb.gamma": ("Gamma", "Gamma"),
     "gb.fps": ("Fotogrammi al secondo", "Frames per second"),
+    "gb.palette": ("Colori dello schermo", "Screen colours"),
+    "gb.palette.livello": ("Livello %(n)d", "Level %(n)d"),
+    "gb.palette.hint": (
+        "Il Game Boy non ha colori: ha quattro gradazioni, e ogni schermo le "
+        "rendeva a modo suo. Il verde \u00e8 quello del DMG del 1989; su un "
+        "pannello LED l'ambra e l'arancione si leggono spesso meglio. I "
+        "quattro riquadri valgono solo scegliendo Personalizzata, e vanno dal "
+        "pi\u00f9 chiaro al pi\u00f9 scuro. Le cartucce Game Boy Color portano i colori "
+        "loro e ignorano questa scelta: \u00e8 la cartuccia a decidere, non lo "
+        "schermo.",
+        "The Game Boy has no colours: it has four shades, and every screen "
+        "rendered them its own way. The green is the 1989 DMG one; on an LED "
+        "panel amber and orange are often easier to read. The four swatches "
+        "apply only with Custom selected, and go from lightest to darkest. "
+        "Game Boy Color cartridges carry their own colours and ignore this "
+        "choice: the cartridge decides, not the screen."),
     "gb.spostamento": ("Spostamento verticale (righe)",
                        "Vertical shift (rows)"),
     "gb.spostamento.hint": (

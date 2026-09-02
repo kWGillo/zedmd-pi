@@ -640,6 +640,14 @@ Storico:
        cartuccia a cartuccia. Un numero negativo alza la finestra, uno
        positivo la abbassa; oltre il bordo dello schermo il valore smette
        semplicemente di avere effetto, perche' li' non c'e' altro da vedere.
+  4.6.1 **Colori dello schermo Game Boy**: verde DMG, grigio, ambra,
+       arancione, blu notte o quattro colori scelti a mano. Il Game Boy non ha
+       colori, ha quattro gradazioni, e su un pannello LED l'ambra si legge
+       meglio del verde del 1989. Corretto anche un difetto della pagina: il
+       log della preparazione la faceva ricaricare ogni tre secondi per
+       sempre, e un valore appena scritto nei campi dell'immagine tornava
+       indietro da solo se non si premeva Invio. E lo stato del WAD e' tornato
+       nella pagina di Doom, dove appartiene.
 """
 
-__version__ = "4.6"
+__version__ = "4.6.1"

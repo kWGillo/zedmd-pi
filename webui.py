@@ -32,6 +32,7 @@ from sources import (DOOM_PULSANTI, DOOM_TASTI, FIELD_LIST, GB_PULSANTI,
                      HOLD_SECONDS, LANGUAGES, OVERFLOW_MODES,
                      PROVIDER_LIST, SIZE_KEYS, SLOTS, UNIT_KEYS,
                      controlla_wad, elenco_rom, giochi_elenco,
+                     palette_scelte,
                      invalidate_scan, is_supported, joystick, normalize_list,
                      scan_media, have_ffmpeg, tastiere, usable)
 from version import __version__
@@ -631,6 +632,7 @@ def create_app(runtime):
             "gameboy.html", cfg=cfg, gb=conf,
             stato=runtime.gameboy_state(), pulsanti=GB_PULSANTI,
             rom=elenco_rom(conf.get("rom_dir") or ""),
+            palette=palette_scelte(),
             tastiere=tastiere(), pad=joystick(con_nome=True),
             hostname=socket.gethostname(),
             prep=gbsetup.stato(cfg), page="gameboy")
@@ -710,6 +712,16 @@ def create_app(runtime):
             conf["gamma"] = 1.0
         for chiave in ("keyboard", "keyboard_starts", "joystick"):
             conf[chiave] = request.form.get(chiave) == "on"
+        scelta = request.form.get("palette", "")
+        if scelta in dict(palette_scelte()):
+            conf["palette"] = scelta
+        colori = []
+        for indice in range(4):
+            valore = request.form.get("pal%d" % indice, "").strip()
+            colori.append(valore if len(valore) == 7 and valore.startswith("#")
+                          else (conf.get("palette_custom") or
+                                ["#ffffff"] * 4)[indice])
+        conf["palette_custom"] = colori
         dmdconf.save()
         # Gamma, overscan e fotogrammi stanno nella riga di comando del
         # processo: cambiarli in configurazione non basta, va fatto ripartire.

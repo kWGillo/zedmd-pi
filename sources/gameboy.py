@@ -38,6 +38,46 @@ BYTE_FOTOGRAMMA = LARGHEZZA * ALTEZZA * 3
 
 ESTENSIONI = (".gb", ".gbc")
 
+# I quattro livelli dello schermo, dal piu' chiaro al piu' scuro. Il Game Boy
+# non ha colori: ha quattro gradazioni, e ogni schermo le rendeva a modo suo.
+# Il verde e' quello del DMG del 1989; gli altri sono scelte nostre, e su un
+# pannello LED arancione o ambra si leggono meglio del verde originale.
+#
+# Valgono per le cartucce Game Boy. Un gioco Game Boy Color porta i colori
+# suoi e li ignora: e' la cartuccia a decidere, non lo schermo.
+PALETTE = {
+    "verde": ("Verde DMG", ("e0f8d0", "88c070", "346856", "081820")),
+    "grigio": ("Grigio", ("ffffff", "aaaaaa", "555555", "000000")),
+    "ambra": ("Ambra", ("ffd772", "d79a45", "8a5a1e", "2a1600")),
+    "arancio": ("Arancione DMD", ("ffb060", "e07818", "8a3c00", "200c00")),
+    "bianco_blu": ("Blu notte", ("dfeaff", "7aa0d0", "2a4a80", "0a1428")),
+    "personalizzata": ("Personalizzata", ()),
+}
+PALETTE_PREDEFINITA = "verde"
+
+
+def palette_scelte():
+    """(chiave, etichetta) per il menu della pagina."""
+    return [(chiave, valore[0]) for chiave, valore in PALETTE.items()]
+
+
+def colori_palette(conf):
+    """I quattro colori da passare al processo, come testo.
+
+    Una palette con un nome vince sui colori scritti a mano: il menu e' quello
+    che si guarda, e se dicesse "Ambra" mentre si vede il verde nessuno
+    saprebbe piu' a cosa credere.
+    """
+    nome = (conf or {}).get("palette") or PALETTE_PREDEFINITA
+    if nome != "personalizzata":
+        colori = PALETTE.get(nome, PALETTE[PALETTE_PREDEFINITA])[1]
+    else:
+        colori = [str(c).lstrip("#") for c in (conf.get("palette_custom") or [])]
+    colori = [c for c in colori if len(c) == 6]
+    if len(colori) != 4:
+        colori = PALETTE[PALETTE_PREDEFINITA][1]
+    return ",".join(colori)
+
 # Codici del protocollo verso gb_dmd.py. La tabella e' ripetuta la' dentro:
 # sono due programmi separati, e un import fra i due sarebbe proprio il
 # collegamento che il processo separato vuole evitare.
@@ -217,7 +257,8 @@ class GameBoySource(Source):
                 "--gamma", "%.2f" % float(conf.get("gamma", 1.0)),
                 "--overscan", "%.0f" % float(conf.get("overscan", 0)),
                 "--spostamento", "%d" % int(conf.get("spostamento", 0)),
-                "--fps", "%.0f" % float(conf.get("fps", 30))]
+                "--fps", "%.0f" % float(conf.get("fps", 30)),
+                "--palette", colori_palette(conf)]
 
     def _avvia_processo(self, rom):
         problema = controlla_rom(rom)

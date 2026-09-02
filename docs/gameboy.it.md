@@ -62,6 +62,23 @@ Stessa convenzione di Doom: **sotto 1 schiarisce, sopra 1 scurisce**. Il
 Game Boy originale ha quattro tonalità di verde, e su un pannello LED i due
 toni intermedi tendono a confondersi: il gamma è la leva per separarli.
 
+### I colori
+
+Il Game Boy non ha colori: ha **quattro gradazioni**, e ogni schermo le
+rendeva a modo suo. Nella pagina si scelgono:
+
+| Palette | Note |
+|---|---|
+| Verde DMG | il verde del Game Boy del 1989 |
+| Grigio | neutro, massimo contrasto |
+| Ambra | spesso il più leggibile su un pannello LED |
+| Arancione DMD | in tinta con l'orologio del pannello |
+| Blu notte | scuro, poco invadente di sera |
+| Personalizzata | quattro colori scelti a mano, dal più chiaro al più scuro |
+
+Le cartucce **Game Boy Color** portano i colori loro e ignorano questa scelta:
+decide la cartuccia, non lo schermo.
+
 ### I fotogrammi al secondo
 
 Il Game Boy ne produce 59,7. Il valore predefinito è **30**, e non è una

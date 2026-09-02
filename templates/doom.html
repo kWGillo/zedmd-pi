@@ -17,6 +17,8 @@
   <h2>{{ t('doom.title') }}</h2>
   <p class="hint">{{ t('doom.intro') }}</p>
   <p class="status" id="stato">{{ stato.status }}</p>
+  <p class="record">{{ t('giochi.doom.stato') }}
+    <b>{{ t('giochi.doom.si') if prep.wad_ok else t('giochi.doom.no') }}</b></p>
 
   <div class="actions">
     <form method="post" action="{{ url_for('api_doom_play') }}">

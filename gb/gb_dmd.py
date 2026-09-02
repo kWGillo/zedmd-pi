@@ -78,7 +78,33 @@ def costruisci_argomenti():
     # ne mandiamo la meta', perche' il ciclo di rendering gira a 30 e ogni
     # fotogramma in piu' e' traffico di memoria che compete con il pannello.
     p.add_argument("--fps", type=float, default=30.0)
+    # I quattro colori dello schermo, dal piu' chiaro al piu' scuro, come
+    # "e0f8d0,88c070,346856,081820". Il Game Boy originale non ha colori: ha
+    # quattro livelli di grigio, e ogni schermo li rendeva a modo suo — il
+    # verde e' quello del DMG, ma su un pannello LED si puo' scegliere.
+    p.add_argument("--palette", default="")
     return p
+
+
+def leggi_palette(testo):
+    """Da "e0f8d0,88c070,..." ai quattro interi che vuole PyBoy.
+
+    Vuoto o malformato = nessuna palette, e comanda il valore predefinito
+    dell'emulatore. Un colore scritto male non merita un errore all'avvio: il
+    Game Boy si vede lo stesso, solo con i colori di sempre.
+    """
+    pezzi = [p.strip().lstrip("#") for p in (testo or "").split(",") if p.strip()]
+    if len(pezzi) != 4:
+        return None
+    fuori = []
+    for pezzo in pezzi:
+        if len(pezzo) != 6:
+            return None
+        try:
+            fuori.append(int(pezzo, 16))
+        except ValueError:
+            return None
+    return tuple(fuori)
 
 
 def tavola_gamma(gamma):
@@ -138,7 +164,9 @@ def main():
     # window="null": nessuna finestra, nessun SDL da aprire. Il suono e'
     # spento — l'audio del salotto non e' nostro, e un secondo canale sarebbe
     # solo rumore.
-    pyboy = PyBoy(args.rom, window="null", sound_emulated=False)
+    colori = leggi_palette(args.palette)
+    extra = {"color_palette": colori} if colori else {}
+    pyboy = PyBoy(args.rom, window="null", sound_emulated=False, **extra)
     pyboy.set_emulation_speed(1)
 
     alto, basso, larghezza = finestra(args.larghezza, args.altezza,

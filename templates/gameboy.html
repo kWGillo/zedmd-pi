@@ -84,6 +84,20 @@
                min="-72" max="72" value="{{ gb.spostamento }}"></div>
     </div>
     <p class="hint">{{ t('gb.spostamento.hint') }}</p>
+
+    <label for="palette">{{ t('gb.palette') }}</label>
+    <select id="palette" name="palette">
+      {% for chiave, etichetta in palette %}
+      <option value="{{ chiave }}" {{ 'selected' if gb.palette == chiave }}>{{ etichetta }}</option>
+      {% endfor %}
+    </select>
+    <div class="row4 colori">
+      {% for c in gb.palette_custom %}
+      <div><label for="pal{{ loop.index0 }}">{{ t('gb.palette.livello', n=loop.index) }}</label>
+        <input type="color" id="pal{{ loop.index0 }}" name="pal{{ loop.index0 }}" value="{{ c }}"></div>
+      {% endfor %}
+    </div>
+    <p class="hint">{{ t('gb.palette.hint') }}</p>
     <p class="hint">{{ t('gb.overscan.hint') }}</p>
 
     <hr class="sep">
@@ -156,14 +170,21 @@
 
   // Mentre la preparazione gira, la pagina guarda il log: senza, l'unico modo
   // di sapere com'e' andata sarebbe ricaricare a caso.
+  //
+  // Si guarda **solo mentre gira davvero**. Prima bastava che il log
+  // esistesse, e siccome il log resta li' per sempre la pagina si ricaricava
+  // ogni tre secondi: un valore appena scritto nei campi dell'immagine, se non
+  // si premeva Invio subito, tornava indietro da solo. Un campo che si annulla
+  // mentre lo stai scrivendo e' peggio di un campo che non c'e'.
   var log = document.getElementById("preplog");
-  if (log) {
-    setInterval(function () {
+  var inCorso = {{ 'true' if prep.in_corso else 'false' }};
+  if (log && inCorso) {
+    var orologio = setInterval(function () {
       fetch("{{ url_for('api_gameboy_setup_state') }}")
         .then(function (r) { return r.json(); })
         .then(function (j) {
           if (j && j.log) { log.textContent = j.log; }
-          if (j && !j.in_corso && j.pyboy) { location.reload(); }
+          if (j && !j.in_corso) { clearInterval(orologio); location.reload(); }
         })
         .catch(function () {});
     }, 3000);

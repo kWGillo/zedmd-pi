@@ -262,6 +262,10 @@ DEFAULTS = {
         # taglia simmetrico, ma i giochi non sono simmetrici — il punteggio
         # sta in alto, la barra della vita in basso.
         "spostamento": 0,
+        # I quattro livelli dello schermo. Un nome dall'elenco di
+        # sources/gameboy.py, oppure "personalizzata" e i colori qui sotto.
+        "palette": "verde",
+        "palette_custom": ["#e0f8d0", "#88c070", "#346856", "#081820"],
         # Fotogrammi al secondo mandati al pannello. Il Game Boy ne fa 59,7:
         # trenta bastano all'occhio e dimezzano il traffico sulla pipe.
         "fps": 30,
