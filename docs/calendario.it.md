@@ -102,10 +102,21 @@ nemmeno il *client secret* — viene tolto come la password del broker MQTT. Un
 segnalazione. Chi lo reimporta riscrive il segreto una volta sola; se invece
 fosse dentro, basterebbe una disattenzione per regalarlo.
 
-Il permesso resta revocabile in ogni momento anche dal lato Google, dalla
-pagina *Account → Sicurezza → App di terze parti*. Il pulsante **Scollega
-l'account** del DMD cancella il file dei token e svuota quello che era già
-stato letto.
+Il pulsante **Scollega l'account** fa due cose: cancella il file dei token (e
+svuota quello che era già stato letto) e chiede a Google di **revocare** il
+permesso. Sono due porte distinte — la seconda resterebbe aperta anche dopo
+aver cancellato tutto da qui — e chiuderle insieme è il comportamento che ci si
+aspetta.
+
+Se la revoca non passa (rete assente, token già scaduto) il DMD si scollega
+**lo stesso**: chi preme quel pulsante vuole prima di tutto che il pannello
+smetta di leggere il suo calendario. Il messaggio lo dice, e in quel caso la
+revoca si completa a mano su *myaccount.google.com → Sicurezza → App di terze
+parti con accesso all'account* — la stessa pagina da usare se il DMD è
+irraggiungibile e vuoi comunque tagliare l'accesso.
+
+Restano invece in configurazione **Client ID e Client secret**: sono
+credenziali della tua applicazione, non dell'account.
 
 ---
 
@@ -134,10 +145,16 @@ L'avviso compare ogni venti minuti e resta dieci secondi, come quello delle
 scadenze. Se ci sono più appuntamenti nella finestra si alternano, invece di
 mostrare sempre il primo e non far sapere degli altri.
 
-Nella scala delle priorità sta a **58**: sopra le scadenze (57), perché una
+Nella scala delle priorità sta a **59**: sopra le scadenze (57), perché una
 scadenza ha un giorno e un appuntamento ha anche un'ora — chi passa davanti al
 pannello dieci minuti prima di uscire di casa ha più bisogno del secondo — e
 sotto Air Radar (60), che segnala un aereo che fra dieci secondi non c'è più.
+
+Cinquantanove e non cinquantotto, che sarebbe stato il numero naturale, perché
+58 è già di Now Playing: a parità l'arbitro tiene chi si è registrato per
+primo — il player — e l'avviso non sarebbe mai comparso mentre suona musica. Un
+pareggio di priorità non è un dettaglio estetico, è una sorgente che tace, e
+c'è una prova che li rifiuta.
 
 Durante una partita, un video o un flusso ZeDMD non si intromette: quelle
 sorgenti tengono il pannello, e l'avviso aspetta il proprio turno.

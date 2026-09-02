@@ -52,6 +52,7 @@ import urllib.request
 
 AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
+REVOKE_URL = "https://oauth2.googleapis.com/revoke"
 EVENTS_URL = ("https://www.googleapis.com/calendar/v3/calendars/"
               "primary/events")
 PROFILO_URL = ("https://www.googleapis.com/calendar/v3/users/me/"
@@ -107,14 +108,52 @@ def account():
     return _read_tokens().get("account", "")
 
 
-def disconnect():
-    """Dimentica l'account. Il permesso resta revocabile anche da Google."""
+def _post_form(url, payload):
+    """POST di un modulo. Isolata perché è il punto che le prove sostituiscono."""
+    body = urllib.parse.urlencode(payload).encode("ascii")
+    richiesta = urllib.request.Request(
+        url, data=body,
+        headers={"Content-Type": "application/x-www-form-urlencoded"})
+    with urllib.request.urlopen(richiesta, timeout=10) as risposta:
+        return 200 <= getattr(risposta, "status", 200) < 300
+
+
+def revoca():
+    """Dice a Google di buttare via il permesso, non solo di dimenticarlo qui.
+
+    Cancellare il file dei token toglie l'accesso *a questo DMD*; il consenso
+    resterebbe però registrato nell'account Google finché non lo si rimuove a
+    mano. Una sola richiesta chiude anche quella porta.
+
+    Torna True solo se Google ha risposto di sì. Un fallimento non e' un
+    guasto — la rete puo' mancare, il token puo' essere gia' scaduto — e non
+    deve impedire di cancellare il file: chi scollega vuole prima di tutto che
+    il DMD smetta di leggere il suo calendario.
+    """
+    tokens = _read_tokens()
+    gettone = tokens.get("refresh_token") or tokens.get("access_token")
+    if not gettone:
+        return False
+    try:
+        return bool(_post_form(REVOKE_URL, {"token": gettone}))
+    except Exception:
+        return False
+
+
+def disconnect(anche_su_google=True):
+    """Dimentica l'account, e per quanto possibile revoca il permesso.
+
+    Torna `{"locale": ..., "google": ...}`: la prima dice se il file dei token
+    e' stato cancellato, la seconda se Google ha confermato la revoca.
+    """
+    revocato = revoca() if anche_su_google else False
     svuota_cache()
     try:
         os.remove(TOKEN_PATH)
-        return True
+        tolto = True
     except OSError:
-        return False
+        tolto = False
+    return {"locale": tolto, "google": revocato}
 
 
 # ------------------------------------------------------------------- PKCE

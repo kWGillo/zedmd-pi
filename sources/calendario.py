@@ -51,11 +51,16 @@ def _carica(size):
 class CalendarioSource(Source):
     name = "calendario"
     label = "Calendario"
-    # Sopra le scadenze (57) e sotto Air Radar (60): una scadenza ha un
-    # giorno, un appuntamento ha anche un'ora, e chi passa davanti al pannello
-    # dieci minuti prima di uscire di casa ha più bisogno del secondo. Sotto
-    # l'aereo, che fra dieci secondi non c'è più.
-    priority = 58
+    # Sopra le scadenze (57): una scadenza ha un giorno, un appuntamento ha
+    # anche un'ora, e chi passa davanti al pannello dieci minuti prima di
+    # uscire di casa ha più bisogno del secondo. Sotto Air Radar (60), che
+    # segnala un aereo che fra dieci secondi non c'è più.
+    #
+    # **59 e non 58**, che sarebbe stato il numero naturale, perché 58 è già
+    # di Now Playing: a parità l'arbitro tiene chi ha registrato per primo —
+    # il player — e l'avviso non sarebbe mai comparso mentre suona musica.
+    # Un pareggio qui non è un dettaglio estetico: è una sorgente che tace.
+    priority = 59
 
     def __init__(self, cfg, width, height):
         super().__init__(cfg, width, height)

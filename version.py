@@ -657,7 +657,10 @@ Storico:
        un'agenda. L'autorizzazione si fa dal browser del proprio computer,
        perche' il DMD non ha tastiera; i token stanno in
        /var/lib/dmd/google.json a 0600, fuori dalla configurazione, e il
-       segreto del client esce dall'export come la password del broker.
+       segreto del client esce dall'export come la password del broker, e
+       scollegando si chiede a Google di revocare il permesso invece di
+       lasciare un consenso in piedi dal loro lato. README riscritto: era
+       fermo alla 3.4.
 """
 
 __version__ = "4.7"

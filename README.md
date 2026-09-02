@@ -1,33 +1,95 @@
-# DMD Controller 3.4
+# DMD Controller 4.7
 
-Servizio unico che possiede il pannello LED (256x64, FM6373) e lo condivide fra
-più sorgenti di contenuto, con interfaccia web di controllo.
+Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
+Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
+di controllo in italiano e inglese.
 
-Servizi implementati:
+Nasce come emulatore di **ZeDMD-WiFi** per un cabinato, ma il pannello resta
+acceso anche quando non si gioca: l'obiettivo è un oggetto da salotto che
+racconta qualcosa — l'ora, il traffico aereo che passa sopra casa, la musica
+in ascolto, gli appuntamenti di domani — e che, quando serve, torna a fare il
+DMD.
+
+## Servizi
+
+Si accendono e si spengono uno per uno dalla pagina **Servizi**, e ognuno ha
+un interruttore anche in Home Assistant.
 
 - **ZeDMD** — ricevitore del protocollo ZeDMD-WiFi: Batocera, `dmdserver`,
-  dmd-extensions o VPX possono inviare frame a questo Raspberry credendo di
-  parlare con un ZeDMD reale.
+  dmd-extensions o VPX inviano frame a questo Raspberry credendo di parlare
+  con un ZeDMD reale.
+- **Clock** — orologio e data, con colori indipendenti, formato 12/24 ore e
+  nomi dei giorni in italiano, francese o inglese. È la sorgente di riserva:
+  quando non ha da dire niente nessun altro, c'è lui.
 - **Media Player** — foto e video a rotazione dalla libreria, con intervallo
   casuale. Libreria raggiungibile via SMB e via upload dalla web UI. Supporta
   anche il materiale Pixelcade, utilizzabile a prescindere da Batocera.
-- **Clock** — orologio e data, con colori indipendenti, formato 12/24 ore e
-  nomi dei giorni in italiano, francese o inglese.
-- **Air Radar** — informazioni degli aerei in transito entro un raggio dato da
-  una coordinata GPS, tramite le API pubbliche ADS-B della comunità.
-- **Now Playing** — brano in ascolto da AirPlay 2 (shairport-sync), dall'API di
-  Spotify o da un topic MQTT libero.
+- **Air Radar** — gli aerei in transito entro un raggio da una coordinata GPS,
+  tramite le API pubbliche ADS-B della comunità, con le sigle tradotte in nomi
+  leggibili e un registro CSV dei passaggi.
+- **Now Playing** — il brano in ascolto da AirPlay 2 (shairport-sync),
+  dall'API di Spotify o da un topic MQTT libero.
 - **Rolling Banner** — dieci testi scorrevoli a comparsa periodica, ciascuno
   con colore, dimensione, velocità e lampeggio propri.
 - **Compleanni** — l'augurio compare da solo nel giorno giusto.
+- **Scadenze** — un semaforo accanto all'orologio dice se c'è qualcosa in
+  arrivo, e ogni tanto il pannello mostra che cosa. Si inseriscono dalla web
+  UI, da un CSV o da Home Assistant.
+- **Google Calendar** — gli appuntamenti dei prossimi tre giorni, a giro.
+  Sola lettura, e **senza semaforo**: un appuntamento succede quando succede.
 - **Rifiuti** — il calendario della raccolta nella colonna libera accanto
   all'orologio, calcolato da una cadenza fissa senza interrogare nessun
   portale.
-- **Doom** — non è un servizio ma una partita: si preme «Gioca», i servizi si
-  fermano, il pannello è del gioco finché non si esce. Tastiera o pad.
+
+## Partite
+
+Non sono servizi: si comincia e si finisce. Premuto «Gioca» i servizi si
+fermano, il pannello è del gioco finché non si esce, e poi torna al suo
+lavoro. Si comandano da tastiera, da pad o dalla pagina web.
+
+- **Doom** — `doomgeneric` in un processo separato, con i propri WAD su una
+  condivisione di rete.
+- **Game Boy** — l'emulatore PyBoy, con le ROM su una condivisione di rete.
+  Lo schermo 160×144 sta al centro del pannello in proporzione, con overscan e
+  spostamento verticale per allargarlo, gamma regolabile e sei tavolozze di
+  colore.
+- **Breakout e Invaders** — scritti per questo pannello, senza dipendenze.
+
+Il tasto Start del pad scorre il giro dei giochi; PS esce.
+
+## Il resto
 
 Fasce orarie: **Night mode** abbassa la luminosità, **Sleep mode** spegne il
-display. Sleep ha la precedenza su Night.
+display. Sleep ha la precedenza su Night. Entrambe si comandano anche da Home
+Assistant.
+
+**Aggiornamento via rete** da questo repository, con verifica dell'archivio e
+ripristino automatico se il servizio non riparte.
+
+**Home Assistant** via MQTT Discovery: il brano corrente, un interruttore per
+ogni servizio, la luminosità, il semaforo delle scadenze e il calendario dei
+rifiuti compaiono da soli, comandabili e non solo leggibili.
+
+---
+
+## Documentazione
+
+I manuali stanno in `docs/`, in Markdown e in PDF già impaginato. Sono nel
+repository e dentro l'archivio scaricato: si aprono direttamente da GitHub,
+oppure si scaricano con `git clone` o dal pulsante *Code → Download ZIP*.
+
+| Documento | PDF |
+|---|---|
+| Manuale completo: hardware, cablaggio, installazione, diagnostica | `docs/DMD_manuale_completo.pdf` |
+| ZeDMD-WiFi: protocollo e collegamento dei client | `docs/DMD_zedmd_wifi.pdf` |
+| Now Playing: AirPlay, Spotify, MQTT, Home Assistant | `docs/DMD_now_playing.pdf` |
+| Doom sul pannello | `docs/DMD_doom.pdf` |
+| Game Boy sul pannello | `docs/DMD_gameboy.pdf` |
+| Google Calendar | `docs/DMD_calendario.pdf` |
+| Joypad: mappatura dei comandi | `docs/DMD_joypad.pdf` |
+
+I PDF **non** vengono installati in `/opt/dmd`: sul Raspberry non servono, e
+l'aggiornamento via rete copia solo ciò che il servizio esegue.
 
 ---
 
@@ -174,22 +236,54 @@ Un tocco in più riallinea il pannello.
 
 ## Interfaccia web
 
-**Impostazioni** — luminosità con applicazione immediata, server NTP, fuso
-orario, ora legale automatica o scostamento UTC manuale, indirizzo IP locale e
-stato della sincronizzazione oraria.
+Su `http://dmdpi.local:8080/`. Aprendo l'indirizzo senza porta si viene
+rediretti automaticamente.
 
-**Servizi** — attivazione dei servizi, indicazione della sorgente attualmente
-a schermo e possibilità di forzare manualmente una sorgente invece di lasciar
-decidere l'arbitro.
+**Impostazioni** — luminosità con applicazione immediata, lingua
+dell'interfaccia, regolazione fine del driver S-PWM, profili hardware del
+pannello, esportazione e importazione della configurazione, indirizzo IP
+locale, riavvio del servizio.
 
-**Aggiornamenti** — controllo e installazione della nuova versione dal
-repository GitHub, con verifica dell'archivio e ripristino automatico se il
-servizio non riparte.
+**Orologio** — colori di ora e data, formato 12/24 ore, lingua dei giorni,
+lampeggio dei due punti, server NTP e fuso orario.
+
+**Media** — libreria, caricamento, rilettura, anteprima immediata, durate e
+intervalli, adattamento al pannello, modalità pixel art.
+
+**Banner** — i dieci testi scorrevoli, uno per riga.
+
+**Musica** — copertura delle sorgenti, collegamento dell'account Spotify,
+aspetto del player, stato di MQTT e delle entità di Home Assistant.
+
+**Compleanni** — l'elenco delle date, compleanni e anniversari.
+
+**Scadenze** — le scadenze aperte con il loro semaforo, l'inserimento, il CSV,
+il registro di quelle completate e le soglie dei tre colori.
+
+**Calendario** — il collegamento dell'account Google e nient'altro, più
+l'elenco in sola lettura degli appuntamenti che il pannello vede.
 
 **Rifiuti** — le voci del calendario, i giorni della settimana e la cadenza di
 ciascuna, e le due tabelle delle eccezioni.
 
-**Doom** — preparazione, scelta del WAD, avvio e uscita dalla partita.
+**Radar** — coordinate e raggio, provider ADS-B, scelta dei parametri di volo,
+registro CSV dei passaggi, tabelle di conversione dei codici, prova
+diagnostica di una rotta.
+
+**Giochi** — i giochi scritti per il pannello, i comandi di tastiera e pad, e
+la scheda degli emulatori esterni che porta a Doom e al Game Boy.
+
+**Doom** — preparazione, scelta del WAD, gamma, avvio e uscita.
+
+**Game Boy** — installazione di PyBoy, condivisione delle ROM, scelta della
+cartuccia, pad su schermo, overscan, spostamento verticale, gamma e tavolozza.
+
+**Servizi** — attivazione dei servizi, indicazione della sorgente attualmente
+a schermo e possibilità di forzarne una invece di lasciar decidere l'arbitro.
+
+**Aggiornamenti** — controllo e installazione della nuova versione da questo
+repository, con verifica dell'archivio e ripristino automatico se il servizio
+non riparte.
 
 ---
 
@@ -201,11 +295,26 @@ stesso servizio e un arbitro sceglie chi vince:
 | Priorità | Sorgente |
 |---|---|
 | 100 | ZeDMD |
+| 90 | Anteprima (gestione media) |
 | 60 | Air Radar |
+| 59 | Google Calendar |
 | 58 | Now Playing |
+| 57 | Scadenze |
+| 56 | Compleanni |
 | 55 | Rolling Banner |
 | 50 | Media Player |
 | 10 | Clock |
+
+**Nessuna coppia pareggia, e non è un caso.** A parità l'arbitro tiene chi si
+è registrato per primo, quindi la seconda non andrebbe mai a schermo: il
+Calendario era nato a 58, che è di Now Playing, e l'avviso non sarebbe mai
+comparso mentre suona musica. Una prova rifiuta i pareggi.
+
+Le partite — Doom, Game Boy, i giochi — non partecipano a questa gara: **prendono
+il pannello** e lo tengono finché non si esce, sopra chiunque altro, ZeDMD
+compreso. La stessa presa la usa la gestione della libreria media, con la
+differenza che quella scade da sola se la pagina web smette di dare segni di
+vita.
 
 Sopra a tutto agiscono le fasce orarie: durante lo Sleep il display resta
 spento qualunque sia la sorgente vincente (salvo il risveglio su frame ZeDMD,
@@ -229,18 +338,27 @@ di Batocera (menu, caricamenti); alzalo se vedi passaggi indesiderati.
 /opt/dmd/mqttbus.py       client MQTT condiviso (ingresso metadati, uscita HA)
 /opt/dmd/nowplaying.py    stato del brano corrente, indipendente dalla sorgente
 /opt/dmd/spotifyapi.py    API web di Spotify (OAuth con PKCE)
+/opt/dmd/gcalendar.py     API di Google Calendar (OAuth, sola lettura)
+/opt/dmd/scadenze.py      scadenze, semaforo e registro
 /opt/dmd/hass.py          entità di Home Assistant via MQTT Discovery
 /opt/dmd/rifiuti.py       calendario della raccolta: cadenze ed eccezioni
 /opt/dmd/doom/            preparazione e ponte verso doomgeneric
+/opt/dmd/gb/              preparazione e ponte verso PyBoy
 /srv/dmd/media            libreria media, condivisa come \\<ip>\dmd-media
 /srv/dmd/doom             WAD di Doom, condivisi come \\<ip>\dmd-doom
+/srv/dmd/rom              ROM Game Boy, condivise come \\<ip>\dmd-rom
 /var/lib/dmd/soppressioni.csv, straordinari.csv  eccezioni del calendario
 /etc/dmd/config.json      configurazione
 /var/lib/dmd/spotify.json token di Spotify, permessi 0600, fuori dall'export
+/var/lib/dmd/google.json  token di Google, permessi 0600, fuori dall'export
 ```
 
-Aggiungere un servizio significa scrivere una nuova sorgente in `sources/`,
-registrarla nel `Runtime` e aggiungere una voce alla pagina Servizi.
+Aggiungere un servizio significa quattro cose, e vanno fatte tutte e quattro:
+scrivere la sorgente in `sources/`, registrarla nel `Runtime`, aggiungere la
+chiave a `services` **con la sua riga nella pagina Servizi**, e la voce in
+`hass.SWITCHES`. Le ultime due si dimenticano — è successo con i Compleanni e
+di nuovo con le Scadenze — e il sintomo è sempre lo stesso: una sorgente che
+funziona e che non si accende mai. Ora una prova le pretende entrambe.
 
 ---
 
@@ -302,38 +420,106 @@ copiare così com'è.
 
 ## Storico versioni
 
+Il dettaglio completo, versione per versione, sta in
+[`CHANGELOG.md`](CHANGELOG.md) e nell'intestazione di `version.py`. Qui solo
+le tappe.
+
 | Versione | Contenuto |
 |---|---|
 | 1.0 | Ricevitore ZeDMD-WiFi, orologio, web UI |
-| 1.1 | Colori di ora e data separati, formato 12/24h, lingua dei giorni, Media Player separato con foto e video, Night mode e Sleep mode, condivisione SMB e upload da web |
-| 1.1.1 | `update.sh` installa ffmpeg e samba in modo indipendente |
-| 1.2 | Regolazione fine del driver S-PWM dalla web UI, riavvio del servizio dall'interfaccia |
-| 1.3 | Air Radar: aerei in transito da coordinate GPS e raggio, via API pubbliche ADS-B |
-| 1.3.1 | Nessuna coordinata preimpostata nel software distribuito |
-| 1.4 | Air Radar: scelta dei parametri di volo mostrati e registro CSV scaricabile |
-| 1.5 | Aggiornamento via rete da GitHub, con verifica preventiva e ripristino automatico |
-| 1.5.1 | Corretta la ricerca della rotta: era subordinata a una seconda casella, ora rimossa |
-| 1.5.2 | Rotte dal servizio routeset di adsb.lol, in blocco e con codici IATA; prova diagnostica |
-| 1.6 | Elenco della libreria media tenuto in memoria invece di rileggere il disco a ogni contenuto |
-| 1.7 | Interfaccia web in italiano e inglese, lingua rilevata dal browser, link al progetto |
-| 1.7.1 | Un errore della web UI non ferma più il servizio: il pannello resta acceso |
-| 1.7.2 | Impronte md5 di tutti i file e verifica automatica prima e dopo la copia |
-| 1.8 | Esportazione e importazione della configurazione, con esclusione delle coordinate |
-| 1.9 | Rolling banner (dieci testi scorrevoli) e controllo aggiornamenti della libreria matrice |
-| 1.9.1 | L'aggiornamento installa i file dichiarati dall'archivio scaricato, non quelli del codice già installato |
-| 1.9.2 | Controllo della libreria anche quando la cartella appartiene all'utente e il servizio gira come root |
-| 1.9.3 | "Ora e sincronizzazione" spostato nella pagina Orologio |
-| 1.9.4 | Durata del bit minimo e bit con dithering: alzano il refresh senza perdere profondità PWM |
-| 1.10 | Now Playing: brano in ascolto da AirPlay 2, Spotify o MQTT; entità in Home Assistant |
-| 1.11 | Radar: due tabelle CSV modificabili traducono i codici degli aeromobili e degli aeroporti in nomi leggibili |
-| 1.12 | Radar: compagnia aerea fra i parametri mostrabili, con la sua tabella di conversione |
-| 2.0 | Compleanni, profili hardware del pannello, unità di misura del radar, Night e Sleep mode da Home Assistant |
-| 2.0.3 | Gestione media: entrando nella libreria i servizi si fermano, così l'anteprima mostra davvero il file scelto |
+| 1.1 | Media Player, Night e Sleep mode, condivisione SMB |
+| 1.2 | Regolazione fine del driver S-PWM dalla web UI |
+| 1.3 | Air Radar dalle API pubbliche ADS-B |
+| 1.5 | Aggiornamento via rete da GitHub, con ripristino automatico |
+| 1.7 | Interfaccia web in italiano e inglese |
+| 1.7.2 | Impronte md5 di tutti i file, verificate prima e dopo la copia |
+| 1.8 | Esportazione e importazione della configurazione |
+| 1.9 | Rolling banner |
+| 1.10 | Now Playing: AirPlay 2, Spotify, MQTT, entità in Home Assistant |
+| 1.11 | Radar: tabelle CSV che traducono i codici in nomi leggibili |
+| 2.0 | Compleanni, profili hardware del pannello, Night e Sleep da Home Assistant |
 | 3.0 | Doom sul pannello, con doomgeneric in un processo separato |
-| 3.2 | Doom non è un servizio ma una partita: «Gioca» ferma i servizi, l'uscita li ripristina |
-| 3.3 | Pad PS4 e da PC per Doom, avvio da Home Assistant, gamma predefinito a 1.15 |
-| 3.4 | Calendario della raccolta rifiuti accanto all'orologio, con eccezioni ed entità in Home Assistant |
+| 3.2 | Doom non è un servizio ma una partita: prende il pannello e lo restituisce |
+| 3.3 | Pad PS4 e da PC, avvio da Home Assistant |
+| 3.4 | Calendario della raccolta rifiuti accanto all'orologio |
+| 3.8 | Breakout e Invaders, scritti per il pannello; il giro del tasto Start |
+| 4.0 | Scadenze: semaforo accanto all'orologio, avviso periodico, registro, MQTT |
+| 4.1 | L'interruttore delle Scadenze mancava nella pagina Servizi: la chiave c'era, la riga no |
+| 4.2 | Cablaggio Adafruit RGB Matrix Bonnet selezionabile dalla web UI |
+| 4.3 | Registri del driver modificabili a mano, per la caccia al ghosting |
+| 4.4 | Un fotogramma identico al precedente non viene riscritto: meno traffico sul bus di memoria, meno righe chiare |
+| 4.5 | Game Boy: l'emulatore PyBoy, con ROM su condivisione SMB, overscan e gamma |
+| 4.5.4 | Il servizio non partiva: cablaggio prima della costruzione. Aggiunta `test_avvio.py`, che costruisce il Runtime vero |
+| 4.6 | Spostamento verticale dell'immagine Game Boy |
+| 4.6.1 | Tavolozze dello schermo Game Boy |
+| **4.7** | **Google Calendar: gli appuntamenti dei prossimi tre giorni, senza semaforo. Token fuori dalla configurazione, revoca del permesso allo scollegamento** |
 
+---
+
+## Scadenze
+
+Un semaforo a destra dell'orologio dice **se** c'è qualcosa in arrivo; un
+avviso periodico dice **che cosa**. Le soglie sono in giorni e si regolano:
+oltre la verde il semaforo resta spento, perché una scadenza fra un mese non è
+una notizia e un pannello che segnala sempre qualcosa non segnala più niente.
+
+Le scadenze si inseriscono dalla web UI, si importano da un CSV, o arrivano da
+Home Assistant su un topic MQTT. Quelle ricorrenti si rigenerano da sole alla
+cadenza scelta; quelle completate finiscono in un registro scaricabile.
+
+---
+
+## Google Calendar
+
+Gli appuntamenti dei prossimi **tre giorni** compaiono sul pannello a giro: in
+alto a destra *quando*, nel colore che l'orologio usa per la data, al centro
+*che cosa*, e sotto *dove*. Un appuntamento compare tre giorni prima e sparisce
+quando è passato.
+
+**Niente semaforo, di proposito.** Il semaforo dice *manca poco*, e ha senso
+per una bolletta, che si può pagare prima; non ne ha per un appuntamento, che
+succede quando succede.
+
+È una vetrina, non un'agenda: sola lettura (`calendar.readonly`), solo il
+calendario principale, e le ricorrenze le espande Google — al pannello arrivano
+occorrenze con una data ciascuna invece di regole da interpretare. Calendari
+secondari, colori e promemoria sono ignorati.
+
+L'autorizzazione si fa **dal browser del proprio computer**, perché il DMD non
+ha tastiera: si apre il link, si accetta, e si incolla l'indirizzo su cui si è
+finiti. I token stanno in `/var/lib/dmd/google.json` con permessi `0600`, fuori
+dalla configurazione; il *client secret* viene tolto dall'export come la
+password del broker MQTT. Scollegando, il DMD chiede anche a Google di revocare
+il permesso, così non resta un consenso in piedi dal loro lato.
+
+Procedura completa su Google Cloud — compreso il passo che si dimentica,
+**pubblicare la schermata di consenso in produzione**, senza il quale Google
+scollega tutto dopo sette giorni — in `docs/calendario.it.md`.
+
+---
+
+## Giochi ed emulatori
+
+Non sono servizi: sono partite. Si comincia dalla pagina o dal pad, i servizi
+si fermano, il pannello è del gioco finché non si esce.
+
+**Doom** gira come processo separato (`doomgeneric`), con i WAD su
+`\\<ip>\dmd-doom`. **Game Boy** usa PyBoy, con le ROM su `\\<ip>\dmd-rom`: lo
+schermo 160×144 viene portato a 64 righe mantenendo la proporzione — 71 pixel
+al centro, i lati spenti — e l'**overscan** toglie righe sopra e sotto per
+allargarlo, con uno **spostamento verticale** che decide da quale parte
+tagliare. Gamma e tavolozza sono regolabili. Le ROM e i WAD sono dell'utente:
+in questo progetto non ce n'è nessuno e non ce ne saranno mai.
+
+**Breakout** e **Invaders** sono scritti per il pannello e non hanno
+dipendenze. Il tasto Start del pad scorre il giro dei giochi disponibili; PS
+esce.
+
+Entrambi gli emulatori girano in un processo separato e non dentro il servizio.
+Il motivo principale è il GIL: un emulatore nel nostro processo si contenderebbe
+l'interprete con il ciclo che disegna il pannello, e su questo progetto la
+moneta è il microsecondo — è misurato che basta la contesa sul bus di memoria
+per accendere una riga sbagliata.
 
 ---
 

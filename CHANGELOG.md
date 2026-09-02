@@ -40,11 +40,34 @@ Tutte le modifiche rilevanti del progetto.
   la voce: fallisce.
 
 ### Sicurezza
+- **Scollegando si revoca.** Il pulsante *Scollega l'account* non si limita a
+  cancellare i token: chiede a Google di buttare via il permesso. Sono due
+  porte distinte — il consenso resterebbe registrato nell'account anche dopo
+  aver cancellato tutto dal DMD — e chiuderle insieme è quello che ci si
+  aspetta da un pulsante che dice «scollega». Se la revoca non passa (rete
+  assente, token già scaduto) il DMD si scollega **lo stesso** e il messaggio
+  spiega dove completarla a mano: chi preme quel pulsante vuole prima di tutto
+  che il pannello smetta di leggere il suo calendario.
 - I token Google stanno in **`/var/lib/dmd/google.json`**, permessi `0600`,
   **fuori dalla configurazione**. E il *client secret* viene tolto dalla
   configurazione esportata come la password del broker MQTT: un `config.json`
   gira — backup, allegati, segnalazioni — e chi lo reimporta riscrive il
   segreto una volta sola.
+
+### Corretto
+- **Priorità del Calendario da 58 a 59.** Cinquantotto era il numero naturale,
+  ed è già di Now Playing: a parità l'arbitro tiene chi si è registrato per
+  primo — il player — e l'avviso non sarebbe mai comparso mentre suona musica.
+  Trovato prima del rilascio scrivendo la riga delle priorità nel README. Una
+  prova nuova rifiuta qualunque pareggio fra sorgenti: un pareggio non è un
+  dettaglio estetico, è una sorgente che tace.
+
+### Documentazione
+- **README riscritto.** Era fermo alla 3.4 e dichiarava nove servizi su
+  dodici: mancavano Scadenze, Google Calendar, il Game Boy, Breakout e
+  Invaders, e la tabella delle priorità ne elencava sei su dieci. Ora c'è
+  anche l'indice dei PDF in `docs/`, e la regola per aggiungere un servizio
+  dice tutte e quattro le cose da fare invece di tre.
 
 ### Prestazioni
 - Si chiede a Google **ogni quindici minuti**, e mai più spesso: il pannello

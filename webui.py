@@ -574,7 +574,13 @@ def create_app(runtime):
 
     @app.route("/api/google/disconnect", methods=["POST"])
     def api_google_disconnect():
-        gcalendar.disconnect()
+        esito = gcalendar.disconnect()
+        # Due messaggi diversi perche' dicono due cose diverse: "scollegato"
+        # vuol dire che il DMD ha smesso di leggere, "revocato" che anche
+        # Google ha buttato via il permesso. Se la revoca non riesce, il
+        # secondo passo lo si fa a mano e va detto.
+        if esito.get("google"):
+            return _google_result("calendario.google.revoked")
         return _google_result("calendario.google.gone")
 
     @app.route("/api/google/refresh", methods=["POST"])

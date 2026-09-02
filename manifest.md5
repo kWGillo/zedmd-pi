@@ -16,9 +16,9 @@ b400dff8b86e25ebd1057e666e53f9e5  doom/setup_doom.sh
 ba43a3f75c392ca49d006a5e4166ab6a  gb/gb_dmd.py
 075e6985999ab1d4bbcca75759c692b7  gb/setup_gb.sh
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
-707be07ca4ebfa1c3c329fd62553c1e5  gcalendar.py
+142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 d3a24b8bba728b625a667ef4f72f53b9  hass.py
-8536594b5c02309068a6dbea52b24898  i18n.py
+b75646652311429e8ef663ed820ee366  i18n.py
 eecf7dc635a9a56681f26450a690973f  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
@@ -35,7 +35,7 @@ a9cc678c5e2734cb68e9729a60b2b1b7  sources/airradar.py
 4839d9f4d5cbf59bfe83a946f7c272ee  sources/anteprima.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
 55c9a31b9be438ad88d3a08b53fb1c9a  sources/base.py
-456d94b6d8474b77786d4576f0239660  sources/calendario.py
+ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 02c92fa004848e415f45d369e2f8c4c9  sources/clock.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
@@ -54,7 +54,7 @@ f614c173dd38726a10229e188c88c859  static/style.css
 e7cbc43ed729a6fc7f71dc5d266d5a98  templates/banner.html
 faf04982f9b69651843accc45538f518  templates/base.html
 f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
-6217dfd870f0484852ce757ec32a2de8  templates/calendario.html
+543d0923aa70d70713ab36b039dd126a  templates/calendario.html
 73c2b6f65a59fbc627244fd38ac6ca5d  templates/clock.html
 b804138404a4f4ccd0910c7d958d6944  templates/doom.html
 856a6ac0a358de34d3026f01599c3a1d  templates/gameboy.html
@@ -70,6 +70,6 @@ fc820c3435f5edea162ed83ce33fb964  templates/services.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 c1bbdc293898e42c3ec251b39d8d0127  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-97ae3f168c2aaaa507d6fbbbf4a1f030  version.py
-8ba0aa75feebcab57ac723776f8aab22  webui.py
+b9b04eb8c8c3e9de4cc7473b8e22b6e3  version.py
+3880c6bf2c6d964a3fcfb6ccd7e5945d  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

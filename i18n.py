@@ -1890,6 +1890,13 @@ STRINGS = {
         "Address you landed on after accepting"),
     "calendario.complete": ("Completa il collegamento", "Complete linking"),
     "calendario.disconnect": ("Scollega l’account", "Disconnect account"),
+    "calendario.disconnect.hint": (
+        "Cancella i token da questo DMD e chiede a Google di revocare il "
+        "permesso. Restano il Client ID e il Client secret, che sono "
+        "credenziali della tua applicazione e non dell’account.",
+        "Deletes the tokens from this DMD and asks Google to revoke the "
+        "permission. The Client ID and Client secret stay: they belong to "
+        "your application, not to the account."),
     "calendario.tokens.hint": (
         "I token stanno in /var/lib/dmd/google.json, leggibili solo da root, "
         "e non finiscono mai nella configurazione esportata.",
@@ -1906,8 +1913,16 @@ STRINGS = {
     "calendario.refresh": ("Rileggi da Google", "Refresh from Google"),
     "calendario.google.ok": ("Account Google collegato.",
                              "Google account linked."),
-    "calendario.google.gone": ("Account Google scollegato.",
-                               "Google account disconnected."),
+    "calendario.google.gone": (
+        "Account Google scollegato dal DMD. Google non ha confermato la "
+        "revoca: se vuoi chiudere anche da lì, vai su myaccount.google.com → "
+        "Sicurezza → App di terze parti.",
+        "Google account disconnected from the DMD. Google did not confirm the "
+        "revocation: to close it on their side too, go to "
+        "myaccount.google.com → Security → Third-party apps."),
+    "calendario.google.revoked": (
+        "Account Google scollegato e permesso revocato.",
+        "Google account disconnected and permission revoked."),
     "calendario.google.refreshed": ("Calendario riletto.",
                                     "Calendar refreshed."),
     "calendario.google.failed": ("Collegamento non riuscito: %(error)s",

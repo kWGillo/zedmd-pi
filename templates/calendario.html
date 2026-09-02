@@ -66,6 +66,7 @@
   <form method="post" action="{{ url_for('api_google_disconnect') }}">
     <button type="submit" class="ghost">{{ t('calendario.disconnect') }}</button>
   </form>
+  <p class="hint">{{ t('calendario.disconnect.hint') }}</p>
   {% endif %}
   <p class="hint">{{ t('calendario.tokens.hint') }}</p>
 </section>
