@@ -28,9 +28,9 @@ from PIL import Image
 
 from .base import Source
 from .comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_RY, ABS_X, ABS_Y,
-                      BTN_EAST, BTN_NORTH, BTN_SOUTH, BTN_TL, BTN_TL2,
-                      BTN_TR, BTN_TR2, BTN_WEST, BTN_THUMBL, BTN_THUMBR,
-                      Lettore, joystick, tastiere)
+                      BTN_EAST, BTN_NORTH, BTN_SELECT, BTN_SOUTH, BTN_START,
+                      BTN_TL, BTN_TL2, BTN_TR, BTN_TR2, BTN_WEST, BTN_THUMBL,
+                      BTN_THUMBR, Lettore, joystick, tastiere)
 
 LARGHEZZA = 256
 ALTEZZA = 64
@@ -60,12 +60,20 @@ LINUX_TASTI = {
 }
 
 # Pad. Croce e cerchio sono A e B; i dorsali fanno le stesse cose per chi ha
-# le dita altrove. Start e Select del Game Boy sulle levette premute.
+# le dita altrove. **Start e Select fisici sono quelli del Game Boy**: in
+# Tetris si sceglie il numero di giocatori con Start, e senza non si gioca.
+# Restano anche sulle levette premute, per chi ha un pad senza quei tasti.
+#
+# Perche' ora si puo'. Start e Select sono pulsanti globali del progetto —
+# scorrono i giochi ed escono — ma a sessione aperta il lettore dei giochi si
+# fa da parte (`GiochiSource.esclusiva`) e li lascia al Game Boy. La via
+# d'uscita diventa **PS**, che sulla console vera vuol dire proprio quello.
 PAD_PULSANTI = {
     BTN_SOUTH: "a", BTN_TR2: "a", BTN_TR: "a",
     BTN_EAST: "b", BTN_WEST: "b", BTN_TL: "b", BTN_TL2: "b",
     BTN_NORTH: "b",
-    BTN_THUMBL: "start", BTN_THUMBR: "select",
+    BTN_START: "start", BTN_THUMBL: "start",
+    BTN_SELECT: "select", BTN_THUMBR: "select",
 }
 
 PAD_ASSI = {

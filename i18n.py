@@ -1365,6 +1365,16 @@ STRINGS = {
         "vuole un WAD preparato)",
         "Include Doom in the game cycle too (it takes a few seconds to start "
         "and needs a prepared WAD)"),
+    "giochi.ciclo_gameboy": ("Il tasto Start scorre anche il Game Boy",
+                             "The Start button also cycles the Game Boy"),
+    "giochi.ciclo_gameboy.hint": (
+        "Entra nel giro solo se PyBoy è installato e la cartuccia scelta è "
+        "valida. Mentre il Game Boy gioca, Start e Select appartengono alla "
+        "console — servono a giocare — e per uscire si usa il tasto PS.",
+        "It joins the rotation only if PyBoy is installed and the chosen "
+        "cartridge is valid. While the Game Boy is playing, Start and Select "
+        "belong to the console — they are game buttons — and the PS button "
+        "is the way out."),
     "giochi.timeout": ("Chiudi la partita dopo (secondi senza comandi)",
                        "Close the game after (seconds with no input)"),
     "giochi.timeout.hint": (

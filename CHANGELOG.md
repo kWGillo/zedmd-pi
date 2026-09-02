@@ -2,6 +2,25 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.5.3]
+
+### Corretto
+- **I pulsanti globali rubavano i tasti al Game Boy.** Premendo B (cerchio) si
+  usciva dalla partita — cerchio è l'uscita globale — e Start e Select, che su
+  Tetris servono a scegliere i giocatori, scorrevano i giochi invece di
+  arrivare alla console. È la stessa classe di difetto della 3.8.2: due
+  lettori ricevono lo stesso evento e gli danno significati diversi.
+  Ora, mentre il Game Boy gioca, il lettore dei giochi **si fa da parte**:
+  croce, cerchio, Start e Select sono della console. Resta **PS** per uscire,
+  che è il significato che quel tasto ha sulla console vera.
+
+### Aggiunto
+- **Il Game Boy entra nel giro del tasto Start**, come Doom, se PyBoy è
+  installato e la cartuccia scelta è valida — così non può esistere una
+  casella su cui Start non fa niente. Si può escludere dalla pagina Giochi.
+- Il tasto PS ha ora un'azione propria (`home`) distinta da Start: fuori da
+  una sessione esclusiva fa quello che ha sempre fatto, scorrere i giochi.
+
 ## [4.5.2]
 
 ### Corretto

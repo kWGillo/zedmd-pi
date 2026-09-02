@@ -3,8 +3,8 @@
 d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 b7799f7832e7313c2e99206e722069d7  display.py
-85d5b0bf4b83e8c2064456d080f92a50  dmdconf.py
-237b17329924b29ce1f2c76784047964  dmdd.py
+bd75d141882a66b0b1b88ae12757097d  dmdconf.py
+3d6b38f44c566aebedf2cc0e4d7c1c18  dmdd.py
 397862a19501abc030946d1b6c39463c  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
 b400dff8b86e25ebd1057e666e53f9e5  doom/setup_doom.sh
@@ -14,7 +14,7 @@ b400dff8b86e25ebd1057e666e53f9e5  doom/setup_doom.sh
 075e6985999ab1d4bbcca75759c692b7  gb/setup_gb.sh
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 c6dbdcd41f04e6903264588935a255c8  hass.py
-2da5f14d153b32037248fc54eea9e5d7  i18n.py
+c885d1c3e2eb956e13d6950bba81141d  i18n.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
@@ -34,8 +34,8 @@ a9cc678c5e2734cb68e9729a60b2b1b7  sources/airradar.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 6d3f097de4b253df01dee962c1d6cf19  sources/doom.py
-847edf5dcadc2c5530639624857fff26  sources/gameboy.py
-af3dcad5826dae183cec697ddb6a50e5  sources/giochi/__init__.py
+064d5313d69217f3a1ffa5e674a5a79a  sources/gameboy.py
+f5366aa66e220cb099c83ef8d5f76f2a  sources/giochi/__init__.py
 b67ccb69dc4ad86f99ff787319a273e8  sources/giochi/base.py
 e8d848a784cc0877be25075128962688  sources/giochi/invasori.py
 13f6314aed0e6c7c3ccd724f0aca3e8e  sources/giochi/mattoni.py
@@ -51,7 +51,7 @@ f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
 73c2b6f65a59fbc627244fd38ac6ca5d  templates/clock.html
 3f9932066963bc7e52187d9956d07955  templates/doom.html
 e92c15a646e684b552ebdd2f73fecb03  templates/gameboy.html
-4edfcffc2a3ad540e2a7d51f6c593780  templates/giochi.html
+5e5962036d0a4eb74e4ef3f825724e1d  templates/giochi.html
 c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
 3be98432e6ad1e869da824653a10975a  templates/media.html
 3a7dc0f319c053a6f1f6bbd9c1416bb5  templates/nowplaying.html
@@ -61,6 +61,6 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 fc820c3435f5edea162ed83ce33fb964  templates/services.html
 730c9c6ba3de8dfe6c577ad73677ef3c  templates/settings.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-3a0b7ed5b759275dc49dddf216599103  version.py
-31a8190538a47905cf6e1a7f6ffd033c  webui.py
+5e133979583475b7118203d43c956a61  version.py
+ac73e1ac23b1355f8b2ce1dc8d3b35cf  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

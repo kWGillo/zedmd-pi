@@ -64,7 +64,12 @@ PULSANTI = {
     BTN_WEST: "fuoco",
     # Start scorre l'elenco dei giochi, Select esce. Cerchio resta una via
     # d'uscita: chi ce l'ha nelle dita da Doom non deve reimpararla.
-    BTN_START: "ciclo", BTN_MODE: "ciclo",
+    #
+    # PS ha un'azione sua, "home", anche se di solito fa la stessa cosa di
+    # Start. Serve durante una sessione **esclusiva** — il Game Boy — dove
+    # Start, Select, croce e cerchio appartengono al gioco: li' PS resta
+    # l'unica via d'uscita, ed e' il significato che ha sulla console vera.
+    BTN_START: "ciclo", BTN_MODE: "home",
     BTN_SELECT: "esci", BTN_EAST: "esci",
 }
 
@@ -240,6 +245,13 @@ class GiochiSource(Source):
             pronto = False
         if pronto:
             giro.append("doom")
+        if self.conf().get("ciclo_gameboy", True):
+            try:
+                pronto_gb = bool(self.gb_pronto and self.gb_pronto())
+            except Exception:
+                pronto_gb = False
+            if pronto_gb:
+                giro.append("gameboy")
         return giro
 
     # Chi sa dire se Doom e' preparato, e chi apre una partita. Le assegna il
@@ -251,6 +263,20 @@ class GiochiSource(Source):
     apri_doom = None
     apri_partita = None
     chiudi_partita = None
+    # Il Game Boy: se e' pronto, e come si apre. Stessa forma di Doom — la
+    # sorgente dei giochi non deve conoscere l'emulatore, deve saper chiedere.
+    gb_pronto = None
+    apri_gameboy = None
+    # E se in questo momento c'e' una partita che vuole i pulsanti tutti per
+    # se'. Vale per il Game Boy: Start e Select sono tasti della console, non
+    # comandi del cabinato, e Tetris senza Start non si gioca.
+    esclusiva = None
+
+    def esclusiva_attiva(self):
+        try:
+            return bool(self.esclusiva and self.esclusiva())
+        except Exception:
+            return False
 
     def ciclo(self):
         """Passa al gioco successivo. Da fermo, riprende da dove era rimasto.
@@ -294,6 +320,10 @@ class GiochiSource(Source):
             if prossimo == "doom":
                 self.chiudi_sessione()
                 fatto = bool(self.apri_doom()) if callable(self.apri_doom) else False
+            elif prossimo == "gameboy":
+                self.chiudi_sessione()
+                fatto = (bool(self.apri_gameboy())
+                         if callable(self.apri_gameboy) else False)
             elif callable(self.apri_partita):
                 # Non `apri_sessione` diretta: aprire un gioco deve poter
                 # **chiudere Doom**, e quella regola sta nel runtime.
@@ -386,6 +416,10 @@ class GiochiSource(Source):
 
     def premi(self, azione, giu=True, apri=True):
         """Un comando, da qualunque parte arrivi: pagina web, tastiera o pad."""
+        if azione == "home":
+            # Fuori da una sessione esclusiva, PS fa quello che ha sempre
+            # fatto: scorre i giochi.
+            azione = "ciclo"
         if azione == "esci" and giu:
             # Select esce da **qualunque** partita, anche da Doom: e' un
             # pulsante globale come Start, e chi lo preme vuole tornare
@@ -440,6 +474,19 @@ class GiochiSource(Source):
         se glielo si negasse la funzione nascerebbe spenta e sembrerebbe
         rotta.
         """
+        if self.esclusiva_attiva():
+            # Il Game Boy in partita si tiene i pulsanti: croce e cerchio sono
+            # A e B, Start e Select sono i suoi. Se li leggessimo anche noi,
+            # premere B chiuderebbe la partita e Start la cambierebbe — che e'
+            # esattamente il difetto segnalato su Tetris. Resta PS per uscire.
+            if azione == "home" and giu and callable(self.chiudi_partita):
+                self.chiudi_partita()
+            return
+        # Fuori da una sessione esclusiva PS e Start sono la stessa cosa, e la
+        # traduzione va fatta **qui**: piu' sotto si decide chi puo' aprire
+        # una partita, e "home" non sarebbe riconosciuto come tasto dedicato.
+        if azione == "home":
+            azione = "ciclo"
         if azione == "ciclo":
             apri = True
         elif avvio:

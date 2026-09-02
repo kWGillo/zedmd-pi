@@ -600,6 +600,7 @@ def create_app(runtime):
         # Da adesso la casella "Doom nel giro" e' una scelta dell'utente: la
         # migrazione non deve piu' rimetterci le mani.
         conf["ciclo_scelto"] = True
+        conf["ciclo_gameboy"] = request.form.get("ciclo_gameboy") == "on"
         for chiave, predefinito in (("tasto_ciclo", 28), ("tasto_esci", 1)):
             try:
                 conf[chiave] = max(0, min(767, int(

@@ -69,16 +69,28 @@ stessa contesa che produce le righe chiare. Trenta bastano all'occhio.
 | Direzioni | croce direzionale e levetta sinistra |
 | A | croce (X), R1, R2 |
 | B | cerchio, quadrato, triangolo, L1, L2 |
-| Start | **L3** (levetta sinistra premuta) |
-| Select | **R3** (levetta destra premuta) |
+| Start | **Start**, o L3 (levetta sinistra premuta) |
+| Select | **Select**, o R3 (levetta destra premuta) |
+| *Uscire* | **PS** |
 
-Start e Select del Game Boy **non** stanno sui pulsanti fisici con quel nome,
-e non è una stranezza: dalla 3.8.2 Start e PS scorrono i giochi e Select esce
-da qualunque partita, per tutto il progetto. Un pulsante deve avere un
-significato solo — quella lezione è costata tre giri di correzioni.
+Start e Select sono pulsanti globali del progetto — scorrono i giochi ed
+escono da qualunque partita — ma **mentre il Game Boy gioca il lettore dei
+giochi si fa da parte** e li lascia alla console. Devono: su Tetris il numero
+di giocatori si sceglie con Start, e senza non si comincia.
 
-Per la stessa ragione **dal pad non si apre mai una partita**: si comincia
-dalla pagina Game Boy.
+Resta **PS** come via d'uscita, che è il significato che quel tasto ha sulla
+console vera. Uscendo, il pannello torna al suo lavoro; premendo poi Start si
+riprende il giro dei giochi da dove era rimasto.
+
+**Dal pad non si apre mai una partita Game Boy**: si comincia dalla pagina, o
+dal giro del tasto Start (vedi sotto).
+
+### Nel giro del tasto Start
+
+Il Game Boy fa parte del giro che il tasto Start scorre, insieme a Breakout,
+Invaders e Doom. Ci entra **solo** se PyBoy è installato e la cartuccia scelta
+è valida: una casella su cui Start non fa niente sarebbe peggio che non
+averla. Si può togliere dal giro nella pagina Giochi.
 
 ### Sulla tastiera
 
@@ -105,8 +117,7 @@ condivisione, e si può copiare o cancellare come qualunque file.
 
 ## 5. Quando la partita finisce
 
-Tre modi: il pulsante *Esci* nella pagina, **Select** sul pad (che esce da
-qualunque partita), oppure il tempo — dopo cinque minuti senza comandi la
+Tre modi: il pulsante *Esci* nella pagina, **PS** sul pad, oppure il tempo — dopo cinque minuti senza comandi la
 sessione si chiude da sola e il pannello torna al suo lavoro. Il tempo si
 cambia dalla pagina; zero vuol dire mai.
 

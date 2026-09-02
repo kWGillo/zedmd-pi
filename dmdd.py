@@ -30,7 +30,8 @@ from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      ClockSource, DoomSource, GameBoySource, GiochiSource,
                      MediaPlayerSource, NowPlayingSource, PreviewSource,
-                     ScadenzeSource, ZeDMDSource, controlla_wad)
+                     ScadenzeSource, ZeDMDSource, controlla_rom,
+                     controlla_wad)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -232,6 +233,15 @@ class Runtime:
         self.giochi.apri_partita = self.gioca
         # Select esce da qualunque partita, Doom compreso.
         self.giochi.chiudi_partita = self.smetti
+        # Il Game Boy entra nel giro come Doom: se PyBoy c'e' ed e' stata
+        # scelta una cartuccia valida, il tasto Start lo raggiunge.
+        self.giochi.gb_pronto = lambda: (
+            self.gameboy.pronto()
+            and not controlla_rom(self.cfg["gameboy"].get("rom", "")))
+        self.giochi.apri_gameboy = lambda: self.gioca("gameboy")
+        # E mentre il Game Boy gioca, i pulsanti sono suoi: il lettore dei
+        # giochi si fa da parte e tiene solo PS per uscire.
+        self.giochi.esclusiva = self.gameboy.in_sessione
         # Il Game Boy e' la terza partita: stessa presa del pannello, stesso
         # arbitro, stessa regola. Non e' un servizio.
         self.gameboy = GameBoySource(self.cfg, self.display.width,

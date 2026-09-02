@@ -617,6 +617,14 @@ Storico:
        condivisione mancante sembrava un pezzo non implementato invece che un
        pulsante non ancora premuto. La condivisione ora si crea **prima**
        dell'emulatore: se pip fallisce, le ROM si possono copiare lo stesso.
+  4.5.3 I pulsanti globali non rubano piu' i tasti al Game Boy. Premendo B
+       (cerchio) si usciva dalla partita, e Start e Select — che su Tetris
+       servono a scegliere i giocatori — scorrevano i giochi invece di
+       arrivare alla console. Ora, a sessione aperta, il lettore dei giochi si
+       fa da parte e lascia tutto all'emulatore: resta **PS** per uscire, che
+       e' il significato che quel tasto ha sulla console vera. E il Game Boy
+       entra nel giro del tasto Start, come Doom, se PyBoy c'e' e la cartuccia
+       scelta e' valida.
 """
 
-__version__ = "4.5.2"
+__version__ = "4.5.3"

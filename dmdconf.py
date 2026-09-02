@@ -193,6 +193,10 @@ DEFAULTS = {
         # il rischio di finirci dentro per sbaglio con un Doom non preparato:
         # senza un WAD valido Doom non entra proprio nel giro.
         "ciclo_doom": True,
+        # E il Game Boy, alle stesse condizioni: entra nel giro solo se PyBoy
+        # e' installato e la cartuccia scelta e' valida, quindi una casella su
+        # cui Start non fa niente non puo' esistere.
+        "ciclo_gameboy": True,
         # Marca che la scelta l'ha fatta una persona: serve solo alla
         # migrazione, per non sovrascrivere due volte una decisione altrui.
         "ciclo_scelto": False,

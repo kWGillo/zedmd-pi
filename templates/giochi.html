@@ -114,6 +114,11 @@
       <input type="checkbox" name="ciclo_doom" {{ 'checked' if cfg.giochi.ciclo_doom }}>
       {{ t('giochi.ciclo_doom') }}
     </label>
+    <label class="check">
+      <input type="checkbox" name="ciclo_gameboy" {{ 'checked' if cfg.giochi.ciclo_gameboy }}>
+      {{ t('giochi.ciclo_gameboy') }}
+    </label>
+    <p class="hint">{{ t('giochi.ciclo_gameboy.hint') }}</p>
 
     <div class="row2">
       <div><label for="session_timeout">{{ t('giochi.timeout') }}</label>
