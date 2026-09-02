@@ -219,6 +219,16 @@ class Runtime:
         # va a schermo solo quando ha la presa, cioe' solo durante una partita.
         self.doom = DoomSource(self.cfg, self.display.width,
                                self.display.height, self.arbiter)
+        # Il Game Boy e' la terza partita: stessa presa del pannello, stesso
+        # arbitro, stessa regola. Non e' un servizio.
+        #
+        # Si costruisce **prima** dei giochi, non dopo: la sorgente dei giochi
+        # riceve qui sotto due funzioni che lo interrogano, e assegnarle prima
+        # che l'oggetto esista faceva morire il servizio all'avvio. Sembrava
+        # innocuo perche' quelle funzioni si chiamano solo dopo, ma
+        # `self.gameboy.in_sessione` si valuta subito.
+        self.gameboy = GameBoySource(self.cfg, self.display.width,
+                                     self.display.height, self.arbiter)
         # Stessa storia per i giochi scritti per il pannello: partita, non
         # servizio. Prendono la presa allo stesso modo e con lo stesso arbitro.
         self.giochi = GiochiSource(self.cfg, self.display.width,
@@ -241,11 +251,12 @@ class Runtime:
         self.giochi.apri_gameboy = lambda: self.gioca("gameboy")
         # E mentre il Game Boy gioca, i pulsanti sono suoi: il lettore dei
         # giochi si fa da parte e tiene solo PS per uscire.
-        self.giochi.esclusiva = self.gameboy.in_sessione
-        # Il Game Boy e' la terza partita: stessa presa del pannello, stesso
-        # arbitro, stessa regola. Non e' un servizio.
-        self.gameboy = GameBoySource(self.cfg, self.display.width,
-                                     self.display.height, self.arbiter)
+        # Lambda e non il metodo diretto: cosi' `self.gameboy` si legge quando
+        # la funzione viene chiamata, non ora. Le altre due qui sopra lo erano
+        # gia', e infatti non si erano rotte. Cintura e bretelle — l'ordine di
+        # costruzione e' corretto — ma un cablaggio che dipende dall'ordine
+        # delle righe e' una trappola per il prossimo che le sposta.
+        self.giochi.esclusiva = lambda: self.gameboy.in_sessione()
         self.scadenze = ScadenzeSource(self.cfg, self.display.width,
                                        self.display.height)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)

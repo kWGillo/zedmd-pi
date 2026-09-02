@@ -2,6 +2,24 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.5.4]
+
+### Corretto
+- **Il servizio non partiva.** Il Runtime assegnava a `giochi.esclusiva` un
+  metodo del Game Boy **tre righe prima** di costruire la sorgente:
+  `AttributeError` all'avvio, processo morto, pannello nero. L'oggetto ora si
+  costruisce prima del cablaggio, e l'assegnazione è una lambda, così il
+  collegamento non dipende dall'ordine delle righe.
+
+### Aggiunto
+- **`test_avvio.py`: il servizio si avvia.** È la prova che mancava, ed è la
+  ragione per cui quarantasei suite verdi non hanno visto un guasto totale:
+  provavano le sorgenti una per una e le pagine web con un runtime finto,
+  cioè tutto tranne il punto in cui il programma si mette in piedi. Ora il
+  pannello è finto ma il Runtime è quello vero, con le sue sorgenti, il suo
+  cablaggio e un giro di rendering completo. Verificata rimettendo il difetto:
+  fallisce.
+
 ## [4.5.3]
 
 ### Corretto

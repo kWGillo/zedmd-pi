@@ -625,6 +625,15 @@ Storico:
        e' il significato che quel tasto ha sulla console vera. E il Game Boy
        entra nel giro del tasto Start, come Doom, se PyBoy c'e' e la cartuccia
        scelta e' valida.
+  4.5.4 **Il servizio non partiva.** Il Runtime assegnava a `giochi.esclusiva`
+       un metodo del Game Boy tre righe prima di costruirlo: AttributeError
+       all'avvio, pannello nero. La correzione e' l'ordine giusto, piu' una
+       lambda perche' il cablaggio non dipenda dall'ordine delle righe. La
+       causa vera pero' e' che **nessuna prova costruiva il Runtime**: si
+       provavano le sorgenti una per una e le pagine con un runtime finto,
+       cioe' tutto tranne il punto in cui il programma si mette in piedi.
+       Ora c'e' test_avvio.py: pannello finto, Runtime vero, e un giro di
+       rendering completo.
 """
 
-__version__ = "4.5.3"
+__version__ = "4.5.4"

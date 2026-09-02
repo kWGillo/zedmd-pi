@@ -7,7 +7,7 @@ d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 b7799f7832e7313c2e99206e722069d7  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
 bd75d141882a66b0b1b88ae12757097d  dmdconf.py
-3d6b38f44c566aebedf2cc0e4d7c1c18  dmdd.py
+72577a5bb248eacb80e628fc34e9b183  dmdd.py
 397862a19501abc030946d1b6c39463c  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
 b400dff8b86e25ebd1057e666e53f9e5  doom/setup_doom.sh
@@ -67,6 +67,6 @@ fc820c3435f5edea162ed83ce33fb964  templates/services.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 c1bbdc293898e42c3ec251b39d8d0127  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-5e133979583475b7118203d43c956a61  version.py
+4548cb9e31ac53dfa901418046581716  version.py
 ac73e1ac23b1355f8b2ce1dc8d3b35cf  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py
