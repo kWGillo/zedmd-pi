@@ -28,9 +28,9 @@ import ota
 import spotifyapi
 from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
-                     ClockSource, DoomSource, GameBoySource, GiochiSource,
-                     MediaPlayerSource, NowPlayingSource, PreviewSource,
-                     ScadenzeSource, ZeDMDSource, controlla_rom,
+                     CalendarioSource, ClockSource, DoomSource, GameBoySource,
+                     GiochiSource, MediaPlayerSource, NowPlayingSource,
+                     PreviewSource, ScadenzeSource, ZeDMDSource, controlla_rom,
                      controlla_wad)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
@@ -259,6 +259,8 @@ class Runtime:
         self.giochi.esclusiva = lambda: self.gameboy.in_sessione()
         self.scadenze = ScadenzeSource(self.cfg, self.display.width,
                                        self.display.height)
+        self.calendario = CalendarioSource(self.cfg, self.display.width,
+                                           self.display.height)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
 
         # Il brano corrente e chi lo disegna sono due cose distinte: lo stato
@@ -272,7 +274,8 @@ class Runtime:
         self.hass = hass.HassBridge(self.cfg, self.mqtt, self)
 
         for source in (self.zedmd, self.preview, self.radar, self.player,
-                       self.birthdays, self.scadenze, self.banner, self.media,
+                       self.birthdays, self.scadenze, self.calendario,
+                       self.banner, self.media,
                        self.doom, self.giochi, self.gameboy,
                        self.clock):
             self.arbiter.register(source)

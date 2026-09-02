@@ -648,6 +648,16 @@ Storico:
        sempre, e un valore appena scritto nei campi dell'immagine tornava
        indietro da solo se non si premeva Invio. E lo stato del WAD e' tornato
        nella pagina di Doom, dove appartiene.
+  4.7  **Google Calendar** come servizio: gli appuntamenti dei prossimi tre
+       giorni compaiono sul pannello a giro, come le scadenze — in alto a
+       destra quando, al centro che cosa, sotto dove — ma **senza semaforo**,
+       che e' la differenza chiesta: il semaforo dice "manca poco", e ha senso
+       per una bolletta, non per un appuntamento, che succede quando succede.
+       Sola lettura e solo il calendario principale: una vetrina, non
+       un'agenda. L'autorizzazione si fa dal browser del proprio computer,
+       perche' il DMD non ha tastiera; i token stanno in
+       /var/lib/dmd/google.json a 0600, fuori dalla configurazione, e il
+       segreto del client esce dall'export come la password del broker.
 """
 
-__version__ = "4.6.1"
+__version__ = "4.7"

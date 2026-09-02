@@ -1824,6 +1824,107 @@ STRINGS = {
     "services.desc.scadenze": (
         "Avviso periodico delle scadenze aperte e semaforo accanto all'orologio.",
         "Periodic notice of open deadlines, plus the traffic light next to the clock."),
+
+    # -------------------------------------------------------------- calendario
+    "nav.calendario": ("Calendario", "Calendar"),
+    "calendario.title": ("Google Calendar", "Google Calendar"),
+    "calendario.intro": (
+        "Il pannello mostra gli appuntamenti dei prossimi %(giorni)s giorni, "
+        "a giro, come fa con le scadenze: in alto a destra quando, al centro "
+        "che cosa. Niente semaforo: un appuntamento succede quando succede. "
+        "Qui si collega l’account e basta — gli appuntamenti si "
+        "scrivono su Google, e da qui non si tocca niente.",
+        "The panel shows the appointments of the next %(giorni)s days, in "
+        "turn, the way it does with deadlines: when at the top right, what in "
+        "the middle. No traffic light: an appointment happens when it "
+        "happens. This page only links the account — appointments are "
+        "written in Google, and nothing here changes them."),
+    "calendario.connected": ("Collegato come %(name)s.", "Connected as %(name)s."),
+    "calendario.connected.anon": ("Account collegato.", "Account connected."),
+    "calendario.notconnected": ("Nessun account collegato.",
+                                "No account connected."),
+    "calendario.client_id": ("Client ID", "Client ID"),
+    "calendario.client_secret": ("Client secret", "Client secret"),
+    "calendario.secret.kept": ("già salvato, lascia vuoto per tenerlo",
+                               "already saved, leave empty to keep it"),
+    "calendario.redirect": ("Indirizzo di ritorno", "Redirect URI"),
+    "calendario.redirect.hint": (
+        "Dev’essere identico, carattere per carattere, a quello scritto "
+        "nel client OAuth su Google Cloud.",
+        "It must match, character for character, the one registered in the "
+        "OAuth client on Google Cloud."),
+    "calendario.steps": ("Come collegare l’account",
+                         "How to link the account"),
+    "calendario.step1": (
+        "Su console.cloud.google.com crea un progetto e abilita la Google "
+        "Calendar API.",
+        "On console.cloud.google.com create a project and enable the Google "
+        "Calendar API."),
+    "calendario.step2": (
+        "Nella schermata di consenso aggiungi il permesso calendar.readonly e "
+        "pubblica in produzione: finché resta in test, Google scollega "
+        "tutto dopo sette giorni.",
+        "In the consent screen add the calendar.readonly scope and publish to "
+        "production: while it stays in testing, Google disconnects everything "
+        "after seven days."),
+    "calendario.step3": (
+        "Crea credenziali di tipo Applicazione web e incolla qui sopra Client "
+        "ID e Client secret.",
+        "Create credentials of type Web application and paste Client ID and "
+        "Client secret above."),
+    "calendario.step4": (
+        "Aggiungi l’indirizzo di ritorno qui sopra fra gli URI "
+        "autorizzati del client.",
+        "Add the redirect URI above to the client’s authorized URIs."),
+    "calendario.step5": (
+        "Premi Autorizza, apri il link dal browser del tuo computer, accetta, "
+        "e incolla qui sotto l’indirizzo su cui sei finito.",
+        "Press Authorize, open the link in your computer’s browser, "
+        "accept, then paste below the address you ended up on."),
+    "calendario.authorize": ("Autorizza", "Authorize"),
+    "calendario.open": (
+        "Apri questo indirizzo nel browser e accetta:",
+        "Open this address in your browser and accept:"),
+    "calendario.paste": (
+        "Indirizzo su cui sei finito dopo aver accettato",
+        "Address you landed on after accepting"),
+    "calendario.complete": ("Completa il collegamento", "Complete linking"),
+    "calendario.disconnect": ("Scollega l’account", "Disconnect account"),
+    "calendario.tokens.hint": (
+        "I token stanno in /var/lib/dmd/google.json, leggibili solo da root, "
+        "e non finiscono mai nella configurazione esportata.",
+        "Tokens live in /var/lib/dmd/google.json, readable by root only, and "
+        "never end up in the exported configuration."),
+    "calendario.next": ("Prossimi appuntamenti", "Upcoming appointments"),
+    "calendario.next.hint": (
+        "Quello che il pannello vede in questo momento: i prossimi %(giorni)s "
+        "giorni del calendario principale.",
+        "What the panel sees right now: the next %(giorni)s days of the "
+        "primary calendar."),
+    "calendario.next.none": ("Nessun appuntamento nella finestra.",
+                             "No appointments in the window."),
+    "calendario.refresh": ("Rileggi da Google", "Refresh from Google"),
+    "calendario.google.ok": ("Account Google collegato.",
+                             "Google account linked."),
+    "calendario.google.gone": ("Account Google scollegato.",
+                               "Google account disconnected."),
+    "calendario.google.refreshed": ("Calendario riletto.",
+                                    "Calendar refreshed."),
+    "calendario.google.failed": ("Collegamento non riuscito: %(error)s",
+                                 "Linking failed: %(error)s"),
+    "services.desc.calendario": (
+        "Avviso periodico degli appuntamenti di Google Calendar. Senza semaforo.",
+        "Periodic notice of Google Calendar appointments. No traffic light."),
+    "status.calendario.scollegato": ("account Google non collegato",
+                                     "Google account not linked"),
+    "status.calendario.errore": ("errore: %(error)s", "error: %(error)s"),
+    "status.calendario.nessuno": (
+        "nessun appuntamento nei prossimi %(giorni)s giorni",
+        "no appointments in the next %(giorni)s days"),
+    "status.calendario.attesa": (
+        "%(count)d appuntamenti, %(shown)d avvisi mostrati",
+        "%(count)d appointments, %(shown)d notices shown"),
+    "status.calendario.mostra": ("in mostra: %(titolo)s", "showing: %(titolo)s"),
 }
 
 

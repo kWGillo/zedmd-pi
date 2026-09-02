@@ -2,6 +2,58 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.7]
+
+### Aggiunto
+- **Google Calendar come servizio.** Gli appuntamenti dei prossimi **tre
+  giorni** compaiono sul pannello a giro, come le scadenze: in alto a destra
+  *quando* — nel colore che l'orologio usa per la data — al centro *che cosa*,
+  grande e scorrevole se il titolo non ci sta, e sotto *dove*, in grigio.
+  Un appuntamento compare tre giorni prima e sparisce quando è passato.
+- **Niente semaforo, e di proposito.** È la differenza chiesta rispetto alle
+  scadenze: il semaforo dice *manca poco*, e ha senso per una bolletta, che si
+  può pagare prima; non ne ha per un appuntamento, che succede quando succede.
+  Una prova legge il fotogramma disegnato e fallisce se compare anche solo una
+  delle tinte del semaforo.
+- **Una vetrina, non un'agenda.** Sola lettura
+  (`calendar.readonly`), solo il calendario principale: calendari secondari,
+  colori, promemoria e regole di visibilità sono ignorati. Le ricorrenze le
+  espande Google, così al pannello arrivano occorrenze con una data ciascuna
+  invece di regole da interpretare.
+- **Pagina Calendario**: il collegamento dell'account e nient'altro, più
+  l'elenco in sola lettura di quello che il pannello vede in questo momento —
+  che non è un'impostazione, è la prova che il collegamento funziona.
+- **Autorizzazione dal browser del proprio computer.** OAuth 2.0 con codice di
+  autorizzazione e PKCE, `access_type=offline` e `prompt=consent` perché serve
+  un refresh token. Il DMD non ha tastiera: si apre il link altrove, si
+  accetta, e si incolla l'indirizzo su cui si è finiti. Funziona anche il
+  ritorno vero, se il browser raggiunge il DMD a quell'indirizzo.
+- Documento **`docs/calendario.it.md`** e relativo PDF, con la procedura su
+  Google Cloud passo per passo — compreso il passo che si dimentica:
+  **pubblicare la schermata di consenso in produzione**, perché finché resta
+  in test Google scollega tutto dopo sette giorni.
+- **Interruttore in Home Assistant**, come ogni altro servizio, e una prova
+  nuova che pretende la regola per tutti: ogni chiave di `services` deve avere
+  la riga nella pagina Servizi *e* la sua entità MQTT. Era la terza faccia
+  dello stesso difetto — chiave in configurazione, nessun interruttore — visto
+  con i Compleanni nella 2.0 e con le Scadenze nella 4.1. Verificata togliendo
+  la voce: fallisce.
+
+### Sicurezza
+- I token Google stanno in **`/var/lib/dmd/google.json`**, permessi `0600`,
+  **fuori dalla configurazione**. E il *client secret* viene tolto dalla
+  configurazione esportata come la password del broker MQTT: un `config.json`
+  gira — backup, allegati, segnalazioni — e chi lo reimporta riscrive il
+  segreto una volta sola.
+
+### Prestazioni
+- Si chiede a Google **ogni quindici minuti**, e mai più spesso: il pannello
+  ridisegna trenta volte al secondo, un calendario no. La riga di stato della
+  pagina Servizi legge **solo la cache** e non apre mai una connessione: è la
+  pagina che si apre quando qualcosa non funziona, e non deve poter restare
+  appesa su una chiamata che non risponde. Un errore di rete non cancella gli
+  appuntamenti già noti.
+
 ## [4.6.1]
 
 ### Aggiunto

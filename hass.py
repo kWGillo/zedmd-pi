@@ -34,6 +34,7 @@ SWITCHES = [
     ("air_radar", "Air Radar"),
     ("clock", "Orologio"),
     ("scadenze", "Scadenze"),
+    ("calendario", "Calendario"),
 ]
 
 # Night mode e Sleep mode non sono servizi: sono modi del display, e stanno in

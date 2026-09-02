@@ -6,6 +6,7 @@ from .banner import (BannerSource, SIZES, SIZE_KEYS, SLOTS, default_banner,
 from .anteprima import PreviewSource, HOLD_SECONDS
 from .compleanni import BirthdaysSource
 from .base import Source
+from .calendario import CalendarioSource
 from .clock import ClockSource, DAY_NAMES, LANGUAGES, parse_color
 from .doom import (DOOM_TASTI, DoomSource, PULSANTI as DOOM_PULSANTI,
                    controlla_wad, direzione_asse, joystick, posizione_asse,
@@ -25,7 +26,7 @@ __all__ = [
     "Source", "ClockSource", "MediaPlayerSource", "ZeDMDSource", "AirRadarSource",
     "BirthdaysSource", "PreviewSource", "HOLD_SECONDS",
     "DoomSource", "DOOM_TASTI", "DOOM_PULSANTI", "tastiere", "controlla_wad",
-    "GiochiSource", "giochi_elenco", "ScadenzeSource",
+    "GiochiSource", "giochi_elenco", "ScadenzeSource", "CalendarioSource",
     "GameBoySource", "GB_PULSANTI", "controlla_rom", "elenco_rom",
     "PALETTE", "palette_scelte", "colori_palette",
     "joystick", "posizione_asse", "direzione_asse",

@@ -21,6 +21,7 @@ import libcheck
 import compleanni
 import doomsetup
 import gbsetup
+import gcalendar
 import lookup
 import rifiuti
 import scadenze
@@ -511,6 +512,83 @@ def create_app(runtime):
         _dopo_scadenze()
         return redirect(url_for("page_scadenze"))
 
+    # ------------------------------------------------------------ calendario
+
+    @app.route("/calendario")
+    def page_calendario():
+        # Solo il collegamento all'account: gli appuntamenti si scrivono su
+        # Google, non qui. L'elenco che segue non e' una tabella modificabile,
+        # e' la prova che il collegamento funziona.
+        return render_template(
+            "calendario.html", cfg=cfg, google=gcalendar.stato(cfg),
+            eventi=gcalendar.eventi(cfg),
+            authorize_url=request.args.get("authorize", ""),
+            result=request.args.get("result", ""),
+            page="calendario")
+
+    @app.route("/api/google", methods=["POST"])
+    def api_google():
+        conf = cfg.setdefault("google", {})
+        conf["client_id"] = request.form.get("client_id", "").strip()
+        # Un campo lasciato vuoto non cancella il segreto gia' salvato: la
+        # pagina non lo ristampa mai, e riscriverlo a ogni salvataggio
+        # significherebbe perderlo al primo giro.
+        segreto = request.form.get("client_secret", "").strip()
+        if segreto:
+            conf["client_secret"] = segreto
+        conf["redirect_uri"] = (request.form.get("redirect_uri", "").strip()
+                                or gcalendar.DEFAULT_REDIRECT)
+        dmdconf.save()
+        return redirect(url_for("page_calendario"))
+
+    @app.route("/api/google/authorize", methods=["POST"])
+    def api_google_authorize():
+        lang = current_language()
+        try:
+            target = gcalendar.authorize_url(cfg)
+        except ValueError as exc:
+            return redirect(url_for("page_calendario", result=i18n.translate(
+                "calendario.google.failed", lang, error=str(exc))))
+        return redirect(url_for("page_calendario", authorize=target))
+
+    @app.route("/api/google/complete", methods=["POST"])
+    def api_google_complete():
+        return _google_exchange(request.form.get("pasted", ""))
+
+    @app.route("/api/google/callback")
+    def api_google_callback():
+        # Funziona se il browser che autorizza raggiunge davvero il DMD a
+        # questo indirizzo; il percorso normale resta l'incolla a mano.
+        if request.args.get("error"):
+            return _google_result("calendario.google.failed",
+                                  error=request.args["error"])
+        return _google_exchange(request.url)
+
+    def _google_exchange(pasted):
+        try:
+            gcalendar.complete(cfg, pasted)
+        except Exception as exc:
+            return _google_result("calendario.google.failed", error=str(exc))
+        gcalendar.eventi(cfg, forza=True)
+        return _google_result("calendario.google.ok")
+
+    @app.route("/api/google/disconnect", methods=["POST"])
+    def api_google_disconnect():
+        gcalendar.disconnect()
+        return _google_result("calendario.google.gone")
+
+    @app.route("/api/google/refresh", methods=["POST"])
+    def api_google_refresh():
+        gcalendar.aggiorna(cfg)
+        errore = gcalendar.errore()
+        if errore:
+            return _google_result("calendario.google.failed", error=errore)
+        return _google_result("calendario.google.refreshed")
+
+    def _google_result(key, **values):
+        return redirect(url_for("page_calendario", result=i18n.translate(
+            key, current_language(), **values)))
+
     # ---------------------------------------------------------------- giochi
 
     GIOCHI_PULSANTI = (("sinistra", "\u25c0"), ("destra", "\u25b6"),
@@ -992,6 +1070,8 @@ def create_app(runtime):
              "status": stato("radar")},
             {"key": "scadenze", "label": "Scadenze", "ready": True,
              "status": stato("scadenze")},
+            {"key": "calendario", "label": "Google Calendar", "ready": True,
+             "status": stato("calendario")},
         ]
         current = runtime.arbiter.current
         return render_template(

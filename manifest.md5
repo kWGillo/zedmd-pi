@@ -6,8 +6,8 @@ d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 112957993893543e06c2302cfb040d28  config.json
 b7799f7832e7313c2e99206e722069d7  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
-1c68528584424665d73f318ce10b138f  dmdconf.py
-72577a5bb248eacb80e628fc34e9b183  dmdd.py
+39700312db089e3d96de763793e32149  dmdconf.py
+0e1ef5f3b1dc1b006a9eea55d3d38bf2  dmdd.py
 397862a19501abc030946d1b6c39463c  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
 b400dff8b86e25ebd1057e666e53f9e5  doom/setup_doom.sh
@@ -16,8 +16,9 @@ b400dff8b86e25ebd1057e666e53f9e5  doom/setup_doom.sh
 ba43a3f75c392ca49d006a5e4166ab6a  gb/gb_dmd.py
 075e6985999ab1d4bbcca75759c692b7  gb/setup_gb.sh
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
-c6dbdcd41f04e6903264588935a255c8  hass.py
-128c4e740e3e7152abd1be21a5b20ac7  i18n.py
+707be07ca4ebfa1c3c329fd62553c1e5  gcalendar.py
+d3a24b8bba728b625a667ef4f72f53b9  hass.py
+8536594b5c02309068a6dbea52b24898  i18n.py
 eecf7dc635a9a56681f26450a690973f  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
@@ -29,11 +30,12 @@ eecf7dc635a9a56681f26450a690973f  install.sh
 5698878038d0f306ecebc25bde34d88c  scadenze.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 7ee163e5c89f7ac983b26ae09a1a4b92  setup_share.sh
-04ca64c5d4d1a1a4db91a19f47d77604  sources/__init__.py
+053f3c704b9bbca0fd5ae6df8df6ce19  sources/__init__.py
 a9cc678c5e2734cb68e9729a60b2b1b7  sources/airradar.py
 4839d9f4d5cbf59bfe83a946f7c272ee  sources/anteprima.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
 55c9a31b9be438ad88d3a08b53fb1c9a  sources/base.py
+456d94b6d8474b77786d4576f0239660  sources/calendario.py
 02c92fa004848e415f45d369e2f8c4c9  sources/clock.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
@@ -50,8 +52,9 @@ e8d848a784cc0877be25075128962688  sources/giochi/invasori.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 f614c173dd38726a10229e188c88c859  static/style.css
 e7cbc43ed729a6fc7f71dc5d266d5a98  templates/banner.html
-ec6b75cb9229b5eb96814bc89e17a7fa  templates/base.html
+faf04982f9b69651843accc45538f518  templates/base.html
 f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
+6217dfd870f0484852ce757ec32a2de8  templates/calendario.html
 73c2b6f65a59fbc627244fd38ac6ca5d  templates/clock.html
 b804138404a4f4ccd0910c7d958d6944  templates/doom.html
 856a6ac0a358de34d3026f01599c3a1d  templates/gameboy.html
@@ -67,6 +70,6 @@ fc820c3435f5edea162ed83ce33fb964  templates/services.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 c1bbdc293898e42c3ec251b39d8d0127  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-05ad28bbee613db4058576136baf383d  version.py
-9da03f5d84f8e640d35c549d5bcf48df  webui.py
+97ae3f168c2aaaa507d6fbbbf4a1f030  version.py
+8ba0aa75feebcab57ac723776f8aab22  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

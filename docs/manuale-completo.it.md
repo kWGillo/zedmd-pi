@@ -557,7 +557,11 @@ immediata, durate e intervalli, adattamento al pannello, modalità pixel art.
 **Radar** — coordinate e raggio, provider ADS-B, scelta dei parametri di volo,
 registro CSV dei passaggi con scaricamento, prova diagnostica di una rotta.
 
-**Servizi** — attivazione dei quattro servizi, sorgente attualmente a schermo e
+**Calendario** — collegamento dell'account Google e nient'altro: gli
+appuntamenti si scrivono su Google, il pannello li mostra e basta. Guida
+completa in `docs/calendario.it.md`.
+
+**Servizi** — attivazione dei servizi, sorgente attualmente a schermo e
 possibilità di forzarne una.
 
 ### 10.3 Lingua

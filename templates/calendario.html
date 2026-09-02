@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.calendario') }}{% endblock %}
+
+{% block content %}
+
+{% if result %}
+<div class="banner">{{ result }}</div>
+{% endif %}
+
+<section class="card">
+  <h2>{{ t('calendario.title') }}</h2>
+  <p class="hint">{{ t('calendario.intro', giorni=google.giorni) }}</p>
+
+  <p class="status">
+    {% if google.connected %}
+      {% if google.account %}{{ t('calendario.connected', name=google.account) }}
+      {% else %}{{ t('calendario.connected.anon') }}{% endif %}
+    {% else %}{{ t('calendario.notconnected') }}{% endif %}
+    {% if google.error %} — <code>{{ google.error }}</code>{% endif %}
+  </p>
+
+  <form method="post" action="{{ url_for('api_google') }}">
+    <div class="row3">
+      <div><label for="client_id_g">{{ t('calendario.client_id') }}</label>
+        <input type="text" id="client_id_g" name="client_id"
+               value="{{ cfg.google.client_id }}" autocomplete="off"></div>
+      <div><label for="client_secret_g">{{ t('calendario.client_secret') }}</label>
+        <input type="password" id="client_secret_g" name="client_secret"
+               value="" autocomplete="new-password"
+               placeholder="{{ t('calendario.secret.kept') if cfg.google.client_secret else '' }}"></div>
+      <div><label for="redirect_uri_g">{{ t('calendario.redirect') }}</label>
+        <input type="text" id="redirect_uri_g" name="redirect_uri"
+               value="{{ cfg.google.redirect_uri }}"></div>
+    </div>
+    <p class="hint">{{ t('calendario.redirect.hint') }}</p>
+    <button type="submit">{{ t('common.save') }}</button>
+  </form>
+
+  <h3>{{ t('calendario.steps') }}</h3>
+  <ol class="hint">
+    <li>{{ t('calendario.step1') }}</li>
+    <li>{{ t('calendario.step2') }}</li>
+    <li>{{ t('calendario.step3') }}</li>
+    <li>{{ t('calendario.step4') }}</li>
+    <li>{{ t('calendario.step5') }}</li>
+  </ol>
+
+  <form method="post" action="{{ url_for('api_google_authorize') }}">
+    <button type="submit" class="ghost">{{ t('calendario.authorize') }}</button>
+  </form>
+
+  {% if authorize_url %}
+  <p class="hint">{{ t('calendario.open') }}</p>
+  <p><a href="{{ authorize_url }}" target="_blank" rel="noopener"
+        class="mono break">{{ authorize_url }}</a></p>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('api_google_complete') }}">
+    <label for="pasted">{{ t('calendario.paste') }}</label>
+    <input type="text" id="pasted" name="pasted" autocomplete="off"
+           placeholder="http://localhost:8080/api/google/callback?code=...">
+    <button type="submit">{{ t('calendario.complete') }}</button>
+  </form>
+
+  {% if google.connected %}
+  <form method="post" action="{{ url_for('api_google_disconnect') }}">
+    <button type="submit" class="ghost">{{ t('calendario.disconnect') }}</button>
+  </form>
+  {% endif %}
+  <p class="hint">{{ t('calendario.tokens.hint') }}</p>
+</section>
+
+<section class="card">
+  <h2>{{ t('calendario.next') }}</h2>
+  <p class="hint">{{ t('calendario.next.hint', giorni=google.giorni) }}</p>
+
+  {% if eventi %}
+  <table class="files">
+    {% for v in eventi %}
+    <tr>
+      <td class="size">{{ v.quando }}</td>
+      <td><b>{{ v.titolo }}</b>
+        {% if v.luogo %}<br><span class="hint">{{ v.luogo }}</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p class="hint">{{ t('calendario.next.none') }}</p>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('api_google_refresh') }}">
+    <button type="submit" class="ghost">{{ t('calendario.refresh') }}</button>
+  </form>
+</section>
+
+{% endblock %}

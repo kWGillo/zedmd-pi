@@ -364,6 +364,27 @@ DEFAULTS = {
         "redirect_uri": "http://127.0.0.1:8080/api/spotify/callback",
         "poll_interval": 8,
     },
+    "google": {
+        # Google Calendar in sola lettura. I token non stanno qui ma in
+        # /var/lib/dmd/google.json, per non finire in un export condiviso; il
+        # segreto del client viene tolto dall'esportazione come la password
+        # del broker MQTT.
+        "client_id": "",
+        "client_secret": "",
+        "redirect_uri": "http://localhost:8080/api/google/callback",
+        # Quanti giorni prima l'appuntamento comincia a comparire. Tre: sotto,
+        # il pannello mostrerebbe la fine del mese, che non e' una notizia.
+        "giorni": 3,
+        # Ogni quanto si chiede a Google, in minuti. Un calendario non cambia
+        # trenta volte al secondo.
+        "poll_minutes": 15,
+        "max_eventi": 10,
+        # L'avviso periodico sul pannello, con la stessa forma di quello delle
+        # scadenze: ogni quanto compare, quanto resta, quanto scorre.
+        "interval_minutes": 20,
+        "seconds": 10,
+        "speed": 40,
+    },
     "time": {
         "ntp_server": "pool.ntp.org",
         "timezone": "Europe/Rome",
@@ -394,6 +415,10 @@ DEFAULTS = {
         # non ruba spazio a nessuno, e chi inserisce una scadenza si aspetta
         # di vederla senza dover accendere un secondo interruttore.
         "scadenze": True,
+        # Spento di suo: finche' non si collega un account Google non c'e'
+        # niente da mostrare, e un interruttore acceso su un servizio muto
+        # fa credere che qualcosa non funzioni.
+        "calendario": False,
         "status_player": False,
         "air_radar": False,
     },
@@ -581,6 +606,10 @@ def snapshot(include_position=True):
         data["air_radar"]["longitude"] = 0.0
     if isinstance(data.get("mqtt"), dict):
         data["mqtt"]["password"] = ""
+    # Stesso ragionamento per il segreto del client Google: e' una credenziale
+    # dell'applicazione, e chi reimporta la riscrive una volta sola.
+    if isinstance(data.get("google"), dict):
+        data["google"]["client_secret"] = ""
     return data
 
 
