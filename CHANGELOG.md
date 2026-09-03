@@ -99,6 +99,18 @@ Tutte le modifiche rilevanti del progetto.
   aggiornamento OTA, con la scheda SD ancora occupata a smaltire le
   scritture. Misurate in fila, ogni configurazione si prende il rumore del
   proprio momento; a giro, il rumore si spalma su tutte.
+- **Soglia relativa al regime di ogni configurazione, non fissa in Hz.** Il
+  primo sweep su `slowdown` l'ha smascherata subito: a 7 il pannello gira a
+  25,9 Hz e la soglia fissa a 28 dichiarava il **100%** dei fotogrammi
+  disturbati. Non misurava i tuffi, misurava «la media sta sotto 28?». Ora un
+  fotogramma è disturbato se sta più del 5% sotto il regime della *sua*
+  configurazione — il massimo della finestra, cioè il valore che il pannello
+  tiene quando nessuno lo disturba — e le righe tornano confrontabili anche
+  quando lo sweep muove il refresh nominale. `--soglia` resta per forzarne una
+  assoluta, `--calo` regola la percentuale.
+- **Il riepilogo non conta più i giri vuoti.** Una configurazione senza
+  campioni veniva sommata come uno zero e usciva con «minimo 0.0», cioè
+  catastrofica invece che non misurata. Ora viene dichiarata per quello che è.
 - **Un lucchetto contro le istanze doppie**, preso con `mkdir` perché è
   atomico: con un file, fra il controllo e la creazione due processi
   passerebbero entrambi.

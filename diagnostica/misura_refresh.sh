@@ -32,7 +32,16 @@
 #   --giri N       ripete lo sweep N volte **a giro**, non in fila (1)
 #   --confronto    misura a riposo e poi sotto carico, generando lei la zavorra
 #   --carico       aggiunge la zavorra a ogni misura
-#   --soglia HZ    sotto quanti Hz un fotogramma si dice disturbato (28)
+#   --calo P       di quanto un fotogramma deve stare sotto il regime della
+#                  **sua** configurazione per dirsi disturbato, in % (5)
+#   --soglia HZ    soglia assoluta in Hz, se proprio la si vuole fissa
+#
+# La soglia e' relativa di proposito. La prima versione la teneva fissa a
+# 28 Hz, e appena lo sweep ha cominciato a muovere il refresh stesso —
+# slowdown 7 gira a 25,9 Hz — ha dichiarato il 100% dei fotogrammi
+# disturbati: stava misurando «la media sta sotto 28?», non «ci sono
+# tuffi?». Con una soglia legata al regime di ciascuna configurazione le
+# righe della tabella tornano confrontabili fra loro.
 #
 # Durante la misura **non aprire la web UI**: ogni ricarica di pagina e'
 # Python che lavora e rete che si muove, cioe' esattamente il disturbo che
@@ -42,8 +51,8 @@ set -u
 
 CONFIG="${DMD_CONFIG:-/etc/dmd/config.json}"
 MINUTI=2
-SOGLIA=28
-SOGLIA_GRAVE=25
+CALO=5          # % sotto il regime della configurazione stessa
+SOGLIA=0        # soglia assoluta in Hz, se la si vuole forzare
 CHIAVE=pwm_bits
 SWEEP=""
 GIRI=1
@@ -65,6 +74,7 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --minuti)     MINUTI="$2"; shift 2 ;;
         --soglia)     SOGLIA="$2"; shift 2 ;;
+        --calo)       CALO="$2"; shift 2 ;;
         --chiave)     CHIAVE="$2"; shift 2 ;;
         --sweep)      SWEEP="$2"; shift 2 ;;
         --giri)       GIRI="$2"; shift 2 ;;
@@ -220,15 +230,22 @@ statistiche() {   # statistiche <inizio> <fine> -> "n media min max sotto gravi"
     journalctl -u dmd -a --since "@$inizio" --until "@$fine" 2>/dev/null \
         | tr '\r\b' '\n\n' \
         | grep -oE '[0-9]+\.[0-9]+Hz' | tr -d 'Hz' \
-        | awk -v s="$SOGLIA" -v g="$SOGLIA_GRAVE" '
-            { n++; tot+=$1
+        | awk -v assoluta="$SOGLIA" -v calo="$CALO" '
+            # Due passate: la prima non puo\47 sapere quale sia il regime, che
+            # e\47 il massimo della finestra — il valore che il pannello tiene
+            # quando nessuno lo disturba. La soglia si calcola dopo, e solo
+            # allora si contano i tuffi.
+            { n++; v[n] = $1; tot += $1
               if (!min || $1 < min) min = $1
-              if ($1 > max) max = $1
-              if ($1 < s) sotto++
-              if ($1 < g) gravi++ }
-            END { if (n == 0) { print "0 0 0 0 0 0"; exit }
-                  printf "%d %.1f %.1f %.1f %d %d\n",
-                         n, tot/n, min, max, sotto+0, gravi+0 }'
+              if ($1 > max) max = $1 }
+            END { if (n == 0) { print "0 0 0 0 0 0 0"; exit }
+                  soglia = (assoluta > 0) ? assoluta : max * (1 - calo/100)
+                  grave = (assoluta > 0) ? assoluta*0.9 : max*(1 - 2*calo/100)
+                  for (i = 1; i <= n; i++) {
+                      if (v[i] < soglia) sotto++
+                      if (v[i] < grave)  gravi++ }
+                  printf "%d %.1f %.1f %.1f %d %d %.1f\n",
+                         n, tot/n, min, max, sotto+0, gravi+0, soglia }'
 }
 
 RACCOLTA="$(mktemp)"
@@ -246,26 +263,28 @@ misura() {   # misura <etichetta> [carico]
     riga_tabella "$etichetta" "$dati"
 }
 
-riga_tabella() {   # riga_tabella <etichetta> "<n media min max sotto gravi>"
+riga_tabella() {   # riga_tabella <etichetta> "<n media min max sotto gravi soglia>"
     local etichetta="$1"
     set -- $2
-    local n="$1" media="$2" min="$3" sotto="$5"
+    local n="$1" media="$2" min="$3" regime="$4" sotto="$5" soglia="$7"
     if [ "$n" = "0" ]; then
-        printf '%-14s  %8s  %7s  %7s  %14s  %8s\n' \
-               "$etichetta" "—" "—" "—" "nessun campione" "—"
+        printf '%-14s  %8s  %7s  %7s  %7s  %7s  %14s\n' \
+               "$etichetta" "—" "—" "—" "—" "—" "nessun campione"
         return
     fi
-    local perc al_minuto
+    local perc
     perc=$(awk -v a="$sotto" -v b="$n" 'BEGIN{printf "%.2f", 100*a/b}')
-    al_minuto=$(awk -v a="$sotto" -v m="$MINUTI" 'BEGIN{printf "%.0f", a/m}')
-    printf '%-14s  %8d  %7s  %7s  %6s (%5s%%)  %8s\n' \
-           "$etichetta" "$n" "$media" "$min" "$sotto" "$perc" "$al_minuto"
+    printf '%-14s  %8d  %7s  %7s  %7s  %7s  %6s (%5s%%)\n' \
+           "$etichetta" "$n" "$regime" "$media" "$min" "$soglia" "$sotto" "$perc"
 }
 
 intestazione() {
-    printf '\n%-14s  %8s  %7s  %7s  %14s  %8s\n' \
-           "config" "campioni" "media" "minimo" "disturbati" "al min."
-    printf '%s\n' "------------------------------------------------------------------------------"
+    # «regime» e\47 il refresh che il pannello tiene indisturbato, «soglia»
+    # quella sotto cui un fotogramma si dice rovinato: cambia da riga a riga
+    # proprio perche\47 e\47 relativa, e stamparla evita di doverlo ricordare.
+    printf '\n%-14s  %8s  %7s  %7s  %7s  %7s  %14s\n' \
+           "config" "campioni" "regime" "media" "minimo" "soglia" "disturbati"
+    printf '%s\n' "----------------------------------------------------------------------------------"
 }
 
 riepilogo() {
@@ -276,18 +295,29 @@ riepilogo() {
     [ "$GIRI" -gt 1 ] || return 0
     echo
     echo "riepilogo per configurazione ($GIRI giri):"
-    printf '%-14s  %8s  %7s  %7s  %14s\n' \
-           "config" "campioni" "media" "minimo" "disturbati"
-    printf '%s\n' "----------------------------------------------------------------"
+    printf '%-14s  %8s  %7s  %7s  %7s  %14s\n' \
+           "config" "campioni" "regime" "media" "minimo" "disturbati"
+    printf '%s\n' "--------------------------------------------------------------------------"
     awk '
         { split($1, p, "/"); c = p[1]
+          if (!(c in ordine)) { ordine[c] = ++k; nomi[k] = c }
+          # Un giro senza campioni non e\47 uno zero: e\47 una misura che non
+          # c\47e\47. Sommarlo abbasserebbe il minimo a zero e farebbe sembrare
+          # catastrofica una configurazione su cui semplicemente non si e\47
+          # letto niente. E\47 successo, e la riga diceva «minimo 0.0».
+          if ($2 + 0 == 0) { vuoti[c]++; next }
           n[c] += $2; somma[c] += $3 * $2; s[c] += $6
           if (!(c in mn) || $4 < mn[c]) mn[c] = $4
-          if (!(c in ordine)) { ordine[c] = ++k; nomi[k] = c } }
+          if ($5 > mx[c]) mx[c] = $5 }
         END { for (i = 1; i <= k; i++) { c = nomi[i]
-                  if (n[c] == 0) { printf "%-14s  %8s\n", c, "—"; continue }
-                  printf "%-14s  %8d  %7.1f  %7.1f  %6d (%5.2f%%)\n",
-                         c, n[c], somma[c]/n[c], mn[c], s[c], 100*s[c]/n[c] } }
+                  if (n[c] == 0) {
+                      printf "%-14s  %8s  %7s  %7s  %7s  %14s\n",
+                             c, "—", "—", "—", "—", "nessun campione"
+                      continue }
+                  printf "%-14s  %8d  %7.1f  %7.1f  %7.1f  %6d (%5.2f%%)%s\n",
+                         c, n[c], mx[c], somma[c]/n[c], mn[c],
+                         s[c], 100*s[c]/n[c],
+                         (c in vuoti) ? sprintf("  [%d giri vuoti]", vuoti[c]) : "" } }
     ' "$RACCOLTA"
 }
 
@@ -299,7 +329,11 @@ echo "=== misura del refresh — $(date '+%Y-%m-%d %H:%M') ==="
 echo "pannello:  pwm_bits=$(leggi panel pwm_bits)  slowdown=$(leggi panel slowdown)" \
      " lsb_ns=$(leggi panel pwm_lsb_nanoseconds)  dither=$(leggi panel pwm_dither_bits)"
 echo "cablaggio: $(leggi panel hardware_mapping)   registri: profilo $(leggi panel spwm_register_config)"
-echo "soglie:    disturbato sotto ${SOGLIA} Hz, grave sotto ${SOGLIA_GRAVE} Hz"
+if [ "$SOGLIA" != "0" ]; then
+    echo "soglia:    fissa, ${SOGLIA} Hz"
+else
+    echo "soglia:    ${CALO}% sotto il regime di ogni configurazione (relativa)"
+fi
 echo "finestra:  ${MINUTI} min per misura"
 if [ "$CONFRONTO" = "1" ] || [ "$CARICO" = "1" ]; then
     echo "zavorra:   ${ZAVORRA_MB} MB per giro su $ZAVORRA_DIR (disco, non RAM)"
@@ -347,7 +381,13 @@ fi
 rm -f "$RACCOLTA"
 
 echo
-echo "«disturbati» = fotogrammi sotto ${SOGLIA} Hz, cioe' quelli in cui la"
-echo "libreria ha aspettato la memoria mentre una riga restava accesa."
-echo "Leggi «media» e «disturbati» insieme: meno disturbi pagati con dieci Hz"
-echo "in meno non sono un affare."
+echo "«disturbati» = fotogrammi caduti sotto la soglia della loro riga, cioe'"
+echo "quelli in cui la libreria ha aspettato la memoria mentre una riga del"
+echo "pannello restava accesa. La soglia e' relativa al regime di ogni"
+echo "configurazione, cosi' le righe si confrontano fra loro anche quando il"
+echo "refresh nominale cambia."
+echo
+echo "Guarda «regime» e «disturbati» insieme, e fidati della percentuale piu'"
+echo "che del conteggio: i bordi della finestra sono sfrangiati di qualche"
+echo "secondo, perche' journald marca col timestamp il blocco e non il singolo"
+echo "campione. La frazione di fotogrammi rovinati non ne risente."

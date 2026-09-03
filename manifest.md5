@@ -4,7 +4,7 @@
 d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 112957993893543e06c2302cfb040d28  config.json
-adab0c2b5f04719898165b3cffb1d93b  diagnostica/misura_refresh.sh
+c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
 39700312db089e3d96de763793e32149  dmdconf.py
