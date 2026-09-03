@@ -242,7 +242,8 @@ rediretti automaticamente.
 
 **Impostazioni** — luminosità con applicazione immediata, lingua
 dell'interfaccia, regolazione fine del driver S-PWM, profili hardware del
-pannello, esportazione e importazione della configurazione, indirizzo IP
+pannello e **taratura automatica** (un pulsante: misura, e aggiunge il profilo
+trovato al menu), esportazione e importazione della configurazione, indirizzo IP
 locale, riavvio del servizio.
 
 **Orologio** — colori di ora e data, formato 12/24 ore, lingua dei giorni,
@@ -278,11 +279,6 @@ la scheda degli emulatori esterni che porta a Doom e al Game Boy.
 
 **Game Boy** — installazione di PyBoy, condivisione delle ROM, scelta della
 cartuccia, pad su schermo, overscan, spostamento verticale, gamma e tavolozza.
-
-**Taratura** — misura il refresh del pannello configurazione per
-configurazione, conta i fotogrammi rovinati, consiglia il valore migliore e lo
-salva come profilo. Le finestre in cui qualcuno ha usato la web UI vengono
-marcate e scartate, perché ogni richiesta è il disturbo che si sta misurando.
 
 **Servizi** — attivazione dei servizi, indicazione della sorgente attualmente
 a schermo e possibilità di forzarne una invece di lasciar decidere l'arbitro.

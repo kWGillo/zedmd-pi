@@ -59,32 +59,37 @@ partire e per leggerne i risultati. Quindi si fa l'altra cosa: durante ogni
 finestra si **conta** il traffico, e le finestre sporcate si dichiarano e si
 buttano. Una misura sporca dichiarata vale più di una misura che credi pulita.
 
-Per la stessa ragione **la pagina non si aggiorna da sola**. Non è una
-dimenticanza: un auto-refresh genererebbe da solo il disturbo da contare.
-Aggiorni a mano quando vuoi, e la misura in corso verrà marcata come
-contaminata — il che è meglio che falsarla di nascosto.
+Per la stessa ragione la pagina Impostazioni **non si aggiorna da sola**
+mentre la taratura gira: un auto-refresh genererebbe da solo il disturbo da
+contare. Se la ricarichi per vedere a che punto è, la misura in corso viene
+marcata contaminata e scartata — il che è meglio che falsarla di nascosto.
 
 ---
 
 ## 4. Come si usa
 
-Nella pagina **Taratura**:
+Un pulsante, **Avvia taratura**, nella pagina Impostazioni sotto il menu dei
+profili.
 
-1. scegli il parametro (il rallentamento GPIO è quello che conta di più);
-2. scrivi i valori da provare, separati da virgola;
-3. scegli quanti minuti per misura e quanti giri.
+Prova il rallentamento GPIO ai valori da 4 a 8, due minuti per misura e due
+giri: una quarantina di minuti, con un riavvio del pannello a ogni
+configurazione. Alla fine il pannello torna **esattamente com'era** e nel menu
+dei profili compare una voce in più — *Autotune 03/09 — Rallentamento GPIO 5*.
+Nient'altro.
+
+La taratura propone, non decide: il profilo si applica quando e se lo si
+vuole, come qualunque altro.
 
 Due minuti danno circa 3.000 campioni, cioè un fotogramma per fotogramma: sono
-abbastanza perché una frazione dello 0,1% si distingua dal caso.
+abbastanza perché una frazione dello 0,1% si distingua dal caso. E i due giri
+servono: misurare le configurazioni in fila attribuisce alla prima tutto il
+rumore del suo momento — è successo davvero, venti fotogrammi disturbati
+subito dopo un aggiornamento, con la scheda ancora occupata a smaltire le
+scritture.
 
-**I giri servono.** Misurare le configurazioni in fila attribuisce alla prima
-tutto il rumore del suo momento: è successo davvero, venti fotogrammi
-disturbati subito dopo un aggiornamento, con la scheda ancora occupata a
-smaltire le scritture. Con due giri le configurazioni si alternano e il rumore
-si spalma su tutte.
-
-Cinque valori per due giri, due minuti l'uno, fanno una quarantina di minuti.
-Il pannello si riavvia a ogni configurazione: è normale.
+Se non esce nessun consiglio — per esempio perché tutte le finestre sono
+risultate contaminate — **non compare nessuna voce**. Meglio nessun profilo
+che uno costruito su misure sporche.
 
 ---
 
@@ -101,8 +106,9 @@ Mezzo punto percentuale di tolleranza sul minimo, perché fra lo 0,07% e lo
 0,18% non c'è differenza vera e pretendere il minimo esatto vuol dire farsi
 guidare dal rumore.
 
-La tabella resta lì: se non sei d'accordo col consiglio, applichi la riga che
-preferisci.
+Il dettaglio delle misure, giro per giro e con le finestre scartate, resta in
+`/var/lib/dmd/autotune.json` e nel diario `/var/lib/dmd/autotune.log`, per chi
+vuole guardare i numeri invece di fidarsi.
 
 ---
 
@@ -123,9 +129,8 @@ Stanno nei profili.
 
 ## 7. Il profilo «Autotune»
 
-Applicando un risultato, il valore viene scritto nel pannello e salvato come
-profilo, che compare fra gli altri nella pagina Impostazioni. Serve a poterci
-tornare: la taratura andrà rifatta con un'altra scheda SD o un altro carico,
+Il risultato viene salvato come profilo e compare fra gli altri nel menu.
+Serve a poterci tornare: la taratura andrà rifatta con un'altra scheda SD o un altro carico,
 perché dipende da **questa macchina**, non dal tipo di pannello — ed è la
 ragione per cui non sta fra i profili di fabbrica.
 

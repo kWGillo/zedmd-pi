@@ -209,8 +209,10 @@ def create_app(runtime):
             sleeping=runtime.sleeping, night=runtime.night,
             presets=presets.choices(cfg["panel"]),
             preset_now=presets.detect(cfg["panel"]),
+            taratura=autotune.stato(), taratura_in_corso=autotune.in_corso(),
             cablaggi=presets.CABLAGGI,
-            config_result=request.args.get("config_result"), page="settings")
+            config_result=request.args.get("config_result"),
+            result=request.args.get("result"), page="settings")
 
     @app.route("/updates")
     def page_updates():
@@ -1112,59 +1114,21 @@ def create_app(runtime):
 
     # ------------------------------------------------------------ taratura
 
-    @app.route("/taratura")
-    def page_taratura():
-        panel = cfg["panel"]
-        dati = autotune.stato()
-        parametri = [
-            {"key": chiave, "label": regola["label"], "nota": regola["nota"],
-             "valori": ", ".join(str(v) for v in regola["valori"]),
-             "attuale": panel.get(chiave, "")}
-            for chiave, regola in autotune.PARAMETRI.items()]
-        return render_template(
-            "taratura.html", cfg=cfg, parametri=parametri, stato=dati,
-            in_corso=autotune.in_corso(), log=autotune.coda_log(20),
-            profilo=presets.profilo_autotune(panel),
-            result=request.args.get("result", ""), page="taratura")
-
     @app.route("/api/autotune/start", methods=["POST"])
     def api_autotune_start():
-        chiave = request.form.get("chiave", "")
-        grezzi = re.split(r"[,\s]+", request.form.get("valori", "").strip())
         try:
-            minuti = max(0.5, min(10.0, float(request.form.get("minuti", 2))))
-        except ValueError:
-            minuti = 2.0
-        try:
-            giri = max(1, min(5, int(request.form.get("giri", 2))))
-        except ValueError:
-            giri = 2
-        try:
-            autotune.avvia(cfg, chiave, grezzi, minuti, giri)
+            autotune.avvia(cfg)
         except ValueError as exc:
-            return _taratura_result("taratura.failed", error=str(exc))
-        return _taratura_result("taratura.started")
+            return _taratura_result("settings.autotune.failed", error=str(exc))
+        return _taratura_result("settings.autotune.started")
 
     @app.route("/api/autotune/stop", methods=["POST"])
     def api_autotune_stop():
         autotune.ferma()
-        return _taratura_result("taratura.stopping")
-
-    @app.route("/api/autotune/apply", methods=["POST"])
-    def api_autotune_apply():
-        grezzo = request.form.get("valore", "")
-        try:
-            valore = autotune.applica(cfg, grezzo if grezzo else None)
-        except ValueError as exc:
-            return _taratura_result("taratura.failed", error=str(exc))
-        dmdconf.save()
-        # Il pannello si riprende i parametri solo ripartendo: la libreria
-        # matrice li legge una volta sola, alla costruzione.
-        subprocess.Popen(["systemctl", "restart", "dmd"])
-        return _taratura_result("taratura.applied", value=valore)
+        return _taratura_result("settings.autotune.stopping")
 
     def _taratura_result(key, **values):
-        return redirect(url_for("page_taratura", result=i18n.translate(
+        return redirect(url_for("page_settings", result=i18n.translate(
             key, current_language(), **values)))
 
     # ------------------------------------------------------------ API

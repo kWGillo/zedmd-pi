@@ -3,6 +3,10 @@
 
 {% block content %}
 
+{% if result %}
+<div class="banner">{{ result }}</div>
+{% endif %}
+
 {% if sleeping or night %}
 <div class="banner">
   {% if sleeping %}{{ t('banner.sleep') }}{% else %}{{ t('banner.night') }}{% endif %}
@@ -103,6 +107,22 @@
       {% endfor %}
     </select>
     <p class="hint">{{ t('preset.hint') }}</p>
+  </form>
+
+  {% if taratura_in_corso %}
+  <p class="status">{{ t('settings.autotune.running',
+                        fatte=taratura.fatte, totale=taratura.totale) }}</p>
+  <form method="post" action="{{ url_for('api_autotune_stop') }}">
+    <button type="submit" class="ghost">{{ t('settings.autotune.stop') }}</button>
+  </form>
+  {% else %}
+  <form method="post" action="{{ url_for('api_autotune_start') }}">
+    <button type="submit" class="ghost">{{ t('settings.autotune') }}</button>
+  </form>
+  <p class="hint">{{ t('settings.autotune.hint') }}</p>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('api_panel') }}">
 
     <label for="hardware_mapping">{{ t('cablaggio.label') }}</label>
     <select id="hardware_mapping" name="hardware_mapping">

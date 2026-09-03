@@ -397,12 +397,21 @@ def esegui(percorso_config, chiave, valori, minuti, giri, porta):
                        if traffico > 0 else ""))
                 aggiorna()
     finally:
+        # Il pannello torna esattamente com'era: la taratura **propone**, non
+        # decide. Il risultato compare come voce nel menu dei profili, e si
+        # applica quando e se lo si vuole.
         if originale is not None:
             _scrivi_valore(percorso_config, chiave, originale)
         if not show_originale:
             _scrivi_valore(percorso_config, "show_refresh", False)
+        riepilogo = riassumi(righe)
+        consiglio = scegli(riepilogo)
+        if consiglio:
+            riga = next((r for r in riepilogo
+                         if r.get("valore") == consiglio["valore"]), {})
+            _scrivi_profilo(percorso_config,
+                            profilo(chiave, consiglio["valore"], riga))
         _servizio("restart")
-        fatte = fatte
         dati = stato()
         dati.update({"in_corso": False, "finita": time.time(),
                      "righe": righe, "riepilogo": riassumi(righe),
@@ -414,7 +423,10 @@ def esegui(percorso_config, chiave, valori, minuti, giri, porta):
         log("finita: %d misure, consiglio %s" % (fatte, dati.get("consiglio")))
 
 
-def avvia(cfg, chiave, valori, minuti=2, giri=2):
+PREDEFINITO = "slowdown"
+
+
+def avvia(cfg, chiave=None, valori=None, minuti=2, giri=2):
     """Lancia la taratura in un processo staccato, che sopravvive al riavvio.
 
     Deve essere staccato per forza: lo sweep riavvia il servizio a ogni
@@ -424,6 +436,9 @@ def avvia(cfg, chiave, valori, minuti=2, giri=2):
     """
     if in_corso():
         raise ValueError("una taratura e' gia' in corso")
+    chiave = chiave or PREDEFINITO
+    if valori is None:
+        valori = PARAMETRI[chiave]["valori"]
     if not parametro_valido(chiave):
         raise ValueError("parametro non tarabile: %s" % chiave)
     valori = valori_validi(chiave, valori)
@@ -456,43 +471,31 @@ def etichetta_profilo(chiave, valore, quando=None):
     return "Autotune %s — %s %s" % (quando.strftime("%d/%m"), nome, valore)
 
 
-def applica(cfg, valore=None):
-    """Scrive il valore scelto nel pannello e lo salva come profilo.
+def profilo(chiave, valore, riga=None):
+    """Il blocco che finisce in `panel["autotune"]` e compare nel menu.
 
-    Il profilo serve a poterci tornare: la taratura si rifa' fra sei mesi con
-    un'altra scheda SD e un altro carico, e sapere qual era quella buona vale
-    quanto averla trovata.
+    Contiene **solo il parametro tarato**: la taratura non ha misurato
+    righe, colonne e tipo di chip, e un profilo che li riscrivesse
+    spegnerebbe il pannello.
     """
-    dati = stato()
-    if dati.get("in_corso"):
-        raise ValueError("taratura ancora in corso")
-    chiave = dati.get("chiave")
-    consiglio = dati.get("consiglio") or {}
-    if valore is None:
-        valore = consiglio.get("valore")
-    if not chiave or valore is None:
-        raise ValueError("nessun risultato da applicare")
-    valori = valori_validi(chiave, [valore])
-    if not valori:
-        raise ValueError("valore fuori intervallo: %s" % valore)
-    valore = valori[0]
-
-    riga = next((r for r in dati.get("riepilogo") or []
-                 if r.get("valore") == valore), {})
-    panel = cfg.setdefault("panel", {})
-    panel[chiave] = valore
-    panel["autotune"] = {
+    riga = riga or {}
+    return {
         "label": etichetta_profilo(chiave, valore),
         "chiave": chiave,
         "quando": time.time(),
         "misura": {"regime": riga.get("regime"), "media": riga.get("media"),
                    "percento": riga.get("percento"), "n": riga.get("n")},
-        # Solo il parametro tarato: un profilo di taratura non deve
-        # riscrivere la geometria del pannello, che non ha misurato.
         "values": {chiave: valore},
     }
-    panel["preset"] = "autotune"
-    return valore
+
+
+def _scrivi_profilo(percorso, blocco):
+    dati = _leggi_config(percorso)
+    dati.setdefault("panel", {})["autotune"] = blocco
+    tmp = percorso + ".tmp"
+    with open(tmp, "w") as handle:
+        json.dump(dati, handle, indent=2)
+    os.replace(tmp, percorso)
 
 
 # ---------------------------------------------------------------------- CLI

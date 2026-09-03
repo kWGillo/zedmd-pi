@@ -5,12 +5,14 @@ Tutte le modifiche rilevanti del progetto.
 ## [4.8]
 
 ### Aggiunto
-- **Taratura automatica del pannello**, pagina *Taratura*. Si sceglie un
-  parametro, i valori da provare, quanti minuti e quanti giri; il DMD misura
-  da solo, riavviandosi a ogni configurazione, e alla fine mostra una tabella
-  e un consiglio. Nasce da una campagna di prove durata settimane fatta a
-  occhio, che con un difetto casuale non distingueva un miglioramento vero da
-  una serie fortunata.
+- **Taratura automatica del pannello**: un pulsante *Avvia taratura* nelle
+  Impostazioni, sotto il menu dei profili. Misura il pannello a diversi
+  rallentamenti, rimette tutto com'era, e aggiunge al menu una voce
+  *Autotune — Rallentamento GPIO 5* con la configurazione trovata. Nient'altro:
+  la taratura **propone**, non decide, e il profilo si applica come qualunque
+  altro. Nasce da una campagna di prove durata settimane fatta a occhio, che
+  con un difetto casuale non distingueva un miglioramento vero da una serie
+  fortunata.
 - **I fotogrammi contaminati si marcano e si scartano.** Ogni richiesta alla
   web UI è Python che lavora e rete che si muove, cioè esattamente il disturbo
   che si sta misurando. Spegnere l'interfaccia durante la misura non si può —
@@ -19,10 +21,12 @@ Tutte le modifiche rilevanti del progetto.
   sporcate si dichiarano. Una misura sporca dichiarata vale più di una che
   credi pulita. Per la stessa ragione **la pagina non si aggiorna da sola**, e
   lo dice: un auto-refresh genererebbe da solo il disturbo da contare.
-- **Profilo «Autotune»** fra i profili del pannello. La configurazione scelta
-  si applica con un clic e resta salvata con la sua misura, così ci si può
-  tornare. Contiene **solo il parametro tarato**: una taratura non ha misurato
-  la geometria del pannello e non deve riscriverla.
+- **Profilo «Autotune»** fra i profili del pannello, salvato con la sua misura
+  così ci si può tornare. Contiene **solo il parametro tarato**: una taratura
+  non ha misurato la geometria del pannello e non deve riscriverla. Se non
+  esce nessun consiglio — tutte le finestre contaminate, per dire — non
+  compare nessuna voce: meglio nessun profilo che uno costruito su misure
+  sporche.
 - **Quattro parametri tarabili**: rallentamento GPIO, profondità PWM, durata
   del bit minimo, bit con dithering. La geometria e il tipo di chip no: quelli
   non sono taratura, sono dire che pannello si ha, e stanno nei profili.
