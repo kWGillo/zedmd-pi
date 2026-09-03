@@ -1,4 +1,4 @@
-# DMD Controller 4.7
+# DMD Controller 4.8
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -86,6 +86,7 @@ oppure si scaricano con `git clone` o dal pulsante *Code → Download ZIP*.
 | Doom sul pannello | `docs/DMD_doom.pdf` |
 | Game Boy sul pannello | `docs/DMD_gameboy.pdf` |
 | Google Calendar | `docs/DMD_calendario.pdf` |
+| Taratura automatica del pannello | `docs/DMD_taratura.pdf` |
 | Joypad: mappatura dei comandi | `docs/DMD_joypad.pdf` |
 
 I PDF **non** vengono installati in `/opt/dmd`: sul Raspberry non servono, e
@@ -278,6 +279,11 @@ la scheda degli emulatori esterni che porta a Doom e al Game Boy.
 **Game Boy** — installazione di PyBoy, condivisione delle ROM, scelta della
 cartuccia, pad su schermo, overscan, spostamento verticale, gamma e tavolozza.
 
+**Taratura** — misura il refresh del pannello configurazione per
+configurazione, conta i fotogrammi rovinati, consiglia il valore migliore e lo
+salva come profilo. Le finestre in cui qualcuno ha usato la web UI vengono
+marcate e scartate, perché ogni richiesta è il disturbo che si sta misurando.
+
 **Servizi** — attivazione dei servizi, indicazione della sorgente attualmente
 a schermo e possibilità di forzarne una invece di lasciar decidere l'arbitro.
 
@@ -339,6 +345,7 @@ di Batocera (menu, caricamenti); alzalo se vedi passaggi indesiderati.
 /opt/dmd/nowplaying.py    stato del brano corrente, indipendente dalla sorgente
 /opt/dmd/spotifyapi.py    API web di Spotify (OAuth con PKCE)
 /opt/dmd/gcalendar.py     API di Google Calendar (OAuth, sola lettura)
+/opt/dmd/autotune.py      taratura automatica: misura, sceglie, salva il profilo
 /opt/dmd/scadenze.py      scadenze, semaforo e registro
 /opt/dmd/hass.py          entità di Home Assistant via MQTT Discovery
 /opt/dmd/rifiuti.py       calendario della raccolta: cadenze ed eccezioni

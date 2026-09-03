@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav.taratura') }}{% endblock %}
+
+{% block content %}
+
+{% if result %}
+<div class="banner">{{ result }}</div>
+{% endif %}
+
+<section class="card">
+  <h2>{{ t('taratura.title') }}</h2>
+  <p class="hint">{{ t('taratura.intro') }}</p>
+
+  {% if in_corso %}
+  <div class="banner warn">
+    {{ t('taratura.running', fatte=stato.fatte, totale=stato.totale) }}
+  </div>
+  <p class="hint">{{ t('taratura.running.hint') }}</p>
+  <p><a href="{{ url_for('page_taratura') }}" class="mono">{{ t('taratura.refresh') }}</a></p>
+  <form method="post" action="{{ url_for('api_autotune_stop') }}">
+    <button type="submit" class="ghost">{{ t('taratura.stop') }}</button>
+  </form>
+  {% else %}
+
+  <form method="post" action="{{ url_for('api_autotune_start') }}">
+    <div class="row3">
+      <div><label for="chiave">{{ t('taratura.parametro') }}</label>
+        <select id="chiave" name="chiave">
+          {% for p in parametri %}
+          <option value="{{ p.key }}" {{ 'selected' if p.key == 'slowdown' }}>
+            {{ p.label }} — {{ t('taratura.ora', valore=p.attuale) }}</option>
+          {% endfor %}
+        </select></div>
+      <div><label for="minuti">{{ t('taratura.minuti') }}</label>
+        <input type="number" id="minuti" name="minuti" min="0.5" max="10"
+               step="0.5" value="2"></div>
+      <div><label for="giri">{{ t('taratura.giri') }}</label>
+        <input type="number" id="giri" name="giri" min="1" max="5" value="2"></div>
+    </div>
+    <label for="valori">{{ t('taratura.valori') }}</label>
+    <input type="text" id="valori" name="valori" value="4, 5, 6, 7, 8"
+           autocomplete="off">
+    <p class="hint">{{ t('taratura.valori.hint') }}</p>
+    <button type="submit">{{ t('taratura.start') }}</button>
+  </form>
+
+  <h3>{{ t('taratura.parametri') }}</h3>
+  <table class="files">
+    {% for p in parametri %}
+    <tr>
+      <td><b>{{ p.label }}</b><br><span class="hint">{{ p.nota }}</span></td>
+      <td class="size">{{ t('taratura.ora', valore=p.attuale) }}<br>
+        <span class="hint">{{ p.valori }}</span></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</section>
+
+{% if stato.riepilogo %}
+<section class="card">
+  <h2>{{ t('taratura.risultati', chiave=stato.chiave) }}</h2>
+
+  {% if stato.consiglio %}
+  <p class="status">
+    {{ t('taratura.consiglio', valore=stato.consiglio.valore,
+          regime=stato.consiglio.regime, percento=stato.consiglio.percento) }}
+  </p>
+  {% endif %}
+  <p class="hint">{{ t('taratura.regola') }}</p>
+
+  <table class="files">
+    <tr>
+      <th>{{ t('taratura.col.valore') }}</th>
+      <th>{{ t('taratura.col.regime') }}</th>
+      <th>{{ t('taratura.col.media') }}</th>
+      <th>{{ t('taratura.col.disturbati') }}</th>
+      <th>{{ t('taratura.col.gravi') }}</th>
+      <th></th>
+    </tr>
+    {% for r in stato.riepilogo %}
+    <tr class="{{ 'stato-verde' if stato.consiglio and r.valore == stato.consiglio.valore }}">
+      <td><b>{{ stato.chiave }} = {{ r.valore }}</b>
+        {% if r.scartate %}<br><span class="hint">{{ t('taratura.scartate', n=r.scartate) }}</span>{% endif %}</td>
+      <td class="size">{% if r.n %}{{ r.regime }} Hz{% else %}—{% endif %}</td>
+      <td class="size">{% if r.n %}{{ r.media }} Hz{% else %}—{% endif %}</td>
+      <td class="size">{% if r.n %}{{ r.percento }}%{% else %}{{ t('taratura.nessuna') }}{% endif %}</td>
+      <td class="size">{% if r.n %}{{ r.percento_gravi }}%{% endif %}</td>
+      <td class="act">
+        {% if r.n and not in_corso %}
+        <form method="post" action="{{ url_for('api_autotune_apply') }}">
+          <input type="hidden" name="valore" value="{{ r.valore }}">
+          <button type="submit" class="small">{{ t('taratura.applica') }}</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <p class="hint">{{ t('taratura.colonne') }}</p>
+
+  {% if stato.righe %}
+  <h3>{{ t('taratura.misure') }}</h3>
+  <table class="files">
+    {% for r in stato.righe %}
+    <tr>
+      <td class="size">{{ stato.chiave }}={{ r.valore }} · {{ t('taratura.giro', n=r.giro) }}</td>
+      <td class="size">{% if r.n %}{{ r.regime }} Hz{% else %}—{% endif %}</td>
+      <td class="size">{% if r.n %}{{ r.percento }}%{% else %}{{ t('taratura.nessuna') }}{% endif %}</td>
+      <td>{% if r.contaminata %}<span class="badge">{{ t('taratura.contaminata', n=r.richieste) }}</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if profilo %}
+<section class="card">
+  <h2>{{ t('taratura.profilo') }}</h2>
+  <p class="status">{{ profilo.label }}</p>
+  <p class="hint">{{ t('taratura.profilo.hint') }}</p>
+</section>
+{% endif %}
+
+{% if log %}
+<section class="card">
+  <h2>{{ t('taratura.log') }}</h2>
+  <pre class="log">{{ log }}</pre>
+</section>
+{% endif %}
+
+{% endblock %}

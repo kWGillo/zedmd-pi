@@ -1940,6 +1940,108 @@ STRINGS = {
         "%(count)d appuntamenti, %(shown)d avvisi mostrati",
         "%(count)d appointments, %(shown)d notices shown"),
     "status.calendario.mostra": ("in mostra: %(titolo)s", "showing: %(titolo)s"),
+
+    # ---------------------------------------------------------------- taratura
+    "nav.taratura": ("Taratura", "Tuning"),
+    "taratura.title": ("Taratura automatica del pannello",
+                       "Automatic panel tuning"),
+    "taratura.intro": (
+        "Il pannello scrive nel log il refresh di ogni fotogramma. In regime "
+        "il valore sta fermo; quando crolla vuol dire che la libreria ha "
+        "aspettato la memoria mentre una riga restava accesa — ed è quella la "
+        "riga chiara che si vede. La taratura prova un parametro alla volta, "
+        "conta i fotogrammi rovinati e dice quale configurazione conviene. "
+        "Misura invece di far guardare.",
+        "The panel writes every frame’s refresh rate to the log. At rest the "
+        "value holds steady; when it collapses it means the library waited on "
+        "memory while a row stayed lit — and that is the bright line you see. "
+        "Tuning tries one parameter at a time, counts the ruined frames and "
+        "says which setting is best. It measures instead of asking you to "
+        "look."),
+    "taratura.parametro": ("Parametro", "Parameter"),
+    "taratura.valori": ("Valori da provare", "Values to try"),
+    "taratura.valori.hint": (
+        "Separati da virgola. Almeno due, altrimenti non c’è confronto.",
+        "Comma separated. At least two, otherwise there is nothing to "
+        "compare."),
+    "taratura.minuti": ("Minuti per misura", "Minutes per measurement"),
+    "taratura.giri": ("Giri", "Rounds"),
+    "taratura.ora": ("ora %(valore)s", "now %(valore)s"),
+    "taratura.start": ("Avvia la taratura", "Start tuning"),
+    "taratura.stop": ("Ferma", "Stop"),
+    "taratura.refresh": ("Aggiorna questa pagina", "Refresh this page"),
+    "taratura.parametri": ("Che cosa si può tarare", "What can be tuned"),
+    "taratura.started": (
+        "Taratura avviata. Il pannello si riavvia a ogni configurazione: è "
+        "normale.",
+        "Tuning started. The panel restarts at every configuration: that is "
+        "normal."),
+    "taratura.stopping": ("Mi fermo alla fine di questa misura.",
+                          "Stopping at the end of this measurement."),
+    "taratura.failed": ("Non riuscita: %(error)s", "Failed: %(error)s"),
+    "taratura.applied": (
+        "Applicato %(value)s e salvato come profilo. Il servizio si riavvia.",
+        "Applied %(value)s and saved as a profile. The service is restarting."),
+    "taratura.running": (
+        "Taratura in corso: %(fatte)s misure su %(totale)s.",
+        "Tuning in progress: %(fatte)s of %(totale)s measurements."),
+    "taratura.running.hint": (
+        "La pagina non si aggiorna da sola, e non è una dimenticanza: ogni "
+        "richiesta al server è proprio il disturbo che stiamo misurando. "
+        "Aggiorna a mano quando vuoi — la misura in corso verrà marcata come "
+        "contaminata e scartata, il che è meglio che falsarla di nascosto.",
+        "The page does not refresh itself, and that is not an oversight: every "
+        "request to the server is exactly the disturbance being measured. "
+        "Refresh by hand whenever you like — the current measurement will be "
+        "marked as contaminated and discarded, which beats skewing it "
+        "silently."),
+    "taratura.risultati": ("Risultati — %(chiave)s", "Results — %(chiave)s"),
+    "taratura.consiglio": (
+        "Consigliato: %(valore)s — %(regime)s Hz, %(percento)s%% di fotogrammi "
+        "disturbati.",
+        "Recommended: %(valore)s — %(regime)s Hz, %(percento)s%% disturbed "
+        "frames."),
+    "taratura.regola": (
+        "La regola è: fra le configurazioni che si disturbano di meno, quella "
+        "con il refresh più alto. Non la più veloce e basta — il valore col "
+        "refresh nominale più alto può essere quello che gira al limite e "
+        "tremola — e nemmeno la più tranquilla, che sarebbe sempre la più "
+        "lenta.",
+        "The rule is: among the settings that get disturbed least, the one "
+        "with the highest refresh. Not simply the fastest — the highest "
+        "nominal refresh may be the one running at the limit and wobbling — "
+        "and not simply the calmest, which would always be the slowest."),
+    "taratura.col.valore": ("Configurazione", "Setting"),
+    "taratura.col.regime": ("Regime", "At rest"),
+    "taratura.col.media": ("Media", "Average"),
+    "taratura.col.disturbati": ("Disturbati", "Disturbed"),
+    "taratura.col.gravi": ("Gravi", "Severe"),
+    "taratura.colonne": (
+        "«Regime» è il refresh che il pannello tiene indisturbato, «media» "
+        "quello reale. «Disturbati» sono i fotogrammi caduti oltre il 5% sotto "
+        "il regime, «gravi» oltre il 10%: la prima colonna vede anche il "
+        "tremolio, la seconda solo i tuffi veri.",
+        "“At rest” is the refresh the panel holds undisturbed, “average” the "
+        "real one. “Disturbed” frames fell more than 5% below the resting "
+        "rate, “severe” more than 10%: the first column also catches jitter, "
+        "the second only real dips."),
+    "taratura.applica": ("Applica", "Apply"),
+    "taratura.misure": ("Le singole misure", "Individual measurements"),
+    "taratura.giro": ("giro %(n)s", "round %(n)s"),
+    "taratura.nessuna": ("nessun campione", "no samples"),
+    "taratura.contaminata": (
+        "scartata: %(n)s richieste web durante la misura",
+        "discarded: %(n)s web requests during the measurement"),
+    "taratura.scartate": ("%(n)s misure scartate", "%(n)s measurements discarded"),
+    "taratura.profilo": ("Profilo tarato", "Tuned profile"),
+    "taratura.profilo.hint": (
+        "Compare fra i profili nella pagina Impostazioni, così ci si può "
+        "tornare. La taratura andrà rifatta con un’altra scheda SD o un altro "
+        "carico: dipende da questa macchina, non dal tipo di pannello.",
+        "It appears among the profiles on the Settings page, so you can come "
+        "back to it. Tuning must be redone with a different SD card or a "
+        "different load: it depends on this machine, not on the panel type."),
+    "taratura.log": ("Diario della taratura", "Tuning log"),
 }
 
 

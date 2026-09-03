@@ -2,6 +2,44 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.8]
+
+### Aggiunto
+- **Taratura automatica del pannello**, pagina *Taratura*. Si sceglie un
+  parametro, i valori da provare, quanti minuti e quanti giri; il DMD misura
+  da solo, riavviandosi a ogni configurazione, e alla fine mostra una tabella
+  e un consiglio. Nasce da una campagna di prove durata settimane fatta a
+  occhio, che con un difetto casuale non distingueva un miglioramento vero da
+  una serie fortunata.
+- **I fotogrammi contaminati si marcano e si scartano.** Ogni richiesta alla
+  web UI è Python che lavora e rete che si muove, cioè esattamente il disturbo
+  che si sta misurando. Spegnere l'interfaccia durante la misura non si può —
+  servirebbe per far partire la taratura e per leggerne i risultati — quindi
+  si fa l'altra cosa: si conta il traffico durante ogni finestra e le finestre
+  sporcate si dichiarano. Una misura sporca dichiarata vale più di una che
+  credi pulita. Per la stessa ragione **la pagina non si aggiorna da sola**, e
+  lo dice: un auto-refresh genererebbe da solo il disturbo da contare.
+- **Profilo «Autotune»** fra i profili del pannello. La configurazione scelta
+  si applica con un clic e resta salvata con la sua misura, così ci si può
+  tornare. Contiene **solo il parametro tarato**: una taratura non ha misurato
+  la geometria del pannello e non deve riscriverla.
+- **Quattro parametri tarabili**: rallentamento GPIO, profondità PWM, durata
+  del bit minimo, bit con dithering. La geometria e il tipo di chip no: quelli
+  non sono taratura, sono dire che pannello si ha, e stanno nei profili.
+
+### Misurato
+- **`slowdown` è la leva del refresh, e va verso il basso.** Da 4 a 8 il
+  pannello passa da 38,2 a 23,4 Hz. Il valore consigliato dalla misura è **5**:
+  33,3 Hz contro i 29,4 di prima, con disturbi più bassi *e* più costanti fra i
+  giri.
+- **Il refresh nominale più alto non vince.** A `slowdown` 4 il ciclo gira al
+  limite e non ha margine: il refresh oscilla fra 34 e 38 Hz e un terzo dei
+  fotogrammi è fuori regime. Il primo valore con abbastanza gioco per
+  assorbire i disturbi è 5, e costa cinque Hz.
+- **La contesa sul bus, con un numero.** Stessa configurazione, due finestre:
+  0,95% di fotogrammi disturbati a riposo, **8,90%** con la scheda SD sotto
+  carico, e il refresh minimo che crolla da 25,9 a 18,5 Hz.
+
 ## [4.7]
 
 ### Aggiunto

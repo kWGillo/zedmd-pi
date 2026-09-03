@@ -56,16 +56,33 @@ PRESETS = {
 # attuale non corrisponde a nessun profilo noto.
 CUSTOM = "custom"
 
+# Il profilo che nasce da una taratura automatica. Non sta in PRESETS perche'
+# non e' un fatto del pannello ma una misura di **questa** macchina: dipende
+# dalla scheda SD, dal carico, da cosa gira accanto. Vive in
+# `panel["autotune"]`, scritto da autotune.py, e compare nel menu solo se
+# esiste davvero.
+AUTOTUNE = "autotune"
 
-def choices():
+
+def profilo_autotune(panel):
+    blocco = (panel or {}).get(AUTOTUNE) or {}
+    return blocco if blocco.get("values") else None
+
+
+def choices(panel=None):
     """(chiave, etichetta) per il menu, con la voce personalizzata in fondo."""
     fuori = [(key, blocco["label"]) for key, blocco in PRESETS.items()]
     fuori.sort(key=lambda voce: voce[1])
+    tarato = profilo_autotune(panel)
+    if tarato:
+        fuori.append((AUTOTUNE, tarato.get("label") or "Autotune"))
     fuori.append((CUSTOM, "Personalizzata"))
     return fuori
 
 
-def known(key):
+def known(key, panel=None):
+    if key == AUTOTUNE:
+        return profilo_autotune(panel) is not None
     return key in PRESETS
 
 
@@ -78,7 +95,8 @@ def apply(panel, key):
     if key == CUSTOM:
         panel["preset"] = CUSTOM
         return False
-    blocco = PRESETS.get(key)
+    blocco = (profilo_autotune(panel) if key == AUTOTUNE
+              else PRESETS.get(key))
     if not blocco:
         return False
     for nome, valore in blocco["values"].items():
@@ -93,7 +111,8 @@ def apply(panel, key):
 
 def matches(panel, key):
     """Vero se il pannello ha esattamente i valori del profilo indicato."""
-    blocco = PRESETS.get(key)
+    blocco = (profilo_autotune(panel) if key == AUTOTUNE
+              else PRESETS.get(key))
     if not blocco:
         return False
     for nome, valore in blocco["values"].items():
@@ -107,7 +126,14 @@ def matches(panel, key):
 
 
 def detect(panel):
-    """Il profilo a cui corrisponde la configurazione attuale, o `custom`."""
+    """Il profilo a cui corrisponde la configurazione attuale, o `custom`.
+
+    Il profilo tarato si guarda **per primo**: contiene un parametro solo, e
+    se il pannello ha quel valore la taratura e' quella che comanda anche
+    quando tutto il resto coincide con un profilo di fabbrica.
+    """
+    if profilo_autotune(panel) and matches(panel, AUTOTUNE):
+        return AUTOTUNE
     for key in PRESETS:
         if matches(panel, key):
             return key

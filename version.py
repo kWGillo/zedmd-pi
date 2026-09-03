@@ -661,6 +661,17 @@ Storico:
        scollegando si chiede a Google di revocare il permesso invece di
        lasciare un consenso in piedi dal loro lato. README riscritto: era
        fermo alla 3.4.
+  4.8  **Taratura automatica del pannello**, dalla pagina Taratura. Il
+       pannello scrive nel log il refresh di ogni fotogramma: in regime sta
+       fermo, e quando crolla vuol dire che la libreria ha aspettato la
+       memoria mentre una riga restava accesa — che e' la riga chiara che si
+       vede. La taratura prova un parametro alla volta, conta i fotogrammi
+       rovinati e consiglia la configurazione migliore, che poi si applica e
+       si salva come profilo. La soglia e' **relativa** al regime di ogni
+       configurazione, altrimenti boccerebbe le piu' lente per il solo fatto
+       di esserlo; e le finestre in cui qualcuno ha usato la web UI vengono
+       **marcate e scartate**, perche' ogni richiesta e' esattamente il
+       disturbo che si sta misurando.
 """
 
-__version__ = "4.7"
+__version__ = "4.8"
