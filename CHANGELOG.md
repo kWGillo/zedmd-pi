@@ -62,6 +62,32 @@ Tutte le modifiche rilevanti del progetto.
   prova nuova rifiuta qualunque pareggio fra sorgenti: un pareggio non è un
   dettaglio estetico, è una sorgente che tace.
 
+### Diagnostica
+- **`diagnostica/misura_refresh.sh`: contare invece di guardare.** La caccia
+  alle righe chiare è andata avanti per settimane a occhio — cambia un
+  parametro, guarda il pannello, decidi se sembra meglio — e con un difetto
+  casuale quel metodo non distingue un miglioramento vero da una serie
+  fortunata. Ma la libreria scrive il refresh di **ogni fotogramma** nel log:
+  in regime sta fermo a 29,3 Hz, e ogni tanto crolla. Un tuffo a 18,9 vuol
+  dire un fotogramma durato 53 ms invece di 34, cioè diciannove millisecondi
+  passati ad aspettare la memoria mentre una riga restava accesa. **Quello è
+  il difetto**, e adesso si conta.
+
+  Lo script campiona una finestra e stampa quanti fotogrammi sono stati
+  disturbati; con `--sweep` cambia `pwm_bits` da solo, riavvia, aspetta
+  l'assestamento, misura e passa al valore dopo, restituendo una tabella. La
+  configurazione torna com'era anche se lo si interrompe — due trap distinte,
+  perché una trap su INT/TERM che si limita a ripulire non ferma lo script e
+  lo sweep proseguirebbe dopo il Ctrl+C. Verificato togliendola: la prova
+  fallisce, e il pannello resterebbe a `pwm_bits` 9 senza che nessuno lo
+  sappia.
+- **Il refresh nel log si può finalmente leggere.** La libreria lo riscrive
+  sulla stessa riga con un ritorno a capo, come una barra di avanzamento:
+  journald riceve un messaggio senza fine riga, decide che è binario e mostra
+  solo `[29.8K blob data]`. Serve `journalctl -a` e un `tr '\r\b' '\n\n'`.
+  Documentato, perché è il genere di cosa che fa credere per mesi che
+  un'opzione non funzioni.
+
 ### Documentazione
 - **README riscritto.** Era fermo alla 3.4 e dichiarava nove servizi su
   dodici: mancavano Scadenze, Google Calendar, il Game Boy, Breakout e

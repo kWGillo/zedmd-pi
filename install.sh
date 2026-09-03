@@ -62,6 +62,13 @@ fi
 # script di preparazione. PyBoy **non** si installa adesso — e' un pacchetto
 # di sistema, e chi non vuole l'emulatore non deve trovarselo installato.
 # Lo installa gb/setup_gb.sh, dal pulsante nella pagina Game Boy.
+# Gli strumenti di misura: non servono al servizio, servono a chi lo tara.
+if [ -d "$SRC_DIR/diagnostica" ]; then
+    mkdir -p /opt/dmd/diagnostica
+    cp "$SRC_DIR"/diagnostica/*.sh /opt/dmd/diagnostica/
+    chmod +x /opt/dmd/diagnostica/*.sh
+fi
+
 if [ -d "$SRC_DIR/gb" ]; then
     mkdir -p /opt/dmd/gb
     cp "$SRC_DIR"/gb/gb_dmd.py "$SRC_DIR"/gb/setup_gb.sh /opt/dmd/gb/

@@ -342,6 +342,7 @@ di Batocera (menu, caricamenti); alzalo se vedi passaggi indesiderati.
 /opt/dmd/scadenze.py      scadenze, semaforo e registro
 /opt/dmd/hass.py          entità di Home Assistant via MQTT Discovery
 /opt/dmd/rifiuti.py       calendario della raccolta: cadenze ed eccezioni
+/opt/dmd/diagnostica/     strumenti di misura del pannello, per la taratura
 /opt/dmd/doom/            preparazione e ponte verso doomgeneric
 /opt/dmd/gb/              preparazione e ponte verso PyBoy
 /srv/dmd/media            libreria media, condivisa come \\<ip>\dmd-media

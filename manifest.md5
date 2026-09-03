@@ -4,6 +4,7 @@
 d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 112957993893543e06c2302cfb040d28  config.json
+aaf73ad2879835f63cbd275095eb8f7d  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
 39700312db089e3d96de763793e32149  dmdconf.py
@@ -19,7 +20,7 @@ ba43a3f75c392ca49d006a5e4166ab6a  gb/gb_dmd.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 d3a24b8bba728b625a667ef4f72f53b9  hass.py
 b75646652311429e8ef663ed820ee366  i18n.py
-eecf7dc635a9a56681f26450a690973f  install.sh
+35564a8ea0d67f89efbce53cf6d77311  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
@@ -68,7 +69,7 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 fc820c3435f5edea162ed83ce33fb964  templates/services.html
 730c9c6ba3de8dfe6c577ad73677ef3c  templates/settings.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-c1bbdc293898e42c3ec251b39d8d0127  update.sh
+6df8717d0a8eea255f7085bb49539572  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
 b9b04eb8c8c3e9de4cc7473b8e22b6e3  version.py
 3880c6bf2c6d964a3fcfb6ccd7e5945d  webui.py
