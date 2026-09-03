@@ -48,6 +48,8 @@ import sys
 import time
 import urllib.request
 
+import staccato
+
 DATA_DIR = os.environ.get("DMD_AUTOTUNE_DIR", "/var/lib/dmd")
 STATO_PATH = os.path.join(DATA_DIR, "autotune.json")
 LOG_PATH = os.path.join(DATA_DIR, "autotune.log")
@@ -64,6 +66,10 @@ ASSESTAMENTO = int(os.environ.get("DMD_ASSESTAMENTO", "12"))
 # distinguibile dal caso. Configurabile solo perche' le prove non possono
 # aspettare mezzo minuto per riga.
 MIN_FINESTRA = int(os.environ.get("DMD_MIN_FINESTRA", "30"))
+
+# Quanto si aspetta che il processo appena avviato dichiari il suo numero.
+# Oltre, vuol dire che non e' mai partito.
+AVVIO_MASSIMO = 60
 
 # Di quanto un fotogramma deve stare sotto il regime per dirsi disturbato.
 CALO = 5.0          # tremolio
@@ -192,6 +198,13 @@ def in_corso():
     """
     dati = stato()
     if not dati.get("in_corso"):
+        return False
+    if not dati.get("pid"):
+        # Appena avviata: il processo non ha ancora scritto il suo numero.
+        # Gli si concede un minuto, poi vuol dire che non e' mai partito.
+        if time.time() - float(dati.get("iniziata", 0)) < AVVIO_MASSIMO:
+            return True
+        _chiudi_orfana(dati)
         return False
     if not _vivo(dati.get("pid")):
         _chiudi_orfana(dati)
@@ -492,13 +505,16 @@ def avvia(cfg, chiave=None, valori=None, minuti=2, giri=2):
             "--valori", ",".join(str(v) for v in valori),
             "--minuti", str(minuti), "--giri", str(giri),
             "--porta", str((cfg.get("web") or {}).get("port", 8080))]
-    processo = subprocess.Popen(args, start_new_session=True,
-                                stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
-    # Lo stato si scrive **qui**, non solo nel figlio: fra lo spawn e la sua
+    # Fuori dal cgroup del servizio, altrimenti il primo `systemctl restart
+    # dmd` — che la taratura stessa fa a ogni configurazione — la ammazza.
+    # Vedi staccato.py: e' costato una taratura intera.
+    staccato.lancia(args, "dmd-autotune")
+    # Lo stato si scrive **qui**, non solo nel figlio: fra l'avvio e la sua
     # prima scrittura passano dei secondi, e in quel buco l'interfaccia
-    # direbbe che non sta succedendo niente.
-    _scrivi_stato({"in_corso": True, "pid": processo.pid, "chiave": chiave,
+    # direbbe che non sta succedendo niente. Il pid non lo sappiamo — con
+    # un'unita' transitoria il processo non e' figlio nostro — e lo scrive
+    # lui appena parte.
+    _scrivi_stato({"in_corso": True, "pid": None, "chiave": chiave,
                    "valori": valori, "minuti": minuti, "giri": giri,
                    "fatte": 0, "totale": len(valori) * int(giri),
                    "iniziata": time.time(), "aggiornato": time.time(),

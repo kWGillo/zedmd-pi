@@ -1,7 +1,7 @@
 43413a31c32e500c1286ea2b4952c563  .gitignore
 011ddce0813df36532e15c1fd86a98ac  aerei.csv
 4884b249008a42c68fbd2c1b934c0a68  aeroporti.csv
-a8ba97e8124b6779ec7435ff580be907  autotune.py
+2f3221ceef25a3daa711ed9b8ba418a2  autotune.py
 d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 112957993893543e06c2302cfb040d28  config.json
@@ -26,7 +26,7 @@ d3a24b8bba728b625a667ef4f72f53b9  hass.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
 29e0f313a234ad9f497a09d7ef1645db  nowplaying.py
-13a2c974c1a6079f37d5ad43a74c36a2  ota.py
+14c72774dba471e7c07ef4a32ea2fa83  ota.py
 0aafffbefa4376e2b3c8a021143c74c2  presets.py
 374d8f430239d5d2ebb9ab5748c9fec5  rifiuti.py
 5698878038d0f306ecebc25bde34d88c  scadenze.py
@@ -52,6 +52,7 @@ e8d848a784cc0877be25075128962688  sources/giochi/invasori.py
 2a73be667459d2a58f2ddab91ff91a98  sources/scadenze.py
 9c78a0b718974f492c303164ac3d0dbf  sources/zedmd.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
+c750104c1eaa178d6958982586e89855  staccato.py
 f614c173dd38726a10229e188c88c859  static/style.css
 e7cbc43ed729a6fc7f71dc5d266d5a98  templates/banner.html
 faf04982f9b69651843accc45538f518  templates/base.html

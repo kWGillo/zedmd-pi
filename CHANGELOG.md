@@ -32,6 +32,19 @@ Tutte le modifiche rilevanti del progetto.
   non sono taratura, sono dire che pannello si ha, e stanno nei profili.
 
 ### Corretto
+- **La taratura moriva dopo pochi secondi.** Il processo veniva staccato con
+  `start_new_session`, che lo toglie dal terminale ma **non dal cgroup** del
+  servizio: e `systemctl restart dmd` — che la taratura stessa fa a ogni
+  configurazione — con il `KillMode` predefinito ammazza tutto quello che sta
+  nel cgroup. Da fuori sembrava che stesse lavorando: il file di stato restava
+  fermo a «0 su 10» e il pannello sul primo valore di prova. Ora parte come
+  unità transitoria di systemd, in un cgroup suo (`staccato.py`).
+- **Lo stesso difetto era nell'aggiornamento via rete**, e lì sarebbe stato
+  peggio: l'OTA riavvia il servizio a lavoro fatto a metà, con `/opt/dmd` già
+  riscritto, e morire in quel punto vuol dire restare a metà **senza nemmeno
+  il ripristino automatico**. Non era mai emerso perché l'aggiornamento lo si
+  è sempre lanciato da SSH, dove il processo nasce nel cgroup della sessione e
+  sopravvive; dal pulsante nella pagina web sarebbe morto. Corretto insieme.
 - **La taratura fantasma.** Spegnendo il Raspberry a metà taratura, il
   processo moriva e il file di stato restava a dire «in corso». Alla
   riaccensione le Impostazioni offrivano *Ferma la taratura* per una taratura
@@ -176,6 +189,19 @@ Tutte le modifiche rilevanti del progetto.
   un'opzione non funzioni.
 
 ### Corretto
+- **La taratura moriva dopo pochi secondi.** Il processo veniva staccato con
+  `start_new_session`, che lo toglie dal terminale ma **non dal cgroup** del
+  servizio: e `systemctl restart dmd` — che la taratura stessa fa a ogni
+  configurazione — con il `KillMode` predefinito ammazza tutto quello che sta
+  nel cgroup. Da fuori sembrava che stesse lavorando: il file di stato restava
+  fermo a «0 su 10» e il pannello sul primo valore di prova. Ora parte come
+  unità transitoria di systemd, in un cgroup suo (`staccato.py`).
+- **Lo stesso difetto era nell'aggiornamento via rete**, e lì sarebbe stato
+  peggio: l'OTA riavvia il servizio a lavoro fatto a metà, con `/opt/dmd` già
+  riscritto, e morire in quel punto vuol dire restare a metà **senza nemmeno
+  il ripristino automatico**. Non era mai emerso perché l'aggiornamento lo si
+  è sempre lanciato da SSH, dove il processo nasce nel cgroup della sessione e
+  sopravvive; dal pulsante nella pagina web sarebbe morto. Corretto insieme.
 - **La taratura fantasma.** Spegnendo il Raspberry a metà taratura, il
   processo moriva e il file di stato restava a dire «in corso». Alla
   riaccensione le Impostazioni offrivano *Ferma la taratura* per una taratura

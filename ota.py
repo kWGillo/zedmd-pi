@@ -115,8 +115,14 @@ def start_update(cfg):
     args = [sys.executable, os.path.join(INSTALL_DIR, "ota.py"), "--apply",
             "--repo", ota["repo"], "--branch", ota["branch"],
             "--port", str(cfg["web"]["port"])]
-    subprocess.Popen(args, start_new_session=True,
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # Fuori dal cgroup del servizio: `start_new_session` non basta, perche'
+    # il figlio ci resta dentro e `systemctl restart dmd` — che questo stesso
+    # processo fa a meta' lavoro — lo ammazzerebbe con /opt/dmd gia'
+    # riscritto e il ripristino automatico mai eseguito. Non era mai emerso
+    # perche' l'aggiornamento lo si lanciava da SSH, dove il processo nasce
+    # in un altro cgroup e sopravvive.
+    import staccato
+    staccato.lancia(args, "dmd-ota")
 
 
 # ---------------------------------------------------------------- installazione
