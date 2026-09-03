@@ -151,14 +151,55 @@ def stato():
         return {}
 
 
+def _vivo(pid):
+    """Vero se quel processo esiste **ed e' il nostro**.
+
+    Il controllo sul nome del comando non e' pignoleria: dopo un riavvio i
+    numeri di processo ricominciano da capo, e il 1234 di ieri oggi puo'
+    essere il server web. Senza guardare cosa sta girando davvero, una
+    taratura morta continuerebbe a sembrare viva a caso.
+    """
+    try:
+        with open("/proc/%d/cmdline" % int(pid), "rb") as handle:
+            argomenti = handle.read().split(b"\0")
+    except (OSError, ValueError, TypeError):
+        return False
+    # Confronto sul nome del file, non sottostringa: `test_autotune.py`
+    # contiene `autotune.py`, e passare per un sottoinsieme di nome sarebbe
+    # il modo piu' sciocco di scambiare un processo per un altro.
+    return any(os.path.basename(a.decode("utf-8", "replace")) == "autotune.py"
+               for a in argomenti if a)
+
+
+def _chiudi_orfana(dati):
+    """Una taratura il cui processo non c'e' piu' e' finita, punto."""
+    dati = dict(dati)
+    dati.update({"in_corso": False, "interrotta": True,
+                 "aggiornato": time.time()})
+    _scrivi_stato(dati)
+    log("taratura interrotta: il processo non c'e' piu' (riavvio o arresto)")
+
+
 def in_corso():
+    """Vero solo se una taratura sta **davvero** girando adesso.
+
+    Fidarsi del flag scritto nel file era un difetto vero: spegnendo il
+    Raspberry a meta' taratura, il processo moriva e il file restava a dire
+    "in corso". Alla riaccensione l'interfaccia offriva «Ferma la taratura»
+    per una taratura che non esisteva, e il pulsante per avviarne una non
+    tornava piu'. Un flag su disco dice cosa e' successo, non cosa sta
+    succedendo: quello lo dice solo il processo.
+    """
     dati = stato()
     if not dati.get("in_corso"):
         return False
-    # Una taratura che dice di essere in corso da piu' di sei ore e' un
-    # processo morto male: meglio dichiararla finita che bloccare per sempre
-    # il pulsante.
+    if not _vivo(dati.get("pid")):
+        _chiudi_orfana(dati)
+        return False
+    # Rete di sicurezza per il caso in cui il processo esista ma sia appeso:
+    # una finestra dura minuti, non ore.
     if time.time() - float(dati.get("aggiornato", 0)) > 6 * 3600:
+        _chiudi_orfana(dati)
         return False
     return True
 
@@ -341,6 +382,7 @@ def esegui(percorso_config, chiave, valori, minuti, giri, porta):
             "minuti": minuti, "giri": giri,
             "fatte": fatte, "totale": totale,
             "iniziata": iniziata, "aggiornato": time.time(),
+            "pid": os.getpid(),
             "righe": righe, "riepilogo": riassumi(righe),
             "originale": originale,
         }
@@ -450,13 +492,35 @@ def avvia(cfg, chiave=None, valori=None, minuti=2, giri=2):
             "--valori", ",".join(str(v) for v in valori),
             "--minuti", str(minuti), "--giri", str(giri),
             "--porta", str((cfg.get("web") or {}).get("port", 8080))]
-    subprocess.Popen(args, start_new_session=True,
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    processo = subprocess.Popen(args, start_new_session=True,
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
+    # Lo stato si scrive **qui**, non solo nel figlio: fra lo spawn e la sua
+    # prima scrittura passano dei secondi, e in quel buco l'interfaccia
+    # direbbe che non sta succedendo niente.
+    _scrivi_stato({"in_corso": True, "pid": processo.pid, "chiave": chiave,
+                   "valori": valori, "minuti": minuti, "giri": giri,
+                   "fatte": 0, "totale": len(valori) * int(giri),
+                   "iniziata": time.time(), "aggiornato": time.time(),
+                   "righe": [], "riepilogo": [], "consiglio": None})
     return valori
 
 
 def ferma():
-    """Chiede alla taratura di fermarsi alla prossima configurazione."""
+    """Chiede alla taratura di fermarsi alla prossima configurazione.
+
+    Se non ne sta girando nessuna, ripulisce lo stato invece di lasciare in
+    giro un file di stop che fermerebbe la prossima.
+    """
+    if not in_corso():
+        dati = stato()
+        if dati:
+            _chiudi_orfana(dati)
+        try:
+            os.remove(STOP_PATH)
+        except OSError:
+            pass
+        return False
     os.makedirs(DATA_DIR, exist_ok=True)
     with open(STOP_PATH, "w") as handle:
         handle.write("%d\n" % time.time())

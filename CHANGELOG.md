@@ -31,6 +31,18 @@ Tutte le modifiche rilevanti del progetto.
   del bit minimo, bit con dithering. La geometria e il tipo di chip no: quelli
   non sono taratura, sono dire che pannello si ha, e stanno nei profili.
 
+### Corretto
+- **La taratura fantasma.** Spegnendo il Raspberry a metà taratura, il
+  processo moriva e il file di stato restava a dire «in corso». Alla
+  riaccensione le Impostazioni offrivano *Ferma la taratura* per una taratura
+  che non esisteva, e il pulsante per avviarne una non tornava più — per sei
+  ore. Un flag su disco dice cosa è successo, non cosa sta succedendo: ora si
+  controlla che il processo esista **e sia davvero il nostro**, confrontando
+  il nome del comando e non una sottostringa (dopo un riavvio i numeri di
+  processo ricominciano da capo, e il 1234 di ieri oggi può essere il server
+  web). Lo stato si ripulisce da solo alla prima occhiata. Verificato
+  rimettendo il difetto: la prova fallisce.
+
 ### Misurato
 - **`slowdown` è la leva del refresh, e va verso il basso.** Da 4 a 8 il
   pannello passa da 38,2 a 23,4 Hz. Il valore consigliato dalla misura è **5**:
@@ -162,6 +174,18 @@ Tutte le modifiche rilevanti del progetto.
   solo `[29.8K blob data]`. Serve `journalctl -a` e un `tr '\r\b' '\n\n'`.
   Documentato, perché è il genere di cosa che fa credere per mesi che
   un'opzione non funzioni.
+
+### Corretto
+- **La taratura fantasma.** Spegnendo il Raspberry a metà taratura, il
+  processo moriva e il file di stato restava a dire «in corso». Alla
+  riaccensione le Impostazioni offrivano *Ferma la taratura* per una taratura
+  che non esisteva, e il pulsante per avviarne una non tornava più — per sei
+  ore. Un flag su disco dice cosa è successo, non cosa sta succedendo: ora si
+  controlla che il processo esista **e sia davvero il nostro**, confrontando
+  il nome del comando e non una sottostringa (dopo un riavvio i numeri di
+  processo ricominciano da capo, e il 1234 di ieri oggi può essere il server
+  web). Lo stato si ripulisce da solo alla prima occhiata. Verificato
+  rimettendo il difetto: la prova fallisce.
 
 ### Misurato
 - **La contesa sul bus è dimostrata con un numero.** Stessa configurazione,
