@@ -32,6 +32,20 @@ Tutte le modifiche rilevanti del progetto.
   non sono taratura, sono dire che pannello si ha, e stanno nei profili.
 
 ### Corretto
+- **Il profilo tarato non compariva mai nel menu.** La taratura finiva, il
+  risultato veniva scritto in `/etc/dmd/config.json`, il servizio ripartiva —
+  e il profilo spariva. `dmdconf._merge` costruiva la configurazione
+  scorrendo **solo le chiavi dei default**: tutto quello che stava nel file e
+  non nei default veniva buttato al caricamento, e il primo salvataggio lo
+  cancellava anche dal disco. Nessun errore, nessun messaggio. Ora le chiavi
+  sconosciute vengono tenute: di roba scritta da una versione più nuova, o da
+  una funzione che scrive fuori dai default, non si sa niente — e non sapere
+  niente non autorizza a cancellare.
+
+  Le prove non l'avevano visto perché leggevano il file di configurazione a
+  mano, cioè da una porta diversa da quella che usa la web UI. Ora ce n'è una
+  che fa il giro intero: carica con `dmdconf`, guarda il menu, salva,
+  ricarica.
 - **La taratura moriva dopo pochi secondi.** Il processo veniva staccato con
   `start_new_session`, che lo toglie dal terminale ma **non dal cgroup** del
   servizio: e `systemctl restart dmd` — che la taratura stessa fa a ogni
@@ -189,6 +203,20 @@ Tutte le modifiche rilevanti del progetto.
   un'opzione non funzioni.
 
 ### Corretto
+- **Il profilo tarato non compariva mai nel menu.** La taratura finiva, il
+  risultato veniva scritto in `/etc/dmd/config.json`, il servizio ripartiva —
+  e il profilo spariva. `dmdconf._merge` costruiva la configurazione
+  scorrendo **solo le chiavi dei default**: tutto quello che stava nel file e
+  non nei default veniva buttato al caricamento, e il primo salvataggio lo
+  cancellava anche dal disco. Nessun errore, nessun messaggio. Ora le chiavi
+  sconosciute vengono tenute: di roba scritta da una versione più nuova, o da
+  una funzione che scrive fuori dai default, non si sa niente — e non sapere
+  niente non autorizza a cancellare.
+
+  Le prove non l'avevano visto perché leggevano il file di configurazione a
+  mano, cioè da una porta diversa da quella che usa la web UI. Ora ce n'è una
+  che fa il giro intero: carica con `dmdconf`, guarda il menu, salva,
+  ricarica.
 - **La taratura moriva dopo pochi secondi.** Il processo veniva staccato con
   `start_new_session`, che lo toglie dal terminale ma **non dal cgroup** del
   servizio: e `systemctl restart dmd` — che la taratura stessa fa a ogni

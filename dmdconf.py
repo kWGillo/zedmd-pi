@@ -441,13 +441,39 @@ _config = None
 
 
 def _merge(base, override):
-    """Fonde ricorsivamente l'override sui default, senza perdere chiavi nuove."""
+    """Fonde ricorsivamente l'override sui default.
+
+    Due direzioni, e la seconda e' costata una taratura intera.
+
+    **Dai default al risultato**: una chiave aggiunta da una versione nuova
+    compare anche in una configurazione scritta da una vecchia, con il suo
+    valore predefinito. E' il motivo per cui l'aggiornamento via rete puo'
+    non eseguire nessuno script di migrazione.
+
+    **Dal file al risultato**: una chiave che sta nel file ma **non** nei
+    default va tenuta lo stesso. Prima non era cosi': il risultato si
+    costruiva scorrendo solo i default, e tutto il resto spariva senza dire
+    niente. La taratura scriveva `panel.autotune` nel file, il servizio
+    ripartiva, il caricamento lo buttava via, e il primo salvataggio lo
+    cancellava anche dal disco — con il profilo che non compariva mai nel
+    menu e nessun errore da nessuna parte.
+
+    Buttare una chiave sconosciuta e' sempre stata una decisione sbagliata:
+    di roba scritta da una versione **piu' nuova**, o da una funzione che
+    scrive fuori dai default, non si sa niente — e non sapere niente non
+    autorizza a cancellare.
+    """
+    override = override or {}
     out = {}
     for key, value in base.items():
         if isinstance(value, dict):
-            out[key] = _merge(value, (override or {}).get(key, {}))
+            sotto = override.get(key)
+            out[key] = _merge(value, sotto if isinstance(sotto, dict) else {})
         else:
-            out[key] = (override or {}).get(key, value)
+            out[key] = override.get(key, value)
+    for key, value in override.items():
+        if key not in out:
+            out[key] = value
     return out
 
 

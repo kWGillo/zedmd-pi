@@ -8,7 +8,7 @@ d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
-39700312db089e3d96de763793e32149  dmdconf.py
+e3f1cb2f5855ab2aec3941179a6c070b  dmdconf.py
 0e1ef5f3b1dc1b006a9eea55d3d38bf2  dmdd.py
 397862a19501abc030946d1b6c39463c  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
