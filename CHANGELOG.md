@@ -74,19 +74,52 @@ Tutte le modifiche rilevanti del progetto.
   il difetto**, e adesso si conta.
 
   Lo script campiona una finestra e stampa quanti fotogrammi sono stati
-  disturbati; con `--sweep` cambia `pwm_bits` da solo, riavvia, aspetta
+  disturbati; con `--sweep` cambia il parametro da solo, riavvia, aspetta
   l'assestamento, misura e passa al valore dopo, restituendo una tabella. La
   configurazione torna com'era anche se lo si interrompe — due trap distinte,
   perché una trap su INT/TERM che si limita a ripulire non ferma lo script e
   lo sweep proseguirebbe dopo il Ctrl+C. Verificato togliendola: la prova
   fallisce, e il pannello resterebbe a `pwm_bits` 9 senza che nessuno lo
   sappia.
+- **`--confronto`: l'esperimento della contesa in un comando.** Misura a
+  riposo, poi sotto carico generando lei la zavorra su disco con
+  `oflag=direct`. Nasce da un errore fatto sul campo: coordinare due terminali
+  a mano aveva prodotto due istanze che leggevano lo stesso journal e
+  stampavano lo stesso numero, con l'illusione di un confronto.
+- **`--chiave`: si sweepa qualunque parametro, non solo `pwm_bits`.** Sul
+  primo sweep vero è emerso che su questo pannello **`pwm_bits` non muove il
+  refresh**: 11, 10 e 9 danno 29,0 / 29,2 / 29,6 Hz, cioè il 2% su due
+  dimezzamenti. Su un pannello normale ogni bit varrebbe un raddoppio; qui la
+  modulazione la fa il chip S-PWM e i piani di bit non vengono usati. Buona
+  notizia travestita da vicolo cieco: gli 11 bit di profondità sono gratis. La
+  leva vera è `slowdown`, e ora si può provare.
+- **`--giri`: le configurazioni si alternano invece di misurarle in fila.**
+  Due misure identiche a distanza di quattro minuti avevano dato 20 e 0
+  fotogrammi disturbati: la prima era partita un secondo dopo un
+  aggiornamento OTA, con la scheda SD ancora occupata a smaltire le
+  scritture. Misurate in fila, ogni configurazione si prende il rumore del
+  proprio momento; a giro, il rumore si spalma su tutte.
+- **Un lucchetto contro le istanze doppie**, preso con `mkdir` perché è
+  atomico: con un file, fra il controllo e la creazione due processi
+  passerebbero entrambi.
 - **Il refresh nel log si può finalmente leggere.** La libreria lo riscrive
   sulla stessa riga con un ritorno a capo, come una barra di avanzamento:
   journald riceve un messaggio senza fine riga, decide che è binario e mostra
   solo `[29.8K blob data]`. Serve `journalctl -a` e un `tr '\r\b' '\n\n'`.
   Documentato, perché è il genere di cosa che fa credere per mesi che
   un'opzione non funzioni.
+
+### Misurato
+- **La contesa sul bus è dimostrata con un numero.** Stessa configurazione,
+  due finestre da due minuti: **0** fotogrammi disturbati a riposo, **80**
+  (40 al minuto) con la scheda SD sotto carico, e il refresh minimo che crolla
+  da 28,3 a 18,6 Hz — fotogrammi da 53 ms invece di 34. La catena carico →
+  tuffi nel refresh → righe chiare sul pannello smette di essere una
+  ricostruzione e diventa una misura.
+- **Il refresh reale è 29 Hz**, non i 38 citati in un paio di punti della
+  documentazione, ora corretti. È basso: ogni fotogramma dura 34 ms, e un
+  inciampo di venti millisecondi dentro quella finestra è una riga ben
+  visibile. A refresh più alto lo stesso inciampo peserebbe molto meno.
 
 ### Documentazione
 - **README riscritto.** Era fermo alla 3.4 e dichiarava nove servizi su

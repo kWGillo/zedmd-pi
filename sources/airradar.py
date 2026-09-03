@@ -505,7 +505,7 @@ class AirRadarSource(Source):
         """Fa scorrere la sola fascia dei dettagli, da destra a sinistra.
 
         Il testo che scorre si legge senza aspettare, ma e' anche l'unica
-        parte del pannello in movimento continuo: su una matrice a 38 Hz
+        parte del pannello in movimento continuo: su una matrice a 29 Hz
         lascia una scia leggera. E' il motivo per cui non e' la modalita'
         predefinita.
 

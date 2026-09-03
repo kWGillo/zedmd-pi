@@ -701,7 +701,7 @@ La pagina Radar decide come comportarsi:
 | Modalità | Che cosa fa |
 |---|---|
 | **A pagine** (predefinita) | I campi si dividono in gruppi che ci stanno per intero e si alternano ogni `page_seconds` secondi. Non se ne perde nessuno, e il testo resta fermo. |
-| **Scorrevole** | La riga passa da destra a sinistra a `scroll_speed` pixel al secondo. Si legge senza attese, ma è l'unica parte del pannello in movimento continuo: su una matrice a 38 Hz lascia una scia leggera. Qui `display_seconds` diventa un **minimo**: una passata iniziata arriva in fondo, e si cambia aereo quando il testo è uscito del tutto da sinistra. |
+| **Scorrevole** | La riga passa da destra a sinistra a `scroll_speed` pixel al secondo. Si legge senza attese, ma è l'unica parte del pannello in movimento continuo: su una matrice a 29 Hz lascia una scia leggera. Qui `display_seconds` diventa un **minimo**: una passata iniziata arriva in fondo, e si cambia aereo quando il testo è uscito del tutto da sinistra. |
 | **Accorcia la riga** | Il comportamento fino alla 1.11.3: i campi in eccesso vengono scartati dal fondo. |
 
 Identificativo e rotta non si muovono mai: cambia solo la fascia bassa, così

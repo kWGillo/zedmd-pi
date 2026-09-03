@@ -4,7 +4,7 @@
 d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 112957993893543e06c2302cfb040d28  config.json
-aaf73ad2879835f63cbd275095eb8f7d  diagnostica/misura_refresh.sh
+adab0c2b5f04719898165b3cffb1d93b  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
 39700312db089e3d96de763793e32149  dmdconf.py
@@ -32,7 +32,7 @@ b75646652311429e8ef663ed820ee366  i18n.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 7ee163e5c89f7ac983b26ae09a1a4b92  setup_share.sh
 053f3c704b9bbca0fd5ae6df8df6ce19  sources/__init__.py
-a9cc678c5e2734cb68e9729a60b2b1b7  sources/airradar.py
+a9e0d1e3f4c8bc605f36daac176c5188  sources/airradar.py
 4839d9f4d5cbf59bfe83a946f7c272ee  sources/anteprima.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
 55c9a31b9be438ad88d3a08b53fb1c9a  sources/base.py
