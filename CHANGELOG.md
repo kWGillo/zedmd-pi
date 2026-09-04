@@ -2,36 +2,24 @@
 
 Tutte le modifiche rilevanti del progetto.
 
-## [4.8]
+## [4.8.1]
 
-### Aggiunto
-- **Taratura automatica del pannello**: un pulsante *Avvia taratura* nelle
-  Impostazioni, sotto il menu dei profili. Misura il pannello a diversi
-  rallentamenti, rimette tutto com'era, e aggiunge al menu una voce
-  *Autotune — Rallentamento GPIO 5* con la configurazione trovata. Nient'altro:
-  la taratura **propone**, non decide, e il profilo si applica come qualunque
-  altro. Nasce da una campagna di prove durata settimane fatta a occhio, che
-  con un difetto casuale non distingueva un miglioramento vero da una serie
-  fortunata.
-- **I fotogrammi contaminati si marcano e si scartano.** Ogni richiesta alla
-  web UI è Python che lavora e rete che si muove, cioè esattamente il disturbo
-  che si sta misurando. Spegnere l'interfaccia durante la misura non si può —
-  servirebbe per far partire la taratura e per leggerne i risultati — quindi
-  si fa l'altra cosa: si conta il traffico durante ogni finestra e le finestre
-  sporcate si dichiarano. Una misura sporca dichiarata vale più di una che
-  credi pulita. Per la stessa ragione **la pagina non si aggiorna da sola**, e
-  lo dice: un auto-refresh genererebbe da solo il disturbo da contare.
-- **Profilo «Autotune»** fra i profili del pannello, salvato con la sua misura
-  così ci si può tornare. Contiene **solo il parametro tarato**: una taratura
-  non ha misurato la geometria del pannello e non deve riscriverla. Se non
-  esce nessun consiglio — tutte le finestre contaminate, per dire — non
-  compare nessuna voce: meglio nessun profilo che uno costruito su misure
-  sporche.
-- **Quattro parametri tarabili**: rallentamento GPIO, profondità PWM, durata
-  del bit minimo, bit con dithering. La geometria e il tipo di chip no: quelli
-  non sono taratura, sono dire che pannello si ha, e stanno nei profili.
+Quattro difetti trovati usando la 4.8 sul pannello vero, in un paio d'ore.
+Tre erano miei e nuovi; il quarto — quello di `dmdconf` — stava lì da sempre,
+e la taratura ha solo avuto la sfortuna di essere la prima funzione a
+scrivere una chiave fuori dai valori predefiniti.
 
-### Corretto
+- **Scegliere un profilo non lo applicava.** Per infilare il pulsante della
+  taratura nella scheda del pannello avevo **spezzato in due il modulo**: il
+  menu dei profili finiva nel pezzo senza pulsante, quindi premendo Salva non
+  veniva inviato affatto. Si sceglieva un profilo, si salvava, e la voce
+  tornava su «Personalizzata» con i parametri invariati — mentre modificare un
+  campo a mano funzionava, perché quei campi stavano nell'altro pezzo. E il
+  pulsante più vicino al menu era diventato *Avvia taratura*, che infatti
+  partiva da sola quando si cercava di cambiare i parametri. Il modulo è di
+  nuovo uno solo e la taratura sta sotto, dov'è un'altra azione. Una prova
+  nuova pretende che il modulo del pannello sia unico e contenga sia il menu
+  sia il pulsante.
 - **Il profilo tarato non compariva mai nel menu.** La taratura finiva, il
   risultato veniva scritto in `/etc/dmd/config.json`, il servizio ripartiva —
   e il profilo spariva. `dmdconf._merge` costruiva la configurazione
@@ -69,6 +57,36 @@ Tutte le modifiche rilevanti del progetto.
   processo ricominciano da capo, e il 1234 di ieri oggi può essere il server
   web). Lo stato si ripulisce da solo alla prima occhiata. Verificato
   rimettendo il difetto: la prova fallisce.
+
+
+## [4.8]
+
+### Aggiunto
+- **Taratura automatica del pannello**: un pulsante *Avvia taratura* nelle
+  Impostazioni, sotto il menu dei profili. Misura il pannello a diversi
+  rallentamenti, rimette tutto com'era, e aggiunge al menu una voce
+  *Autotune — Rallentamento GPIO 5* con la configurazione trovata. Nient'altro:
+  la taratura **propone**, non decide, e il profilo si applica come qualunque
+  altro. Nasce da una campagna di prove durata settimane fatta a occhio, che
+  con un difetto casuale non distingueva un miglioramento vero da una serie
+  fortunata.
+- **I fotogrammi contaminati si marcano e si scartano.** Ogni richiesta alla
+  web UI è Python che lavora e rete che si muove, cioè esattamente il disturbo
+  che si sta misurando. Spegnere l'interfaccia durante la misura non si può —
+  servirebbe per far partire la taratura e per leggerne i risultati — quindi
+  si fa l'altra cosa: si conta il traffico durante ogni finestra e le finestre
+  sporcate si dichiarano. Una misura sporca dichiarata vale più di una che
+  credi pulita. Per la stessa ragione **la pagina non si aggiorna da sola**, e
+  lo dice: un auto-refresh genererebbe da solo il disturbo da contare.
+- **Profilo «Autotune»** fra i profili del pannello, salvato con la sua misura
+  così ci si può tornare. Contiene **solo il parametro tarato**: una taratura
+  non ha misurato la geometria del pannello e non deve riscriverla. Se non
+  esce nessun consiglio — tutte le finestre contaminate, per dire — non
+  compare nessuna voce: meglio nessun profilo che uno costruito su misure
+  sporche.
+- **Quattro parametri tarabili**: rallentamento GPIO, profondità PWM, durata
+  del bit minimo, bit con dithering. La geometria e il tipo di chip no: quelli
+  non sono taratura, sono dire che pannello si ha, e stanno nei profili.
 
 ### Misurato
 - **`slowdown` è la leva del refresh, e va verso il basso.** Da 4 a 8 il
@@ -203,6 +221,17 @@ Tutte le modifiche rilevanti del progetto.
   un'opzione non funzioni.
 
 ### Corretto
+- **Scegliere un profilo non lo applicava.** Per infilare il pulsante della
+  taratura nella scheda del pannello avevo **spezzato in due il modulo**: il
+  menu dei profili finiva nel pezzo senza pulsante, quindi premendo Salva non
+  veniva inviato affatto. Si sceglieva un profilo, si salvava, e la voce
+  tornava su «Personalizzata» con i parametri invariati — mentre modificare un
+  campo a mano funzionava, perché quei campi stavano nell'altro pezzo. E il
+  pulsante più vicino al menu era diventato *Avvia taratura*, che infatti
+  partiva da sola quando si cercava di cambiare i parametri. Il modulo è di
+  nuovo uno solo e la taratura sta sotto, dov'è un'altra azione. Una prova
+  nuova pretende che il modulo del pannello sia unico e contenga sia il menu
+  sia il pulsante.
 - **Il profilo tarato non compariva mai nel menu.** La taratura finiva, il
   risultato veniva scritto in `/etc/dmd/config.json`, il servizio ripartiva —
   e il profilo spariva. `dmdconf._merge` costruiva la configurazione

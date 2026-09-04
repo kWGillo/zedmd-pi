@@ -672,6 +672,18 @@ Storico:
        di esserlo; e le finestre in cui qualcuno ha usato la web UI vengono
        **marcate e scartate**, perche' ogni richiesta e' esattamente il
        disturbo che si sta misurando.
+  4.8.1 Quattro difetti trovati usando la 4.8 sul pannello vero. Scegliere un
+       profilo non lo applicava, perche' il modulo del pannello era rimasto
+       spezzato in due e il menu finiva nel pezzo senza pulsante. Il profilo
+       tarato non compariva mai: `dmdconf` costruiva la configurazione
+       scorrendo solo le chiavi dei valori predefiniti, e buttava via tutto il
+       resto al caricamento — difetto vecchio quanto il progetto, che la
+       taratura e' stata la prima a incontrare. La taratura moriva dopo pochi
+       secondi, perche' `start_new_session` non la toglieva dal cgroup del
+       servizio e il primo `systemctl restart` la ammazzava; lo stesso valeva
+       per l'aggiornamento via rete lanciato dal pulsante web, dove sarebbe
+       stato peggio. E una taratura interrotta da uno spegnimento continuava a
+       dichiararsi in corso.
 """
 
-__version__ = "4.8"
+__version__ = "4.8.1"

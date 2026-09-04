@@ -65,8 +65,8 @@ b07c92e34dc3053d7fbd3a2499c746f8  templates/radar.html
 f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 403872d6a716a4b13b8775cfbbdd355a  templates/scadenze.html
 fc820c3435f5edea162ed83ce33fb964  templates/services.html
-b2f8071b93547202c32601370dd4835e  templates/settings.html
+8c82596b38c6babd65e54adb819178fa  templates/settings.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-c095eab2f3afa2323ac2cae8e68204e2  version.py
+0443fcc5aab111af2e47bb6cc48e7511  version.py
 c38133d5e02f720bdaf53d27c0e9730c  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py
