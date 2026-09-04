@@ -696,6 +696,11 @@ Storico:
        dalla taratura era lo stesso del profilo di fabbrica, ogni
        configurazione risultava "tarata". Ora il profilo tarato vale solo se
        e' stato scelto, non se i valori per caso coincidono.
+  4.8.4 Il modulo del pannello tagliava lo `slowdown` a 6, mentre la taratura
+       arriva a provare 7 e 8: un profilo tarato su 7 sarebbe stato riportato
+       a 6 al primo salvataggio, in silenzio. Due pezzi dello stesso
+       programma non possono avere due idee di cosa sia un valore ammesso, e
+       ora una prova confronta i due elenchi.
 """
 
-__version__ = "4.8.3"
+__version__ = "4.8.4"

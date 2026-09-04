@@ -2,6 +2,14 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.8.4]
+
+- **Il modulo del pannello tagliava lo `slowdown` a 6**, mentre la taratura
+  arriva a provare 7 e 8. Un profilo tarato su 7 sarebbe stato riportato a 6
+  al primo salvataggio successivo, senza dire niente. Due pezzi dello stesso
+  programma non possono avere due idee di cosa sia un valore ammesso: ora una
+  prova confronta i due elenchi e fallisce se divergono.
+
 ## [4.8.3]
 
 - **Il menu dei profili tornava sempre su «Autotune».** Il profilo tarato

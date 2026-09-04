@@ -73,6 +73,6 @@ fc820c3435f5edea162ed83ce33fb964  templates/services.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 6df8717d0a8eea255f7085bb49539572  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-a57db03d6a38f170d29560c63eb6b55e  version.py
-2ed74e334bfa123bea9f3935962c92d8  webui.py
+cad84512f72c5e7712155885ea9d1945  version.py
+4e2917807e9ed16ce9a92469c50528e3  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

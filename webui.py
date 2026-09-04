@@ -1288,7 +1288,14 @@ def create_app(runtime):
                                         ("pwm_bits", 1, 11, 11),
                                         ("pwm_lsb_nanoseconds", 50, 3000, 130),
                                         ("pwm_dither_bits", 0, 2, 0),
-                                        ("slowdown", 0, 6, 3),
+                                        # Fino a 10, non a 6: la taratura prova
+                                        # anche 7 e 8, e con il limite a 6 un
+                                        # profilo tarato su 7 veniva silenziosamente
+                                        # riportato a 6 al salvataggio successivo.
+                                        # Due pezzi dello stesso programma non
+                                        # possono avere due idee di cosa sia un
+                                        # valore ammesso.
+                                        ("slowdown", 0, 10, 3),
                                         ("spwm_register_config", 0, 77, 2)):
             try:
                 panel[key] = max(low, min(high, int(request.form.get(key, default))))

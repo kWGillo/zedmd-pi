@@ -67,6 +67,6 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 fc820c3435f5edea162ed83ce33fb964  templates/services.html
 646a443a85c4c90d10b96a2581ec63d9  templates/settings.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-a57db03d6a38f170d29560c63eb6b55e  version.py
-2ed74e334bfa123bea9f3935962c92d8  webui.py
+cad84512f72c5e7712155885ea9d1945  version.py
+4e2917807e9ed16ce9a92469c50528e3  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py
