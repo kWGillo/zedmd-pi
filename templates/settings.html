@@ -100,6 +100,11 @@
 
   <form method="post" action="{{ url_for('api_panel') }}">
     <label for="preset">{{ t('preset.label') }}</label>
+    {# Quale voce c'era quando la pagina e' stata disegnata. Serve a
+       distinguere "ho cambiato profilo" da "ho modificato un numero": nel
+       primo caso il profilo va riapplicato, nel secondo riapplicarlo
+       cancellerebbe la modifica appena fatta. #}
+    <input type="hidden" name="preset_attuale" value="{{ preset_now }}">
     <select id="preset" name="preset">
       {% for key, etichetta in presets %}
       <option value="{{ key }}" {{ 'selected' if preset_now == key }}>

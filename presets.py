@@ -126,21 +126,41 @@ def matches(panel, key):
 
 
 def detect(panel):
-    """Il profilo a cui corrisponde la configurazione attuale, o `custom`.
+    """Che voce mostrare nel menu: **quella scelta**, se regge ancora.
 
-    Il profilo tarato **non si riconosce dai valori**, e la prima versione
-    che ci provava era sbagliata in modo grossolano: contiene un parametro
-    solo, e un parametro solo coincide con mezzo mondo — a cominciare dal
-    profilo di fabbrica, che quel valore ce l'ha uguale. Il risultato era che
-    il menu tornava sempre su «Autotune» qualunque cosa si scegliesse, e
-    sembrava che la taratura partisse da sola.
+    La regola e' una sola, e viene prima di tutto il resto: se l'utente ha
+    scelto una voce e i valori sono ancora quelli, il menu mostra **quella
+    voce**. Non un'altra che per caso ha gli stessi numeri.
 
-    Quindi vale **solo se e' stato scelto**: se `preset` dice autotune e i
-    valori ci sono ancora, e' quello; altrimenti si guardano i profili veri,
-    che di parametri ne hanno venti e non si confondono.
+    Serviva dirlo perche' la versione precedente faceva il contrario: cercava
+    a chi somigliassero i valori, e rispondeva con il primo profilo che
+    combaciava. Due conseguenze, tutte e due sbagliate.
+
+    La prima, la piu' fastidiosa: si sceglieva «Personalizzata», si salvava,
+    e al ricaricamento il menu diceva «FM6373 & DP32020B». Vero che i numeri
+    erano quelli — «Personalizzata» non li cambia, e' il suo mestiere — ma la
+    scelta dell'utente era sparita dallo schermo. E non era solo estetica:
+    `api_panel` applica il profilo che vede nel menu **dopo** aver scritto i
+    campi del modulo, quindi finche' li' c'era scritto un profilo di fabbrica
+    ogni modifica a mano veniva riscritta al salvataggio successivo. Mostrare
+    «Personalizzata» e' cio' che rende possibile modificare a mano.
+
+    La seconda riguardava il profilo tarato: ha un parametro solo, e un
+    parametro solo coincide con mezzo mondo — a cominciare dal profilo di
+    fabbrica, che quel valore ce l'ha uguale.
+
+    `matches` resta come rete: se i valori non corrispondono piu' alla voce
+    scelta — qualcuno ha modificato un campo a mano — la scelta e' decaduta e
+    si torna a riconoscere dai valori. Per `custom` non c'e' niente da
+    verificare: e' la voce che dice «questi numeri li ho scelti io».
     """
-    if (panel or {}).get("preset") == AUTOTUNE and matches(panel, AUTOTUNE):
+    scelto = (panel or {}).get("preset")
+    if scelto == CUSTOM:
+        return CUSTOM
+    if scelto == AUTOTUNE and matches(panel, AUTOTUNE):
         return AUTOTUNE
+    if scelto in PRESETS and matches(panel, scelto):
+        return scelto
     for key in PRESETS:
         if matches(panel, key):
             return key

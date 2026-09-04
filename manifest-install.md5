@@ -23,7 +23,7 @@ d3a24b8bba728b625a667ef4f72f53b9  hass.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
 29e0f313a234ad9f497a09d7ef1645db  nowplaying.py
 14c72774dba471e7c07ef4a32ea2fa83  ota.py
-5f9308e3d346ccc65d198e3ec6116dd7  presets.py
+93965a204d48b45ce5aabd985e80364b  presets.py
 374d8f430239d5d2ebb9ab5748c9fec5  rifiuti.py
 5698878038d0f306ecebc25bde34d88c  scadenze.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
@@ -65,8 +65,8 @@ b07c92e34dc3053d7fbd3a2499c746f8  templates/radar.html
 f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 403872d6a716a4b13b8775cfbbdd355a  templates/scadenze.html
 fc820c3435f5edea162ed83ce33fb964  templates/services.html
-646a443a85c4c90d10b96a2581ec63d9  templates/settings.html
+93462ac10d113c59bf1012fe92cb165b  templates/settings.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-cad84512f72c5e7712155885ea9d1945  version.py
-4e2917807e9ed16ce9a92469c50528e3  webui.py
+0ebcae379b459581b653a2a2fea75aaf  version.py
+7a8602abd40f14bf000f71ad57a0f80a  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

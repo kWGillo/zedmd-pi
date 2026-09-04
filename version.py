@@ -701,6 +701,18 @@ Storico:
        a 6 al primo salvataggio, in silenzio. Due pezzi dello stesso
        programma non possono avere due idee di cosa sia un valore ammesso, e
        ora una prova confronta i due elenchi.
+  4.8.5 Il menu dei profili mostra la voce **scelta**, non quella a cui i
+       numeri somigliano. Si sceglieva «Personalizzata», si salvava, si
+       ricaricava e compariva «FM6373 & DP32020B»: i valori erano quelli —
+       «Personalizzata» non li cambia, e' il suo mestiere — ma la scelta
+       spariva dallo schermo.
+       Non era estetica. Il profilo veniva riapplicato *dopo* i campi del
+       modulo a ogni salvataggio, anche quando la voce del menu non era stata
+       toccata: si portava il PWM da 10 a 11, si premeva Applica, e tornava
+       10 senza dire niente. Ora il profilo si riapplica solo se la voce
+       **cambia** — la pagina dichiara al modulo quale stava mostrando — e
+       modificare un numero a mano porta il menu su «Personalizzata», che e'
+       esattamente quello che e' successo.
 """
 
-__version__ = "4.8.4"
+__version__ = "4.8.5"

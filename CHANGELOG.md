@@ -2,6 +2,24 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.8.5]
+
+- **Scegliendo «Personalizzata» il menu tornava sul profilo di fabbrica.**
+  Si sceglieva la voce, si salvava, si ricaricava la pagina e compariva
+  *FM6373 & DP32020B*. I numeri erano davvero quelli — «Personalizzata» non
+  li cambia, è il suo mestiere — ma il menu rispondeva alla domanda sbagliata:
+  diceva *a chi somigliano i valori* invece di *cosa ho scelto*. Ora la voce
+  scelta resta mostrata finché i valori le corrispondono; quando non
+  corrispondono più si passa a «Personalizzata».
+
+- **Modificare un numero a mano non veniva salvato.** È la stessa cosa vista
+  dall'altra parte, ed è il difetto serio dei due. Il profilo si riapplica
+  *dopo* i campi del modulo — ed è giusto, perché cambiare voce nel menu vuol
+  dire «riportami a quei valori» — ma lo faceva a **ogni** salvataggio, anche
+  quando la voce non era stata toccata. Risultato: PWM da 10 a 11, Applica, e
+  tornava 10 in silenzio. Ora la pagina dichiara al modulo quale voce stava
+  mostrando, e il profilo si riapplica **solo se la voce cambia**.
+
 ## [4.8.4]
 
 - **Il modulo del pannello tagliava lo `slowdown` a 6**, mentre la taratura

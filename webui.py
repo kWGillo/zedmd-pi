@@ -1310,14 +1310,30 @@ def create_app(runtime):
             # Un campo vuoto rimuove l'override e ripristina il predefinito.
             env[name] = str(int(raw)) if raw.lstrip("-").isdigit() else ""
 
-        # Il profilo si applica *dopo* i campi: scegliendone uno noto si
-        # vuole tornare ai suoi valori, non salvare quelli che erano nella
-        # pagina. Sceglierne uno solo per sbaglio non e' un rischio: la
-        # configurazione precedente si riottiene riapplicando il profilo.
+        # Il profilo si riapplica *dopo* i campi, ma **solo se e' stato
+        # cambiato**. La distinzione e' tutta qui, e mancava.
+        #
+        # Cambiare voce nel menu vuol dire "riportami ai valori di quel
+        # profilo", e allora e' giusto che sovrascriva i campi della pagina.
+        # Lasciarla dov'e' e modificare un numero vuol dire l'opposto — e
+        # riapplicare il profilo anche in questo caso cancellava la modifica
+        # appena fatta, senza dire niente: si cambiava PWM da 10 a 11, si
+        # premeva Applica, e tornava 10.
+        #
+        # `preset_attuale` e' la voce che la pagina mostrava quando e' stata
+        # disegnata. Se non arriva — una richiesta fatta a mano, una prova —
+        # si ricade sul comportamento di prima, che applica sempre.
         scelto = request.form.get("preset", "")
-        if scelto and (presets.known(scelto, panel) or scelto == presets.CUSTOM):
+        prima = request.form.get("preset_attuale")
+        cambiato = bool(scelto) and (prima is None or scelto != prima)
+        if cambiato and (presets.known(scelto, panel) or scelto == presets.CUSTOM):
             presets.apply(panel, scelto)
         else:
+            # I valori restano quelli della pagina; la voce da mostrare la
+            # decide `detect`, che tiene buona la scelta finche' i numeri le
+            # corrispondono e passa a «Personalizzata» quando non piu'.
+            if scelto:
+                panel["preset"] = scelto
             panel["preset"] = presets.detect(panel)
 
         # Il cablaggio si scrive *dopo* il profilo, ed e' l'unico campo che il
