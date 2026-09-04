@@ -1943,6 +1943,7 @@ STRINGS = {
 
     # ---------------------------------------------------------------- taratura
     "settings.autotune": ("Avvia taratura", "Start tuning"),
+    "settings.autotune.title": ("Taratura automatica", "Automatic tuning"),
     "settings.autotune.hint": (
         "Misura il pannello a diversi rallentamenti e aggiunge il profilo "
         "trovato qui sopra. Circa quaranta minuti, con qualche riavvio.",

@@ -1116,6 +1116,13 @@ def create_app(runtime):
 
     @app.route("/api/autotune/start", methods=["POST"])
     def api_autotune_start():
+        # La taratura dura tre quarti d'ora e riavvia il pannello a ogni
+        # configurazione: non deve poter partire per una richiesta capitata
+        # per caso su questo indirizzo. Il campo lo mette solo il modulo del
+        # pulsante, e senza non si parte.
+        if request.form.get("conferma") != "1":
+            return _taratura_result("settings.autotune.failed",
+                                    error="richiesta senza conferma")
         try:
             autotune.avvia(cfg)
         except ValueError as exc:

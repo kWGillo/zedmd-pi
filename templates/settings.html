@@ -178,7 +178,10 @@
 
   <p class="hint">{{ t('settings.panel.note') }}
      <span class="mono">journalctl -u dmd -f</span>.</p>
+</section>
 
+<section class="card">
+  <h2>{{ t('settings.autotune.title') }}</h2>
   {% if taratura_in_corso %}
   <p class="status">{{ t('settings.autotune.running',
                         fatte=taratura.fatte, totale=taratura.totale) }}</p>
@@ -186,10 +189,11 @@
     <button type="submit" class="ghost">{{ t('settings.autotune.stop') }}</button>
   </form>
   {% else %}
+  <p class="hint">{{ t('settings.autotune.hint') }}</p>
   <form method="post" action="{{ url_for('api_autotune_start') }}">
+    <input type="hidden" name="conferma" value="1">
     <button type="submit" class="ghost">{{ t('settings.autotune') }}</button>
   </form>
-  <p class="hint">{{ t('settings.autotune.hint') }}</p>
   {% endif %}
 </section>
 

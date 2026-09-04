@@ -2,6 +2,31 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.8.3]
+
+- **Il menu dei profili tornava sempre su «Autotune».** Il profilo tarato
+  contiene un parametro solo — lo `slowdown` — e veniva riconosciuto dai
+  valori come tutti gli altri. Ma un parametro solo coincide con mezzo mondo,
+  a cominciare dal profilo di fabbrica, che quel valore ce l'ha uguale:
+  qualunque configurazione risultava «tarata», e scegliendo *FM6373 &
+  DP32020B* la voce saltava su *Autotune* appena la pagina si ridisegnava.
+  Ora il profilo tarato vale **solo se è stato scelto**, non se i valori per
+  caso coincidono; gli altri profili, che di parametri ne hanno venti, si
+  continuano a riconoscere dai valori.
+
+  È anche la spiegazione del «parte da sola la taratura»: la taratura non è
+  mai partita — il registro del server non ha mai visto una richiesta di
+  avvio — era il menu che si riposizionava da solo su quella voce.
+
+## [4.8.2]
+
+- **La taratura esce dalla scheda del pannello** e va in una scheda sua.
+  «Salva e riavvia il servizio» e «Avvia taratura» erano due pulsanti vicini
+  che fanno cose incomparabili: uno scrive un campo, l'altro avvia tre quarti
+  d'ora di riavvii del pannello. Separarli non è estetica.
+- **L'avvio pretende un campo di conferma** che manda solo quel modulo: una
+  richiesta capitata su `/api/autotune/start` non fa più partire niente.
+
 ## [4.8.1]
 
 Quattro difetti trovati usando la 4.8 sul pannello vero, in un paio d'ore.

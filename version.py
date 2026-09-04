@@ -684,6 +684,18 @@ Storico:
        per l'aggiornamento via rete lanciato dal pulsante web, dove sarebbe
        stato peggio. E una taratura interrotta da uno spegnimento continuava a
        dichiararsi in corso.
+  4.8.2 La taratura esce dalla scheda del pannello e va in una scheda sua:
+       «Salva» e «Avvia taratura» erano due pulsanti vicini che fanno cose
+       incomparabili — uno scrive un campo, l'altro avvia tre quarti d'ora di
+       riavvii. E l'avvio pretende un campo di conferma che solo quel modulo
+       manda: una richiesta capitata su quell'indirizzo non fa piu' partire
+       niente.
+  4.8.3 Il menu dei profili tornava sempre su «Autotune» qualunque voce si
+       scegliesse. Il profilo tarato contiene **un parametro solo**, e il
+       riconoscimento automatico bastava quello: siccome lo `slowdown` scelto
+       dalla taratura era lo stesso del profilo di fabbrica, ogni
+       configurazione risultava "tarata". Ora il profilo tarato vale solo se
+       e' stato scelto, non se i valori per caso coincidono.
 """
 
-__version__ = "4.8.1"
+__version__ = "4.8.3"

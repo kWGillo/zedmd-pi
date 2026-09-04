@@ -128,11 +128,18 @@ def matches(panel, key):
 def detect(panel):
     """Il profilo a cui corrisponde la configurazione attuale, o `custom`.
 
-    Il profilo tarato si guarda **per primo**: contiene un parametro solo, e
-    se il pannello ha quel valore la taratura e' quella che comanda anche
-    quando tutto il resto coincide con un profilo di fabbrica.
+    Il profilo tarato **non si riconosce dai valori**, e la prima versione
+    che ci provava era sbagliata in modo grossolano: contiene un parametro
+    solo, e un parametro solo coincide con mezzo mondo — a cominciare dal
+    profilo di fabbrica, che quel valore ce l'ha uguale. Il risultato era che
+    il menu tornava sempre su «Autotune» qualunque cosa si scegliesse, e
+    sembrava che la taratura partisse da sola.
+
+    Quindi vale **solo se e' stato scelto**: se `preset` dice autotune e i
+    valori ci sono ancora, e' quello; altrimenti si guardano i profili veri,
+    che di parametri ne hanno venti e non si confondono.
     """
-    if profilo_autotune(panel) and matches(panel, AUTOTUNE):
+    if (panel or {}).get("preset") == AUTOTUNE and matches(panel, AUTOTUNE):
         return AUTOTUNE
     for key in PRESETS:
         if matches(panel, key):
