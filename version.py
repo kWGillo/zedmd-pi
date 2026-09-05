@@ -783,6 +783,31 @@ Storico:
        danno un fotogramma nemmeno a insistere.
        Le immagini non escono dal Raspberry: niente rete, niente MQTT. Il
        servizio parte spento, perche' e' una telecamera in soggiorno.
+  4.10.1 Tre cose sulla telecamera, che adesso si chiama **Funcam** e nel menu
+       sta prima dei Servizi.
+       **I colori si scelgono.** Da 2 a 8 livelli per canale: 2 sono gli otto
+       pieni di prima, 6 ne danno 216 — in pratica la tavolozza da 256 colori
+       dell\'epoca. Un 256 esatto con tre canali uniformi non esiste: quei 256
+       erano una tavolozza scelta a mano. Salire non costa niente in CPU ne\'
+       sul bus; costa solo il rischio che le tinte intermedie sfarfallino, e
+       l\'unico modo di saperlo e\' guardare il pannello. La regola degli otto
+       colori era nata disegnando **testo**, dove i pochi pixel sfumati di un
+       bordo tremano contro uno sfondo fermo: un\'immagine di telecamera e\'
+       fatta tutta di mezzi toni e potrebbe comportarsi diversamente. Il
+       predefinito resta 2.
+       **«Device or resource busy» corretto.** Il /dev/video si apre una volta
+       sola, e la chiusura del processo precedente non veniva attesa fino in
+       fondo: bastava che ffmpeg avesse chiuso lo stderr perche\' la cattura si
+       dichiarasse spenta, mentre il dispositivo era ancora suo. Chi riapriva
+       — un clic sull\'interruttore, o la ripartenza automatica dopo una pausa
+       — trovava occupato, e restava spento con un errore che sembrava un
+       guasto. Ora si aspetta l\'uscita vera del processo, accensioni e
+       spegnimenti passano uno per volta, e chi non puo\' bloccarsi (il ciclo
+       che disegna il pannello, trenta volte al secondo) se ne va e riprova.
+       **E un errore non resta li\' per sempre.** Quasi tutti i motivi per cui
+       una telecamera non si apre passano da soli: si riprova con attese che
+       raddoppiano fino a mezzo minuto, invece di costringere a spegnere e
+       riaccendere il servizio a mano.
 """
 
-__version__ = "4.10"
+__version__ = "4.10.1"

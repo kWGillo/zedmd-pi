@@ -438,8 +438,15 @@ DEFAULTS = {
         # buttati. Scartare dopo risparmia CPU; non chiedere risparmia anche
         # il bus, che e' quello che si vede come righe chiare sul pannello.
         "fps": 10,
-        # otto | gameboy | grigi
-        "stile": "otto",
+        # colori | gameboy | grigi
+        "stile": "colori",
+        # Livelli **per canale** dello stile a colori: i colori sono il cubo,
+        # cioe' livelli**3. Due danno gli otto pieni — gli unici che di sicuro
+        # non tremano su questo pannello — sei ne danno 216, che e' in pratica
+        # la tavolozza da 256 colori di allora. Si parte da due e si sale
+        # guardando il pannello: se le tinte intermedie sfarfallano si vede
+        # subito, e non c'e' modo di saperlo se non provando.
+        "livelli_colore": 2,
         "livelli_grigio": 4,
         # Ci si aspetta di vedersi come allo specchio: alzando la mano destra
         # si alza la mano a destra sul pannello.
@@ -520,6 +527,13 @@ def _migrate(raw):
         raw["arbiter"]["force_source"] = "clock"
     if raw.get("web", {}).get("port") == 80:
         raw["web"]["port"] = 8080
+    # 4.10 chiamava "otto" lo stile a colori della telecamera, perche' otto
+    # erano. Adesso i livelli per canale si scelgono, quindi il nome sarebbe
+    # diventato una bugia: il valore vecchio si traduce, e chi lo aveva si
+    # ritrova con gli stessi otto colori di prima.
+    if raw.get("webcam", {}).get("stile") == "otto":
+        raw["webcam"]["stile"] = "colori"
+        raw["webcam"].setdefault("livelli_colore", 2)
 
     # 1.9: le dieci caselle del Rolling banner devono esserci sempre, anche
     # in una configurazione salvata prima che la funzione esistesse.

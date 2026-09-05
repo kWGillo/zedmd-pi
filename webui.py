@@ -260,6 +260,9 @@ def create_app(runtime):
         for chiave, basso, alto, default in (("capture_width", 160, 1920, 640),
                                              ("capture_height", 120, 1080, 480),
                                              ("fps", 1, 30, 10),
+                                             ("livelli_colore",
+                                              webcam.LIVELLI_MIN,
+                                              webcam.LIVELLI_MAX, 2),
                                              ("livelli_grigio", 2, 16, 4),
                                              ("gif_secondi", 1, 15, 3)):
             try:
@@ -1227,7 +1230,7 @@ def create_app(runtime):
              "status": stato("scadenze")},
             {"key": "calendario", "label": "Google Calendar", "ready": True,
              "status": stato("calendario")},
-            {"key": "webcam", "label": "Telecamera", "ready": True,
+            {"key": "webcam", "label": "Funcam", "ready": True,
              "status": stato("telecamera")},
         ]
         current = runtime.arbiter.current

@@ -88,7 +88,7 @@ oppure si scaricano con `git clone` o dal pulsante *Code → Download ZIP*.
 | Google Calendar | `docs/DMD_calendario.pdf` |
 | Taratura automatica del pannello | `docs/DMD_taratura.pdf` |
 | Rete wifi dalla pagina web | `docs/DMD_rete.pdf` |
-| Telecamera: la webcam sul pannello, a otto colori | `docs/DMD_telecamera.pdf` |
+| Funcam: la webcam sul pannello, con pochi colori | `docs/DMD_telecamera.pdf` |
 | Joypad: mappatura dei comandi | `docs/DMD_joypad.pdf` |
 
 I PDF **non** vengono installati in `/opt/dmd`: sul Raspberry non servono, e

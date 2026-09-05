@@ -1185,8 +1185,8 @@ STRINGS = {
         "Title, artist and progress of the current track, from AirPlay or Spotify."),
     "services.desc.status_player": ("Notifiche sui giochi avviati dagli amici su Batocera.",
                                     "Notifications about games your friends launch on Batocera."),
-    "nav.telecamera": ("Telecamera", "Camera"),
-    "webcam.title": ("Telecamera", "Camera"),
+    "nav.telecamera": ("Funcam", "Funcam"),
+    "webcam.title": ("Funcam", "Funcam"),
     "webcam.intro": (
         "La webcam sul pannello, ridotta a quello che un computer di "
         "quarant'anni fa sapeva mostrare. Si accende dalla pagina Servizi.",
@@ -1208,6 +1208,9 @@ STRINGS = {
         "watches is just traffic on the bus"),
     "webcam.status.recording": ("sto registrando…", "recording…"),
     "webcam.status.error": ("non funziona: %(error)s", "not working: %(error)s"),
+    "webcam.status.retry": (
+        "non funziona: %(error)s — riprovo fra %(seconds)d secondi",
+        "not working: %(error)s — retrying in %(seconds)d seconds"),
     "webcam.shoot": ("Scatta", "Capture"),
     "webcam.shoot.hint": (
         "Foto e GIF finiscono nella libreria media, quindi il Media Player "
@@ -1232,19 +1235,32 @@ STRINGS = {
         "actually captures is listed here. If the choice does not work, the "
         "state above says so."),
     "webcam.style": ("Aspetto", "Look"),
-    "webcam.style.otto": ("8 colori pieni, con dithering",
-                          "8 full colours, dithered"),
+    "webcam.style.colori": ("Colori, con dithering", "Colours, dithered"),
     "webcam.style.gameboy": ("Verde Game Boy", "Game Boy green"),
     "webcam.style.grigi": ("Grigi, poche sfumature", "Greys, few shades"),
     "webcam.style.hint": (
-        "Gli otto colori pieni non sono una scelta di stile: sono gli unici "
-        "che su questo pannello non sfarfallano — ed è anche la tavolozza "
-        "dei primi computer a colori. Le sfumature che mancano le rimette il "
-        "dithering.",
-        "The eight full colours are not a style choice: they are the only "
-        "ones that do not flicker on this panel — and they are also the "
-        "palette of the first colour computers. Dithering puts back the "
-        "shades that are missing."),
+        "Quanti colori li decide il campo qui sotto. Le sfumature che "
+        "mancano le rimette il dithering.",
+        "How many colours is decided by the field below. Dithering puts back "
+        "the shades that are missing."),
+    "webcam.depth": ("Livelli per canale", "Levels per channel"),
+    "webcam.depth.hint": (
+        "Adesso: %(colori)d colori. I livelli valgono per rosso, verde e blu "
+        "separatamente, quindi i colori sono il loro cubo — 2 danno 8, 4 ne "
+        "danno 64, 6 ne danno 216, che è in pratica la tavolozza da 256 "
+        "colori dell'epoca. Due è il valore sicuro: sono i colori pieni, gli "
+        "unici che su questo pannello di sicuro non tremano. Salire non "
+        "costa niente in CPU né sul bus — costa solo il rischio che le tinte "
+        "intermedie sfarfallino, e l'unico modo di saperlo è guardare il "
+        "pannello.",
+        "Right now: %(colori)d colours. Levels apply to red, green and blue "
+        "separately, so the colours are their cube — 2 give 8, 4 give 64, 6 "
+        "give 216, which is in practice the 256-colour palette of the era. "
+        "Two is the safe value: those are the full colours, the only ones "
+        "that certainly do not flicker on this panel. Going higher costs "
+        "nothing in CPU or bus traffic — it only risks the intermediate "
+        "tones flickering, and the only way to know is to look at the "
+        "panel."),
     "webcam.levels": ("Sfumature (verde e grigi)", "Shades (green and greys)"),
     "webcam.levels.hint": (
         "Quante sfumature per gli stili Game Boy e grigi. Quattro è il "
@@ -1296,8 +1312,8 @@ STRINGS = {
         "the service starts off — a camera in the living room turns on when "
         "you decide it does."),
     "services.desc.webcam": (
-        "La webcam sul pannello, dal vivo e a otto colori.",
-        "The webcam on the panel, live and in eight colours."),
+        "La webcam sul pannello, dal vivo e con pochi colori.",
+        "The webcam on the panel, live and in few colours."),
     "nav.rete": ("Rete", "Network"),
     "rete.title": ("Rete wifi", "Wi-Fi network"),
     "rete.current": ("Collegamento attuale", "Current connection"),

@@ -1,6 +1,6 @@
 ---
-title: "La telecamera sul pannello"
-subtitle: "Passi davanti alla webcam e ti vedi, a otto colori"
+title: "Funcam"
+subtitle: "Passi davanti alla webcam e ti vedi sul pannello, con pochi colori"
 ---
 
 # 1. L'idea
@@ -11,7 +11,7 @@ ridotto a quello che un computer di quarant'anni fa sapeva mostrare.
 Non è un filtro nostalgico appiccicato sopra. È quello che questo pannello sa
 fare davvero.
 
-# 2. Perché otto colori non è una scelta di stile
+# 2. Perché si parte da otto colori
 
 Sta scritto da tempo nel Now Playing, sotto `safe_colors`: **su questo
 pannello gli otto colori pieni sono gli unici che non sfarfallano**. Ogni
@@ -27,18 +27,54 @@ matrice 4×4 di soglie che alterna i pixel accesi e spenti secondo un motivo
 regolare. Da vicino si vede la trama, da lontano si vedono i mezzitoni. È come
 stampavano i giornali, ed è come disegnavano i computer a otto colori.
 
-Nella pagina si sceglie fra tre aspetti:
+Nella pagina **Funcam** si sceglie fra tre aspetti:
 
 | Aspetto | Cosa fa |
 |---|---|
-| **8 colori pieni** | Gli otto vertici del cubo dei colori, con dithering. Il consigliato. |
+| **Colori** | Il cubo dei colori, con dithering. Quanti sono lo decidi tu: vedi il capitolo 3. |
 | **Verde Game Boy** | Le quattro tinte dello schermo DMG, le stesse della sorgente Game Boy. |
 | **Grigi** | Da 2 a 16 livelli di grigio. Regge bene la poca luce della sera. |
+
+## Quanti colori, davvero
+
+La regola degli otto colori è nata disegnando **testo**: lettere chiare su
+fondo nero, dove i pochi pixel sfumati del bordo tremano contro uno sfondo
+fermo. È la condizione in cui il difetto si vede peggio.
+
+Un'immagine di telecamera è un'altra cosa. È fatta *tutta* di mezzi toni, non
+c'è nessun bordo netto a cui confrontarli, e l'occhio legge il tutto come
+grana. Non è detto che tremi allo stesso modo — e non è una cosa che si possa
+decidere ragionando.
+
+Per questo i livelli si scelgono dalla pagina, da 2 a 8 **per canale**. I
+colori sono il loro cubo:
+
+| Livelli | Colori | |
+|---|---|---|
+| 2 | 8 | i pieni, quelli sicuri — il predefinito |
+| 3 | 27 | |
+| 4 | 64 | |
+| 6 | 216 | in pratica la tavolozza da 256 colori dell'epoca |
+| 8 | 512 | |
+
+Un 256 esatto non esiste con tre canali uniformi: i 256 colori dei computer di
+allora erano una tavolozza scelta a mano, non tre canali indipendenti. 216 è il
+numero vicino più onesto, ed è anche la vecchia *web safe palette*, nata dallo
+stesso conto.
+
+Salire **non costa niente**: gli stessi byte, lo stesso conto vettoriale,
+nessun traffico in più sul bus. Costa solo il rischio che le tinte intermedie
+sfarfallino, e l'unico modo di saperlo è guardare il pannello. Con più livelli,
+in compenso, il dithering ha passi più corti da coprire: la trama diventa più
+fine e l'immagine meno granulosa.
+
+Il valore predefinito resta 2, perché un predefinito deve funzionare senza
+chiedere niente a nessuno.
 
 ## Il contrasto automatico
 
 Un soggiorno di sera, dalla webcam, esce come una poltiglia grigia stretta fra
-40 e 90. Ridotta a otto colori diventerebbe un rettangolo quasi uniforme.
+40 e 90. Ridotta a pochi colori diventerebbe un rettangolo quasi uniforme.
 
 Prima di quantizzare si allarga la gamma usando il 2% e il 98% dei valori: è
 ciò che fa la differenza fra vedere qualcosa e vedere una macchia. Se però la
@@ -92,7 +128,7 @@ peggio del nero, perché sembra che funzioni.
 
 # 4. Dove sta, e chi ha la precedenza
 
-La telecamera ha **priorità 51**: sopra il Media Player (50), sotto il Rolling
+Funcam ha **priorità 51**: sopra il Media Player (50), sotto il Rolling
 Banner (55).
 
 Acceso il servizio, la ripresa dal vivo *è* quello che si vuole vedere, quindi

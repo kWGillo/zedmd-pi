@@ -16,7 +16,10 @@
   {% else %}
   <p class="status">
     {%- if not cfg.services.webcam %}{{ t('webcam.state.off') }}
-    {%- elif stato.errore %}{{ t('webcam.status.error', error=stato.errore) }}
+    {%- elif stato.errore and stato.riprova_fra %}{{ t('webcam.status.retry',
+          error=stato.errore, seconds=stato.riprova_fra) }}
+    {%- elif stato.errore and not stato.acceso %}{{ t('webcam.status.error',
+          error=stato.errore) }}
     {%- elif stato.registrando %}{{ t('webcam.status.recording') }}
     {%- elif stato.acceso %}{{ t('webcam.status.live', device=stato.device or '—') }}
     {%- else %}{{ t('webcam.status.paused') }}{% endif %}
@@ -61,6 +64,12 @@
       {% endfor %}
     </select>
     <p class="hint">{{ t('webcam.style.hint') }}</p>
+
+    <label for="livelli_colore">{{ t('webcam.depth') }}</label>
+    <input type="number" id="livelli_colore" name="livelli_colore"
+           min="2" max="8" value="{{ cfg.webcam.livelli_colore }}">
+    <p class="hint">{{ t('webcam.depth.hint',
+                        colori=cfg.webcam.livelli_colore ** 3) }}</p>
 
     <label for="livelli_grigio">{{ t('webcam.levels') }}</label>
     <input type="number" id="livelli_grigio" name="livelli_grigio" min="2" max="16"

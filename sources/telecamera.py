@@ -14,7 +14,7 @@ from .base import Source
 
 class TelecameraSource(Source):
     name = "webcam"
-    label = "Telecamera"
+    label = "Funcam"
 
     # Sopra il Media Player (50), sotto il Rolling Banner (55).
     #
@@ -70,12 +70,17 @@ class TelecameraSource(Source):
             return False
         numero, _quadro = self._cattura.fotogramma()
         if self._cattura.in_pausa():
-            # Si era spenta perche' il pannello era di qualcun altro. Adesso
-            # qualcuno guarda di nuovo: si riparte. Nel secondo che ffmpeg
+            # Si era spenta perche' il pannello era di qualcun altro, o
+            # perche' un tentativo era andato male. In tutti e due i casi
+            # adesso qualcuno guarda: si riprova. Nel secondo che ffmpeg
             # impiega a tornare si continua a mostrare l'ultimo fotogramma —
             # meglio di un buco nero — ma solo per `VALIDO_PER` secondi, dopo
             # i quali `fotogramma` smette di offrirlo e la sorgente sparisce.
-            self._cattura.avvia()
+            #
+            # `attendi=False`: questo metodo lo chiama l'arbitro trenta volte
+            # al secondo e non puo' restare fermo ad aspettare che un processo
+            # chiuda. Se trova occupato riprova al giro dopo.
+            self._cattura.avvia(attendi=False)
         return bool(numero)
 
     def frame(self):
@@ -90,9 +95,10 @@ class TelecameraSource(Source):
             return None
         conf = self.cfg.get("webcam") or {}
         try:
-            self._immagine = webcam.rendi(quadro, conf.get("stile", "otto"),
+            self._immagine = webcam.rendi(quadro, conf.get("stile", "colori"),
                                           conf.get("livelli_grigio", 4),
-                                          conf.get("contrasto_auto", True))
+                                          conf.get("contrasto_auto", True),
+                                          conf.get("livelli_colore", 2))
         except Exception as exc:                        # pragma: no cover
             print("[webcam] fotogramma non convertito: %s" % exc)
             return None
@@ -105,7 +111,10 @@ class TelecameraSource(Source):
         if not self.enabled:
             return self.t("status.disabled", lang)
         stato = self._cattura.stato()
-        if stato["errore"]:
+        if stato["errore"] and not stato["acceso"]:
+            # L'errore si racconta solo se la telecamera e' davvero ferma: uno
+            # inciampo passeggero, gia' superato da un nuovo tentativo
+            # riuscito, non deve restare scritto in pagina a spaventare.
             return self.t("webcam.status.error", lang, error=stato["errore"])
         if not stato["acceso"]:
             return self.t("webcam.status.paused", lang)

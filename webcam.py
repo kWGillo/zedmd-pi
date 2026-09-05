@@ -1,18 +1,32 @@
 # -*- coding: utf-8 -*-
-"""La telecamera sul pannello, degradata a otto colori.
+"""La telecamera sul pannello, ridotta a pochi colori.
 
 L'idea: passi davanti alla webcam e ti vedi sul DMD, ridotto a quello che un
 computer di quarant'anni fa sapeva mostrare. Non e' un filtro nostalgico
 appiccicato sopra — e' quello che questo pannello sa fare davvero.
 
-Perche' otto colori non e' una scelta di stile
-----------------------------------------------
-Sta gia' scritto in `nowplaying.safe_colors`: su questo pannello **gli otto
-colori pieni sono gli unici che non sfarfallano**. Ogni componente a 0 o a
-255, niente vie di mezzo. Era nato come rimedio a un difetto, ed e'
-esattamente la tavolozza dei primi computer a colori. Il vincolo hardware e
-l'estetica voluta sono la stessa cosa: un caso fortunato che non capita
-spesso, e che qui si sfrutta invece di combatterlo.
+Quanti colori, e perche' si parte da otto
+-----------------------------------------
+Sta scritto in `nowplaying.safe_colors`: su questo pannello **le intensita'
+intermedie sfarfallano, i colori pieni no**. Ogni componente a 0 o a 255
+lascia otto colori, che sono anche la tavolozza dei primi computer a colori:
+il vincolo e l'estetica coincidono, e qui si sfrutta invece di combatterlo.
+
+Ma quella regola e' nata disegnando **testo**: lettere chiare su fondo nero,
+dove i pochi pixel sfumati del bordo tremano contro uno sfondo fermo, ed e' la
+condizione in cui il difetto si vede peggio. Un'immagine di telecamera e'
+un'altra cosa: e' fatta *tutta* di mezzi toni, non c'e' nessun bordo netto a
+cui confrontarli, e l'occhio legge il tutto come grana. Non e' detto che tremi
+allo stesso modo, e non e' una cosa che si possa decidere ragionando.
+
+Per questo i livelli per canale si scelgono: `livelli_colore`, da 2 a 8. Due
+sono gli otto pieni, quelli sicuri. Sei danno 216 colori, che e' in pratica la
+tavolozza da 256 dell'epoca — non esiste un 256 esatto con tre canali
+uniformi, quei 256 erano una tavolozza scelta a mano. Salire non costa niente:
+gli stessi byte, lo stesso conto vettoriale, nessun traffico in piu' sul bus.
+Costa solo il rischio di sfarfallio, e l'unico modo di saperlo e' guardare il
+pannello. Il valore predefinito resta due, perche' un predefinito deve
+funzionare senza chiedere niente a nessuno.
 
 Le sfumature che mancano le rimette il **dithering ordinato** di Bayer: una
 matrice 4x4 di soglie che alterna i pixel accesi e spenti in un motivo
@@ -73,7 +87,25 @@ BAYER = [[0, 8, 2, 10],
 # scelto a occhio.
 GAMEBOY = [(15, 56, 15), (48, 98, 48), (139, 172, 15), (155, 188, 15)]
 
-STILI = ("otto", "gameboy", "grigi")
+# Quanti livelli per canale puo' chiedere lo stile a colori, e quanti colori
+# vengono fuori: sono livelli**3, perche' le tre componenti sono indipendenti.
+#
+#   2 ->   8    i colori pieni, quelli che sul pannello non tremano
+#   3 ->  27
+#   4 ->  64
+#   5 -> 125
+#   6 -> 216    la tavolozza dei 256 colori dell'epoca, in pratica
+#   7 -> 343
+#   8 -> 512
+#
+# Non esiste un 256 esatto con un cubo uniforme: i 256 colori dei computer di
+# allora erano una tavolozza scelta a mano, non tre canali indipendenti. 216
+# e' il numero vicino piu' onesto, ed e' anche la vecchia "web safe palette",
+# nata dallo stesso conto.
+LIVELLI_MIN = 2
+LIVELLI_MAX = 8
+
+STILI = ("colori", "gameboy", "grigi")
 
 CARTELLA_V4L = "/sys/class/video4linux"
 
@@ -181,18 +213,29 @@ def _contrasto(pixel):
     return np.clip((pixel.astype(np.float32) - basso) * scala, 0, 255)
 
 
-def rendi(pixel, stile="otto", livelli=4, contrasto=True):
-    """Da fotogramma a immagine per il pannello. `pixel` e' (h, w, 3) uint8."""
+def rendi(pixel, stile="colori", livelli=4, contrasto=True, livelli_colore=2):
+    """Da fotogramma a immagine per il pannello. `pixel` e' (h, w, 3) uint8.
+
+    `livelli_colore` sono i livelli **per canale** dello stile a colori: due
+    danno gli otto colori pieni, sei ne danno 216. `livelli` invece sono le
+    sfumature degli stili in verde e in grigio, dove il canale e' uno solo.
+    """
     altezza, larghezza = pixel.shape[0], pixel.shape[1]
     soglie = _soglie(altezza, larghezza)
     valori = _contrasto(pixel) if contrasto else pixel.astype(np.float32)
 
-    if stile == "otto":
-        # Ogni canale per conto suo, acceso o spento. Tre decisioni
-        # indipendenti per pixel danno gli otto vertici del cubo dei colori:
-        # nero, rosso, verde, blu, giallo, ciano, magenta, bianco.
-        acceso = (valori / 255.0) > soglie[:, :, None]
-        return Image.fromarray((acceso * 255).astype(np.uint8), "RGB")
+    if stile in ("colori", "otto"):
+        # Ogni canale per conto suo. Con due livelli sono tre decisioni
+        # acceso/spento per pixel, e vengono fuori gli otto vertici del cubo
+        # dei colori: nero, rosso, verde, blu, giallo, ciano, magenta, bianco.
+        # Con piu' livelli il cubo si riempie — e il dithering, avendo passi
+        # piu' corti da coprire, diventa una trama piu' fine.
+        quanti = max(LIVELLI_MIN, min(LIVELLI_MAX, int(livelli_colore)))
+        gradini = np.clip(
+            np.floor(valori / 255.0 * (quanti - 1) + soglie[:, :, None]),
+            0, quanti - 1)
+        passo = 255.0 / (quanti - 1)
+        return Image.fromarray((gradini * passo).round().astype(np.uint8), "RGB")
 
     # Gli altri due stili passano dalla luminosita': il colore si butta via
     # prima, non dopo, altrimenti si quantizza tre volte quello che poi
@@ -228,6 +271,14 @@ class Cattura:
         self.larghezza = larghezza
         self.altezza = altezza
         self._lucchetto = threading.Lock()
+        # Un secondo lucchetto, solo per accensione e spegnimento. Non e'
+        # pignoleria: `active()` chiama `avvia` trenta volte al secondo, e se
+        # un avvio si mettesse in coda dietro la chiusura del processo
+        # precedente bloccherebbe il ciclo che disegna il pannello. Chi trova
+        # occupato se ne va e riprova al giro dopo.
+        self._avvio = threading.Lock()
+        self._prossimo = 0.0         # non riprovare prima di questo istante
+        self._attesa = 0.0           # quanto si aspetta al prossimo fallimento
         self._processo = None
         self._thread = None
         self._acceso = False
@@ -280,41 +331,97 @@ class Cattura:
 
     # ---------------------------------------------------------------- avvio
 
-    def avvia(self):
-        with self._lucchetto:
-            if self._acceso:
-                return True
-            if np is None:
-                self._errore = "numpy non installato"
-                return False
-            if not disponibile():
-                self._errore = "ffmpeg non installato"
-                return False
-            device = scelto(self.cfg)
-            if not device:
-                self._errore = "nessuna telecamera collegata"
-                return False
-            self._device = device
-            self._errore = ""
-            self._acceso = True
-            self._thread = threading.Thread(target=self._ciclo, name="webcam",
-                                            args=(device,), daemon=True)
-            self._thread.start()
+    def avvia(self, attendi=True):
+        """Accende la cattura. `attendi=False` per chi non puo' bloccarsi.
+
+        Il `/dev/video` si apre una volta sola: se ffmpeg parte mentre quello
+        di prima non ha ancora chiuso, il kernel risponde **Device or
+        resource busy** e la telecamera resta spenta con un errore che sembra
+        un guasto. Era proprio cio' che succedeva spegnendo e riaccendendo il
+        servizio dalla pagina: `ferma` faceva partire la chiusura e tornava
+        subito, e l'accensione successiva trovava la porta ancora occupata.
+
+        Da qui la regola: accensioni e spegnimenti passano uno per volta da
+        `_avvio`, e chi accende aspetta che il ciclo precedente sia finito
+        davvero prima di aprire il dispositivo.
+        """
+        if not self._avvio.acquire(blocking=attendi):
+            return False
+        try:
+            with self._lucchetto:
+                if self._acceso:
+                    return True
+                if time.time() < self._prossimo:
+                    return False
+                if np is None:
+                    self._errore = "numpy non installato"
+                    return False
+                if not disponibile():
+                    self._errore = "ffmpeg non installato"
+                    return False
+                device = scelto(self.cfg)
+                if not device:
+                    self._errore = "nessuna telecamera collegata"
+                    return False
+                vecchio = self._thread
+
+            # Fuori dal lucchetto dei dati: il ciclo che sta chiudendo deve
+            # poterlo prendere per scrivere il proprio stato finale.
+            if vecchio is not None and vecchio.is_alive():
+                vecchio.join(timeout=5)
+
+            with self._lucchetto:
+                self._device = device
+                self._errore = ""
+                self._acceso = True
+                self._thread = threading.Thread(target=self._ciclo,
+                                                name="webcam",
+                                                args=(device,), daemon=True)
+                self._thread.start()
             return True
+        finally:
+            self._avvio.release()
+
+    def _rimanda(self, errore):
+        """Segna un fallimento e decide fra quanto vale la pena riprovare.
+
+        Un errore che resta li' per sempre costringerebbe a spegnere e
+        riaccendere il servizio a mano per una condizione che quasi sempre
+        passa da sola — la telecamera occupata per un istante, il processo di
+        prima che non aveva ancora chiuso. Si riprova, ma con attese sempre
+        piu' lunghe: se davvero un altro programma tiene la webcam, non ha
+        senso bussare ogni secondo per ore.
+        """
+        with self._lucchetto:
+            self._errore = errore
+            self._attesa = min(30.0, (self._attesa or 1.5) * 2)
+            self._prossimo = time.time() + self._attesa
 
     def ferma(self):
-        with self._lucchetto:
-            self._acceso = False
-            processo, self._processo = self._processo, None
-        if processo:
-            try:
-                processo.terminate()
-                processo.wait(timeout=3)
-            except Exception:
+        with self._avvio:
+            with self._lucchetto:
+                self._acceso = False
+                processo, self._processo = self._processo, None
+                thread = self._thread
+                # Spegnere a mano azzera l'attesa: la prossima accensione e'
+                # una decisione di chi guarda, non un altro tentativo.
+                self._attesa = 0.0
+                self._prossimo = 0.0
+            if processo:
                 try:
-                    processo.kill()
+                    processo.terminate()
+                    processo.wait(timeout=3)
                 except Exception:
-                    pass
+                    try:
+                        processo.kill()
+                        processo.wait(timeout=2)
+                    except Exception:
+                        pass
+            # Il ciclo deve aver finito **davvero**: finche' e' vivo puo'
+            # ancora avere il dispositivo aperto, e la riaccensione
+            # troverebbe occupato.
+            if thread is not None and thread.is_alive():
+                thread.join(timeout=5)
 
     def _ciclo(self, device):
         byte_per_frame = self.larghezza * self.altezza * 3
@@ -324,8 +431,8 @@ class Cattura:
                                         stderr=subprocess.PIPE)
         except (OSError, subprocess.SubprocessError) as exc:
             with self._lucchetto:
-                self._errore = str(exc)
                 self._acceso = False
+            self._rimanda(str(exc))
             return
 
         with self._lucchetto:
@@ -371,13 +478,30 @@ class Cattura:
             try:
                 processo.terminate()
                 errore = (processo.stderr.read() or b"")[-400:]
+                # Aspettare davvero, non solo chiedere: finche' il processo
+                # non e' morto il /dev/video resta suo, e chi riaccende
+                # trova occupato.
+                processo.wait(timeout=5)
             except Exception:
-                pass
+                try:
+                    processo.kill()
+                    processo.wait(timeout=2)
+                except Exception:
+                    pass
+            testo = errore.decode("utf-8", "replace").strip()
             with self._lucchetto:
                 self._acceso = False
                 self._processo = None
-                if errore and not self._errore:
-                    self._errore = errore.decode("utf-8", "replace").strip()
+                riuscito = self._numero > 0
+            if testo:
+                self._rimanda(" ".join(testo.split()))
+            elif riuscito:
+                # Chiusura pulita dopo aver lavorato: nessun errore da
+                # ricordare e nessuna attesa da scontare alla riaccensione.
+                with self._lucchetto:
+                    self._errore = ""
+                    self._attesa = 0.0
+                    self._prossimo = 0.0
 
     # ------------------------------------------------------------ lettura
 
@@ -401,14 +525,22 @@ class Cattura:
             return self._numero, self._grezzo
 
     def in_pausa(self):
+        """Vero se si puo' riaccendere adesso.
+
+        Anche dopo un errore, passata l'attesa: quasi tutti i motivi per cui
+        una telecamera non si apre — occupata un istante, staccata e
+        riattaccata — passano da soli, e obbligare a spegnere e riaccendere
+        il servizio a mano per quelli sarebbe una seccatura inutile.
+        """
         with self._lucchetto:
-            return not self._acceso and not self._errore
+            return not self._acceso and time.time() >= self._prossimo
 
     def stato(self):
         with self._lucchetto:
             return {"acceso": self._acceso, "errore": self._errore,
                     "device": self._device, "numero": self._numero,
-                    "registrando": self._registrando is not None}
+                    "registrando": self._registrando is not None,
+                    "riprova_fra": max(0, int(self._prossimo - time.time()))}
 
     # ---------------------------------------------------------- registrazione
 
@@ -432,9 +564,10 @@ class Cattura:
 
     def _immagine(self, quadro):
         conf = self._conf()
-        return rendi(quadro, conf.get("stile", "otto"),
+        return rendi(quadro, conf.get("stile", "colori"),
                      conf.get("livelli_grigio", 4),
-                     conf.get("contrasto_auto", True))
+                     conf.get("contrasto_auto", True),
+                     conf.get("livelli_colore", 2))
 
     def scatta(self):
         """Salva il fotogramma attuale. Restituisce (percorso, motivo)."""
@@ -473,7 +606,15 @@ class Cattura:
             # In modo P con tavolozza adattiva: con otto colori la tavolozza
             # e' minuscola e la GIF pesa quanto un'icona. In RGB pesarebbe
             # dieci volte tanto per mostrare le stesse otto tinte.
-            tavolozza = [im.convert("P", palette=Image.ADAPTIVE, colors=16)
+            # La tavolozza si dimensiona su quanti colori lo stile puo'
+            # davvero produrre: con due livelli per canale bastano 8 voci,
+            # con sei ne servono 216. Chiederne meno del necessario
+            # rifarebbe una quantizzazione gia' fatta, e con un criterio
+            # diverso: le sfumature appena costruite tornerebbero a fondersi.
+            quanti = max(LIVELLI_MIN, min(LIVELLI_MAX,
+                                          int(conf.get("livelli_colore", 2))))
+            colori = min(256, max(4, quanti ** 3))
+            tavolozza = [im.convert("P", palette=Image.ADAPTIVE, colors=colori)
                          for im in immagini]
             tavolozza[0].save(percorso, save_all=True,
                               append_images=tavolozza[1:],
