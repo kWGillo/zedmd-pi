@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{{ t('webcam.title') }}{% endblock %}
+
+{% block content %}
+
+{% if result %}<div class="banner">{{ result }}</div>{% endif %}
+
+<section class="card">
+  <h2>{{ t('webcam.title') }}</h2>
+  <p class="hint">{{ t('webcam.intro') }}</p>
+
+  {% if not ffmpeg %}
+  <p class="status">{{ t('media.noffmpeg') }}</p>
+  {% elif not dispositivi %}
+  <p class="status">{{ t('webcam.nocam') }}</p>
+  {% else %}
+  <p class="status">
+    {%- if not cfg.services.webcam %}{{ t('webcam.state.off') }}
+    {%- elif stato.errore %}{{ t('webcam.status.error', error=stato.errore) }}
+    {%- elif stato.registrando %}{{ t('webcam.status.recording') }}
+    {%- elif stato.acceso %}{{ t('webcam.status.live', device=stato.device or '—') }}
+    {%- else %}{{ t('webcam.status.paused') }}{% endif %}
+  </p>
+  {% endif %}
+</section>
+
+{% if dispositivi %}
+<section class="card">
+  <h2>{{ t('webcam.shoot') }}</h2>
+  <p class="hint">{{ t('webcam.shoot.hint') }}</p>
+  <form method="post" action="{{ url_for('api_telecamera_scatta') }}" class="inline">
+    <button type="submit">{{ t('webcam.shoot.photo') }}</button>
+  </form>
+  <form method="post" action="{{ url_for('api_telecamera_registra') }}" class="inline">
+    <button type="submit">{{ t('webcam.shoot.gif',
+                               seconds=cfg.webcam.gif_secondi) }}</button>
+  </form>
+</section>
+{% endif %}
+
+<section class="card">
+  <h2>{{ t('webcam.settings') }}</h2>
+
+  <form method="post" action="{{ url_for('api_telecamera') }}">
+    <label for="device">{{ t('webcam.device') }}</label>
+    <select id="device" name="device">
+      <option value="" {{ 'selected' if not cfg.webcam.device }}>
+        {{ t('webcam.device.auto') }}</option>
+      {% for voce in dispositivi %}
+      <option value="{{ voce.path }}" {{ 'selected' if cfg.webcam.device == voce.path }}>
+        {{ voce.nome }} ({{ voce.path }})</option>
+      {% endfor %}
+    </select>
+    <p class="hint">{{ t('webcam.device.hint') }}</p>
+
+    <label for="stile">{{ t('webcam.style') }}</label>
+    <select id="stile" name="stile">
+      {% for chiave in stili %}
+      <option value="{{ chiave }}" {{ 'selected' if cfg.webcam.stile == chiave }}>
+        {{ t('webcam.style.' ~ chiave) }}</option>
+      {% endfor %}
+    </select>
+    <p class="hint">{{ t('webcam.style.hint') }}</p>
+
+    <label for="livelli_grigio">{{ t('webcam.levels') }}</label>
+    <input type="number" id="livelli_grigio" name="livelli_grigio" min="2" max="16"
+           value="{{ cfg.webcam.livelli_grigio }}">
+    <p class="hint">{{ t('webcam.levels.hint') }}</p>
+
+    <label for="fps">{{ t('webcam.fps') }}</label>
+    <input type="number" id="fps" name="fps" min="1" max="30"
+           value="{{ cfg.webcam.fps }}">
+    <p class="hint">{{ t('webcam.fps.hint') }}</p>
+
+    <div class="row">
+      <div><label for="capture_width">{{ t('webcam.width') }}</label>
+        <input type="number" id="capture_width" name="capture_width"
+               min="160" max="1920" value="{{ cfg.webcam.capture_width }}"></div>
+      <div><label for="capture_height">{{ t('webcam.height') }}</label>
+        <input type="number" id="capture_height" name="capture_height"
+               min="120" max="1080" value="{{ cfg.webcam.capture_height }}"></div>
+    </div>
+    <p class="hint">{{ t('webcam.size.hint') }}</p>
+
+    <label for="gif_secondi">{{ t('webcam.gifsec') }}</label>
+    <input type="number" id="gif_secondi" name="gif_secondi" min="1" max="15"
+           value="{{ cfg.webcam.gif_secondi }}">
+
+    <label class="check">
+      <input type="checkbox" name="specchio" {{ 'checked' if cfg.webcam.specchio }}>
+      {{ t('webcam.mirror') }}</label>
+    <label class="check">
+      <input type="checkbox" name="contrasto_auto"
+             {{ 'checked' if cfg.webcam.contrasto_auto }}>
+      {{ t('webcam.autocontrast') }}</label>
+
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+</section>
+
+{% if scatti %}
+<section class="card">
+  <h2>{{ t('webcam.gallery') }}</h2>
+  <p class="hint">{{ t('webcam.gallery.hint') }}</p>
+  <ul class="mono">
+    {% for voce in scatti %}
+    <li>{{ voce.nome }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="card">
+  <h2>{{ t('webcam.privacy') }}</h2>
+  <p class="hint">{{ t('webcam.privacy.hint') }}</p>
+</section>
+
+{% endblock %}

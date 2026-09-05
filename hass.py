@@ -35,6 +35,9 @@ SWITCHES = [
     ("clock", "Orologio"),
     ("scadenze", "Scadenze"),
     ("calendario", "Calendario"),
+    # Una telecamera si spegne anche da lontano: e' la ragione principale per
+    # cui questo interruttore vale la pena averlo in Home Assistant.
+    ("webcam", "Telecamera"),
 ]
 
 # Night mode e Sleep mode non sono servizi: sono modi del display, e stanno in

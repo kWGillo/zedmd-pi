@@ -2,6 +2,41 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.10]
+
+- **La telecamera.** Una webcam USB attaccata al Raspberry, e sul pannello
+  compare quello che vede — ridotto a quello che un computer di quarant'anni
+  fa sapeva mostrare.
+
+  Gli otto colori pieni non sono una scelta di stile: sono gli unici che su
+  questo pannello non sfarfallano (lo sapevamo già, sta in
+  `nowplaying.safe_colors`), ed è anche la tavolozza dei primi computer a
+  colori. Il vincolo hardware e l'estetica voluta sono la stessa cosa. Le
+  sfumature che mancano le rimette il dithering ordinato di Bayer. Tre aspetti
+  a scelta dalla pagina: otto colori, verde Game Boy, grigi.
+
+  **I fotogrammi in più non si scartano: non si chiedono.** Uno scartato dopo
+  la cattura ha già attraversato l'USB e il bus, e il risparmio è solo di CPU;
+  uno mai prodotto non costa niente a nessuno. Quindi il numero di fotogrammi
+  al secondo è `-framerate` sull'ingresso v4l2, non un filtro a valle. Si
+  chiede YUYV e non MJPEG, così non c'è nessun JPEG da decodificare. E se il
+  pannello è di qualcun altro — ZeDMD, Doom — la cattura si ferma da sola dopo
+  venti secondi e riparte quando serve.
+
+  Foto e GIF da due pulsanti, salvate nella libreria media: il Media Player le
+  rimette sul pannello da solo, più avanti. Con più telecamere collegate si
+  sceglie dal menu, e l'elenco mostra solo i nodi che catturano davvero — una
+  webcam USB ne espone due o tre, e gli altri non danno un fotogramma nemmeno
+  a insistere.
+
+  Priorità 51: sopra il Media Player, sotto tutto ciò che ha qualcosa da
+  *dire*. Un avviso che non compare perché c'è la telecamera accesa sarebbe un
+  avviso perso.
+
+  Le immagini non escono dal Raspberry: niente rete, niente MQTT, nessun
+  servizio esterno. Il servizio parte spento, perché è una telecamera in
+  soggiorno.
+
 ## [4.9]
 
 - **Pagina Rete.** Le reti wifi si vedono e si scelgono dal browser: elenco

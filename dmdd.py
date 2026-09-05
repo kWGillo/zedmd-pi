@@ -30,8 +30,8 @@ from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      CalendarioSource, ClockSource, DoomSource, GameBoySource,
                      GiochiSource, MediaPlayerSource, NowPlayingSource,
-                     PreviewSource, ScadenzeSource, ZeDMDSource, controlla_rom,
-                     controlla_wad)
+                     PreviewSource, ScadenzeSource, TelecameraSource,
+                     ZeDMDSource, controlla_rom, controlla_wad)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -262,6 +262,8 @@ class Runtime:
         self.calendario = CalendarioSource(self.cfg, self.display.width,
                                            self.display.height)
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
+        self.telecamera = TelecameraSource(self.cfg, self.display.width,
+                                           self.display.height)
 
         # Il brano corrente e chi lo disegna sono due cose distinte: lo stato
         # viene aggiornato anche a servizio spento, cosi' Home Assistant lo
@@ -275,7 +277,7 @@ class Runtime:
 
         for source in (self.zedmd, self.preview, self.radar, self.player,
                        self.birthdays, self.scadenze, self.calendario,
-                       self.banner, self.media,
+                       self.banner, self.telecamera, self.media,
                        self.doom, self.giochi, self.gameboy,
                        self.clock):
             self.arbiter.register(source)

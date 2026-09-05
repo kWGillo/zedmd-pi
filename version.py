@@ -761,6 +761,28 @@ Storico:
        E' la prima meta'. La seconda — l'hotspot di soccorso che si alza da
        solo quando la connessione cade, e ogni tanto riprova le reti
        conosciute — si appoggera' a queste funzioni.
+  4.10 La telecamera. Passi davanti alla webcam e ti vedi sul pannello,
+       ridotto a quello che un computer di quarant'anni fa sapeva mostrare.
+       Gli otto colori pieni non sono una scelta di stile: sono gli unici che
+       su questo pannello non sfarfallano — sta scritto da tempo in
+       `nowplaying.safe_colors` — ed e' anche la tavolozza dei primi computer
+       a colori. Il vincolo hardware e l'estetica voluta sono la stessa cosa.
+       Le sfumature che mancano le rimette il dithering ordinato di Bayer.
+       Tre aspetti a scelta dalla pagina: otto colori, verde Game Boy, grigi.
+       Il carico si tiene basso in tre modi, e il primo e' il piu' importante:
+       i fotogrammi in piu' **non si scartano, non si chiedono**. Uno
+       scartato dopo la cattura ha gia' attraversato l'USB e il bus, e il
+       risparmio e' solo di CPU; uno mai prodotto non costa niente a nessuno.
+       Poi si chiede YUYV e non MJPEG, cosi' non c'e' nessun JPEG da
+       decodificare. E se il pannello e' di qualcun altro — ZeDMD, Doom — la
+       cattura si ferma da sola dopo venti secondi e riparte quando serve.
+       Foto e GIF da due pulsanti, salvate nella libreria media: il Media
+       Player le rimette sul pannello da solo, piu' avanti. Se ci sono piu'
+       telecamere si sceglie dal menu, e l'elenco mostra solo i nodi che
+       catturano davvero — una webcam USB ne espone due o tre, e gli altri non
+       danno un fotogramma nemmeno a insistere.
+       Le immagini non escono dal Raspberry: niente rete, niente MQTT. Il
+       servizio parte spento, perche' e' una telecamera in soggiorno.
 """
 
-__version__ = "4.9"
+__version__ = "4.10"

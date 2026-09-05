@@ -1185,6 +1185,119 @@ STRINGS = {
         "Title, artist and progress of the current track, from AirPlay or Spotify."),
     "services.desc.status_player": ("Notifiche sui giochi avviati dagli amici su Batocera.",
                                     "Notifications about games your friends launch on Batocera."),
+    "nav.telecamera": ("Telecamera", "Camera"),
+    "webcam.title": ("Telecamera", "Camera"),
+    "webcam.intro": (
+        "La webcam sul pannello, ridotta a quello che un computer di "
+        "quarant'anni fa sapeva mostrare. Si accende dalla pagina Servizi.",
+        "The webcam on the panel, reduced to what a computer from forty "
+        "years ago could show. Turn it on from the Services page."),
+    "webcam.nocam": (
+        "Nessuna telecamera collegata. Attaccane una alla porta USB: compare "
+        "qui senza bisogno di riavviare.",
+        "No camera connected. Plug one into the USB port: it shows up here "
+        "without a restart."),
+    "webcam.state.off": (
+        "Servizio spento. Si accende dalla pagina Servizi.",
+        "Service off. Turn it on from the Services page."),
+    "webcam.status.live": ("in ripresa da %(device)s", "live from %(device)s"),
+    "webcam.status.paused": (
+        "in pausa: il pannello è di qualcun altro, e una telecamera che "
+        "nessuno guarda è solo traffico sul bus",
+        "paused: the panel belongs to someone else, and a camera nobody "
+        "watches is just traffic on the bus"),
+    "webcam.status.recording": ("sto registrando…", "recording…"),
+    "webcam.status.error": ("non funziona: %(error)s", "not working: %(error)s"),
+    "webcam.shoot": ("Scatta", "Capture"),
+    "webcam.shoot.hint": (
+        "Foto e GIF finiscono nella libreria media, quindi il Media Player "
+        "te le rimette sul pannello da solo, più avanti.",
+        "Photos and GIFs go into the media library, so the Media Player "
+        "puts them back on the panel by itself, later on."),
+    "webcam.shoot.photo": ("Foto", "Photo"),
+    "webcam.shoot.gif": ("GIF di %(seconds)s secondi", "%(seconds)s second GIF"),
+    "webcam.shot": ("Salvata %(name)s.", "Saved %(name)s."),
+    "webcam.recording": ("Registro per %(seconds)s secondi…",
+                         "Recording for %(seconds)s seconds…"),
+    "webcam.failed": ("Non è stato possibile: %(error)s",
+                      "It did not work: %(error)s"),
+    "webcam.settings": ("Impostazioni", "Settings"),
+    "webcam.device": ("Telecamera", "Camera"),
+    "webcam.device.auto": ("La prima collegata", "The first one connected"),
+    "webcam.device.hint": (
+        "Una webcam USB espone più di un /dev/video: qui compare solo quello "
+        "che cattura davvero. Se la scelta non funziona, lo stato qui sopra "
+        "lo dice.",
+        "A USB webcam exposes more than one /dev/video: only the one that "
+        "actually captures is listed here. If the choice does not work, the "
+        "state above says so."),
+    "webcam.style": ("Aspetto", "Look"),
+    "webcam.style.otto": ("8 colori pieni, con dithering",
+                          "8 full colours, dithered"),
+    "webcam.style.gameboy": ("Verde Game Boy", "Game Boy green"),
+    "webcam.style.grigi": ("Grigi, poche sfumature", "Greys, few shades"),
+    "webcam.style.hint": (
+        "Gli otto colori pieni non sono una scelta di stile: sono gli unici "
+        "che su questo pannello non sfarfallano — ed è anche la tavolozza "
+        "dei primi computer a colori. Le sfumature che mancano le rimette il "
+        "dithering.",
+        "The eight full colours are not a style choice: they are the only "
+        "ones that do not flicker on this panel — and they are also the "
+        "palette of the first colour computers. Dithering puts back the "
+        "shades that are missing."),
+    "webcam.levels": ("Sfumature (verde e grigi)", "Shades (green and greys)"),
+    "webcam.levels.hint": (
+        "Quante sfumature per gli stili Game Boy e grigi. Quattro è il "
+        "numero del Game Boy vero.",
+        "How many shades for the Game Boy and grey looks. Four is the real "
+        "Game Boy's number."),
+    "webcam.fps": ("Fotogrammi al secondo", "Frames per second"),
+    "webcam.fps.hint": (
+        "Non è un filtro dopo la cattura: è quello che si chiede alla "
+        "telecamera di produrre. Un fotogramma mai prodotto non attraversa "
+        "l'USB e non tocca il bus — ed è il bus che, quando è affollato, "
+        "disegna le righe chiare sul pannello. Dieci bastano; sotto i cinque "
+        "l'immagine va a scatti.",
+        "This is not a filter after capture: it is what the camera is asked "
+        "to produce. A frame never produced never crosses the USB and never "
+        "touches the bus — and it is the bus that, when busy, draws the "
+        "bright lines on the panel. Ten is enough; below five it stutters."),
+    "webcam.width": ("Larghezza di cattura", "Capture width"),
+    "webcam.height": ("Altezza di cattura", "Capture height"),
+    "webcam.size.hint": (
+        "Va scelta fra le risoluzioni che la telecamera sa dare davvero "
+        "(`v4l2-ctl --list-formats-ext`). Più grande non vuol dire meglio: "
+        "l'immagine finisce comunque in 256×64, e ogni pixel in più è "
+        "traffico pagato per niente.",
+        "Pick one of the resolutions the camera really offers "
+        "(`v4l2-ctl --list-formats-ext`). Bigger is not better: the image "
+        "ends up in 256×64 anyway, and every extra pixel is traffic paid "
+        "for nothing."),
+    "webcam.gifsec": ("Durata della GIF (secondi)", "GIF length (seconds)"),
+    "webcam.mirror": ("Come allo specchio", "Mirrored"),
+    "webcam.autocontrast": ("Allarga il contrasto da solo",
+                            "Stretch the contrast automatically"),
+    "webcam.gallery": ("Ultimi scatti", "Latest captures"),
+    "webcam.gallery.hint": (
+        "Stanno nella libreria media, sotto la cartella indicata in "
+        "configurazione: da lì si guardano, si scaricano e si cancellano "
+        "come qualunque altro contenuto.",
+        "They live in the media library, under the folder set in the "
+        "configuration: from there you can view, download and delete them "
+        "like any other content."),
+    "webcam.privacy": ("Dove finiscono le immagini", "Where the images go"),
+    "webcam.privacy.hint": (
+        "Da nessuna parte. Le immagini non escono dal Raspberry: niente "
+        "rete, niente MQTT, niente servizi esterni. Quello che salvi resta "
+        "sulla scheda SD, e il servizio parte spento — una telecamera in "
+        "soggiorno si accende quando lo decidi tu.",
+        "Nowhere. The images never leave the Raspberry: no network, no "
+        "MQTT, no outside services. What you save stays on the SD card, and "
+        "the service starts off — a camera in the living room turns on when "
+        "you decide it does."),
+    "services.desc.webcam": (
+        "La webcam sul pannello, dal vivo e a otto colori.",
+        "The webcam on the panel, live and in eight colours."),
     "nav.rete": ("Rete", "Network"),
     "rete.title": ("Rete wifi", "Wi-Fi network"),
     "rete.current": ("Collegamento attuale", "Current connection"),

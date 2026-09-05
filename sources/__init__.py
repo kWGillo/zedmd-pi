@@ -20,6 +20,7 @@ from .gameboy import (GameBoySource, PALETTE, PULSANTI as GB_PULSANTI,
                       palette_scelte)
 from .giochi import GiochiSource, elenco as giochi_elenco
 from .scadenze import ScadenzeSource
+from .telecamera import TelecameraSource
 from .zedmd import ZeDMDSource
 
 __all__ = [
@@ -27,6 +28,7 @@ __all__ = [
     "BirthdaysSource", "PreviewSource", "HOLD_SECONDS",
     "DoomSource", "DOOM_TASTI", "DOOM_PULSANTI", "tastiere", "controlla_wad",
     "GiochiSource", "giochi_elenco", "ScadenzeSource", "CalendarioSource",
+    "TelecameraSource",
     "GameBoySource", "GB_PULSANTI", "controlla_rom", "elenco_rom",
     "PALETTE", "palette_scelte", "colori_palette",
     "joystick", "posizione_asse", "direzione_asse",

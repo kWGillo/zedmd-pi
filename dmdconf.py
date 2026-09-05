@@ -421,6 +421,37 @@ DEFAULTS = {
         "calendario": False,
         "status_player": False,
         "air_radar": False,
+        # Spento di suo, e non e' prudenza formale: e' una telecamera accesa
+        # in soggiorno. Si accende quando qualcuno decide di accenderla.
+        "webcam": False,
+    },
+    "webcam": {
+        # Vuoto = la prima telecamera collegata. Si scrive un /dev/videoN
+        # solo quando ce n'e' piu' d'una e si vuole scegliere.
+        "device": "",
+        # Quanto si chiede alla telecamera, non quanto si mostra.
+        "capture_width": 640,
+        "capture_height": 480,
+        # Dieci al secondo, e non e' un filtro dopo la cattura: e' cio' che si
+        # chiede alla telecamera di **produrre**. I fotogrammi in piu' non
+        # esistono, invece di essere prodotti, trasportati sull'USB e poi
+        # buttati. Scartare dopo risparmia CPU; non chiedere risparmia anche
+        # il bus, che e' quello che si vede come righe chiare sul pannello.
+        "fps": 10,
+        # otto | gameboy | grigi
+        "stile": "otto",
+        "livelli_grigio": 4,
+        # Ci si aspetta di vedersi come allo specchio: alzando la mano destra
+        # si alza la mano a destra sul pannello.
+        "specchio": True,
+        # Un soggiorno di sera esce come una poltiglia grigia stretta fra 40 e
+        # 90: senza allargare la gamma, ridotta a otto colori e' un
+        # rettangolo nero.
+        "contrasto_auto": True,
+        "gif_secondi": 3,
+        # Sottocartella della libreria media dove finiscono foto e GIF, cosi'
+        # il Media Player le rimette sul pannello da solo piu' avanti.
+        "cartella": "telecamera",
     },
     "zedmd": {
         "stream_port": 3333,

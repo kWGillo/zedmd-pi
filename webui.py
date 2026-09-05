@@ -31,6 +31,7 @@ import nowplaying
 import presets
 import ota
 import rete
+import webcam
 import spotifyapi
 from sources import (DOOM_PULSANTI, DOOM_TASTI, FIELD_LIST, GB_PULSANTI,
                      HOLD_SECONDS, LANGUAGES, OVERFLOW_MODES,
@@ -214,6 +215,96 @@ def create_app(runtime):
             cablaggi=presets.CABLAGGI,
             config_result=request.args.get("config_result"),
             result=request.args.get("result"), page="settings")
+
+    @app.route("/telecamera")
+    def page_telecamera():
+        """La webcam: quale, che aspetto, e gli scatti fatti finora."""
+        sorgente = getattr(runtime, "telecamera", None)
+        cattura = getattr(sorgente, "cattura", None)
+        return render_template(
+            "telecamera.html", cfg=cfg,
+            dispositivi=webcam.dispositivi(),
+            scelto=webcam.scelto(cfg),
+            ffmpeg=webcam.disponibile(),
+            stato=cattura.stato() if cattura else {},
+            scatti=webcam.elenco_scatti(cfg),
+            stili=webcam.STILI,
+            result=request.args.get("result"), page="telecamera")
+
+    @app.route("/api/telecamera", methods=["POST"])
+    def api_telecamera():
+        """Salva le impostazioni. Cambiare telecamera o formato la riapre.
+
+        Stile, livelli e contrasto agiscono sul fotogramma **dopo** la
+        cattura: cambiarli si vede al primo disegno e non vale la pena
+        riaprire la telecamera per loro. Dispositivo, risoluzione, fps e
+        specchio invece sono argomenti della riga di comando di ffmpeg: per
+        quelli il processo va rifatto.
+        """
+        conf = cfg["webcam"]
+        prima = (conf.get("device"), conf.get("capture_width"),
+                 conf.get("capture_height"), conf.get("fps"),
+                 conf.get("specchio"))
+
+        device = request.form.get("device", "").strip()
+        # Un percorso qualsiasi non si scrive: finirebbe nella riga di comando
+        # di ffmpeg. Si accetta solo un nodo che esiste davvero, o il vuoto,
+        # che significa «la prima che trovi».
+        if not device or device in [d["path"] for d in webcam.dispositivi()]:
+            conf["device"] = device
+
+        stile = request.form.get("stile", "")
+        if stile in webcam.STILI:
+            conf["stile"] = stile
+
+        for chiave, basso, alto, default in (("capture_width", 160, 1920, 640),
+                                             ("capture_height", 120, 1080, 480),
+                                             ("fps", 1, 30, 10),
+                                             ("livelli_grigio", 2, 16, 4),
+                                             ("gif_secondi", 1, 15, 3)):
+            try:
+                conf[chiave] = max(basso, min(alto, int(
+                    request.form.get(chiave, default))))
+            except ValueError:
+                conf[chiave] = default
+
+        conf["specchio"] = request.form.get("specchio") == "on"
+        conf["contrasto_auto"] = request.form.get("contrasto_auto") == "on"
+        dmdconf.save()
+
+        dopo = (conf.get("device"), conf.get("capture_width"),
+                conf.get("capture_height"), conf.get("fps"),
+                conf.get("specchio"))
+        sorgente = getattr(runtime, "telecamera", None)
+        if prima != dopo and sorgente is not None and sorgente.enabled:
+            sorgente.stop()
+            sorgente.start()
+        return redirect(url_for("page_telecamera"))
+
+    @app.route("/api/telecamera/scatta", methods=["POST"])
+    def api_telecamera_scatta():
+        cattura = getattr(getattr(runtime, "telecamera", None), "cattura", None)
+        if cattura is None:
+            return _telecamera_result("webcam.failed", error="telecamera assente")
+        percorso, motivo = cattura.scatta()
+        if not percorso:
+            return _telecamera_result("webcam.failed", error=motivo)
+        return _telecamera_result("webcam.shot", name=os.path.basename(percorso))
+
+    @app.route("/api/telecamera/registra", methods=["POST"])
+    def api_telecamera_registra():
+        cattura = getattr(getattr(runtime, "telecamera", None), "cattura", None)
+        if cattura is None:
+            return _telecamera_result("webcam.failed", error="telecamera assente")
+        avviato, motivo = cattura.registra(cfg["webcam"].get("gif_secondi"))
+        if not avviato:
+            return _telecamera_result("webcam.failed", error=motivo)
+        return _telecamera_result("webcam.recording",
+                                  seconds=cfg["webcam"].get("gif_secondi", 3))
+
+    def _telecamera_result(key, **values):
+        return redirect(url_for("page_telecamera", result=i18n.translate(
+            key, current_language(), **values)))
 
     @app.route("/rete")
     def page_rete():
@@ -1136,6 +1227,8 @@ def create_app(runtime):
              "status": stato("scadenze")},
             {"key": "calendario", "label": "Google Calendar", "ready": True,
              "status": stato("calendario")},
+            {"key": "webcam", "label": "Telecamera", "ready": True,
+             "status": stato("telecamera")},
         ]
         current = runtime.arbiter.current
         return render_template(
