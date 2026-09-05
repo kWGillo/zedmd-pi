@@ -1,7 +1,7 @@
 43413a31c32e500c1286ea2b4952c563  .gitignore
 011ddce0813df36532e15c1fd86a98ac  aerei.csv
 4884b249008a42c68fbd2c1b934c0a68  aeroporti.csv
-2f3221ceef25a3daa711ed9b8ba418a2  autotune.py
+13e95841fe78d3774935f35182209ae3  autotune.py
 d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 112957993893543e06c2302cfb040d28  config.json
@@ -27,7 +27,7 @@ d3a24b8bba728b625a667ef4f72f53b9  hass.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
 29e0f313a234ad9f497a09d7ef1645db  nowplaying.py
 14c72774dba471e7c07ef4a32ea2fa83  ota.py
-93965a204d48b45ce5aabd985e80364b  presets.py
+0e34e3813c0ae5174c80d38b1c48fd42  presets.py
 374d8f430239d5d2ebb9ab5748c9fec5  rifiuti.py
 5698878038d0f306ecebc25bde34d88c  scadenze.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
@@ -73,6 +73,6 @@ fc820c3435f5edea162ed83ce33fb964  templates/services.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 6df8717d0a8eea255f7085bb49539572  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-0ebcae379b459581b653a2a2fea75aaf  version.py
+ec3ff18959a9e87261b949401886b11b  version.py
 7a8602abd40f14bf000f71ad57a0f80a  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

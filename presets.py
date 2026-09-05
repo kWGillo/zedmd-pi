@@ -69,6 +69,58 @@ def profilo_autotune(panel):
     return blocco if blocco.get("values") else None
 
 
+_ASSENTE = object()
+
+
+def base_autotune(blocco):
+    """Il profilo da cui e' partita la taratura, se e' uno di quelli noti.
+
+    La taratura misura **un parametro**: gli altri diciannove sono quelli che
+    c'erano quando e' partita. Perche' la voce «Autotune» nel menu voglia dire
+    qualcosa bisogna sapere da dove partiva, altrimenti applicarla cambia un
+    numero e lascia gli altri come capita — che e' esattamente il difetto:
+    dopo aver portato il PWM a 8 a mano, scegliere «Autotune» lasciava il PWM
+    a 8, perche' il profilo tarato il PWM non ce l'ha scritto.
+
+    Tre casi. La chiave c'e' e nomina un profilo noto: e' quello. La chiave
+    c'e' e dice altro — `custom`, tipicamente: la taratura e' partita da una
+    configurazione fatta a mano, non c'e' nessun profilo a cui tornare e si
+    applica solo il parametro misurato, come prima. La chiave **manca**: e' un
+    profilo scritto da una versione precedente, che il campo non lo salvava,
+    e finche' di profili ne esiste uno solo non c'e' niente da indovinare.
+    """
+    base = (blocco or {}).get("base", _ASSENTE)
+    if base is _ASSENTE:
+        return next(iter(PRESETS)) if len(PRESETS) == 1 else None
+    return base if base in PRESETS else None
+
+
+def valori_autotune(panel):
+    """I valori completi del profilo tarato: la base piu' il parametro misurato."""
+    blocco = profilo_autotune(panel)
+    if not blocco:
+        return None
+    fuori = {}
+    base = base_autotune(blocco)
+    if base:
+        for nome, valore in PRESETS[base]["values"].items():
+            fuori[nome] = dict(valore) if isinstance(valore, dict) else valore
+    for nome, valore in (blocco.get("values") or {}).items():
+        if isinstance(valore, dict) and isinstance(fuori.get(nome), dict):
+            fuori[nome].update(valore)
+        else:
+            fuori[nome] = valore
+    return fuori
+
+
+def _valori(panel, key):
+    """I valori che quella voce del menu scrive nel pannello."""
+    if key == AUTOTUNE:
+        return valori_autotune(panel)
+    blocco = PRESETS.get(key)
+    return blocco["values"] if blocco else None
+
+
 def choices(panel=None):
     """(chiave, etichetta) per il menu, con la voce personalizzata in fondo."""
     fuori = [(key, blocco["label"]) for key, blocco in PRESETS.items()]
@@ -95,11 +147,10 @@ def apply(panel, key):
     if key == CUSTOM:
         panel["preset"] = CUSTOM
         return False
-    blocco = (profilo_autotune(panel) if key == AUTOTUNE
-              else PRESETS.get(key))
-    if not blocco:
+    valori = _valori(panel, key)
+    if not valori:
         return False
-    for nome, valore in blocco["values"].items():
+    for nome, valore in valori.items():
         if isinstance(valore, dict):
             ramo = panel.setdefault(nome, {})
             ramo.update(valore)
@@ -111,11 +162,10 @@ def apply(panel, key):
 
 def matches(panel, key):
     """Vero se il pannello ha esattamente i valori del profilo indicato."""
-    blocco = (profilo_autotune(panel) if key == AUTOTUNE
-              else PRESETS.get(key))
-    if not blocco:
+    valori = _valori(panel, key)
+    if not valori:
         return False
-    for nome, valore in blocco["values"].items():
+    for nome, valore in valori.items():
         if isinstance(valore, dict):
             ramo = panel.get(nome) or {}
             if any(str(ramo.get(k, "")) != str(v) for k, v in valore.items()):

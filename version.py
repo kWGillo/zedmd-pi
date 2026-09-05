@@ -713,6 +713,20 @@ Storico:
        **cambia** — la pagina dichiara al modulo quale stava mostrando — e
        modificare un numero a mano porta il menu su «Personalizzata», che e'
        esattamente quello che e' successo.
+  4.8.6 Il profilo tarato riporta anche i parametri che non ha misurato.
+       Sequenza: «Personalizzata», PWM a 8, salva, ricarica, «Autotune»,
+       salva — e il PWM restava 8. La taratura misura **un** parametro e nel
+       profilo scriveva solo quello, quindi sceglierlo dal menu cambiava lo
+       `slowdown` e lasciava gli altri diciannove com'erano: una voce di menu
+       che non porta da nessuna parte precisa.
+       Gli altri parametri sono quelli da cui la taratura e' partita, e ora
+       il profilo se lo ricorda: salva il nome del profilo di partenza e
+       applicarlo vuol dire «quel profilo, con questo parametro cambiato».
+       Chi ha gia' una taratura fatta non deve rifarla: finche' di profili di
+       pannello ne esiste uno solo non c'e' niente da indovinare. Se invece
+       la taratura e' partita da una configurazione fatta a mano, resta
+       scritto anche quello e si applica solo il parametro misurato: i numeri
+       scelti dall'utente non si sovrascrivono per deduzione.
 """
 
-__version__ = "4.8.5"
+__version__ = "4.8.6"

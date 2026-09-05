@@ -48,6 +48,7 @@ import sys
 import time
 import urllib.request
 
+import presets
 import staccato
 
 DATA_DIR = os.environ.get("DMD_AUTOTUNE_DIR", "/var/lib/dmd")
@@ -381,9 +382,13 @@ def _scrivi_valore(percorso, chiave, valore):
 
 def esegui(percorso_config, chiave, valori, minuti, giri, porta):
     """Lo sweep vero. Gira nel processo staccato, non nel servizio."""
-    originale = (_leggi_config(percorso_config).get("panel") or {}).get(chiave)
-    show_originale = bool(
-        (_leggi_config(percorso_config).get("panel") or {}).get("show_refresh"))
+    pannello_iniziale = _leggi_config(percorso_config).get("panel") or {}
+    originale = pannello_iniziale.get(chiave)
+    show_originale = bool(pannello_iniziale.get("show_refresh"))
+    # Da dove si parte, letto *prima* di cominciare a scrivere valori di prova:
+    # e' quello che rendera' completo il profilo tarato. Fra un minuto la
+    # configurazione sara' gia' cambiata e questa informazione non ci sara' piu'.
+    base = presets.detect(pannello_iniziale)
     secondi = max(MIN_FINESTRA, int(float(minuti) * 60))
     totale = len(valori) * int(giri)
     righe = []
@@ -465,7 +470,7 @@ def esegui(percorso_config, chiave, valori, minuti, giri, porta):
             riga = next((r for r in riepilogo
                          if r.get("valore") == consiglio["valore"]), {})
             _scrivi_profilo(percorso_config,
-                            profilo(chiave, consiglio["valore"], riga))
+                            profilo(chiave, consiglio["valore"], riga, base))
         _servizio("restart")
         dati = stato()
         dati.update({"in_corso": False, "finita": time.time(),
@@ -551,17 +556,28 @@ def etichetta_profilo(chiave, valore, quando=None):
     return "Autotune %s — %s %s" % (quando.strftime("%d/%m"), nome, valore)
 
 
-def profilo(chiave, valore, riga=None):
+def profilo(chiave, valore, riga=None, base=None):
     """Il blocco che finisce in `panel["autotune"]` e compare nel menu.
 
-    Contiene **solo il parametro tarato**: la taratura non ha misurato
-    righe, colonne e tipo di chip, e un profilo che li riscrivesse
-    spegnerebbe il pannello.
+    In `values` c'e' **solo il parametro tarato**: la taratura non ha misurato
+    righe, colonne e tipo di chip, e inventarseli qui vorrebbe dire scrivere
+    numeri mai provati in un posto dove sbagliarli spegne il pannello.
+
+    Gli altri diciannove parametri sono quelli da cui la taratura e' partita,
+    e per ritrovarli basta ricordarsi **da dove** e' partita: `base` e' il
+    nome del profilo che c'era nel menu quando la misura e' cominciata. Senza,
+    scegliere «Autotune» cambiava un numero e lasciava gli altri come
+    capitava — dopo aver messo il PWM a 8 a mano, il PWM restava 8.
+
+    `base` puo' essere `custom`: la taratura e' partita da una configurazione
+    fatta a mano e non c'e' nessun profilo a cui tornare. E' un'informazione,
+    non un buco: e' diverso dal non averla mai scritta.
     """
     riga = riga or {}
     return {
         "label": etichetta_profilo(chiave, valore),
         "chiave": chiave,
+        "base": base or presets.CUSTOM,
         "quando": time.time(),
         "misura": {"regime": riga.get("regime"), "media": riga.get("media"),
                    "percento": riga.get("percento"), "n": riga.get("n")},
