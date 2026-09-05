@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ t('rete.title') }}{% endblock %}
+
+{% block content %}
+
+{% if result %}<div class="banner">{{ result }}</div>{% endif %}
+
+<section class="card">
+  <h2>{{ t('rete.current') }}</h2>
+
+  {% if not stato.disponibile %}
+  <p class="status">{{ t('rete.nonmcli') }}</p>
+  {% else %}
+  <dl class="grid">
+    <dt>{{ t('rete.state') }}</dt>
+    <dd>
+      {%- if stato.connessa and stato.ssid %}{{ t('rete.connected', name=stato.ssid) }}
+      {%- elif stato.connessa %}{{ t('rete.connected.noname') }}
+      {%- else %}{{ t('rete.disconnected') }}{% endif %}
+      {%- if stato.segnale %} — {{ stato.segnale }}%{% endif %}
+    </dd>
+    <dt>{{ t('rete.interface') }}</dt>
+    <dd class="mono">{{ stato.interfaccia or '—' }}</dd>
+  </dl>
+  {% if stato.errore %}<p class="status">{{ stato.errore }}</p>{% endif %}
+  {% endif %}
+
+  {% if indirizzi %}
+  <p class="hint">{{ t('rete.addresses') }}
+    {% for voce in indirizzi %}<code>{{ voce.ip }}</code> ({{ voce.interfaccia }}){% if not loop.last %}, {% endif %}{% endfor %}
+  </p>
+  {% endif %}
+
+  {% if tentativo.ssid %}
+  <p class="status">
+    {%- if tentativo.in_corso %}{{ t('rete.attempt.running', name=tentativo.ssid) }}
+    {%- elif tentativo.esito == 'ok' %}{{ t('rete.attempt.ok', name=tentativo.ssid) }}
+    {%- else %}{{ t('rete.attempt.failed', name=tentativo.ssid) }}
+      {%- if tentativo.messaggio %} — <code>{{ tentativo.messaggio }}</code>{% endif %}
+    {%- endif %}
+  </p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ t('rete.scan') }}</h2>
+  <p class="hint">{{ t('rete.scan.hint') }}</p>
+
+  <form method="get" action="{{ url_for('page_rete') }}" class="inline">
+    <input type="hidden" name="scan" value="1">
+    <button type="submit">{{ t('rete.scan.button') }}</button>
+  </form>
+
+  {% if cercato and not reti %}
+  <p class="status">{{ t('rete.none') }}</p>
+  {% endif %}
+
+  {% for voce in reti %}
+  <div class="service-head">
+    <h3>
+      {{ voce.ssid }}
+      {%- if voce.attiva %} ✓{% endif %}
+      <span class="hint">{{ voce.segnale }}%
+        — {{ voce.sicurezza if not voce.aperta else t('rete.open') }}
+        {%- if voce.conosciuta %} — {{ t('rete.known') }}{% endif %}</span>
+    </h3>
+  </div>
+  <form method="post" action="{{ url_for('api_rete_connect') }}" class="inline">
+    <input type="hidden" name="ssid" value="{{ voce.ssid }}">
+    {% if not voce.aperta %}
+    <input type="password" name="password" autocomplete="off"
+           placeholder="{{ t('rete.password') if not voce.conosciuta else t('rete.password.keep') }}">
+    {% endif %}
+    <button type="submit">{{ t('rete.connect') }}</button>
+  </form>
+  {% endfor %}
+</section>
+
+<section class="card">
+  <h2>{{ t('rete.hidden') }}</h2>
+  <p class="hint">{{ t('rete.hidden.hint') }}</p>
+  <form method="post" action="{{ url_for('api_rete_connect') }}" class="inline">
+    <input type="text" name="ssid" placeholder="{{ t('rete.name') }}"
+           autocomplete="off">
+    <input type="password" name="password" placeholder="{{ t('rete.password') }}"
+           autocomplete="off">
+    <button type="submit">{{ t('rete.connect') }}</button>
+  </form>
+</section>
+
+{% if conosciute %}
+<section class="card">
+  <h2>{{ t('rete.saved') }}</h2>
+  <p class="hint">{{ t('rete.saved.hint') }}</p>
+  {% for nome in conosciute %}
+  <div class="service-head">
+    <h3>{{ nome }}{% if nome == stato.ssid %} ✓{% endif %}</h3>
+    <form method="post" action="{{ url_for('api_rete_forget') }}">
+      <input type="hidden" name="ssid" value="{{ nome }}">
+      <button type="submit" {{ 'disabled' if nome == stato.ssid }}>
+        {{ t('rete.forget') }}</button>
+    </form>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+<section class="card">
+  <h2>{{ t('rete.console') }}</h2>
+  <p class="hint">{{ t('rete.console.hint') }}</p>
+  <pre class="mono">nmcli device wifi list
+sudo nmcli device wifi connect "NOME_RETE" password "PASSWORD"</pre>
+</section>
+
+{% endblock %}

@@ -26,6 +26,7 @@
       <a href="{{ url_for('page_giochi') }}" class="{{ 'on' if page in ('giochi', 'doom', 'gameboy') }}">{{ t('nav.giochi') }}</a>
       <a href="{{ url_for('page_services') }}" class="{{ 'on' if page == 'services' }}">{{ t('nav.services') }}</a>
       <a href="{{ url_for('page_settings') }}" class="{{ 'on' if page == 'settings' }}">{{ t('nav.settings') }}</a>
+      <a href="{{ url_for('page_rete') }}" class="{{ 'on' if page == 'rete' }}">{{ t('nav.rete') }}</a>
       <a href="{{ url_for('page_updates') }}" class="{{ 'on' if page == 'updates' }}">{{ t('nav.updates') }}</a>
     </nav>
     <form method="post" action="{{ url_for('api_language') }}" class="langpick">

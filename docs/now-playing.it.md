@@ -444,6 +444,25 @@ Nella pagina Musica ci sono comunque due pulsanti manuali:
   cambi l'identificativo o smetti di usare l'integrazione: senza, le vecchie
   entità resterebbero depositate sul broker come fantasmi.
 
+### Staccare il collegamento
+
+Nella pagina **Servizi**, in alto, c'è un interruttore *MQTT e Home
+Assistant*: spegne e riaccende il collegamento al broker senza toccare
+nient'altro. Le impostazioni — indirizzo, utente, password, topic — restano
+dove sono, quindi riaccendere è un clic e non una ridigitazione.
+
+Sta lì perché è lì che lo si cerca: quando Home Assistant dice cose che non
+tornano, la prima cosa da fare è staccare e vedere cosa cambia. Prima l'unico
+modo era questa pagina, in fondo, dentro un modulo di undici campi che vanno
+risalvati tutti insieme — con il rischio di perdere l'indirizzo del broker
+mentre si voleva soltanto spegnere.
+
+Spegnendo, il DMD **saluta**: pubblica `offline` sul topic di disponibilità,
+e in Home Assistant le entità diventano *non disponibili* invece di restare
+congelate sull'ultimo valore. Sul pannello non cambia niente — i servizi
+continuano per conto loro, e la musica via AirPlay smette di essere
+annunciata, non di suonare.
+
 ## Da Home Assistant verso il DMD
 
 È il modo di coprire quello che il DMD non vede da solo: un HomePod avviato a

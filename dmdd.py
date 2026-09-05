@@ -368,6 +368,13 @@ class Runtime:
             self._subscribe_audio()
             if self.mqtt.start():
                 self.hass.start()
+            else:
+                # Spento vuol dire spento: senza questa riga il thread del
+                # ponte Home Assistant continuava a girare a vuoto, a
+                # pubblicare su un client che non c'e' piu'. Non si vedeva —
+                # le pubblicazioni cadono in silenzio — ma «spegnere» deve
+                # fermare qualcosa, non solo smettere di collegarsi.
+                self.hass.stop()
             self.player.invalidate()
             return True
         except Exception as exc:

@@ -2,6 +2,60 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [4.9]
+
+- **Pagina Rete.** Le reti wifi si vedono e si scelgono dal browser: elenco
+  con segnale e cifratura, reti già salvate, reti nascoste da scrivere a
+  mano, e il pulsante per dimenticarne una. Prima, per cambiare rete,
+  servivano un monitor, una tastiera e un mouse attaccati al Raspberry.
+
+  Si parla con `nmcli` e con nient'altro: NetworkManager è il proprietario
+  della rete su Raspberry Pi OS, e due proprietari della stessa cosa sono
+  peggio di nessuno. Se `nmcli` non c'è la pagina si apre lo stesso e spiega
+  dove guardare — è la pagina che si apre quando le cose non vanno, cadere
+  proprio lì sarebbe il difetto peggiore.
+
+  **Le password non le custodisce il DMD.** Vanno a NetworkManager, che le
+  tiene già per mestiere: nel `config.json` non finisce niente, quindi non
+  c'è una credenziale da esportare per sbaglio né da perdere. Nel registro
+  la password diventa `***`.
+
+  **Il collegamento non blocca la pagina.** Chi preme il pulsante è collegato
+  attraverso la rete di prima: se il cambio riesce, la risposta non gli
+  arriva mai. Parte un thread, la pagina risponde subito, e l'esito si legge
+  riaprendola sul nuovo indirizzo — che la pagina elenca prima del cambio. Se
+  il tentativo fallisce non si perde niente: NetworkManager riattiva il
+  profilo di prima, ed è il motivo per cui il vecchio non si cancella mai
+  prima di aver provato il nuovo.
+
+  Non si può dimenticare la rete attraverso cui si sta guardando la pagina:
+  sarebbe staccarsi il filo sotto i piedi, e per rimediare servirebbe di
+  nuovo il monitor.
+
+  È la prima metà. La seconda — l'hotspot di soccorso che si alza da solo
+  quando la connessione cade, e ogni tanto riprova le reti conosciute — si
+  appoggerà a queste funzioni.
+
+## [4.8.7]
+
+- **Interruttore MQTT nella pagina Servizi.** In cima, sopra l'elenco delle
+  sorgenti: spegne e riaccende il collegamento al broker, e con esso il ponte
+  verso Home Assistant. Le impostazioni non le tocca — indirizzo, utente,
+  password e topic restano dove sono — quindi riaccendere è un clic e non una
+  ridigitazione. Prima l'unico modo era una casella in fondo alla pagina
+  Musica, dentro un modulo di undici campi che vanno risalvati tutti insieme:
+  per staccare il broker si rischiava di perderne l'indirizzo.
+
+  Spegnendo, il DMD **saluta**: pubblica l'`offline` ritenuto sul topic di
+  disponibilità, così in Home Assistant le entità diventano *non disponibili*
+  invece di restare congelate sull'ultimo valore. Sul pannello non cambia
+  niente, i servizi continuano per conto loro.
+
+- Il ponte verso Home Assistant ora si **ferma** davvero quando MQTT viene
+  spento. Prima il suo thread continuava a girare, pubblicando su un client
+  che non c'era più: non si vedeva — le pubblicazioni cadevano in silenzio —
+  ma «spegnere» deve fermare qualcosa, non solo smettere di collegarsi.
+
 ## [4.8.6]
 
 - **Il profilo tarato non riportava i parametri che non aveva misurato.**

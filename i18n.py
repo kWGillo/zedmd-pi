@@ -1154,6 +1154,24 @@ STRINGS = {
     "services.on": ("Attivo", "On"),
     "services.off": ("Spento", "Off"),
     "services.soon": ("In arrivo", "Coming soon"),
+    "services.mqtt": ("MQTT e Home Assistant", "MQTT and Home Assistant"),
+    "services.mqtt.desc": (
+        "Il collegamento al broker. Da acceso, i servizi qui sotto diventano "
+        "interruttori in Home Assistant e il brano in riproduzione arriva da "
+        "AirPlay.",
+        "The link to the broker. When on, the services below become switches "
+        "in Home Assistant and the current track arrives over AirPlay."),
+    "services.mqtt.hint": (
+        "Spegnendolo il DMD saluta il broker e in Home Assistant il "
+        "dispositivo passa a «non disponibile», invece di restare fermo "
+        "sull'ultimo valore. Sul pannello non cambia niente: i servizi qui "
+        "sotto continuano per conto loro. Indirizzo, utente e topic si "
+        "impostano in Now Playing.",
+        "Turning it off makes the DMD say goodbye to the broker, so in Home "
+        "Assistant the device becomes «unavailable» instead of freezing on "
+        "its last value. Nothing changes on the panel: the services below "
+        "carry on by themselves. Address, user and topics are set in Now "
+        "Playing."),
     "services.desc.zedmd": ("Riceve i frame DMD via rete da Batocera, dmdserver o VPX.",
                            "Receives DMD frames over the network from Batocera, dmdserver or VPX."),
     "services.desc.mediaplayer": ("Foto e video a rotazione dalla libreria, a intervalli casuali.",
@@ -1167,6 +1185,72 @@ STRINGS = {
         "Title, artist and progress of the current track, from AirPlay or Spotify."),
     "services.desc.status_player": ("Notifiche sui giochi avviati dagli amici su Batocera.",
                                     "Notifications about games your friends launch on Batocera."),
+    "nav.rete": ("Rete", "Network"),
+    "rete.title": ("Rete wifi", "Wi-Fi network"),
+    "rete.current": ("Collegamento attuale", "Current connection"),
+    "rete.state": ("Stato", "State"),
+    "rete.interface": ("Interfaccia", "Interface"),
+    "rete.connected": ("collegato a %(name)s", "connected to %(name)s"),
+    "rete.connected.noname": ("collegato", "connected"),
+    "rete.disconnected": ("non collegato", "not connected"),
+    "rete.nonmcli": (
+        "Su questa macchina non c'è nmcli: la rete è gestita in un altro "
+        "modo (di solito wpa_supplicant, sulle immagini più vecchie) e da "
+        "qui non si può cambiare. La procedura da riga di comando è in fondo "
+        "alla pagina.",
+        "This machine has no nmcli: the network is managed some other way "
+        "(usually wpa_supplicant, on older images) and cannot be changed "
+        "from here. The command line procedure is at the bottom of the page."),
+    "rete.addresses": ("Il DMD risponde a:", "The DMD answers at:"),
+    "rete.scan": ("Reti visibili", "Networks in range"),
+    "rete.scan.button": ("Cerca le reti", "Scan"),
+    "rete.scan.hint": (
+        "La ricerca non parte da sola: dura qualche secondo e disturba il "
+        "pannello, quindi si fa quando serve.",
+        "The scan does not start on its own: it takes a few seconds and "
+        "disturbs the panel, so it runs when you ask for it."),
+    "rete.none": ("Nessuna rete trovata.", "No networks found."),
+    "rete.open": ("aperta", "open"),
+    "rete.known": ("già salvata", "saved"),
+    "rete.name": ("Nome della rete", "Network name"),
+    "rete.password": ("Password", "Password"),
+    "rete.password.keep": ("Vuoto = quella salvata", "Empty = the saved one"),
+    "rete.connect": ("Collega", "Connect"),
+    "rete.hidden": ("Rete nascosta", "Hidden network"),
+    "rete.hidden.hint": (
+        "Una rete che non trasmette il proprio nome non compare nell'elenco: "
+        "va scritto a mano.",
+        "A network that does not broadcast its name is not listed: type it "
+        "in by hand."),
+    "rete.saved": ("Reti salvate", "Saved networks"),
+    "rete.saved.hint": (
+        "Il DMD si ricollega da solo a queste, in ordine di segnale. La rete "
+        "attraverso cui stai guardando questa pagina non si può dimenticare: "
+        "collegati prima a un'altra.",
+        "The DMD reconnects to these on its own, by signal strength. The "
+        "network you are reading this page through cannot be forgotten: "
+        "connect to another one first."),
+    "rete.forget": ("Dimentica", "Forget"),
+    "rete.forgotten": ("Rete %(name)s dimenticata.", "Network %(name)s forgotten."),
+    "rete.trying": (
+        "Sto provando a collegarmi a %(name)s. Se il cambio riesce questa "
+        "pagina non risponde più: riaprila su uno degli indirizzi qui sopra.",
+        "Trying to connect to %(name)s. If the switch succeeds this page "
+        "stops answering: reopen it at one of the addresses above."),
+    "rete.failed": ("Non è stato possibile: %(error)s",
+                    "It did not work: %(error)s"),
+    "rete.attempt.running": ("tentativo su %(name)s in corso…",
+                             "attempt on %(name)s in progress…"),
+    "rete.attempt.ok": ("ultimo tentativo: %(name)s, riuscito",
+                        "last attempt: %(name)s, succeeded"),
+    "rete.attempt.failed": ("ultimo tentativo: %(name)s, fallito",
+                            "last attempt: %(name)s, failed"),
+    "rete.console": ("Se questa pagina non basta", "If this page is not enough"),
+    "rete.console.hint": (
+        "Da SSH o da tastiera attaccata al Raspberry, con l'utente root o "
+        "con sudo:",
+        "Over SSH, or with a keyboard attached to the Raspberry, as root or "
+        "with sudo:"),
     "nav.updates": ("Aggiornamenti", "Updates"),
     "updates.intro": (
         "Qui si aggiorna il sistema: il programma dal repository e la "

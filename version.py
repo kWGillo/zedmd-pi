@@ -727,6 +727,40 @@ Storico:
        la taratura e' partita da una configurazione fatta a mano, resta
        scritto anche quello e si applica solo il parametro misurato: i numeri
        scelti dall'utente non si sovrascrivono per deduzione.
+  4.8.7 Un interruttore per MQTT in cima alla pagina Servizi. Spegne e
+       riaccende il collegamento al broker — e con esso il ponte verso Home
+       Assistant — senza toccare nient'altro: indirizzo, utente, password e
+       topic restano dove sono, quindi riaccendere e' un clic e non una
+       ridigitazione. Prima l'unico modo era un campo in fondo alla pagina
+       Musica, dentro un modulo di undici campi che vanno risalvati insieme.
+       Spegnendo, il DMD saluta: il "offline" ritenuto fa comparire in Home
+       Assistant le entita' come non disponibili invece di lasciarle ferme
+       sull'ultimo valore, e il thread del ponte si ferma davvero — prima
+       continuava a girare a vuoto, pubblicando su un client che non c'era
+       piu'.
+  4.9 La pagina Rete: le reti wifi si vedono e si scelgono dal browser.
+       Prima, per cambiare rete, servivano un monitor, una tastiera e un
+       mouse attaccati al Raspberry — per un oggetto che sta in soggiorno e'
+       una procedura assurda.
+       Si parla con `nmcli` e con nient'altro: NetworkManager e' il
+       proprietario della rete, e due proprietari sono peggio di nessuno. Le
+       password vanno a lui, che le custodisce gia' per mestiere; nel
+       `config.json` non finisce niente, quindi non c'e' una credenziale da
+       esportare per sbaglio ne' da perdere. Nel registro la password diventa
+       `***`.
+       Il collegamento non si fa dentro la richiesta web: chi ha premuto il
+       pulsante e' collegato attraverso la rete di prima, e se il cambio
+       riesce la risposta non gli arriva mai. Parte un thread, la pagina
+       risponde subito, e l'esito si legge riaprendola sul nuovo indirizzo —
+       che la pagina elenca. Se il tentativo fallisce non si perde niente:
+       NetworkManager riattiva il profilo di prima, e per questo il vecchio
+       non si cancella mai prima di aver provato il nuovo.
+       Non si puo' dimenticare la rete attraverso cui si sta guardando la
+       pagina: sarebbe staccarsi il filo sotto i piedi, e per rimediare
+       servirebbe di nuovo il monitor.
+       E' la prima meta'. La seconda — l'hotspot di soccorso che si alza da
+       solo quando la connessione cade, e ogni tanto riprova le reti
+       conosciute — si appoggera' a queste funzioni.
 """
 
-__version__ = "4.8.6"
+__version__ = "4.9"

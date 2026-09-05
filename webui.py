@@ -30,6 +30,7 @@ import scadenze
 import nowplaying
 import presets
 import ota
+import rete
 import spotifyapi
 from sources import (DOOM_PULSANTI, DOOM_TASTI, FIELD_LIST, GB_PULSANTI,
                      HOLD_SECONDS, LANGUAGES, OVERFLOW_MODES,
@@ -213,6 +214,58 @@ def create_app(runtime):
             cablaggi=presets.CABLAGGI,
             config_result=request.args.get("config_result"),
             result=request.args.get("result"), page="settings")
+
+    @app.route("/rete")
+    def page_rete():
+        """Le reti wifi viste dal DMD, e quella a cui e' collegato.
+
+        Sta fuori dalle Impostazioni per lo stesso motivo degli
+        aggiornamenti: non regola il pannello, cambia il modo in cui la
+        macchina sta al mondo. E soprattutto e' la pagina che si apre quando
+        qualcosa non va — deve aprirsi anche se `nmcli` non c'e', anche se
+        l'interfaccia wifi e' sparita, anche se la scansione fallisce. Da qui
+        non si rimbalza da nessun'altra parte.
+
+        La scansione si fa solo quando la si chiede: `--rescan yes` costa
+        qualche secondo e, su una macchina che sta gia' facendo fatica,
+        rifarla a ogni ricaricamento sarebbe un disturbo continuo.
+        """
+        cercare = request.args.get("scan") == "1"
+        return render_template(
+            "rete.html", cfg=cfg,
+            stato=rete.stato(),
+            reti=rete.scansiona(forza=True) if cercare else [],
+            cercato=cercare,
+            conosciute=rete.conosciute(),
+            indirizzi=rete.indirizzi(),
+            tentativo=rete.tentativo(),
+            result=request.args.get("result"), page="rete")
+
+    @app.route("/api/rete/connect", methods=["POST"])
+    def api_rete_connect():
+        """Avvia il collegamento a una rete. Non aspetta che finisca.
+
+        Chi ha premuto il pulsante e' collegato al DMD **attraverso la rete
+        di prima**: se il cambio riesce, questa risposta non gli arrivera'
+        mai. Quindi si risponde subito, e l'esito si legge riaprendo la
+        pagina — al nuovo indirizzo, che la pagina stessa elenca.
+        """
+        ssid = request.form.get("ssid", "")
+        password = request.form.get("password", "")
+        avviato, motivo = rete.connetti(ssid, password)
+        if not avviato:
+            return redirect(url_for("page_rete", result=i18n.translate(
+                "rete.failed", current_language(), error=motivo)))
+        return redirect(url_for("page_rete", result=i18n.translate(
+            "rete.trying", current_language(), name=ssid)))
+
+    @app.route("/api/rete/forget", methods=["POST"])
+    def api_rete_forget():
+        fatto, motivo = rete.dimentica(request.form.get("ssid", ""))
+        chiave = "rete.forgotten" if fatto else "rete.failed"
+        return redirect(url_for("page_rete", result=i18n.translate(
+            chiave, current_language(), error=motivo,
+            name=request.form.get("ssid", ""))))
 
     @app.route("/updates")
     def page_updates():
@@ -1088,6 +1141,7 @@ def create_app(runtime):
         return render_template(
             "services.html", cfg=cfg, services=services,
             current=current.label if current else "—",
+            mqtt=runtime.mqtt.status(),
             sleeping=runtime.sleeping, night=runtime.night, page="services")
 
     # ---------------------------------------------- contatore delle richieste
@@ -1776,6 +1830,30 @@ def create_app(runtime):
             cfg["services"][key] = request.form.get("value") == "1"
             dmdconf.save()
             runtime.arbiter.apply_services()
+        return redirect(url_for("page_services"))
+
+    @app.route("/api/mqtt/toggle", methods=["POST"])
+    def api_mqtt_toggle():
+        """Accende o spegne il collegamento al broker, senza toccare altro.
+
+        E' l'unico interruttore della pagina Servizi che non e' un servizio:
+        non decide cosa va sul pannello, decide se il DMD parla con il resto
+        della casa. Sta li' perche' e' li' che lo si cerca quando Home
+        Assistant dice cose che non tornano — l'alternativa era in fondo alla
+        pagina Now Playing, dentro un modulo di undici campi.
+
+        Il resto delle impostazioni MQTT resta dov'e': questo pulsante non ne
+        riscrive nessuna, per non trasformare un clic di prova in una perdita
+        di indirizzo e credenziali.
+        """
+        acceso = request.form.get("value") == "1"
+        if bool(cfg["mqtt"].get("enabled")) != acceso:
+            cfg["mqtt"]["enabled"] = acceso
+            dmdconf.save()
+            # Spegnendo, `stop()` pubblica il "offline" ritenuto: e' cio' che
+            # in Home Assistant fa comparire "non disponibile" invece di
+            # lasciare le entita' congelate sull'ultimo valore.
+            runtime.reconnect_mqtt()
         return redirect(url_for("page_services"))
 
     @app.route("/api/force", methods=["POST"])

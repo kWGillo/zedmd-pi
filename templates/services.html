@@ -27,6 +27,31 @@
   <p class="hint">{{ t('services.arbiter.hint', grace=cfg.zedmd.grace_seconds) }}</p>
 </section>
 
+{# Non e' un servizio — non decide cosa va sul pannello — ma sta qui perche'
+   e' qui che lo si cerca. In alto e non in fondo all'elenco: quando serve,
+   serve subito. #}
+<section class="card service">
+  <div class="service-head">
+    <h2>{{ t('services.mqtt') }}</h2>
+    <form method="post" action="{{ url_for('api_mqtt_toggle') }}">
+      <input type="hidden" name="value" value="{{ '0' if cfg.mqtt.enabled else '1' }}">
+      <button type="submit" class="toggle {{ 'on' if cfg.mqtt.enabled }}">
+        {{ t('services.on') if cfg.mqtt.enabled else t('services.off') }}
+      </button>
+    </form>
+  </div>
+  <p class="desc">{{ t('services.mqtt.desc') }}</p>
+  <p class="status">
+    {%- if not mqtt.available %}{{ t('nowplaying.mqtt.missing', package=mqtt.package) }}
+    {%- elif not cfg.mqtt.enabled %}{{ t('nowplaying.mqtt.off') }}
+    {%- elif mqtt.connected %}{{ t('nowplaying.mqtt.connected', host=mqtt.host, port=mqtt.port) }}
+      — {{ t('nowplaying.mqtt.messages', count=mqtt.messages) }}
+    {%- else %}{{ t('nowplaying.mqtt.disconnected') }}{% endif %}
+    {%- if mqtt.error %} — <code>{{ mqtt.error }}</code>{% endif %}
+  </p>
+  <p class="hint">{{ t('services.mqtt.hint') }}</p>
+</section>
+
 {% for service in services %}
 <section class="card service {{ 'disabled' if not service.ready }}">
   <div class="service-head">
