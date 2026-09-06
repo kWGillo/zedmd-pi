@@ -27,6 +27,78 @@
   {% endif %}
 </section>
 
+<section class="card">
+  <h2>{{ t('webcam.button') }}</h2>
+  <p class="hint">{{ t('webcam.button.what') }}</p>
+
+  <dl class="grid">
+    <dt>{{ t('webcam.button.click') }}</dt><dd>{{ t('webcam.button.click.what') }}</dd>
+    <dt>{{ t('webcam.button.click2') }}</dt><dd>{{ t('webcam.button.click2.what') }}</dd>
+    <dt>{{ t('webcam.button.hold') }}</dt><dd>{{ t('webcam.button.hold.what') }}</dd>
+  </dl>
+
+  <h3>{{ t('webcam.gpiozero') }}</h3>
+  {% if gpiozero.pronto %}
+  <p class="status">{{ t('webcam.gpiozero.ok', package=gpiozero.pacchetto) }}</p>
+  {% elif gpiozero.in_corso %}
+  <p class="status">{{ t('webcam.gpiozero.running') }}</p>
+  {% else %}
+  <p class="hint">{{ t('webcam.gpiozero.hint', package=gpiozero.pacchetto) }}</p>
+  <form method="post" action="{{ url_for('api_telecamera_gpiozero') }}" class="inline">
+    <button type="submit">{{ t('webcam.gpiozero.install',
+                               package=gpiozero.pacchetto) }}</button>
+  </form>
+  {% endif %}
+  {% if gpiozero.log %}<pre class="mono">{{ gpiozero.log }}</pre>{% endif %}
+
+  <h3>{{ t('webcam.button.wiring') }}</h3>
+  <p class="hint">{{ t('webcam.button.wiring.hint',
+                       gpio=cfg.webcam.pulsante.gpio) }}</p>
+
+  <h3>{{ t('webcam.button.enable') }}</h3>
+  <form method="post" action="{{ url_for('api_telecamera_pulsante') }}">
+    <label class="check">
+      <input type="checkbox" name="pulsante"
+             {{ 'checked' if cfg.webcam.pulsante.enabled }}>
+      {{ t('webcam.button.enable.label') }}</label>
+
+    <label for="gpio">{{ t('webcam.button.gpio') }}</label>
+    <select id="gpio" name="gpio">
+      {% for pin in gpio_ammessi %}
+      <option value="{{ pin }}" {{ 'selected' if cfg.webcam.pulsante.gpio == pin }}>
+        GPIO {{ pin }}{% if pin == 25 %} — {{ t('webcam.button.suggested') }}{% endif %}</option>
+      {% endfor %}
+    </select>
+    <p class="hint">{{ t('webcam.button.hint') }}</p>
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+
+  {% if cfg.webcam.pulsante.enabled %}
+  {% if bottone.errore %}
+  <p class="status">{{ t('webcam.status.button.error', error=bottone.errore) }}</p>
+  {% endif %}
+  {% if gpiozero.pronto and not bottone.aperto %}
+  <form method="post" action="{{ url_for('api_telecamera_riarma') }}" class="inline">
+    <button type="submit">{{ t('webcam.button.rearm') }}</button>
+  </form>
+  <p class="hint">{{ t('webcam.button.rearm.hint') }}</p>
+  {% endif %}
+
+  <h3>{{ t('webcam.button.now') }}</h3>
+  <p class="hint">{{ t('webcam.button.now.hint') }}</p>
+  <form method="post" action="{{ url_for('api_telecamera_accendi') }}" class="inline">
+    <input type="hidden" name="valore" value="{{ '0' if dal_vivo else '1' }}">
+    <button type="submit" class="toggle {{ 'on' if dal_vivo }}">
+      {{ t('webcam.button.off') if dal_vivo else t('webcam.button.on') }}
+    </button>
+  </form>
+  {% endif %}
+</section>
+
+{% if gpiozero.in_corso %}
+<script>setTimeout(function () { location.reload(); }, 4000);</script>
+{% endif %}
+
 {% if dispositivi %}
 <section class="card">
   <h2>{{ t('webcam.shoot') }}</h2>
@@ -91,20 +163,6 @@
     </div>
     <p class="hint">{{ t('webcam.size.hint') }}</p>
 
-    <label class="check">
-      <input type="checkbox" name="pulsante"
-             {{ 'checked' if cfg.webcam.pulsante.enabled }}>
-      {{ t('webcam.button') }}</label>
-
-    <label for="gpio">{{ t('webcam.button.gpio') }}</label>
-    <select id="gpio" name="gpio">
-      {% for pin in gpio_ammessi %}
-      <option value="{{ pin }}" {{ 'selected' if cfg.webcam.pulsante.gpio == pin }}>
-        GPIO {{ pin }}{% if pin == 25 %} — {{ t('webcam.button.suggested') }}{% endif %}</option>
-      {% endfor %}
-    </select>
-    <p class="hint">{{ t('webcam.button.hint') }}</p>
-
     <label for="gif_secondi">{{ t('webcam.gifsec') }}</label>
     <input type="number" id="gif_secondi" name="gif_secondi" min="1" max="15"
            value="{{ cfg.webcam.gif_secondi }}">
@@ -130,60 +188,6 @@
     <li>{{ voce.nome }}</li>
     {% endfor %}
   </ul>
-</section>
-{% endif %}
-
-{% if cfg.webcam.pulsante.enabled %}
-<section class="card">
-  <h2>{{ t('webcam.button.now') }}</h2>
-  <p class="hint">{{ t('webcam.button.now.hint') }}</p>
-  <form method="post" action="{{ url_for('api_telecamera_accendi') }}" class="inline">
-    <input type="hidden" name="valore" value="{{ '0' if dal_vivo else '1' }}">
-    <button type="submit" class="toggle {{ 'on' if dal_vivo }}">
-      {{ t('webcam.button.off') if dal_vivo else t('webcam.button.on') }}
-    </button>
-  </form>
-</section>
-
-<section class="card">
-  <h2>{{ t('webcam.gpiozero') }}</h2>
-  {% if gpiozero.pronto %}
-  <p class="status">{{ t('webcam.gpiozero.ok', package=gpiozero.pacchetto) }}</p>
-  {% if bottone.errore %}
-  <p class="status">{{ t('webcam.status.button.error', error=bottone.errore) }}</p>
-  {% endif %}
-  {% if not bottone.aperto %}
-  <form method="post" action="{{ url_for('api_telecamera_riarma') }}" class="inline">
-    <button type="submit">{{ t('webcam.button.rearm') }}</button>
-  </form>
-  <p class="hint">{{ t('webcam.button.rearm.hint') }}</p>
-  {% endif %}
-  {% elif gpiozero.in_corso %}
-  <p class="status">{{ t('webcam.gpiozero.running') }}</p>
-  {% else %}
-  <p class="hint">{{ t('webcam.gpiozero.hint', package=gpiozero.pacchetto) }}</p>
-  <form method="post" action="{{ url_for('api_telecamera_gpiozero') }}" class="inline">
-    <button type="submit">{{ t('webcam.gpiozero.install',
-                               package=gpiozero.pacchetto) }}</button>
-  </form>
-  {% endif %}
-  {% if gpiozero.log %}
-  <pre class="mono">{{ gpiozero.log }}</pre>
-  {% endif %}
-</section>
-{% if gpiozero.in_corso %}
-<script>setTimeout(function () { location.reload(); }, 4000);</script>
-{% endif %}
-
-<section class="card">
-  <h2>{{ t('webcam.button.wiring') }}</h2>
-  <p class="hint">{{ t('webcam.button.wiring.hint',
-                       gpio=cfg.webcam.pulsante.gpio) }}</p>
-  <dl class="grid">
-    <dt>{{ t('webcam.button.click') }}</dt><dd>{{ t('webcam.button.click.what') }}</dd>
-    <dt>{{ t('webcam.button.click2') }}</dt><dd>{{ t('webcam.button.click2.what') }}</dd>
-    <dt>{{ t('webcam.button.hold') }}</dt><dd>{{ t('webcam.button.hold.what') }}</dd>
-  </dl>
 </section>
 {% endif %}
 

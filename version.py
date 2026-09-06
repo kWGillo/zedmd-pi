@@ -852,6 +852,21 @@ Storico:
        interpretazioni. A non lasciarla irraggiungibile ci pensa la pagina,
        che adesso ha i suoi due comandi — accendi e spegni — utili comunque
        per quando non si e\' davanti al pannello.
+  5.0.2 Il pulsante per installare `gpiozero` era nascosto dietro la spunta
+       «Pulsante fisico»: per installare la libreria bisognava prima accendere
+       una funzione che senza quella libreria non parte. Al contrario, e
+       trovato usandolo — la 5.0.1 sembrava non avere affatto quel pulsante,
+       e il servizio acceso faceva partire la webcam come sempre, che era il
+       comportamento giusto per una spunta spenta ma sembrava un guasto.
+       Adesso la scheda «Pulsante fisico» c'e\' sempre, e si legge nell'ordine
+       in cui servono le cose: cosa fa, la libreria con il suo pulsante di
+       installazione, dove si salda, e infine la spunta per accenderlo. Solo
+       i comandi «accendi/spegni» restano nascosti finche\' il pulsante non e\'
+       attivo, perche\' senza non farebbero niente.
+       La spunta e il piedino hanno un modulo proprio, che scrive due chiavi e
+       basta: `api_telecamera` riscrive tutti i campi che riceve, quindi una
+       spunta dentro quel modulo avrebbe azzerato dispositivo, risoluzione e
+       aspetto. E\' la stessa lezione del profilo del pannello nella 4.8.5.
 """
 
-__version__ = "5.0.1"
+__version__ = "5.0.2"

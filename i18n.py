@@ -1290,6 +1290,17 @@ STRINGS = {
         "ends up in 256×64 anyway, and every extra pixel is traffic paid "
         "for nothing."),
     "webcam.button": ("Pulsante fisico", "Hardware button"),
+    "webcam.button.what": (
+        "Un pulsante saldato sotto il pannello, per accendere la telecamera "
+        "senza tirare fuori il telefono. Non è obbligatorio: senza, il "
+        "servizio accende la ripresa come sempre.",
+        "A button soldered under the panel, to turn the camera on without "
+        "reaching for your phone. It is optional: without it, the service "
+        "turns the live view on as always."),
+    "webcam.button.enable": ("Accendilo", "Turn it on"),
+    "webcam.button.enable.label": (
+        "Usa il pulsante fisico (il servizio arma, non accende)",
+        "Use the hardware button (the service arms, it does not turn on)"),
     "webcam.button.gpio": ("Piedino del pulsante", "Button GPIO"),
     "webcam.button.suggested": ("consigliato", "recommended"),
     "webcam.button.hint": (

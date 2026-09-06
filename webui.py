@@ -278,19 +278,6 @@ def create_app(runtime):
             except ValueError:
                 conf[chiave] = default
 
-        bottone = conf.setdefault("pulsante", {})
-        prima_bottone = (bottone.get("enabled"), bottone.get("gpio"))
-        bottone["enabled"] = request.form.get("pulsante") == "on"
-        try:
-            scelto_gpio = int(request.form.get("gpio", pulsante.GPIO_PREDEFINITO))
-        except ValueError:
-            scelto_gpio = pulsante.GPIO_PREDEFINITO
-        # Un piedino fuori elenco non si scrive: quasi tutti gli altri li usa
-        # la matrice, e prenderne uno vorrebbe dire un pannello che smette di
-        # funzionare, con la causa nell'ultimo posto in cui si cercherebbe.
-        bottone["gpio"] = (scelto_gpio if pulsante.valido(scelto_gpio)
-                           else pulsante.GPIO_PREDEFINITO)
-
         conf["specchio"] = request.form.get("specchio") == "on"
         conf["contrasto_auto"] = request.form.get("contrasto_auto") == "on"
         dmdconf.save()
@@ -298,13 +285,41 @@ def create_app(runtime):
         dopo = (conf.get("device"), conf.get("capture_width"),
                 conf.get("capture_height"), conf.get("fps"),
                 conf.get("specchio"))
-        # Il pulsante si apre in `start()`: cambiarlo vuol dire richiudere e
-        # riaprire il piedino, quindi conta come un cambio che fa ripartire
-        # la sorgente.
-        if (bottone.get("enabled"), bottone.get("gpio")) != prima_bottone:
-            dopo = dopo + ("pulsante",)
         sorgente = getattr(runtime, "telecamera", None)
         if prima != dopo and sorgente is not None and sorgente.enabled:
+            sorgente.stop()
+            sorgente.start()
+        return redirect(url_for("page_telecamera"))
+
+    @app.route("/api/telecamera/pulsante", methods=["POST"])
+    def api_telecamera_pulsante():
+        """Solo il pulsante: acceso/spento e piedino.
+
+        Ha un modulo suo e non sta in quello delle impostazioni per la stessa
+        ragione per cui il profilo del pannello ha imparato a non farsi
+        riapplicare a ogni salvataggio: `api_telecamera` riscrive **tutti** i
+        campi che riceve, quindi un modulo parziale azzererebbe dispositivo,
+        risoluzione e aspetto. Un modulo che scrive due chiavi ne scrive due.
+        """
+        conf = cfg["webcam"].setdefault("pulsante", {})
+        prima = (conf.get("enabled"), conf.get("gpio"))
+        conf["enabled"] = request.form.get("pulsante") == "on"
+        try:
+            scelto_gpio = int(request.form.get("gpio", pulsante.GPIO_PREDEFINITO))
+        except ValueError:
+            scelto_gpio = pulsante.GPIO_PREDEFINITO
+        # Un piedino fuori elenco non si scrive: quasi tutti gli altri li usa
+        # la matrice, e prenderne uno vorrebbe dire un pannello che smette di
+        # funzionare, con la causa nell'ultimo posto in cui si cercherebbe.
+        conf["gpio"] = (scelto_gpio if pulsante.valido(scelto_gpio)
+                        else pulsante.GPIO_PREDEFINITO)
+        dmdconf.save()
+
+        sorgente = getattr(runtime, "telecamera", None)
+        if (conf["enabled"], conf["gpio"]) != prima and sorgente is not None \
+                and sorgente.enabled:
+            # Il piedino si apre in `start()`: cambiarlo vuol dire richiuderlo
+            # e riaprirlo.
             sorgente.stop()
             sorgente.start()
         return redirect(url_for("page_telecamera"))

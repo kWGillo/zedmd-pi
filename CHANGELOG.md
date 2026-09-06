@@ -2,6 +2,29 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [5.0.2]
+
+- **Il pulsante per installare `gpiozero` era nascosto dietro la spunta
+  «Pulsante fisico».** Cioè: per installare la libreria bisognava prima
+  accendere una funzione che senza quella libreria non parte. Al contrario.
+
+  Trovato usandolo, non provandolo: la 5.0.1 sembrava semplicemente non avere
+  quel pulsante, e con il servizio acceso partiva subito la webcam — che era
+  il comportamento corretto per una spunta spenta, ma da fuori sembrava un
+  guasto.
+
+  Adesso la scheda «Pulsante fisico» c'è **sempre**, e si legge nell'ordine in
+  cui servono le cose: cosa fa, la libreria con il suo pulsante di
+  installazione, dove si salda, e infine la spunta per accenderlo. Solo i
+  comandi *accendi/spegni* restano nascosti finché il pulsante non è attivo,
+  perché senza non farebbero niente.
+
+- **La spunta e il piedino hanno un modulo proprio**, che scrive due chiavi e
+  basta. `api_telecamera` riscrive *tutti* i campi che riceve: una spunta
+  dentro quel modulo avrebbe azzerato dispositivo, risoluzione e aspetto a
+  ogni salvataggio parziale. È la stessa lezione del profilo del pannello
+  nella 4.8.5.
+
 ## [5.0.1]
 
 - **Il pulsante fisico della Funcam.** Accendere la telecamera dalla pagina
