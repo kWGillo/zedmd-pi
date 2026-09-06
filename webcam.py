@@ -122,6 +122,51 @@ PAUSA_DOPO = 20
 # sempre e' peggio del nero: sembra che funzioni, e non e' vero.
 VALIDO_PER = 10
 
+# Quello che ffmpeg stampa quando **noi** gli chiediamo di chiudere. Sono
+# messaggi di uscita regolare, non guasti: il codice -1414092869 e' il suo
+# AVERROR_EXIT, cioe' "mi hanno chiesto di uscire subito".
+#
+# Distinguerli conta piu' di quanto sembri. Trattare "c'e' del testo su
+# stderr" come "e' fallito" vuol dire che **ogni chiusura normale** — lo
+# spegnimento del servizio, e soprattutto la pausa automatica quando nessuno
+# guarda — lascia scritto in pagina un errore che non e' mai successo, e fa
+# scattare l'attesa prima di riprovare. Attesa che raddoppia a ogni pausa,
+# fino a mezzo minuto: la telecamera diventa sempre piu' lenta a tornare, e
+# il motivo scritto sullo schermo e' una bugia.
+USCITA_REGOLARE = (
+    "immediate exit requested",
+    "exiting normally",
+    "received signal",
+    "error muxing a packet",
+    "error writing trailer",
+    "error closing file",
+    "terminating thread with return code",
+    "task finished with error code",
+)
+
+
+def _guasto_vero(testo):
+    """Le righe di stderr che restano dopo aver tolto i saluti di ffmpeg.
+
+    Restituisce la piu' utile, o "" se non e' rimasto niente: in quel caso
+    ffmpeg si e' limitato a dire che stava uscendo, ed e' esattamente cio'
+    che gli avevamo chiesto.
+    """
+    utili = []
+    for riga in (testo or "").splitlines():
+        riga = riga.strip()
+        if not riga:
+            continue
+        basso = riga.lower()
+        if any(segno in basso for segno in USCITA_REGOLARE):
+            continue
+        utili.append(riga)
+    if not utili:
+        return ""
+    # L'ultima riga utile e' quella che di solito spiega: ffmpeg racconta il
+    # contesto prima e il motivo dopo.
+    return " ".join(utili[-1].split())[:200]
+
 
 def disponibile():
     return shutil.which("ffmpeg") is not None
@@ -279,6 +324,9 @@ class Cattura:
         # occupato se ne va e riprova al giro dopo.
         self._avvio = threading.Lock()
         self._prossimo = 0.0         # non riprovare prima di questo istante
+        # Vero quando la chiusura l'abbiamo chiesta noi — spegnimento o pausa.
+        # Senza, l'uscita regolare di ffmpeg verrebbe scambiata per un guasto.
+        self._voluta = False
         self._attesa = 0.0           # quanto si aspetta al prossimo fallimento
         self._processo = None
         self._thread = None
@@ -375,6 +423,7 @@ class Cattura:
                 self._device = device
                 self._errore = ""
                 self._acceso = True
+                self._voluta = False
                 self._thread = threading.Thread(target=self._ciclo,
                                                 name="webcam",
                                                 args=(device,), daemon=True)
@@ -402,6 +451,9 @@ class Cattura:
         with self._avvio:
             with self._lucchetto:
                 self._acceso = False
+                # La chiusura la stiamo chiedendo noi: quello che ffmpeg
+                # stampera' uscendo non e' un guasto.
+                self._voluta = True
                 processo, self._processo = self._processo, None
                 thread = self._thread
                 # Spegnere a mano azzera l'attesa: la prossima accensione e'
@@ -452,6 +504,10 @@ class Cattura:
                     # che nessuno vedra'.
                     print("[webcam] nessuno guarda da %ds: cattura in pausa"
                           % int(fermo_da))
+                    with self._lucchetto:
+                        # Anche questa e' una chiusura voluta: la pausa e' il
+                        # funzionamento normale, non un incidente.
+                        self._voluta = True
                     break
                 dati = processo.stdout.read(byte_per_frame)
                 if not dati or len(dati) < byte_per_frame:
@@ -494,11 +550,17 @@ class Cattura:
                 self._acceso = False
                 self._processo = None
                 riuscito = self._numero > 0
-            if testo:
-                self._rimanda(" ".join(testo.split()))
-            elif riuscito:
-                # Chiusura pulita dopo aver lavorato: nessun errore da
-                # ricordare e nessuna attesa da scontare alla riaccensione.
+                voluta = self._voluta
+                self._voluta = False
+            # Il guasto e' quello che resta dopo aver tolto i saluti di
+            # ffmpeg. Se la chiusura l'abbiamo chiesta noi non si guarda
+            # nemmeno: qualunque cosa abbia stampato, stava obbedendo.
+            guasto = "" if voluta else _guasto_vero(testo)
+            if guasto:
+                self._rimanda(guasto)
+            elif voluta or riuscito:
+                # Chiusura pulita: nessun errore da ricordare e nessuna
+                # attesa da scontare alla riaccensione.
                 with self._lucchetto:
                     self._errore = ""
                     self._attesa = 0.0

@@ -78,7 +78,7 @@ bd6093466f7b3b6f044d7b2d5651e2cc  templates/telecamera.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 6df8717d0a8eea255f7085bb49539572  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-811b0efc8efdd91adf9adf49cd122920  version.py
-b6474dc6f75e3f662ef0279e9f85d097  webcam.py
+8fc1921d950c52031c138ff18977044c  version.py
+c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 2da63f905b3d37511a9e19b20e0dc4fe  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

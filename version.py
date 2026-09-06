@@ -867,6 +867,23 @@ Storico:
        basta: `api_telecamera` riscrive tutti i campi che riceve, quindi una
        spunta dentro quel modulo avrebbe azzerato dispositivo, risoluzione e
        aspetto. E\' la stessa lezione del profilo del pannello nella 4.8.5.
+  5.0.3 «non funziona: Error muxing a packet… Immediate exit requested» non
+       era un guasto: era ffmpeg che **salutava**. Il codice -1414092869 e\'
+       il suo AVERROR_EXIT, cioe\' "mi hanno chiesto di uscire subito" — e a
+       chiederglielo eravamo noi.
+       Il difetto stava nel giudizio: trattavo "c\'e\' del testo su stderr"
+       come "e\' fallito". Ma ogni chiusura regolare ne stampa. Quindi ogni
+       spegnimento del servizio, e soprattutto **ogni pausa automatica**
+       — quella che ferma la cattura quando nessuno guarda, cioe\' il
+       funzionamento normale — lasciava in pagina un errore mai avvenuto e
+       faceva scattare l\'attesa prima di riprovare. Attesa che raddoppiava a
+       ogni pausa, fino a mezzo minuto: la telecamera diventava sempre piu\'
+       lenta a tornare, con scritto accanto un motivo falso.
+       Adesso una chiusura chiesta da noi non viene nemmeno esaminata, e di
+       quello che ffmpeg stampa si scartano i saluti noti: se non resta
+       niente, non e\' successo niente. Se invece resta qualcosa, in pagina va
+       **una riga sola** — quella che spiega — invece di quattrocento
+       caratteri di chiacchiere del muxer.
 """
 
-__version__ = "5.0.2"
+__version__ = "5.0.3"

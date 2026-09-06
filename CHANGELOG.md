@@ -2,6 +2,29 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [5.0.3]
+
+- **«non funziona: Error muxing a packet… Immediate exit requested» non era un
+  guasto: era ffmpeg che salutava.** Il codice `-1414092869` è il suo
+  `AVERROR_EXIT` — *«mi hanno chiesto di uscire subito»* — e a chiederglielo
+  eravamo noi.
+
+  Il difetto stava nel giudizio: trattavo «c'è del testo su stderr» come «è
+  fallito». Ma ogni chiusura regolare ne stampa. Quindi ogni spegnimento del
+  servizio, e soprattutto **ogni pausa automatica** — quella che ferma la
+  cattura quando nessuno guarda, cioè il funzionamento normale — lasciava in
+  pagina un errore mai avvenuto e faceva scattare l'attesa prima di
+  riprovare. Attesa che raddoppiava a ogni pausa, fino a mezzo minuto: la
+  telecamera diventava sempre più lenta a tornare, con scritto accanto un
+  motivo falso.
+
+  Ora una chiusura chiesta da noi non viene nemmeno esaminata, e di quello che
+  ffmpeg stampa si scartano i saluti noti: se non resta niente, non è successo
+  niente.
+
+- **E se resta qualcosa, in pagina va una riga sola** — quella che spiega —
+  invece di quattrocento caratteri di chiacchiere del muxer.
+
 ## [5.0.2]
 
 - **Il pulsante per installare `gpiozero` era nascosto dietro la spunta
