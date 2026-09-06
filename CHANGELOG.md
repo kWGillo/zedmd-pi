@@ -2,6 +2,25 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [5.1]
+
+- **Il servizio arma, non accende. Sempre.** L'interruttore nella pagina
+  Servizi non fa più partire la telecamera: dice che la si **può** accendere.
+  La ripresa parte solo quando qualcuno la chiama — il pulsante fisico, oppure
+  i due comandi nella pagina Funcam, che ora ci sono sempre. A servizio spento
+  non succede niente: né dal pulsante, né dalla pagina.
+
+  Fino alla 5.0.3 questo valeva *solo* con la spunta «Pulsante fisico» attiva;
+  senza, il servizio accendeva la ripresa come una sorgente qualsiasi. Era un
+  errore di impostazione, non un difetto di codice: legava il momento in cui
+  una webcam in soggiorno si accende a una casella che riguarda tutt'altro —
+  se un pulsante è stato saldato o no. Su una telecamera *quando si accende* è
+  la domanda importante, e la risposta non può dipendere da un dettaglio di
+  cablaggio.
+
+- **La spunta «Pulsante fisico» decide ora una cosa sola:** se aprire il
+  piedino per leggere un pulsante. Niente di più.
+
 ## [5.0.3]
 
 - **«non funziona: Error muxing a packet… Immediate exit requested» non era un

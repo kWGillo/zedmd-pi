@@ -28,6 +28,17 @@
 </section>
 
 <section class="card">
+  <h2>{{ t('webcam.button.now') }}</h2>
+  <p class="hint">{{ t('webcam.button.now.hint') }}</p>
+  <form method="post" action="{{ url_for('api_telecamera_accendi') }}" class="inline">
+    <input type="hidden" name="valore" value="{{ '0' if dal_vivo else '1' }}">
+    <button type="submit" class="toggle {{ 'on' if dal_vivo }}">
+      {{ t('webcam.button.off') if dal_vivo else t('webcam.button.on') }}
+    </button>
+  </form>
+</section>
+
+<section class="card">
   <h2>{{ t('webcam.button') }}</h2>
   <p class="hint">{{ t('webcam.button.what') }}</p>
 
@@ -83,15 +94,6 @@
   </form>
   <p class="hint">{{ t('webcam.button.rearm.hint') }}</p>
   {% endif %}
-
-  <h3>{{ t('webcam.button.now') }}</h3>
-  <p class="hint">{{ t('webcam.button.now.hint') }}</p>
-  <form method="post" action="{{ url_for('api_telecamera_accendi') }}" class="inline">
-    <input type="hidden" name="valore" value="{{ '0' if dal_vivo else '1' }}">
-    <button type="submit" class="toggle {{ 'on' if dal_vivo }}">
-      {{ t('webcam.button.off') if dal_vivo else t('webcam.button.on') }}
-    </button>
-  </form>
   {% endif %}
 </section>
 

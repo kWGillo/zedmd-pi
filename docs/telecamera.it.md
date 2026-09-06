@@ -219,15 +219,23 @@ A servizio spento il pulsante non esiste — non si apre nemmeno il piedino.
 
 ## Il servizio arma, non accende
 
-Con il pulsante attivo l'interruttore nella pagina Servizi cambia significato:
-dice che il pulsante è armato, e nient'altro. La telecamera parte **spenta**.
+Una regola sola, e vale sempre — con o senza pulsante saldato.
+
+L'interruttore nella pagina Servizi **non accende la telecamera**: dice che la
+si *può* accendere. La ripresa parte solo quando qualcuno la chiama: il
+pulsante fisico, oppure i due comandi in cima alla pagina Funcam. A servizio
+spento non succede niente, né dal pulsante né dalla pagina, e il piedino non è
+nemmeno aperto.
 
 È la differenza fra una webcam accesa tutto il giorno e una che si accende
 quando la chiami — che su un oggetto con una telecamera in soggiorno non è una
 comodità, è il punto.
 
-Senza pulsante tutto resta come prima: acceso il servizio, la ripresa va sul
-pannello.
+Nelle prime stesure questo valeva soltanto con il pulsante fisico attivo, e
+senza pulsante il servizio accendeva la ripresa come una sorgente qualsiasi.
+Era un errore di impostazione: legava il momento in cui una webcam si accende
+a una casella che riguarda tutt'altro — se un pulsante è stato saldato o no.
+La spunta «Pulsante fisico» ora decide una cosa sola: se aprire il piedino.
 
 ## Dove si salda
 

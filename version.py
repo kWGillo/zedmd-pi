@@ -884,6 +884,21 @@ Storico:
        niente, non e\' successo niente. Se invece resta qualcosa, in pagina va
        **una riga sola** — quella che spiega — invece di quattrocento
        caratteri di chiacchiere del muxer.
+  5.1  Il servizio arma, non accende. Sempre.
+       L'interruttore nella pagina Servizi non fa piu\' partire la telecamera:
+       dice che la si **puo\'** accendere. La ripresa parte solo quando
+       qualcuno la chiama — il pulsante fisico, oppure i due comandi nella
+       pagina Funcam, che adesso ci sono sempre. A servizio spento non
+       succede niente: ne\' dal pulsante, ne\' dalla pagina.
+       Fino alla 5.0.3 questo valeva **solo** con la spunta del pulsante
+       fisico attiva; senza, il servizio accendeva la ripresa come una
+       sorgente qualsiasi. Era un errore di impostazione, non un difetto di
+       codice: legava il momento in cui una webcam in soggiorno si accende a
+       una casella che riguarda tutt\'altro — se un pulsante e\' stato saldato
+       o no. Su una telecamera *quando si accende* e\' la domanda importante,
+       e la risposta non puo\' dipendere da un dettaglio di cablaggio.
+       La spunta «Pulsante fisico» resta, ma adesso decide una cosa sola: se
+       aprire il piedino per leggere un pulsante. Niente di piu\'.
 """
 
-__version__ = "5.0.3"
+__version__ = "5.1"

@@ -6,16 +6,21 @@ ridurre i colori — sta in `webcam.py`; il pulsante fisico in `pulsante.py`.
 Qui c'e' il pezzo che riguarda l'arbitro — quando questa sorgente ha
 qualcosa da mostrare — e i tre stati in cui puo' trovarsi.
 
-Due modi di lavorare, e la differenza la fa il pulsante
-------------------------------------------------------
-**Senza pulsante** e' come e' sempre stata: acceso il servizio, la ripresa
-va sul pannello finche' non lo si spegne.
+Il servizio arma, non accende
+-----------------------------
+Una regola sola, e vale sempre.
 
-**Con il pulsante** il servizio diventa un'abilitazione, non un interruttore:
-dice che il pulsante e' armato, e nient'altro. La telecamera parte **spenta**
-e la accende un clic. E' la differenza fra una telecamera accesa tutto il
-giorno e una che si accende quando la si vuole — che su un oggetto con una
-webcam in soggiorno non e' una comodita', e' il punto.
+L'interruttore nella pagina Servizi **non accende la telecamera**: dice che
+la si puo' accendere. La ripresa parte solo quando qualcuno la chiama — il
+pulsante fisico, o i due comandi nella pagina Funcam. A servizio spento il
+pulsante non fa niente, e il piedino non e' nemmeno aperto.
+
+Nelle prime stesure questo valeva solo con il pulsante fisico attivo, e senza
+pulsante il servizio accendeva la ripresa come una sorgente qualsiasi. Era un
+errore di impostazione: legava il momento in cui una webcam in soggiorno si
+accende a una casella che riguarda tutt'altro — se un pulsante e' stato
+saldato o no. Su una telecamera, *quando si accende* e' la domanda
+importante, e la risposta non puo' dipendere da un dettaglio di cablaggio.
 """
 
 import time
@@ -77,14 +82,18 @@ class TelecameraSource(Source):
         return bool(self._conf_pulsante().get("enabled"))
 
     def start(self):
-        if not self.con_pulsante():
-            self._dal_vivo = True
-            self._cattura.avvia()
-            return
-        # Con il pulsante si parte spenti: la telecamera si apre al primo
-        # clic. Aprirla adesso vorrebbe dire tenerla accesa per ore in attesa
-        # di un dito, che e' proprio cio' che il pulsante evita.
+        """Il servizio e' acceso: da adesso la telecamera **si puo'** accendere.
+
+        Non si apre niente. Aprirla adesso vorrebbe dire tenerla accesa per
+        ore in attesa di un dito, che e' esattamente cio' che si sta
+        evitando.
+        """
         self._dal_vivo = False
+        if not self.con_pulsante():
+            # Nessun pulsante saldato: si accende dai due comandi della
+            # pagina. Il piedino non si apre, perche' non c'e' niente da
+            # leggere.
+            return
         gpio = self._conf_pulsante().get("gpio", pulsante_mod.GPIO_PREDEFINITO)
         self._pulsante = pulsante_mod.Pulsante(
             gpio, su_clic=self._clic, su_tenuta=self._tenuta)
@@ -201,8 +210,8 @@ class TelecameraSource(Source):
         """
         if not self.enabled:
             return False
-        if self.con_pulsante() and not self._dal_vivo:
-            # Spenta dal pulsante: il pannello e' di chi viene dopo.
+        if not self._dal_vivo:
+            # Nessuno l'ha accesa: il pannello e' di chi viene dopo.
             return False
         if self._mostra_fino and time.time() < self._mostra_fino:
             return True
@@ -324,13 +333,14 @@ class TelecameraSource(Source):
     def status(self, lang=None):
         if not self.enabled:
             return self.t("status.disabled", lang)
-        if self.con_pulsante():
-            bottone = self.stato_pulsante()
-            if bottone["errore"]:
-                return self.t("webcam.status.button.error", lang,
-                              error=bottone["errore"])
-            if not self._dal_vivo:
-                return self.t("webcam.status.armed", lang, gpio=bottone["gpio"])
+        if self.con_pulsante() and self.stato_pulsante()["errore"]:
+            return self.t("webcam.status.button.error", lang,
+                          error=self.stato_pulsante()["errore"])
+        if not self._dal_vivo:
+            if self.con_pulsante() and self.stato_pulsante()["aperto"]:
+                return self.t("webcam.status.armed", lang,
+                              gpio=self.stato_pulsante()["gpio"])
+            return self.t("webcam.status.armed.page", lang)
         if self._scatto_alle:
             return self.t("webcam.status.countdown", lang,
                           seconds=self._mancano())

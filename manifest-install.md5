@@ -17,7 +17,7 @@ ba43a3f75c392ca49d006a5e4166ab6a  gb/gb_dmd.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 b2ff07ba075e9ab069428c2d17f9b1a1  hass.py
-f3806be8468c6be7d9ecccfc2c980c18  i18n.py
+c6682f65d4ef758a066e3bd73d0d3806  i18n.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
@@ -48,7 +48,7 @@ e8d848a784cc0877be25075128962688  sources/giochi/invasori.py
 8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
 552c44bff4e35f557dd92f658c84f897  sources/nowplaying.py
 2a73be667459d2a58f2ddab91ff91a98  sources/scadenze.py
-df4325497d63b4a08da4bccfac4ef4fa  sources/telecamera.py
+1eecccd6a71131c4846b10182424bfb4  sources/telecamera.py
 9c78a0b718974f492c303164ac3d0dbf  sources/zedmd.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 c750104c1eaa178d6958982586e89855  staccato.py
@@ -70,9 +70,9 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 403872d6a716a4b13b8775cfbbdd355a  templates/scadenze.html
 17cd2da57b171fa4418a9ceab30da511  templates/services.html
 93462ac10d113c59bf1012fe92cb165b  templates/settings.html
-bd6093466f7b3b6f044d7b2d5651e2cc  templates/telecamera.html
+89ef98e1a7dbaf0776c5cc10943e32b7  templates/telecamera.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-8fc1921d950c52031c138ff18977044c  version.py
+0e42ebe592a755a657d6844726878067  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 2da63f905b3d37511a9e19b20e0dc4fe  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

@@ -1198,8 +1198,10 @@ STRINGS = {
         "No camera connected. Plug one into the USB port: it shows up here "
         "without a restart."),
     "webcam.state.off": (
-        "Servizio spento. Si accende dalla pagina Servizi.",
-        "Service off. Turn it on from the Services page."),
+        "Servizio spento: la telecamera non si può accendere, né dalla "
+        "pagina né dal pulsante. Si abilita dalla pagina Servizi.",
+        "Service off: the camera cannot be turned on, neither from the page "
+        "nor from the button. Enable it from the Services page."),
     "webcam.status.live": ("in ripresa da %(device)s", "live from %(device)s"),
     "webcam.status.paused": (
         "in pausa: il pannello è di qualcun altro, e una telecamera che "
@@ -1292,11 +1294,11 @@ STRINGS = {
     "webcam.button": ("Pulsante fisico", "Hardware button"),
     "webcam.button.what": (
         "Un pulsante saldato sotto il pannello, per accendere la telecamera "
-        "senza tirare fuori il telefono. Non è obbligatorio: senza, il "
-        "servizio accende la ripresa come sempre.",
+        "senza tirare fuori il telefono. Non è obbligatorio: senza, si "
+        "accende dai comandi qui sopra.",
         "A button soldered under the panel, to turn the camera on without "
-        "reaching for your phone. It is optional: without it, the service "
-        "turns the live view on as always."),
+        "reaching for your phone. It is optional: without it, use the "
+        "commands above."),
     "webcam.button.enable": ("Accendilo", "Turn it on"),
     "webcam.button.enable.label": (
         "Usa il pulsante fisico (il servizio arma, non accende)",
@@ -1345,10 +1347,12 @@ STRINGS = {
         "it turns off, while your finger is still down"),
     "webcam.button.now": ("Adesso", "Right now"),
     "webcam.button.now.hint": (
-        "Gli stessi due gesti del pulsante, per quando non sei davanti al "
-        "pannello.",
-        "The same two gestures as the button, for when you are not in front "
-        "of the panel."),
+        "Accendere il servizio non accende la telecamera: dice che la si può "
+        "accendere. La ripresa parte da qui, o dal pulsante fisico se ne hai "
+        "saldato uno.",
+        "Turning the service on does not turn the camera on: it says the "
+        "camera may be turned on. The live view starts from here, or from "
+        "the hardware button if you have soldered one."),
     "webcam.button.on": ("Accendi la telecamera", "Turn the camera on"),
     "webcam.button.off": ("Spegni la telecamera", "Turn the camera off"),
     "webcam.gpiozero": ("Libreria del pulsante", "Button library"),
@@ -1389,6 +1393,9 @@ STRINGS = {
     "webcam.status.armed": (
         "spenta, in attesa del pulsante su GPIO %(gpio)s",
         "off, waiting for the button on GPIO %(gpio)s"),
+    "webcam.status.armed.page": (
+        "spenta: si accende dalla pagina Funcam",
+        "off: turn it on from the Funcam page"),
     "webcam.status.countdown": ("scatto fra %(seconds)d…",
                                 "shooting in %(seconds)d…"),
     "webcam.status.button.error": ("pulsante non disponibile: %(error)s",
