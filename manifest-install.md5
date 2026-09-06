@@ -5,7 +5,7 @@ d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
-689f8a252fcc2d4fbe6e23ec38cbbc88  dmdconf.py
+d666d94f873facc06f1614cc5ac371df  dmdconf.py
 b4c27e1bcbacbad5e64d8e1bafd8a92e  dmdd.py
 397862a19501abc030946d1b6c39463c  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
@@ -17,13 +17,14 @@ ba43a3f75c392ca49d006a5e4166ab6a  gb/gb_dmd.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 b2ff07ba075e9ab069428c2d17f9b1a1  hass.py
-2780ce3312973a70bf064a52811a6313  i18n.py
+2fc8bbd0241f17783de560d05a3d1b95  i18n.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
 29e0f313a234ad9f497a09d7ef1645db  nowplaying.py
 14c72774dba471e7c07ef4a32ea2fa83  ota.py
 0e34e3813c0ae5174c80d38b1c48fd42  presets.py
+1a67905bf513737f856503e2ae363169  pulsante.py
 ac3fdf21dcb14c32efdc79f4baac04f3  rete.py
 374d8f430239d5d2ebb9ab5748c9fec5  rifiuti.py
 5698878038d0f306ecebc25bde34d88c  scadenze.py
@@ -47,7 +48,7 @@ e8d848a784cc0877be25075128962688  sources/giochi/invasori.py
 8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
 552c44bff4e35f557dd92f658c84f897  sources/nowplaying.py
 2a73be667459d2a58f2ddab91ff91a98  sources/scadenze.py
-990dc3a013c6ac1f499db980bb2cf92a  sources/telecamera.py
+df4325497d63b4a08da4bccfac4ef4fa  sources/telecamera.py
 9c78a0b718974f492c303164ac3d0dbf  sources/zedmd.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 c750104c1eaa178d6958982586e89855  staccato.py
@@ -69,9 +70,9 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 403872d6a716a4b13b8775cfbbdd355a  templates/scadenze.html
 17cd2da57b171fa4418a9ceab30da511  templates/services.html
 93462ac10d113c59bf1012fe92cb165b  templates/settings.html
-705c9a6d77440b080f9daf270350c26f  templates/telecamera.html
+87a7ed333ff963a07e57aa0cc0b62e08  templates/telecamera.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-fe3ba701cbe9f9acc4cfb05b00a3ff80  version.py
-e76d931e949cd173e748033820aecf0e  webcam.py
-982cd477335ddb9a6bcfdc6cc8949a10  webui.py
+60794e029d41a1f476999f5f900a1ea8  version.py
+b6474dc6f75e3f662ef0279e9f85d097  webcam.py
+cc4ca0dead33bcc95a366b62d3df5fc1  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

@@ -446,6 +446,12 @@ DEFAULTS = {
         # la tavolozza da 256 colori di allora. Si parte da due e si sale
         # guardando il pannello: se le tinte intermedie sfarfallano si vede
         # subito, e non c'e' modo di saperlo se non provando.
+        # Livelli **per canale** dello stile a colori: i colori sono il cubo,
+        # cioe' livelli**3. Due danno gli otto pieni — gli unici che di sicuro
+        # non tremano su questo pannello — sei ne danno 216, che e' in pratica
+        # la tavolozza da 256 colori di allora. Si parte da due e si sale
+        # guardando il pannello: se le tinte intermedie sfarfallano si vede
+        # subito, e non c'e' modo di saperlo se non provando.
         "livelli_colore": 2,
         "livelli_grigio": 4,
         # Ci si aspetta di vedersi come allo specchio: alzando la mano destra
@@ -456,6 +462,18 @@ DEFAULTS = {
         # rettangolo nero.
         "contrasto_auto": True,
         "gif_secondi": 3,
+        # Il pulsante fisico. Spento di suo: senza un pulsante saldato
+        # davvero, accenderlo vorrebbe dire una telecamera che non si accende
+        # piu' e nessun modo evidente di capire perche'.
+        "pulsante": {
+            "enabled": False,
+            # GPIO 25, che sul connettore a 40 piedini e' il piedino 22 e ha
+            # una massa accanto, al 20. E' anche il piedino che Adafruit usa
+            # per un pulsante su questa stessa scheda. I piedini possibili
+            # sono pochi: quasi tutti li prende la matrice, e sceglierne uno
+            # occupato vorrebbe dire un pannello che smette di funzionare.
+            "gpio": 25,
+        },
         # Sottocartella della libreria media dove finiscono foto e GIF, cosi'
         # il Media Player le rimette sul pannello da solo piu' avanti.
         "cartella": "telecamera",

@@ -808,6 +808,50 @@ Storico:
        una telecamera non si apre passano da soli: si riprova con attese che
        raddoppiano fino a mezzo minuto, invece di costringere a spegnere e
        riaccendere il servizio a mano.
+  5.0  Il pulsante fisico della Funcam.
+       Accendere la telecamera dalla pagina Servizi voleva dire tirare fuori
+       il telefono, aprire il browser, trovare la voce: per una cosa che si
+       fa passando davanti al pannello e' una procedura assurda — la stessa
+       obiezione, e la stessa risposta, della pagina Rete.
+       Un pulsante solo, tre gesti. Un clic a telecamera spenta la accende;
+       un clic a telecamera accesa scatta una foto dopo tre secondi, con il
+       conto alla rovescia grande sul pannello; tenuto premuto tre secondi la
+       spegne — e lo fa **mentre** il dito e\' ancora sopra, che e\' l\'unico
+       modo di sapere di aver tenuto abbastanza senza contare a mente. A
+       servizio spento il pulsante non esiste: non si apre nemmeno il piedino.
+       Con il pulsante acceso, il servizio cambia significato: non accende
+       piu\' la telecamera, la **arma**. La webcam parte spenta e resta spenta
+       finche\' non la si chiama, che su un oggetto con una telecamera in
+       soggiorno non e\' una comodita\', e\' il punto. Senza pulsante tutto si
+       comporta esattamente come prima.
+       **Dove si collega.** GPIO 25, che sul connettore a 40 piedini e\' il
+       piedino 22, con una massa accanto al piedino 20 — stessa fila. Un
+       pulsante normalmente aperto fra i due e nient\'altro: la resistenza di
+       richiamo e\' quella interna al Raspberry. Si salda sui fori del
+       connettore della Bonnet, esposti sopra perche\' lo zoccolo sta sotto:
+       e\' il metodo che Adafruit documenta per questa stessa scheda, e GPIO
+       25 e\' anche il piedino che usa lei per un pulsante.
+       La scelta non e\' libera e il programma non la lascia libera: con la
+       Bonnet montata la matrice usa 4 (o 18 con la modifica PWM), 5, 6, 12,
+       13, 16, 17, 20, 21, 22, 23, 24, 26 e 27, e prenderne uno vorrebbe dire
+       un pannello che smette di funzionare con la causa nell\'ultimo posto in
+       cui si andrebbe a cercare. Il menu propone solo i liberi, e un valore
+       fuori elenco viene rifiutato.
+       `gpiozero` si installa **da un pulsante nella pagina**, come Doom, il
+       Game Boy e la condivisione SMB: chi ha appena saldato un pulsante
+       sotto il pannello non ha un terminale aperto, e mandarlo a cercarne
+       uno vanifica il pulsante stesso. L\'installazione gira fuori dal
+       servizio — apt ucciso a meta\' lascia dpkg da riparare a mano — e
+       aspetta il lucchetto di apt fino a due minuti, perche\' su un Raspberry
+       appena acceso ce l\'hanno spesso gli aggiornamenti automatici.
+       Se il pulsante non si apre, la telecamera **resta spenta**. La prima
+       stesura la accendeva "per non lasciarla irraggiungibile", ed era il
+       rovescio esatto di cio\' che serve: chi accende il pulsante vuole una
+       webcam spenta finche\' non la chiama, e rispondere a un guasto
+       lasciandola accesa in soggiorno per giorni e\' la peggiore delle
+       interpretazioni. A non lasciarla irraggiungibile ci pensa la pagina,
+       che adesso ha i suoi due comandi — accendi e spegni — utili comunque
+       per quando non si e\' davanti al pannello.
 """
 
-__version__ = "4.10.1"
+__version__ = "5.0.1"

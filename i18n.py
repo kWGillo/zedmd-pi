@@ -1289,6 +1289,99 @@ STRINGS = {
         "(`v4l2-ctl --list-formats-ext`). Bigger is not better: the image "
         "ends up in 256×64 anyway, and every extra pixel is traffic paid "
         "for nothing."),
+    "webcam.button": ("Pulsante fisico", "Hardware button"),
+    "webcam.button.gpio": ("Piedino del pulsante", "Button GPIO"),
+    "webcam.button.suggested": ("consigliato", "recommended"),
+    "webcam.button.hint": (
+        "Con il pulsante acceso, il servizio non accende più la telecamera: "
+        "la **arma**. La ripresa parte al primo clic, e finché non lo premi "
+        "la webcam resta spenta — che su una telecamera in soggiorno non è "
+        "una comodità, è il punto. I piedini in elenco sono gli unici liberi "
+        "con la Bonnet montata: tutti gli altri li usa la matrice.",
+        "With the button on, the service no longer switches the camera on: "
+        "it **arms** it. The live view starts on the first click, and until "
+        "you press it the webcam stays off — which on a living-room camera "
+        "is not a convenience, it is the point. The listed pins are the only "
+        "free ones with the Bonnet fitted: the matrix uses all the others."),
+    "webcam.button.wiring": ("Come si collega", "How to wire it"),
+    "webcam.button.wiring.hint": (
+        "Un pulsante normalmente aperto fra GPIO %(gpio)s e massa, e "
+        "nient'altro: niente resistenze, perché si usa quella di richiamo "
+        "interna al Raspberry. Sul connettore a 40 piedini GPIO 25 è il "
+        "piedino 22 e una massa è il 20 — sono accanto, sulla stessa fila. "
+        "Si salda sui due fori del connettore della Bonnet, che sono esposti "
+        "sopra perché lo zoccolo sta sotto: è il metodo che Adafruit "
+        "documenta per questa stessa scheda.",
+        "A normally-open button between GPIO %(gpio)s and ground, and "
+        "nothing else: no resistors, because the Raspberry's internal pull-up "
+        "does the job. On the 40-pin header GPIO 25 is pin 22 and a ground is "
+        "pin 20 — adjacent, same row. Solder to the two header holes on the "
+        "Bonnet, exposed on top because the socket is underneath: it is the "
+        "method Adafruit documents for this very board."),
+    "webcam.button.click": ("Un clic, telecamera spenta",
+                            "One click, camera off"),
+    "webcam.button.click.what": ("si accende", "it turns on"),
+    "webcam.button.click2": ("Un clic, telecamera accesa",
+                             "One click, camera on"),
+    "webcam.button.click2.what": (
+        "scatta una foto dopo tre secondi, con il conto alla rovescia sul "
+        "pannello",
+        "takes a photo after three seconds, counting down on the panel"),
+    "webcam.button.hold": ("Tenuto premuto tre secondi",
+                           "Held for three seconds"),
+    "webcam.button.hold.what": (
+        "si spegne, mentre tieni ancora il dito sopra",
+        "it turns off, while your finger is still down"),
+    "webcam.button.now": ("Adesso", "Right now"),
+    "webcam.button.now.hint": (
+        "Gli stessi due gesti del pulsante, per quando non sei davanti al "
+        "pannello.",
+        "The same two gestures as the button, for when you are not in front "
+        "of the panel."),
+    "webcam.button.on": ("Accendi la telecamera", "Turn the camera on"),
+    "webcam.button.off": ("Spegni la telecamera", "Turn the camera off"),
+    "webcam.gpiozero": ("Libreria del pulsante", "Button library"),
+    "webcam.gpiozero.ok": ("%(package)s è installata.",
+                           "%(package)s is installed."),
+    "webcam.gpiozero.hint": (
+        "Per leggere il pulsante serve %(package)s. Su Raspberry Pi OS di "
+        "solito c'è già; se manca, si installa da qui — senza aprire un "
+        "terminale, che è esattamente ciò che il pulsante serve a evitare.",
+        "Reading the button needs %(package)s. On Raspberry Pi OS it is "
+        "usually already there; if it is missing, install it from here — "
+        "without opening a terminal, which is exactly what the button is "
+        "there to avoid."),
+    "webcam.gpiozero.install": ("Installa %(package)s", "Install %(package)s"),
+    "webcam.gpiozero.started": (
+        "Installazione avviata. Ci vuole un minuto: la pagina si aggiorna da "
+        "sola.",
+        "Installation started. It takes a minute: the page refreshes by "
+        "itself."),
+    "webcam.gpiozero.running": ("Installazione in corso…",
+                                "Installation in progress…"),
+    "webcam.button.rearm": ("Apri il pulsante", "Open the button"),
+    "webcam.button.rearm.hint": (
+        "Il piedino non è aperto: succede se la libreria è arrivata dopo "
+        "l'avvio del servizio. Si riapre da qui, senza spegnere e "
+        "riaccendere niente.",
+        "The pin is not open: this happens when the library arrived after "
+        "the service started. Open it from here, without switching anything "
+        "off and on again."),
+    "webcam.button.ready": ("Pulsante aperto.", "Button open."),
+    "webcam.button.nolib": (
+        "Manca gpiozero: il pulsante non può essere letto. Si installa con "
+        "«sudo apt install python3-gpiozero». Finché manca, la telecamera "
+        "si comporta come senza pulsante.",
+        "gpiozero is missing: the button cannot be read. Install it with "
+        "«sudo apt install python3-gpiozero». Until then the camera behaves "
+        "as if there were no button."),
+    "webcam.status.armed": (
+        "spenta, in attesa del pulsante su GPIO %(gpio)s",
+        "off, waiting for the button on GPIO %(gpio)s"),
+    "webcam.status.countdown": ("scatto fra %(seconds)d…",
+                                "shooting in %(seconds)d…"),
+    "webcam.status.button.error": ("pulsante non disponibile: %(error)s",
+                                   "button not available: %(error)s"),
     "webcam.gifsec": ("Durata della GIF (secondi)", "GIF length (seconds)"),
     "webcam.mirror": ("Come allo specchio", "Mirrored"),
     "webcam.autocontrast": ("Allarga il contrasto da solo",

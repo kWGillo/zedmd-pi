@@ -30,6 +30,7 @@ import scadenze
 import nowplaying
 import presets
 import ota
+import pulsante
 import rete
 import webcam
 import spotifyapi
@@ -221,9 +222,15 @@ def create_app(runtime):
         """La webcam: quale, che aspetto, e gli scatti fatti finora."""
         sorgente = getattr(runtime, "telecamera", None)
         cattura = getattr(sorgente, "cattura", None)
+        sorgente = getattr(runtime, "telecamera", None)
         return render_template(
             "telecamera.html", cfg=cfg,
             dispositivi=webcam.dispositivi(),
+            gpio_ammessi=pulsante.GPIO_AMMESSI,
+            gpio_disponibile=pulsante.disponibile(),
+            bottone=(sorgente.stato_pulsante() if sorgente else {}),
+            gpiozero=pulsante.stato(),
+            dal_vivo=bool(sorgente and sorgente.dal_vivo()),
             scelto=webcam.scelto(cfg),
             ffmpeg=webcam.disponibile(),
             stato=cattura.stato() if cattura else {},
@@ -271,6 +278,19 @@ def create_app(runtime):
             except ValueError:
                 conf[chiave] = default
 
+        bottone = conf.setdefault("pulsante", {})
+        prima_bottone = (bottone.get("enabled"), bottone.get("gpio"))
+        bottone["enabled"] = request.form.get("pulsante") == "on"
+        try:
+            scelto_gpio = int(request.form.get("gpio", pulsante.GPIO_PREDEFINITO))
+        except ValueError:
+            scelto_gpio = pulsante.GPIO_PREDEFINITO
+        # Un piedino fuori elenco non si scrive: quasi tutti gli altri li usa
+        # la matrice, e prenderne uno vorrebbe dire un pannello che smette di
+        # funzionare, con la causa nell'ultimo posto in cui si cercherebbe.
+        bottone["gpio"] = (scelto_gpio if pulsante.valido(scelto_gpio)
+                           else pulsante.GPIO_PREDEFINITO)
+
         conf["specchio"] = request.form.get("specchio") == "on"
         conf["contrasto_auto"] = request.form.get("contrasto_auto") == "on"
         dmdconf.save()
@@ -278,10 +298,50 @@ def create_app(runtime):
         dopo = (conf.get("device"), conf.get("capture_width"),
                 conf.get("capture_height"), conf.get("fps"),
                 conf.get("specchio"))
+        # Il pulsante si apre in `start()`: cambiarlo vuol dire richiudere e
+        # riaprire il piedino, quindi conta come un cambio che fa ripartire
+        # la sorgente.
+        if (bottone.get("enabled"), bottone.get("gpio")) != prima_bottone:
+            dopo = dopo + ("pulsante",)
         sorgente = getattr(runtime, "telecamera", None)
         if prima != dopo and sorgente is not None and sorgente.enabled:
             sorgente.stop()
             sorgente.start()
+        return redirect(url_for("page_telecamera"))
+
+    @app.route("/api/telecamera/gpiozero", methods=["POST"])
+    def api_telecamera_gpiozero():
+        """Installa la libreria che legge il pulsante.
+
+        Sta qui e non in una riga di istruzioni per lo stesso motivo per cui
+        Doom e il Game Boy si preparano da un pulsante: chi ha appena saldato
+        un pulsante sotto il pannello non ha un terminale aperto, e mandarlo
+        a cercarne uno vanifica il pulsante stesso.
+        """
+        errore = pulsante.installa()
+        if errore:
+            return _telecamera_result("webcam.failed", error=errore)
+        return _telecamera_result("webcam.gpiozero.started")
+
+    @app.route("/api/telecamera/riarma", methods=["POST"])
+    def api_telecamera_riarma():
+        sorgente = getattr(runtime, "telecamera", None)
+        if sorgente is None:
+            return _telecamera_result("webcam.failed", error="telecamera assente")
+        aperto, motivo = sorgente.riarma()
+        if not aperto:
+            return _telecamera_result("webcam.failed", error=motivo)
+        return _telecamera_result("webcam.button.ready")
+
+    @app.route("/api/telecamera/accendi", methods=["POST"])
+    def api_telecamera_accendi():
+        sorgente = getattr(runtime, "telecamera", None)
+        if sorgente is None:
+            return _telecamera_result("webcam.failed", error="telecamera assente")
+        if request.form.get("valore") == "0":
+            sorgente.spegni()
+        else:
+            sorgente.accendi()
         return redirect(url_for("page_telecamera"))
 
     @app.route("/api/telecamera/scatta", methods=["POST"])

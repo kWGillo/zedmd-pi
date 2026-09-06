@@ -219,6 +219,7 @@ def rendi(pixel, stile="colori", livelli=4, contrasto=True, livelli_colore=2):
     `livelli_colore` sono i livelli **per canale** dello stile a colori: due
     danno gli otto colori pieni, sei ne danno 216. `livelli` invece sono le
     sfumature degli stili in verde e in grigio, dove il canale e' uno solo.
+
     """
     altezza, larghezza = pixel.shape[0], pixel.shape[1]
     soglie = _soglie(altezza, larghezza)
@@ -315,8 +316,8 @@ class Cattura:
             # farlo qui evita di ribaltare l'immagine in Python.
             filtri.append("hflip")
         # `area` e non `neighbor`: da 640 a 256 il vicino piu' prossimo
-        # produce alias e sfarfallio sui bordi. La grana da otto bit la mette
-        # il dithering, non il ridimensionamento fatto male.
+        # produce alias e sfarfallio sui bordi. La grana la mette il
+        # dithering, non un ridimensionamento fatto male.
         filtri.append("scale=%d:%d:flags=area" % (self.larghezza, self.altezza))
 
         return ["ffmpeg", "-v", "error", "-nostdin",
