@@ -1,4 +1,4 @@
-# DMD Controller 4.8
+# DMD Controller 5.3
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -40,6 +40,10 @@ un interruttore anche in Home Assistant.
 - **Rifiuti** — il calendario della raccolta nella colonna libera accanto
   all'orologio, calcolato da una cadenza fissa senza interrogare nessun
   portale.
+- **Funcam** — una webcam USB sul pannello, ridotta a quello che un computer
+  di quarant'anni fa sapeva mostrare. Il servizio **arma** e basta: la ripresa
+  parte da un pulsante fisico o dai comandi della pagina, mai dal solo
+  interruttore. Le immagini non escono dal Raspberry.
 
 ## Partite
 
@@ -62,6 +66,18 @@ Il tasto Start del pad scorre il giro dei giochi; PS esce.
 Fasce orarie: **Night mode** abbassa la luminosità, **Sleep mode** spegne il
 display. Sleep ha la precedenza su Night. Entrambe si comandano anche da Home
 Assistant.
+
+**Audio** — con una scheda audio USB (l'unica strada: la libreria della
+matrice si prende il blocco PWM, cioè lo stesso dell'uscita jack) ogni
+servizio può avere un suono di avviso al momento della notifica, i giochi
+hanno i loro effetti, e Doom la sua colonna sonora. Un interruttore in Now
+Playing manda la musica AirPlay sulla scheda: il DMD diventa una cassa.
+
+**Rete wifi dalla pagina web**: si scandiscono le reti, si sceglie e si
+cambia, senza attaccare monitor e tastiera.
+
+**Pulsante fisico** sulla Adafruit RGB Matrix Bonnet (GPIO 25, accanto a un
+GND): accende la Funcam, scatta una foto, la spegne tenendolo premuto.
 
 **Aggiornamento via rete** da questo repository, con verifica dell'archivio e
 ripristino automatico se il servizio non riparte.
@@ -105,6 +121,11 @@ Un Raspberry Pi già preparato secondo la procedura del progetto:
 - `isolcpus=3` sui modelli quad-core
 - libreria `rpi-rgb-led-matrix_pwm_experiment` clonata e compilata
 - pannelli cablati e verificati con la demo
+
+Facoltativa ma consigliata: una **scheda audio USB**. L'audio interno del
+Raspberry non è utilizzabile — la libreria della matrice si prende il blocco
+PWM, che è lo stesso dell'uscita jack — quindi l'USB non è un ripiego, è
+l'unica strada.
 
 ---
 
@@ -246,8 +267,9 @@ rediretti automaticamente.
 **Impostazioni** — luminosità con applicazione immediata, lingua
 dell'interfaccia, regolazione fine del driver S-PWM, profili hardware del
 pannello e **taratura automatica** (un pulsante: misura, e aggiunge il profilo
-trovato al menu), esportazione e importazione della configurazione, indirizzo IP
-locale, riavvio del servizio.
+trovato al menu), **audio** (scheda di uscita, volume, effetti dei giochi,
+audio di Doom, prova immediata), esportazione e importazione della
+configurazione, indirizzo IP locale, riavvio del servizio.
 
 **Orologio** — colori di ora e data, formato 12/24 ore, lingua dei giorni,
 lampeggio dei due punti, server NTP e fuso orario.
@@ -258,7 +280,17 @@ intervalli, adattamento al pannello, modalità pixel art.
 **Banner** — i dieci testi scorrevoli, uno per riga.
 
 **Musica** — copertura delle sorgenti, collegamento dell'account Spotify,
-aspetto del player, stato di MQTT e delle entità di Home Assistant.
+aspetto del player, stato di MQTT e delle entità di Home Assistant, e
+l'**uscita musicale**: con questa accesa la musica AirPlay esce davvero dalla
+scheda audio invece di essere solo raccontata.
+
+**Rete** — le reti wifi visibili con segnale e cifratura, il collegamento
+attuale, gli indirizzi a cui il DMD risponde. Le password le custodisce
+NetworkManager, non il `config.json`.
+
+**Funcam** — scelta della telecamera fra quelle collegate, risoluzione,
+aspetto, i due comandi per accendere e spegnere la ripresa, il pulsante
+fisico e l'installazione di `gpiozero`.
 
 **Compleanni** — l'elenco delle date, compleanni e anniversari.
 
@@ -284,11 +316,35 @@ la scheda degli emulatori esterni che porta a Doom e al Game Boy.
 cartuccia, pad su schermo, overscan, spostamento verticale, gamma e tavolozza.
 
 **Servizi** — attivazione dei servizi, indicazione della sorgente attualmente
-a schermo e possibilità di forzarne una invece di lasciar decidere l'arbitro.
+a schermo, possibilità di forzarne una invece di lasciar decidere l'arbitro,
+il **suono di avviso** di ciascuno e l'interruttore generale di MQTT.
 
 **Aggiornamenti** — controllo e installazione della nuova versione da questo
 repository, con verifica dell'archivio e ripristino automatico se il servizio
 non riparte.
+
+### Che cosa entra nel backup, e che cosa no
+
+L'esportazione della configurazione (Impostazioni → *Esporta*) porta con sé
+**tutto `config.json`**, blocchi nuovi compresi: l'audio con la scheda scelta,
+il volume e il file di avviso di ogni servizio, la Funcam con il piedino del
+pulsante. Reimportando un backup **vecchio** non si perde niente: le chiavi
+che allora non esistevano ricompaiono con i valori predefiniti, e quelle che
+c'erano restano come le avevi lasciate.
+
+Restano fuori tre categorie, e nessuna per dimenticanza:
+
+| Cosa | Dove vive | Perché non è nel backup |
+|---|---|---|
+| Password del broker MQTT | `config.json`, tolta all'export | Un file di configurazione gira: finisce in un allegato, in una segnalazione. Si riscrive una volta sola |
+| Password wifi | NetworkManager | Le custodisce chi lo fa di mestiere; nel nostro file non c'è niente da perdere né da regalare |
+| Token di Spotify e Google | `/var/lib/dmd/*.json`, permessi 0600 | Sono credenziali, non impostazioni |
+| **Uscita musicale** (5.3) | `/etc/shairport-sync.conf` | È la configurazione di un altro programma. Tenerne una copia da questa parte vorrebbe dire due verità che prima o poi divergono |
+| Coordinate del radar | `config.json` | Escludibili con una spunta all'export |
+
+Da ricordare per l'audio: il backup salva **il nome** del file di avviso, non
+il file. Ripristinando su una macchina senza la libreria media, i servizi
+restano semplicemente muti finché i file non tornano al loro posto.
 
 ---
 
@@ -307,6 +363,7 @@ stesso servizio e un arbitro sceglie chi vince:
 | 57 | Scadenze |
 | 56 | Compleanni |
 | 55 | Rolling Banner |
+| 51 | Funcam |
 | 50 | Media Player |
 | 10 | Clock |
 
@@ -348,6 +405,12 @@ di Batocera (menu, caricamenti); alzalo se vedi passaggi indesiderati.
 /opt/dmd/scadenze.py      scadenze, semaforo e registro
 /opt/dmd/hass.py          entità di Home Assistant via MQTT Discovery
 /opt/dmd/rifiuti.py       calendario della raccolta: cadenze ed eccezioni
+/opt/dmd/suoni.py         avvisi, effetti e audio di Doom: chi suona e quando
+/opt/dmd/suoni/           i dodici effetti dei giochi, nostri e non della libreria
+/opt/dmd/cassa.py         l'uscita musicale: shairport-sync sulla scheda vera
+/opt/dmd/rete.py          reti wifi via nmcli, senza toccare wpa_supplicant
+/opt/dmd/webcam.py        cattura dalla webcam e riduzione a pochi colori
+/opt/dmd/pulsante.py      il pulsante fisico sulla Bonnet, via gpiozero
 /opt/dmd/diagnostica/     strumenti di misura del pannello, per la taratura
 /opt/dmd/doom/            preparazione e ponte verso doomgeneric
 /opt/dmd/gb/              preparazione e ponte verso PyBoy
@@ -459,7 +522,14 @@ le tappe.
 | 4.5.4 | Il servizio non partiva: cablaggio prima della costruzione. Aggiunta `test_avvio.py`, che costruisce il Runtime vero |
 | 4.6 | Spostamento verticale dell'immagine Game Boy |
 | 4.6.1 | Tavolozze dello schermo Game Boy |
-| **4.7** | **Google Calendar: gli appuntamenti dei prossimi tre giorni, senza semaforo. Token fuori dalla configurazione, revoca del permesso allo scollegamento** |
+| 4.7 | Google Calendar: gli appuntamenti dei prossimi tre giorni, senza semaforo. Token fuori dalla configurazione, revoca del permesso allo scollegamento |
+| 4.8 | Profili del pannello con taratura automatica; il profilo scelto a mano non viene più riscritto al salvataggio |
+| 4.9 | Rete wifi dalla pagina web: scansione, scelta, password custodite da NetworkManager |
+| 4.10 | Funcam: la webcam sul pannello, con pochi colori |
+| 5.0 | Pulsante fisico sulla Bonnet: accende la Funcam, scatta una foto, la spegne tenendolo premuto |
+| 5.1 | Il servizio Funcam **arma**, non accende: la ripresa parte solo se qualcuno la chiama |
+| 5.2 | Audio: un avviso per servizio al momento della notifica, dodici effetti per Invaders e Breakout, la colonna sonora di Doom |
+| **5.3** | **Il DMD diventa una cassa: la musica AirPlay esce dalla scheda audio. Corretta la scelta automatica dell'uscita, che poteva finire sulla scheda fittizia** |
 
 ---
 

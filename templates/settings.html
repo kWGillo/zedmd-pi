@@ -137,9 +137,11 @@
     <button type="submit">{{ t('common.apply') }}</button>
   </form>
 
-  <form method="post" action="{{ url_for('api_audio_prova') }}" class="inline">
-    <button type="submit">{{ t('audio.test') }}</button>
-  </form>
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_audio_prova') }}">
+      <button type="submit" class="ghost">{{ t('audio.test') }}</button>
+    </form>
+  </div>
   <p class="hint">{{ t('audio.services.hint') }}</p>
 </section>
 

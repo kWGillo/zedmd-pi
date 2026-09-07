@@ -267,6 +267,10 @@ table.files form { margin: 0; }
 
 .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
 .actions form { margin: 0; }
+/* 5.3: lo stacco lo mette la riga, non i tasti. Senza questa, due form
+   affiancati mostravano i pulsanti sfalsati in verticale; e con
+   `form.inline`, che azzera il margine, si toccavano proprio. */
+.actions button { margin-top: 0; }
 .actions .btn {
   display: inline-block; padding: 10px 18px; background: var(--accent);
   color: #1a0f00; border-radius: 8px; font-size: 15px; font-weight: 600;

@@ -958,6 +958,12 @@ Storico:
        `-v error` stampa prima la causa e poi la conseguenza, e l\'ultima riga
        — "Error opening output device" — e\' proprio quella che non dice
        niente.
+       Due pulsanti di form diversi nella stessa scheda stavano attaccati: il
+       margine che li stacca ce l\'ha il singolo tasto, e `form.inline` lo
+       azzera. Adesso lo stacco lo mette la riga che li contiene. Succedeva in
+       Impostazioni (Applica / Prova il suono) e in Funcam (foto / gif); nel
+       Radar la coppia Aggiungi / Dimentica era incolonnata invece che
+       affiancata, e passa nella stessa riga.
 """
 
 __version__ = "5.3"

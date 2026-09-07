@@ -49,6 +49,19 @@ Tutte le modifiche rilevanti del progetto.
   conseguenza (`Error opening output device`), ed è la seconda quella che non
   dice niente.
 
+- **Due pulsanti di form diversi nella stessa scheda stavano attaccati.** Il
+  margine che li stacca ce l'ha il singolo tasto, e `form.inline` lo azzera:
+  ora lo stacco lo mette la riga che li contiene. Succedeva in Impostazioni
+  (*Applica* / *Prova il suono*) e in Funcam (foto / gif); nel Radar la coppia
+  *Aggiungi* / *Dimentica* era incolonnata invece che affiancata, e passa
+  nella stessa riga.
+
+- **README aggiornato**, fermo alla 4.8: mancavano la Funcam, la pagina Rete,
+  il pulsante fisico, l'audio e l'uscita musicale, la priorità 51 nella
+  tabella dell'arbitro, i moduli nuovi nella struttura dei file e otto righe
+  di storico. Aggiunta anche una tabella su **che cosa entra nel backup della
+  configurazione e che cosa no**.
+
 ## [5.2]
 
 - **Il pannello guadagna una voce.** Serve una scheda audio USB, e non è un

@@ -215,12 +215,14 @@
     {% endfor %}
   </table>
   <p class="hint">{{ t('lookup.add.hint') }}</p>
-  <form method="post" action="{{ url_for('api_radar_lookup_add') }}">
-    <button type="submit">{{ t('lookup.add') }}</button>
-  </form>
-  <form method="post" action="{{ url_for('api_radar_lookup_forget') }}">
-    <button type="submit" class="ghost">{{ t('lookup.forget') }}</button>
-  </form>
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_radar_lookup_add') }}">
+      <button type="submit">{{ t('lookup.add') }}</button>
+    </form>
+    <form method="post" action="{{ url_for('api_radar_lookup_forget') }}">
+      <button type="submit" class="ghost">{{ t('lookup.forget') }}</button>
+    </form>
+  </div>
   {% else %}
   <p class="hint">{{ t('lookup.unknown.none') }}</p>
   {% endif %}

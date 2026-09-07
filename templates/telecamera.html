@@ -105,13 +105,15 @@
 <section class="card">
   <h2>{{ t('webcam.shoot') }}</h2>
   <p class="hint">{{ t('webcam.shoot.hint') }}</p>
-  <form method="post" action="{{ url_for('api_telecamera_scatta') }}" class="inline">
-    <button type="submit">{{ t('webcam.shoot.photo') }}</button>
-  </form>
-  <form method="post" action="{{ url_for('api_telecamera_registra') }}" class="inline">
-    <button type="submit">{{ t('webcam.shoot.gif',
-                               seconds=cfg.webcam.gif_secondi) }}</button>
-  </form>
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_telecamera_scatta') }}">
+      <button type="submit">{{ t('webcam.shoot.photo') }}</button>
+    </form>
+    <form method="post" action="{{ url_for('api_telecamera_registra') }}">
+      <button type="submit">{{ t('webcam.shoot.gif',
+                                 seconds=cfg.webcam.gif_secondi) }}</button>
+    </form>
+  </div>
 </section>
 {% endif %}
 
