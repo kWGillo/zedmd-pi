@@ -2,6 +2,48 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [5.5]
+
+- **Doom non poteva suonare, e l'avevo scritto io nel Makefile.** La 5.2 ha
+  aggiunto la levetta *«Audio di Doom»*, il changelog che la annunciava e un
+  manuale che spiegava come funzionava. Non funzionava: in cima al Makefile
+  c'era scritto da anni *«non vuole SDL e non fa suono»*, e infatti nessun
+  modulo sonoro veniva compilato. `-nosound` era ininfluente, e
+  `SDL_AUDIODRIVER`/`AUDIODEV` non li leggeva nessuno perché SDL non era
+  collegato. Ho dichiarato una funzione senza verificarla.
+
+  doomgeneric il modulo ce l'ha — `i_sdlsound.c` e `i_sdlmusic.c`, quelli di
+  chocolate-doom — e lo cerca sotto il nome `DG_sound_module` quando
+  `FEATURE_SOUND` è definito. Ora il Makefile lo compila se trova SDL2 e
+  SDL2_mixer, e se non li trova compila **muto come prima** invece di fallire:
+  una libreria mancante non deve impedire di giocare.
+
+- **Serve una ricompilazione sul Raspberry**, che l'aggiornamento via rete non
+  fa apposta (ricompilare a ogni update vorrebbe dire due minuti di attesa per
+  niente). La pagina Doom se ne accorge da sola: guarda che cosa ha *collegato*
+  il binario, non che cosa dice il sorgente, e lo segnala a chi l'audio di Doom
+  l'ha chiesto. Il controllo del «binario vecchio» ora guarda anche il
+  Makefile, non solo il `.c` — questa versione cambia **solo** il Makefile, e
+  senza quel controllo l'aggiornamento sarebbe passato in silenzio.
+
+- **Breakout aveva pochi suoni.** In parte è vero per costruzione: misurati 83
+  al minuto contro i 291 di Invaders. Ma mancava anche qualcosa. L'effetto
+  `livello` esisteva dalla 5.2 e non lo suonava nessuno — lo chiamava solo
+  Invaders — quindi finire un muro passava in silenzio. Ora c'è, c'è il lancio
+  della palla, e soprattutto i mattoni hanno **una nota per fila**, che sale
+  scavando verso l'alto: è il suono con cui il Breakout del 1976 diceva, senza
+  scriverlo, a che punto eri arrivato. Da 83 a 131 suoni al minuto, e non
+  tutti uguali.
+
+- **Il Game Boy suona.** Non con effetti nostri: con la sua APU, emulata da
+  PyBoy, che con `sound_emulated=True` calcola i campioni senza aprire nessun
+  dispositivo e ce li lascia leggere a ogni tick. Li mandiamo a ffmpeg come
+  tutto il resto, quindi nessuna dipendenza nuova. Si raccolgono anche dai
+  fotogrammi che **non** vengono disegnati: il video si può saltare, l'audio
+  no — prenderli solo dai fotogrammi mostrati vorrebbe dire buttare via due
+  terzi del suono. Segue la levetta *«Effetti dei giochi»*, e tace quando la
+  scheda è della musica AirPlay.
+
 ## [5.4]
 
 - **Cerchio spara, e non esce più.** Era l'ultimo posto in cui il tasto **B**

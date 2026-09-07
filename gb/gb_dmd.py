@@ -39,6 +39,7 @@ cielo e una di terreno.
 import argparse
 import os
 import select
+import subprocess
 import sys
 import time
 
@@ -83,6 +84,11 @@ def costruisci_argomenti():
     # quattro livelli di grigio, e ogni schermo li rendeva a modo suo — il
     # verde e' quello del DMG, ma su un pannello LED si puo' scegliere.
     p.add_argument("--palette", default="")
+    # Il dispositivo ALSA su cui mandare l'audio del Game Boy, o vuoto per
+    # restare muti. Lo decide chi ci lancia: qui non si sa niente della
+    # configurazione del DMD.
+    p.add_argument("--audio", default="")
+    p.add_argument("--volume", type=float, default=1.0)
     return p
 
 
@@ -146,6 +152,66 @@ def finestra(larghezza_pannello, altezza_pannello, overscan, spostamento=0):
     return prima, 144 - (tolte - prima), larghezza
 
 
+class Altoparlante:
+    """L'audio emulato del Game Boy, mandato a una scheda ALSA.
+
+    PyBoy con `sound_emulated=True` calcola i campioni ma non apre nessun
+    dispositivo: dopo ogni tick te li lascia leggere, **int8 stereo** a 48 kHz.
+    Qui si convertono a 16 bit — uno spostamento di otto posizioni, non una
+    conversione vera — e si scrivono nella pipe di un ffmpeg che fa da sola
+    uscita ALSA. E' lo stesso attrezzo con cui suona tutto il resto del DMD, e
+    non aggiunge nessuna dipendenza a PyBoy.
+
+    Se qualcosa va storto si smette e basta: un altoparlante che tace e' molto
+    meglio di una partita che si ferma.
+    """
+
+    def __init__(self, device, volume, frequenza):
+        self.processo = None
+        self.volume = max(0.0, min(1.0, volume))
+        comando = ["ffmpeg", "-v", "error", "-nostdin",
+                   "-f", "s16le", "-ar", str(int(frequenza)), "-ac", "2",
+                   "-i", "-"]
+        if self.volume < 0.999:
+            comando += ["-filter:a", "volume=%.2f" % self.volume]
+        comando += ["-f", "alsa", device]
+        try:
+            self.processo = subprocess.Popen(comando, stdin=subprocess.PIPE,
+                                             stdout=subprocess.DEVNULL,
+                                             stderr=subprocess.DEVNULL)
+        except (OSError, subprocess.SubprocessError) as exc:
+            sys.stderr.write("[gb] audio non disponibile: %s\n" % exc)
+            self.processo = None
+
+    def scrivi(self, campioni):
+        if self.processo is None or self.processo.poll() is not None:
+            return
+        try:
+            # Il tipo si nomina per stringa: `numpy` in questo file e'
+            # importato dentro main(), quindi qui non si vedrebbe.
+            # `<< 8` e non una moltiplicazione: da int8 a int16 il valore
+            # cambia di scala, non di significato.
+            self.processo.stdin.write(
+                (campioni.astype("int16") << 8).tobytes())
+        except (BrokenPipeError, ValueError, OSError):
+            # ffmpeg se n'e' andato: da qui in poi si gioca in silenzio.
+            self.chiudi()
+
+    def chiudi(self):
+        processo, self.processo = self.processo, None
+        if processo is None:
+            return
+        try:
+            processo.stdin.close()
+        except Exception:
+            pass
+        try:
+            processo.terminate()
+            processo.wait(timeout=3)
+        except Exception:
+            pass
+
+
 def main():
     args = costruisci_argomenti().parse_args()
 
@@ -161,12 +227,18 @@ def main():
         sys.stderr.write("manca una libreria: %s\n" % exc)
         return 3
 
-    # window="null": nessuna finestra, nessun SDL da aprire. Il suono e'
-    # spento — l'audio del salotto non e' nostro, e un secondo canale sarebbe
-    # solo rumore.
+    # window="null": nessuna finestra, nessun SDL da aprire.
+    #
+    # L'audio non passa da PyBoy: `sound_emulated=True` gli fa **calcolare**
+    # i campioni senza aprire nessun dispositivo, e ce li lascia leggere un
+    # fotogramma per volta. Li mandiamo noi a una scheda scelta da chi ci ha
+    # lanciati, con lo stesso ffmpeg che usa il resto del DMD. Cosi' l'APU
+    # emulata gira comunque nel processo che gia' c'e', e non serve che PyBoy
+    # sappia niente di ALSA.
     colori = leggi_palette(args.palette)
     extra = {"color_palette": colori} if colori else {}
-    pyboy = PyBoy(args.rom, window="null", sound_emulated=False, **extra)
+    con_suono = bool(args.audio)
+    pyboy = PyBoy(args.rom, window="null", sound_emulated=con_suono, **extra)
     pyboy.set_emulation_speed(1)
 
     alto, basso, larghezza = finestra(args.larghezza, args.altezza,
@@ -191,13 +263,24 @@ def main():
     # se ne accorga su un pannello da 64 righe.
     salto = max(1, int(round(59.7 / max(1.0, args.fps))))
 
+    altoparlante = Altoparlante(args.audio, args.volume,
+                                pyboy.sound.sample_rate) if con_suono else None
+
     premuti = set()
     vivo = True
     while vivo:
+        # I campioni si raccolgono a **ogni** tick, anche quelli non
+        # disegnati: il video si puo' saltare, l'audio no. Prenderli solo dai
+        # fotogrammi mostrati vorrebbe dire buttare via due terzi del suono e
+        # sentire un gioco che balbetta.
         for _ in range(salto - 1):
             pyboy.tick(1, False)
+            if altoparlante is not None:
+                altoparlante.scrivi(pyboy.sound.ndarray)
         if not pyboy.tick(1, True):
             break
+        if altoparlante is not None:
+            altoparlante.scrivi(pyboy.sound.ndarray)
 
         # Comandi in arrivo. Si legge quello che c'e' e basta: se non arriva
         # niente non si aspetta, che qui il tempo e' del gioco.
@@ -239,6 +322,8 @@ def main():
         except (BrokenPipeError, ValueError):
             break
 
+    if altoparlante is not None:
+        altoparlante.chiudi()
     try:
         # save=True: la memoria tampone della cartuccia finisce accanto alla
         # ROM, quindi i salvataggi dei giochi sopravvivono all'uscita e si

@@ -1999,6 +1999,15 @@ STRINGS = {
         "pulsante qui sotto.",
         "Doom is not ready yet: it has to be prepared once, with the button "
         "below."),
+    "doom.mute": (
+        "Il programma è stato compilato senza audio, quindi «Audio di Doom» "
+        "nelle Impostazioni non può funzionare: fino alla 5.4 nessun modulo "
+        "sonoro veniva compilato. Premi «Prepara Doom» qui sotto per "
+        "installare SDL2 e ricompilare — sono un paio di minuti.",
+        "The program was compiled without audio, so «Doom audio» in Settings "
+        "cannot work: until 5.4 no sound module was compiled in at all. Press "
+        "«Prepare Doom» below to install SDL2 and rebuild — a couple of "
+        "minutes."),
     "doom.stale": (
         "Il programma è stato compilato prima dell'ultimo aggiornamento: "
         "funziona, ma non è quello che dice il sorgente installato. "

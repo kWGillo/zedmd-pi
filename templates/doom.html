@@ -11,6 +11,10 @@
 <div class="banner warn">{{ t('doom.nowad', path=doom.wad) }}</div>
 {% elif prep.binary_stale %}
 <div class="banner warn">{{ t('doom.stale') }}</div>
+{% elif prep.binary_mute and cfg.audio.doom and cfg.audio.enabled %}
+{# Solo a chi l'audio di Doom l'ha chiesto: a chi non lo vuole questo
+   avviso non dice niente di utile. #}
+<div class="banner warn">{{ t('doom.mute') }}</div>
 {% endif %}
 
 <section class="card">

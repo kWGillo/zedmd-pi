@@ -399,6 +399,27 @@ def doom_con_suono(cfg):
     return bool(ambiente_doom(cfg))
 
 
+def uscita_giochi(cfg):
+    """La scheda su cui puo' suonare un gioco che si porta il suo audio.
+
+    Oggi e' il Game Boy, che ha un chip sonoro emulato: i suoi suoni non sono
+    nostri e non stanno in `suoni/`, sono la musica scritta per quel chip.
+    Vale la stessa levetta degli altri effetti dei giochi — chi li spegne
+    vuole silenzio, non silenzio tranne uno.
+
+    Restituisce "" quando non si deve suonare, ed e' quello che si passa a un
+    processo esterno: un argomento vuoto e' piu' facile da controllare di un
+    argomento assente.
+    """
+    if not acceso(cfg) or not _conf(cfg).get("giochi", True):
+        return ""
+    if _musica():
+        # La scheda e' di shairport-sync: il Game Boy partirebbe muto e con
+        # un errore per traverso. Meglio muto e basta.
+        return ""
+    return uscita(cfg)
+
+
 def stato(cfg):
     """Quel che serve alle pagine."""
     return {"disponibile": disponibile(), "acceso": acceso(cfg),

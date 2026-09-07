@@ -26,6 +26,8 @@ import time
 
 from PIL import Image
 
+import suoni
+
 from .base import Source
 from .comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_RY, ABS_X, ABS_Y,
                       BTN_EAST, BTN_NORTH, BTN_SELECT, BTN_SOUTH, BTN_START,
@@ -258,7 +260,13 @@ class GameBoySource(Source):
                 "--overscan", "%.0f" % float(conf.get("overscan", 0)),
                 "--spostamento", "%d" % int(conf.get("spostamento", 0)),
                 "--fps", "%.0f" % float(conf.get("fps", 30)),
-                "--palette", colori_palette(conf)]
+                "--palette", colori_palette(conf),
+                # Il Game Boy suona con l'APU emulata da PyBoy, non con dei
+                # nostri campioni: e' musica scritta per quel chip, e
+                # rifarla sarebbe rifare il gioco. La scheda gliela diciamo
+                # noi, perche' `gb_dmd.py` non conosce la configurazione.
+                "--audio", suoni.uscita_giochi(self.cfg),
+                "--volume", "%.2f" % suoni.volume(self.cfg)]
 
     def _avvia_processo(self, rom):
         problema = controlla_rom(rom)

@@ -1,6 +1,6 @@
 ---
 title: "L'audio del DMD"
-subtitle: "Una scheda USB, un avviso per servizio, gli effetti dei giochi e la colonna sonora di Doom"
+subtitle: "Una scheda USB, un avviso per servizio, gli effetti dei giochi, Doom e il Game Boy"
 ---
 
 # 1. Perché serve una scheda USB
@@ -53,16 +53,18 @@ Un wav a 44 100 Hz stereo su una chiavetta che vuole 48 000 Hz mono, con `hw`,
 non parte e basta — e il motivo non si scopre in fretta. Con `plughw` esce, e
 la conversione la fa ALSA. Il DMD usa sempre `plughw`.
 
-# 3. Le tre cose, che sono davvero tre
+# 3. Le quattro cose, che sono davvero quattro
 
-Le impostazioni dell'audio sono divise in tre perché rispondono a tre domande
-diverse, non per gusto della simmetria.
+Le impostazioni dell'audio sono divise perché rispondono a domande diverse,
+non per gusto della simmetria. I due emulatori si portano il proprio suono; il
+resto lo mettiamo noi.
 
 | | Cosa suona | Da dove viene il file |
 |---|---|---|
 | **Avvisi dei servizi** | quando una sorgente prende il pannello | libreria media, scelto da te |
 | **Effetti dei giochi** | Invaders e Breakout | `suoni/`, dentro il programma |
 | **Audio di Doom** | la colonna sonora del gioco | i WAD, come nel gioco vero |
+| **Audio del Game Boy** | la musica della cartuccia | l'APU emulata da PyBoy |
 
 ## 3.1 Gli avvisi dei servizi
 
@@ -99,7 +101,7 @@ peggio che non sentirlo. E interromperne uno a metà è un singhiozzo.
 
 ## 3.2 Gli effetti dei giochi
 
-Invaders e Breakout hanno dodici effetti a onda quadra, 22 050 Hz mono, scritti
+Invaders e Breakout hanno diciassette effetti a onda quadra, 22 050 Hz mono, scritti
 per loro. Stanno in `/opt/dmd/suoni/` — **dentro il programma, non nella
 libreria media**.
 
@@ -113,16 +115,28 @@ fossero roba da scegliere.
 | `sparo` | Invaders: il colpo del cannone |
 | `colpito` | Invaders: un alieno esplode |
 | `passo1`…`passo4` | Invaders: le quattro note del passo della schiera |
-| `livello` | Invaders: schiera ripulita, ne arriva un'altra |
-| `mattone` | Breakout: un mattone si rompe |
+| `mattone1`…`mattone5` | Breakout: un mattone si rompe — **una nota per fila** |
 | `racchetta` | Breakout: rimbalzo sulla racchetta |
 | `muro` | Breakout: rimbalzo sulle pareti |
+| `lancio` | Breakout: la palla parte dalla racchetta |
+| `livello` | entrambi: schiera ripulita o muro finito |
 | `persa` | entrambi: vita persa |
 | `record` | entrambi: primato personale battuto |
 
-Le quattro note del passo sono la cosa più fedele all'originale del 1978: è il
-battito del gioco, e accelera insieme alla schiera. Metà della tensione stava
-lì.
+Due sono citazioni, non decorazioni.
+
+Le **quattro note del passo** di Invaders sono la cosa più fedele
+all'originale del 1978: è il battito del gioco, e accelera insieme alla
+schiera. Metà della tensione stava lì.
+
+Le **cinque note dei mattoni** di Breakout salgono man mano che si scava verso
+l'alto — la fila in cima, quella che vale 50 punti, è la più acuta. Nel
+Breakout del 1976 era il modo in cui il gioco diceva, senza scriverlo, a che
+punto eri arrivato.
+
+> Breakout resta comunque più rado di Invaders, e non è un difetto: misurati
+> 131 suoni al minuto contro 291. Invaders ha una cadenza continua, Breakout
+> solo eventi.
 
 Si spengono tutti insieme dalla levetta **Effetti dei giochi** in
 Impostazioni.
@@ -134,6 +148,21 @@ nel gioco originale.
 
 Fino alla 5.1 il DMD lo lanciava sempre con `-nosound -nomusic`. Ora quei due
 argomenti compaiono solo se l'audio di Doom è spento.
+
+> **Serve una ricompilazione, e fino alla 5.4 questa pagina mentiva.** La 5.2
+> ha aggiunto la levetta e questo manuale, ma il binario non aveva **nessun
+> modulo sonoro dentro**: il Makefile non ne compilava, e in cima c'era scritto
+> a chiare lettere «non vuole SDL e non fa suono». Togliere `-nosound` non
+> poteva bastare, e infatti non bastava.
+>
+> Dalla 5.5 il Makefile compila il modulo sonoro di doomgeneric
+> (`i_sdlsound.c`, `i_sdlmusic.c`) quando trova **SDL2** e **SDL2_mixer**. Se
+> non li trova compila muto come prima, invece di fallire.
+>
+> Chi aggiorna deve **ricompilare**: pagina Doom → *Prepara Doom*. Sono un paio
+> di minuti e installa da sé le due librerie. L'aggiornamento via rete non
+> ricompila apposta — lo farebbe a ogni update, per niente. La pagina Doom
+> controlla che cosa ha collegato il binario e lo dice da sola.
 
 La scheda gliela passiamo dall'ambiente, non dalla riga di comando:
 
@@ -156,6 +185,29 @@ le righe chiare sul pannello — il disturbo che la pagina Taratura misura. Un
 avviso di mezzo secondo non si misura nemmeno. Una colonna sonora che va per
 tutta la partita sì. Se durante Doom noti disturbi che senza non ci sono, la
 levetta è lì per questo.
+
+## 3.4 Il Game Boy
+
+Il Game Boy suona con il **suo** chip sonoro, emulato da PyBoy. Non ci sono
+effetti nostri: la musica di un gioco Game Boy è scritta per quell'APU, e
+rifarla vorrebbe dire rifare il gioco.
+
+Il meccanismo è diverso da quello di Doom, e più semplice. PyBoy con
+`sound_emulated=True` **calcola** i campioni senza aprire nessun dispositivo
+audio, e dopo ogni tick te li lascia leggere: int8 stereo a 48 kHz, circa 800
+campioni per fotogramma. Il DMD li converte a 16 bit e li scrive nella pipe di
+un ffmpeg che fa da uscita ALSA — lo stesso attrezzo di tutto il resto, e
+nessuna dipendenza nuova per PyBoy.
+
+Un dettaglio che conta: i campioni si raccolgono **a ogni tick**, anche dai
+fotogrammi che non vengono disegnati. Il DMD ne mostra 30 al secondo dei 59,7
+che il Game Boy produce, perché l'occhio su 64 righe non vede la differenza e
+la pipe video costa. L'orecchio invece la sentirebbe eccome: prendere i
+campioni solo dai fotogrammi mostrati vorrebbe dire buttare via due terzi del
+suono.
+
+Non ha una levetta propria: segue quella degli **effetti dei giochi**. E tace
+quando la scheda è occupata dalla musica AirPlay, come tutto il resto.
 
 # 4. Il DMD come cassa AirPlay
 

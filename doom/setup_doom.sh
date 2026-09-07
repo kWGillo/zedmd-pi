@@ -47,6 +47,25 @@ else
     echo "    gia' presenti"
 fi
 
+# 5.5: l'audio di Doom. Il modulo sonoro di doomgeneric e' quello di
+# chocolate-doom e vuole SDL2 con SDL2_mixer. Non sono obbligatorie — il
+# Makefile compila lo stesso e Doom resta muto, esattamente com'era — ma
+# senza di loro la levetta "Audio di Doom" nelle Impostazioni non puo'
+# funzionare. Fino alla 5.4 non funzionava per questo: il binario non aveva
+# nessun modulo sonoro dentro, e la levetta prometteva una cosa impossibile.
+echo "==> Librerie audio (SDL2)"
+if pkg-config --exists sdl2 SDL2_mixer 2>/dev/null; then
+    echo "    gia' presenti"
+else
+    echo "    installo libsdl2-dev e libsdl2-mixer-dev"
+    apt update
+    if apt install -y libsdl2-dev libsdl2-mixer-dev; then
+        echo "    installate"
+    else
+        echo "    NON installate: Doom verra' compilato muto"
+    fi
+fi
+
 echo "==> Sorgenti di doomgeneric in $DOOM_DIR"
 if [ -d "$DOOM_DIR/.git" ]; then
     git -C "$DOOM_DIR" pull --ff-only || true

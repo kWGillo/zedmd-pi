@@ -75,6 +75,7 @@ class Mattoni(Gioco):
         self.vx = math.sin(angolo) * self.velocita
         self.vy = -math.cos(angolo) * self.velocita
         self.attaccata = False
+        self.suona("lancio")
 
     def rimasti(self):
         return sum(1 for v in self.mattoni.values() if v)
@@ -116,6 +117,9 @@ class Mattoni(Gioco):
             self.livello += 1
             self.punteggio += 100
             self._aggiorna_record()
+            # L'effetto c'era dalla 5.2 e non lo suonava nessuno: era Invaders
+            # a chiamarlo, e finire un muro passava in silenzio.
+            self.suona("livello")
             self._nuovo_livello()
 
     def _micro_passo(self, dt):
@@ -178,7 +182,10 @@ class Mattoni(Gioco):
         if not self.mattoni.get((colonna, fila)):
             return
         self.mattoni[(colonna, fila)] = False
-        self.suona("mattone")
+        # Una nota per fila, e sale scavando verso l'alto. E' il suono che il
+        # Breakout del 1976 usava per dire, senza scriverlo, a che punto sei
+        # arrivato: la fila 0 e' quella in cima, quella che vale di piu'.
+        self.suona("mattone%d" % (fila + 1))
         self.punteggio += PUNTI[fila]
         self._aggiorna_record()
         self.vy = -self.vy

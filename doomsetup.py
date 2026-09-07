@@ -192,11 +192,44 @@ def binario_vecchio(cfg):
     chi cerca una modifica che non vede impazzisce.
     """
     binario = cfg["doom"].get("binary") or ""
-    sorgente = os.path.join(os.path.dirname(script()), "doomgeneric_dmd.c")
+    cartella = os.path.dirname(script())
+    # Anche il Makefile, non solo il .c: la 5.5 aggiunge l'audio cambiando
+    # **soltanto** il Makefile, e un aggiornamento che lascia il binario com'e'
+    # senza dirlo e' il modo migliore per far cercare a qualcuno un difetto
+    # che non esiste.
     try:
-        return os.path.getmtime(sorgente) > os.path.getmtime(binario)
+        eta = os.path.getmtime(binario)
     except OSError:
         return False
+    for nome in ("doomgeneric_dmd.c", "Makefile"):
+        try:
+            if os.path.getmtime(os.path.join(cartella, nome)) > eta:
+                return True
+        except OSError:
+            continue
+    return False
+
+
+def binario_muto(cfg):
+    """True se il binario compilato non ha dentro nessun modulo sonoro.
+
+    Si guarda che cosa ha collegato, non che cosa dice il sorgente: il file
+    compilato e' l'unico che conti, e sul Raspberry puo' essere di mesi prima
+    rispetto al Makefile arrivato con l'aggiornamento.
+
+    Fino alla 5.4 era muto **sempre** — nessun modulo sonoro veniva compilato —
+    e intanto le Impostazioni offrivano una levetta "Audio di Doom" che non
+    poteva funzionare.
+    """
+    binario = cfg["doom"].get("binary") or ""
+    if not binario or not os.path.isfile(binario):
+        return False
+    try:
+        esito = subprocess.run(["ldd", binario], capture_output=True,
+                               text=True, timeout=15)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return "libSDL2" not in (esito.stdout or "")
 
 
 def log(messaggio):
@@ -309,6 +342,7 @@ def stato(cfg):
         "binary": cfg["doom"].get("binary", ""),
         "binary_ready": binario_pronto(cfg),
         "binary_stale": binario_vecchio(cfg),
+        "binary_mute": binario_muto(cfg),
         "wad_dir": cartella_wad(cfg),
         "share": CONDIVISIONE,
         "wads": wad,

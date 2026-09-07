@@ -1,4 +1,4 @@
-# DMD Controller 5.4
+# DMD Controller 5.5
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -71,9 +71,10 @@ Assistant.
 
 **Audio** — con una scheda audio USB (l'unica strada: la libreria della
 matrice si prende il blocco PWM, cioè lo stesso dell'uscita jack) ogni
-servizio può avere un suono di avviso al momento della notifica, i giochi
-hanno i loro effetti, e Doom la sua colonna sonora. Un interruttore in Now
-Playing manda la musica AirPlay sulla scheda: il DMD diventa una cassa.
+servizio può avere un suono di avviso al momento della notifica, Breakout e
+Invaders hanno i loro effetti, e Doom e il Game Boy si portano il proprio
+audio — la colonna sonora dai WAD, l'APU emulata da PyBoy. Un interruttore in
+Now Playing manda la musica AirPlay sulla scheda: il DMD diventa una cassa.
 
 **Rete wifi dalla pagina web**: si scandiscono le reti, si sceglie e si
 cambia, senza attaccare monitor e tastiera.
@@ -532,7 +533,8 @@ le tappe.
 | 5.1 | Il servizio Funcam **arma**, non accende: la ripresa parte solo se qualcuno la chiama |
 | 5.2 | Audio: un avviso per servizio al momento della notifica, dodici effetti per Invaders e Breakout, la colonna sonora di Doom |
 | 5.3 | Il DMD diventa una cassa: la musica AirPlay esce dalla scheda audio. Corretta la scelta automatica dell'uscita, che poteva finire sulla scheda fittizia |
-| **5.4** | **Cerchio (B) spara invece di uscire: era l'ultimo tasto frontale che chiudeva una partita. Il pulsante di prova dell'audio dice se l'interruttore generale è spento** |
+| 5.4 | Cerchio (B) spara invece di uscire: era l'ultimo tasto frontale che chiudeva una partita. Il pulsante di prova dell'audio dice se l'interruttore generale è spento |
+| **5.5** | **Doom suona davvero: il Makefile non compilava nessun modulo sonoro, e la levetta della 5.2 prometteva l'impossibile. Il Game Boy suona con la sua APU. Breakout ha una nota per fila di mattoni** |
 
 ---
 
