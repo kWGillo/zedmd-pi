@@ -964,6 +964,26 @@ Storico:
        Impostazioni (Applica / Prova il suono) e in Funcam (foto / gif); nel
        Radar la coppia Aggiungi / Dimentica era incolonnata invece che
        affiancata, e passa nella stessa riga.
+  5.4  **Cerchio spara, e non esce piu\'.** Era l\'ultimo posto in cui il tasto
+       B del pad chiudeva una partita. La 4.5.3 aveva tolto quel significato
+       al Game Boy, dove B appartiene al gioco; nei giochi interni era
+       rimasto, con la motivazione — scritta nel codice — che "chi ce l\'ha
+       nelle dita da Doom non deve reimpararla". La motivazione era **falsa**:
+       in Doom cerchio e\' `usa`, non l\'uscita. Su un pad i quattro tasti
+       frontali stanno sotto le stesse dita, e uno di loro non puo\' portare
+       via la partita. Per uscire restano Select e PS, che si premono apposta.
+       **Il pulsante di prova dell\'audio non inganna piu\'.** Suona anche a
+       "Suono acceso" spento, ed e\' voluto — serve a decidere se accenderlo.
+       Ma diceva solo "Suono inviato alla scheda": si provava, si sentiva il
+       tono, e si concludeva che l\'audio funzionasse. Poi avvisi e giochi
+       restavano muti, senza che il motivo fosse scritto da nessuna parte.
+       Adesso, a interruttore spento, il riquadro lo dice **prima** di provare
+       e il messaggio della prova lo ripete dopo.
+       Le prove dei suoni montavano i giochi a mano, quindi non dicevano
+       niente sul collegamento vero — quello che `apri_sessione` fa aprendo la
+       partita, cioe\' esattamente il punto in cui il suono poteva mancare.
+       Ora una partita vera gira dentro la prova e si controlla che gli
+       effetti arrivino a ffmpeg.
 """
 
-__version__ = "5.3"
+__version__ = "5.4"

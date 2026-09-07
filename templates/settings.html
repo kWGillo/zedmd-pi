@@ -100,6 +100,10 @@
 
   {% if not audio.dispositivi %}
   <p class="status">{{ t('audio.nocard') }}</p>
+  {% elif not cfg.audio.enabled %}
+  {# La prova suona anche da spento, apposta. Senza questa riga si prova, si
+     sente il tono e si conclude che l'audio funzioni: e' successo. #}
+  <p class="status">{{ t('audio.off') }}</p>
   {% endif %}
   {% if audio.errore %}
   <p class="status">{{ t('audio.error', error=audio.errore) }}</p>

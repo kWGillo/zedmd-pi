@@ -1645,7 +1645,16 @@ def create_app(runtime):
         """
         percorso = suoni.effetto("livello")
         partito, motivo = suoni.riproduci(cfg, percorso, forza=True)
-        chiave = "audio.tested" if partito else "audio.failed"
+        if not partito:
+            chiave = "audio.failed"
+        elif not suoni.acceso(cfg):
+            # Il tono si e' sentito, ma l'interruttore generale e' spento:
+            # avvisi e giochi resteranno muti. Dire solo "suono inviato"
+            # sarebbe vero e fuorviante insieme — si prova, funziona, e si
+            # conclude che l'audio e' a posto.
+            chiave = "audio.tested.off"
+        else:
+            chiave = "audio.tested"
         return redirect(url_for("page_settings", result=i18n.translate(
             chiave, current_language(), error=motivo)))
 

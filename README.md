@@ -1,4 +1,4 @@
-# DMD Controller 5.3
+# DMD Controller 5.4
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -59,7 +59,9 @@ lavoro. Si comandano da tastiera, da pad o dalla pagina web.
   colore.
 - **Breakout e Invaders** — scritti per questo pannello, senza dipendenze.
 
-Il tasto Start del pad scorre il giro dei giochi; PS esce.
+Il tasto Start del pad scorre il giro dei giochi; **Select e PS escono**. I
+quattro tasti frontali sparano: stanno sotto le stesse dita mentre si gioca,
+e nessuno di loro porta via la partita.
 
 ## Il resto
 
@@ -529,7 +531,8 @@ le tappe.
 | 5.0 | Pulsante fisico sulla Bonnet: accende la Funcam, scatta una foto, la spegne tenendolo premuto |
 | 5.1 | Il servizio Funcam **arma**, non accende: la ripresa parte solo se qualcuno la chiama |
 | 5.2 | Audio: un avviso per servizio al momento della notifica, dodici effetti per Invaders e Breakout, la colonna sonora di Doom |
-| **5.3** | **Il DMD diventa una cassa: la musica AirPlay esce dalla scheda audio. Corretta la scelta automatica dell'uscita, che poteva finire sulla scheda fittizia** |
+| 5.3 | Il DMD diventa una cassa: la musica AirPlay esce dalla scheda audio. Corretta la scelta automatica dell'uscita, che poteva finire sulla scheda fittizia |
+| **5.4** | **Cerchio (B) spara invece di uscire: era l'ultimo tasto frontale che chiudeva una partita. Il pulsante di prova dell'audio dice se l'interruttore generale è spento** |
 
 ---
 

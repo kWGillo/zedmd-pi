@@ -18,7 +18,7 @@ ba43a3f75c392ca49d006a5e4166ab6a  gb/gb_dmd.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 b2ff07ba075e9ab069428c2d17f9b1a1  hass.py
-6e413913101bb60d145bc716d555c9a1  i18n.py
+2dee1984ba2195b1916aaad8542ecbe3  i18n.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
@@ -42,7 +42,7 @@ ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 6e30dae484efe052f8cfb3a89545a245  sources/doom.py
 e5ae6e09c246f99f419c0cdda7b6e4ee  sources/gameboy.py
-2327cdf524c2915b61d69cc7b0526e7b  sources/giochi/__init__.py
+9980da32a7b7d743bab5ae425ab51014  sources/giochi/__init__.py
 1ae61a11b831aaff6c3f30b82572247d  sources/giochi/base.py
 018e911289febd4efb970fba0d9e5626  sources/giochi/invasori.py
 0bccf8ac216bb195977931e8ec55c05a  sources/giochi/mattoni.py
@@ -83,10 +83,10 @@ cb2bf411ad933041798e06169e45627e  templates/rete.html
 f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 403872d6a716a4b13b8775cfbbdd355a  templates/scadenze.html
 848137dc72db27fda9b3b75783284ac3  templates/services.html
-5a1218f191566b394dd950dc61f6dced  templates/settings.html
+7c0273ad8b84559e5569f20a8f7584f5  templates/settings.html
 0823432fc4a73241082966d4f4c9e760  templates/telecamera.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-4b92d45d9af2ecf37ea33be65df36665  version.py
+332796edcf72c3f1d7132f3003973bec  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-15c544dbe2251d7fe17bd1abce070d9a  webui.py
+6e78649395d1db3fdbc215979beebdf2  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

@@ -155,9 +155,15 @@ levette e croce direzionale. Se `evtest` non è installato:
 | Comando | Sul pad |
 |---|---|
 | muoversi | levetta sinistra, levetta destra, croce direzionale |
-| sparare / lanciare la palla | **X**, **quadrato**, **R1**, **R2** |
-| uscire dalla partita | **cerchio** |
+| sparare / lanciare la palla | **X**, **cerchio**, **quadrato**, **R1**, **R2** |
+| uscire dalla partita | **Share/Select** |
+| scorrere il giro dei giochi | **Options/Start** (fuori dal Game Boy anche **PS**) |
 | **far cominciare** una partita | **Options** (o il tasto **PS**) |
+
+> **Dalla 5.4 cerchio spara, e non esce più.** Era l'ultimo posto in cui un
+> tasto frontale chiudeva la partita: stanno tutti e quattro sotto le stesse
+> dita mentre si gioca, e uno di loro non può portare via il pannello. Per
+> uscire restano Share/Select e PS, che si premono apposta.
 
 ### 5.2 In Doom
 
@@ -169,9 +175,26 @@ levette e croce direzionale. Se `evtest` non è installato:
 | aprire porte / usare | **cerchio**, **quadrato** |
 | correre | **L1**, **L2** |
 | mappa | **triangolo** |
-| menu | **Options**, tasto **PS** |
-| invio | **Share** |
-| cambio arma | pressione delle levette (L3, R3) |
+| menu | **L3** (pressione della levetta sinistra) |
+| invio | **R3** (pressione della levetta destra) |
+| uscire dalla partita | **Share/Select** |
+
+Options, PS e Share/Select **non** appartengono a Doom: sono globali e li legge
+il gestore dei giochi, altrimenti una pressione sola farebbe due cose. È il
+motivo per cui menu e invio stanno sulle levette premute, che non usa nessun
+altro.
+
+### 5.3 Nel Game Boy
+
+A partita aperta l'emulatore si tiene tutto, perché Start e Select sono suoi:
+
+| Comando | Sul pad |
+|---|---|
+| A | **X**, **R1**, **R2** |
+| B | **cerchio**, **quadrato**, **triangolo**, **L1**, **L2** |
+| Start | **Options/Start**, **L3** |
+| Select | **Share/Select**, **R3** |
+| uscire dalla partita | **PS** |
 
 I nomi sulle plastiche cambiano da un pad all'altro, e negli anni qualche
 versione del kernel ha scambiato triangolo e quadrato: per questo le azioni

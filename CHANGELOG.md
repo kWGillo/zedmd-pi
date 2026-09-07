@@ -2,6 +2,31 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [5.4]
+
+- **Cerchio spara, e non esce più.** Era l'ultimo posto in cui il tasto **B**
+  del pad chiudeva una partita. La 4.5.3 aveva già tolto quel significato al
+  Game Boy, dove B appartiene al gioco; nei giochi interni era rimasto, con la
+  motivazione — scritta nel codice — che *«chi ce l'ha nelle dita da Doom non
+  deve reimpararla»*. La motivazione era **falsa**: in Doom cerchio è `usa`,
+  non l'uscita. Su un pad i quattro tasti frontali stanno sotto le stesse dita
+  mentre si gioca, e uno di loro non può portare via la partita. Per uscire
+  restano **Select** e **PS**, che si premono apposta.
+
+- **Il pulsante di prova dell'audio non inganna più.** Suona anche a «Suono
+  acceso» spento, ed è voluto: serve proprio a decidere se accenderlo. Ma
+  diceva soltanto *«Suono inviato alla scheda»* — si provava, si sentiva il
+  tono, e si concludeva che l'audio funzionasse. Poi avvisi dei servizi ed
+  effetti dei giochi restavano muti, e il motivo non era scritto da nessuna
+  parte. Ora, a interruttore spento, il riquadro lo dice **prima** di provare
+  e il messaggio della prova lo ripete dopo.
+
+- **Le prove dei suoni non toccavano il collegamento vero.** Montavano i
+  giochi a mano, quindi non dicevano niente su quello che `apri_sessione` fa
+  aprendo la partita — cioè esattamente il punto in cui il suono dei giochi
+  poteva mancare senza che nessuno se ne accorgesse. Ora una partita vera gira
+  dentro la prova e si controlla che gli effetti arrivino a ffmpeg.
+
 ## [5.3]
 
 - **Il DMD diventa una cassa.** Un interruttore nella pagina Now Playing e la

@@ -62,15 +62,21 @@ TASTO_ESCI = 1          # escape
 PULSANTI = {
     BTN_SOUTH: "fuoco", BTN_TR2: "fuoco", BTN_TR: "fuoco",
     BTN_WEST: "fuoco",
-    # Start scorre l'elenco dei giochi, Select esce. Cerchio resta una via
-    # d'uscita: chi ce l'ha nelle dita da Doom non deve reimpararla.
+    # 5.4: **cerchio spara**, e non esce piu'.
+    # Era l'ultimo posto in cui B chiudeva una partita. La 4.5.3 aveva tolto
+    # quel significato al Game Boy, dove B e' un tasto del gioco; qui era
+    # rimasto, con la motivazione che "chi ce l'ha nelle dita da Doom non
+    # deve reimpararlo" — motivazione **falsa**, perche' in Doom cerchio e'
+    # `usa`, non l'uscita. Su un pad i quattro tasti frontali stanno sotto le
+    # stesse dita: uno di loro non puo' portare via la partita.
+    # Per uscire restano Select e PS, che si premono apposta.
     #
     # PS ha un'azione sua, "home", anche se di solito fa la stessa cosa di
     # Start. Serve durante una sessione **esclusiva** — il Game Boy — dove
     # Start, Select, croce e cerchio appartengono al gioco: li' PS resta
     # l'unica via d'uscita, ed e' il significato che ha sulla console vera.
     BTN_START: "ciclo", BTN_MODE: "home",
-    BTN_SELECT: "esci", BTN_EAST: "esci",
+    BTN_SELECT: "esci", BTN_EAST: "fuoco",
 }
 
 ASSI = {

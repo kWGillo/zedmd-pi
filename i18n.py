@@ -1203,6 +1203,11 @@ STRINGS = {
         "a restart."),
     "audio.error": ("Ultimo errore: %(error)s", "Last error: %(error)s"),
     "audio.enabled": ("Suono acceso", "Sound on"),
+    "audio.off": (
+        "Il suono è spento: avvisi dei servizi ed effetti dei giochi non "
+        "suonano. Il pulsante di prova qui sotto funziona lo stesso, apposta.",
+        "Sound is off: service chimes and game effects do not play. The test "
+        "button below still works, on purpose."),
     "audio.device": ("Uscita audio", "Audio output"),
     "audio.device.auto": ("L'ultima collegata", "The last one connected"),
     "audio.device.hint": (
@@ -1230,6 +1235,11 @@ STRINGS = {
         "That is why it has a switch of its own."),
     "audio.test": ("Prova il suono", "Test the sound"),
     "audio.tested": ("Suono inviato alla scheda.", "Sound sent to the card."),
+    "audio.tested.off": (
+        "Il tono si è sentito, ma «Suono acceso» è spento: avvisi dei servizi "
+        "ed effetti dei giochi restano muti. Spuntalo e premi Applica.",
+        "The tone played, but «Sound on» is off: service chimes and game "
+        "effects stay silent. Tick it and press Apply."),
     "audio.failed": ("Non ha suonato: %(error)s", "It did not play: %(error)s"),
     "audio.services.hint": (
         "Il file di avviso di ogni servizio si sceglie nella pagina Servizi. "
