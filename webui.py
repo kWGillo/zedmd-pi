@@ -15,6 +15,7 @@ from flask import (Flask, has_request_context, jsonify, redirect,
                    render_template, request, send_file, url_for)
 from werkzeug.utils import secure_filename
 
+import cassa
 import dmdconf
 import fasce
 import i18n
@@ -32,6 +33,7 @@ import presets
 import ota
 import pulsante
 import rete
+import suoni
 import webcam
 import spotifyapi
 from sources import (DOOM_PULSANTI, DOOM_TASTI, FIELD_LIST, GB_PULSANTI,
@@ -215,6 +217,7 @@ def create_app(runtime):
             taratura=autotune.stato(), taratura_in_corso=autotune.in_corso(),
             cablaggi=presets.CABLAGGI,
             config_result=request.args.get("config_result"),
+            audio=suoni.stato(cfg),
             result=request.args.get("result"), page="settings")
 
     @app.route("/telecamera")
@@ -1236,6 +1239,7 @@ def create_app(runtime):
             spotify=runtime.spotify.status(),
             authorize_url=request.args.get("authorize", ""),
             result=request.args.get("result", ""),
+            audio=suoni.stato(cfg), cassa=cassa.stato(cfg),
             status=runtime.player.status(current_language()), page="nowplaying")
 
     @app.route("/radar")
@@ -1308,9 +1312,12 @@ def create_app(runtime):
             {"key": "webcam", "label": "Funcam", "ready": True,
              "status": stato("telecamera")},
         ]
+        for voce in services:
+            voce["suono"] = voce["key"] in suoni.SERVIZI_CON_SUONO
         current = runtime.arbiter.current
         return render_template(
             "services.html", cfg=cfg, services=services,
+            audio=suoni.stato(cfg), suoni_file=suoni.file_disponibili(cfg),
             current=current.label if current else "—",
             mqtt=runtime.mqtt.status(),
             sleeping=runtime.sleeping, night=runtime.night, page="services")
@@ -1608,6 +1615,60 @@ def create_app(runtime):
         ota.start_update(cfg)
         return redirect(url_for("page_updates"))
 
+    @app.route("/api/audio", methods=["POST"])
+    def api_audio():
+        """Uscita e volume. Solo quelli: il resto dell'audio sta altrove."""
+        conf = cfg["audio"]
+        conf["enabled"] = request.form.get("enabled") == "on"
+        conf["giochi"] = request.form.get("giochi") == "on"
+        conf["doom"] = request.form.get("doom") == "on"
+        device = request.form.get("device", "").strip()
+        # Una scheda inventata non si scrive: finirebbe negli argomenti di un
+        # processo lanciato da root, e per giunta non suonerebbe.
+        if not device or device in [d["alsa"] for d in suoni.dispositivi()]:
+            conf["device"] = device
+        try:
+            conf["volume"] = max(0.0, min(1.0,
+                                          int(request.form.get("volume", 70)) / 100.0))
+        except ValueError:
+            conf["volume"] = 0.7
+        dmdconf.save()
+        return redirect(url_for("page_settings"))
+
+    @app.route("/api/audio/prova", methods=["POST"])
+    def api_audio_prova():
+        """Suona un effetto per capire se l'audio esce davvero.
+
+        `forza`: la prova serve proprio a decidere se accendere l'audio, e
+        pretendere che sia gia' acceso renderebbe il pulsante inutile nel
+        solo momento in cui serve.
+        """
+        percorso = suoni.effetto("livello")
+        partito, motivo = suoni.riproduci(cfg, percorso, forza=True)
+        chiave = "audio.tested" if partito else "audio.failed"
+        return redirect(url_for("page_settings", result=i18n.translate(
+            chiave, current_language(), error=motivo)))
+
+    @app.route("/api/audio/servizio", methods=["POST"])
+    def api_audio_servizio():
+        """Il file di avviso di un servizio. Scrive una chiave sola."""
+        chiave = request.form.get("key", "")
+        if chiave not in suoni.SERVIZI_CON_SUONO:
+            return redirect(url_for("page_services"))
+        scelto = request.form.get("file", "").strip()
+        noti = [v["nome"] for v in suoni.file_disponibili(cfg)]
+        servizi = cfg["audio"].setdefault("servizi", {})
+        if not scelto:
+            servizi.pop(chiave, None)
+        elif scelto in noti:
+            servizi[chiave] = scelto
+        dmdconf.save()
+        if request.form.get("prova") == "1":
+            percorso = suoni.percorso_servizio(cfg, chiave)
+            if percorso:
+                suoni.riproduci(cfg, percorso, forza=True)
+        return redirect(url_for("page_services"))
+
     @app.route("/api/restart", methods=["POST"])
     def api_restart():
         subprocess.Popen(["systemctl", "restart", "dmd"])
@@ -1714,6 +1775,28 @@ def create_app(runtime):
         dmdconf.save()
         runtime.player.invalidate()
         return redirect(url_for("page_nowplaying"))
+
+    @app.route("/api/nowplaying/cassa", methods=["POST"])
+    def api_nowplaying_cassa():
+        """L'uscita musicale: la musica AirPlay esce dalla scheda audio.
+
+        Modulo per conto suo, come il pulsante della telecamera nella 5.0.2 e
+        il profilo del pannello nella 4.8.5: `api_nowplaying` riscrive tutti i
+        campi che riceve, e una spunta dentro quel modulo avrebbe azzerato i
+        colori del player al primo salvataggio.
+
+        Qui non si scrive niente in `config.json`: lo stato vero e' la
+        configurazione di shairport-sync, e tenerne una copia da questa parte
+        vorrebbe dire avere due verita' che prima o poi divergono.
+        """
+        acceso = request.form.get("cassa") == "on"
+        ok, motivo = cassa.imposta(suoni.uscita(cfg), acceso)
+        if ok:
+            chiave = "cassa.on" if acceso else "cassa.off"
+        else:
+            chiave = "cassa.failed"
+        return redirect(url_for("page_nowplaying", result=i18n.translate(
+            chiave, current_language(), error=motivo)))
 
     @app.route("/api/nowplaying/test", methods=["POST"])
     def api_nowplaying_test():

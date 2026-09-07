@@ -1185,6 +1185,101 @@ STRINGS = {
         "Title, artist and progress of the current track, from AirPlay or Spotify."),
     "services.desc.status_player": ("Notifiche sui giochi avviati dagli amici su Batocera.",
                                     "Notifications about games your friends launch on Batocera."),
+    "audio.title": ("Audio", "Audio"),
+    "audio.intro": (
+        "Un suono di avviso per ogni servizio, gli effetti dei giochi e "
+        "l'audio di Doom. Serve una scheda audio USB: quella interna del "
+        "Raspberry con questo pannello non si può usare, perché la libreria "
+        "della matrice si prende lo stesso blocco PWM — è il motivo per cui "
+        "l'installazione la disattiva.",
+        "A notification sound for each service, the game effects and Doom's "
+        "audio. A USB sound card is required: the Raspberry's built-in audio "
+        "cannot be used with this panel, because the matrix library takes "
+        "the same PWM block — which is why the installation disables it."),
+    "audio.nocard": (
+        "Nessuna scheda audio collegata. Infilane una USB: compare qui senza "
+        "bisogno di riavviare.",
+        "No sound card connected. Plug in a USB one: it appears here without "
+        "a restart."),
+    "audio.error": ("Ultimo errore: %(error)s", "Last error: %(error)s"),
+    "audio.enabled": ("Suono acceso", "Sound on"),
+    "audio.device": ("Uscita audio", "Audio output"),
+    "audio.device.auto": ("L'ultima collegata", "The last one connected"),
+    "audio.device.hint": (
+        "Si suona con `plughw`, che converte frequenza e formato al volo: un "
+        "wav a 44100 stereo su una chiavetta che vuole 48000 mono altrimenti "
+        "non partirebbe, e il motivo non si scopre in fretta.",
+        "Playback uses `plughw`, which converts rate and format on the fly: a "
+        "44100 stereo wav on a stick that wants 48000 mono would otherwise "
+        "not play at all, and the reason is not quick to find."),
+    "audio.volume": ("Volume (0-100)", "Volume (0-100)"),
+    "audio.volume.hint": (
+        "Agisce sul suono prodotto dal DMD, non sul mixer di sistema: alzarlo "
+        "qui non tocca gli altri programmi.",
+        "It applies to the sound the DMD produces, not to the system mixer: "
+        "raising it here does not affect other programs."),
+    "audio.giochi": ("Effetti dei giochi (Breakout, Invaders)",
+                     "Game effects (Breakout, Invaders)"),
+    "audio.doom": ("Audio di Doom", "Doom audio"),
+    "audio.doom.hint": (
+        "L'audio di Doom è l'unico suono continuo, quindi l'unico che si "
+        "paghi davvero in traffico sul bus — quello che sul pannello si vede "
+        "come righe chiare. Per questo ha un interruttore suo.",
+        "Doom's audio is the only continuous sound, so the only one that "
+        "really costs bus traffic — what shows on the panel as bright lines. "
+        "That is why it has a switch of its own."),
+    "audio.test": ("Prova il suono", "Test the sound"),
+    "audio.tested": ("Suono inviato alla scheda.", "Sound sent to the card."),
+    "audio.failed": ("Non ha suonato: %(error)s", "It did not play: %(error)s"),
+    "audio.services.hint": (
+        "Il file di avviso di ogni servizio si sceglie nella pagina Servizi. "
+        "Carica i wav o gli mp3 nella libreria media e compaiono lì.",
+        "Each service's notification file is chosen on the Services page. "
+        "Upload wav or mp3 files to the media library and they appear there."),
+    "audio.none": ("Nessun suono", "No sound"),
+    "audio.play": ("Ascolta", "Play"),
+    "audio.device.finta": ("scheda fittizia, non suona",
+                           "dummy card, makes no sound"),
+
+    "cassa.title": ("Uscita musicale", "Music output"),
+    "cassa.intro": (
+        "Con questo acceso la musica AirPlay esce davvero dalla scheda audio: "
+        "il DMD diventa una cassa, non solo un display che racconta il brano.",
+        "With this on, AirPlay music actually comes out of the sound card: "
+        "the DMD becomes a speaker, not just a display that narrates the "
+        "track."),
+    "cassa.enabled": ("La musica esce dalla scheda audio",
+                      "Music plays through the sound card"),
+    "cassa.hint": (
+        "Riguarda solo AirPlay. Spotify dice che cosa sta suonando su un "
+        "altro dispositivo: da un racconto non esce audio.",
+        "AirPlay only. Spotify reports what is playing on another device, "
+        "and a report carries no audio."),
+    "cassa.busy": (
+        "Mentre suona la musica gli avvisi dei servizi tacciono: la scheda è "
+        "di shairport-sync, e comunque un campanello sopra il brano non lo "
+        "vuole nessuno. Le notifiche sul pannello si vedono lo stesso.",
+        "While music is playing the service chimes stay silent: the card "
+        "belongs to shairport-sync, and a chime over the music is not "
+        "something anyone wants. Panel notifications still appear."),
+    "cassa.current": ("Uscita di shairport-sync adesso: %(device)s",
+                      "shairport-sync output right now: %(device)s"),
+    "cassa.missing": (
+        "shairport-sync non risulta installato: questo interruttore serve "
+        "dopo aver lanciato setup_nowplaying.sh.",
+        "shairport-sync does not appear to be installed: this switch is for "
+        "after running setup_nowplaying.sh."),
+    "cassa.on": (
+        "Uscita musicale accesa. Il tono che hai sentito è la prova che la "
+        "scheda regge il formato di AirPlay.",
+        "Music output on. The tone you heard proves the card handles the "
+        "AirPlay format."),
+    "cassa.off": ("Uscita musicale spenta: la musica torna alla scheda "
+                  "fittizia e restano i soli metadati.",
+                  "Music output off: audio goes back to the dummy card and "
+                  "only the metadata remains."),
+    "cassa.failed": ("Non è stato cambiato niente: %(error)s",
+                     "Nothing was changed: %(error)s"),
     "nav.telecamera": ("Funcam", "Funcam"),
     "webcam.title": ("Funcam", "Funcam"),
     "webcam.intro": (

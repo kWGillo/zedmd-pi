@@ -135,12 +135,18 @@ class Invasori(Gioco):
         # tempismo una scelta invece di una raffica.
         if "fuoco" in tasti and self.colpo is None:
             self.colpo = [self.nave_x + LARGA_NAVE / 2, float(Y_NAVE - 1)]
+            self.suona("sparo")
 
         # --- la schiera
         self._da_passo -= dt
         if self._da_passo <= 0:
             self._da_passo = self._intervallo_passo()
             self._muovi_schiera()
+            # Il passo della schiera e' il battito del gioco: quattro note che
+            # si alternano, e accelerano insieme agli alieni perche' il passo
+            # stesso accelera. E' la meta' della tensione dell'originale.
+            self._nota = (getattr(self, "_nota", 0) % 4) + 1
+            self.suona("passo%d" % self._nota)
 
         # --- proiettili
         self._muovi_colpo(dt)
@@ -148,6 +154,7 @@ class Invasori(Gioco):
 
         # --- fine livello
         if self.vivi() == 0:
+            self.suona("livello")
             self.livello += 1
             self.punteggio += 50
             self._aggiorna_record()
@@ -193,6 +200,7 @@ class Invasori(Gioco):
             ax, ay = self._pos(colonna, fila)
             if ax <= x < ax + LARGO_ALIENO and ay <= y < ay + ALTO_ALIENO:
                 self.alieni[(colonna, fila)] = False
+                self.suona("colpito")
                 self.punteggio += PUNTI[fila]
                 self._aggiorna_record()
                 self.colpo = None
@@ -214,6 +222,7 @@ class Invasori(Gioco):
             if Y_NAVE <= y < Y_NAVE + ALTA_NAVE \
                     and self.nave_x - 1 <= x <= self.nave_x + LARGA_NAVE:
                 self.vite -= 1
+                self.suona("persa")
                 self._muori()
                 return
             restano.append(bomba)

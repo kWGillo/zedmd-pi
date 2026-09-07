@@ -90,6 +90,7 @@ oppure si scaricano con `git clone` o dal pulsante *Code → Download ZIP*.
 | Rete wifi dalla pagina web | `docs/DMD_rete.pdf` |
 | Funcam: la webcam sul pannello, con pochi colori | `docs/DMD_telecamera.pdf` |
 | Joypad: mappatura dei comandi | `docs/DMD_joypad.pdf` |
+| Audio: scheda USB, avvisi dei servizi, effetti dei giochi | `docs/DMD_audio.pdf` |
 
 I PDF **non** vengono installati in `/opt/dmd`: sul Raspberry non servono, e
 l'aggiornamento via rete copia solo ciò che il servizio esegue.

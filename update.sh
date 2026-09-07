@@ -50,6 +50,14 @@ if [ -d "$SRC_DIR/gb" ]; then
     cp "$SRC_DIR"/gb/gb_dmd.py "$SRC_DIR"/gb/setup_gb.sh /opt/dmd/gb/
     chmod +x /opt/dmd/gb/setup_gb.sh /opt/dmd/gb/gb_dmd.py
 fi
+
+# 5.2: gli effetti sonori dei giochi. Sono nostri e stanno nel programma, non
+# nella libreria media dell'utente: i suoni di Invaders e Breakout non devono
+# comparire fra le cose che si scelgono per i servizi.
+if [ -d "$SRC_DIR/suoni" ]; then
+    mkdir -p /opt/dmd/suoni
+    cp "$SRC_DIR"/suoni/*.wav /opt/dmd/suoni/
+fi
 mkdir -p /var/lib/dmd
 
 echo "==> Adeguamento della configurazione"

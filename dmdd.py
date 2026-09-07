@@ -26,6 +26,8 @@ import mqttbus
 import nowplaying
 import ota
 import spotifyapi
+import cassa
+import suoni
 from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      CalendarioSource, ClockSource, DoomSource, GameBoySource,
@@ -275,6 +277,12 @@ class Runtime:
         self.spotify = spotifyapi.SpotifyPoller(self.cfg, self.nowplaying)
         self.hass = hass.HassBridge(self.cfg, self.mqtt, self)
 
+        # Quando la musica esce dalla nostra scheda, la scheda e' di
+        # shairport-sync: gli avvisi tacciono finche' dura il brano. Il
+        # collegamento si fa qui perche' `suoni` non deve sapere che esiste
+        # Now Playing, e Now Playing non deve sapere che esiste il suono.
+        suoni.musica_in_corso = self._musica_in_corso
+
         for source in (self.zedmd, self.preview, self.radar, self.player,
                        self.birthdays, self.scadenze, self.calendario,
                        self.banner, self.telecamera, self.media,
@@ -322,6 +330,23 @@ class Runtime:
         self.frame_saltati = 0
 
     # ------------------------------------------------------------------ musica
+
+    def _musica_in_corso(self):
+        """Vero se un brano AirPlay sta uscendo dalla nostra scheda audio.
+
+        Due condizioni, e servono entrambe. Se l'uscita musicale e' spenta la
+        musica va nella scheda fittizia e non da' fastidio a nessuno, quindi
+        gli avvisi devono suonare come sempre. E fra le tre sorgenti di Now
+        Playing conta solo AirPlay: Spotify racconta un brano che sta suonando
+        altrove, e da un racconto non esce audio.
+        """
+        try:
+            if not cassa.attiva():
+                return False
+            brano = self.nowplaying.snapshot()
+            return brano["source"] == "airplay" and brano["playing"]
+        except Exception:
+            return False
 
     def _start_audio(self):
         """Collega il bus MQTT, le sottoscrizioni e il poller di Spotify.
@@ -641,6 +666,17 @@ class Runtime:
             winner = self.arbiter.pick()
 
             if winner is not self.arbiter.current:
+                # Il **momento della notifica** e' questo, e non ce n'e' un
+                # altro: la sorgente ha appena preso il pannello, cioe' ha
+                # qualcosa da dire adesso. Agganciare il suono all'interruttore
+                # del servizio suonerebbe quando lo si accende — che non e'
+                # una notizia — e agganciarlo al disegno del fotogramma
+                # suonerebbe trenta volte al secondo.
+                if winner is not None:
+                    try:
+                        suoni.suona_servizio(self.cfg, winner.name)
+                    except Exception as exc:      # pragma: no cover
+                        print("[suoni] avviso non riprodotto: %s" % exc)
                 self.arbiter.current = winner
                 self._blank_shown = False
                 self._ridisegna()

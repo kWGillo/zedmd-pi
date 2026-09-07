@@ -899,6 +899,65 @@ Storico:
        e la risposta non puo\' dipendere da un dettaglio di cablaggio.
        La spunta «Pulsante fisico» resta, ma adesso decide una cosa sola: se
        aprire il piedino per leggere un pulsante. Niente di piu\'.
+  5.2  Audio: il pannello guadagna una voce.
+       Serve una scheda audio USB, e non e\' un ripiego: la libreria della
+       matrice si prende il blocco PWM del Raspberry, che e\' lo stesso che fa
+       suonare l\'uscita jack. O si accende il pannello o si accende l\'audio
+       interno — quindi l\'audio passa dall\'USB, sempre.
+       Tre cose distinte, perche\' rispondono a domande distinte.
+       *Le notifiche.* Quando una sorgente prende il pannello — e solo in quel
+       momento, non finche\' ci resta — si sente il file scelto per lei nella
+       pagina Servizi, preso dalla libreria media. Media, rolling banner e
+       rifiuti non ne hanno: i primi due il pannello lo prendono di continuo, e
+       un campanello a ogni foto sarebbe un tormento.
+       *I giochi.* Invaders e Breakout hanno dodici effetti a onda quadra
+       scritti per loro, che stanno in `suoni/` dentro il programma e non nella
+       libreria media: sono parte del gioco, non roba da scegliere.
+       *Doom.* Suona con la sua colonna sonora, dalla sua uscita ALSA. E\'
+       l\'unico suono continuo del sistema, ed e\' anche l\'unico che pesa
+       davvero sul bus: per questo ha una levetta tutta sua.
+       Nessuna dipendenza nuova: a scrivere sulla scheda e\' ffmpeg, che c\'e\'
+       gia\', col muxer `alsa` e il dispositivo `plughw` — che a differenza di
+       `hw` converte frequenza e formato al volo, cosi\' un mp3 a 44,1 kHz esce
+       anche da una chiavetta che sa fare solo 48 kHz.
+       Un suono per volta: se ne arriva un secondo mentre il primo suona, viene
+       **scartato**, non messo in coda. Una coda vorrebbe dire sentire il
+       campanello di una notifica mezzo minuto dopo che e\' passata.
+  5.3  Il DMD diventa una cassa. Un interruttore nella pagina Now Playing e la
+       musica AirPlay esce davvero dalla scheda audio, invece di essere solo
+       raccontata sul pannello.
+       Fino a ieri `setup_nowplaying.sh` mandava l\'audio di shairport-sync
+       nella scheda **fittizia** del kernel: dei brani si prendevano i
+       metadati e il suono si buttava, perche\' non c\'era niente da cui farlo
+       uscire. Con la scheda USB quella scelta non ha piu\' motivo di esistere,
+       e cambiarla e\' una riga di `/etc/shairport-sync.conf`.
+       Riguarda **solo AirPlay**, e va detto: Spotify racconta un brano che
+       sta suonando su un altro dispositivo, e da un racconto non esce audio.
+       Prima di scrivere si prova la scheda per davvero, in 44100 stereo e in
+       accesso esclusivo, che e\' il formato di AirPlay: se non lo regge, non
+       si tocca niente e il motivo si legge subito. Meglio un interruttore che
+       non scatta di una cassa AirPlay che non suona piu\' e nessuno sa
+       perche\'. La configurazione si modifica in un punto solo, perche\' nello
+       stesso file c\'e\' la password del broker MQTT.
+       A shairport si da\' `hw:`, ai nostri avvisi resta `plughw:`. Sembra
+       un\'incoerenza: `plughw` mette un convertitore davanti alla scheda, ed
+       e\' giusto per un mp3 qualunque, mentre shairport la frequenza la
+       gestisce da se\' e la scheda vuole vederla com\'e\'.
+       Mentre suona la musica gli avvisi dei servizi **tacciono**: la scheda e\'
+       di shairport-sync, e comunque un campanello sopra il brano non lo vuole
+       nessuno. Le notifiche sul pannello si vedono lo stesso. Doom, per la
+       stessa ragione, parte muto — deciso da noi, invece di lasciare che SDL
+       fallisca l\'apertura con qualche secondo di errori a inizio partita.
+       Corretto un difetto della 5.2: la scelta automatica dell\'uscita
+       prendeva l\'ultima scheda dell\'elenco, e su una macchina con Now Playing
+       installato l\'ultima puo\' benissimo essere quella fittizia. Il risultato
+       era silenzio perfetto senza un solo errore da leggere, che e\' il modo
+       peggiore in cui una cosa possa non funzionare. Adesso la scelta
+       automatica la salta, e nell\'elenco compare per quello che e\'.
+       Degli errori di ffmpeg si mostra la **prima** riga e non l\'ultima: con
+       `-v error` stampa prima la causa e poi la conseguenza, e l\'ultima riga
+       — "Error opening output device" — e\' proprio quella che non dice
+       niente.
 """
 
-__version__ = "5.1"
+__version__ = "5.3"

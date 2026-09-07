@@ -65,6 +65,21 @@
     </form>
   </div>
   <p class="desc">{{ t('services.desc.' ~ service.key) }}</p>
+  {% if service.suono and cfg.audio.enabled %}
+  <form method="post" action="{{ url_for('api_audio_servizio') }}" class="inline">
+    <input type="hidden" name="key" value="{{ service.key }}">
+    <select name="file">
+      <option value="">{{ t('audio.none') }}</option>
+      {% for voce in suoni_file %}
+      <option value="{{ voce.nome }}"
+              {{ 'selected' if cfg.audio.servizi.get(service.key) == voce.nome }}>
+        {{ voce.nome }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">{{ t('common.apply') }}</button>
+    <button type="submit" name="prova" value="1">{{ t('audio.play') }}</button>
+  </form>
+  {% endif %}
   {% if service.status %}<p class="status">{{ service.status }}</p>{% endif %}
   {% if not service.ready %}
   <p class="badge">{{ t('services.soon') }}</p>

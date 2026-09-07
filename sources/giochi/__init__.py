@@ -261,6 +261,13 @@ class GiochiSource(Source):
     # l'unico che lo sa e' lui.
     doom_pronto = None
     apri_doom = None
+    def _suona_effetto(self, nome):
+        try:
+            import suoni
+            suoni.suona_effetto(self.cfg, nome)
+        except Exception as exc:                    # pragma: no cover
+            print("[giochi] effetto non riprodotto: %s" % exc)
+
     apri_partita = None
     chiudi_partita = None
     # Il Game Boy: se e' pronto, e come si apre. Stessa forma di Doom — la
@@ -349,6 +356,10 @@ class GiochiSource(Source):
             self._ferma_ciclo()
         record = self._gioco.record() if self._gioco else 0
         self._gioco = per_nome(nome)()
+        # Gli effetti arrivano da qui e non da dentro il gioco: cosi' una
+        # partita si puo' ancora far girare dentro una prova, in silenzio e
+        # senza scheda audio.
+        self._gioco.suona = self._suona_effetto
         self._gioco._record = max(record if self._gioco.nome == nome else 0,
                                   int(self.conf().get("record", {}).get(nome, 0)))
         self._premuti.clear()
@@ -397,6 +408,10 @@ class GiochiSource(Source):
                 conf["ultimo"] = nome
                 import dmdconf
                 dmdconf.save()
+                # L'unico effetto che non appartiene a un gioco in
+                # particolare: il primato e' dei due, e questo e' il solo
+                # momento in cui si sa per certo che e' stato battuto.
+                self._suona_effetto("record")
         except Exception as exc:
             print("[giochi] record non salvato: %s" % exc)
 

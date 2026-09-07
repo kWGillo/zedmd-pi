@@ -478,6 +478,27 @@ DEFAULTS = {
         # il Media Player le rimette sul pannello da solo piu' avanti.
         "cartella": "telecamera",
     },
+    "audio": {
+        # Spento di suo: senza una scheda USB collegata non c'e' niente da
+        # accendere, e l'audio interno del Raspberry con questo pannello non
+        # si puo' usare — la libreria della matrice si prende lo stesso
+        # blocco PWM, e infatti l'installazione lo disattiva.
+        "enabled": False,
+        # Vuoto = l'ultima scheda comparsa, che con una chiavetta USB appena
+        # infilata e' quasi sempre quella giusta. Si scrive un `plughw:N,0`
+        # per sceglierne una in particolare.
+        "device": "",
+        "volume": 0.7,
+        # Il file di avviso per ogni servizio, come percorso dentro la
+        # libreria media. Vuoto = quel servizio resta muto.
+        "servizi": {},
+        # Gli effetti dei giochi scritti per il pannello. Stanno accanto al
+        # programma, non fra i contenuti dell'utente.
+        "giochi": True,
+        # L'audio di Doom. Voce a parte perche' e' l'unico suono continuo, ed
+        # e' quindi l'unico che si paghi davvero in traffico sul bus.
+        "doom": True,
+    },
     "zedmd": {
         "stream_port": 3333,
         "http_port": 80,

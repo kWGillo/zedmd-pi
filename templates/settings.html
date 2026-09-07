@@ -95,6 +95,55 @@
 </section>
 
 <section class="card">
+  <h2>{{ t('audio.title') }}</h2>
+  <p class="hint">{{ t('audio.intro') }}</p>
+
+  {% if not audio.dispositivi %}
+  <p class="status">{{ t('audio.nocard') }}</p>
+  {% endif %}
+  {% if audio.errore %}
+  <p class="status">{{ t('audio.error', error=audio.errore) }}</p>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('api_audio') }}">
+    <label class="check">
+      <input type="checkbox" name="enabled" {{ 'checked' if cfg.audio.enabled }}>
+      {{ t('audio.enabled') }}</label>
+
+    <label for="device">{{ t('audio.device') }}</label>
+    <select id="device" name="device">
+      <option value="" {{ 'selected' if not cfg.audio.device }}>
+        {{ t('audio.device.auto') }}</option>
+      {% for scheda in audio.dispositivi %}
+      <option value="{{ scheda.alsa }}" {{ 'selected' if cfg.audio.device == scheda.alsa }}>
+        {{ scheda.nome }} ({{ scheda.alsa }}){% if scheda.finta %} — {{ t('audio.device.finta') }}{% endif %}</option>
+      {% endfor %}
+    </select>
+    <p class="hint">{{ t('audio.device.hint') }}</p>
+
+    <label for="volume">{{ t('audio.volume') }}</label>
+    <input type="number" id="volume" name="volume" min="0" max="100"
+           value="{{ (cfg.audio.volume * 100) | round | int }}">
+    <p class="hint">{{ t('audio.volume.hint') }}</p>
+
+    <label class="check">
+      <input type="checkbox" name="giochi" {{ 'checked' if cfg.audio.giochi }}>
+      {{ t('audio.giochi') }}</label>
+    <label class="check">
+      <input type="checkbox" name="doom" {{ 'checked' if cfg.audio.doom }}>
+      {{ t('audio.doom') }}</label>
+    <p class="hint">{{ t('audio.doom.hint') }}</p>
+
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+
+  <form method="post" action="{{ url_for('api_audio_prova') }}" class="inline">
+    <button type="submit">{{ t('audio.test') }}</button>
+  </form>
+  <p class="hint">{{ t('audio.services.hint') }}</p>
+</section>
+
+<section class="card">
   <h2>{{ t('settings.panel') }}</h2>
   <p class="hint">{{ t('settings.panel.hint') | safe }}</p>
 

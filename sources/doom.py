@@ -281,9 +281,14 @@ class DoomSource(Source):
                 "--fascia-alto=%d" % int(conf.get("band_top", 36)),
                 "--fascia-altezza=%d" % int(conf.get("band_height", 96)),
                 "--gamma=%.2f" % float(conf.get("gamma", 1.15)),
-                # Nessun suono: l'audio del cabinato e' di Batocera, e un
-                # secondo canale sarebbe solo rumore sopra al gioco vero.
-                "-nosound", "-nomusic"]
+                ]
+        # L'audio di Doom nasceva spento: il suono del cabinato era quello di
+        # Batocera, e un secondo canale sarebbe stato rumore sopra al gioco
+        # vero. Con una scheda USB dedicata la situazione e' rovesciata — e'
+        # il **suo** audio — quindi si spegne solo se lo si chiede.
+        import suoni
+        if not suoni.doom_con_suono(self.cfg):
+            args += ["-nosound", "-nomusic"]
         if not gioca:
             return args
 
@@ -319,8 +324,13 @@ class DoomSource(Source):
             return False
 
         try:
+            import suoni
+            # SDL sceglie la scheda da `AUDIODEV`, e senza `SDL_AUDIODRIVER`
+            # proverebbe prima pulseaudio: su un'immagine senza sessione
+            # grafica non c'e', e Doom partirebbe muto senza dire perche'.
+            ambiente = dict(os.environ, **suoni.ambiente_doom(self.cfg))
             self._proc = subprocess.Popen(
-                self._comando(gioca), cwd=lavoro,
+                self._comando(gioca), cwd=lavoro, env=ambiente,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 bufsize=0)
         except OSError as exc:

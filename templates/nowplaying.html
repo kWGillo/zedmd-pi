@@ -53,6 +53,30 @@
   <p class="hint">{{ t('nowplaying.coverage.gap') }}</p>
 </section>
 
+<section class="card">
+  <h2>{{ t('cassa.title') }}</h2>
+  <p class="hint">{{ t('cassa.intro') }}</p>
+
+  {% if not cassa.installato %}
+  <p class="status">{{ t('cassa.missing') }}</p>
+  {% elif not audio.dispositivi %}
+  <p class="status">{{ t('audio.nocard') }}</p>
+  {% else %}
+  <form method="post" action="{{ url_for('api_nowplaying_cassa') }}">
+    <label class="check">
+      <input type="checkbox" name="cassa" {{ 'checked' if cassa.attiva }}>
+      {{ t('cassa.enabled') }}</label>
+    <p class="hint">{{ t('cassa.hint') }}</p>
+    <p class="hint">{{ t('cassa.busy') }}</p>
+    <button type="submit">{{ t('form.save') }}</button>
+  </form>
+  {% endif %}
+
+  {% if cassa.uscita %}
+  <p class="hint">{{ t('cassa.current', device=cassa.uscita) }}</p>
+  {% endif %}
+</section>
+
 <form method="post" action="{{ url_for('api_mqtt') }}">
   <section class="card">
     <h2>{{ t('nowplaying.broker') }}</h2>

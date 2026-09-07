@@ -110,6 +110,10 @@ class Gioco:
     COMANDI = ("sinistra", "destra", "fuoco", "avvia", "esci")
 
     def __init__(self, seme=None):
+        # Chi vuole sentire i suoni la sostituisce. Di suo non fa niente, e
+        # non e' pigrizia: un gioco che sapesse di schede audio e di
+        # configurazione non si potrebbe piu' far girare dentro una prova.
+        self.suona = lambda nome: None
         self.punteggio = 0
         self.vite = 3
         self.livello = 1

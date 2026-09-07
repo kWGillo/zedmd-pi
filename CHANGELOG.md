@@ -2,6 +2,105 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [5.3]
+
+- **Il DMD diventa una cassa.** Un interruttore nella pagina Now Playing e la
+  musica AirPlay esce davvero dalla scheda audio, invece di essere soltanto
+  raccontata sul pannello. Fino a ieri `setup_nowplaying.sh` mandava l'audio
+  di shairport-sync nella scheda **fittizia** del kernel: dei brani si
+  prendevano i metadati e il suono si buttava, perché non c'era niente da cui
+  farlo uscire. Con la scheda USB quella scelta non ha più motivo di esistere,
+  e cambiarla è una riga di `/etc/shairport-sync.conf`.
+
+- **Riguarda solo AirPlay, e va detto.** Spotify racconta che cosa sta
+  suonando su un *altro* dispositivo: da un racconto non esce audio. Per fare
+  del DMD anche un altoparlante Spotify Connect servirebbe `librespot`, che è
+  un altro programma e un'altra storia.
+
+- **Prima di scrivere, la scheda si prova per davvero:** 44 100 Hz stereo in
+  accesso esclusivo, cioè il formato di AirPlay. Se non lo regge non si tocca
+  niente e il motivo si legge subito — meglio un interruttore che non scatta
+  di una cassa AirPlay che non suona più e nessuno sa perché. Il tono che si
+  sente è la prova stessa. La configurazione si modifica in un punto solo:
+  nello stesso file c'è la password del broker MQTT, e riscriverlo da capo
+  vorrebbe dire perderla o maneggiarla.
+
+- **A shairport si dà `hw:`, ai nostri avvisi resta `plughw:`.** Sembra
+  un'incoerenza: `plughw` mette un convertitore davanti alla scheda, ed è
+  giusto per un mp3 qualunque; shairport-sync la frequenza la gestisce da sé e
+  la scheda vuole vederla com'è.
+
+- **Mentre suona la musica gli avvisi tacciono.** La scheda è di
+  shairport-sync finché dura il brano, e comunque un campanello sopra la
+  musica non lo vuole nessuno: le notifiche sul pannello si vedono lo stesso.
+  Doom, per la stessa ragione, parte muto — deciso da noi, invece di lasciare
+  che SDL fallisca l'apertura con qualche secondo di errori proprio a inizio
+  partita.
+
+- **Corretto un difetto della 5.2.** La scelta automatica dell'uscita audio
+  prendeva l'ultima scheda dell'elenco, e su una macchina con Now Playing
+  installato l'ultima può benissimo essere quella **fittizia**. Il risultato
+  era silenzio perfetto senza un solo errore da leggere, che è il modo
+  peggiore in cui una cosa possa non funzionare. Ora la scelta automatica la
+  salta, e nell'elenco compare per quello che è.
+
+- **Degli errori di ffmpeg si mostra la prima riga, non l'ultima.** Con
+  `-v error` stampa prima la causa (`cannot set sample rate`) e poi la
+  conseguenza (`Error opening output device`), ed è la seconda quella che non
+  dice niente.
+
+## [5.2]
+
+- **Il pannello guadagna una voce.** Serve una scheda audio USB, e non è un
+  ripiego: la libreria della matrice si prende il blocco PWM del Raspberry,
+  che è lo stesso che fa suonare l'uscita jack. O si accende il pannello o si
+  accende l'audio interno — infatti l'installazione spegne `snd_bcm2835`.
+  L'USB è l'unica strada, non un compromesso.
+
+- **Un avviso per servizio, al momento della notifica.** Quando una sorgente
+  vince l'arbitrato e prende il pannello — e solo in quell'istante, non finché
+  ci resta — suona il file scelto per lei nella pagina Servizi, preso dalla
+  libreria media. Otto servizi possono averlo. **Media Player e Rolling Banner
+  no:** non annunciano niente, compaiono a intervalli per decorazione, e un
+  campanello a ogni foto sarebbe un metronomo. **I rifiuti nemmeno**, per un
+  motivo diverso: non sono un servizio, li disegna l'orologio dentro la sua
+  colonna.
+
+- **Un suono per volta.** Se ne parte uno mentre un altro suona, il nuovo si
+  **scarta**: non va in coda e non interrompe. Un avviso in coda si sentirebbe
+  tre secondi dopo, riferito a qualcosa che dal pannello è già sparito. Gli
+  avvisi si troncano a 15 secondi, così un file lungo scelto per sbaglio non
+  tiene muto tutto il resto per minuti.
+
+- **Dodici effetti per Invaders e Breakout**, a onda quadra, scritti per loro.
+  Stanno in `suoni/` dentro il programma e **non** nella libreria media: sono
+  parte del gioco come i suoi colori, e mescolarli ai contenuti dell'utente
+  vorrebbe dire che cancellandone uno per sbaglio il gioco diventa muto. Fra
+  questi le quattro note del passo della schiera, che accelerano con lei: metà
+  della tensione dell'originale stava lì. E `record`, che è dei due giochi
+  insieme, quando il primato personale viene battuto.
+
+- **Doom suona.** Con la sua colonna sonora, dai suoi WAD: `-nosound -nomusic`
+  ora compaiono solo se l'audio di Doom è spento. La scheda gli arriva
+  dall'ambiente (`SDL_AUDIODRIVER=alsa`, `AUDIODEV`), perché senza il primo SDL
+  proverebbe pulseaudio — che su un'immagine senza sessione grafica non c'è, e
+  Doom partirebbe muto senza dire perché. Ha una levetta tutta sua: è l'unico
+  suono continuo del sistema, quindi l'unico che pesa davvero sul bus.
+
+- **Nessuna dipendenza nuova:** a scrivere sulla scheda è `ffmpeg`, che c'è
+  già, col muxer `alsa`. Con `plughw` e non `hw` — il primo converte frequenza
+  e formato al volo, così un mp3 a 44 100 Hz esce anche da una chiavetta che
+  sa fare solo 48 000. Il volume è un filtro di ffmpeg, non il mixer di
+  sistema: non cambia niente per gli altri programmi.
+
+- **Una scheda staccata non fa ripiegare in silenzio su un'altra.** Il DMD
+  resta muto e lo scrive in pagina: suonare dall'altoparlante sbagliato senza
+  avvisare è peggio che non suonare, perché non si capisce cosa stia
+  succedendo. Il pulsante di prova funziona anche a suono spento — serve
+  proprio a decidere se accenderlo.
+
+- Manuale nuovo: `docs/DMD_audio.pdf`.
+
 ## [5.1]
 
 - **Il servizio arma, non accende. Sempre.** L'interruttore nella pagina

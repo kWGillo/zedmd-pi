@@ -12,6 +12,13 @@ audio dell'iPhone, accetta il flusso, butta via l'audio e tiene solo i
 metadati: titolo, artista, album, stato e posizione nel brano. Quello che
 esce dalle casse vere non cambia di una virgola.
 
+> **Dalla 5.3 può anche suonare davvero.** Con una scheda audio USB
+> collegata, la spunta *«La musica esce dalla scheda audio»* in fondo a questa
+> pagina sposta l'uscita di shairport-sync dalla scheda fittizia a quella
+> vera, e il DMD diventa una cassa AirPlay a tutti gli effetti. Vale solo per
+> AirPlay — Spotify racconta un brano che sta suonando altrove — ed è
+> descritto per intero in `docs/audio.it.md`, § 4.
+
 Non è un aggiramento: è il modo previsto. L'alternativa — intercettare il
 traffico di rete — non funziona e non può funzionare, perché AirPlay 2 cifra
 il flusso end-to-end con chiavi che nascono dall'accoppiamento. Da un port

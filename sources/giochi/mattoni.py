@@ -97,6 +97,7 @@ class Mattoni(Gioco):
         if self.attaccata:
             self.bx = self.racchetta + RACCHETTA_L / 2
             self.by = float(RACCHETTA_Y - PALLA)
+            self.suona("racchetta")
             if "fuoco" in tasti:
                 self._lancia()
             return
@@ -124,12 +125,15 @@ class Mattoni(Gioco):
         if self.bx <= 0:
             self.bx = 0.0
             self.vx = abs(self.vx)
+            self.suona("muro")
         elif self.bx >= CAMPO - PALLA:
             self.bx = CAMPO - PALLA
             self.vx = -abs(self.vx)
+            self.suona("muro")
         if self.by <= 0:
             self.by = 0.0
             self.vy = abs(self.vy)
+            self.suona("muro")
 
         self._colpisci_mattone()
 
@@ -137,6 +141,7 @@ class Mattoni(Gioco):
         if (self.vy > 0 and RACCHETTA_Y - PALLA <= self.by <= RACCHETTA_Y + RACCHETTA_H
                 and self.racchetta - 1 <= self.bx + PALLA / 2 <= self.racchetta + RACCHETTA_L + 1):
             self.by = float(RACCHETTA_Y - PALLA)
+            self.suona("racchetta")
             # L'angolo dipende da dove si colpisce: e' quello che trasforma la
             # racchetta da muro a strumento di mira.
             centro = self.racchetta + RACCHETTA_L / 2
@@ -155,6 +160,7 @@ class Mattoni(Gioco):
 
         if self.by > ALTEZZA:
             self.vite -= 1
+            self.suona("persa")
             if self.vite <= 0:
                 self.vite = 0
                 self.finita = True
@@ -172,6 +178,7 @@ class Mattoni(Gioco):
         if not self.mattoni.get((colonna, fila)):
             return
         self.mattoni[(colonna, fila)] = False
+        self.suona("mattone")
         self.punteggio += PUNTI[fila]
         self._aggiorna_record()
         self.vy = -self.vy
