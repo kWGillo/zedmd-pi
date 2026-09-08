@@ -369,6 +369,13 @@ class GiochiSource(Source):
         self._gioco._record = max(record if self._gioco.nome == nome else 0,
                                   int(self.conf().get("record", {}).get(nome, 0)))
         self._premuti.clear()
+        # Il mixer degli effetti vive quanto la partita: aperto adesso,
+        # chiuso quando si esce. A pannello fermo non tiene occupata la
+        # scheda audio e non consuma niente.
+        try:
+            suoni.effetti_avvia(self.cfg)
+        except Exception as exc:                    # pragma: no cover
+            print("[giochi] mixer non avviato: %s" % exc)
         self._sessione = True
         self._stop.clear()
         self._thread = threading.Thread(target=self._ciclo, name="giochi",
@@ -398,7 +405,13 @@ class GiochiSource(Source):
         thread, self._thread = self._thread, None
         if thread is not None and thread is not threading.current_thread():
             thread.join(timeout=1.5)
+        # Prima il record — che e' l'ultimo effetto della partita e deve
+        # ancora poter suonare — e solo dopo si chiude il mixer.
         self._salva_record()
+        try:
+            suoni.effetti_ferma()
+        except Exception as exc:                    # pragma: no cover
+            print("[giochi] mixer non fermato: %s" % exc)
 
     def _salva_record(self):
         """Il record sopravvive alla partita: e' l'unica cosa che ha senso

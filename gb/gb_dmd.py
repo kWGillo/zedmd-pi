@@ -39,6 +39,7 @@ cielo e una di terreno.
 import argparse
 import os
 import select
+import shutil
 import subprocess
 import sys
 import time
@@ -166,22 +167,61 @@ class Altoparlante:
     meglio di una partita che si ferma.
     """
 
+    # Quanto audio sta in volo. 80 ms in una partita non si notano; il buffer
+    # di ffmpeg, che sono 0,68 secondi, si nota eccome — era il ritardo fra
+    # quello che si vedeva e quello che si sentiva.
+    BUFFER_US = 80000
+    PERIODO_US = 20000
+
     def __init__(self, device, volume, frequenza):
         self.processo = None
         self.volume = max(0.0, min(1.0, volume))
+        try:
+            self.processo = subprocess.Popen(
+                self._comando(device, frequenza), stdin=subprocess.PIPE,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except (OSError, subprocess.SubprocessError) as exc:
+            sys.stderr.write("[gb] audio non disponibile: %s\n" % exc)
+            self.processo = None
+            return
+        self._stringi_tubo()
+
+    def _comando(self, device, frequenza):
+        """`aplay` se c'e', altrimenti ffmpeg.
+
+        Non e' preferenza: il muxer `alsa` di ffmpeg **non accetta opzioni** e
+        apre un buffer fisso di 32768 campioni, che a 48 kHz fanno 0,68
+        secondi di ritardo. In un gioco si sente. `aplay` il buffer lo prende
+        come argomento, e sta in `alsa-utils` — lo stesso pacchetto di
+        `alsamixer`, che su Raspberry Pi OS c'e' quasi sempre.
+        """
+        if shutil.which("aplay"):
+            # aplay non regola il volume, quindi lo applichiamo noi ai
+            # campioni. Con ffmpeg invece lo fa il filtro, che costa meno.
+            return ["aplay", "-q", "-t", "raw", "-f", "S16_LE",
+                    "-r", str(int(frequenza)), "-c", "2",
+                    "--buffer-time=%d" % self.BUFFER_US,
+                    "--period-time=%d" % self.PERIODO_US,
+                    "-D", device, "-"]
+        self.volume_a_valle = True
         comando = ["ffmpeg", "-v", "error", "-nostdin",
                    "-f", "s16le", "-ar", str(int(frequenza)), "-ac", "2",
                    "-i", "-"]
         if self.volume < 0.999:
             comando += ["-filter:a", "volume=%.2f" % self.volume]
-        comando += ["-f", "alsa", device]
+        return comando + ["-f", "alsa", device]
+
+    def _stringi_tubo(self, byte=16384):
+        """Un tubo Linux tiene 64 KB: a 48 kHz stereo sono altri 340 ms di
+        ritardo sopra a quello del riproduttore. Qui accumulare non serve —
+        se il riproduttore e' indietro vogliamo bloccarci, non far magazzino.
+        """
         try:
-            self.processo = subprocess.Popen(comando, stdin=subprocess.PIPE,
-                                             stdout=subprocess.DEVNULL,
-                                             stderr=subprocess.DEVNULL)
-        except (OSError, subprocess.SubprocessError) as exc:
-            sys.stderr.write("[gb] audio non disponibile: %s\n" % exc)
-            self.processo = None
+            import fcntl
+            fcntl.fcntl(self.processo.stdin.fileno(),
+                        getattr(fcntl, "F_SETPIPE_SZ", 1031), byte)
+        except Exception:
+            pass
 
     def scrivi(self, campioni):
         if self.processo is None or self.processo.poll() is not None:
@@ -191,8 +231,11 @@ class Altoparlante:
             # importato dentro main(), quindi qui non si vedrebbe.
             # `<< 8` e non una moltiplicazione: da int8 a int16 il valore
             # cambia di scala, non di significato.
-            self.processo.stdin.write(
-                (campioni.astype("int16") << 8).tobytes())
+            blocco = campioni.astype("int16") << 8
+            if not getattr(self, "volume_a_valle", False) and self.volume < 0.999:
+                # Con aplay il volume non lo regola nessuno a valle: qui.
+                blocco = (blocco * self.volume).astype("int16")
+            self.processo.stdin.write(blocco.tobytes())
         except (BrokenPipeError, ValueError, OSError):
             # ffmpeg se n'e' andato: da qui in poi si gioca in silenzio.
             self.chiudi()

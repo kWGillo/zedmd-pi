@@ -2,6 +2,41 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [5.6]
+
+Due difetti dell'audio con la stessa radice: **come il PCM arriva alla
+scheda**.
+
+- **Il Game Boy suonava in ritardo.** Il muxer `alsa` di ffmpeg non accetta
+  nessuna opzione e apre un buffer fisso di 32768 campioni: a 48 kHz sono
+  **0,68 secondi**, più i 340 ms del tubo. Per un avviso di mezzo secondo non
+  conta niente; in una partita è la distanza fra quello che si vede e quello
+  che si sente.
+
+  Ora si usa `aplay`, che il buffer lo prende come argomento — **80 ms** — e il
+  tubo si stringe da 64 a 16 KB. `aplay` sta in `alsa-utils`, lo stesso
+  pacchetto di `alsamixer` che il manuale dell'audio fa già usare per alzare il
+  volume della chiavetta. Se manca si ripiega su ffmpeg: in ritardo è meglio
+  che muto.
+
+- **Breakout aveva ancora suoni muti.** La causa era la regola «uno per
+  volta»: un processo per effetto, e una scheda ALSA aperta in `plughw` sta in
+  mano a un programma alla volta, quindi il secondo suono ravvicinato veniva
+  buttato. Su Breakout se ne perdeva circa un quinto.
+
+  Durante una partita ora c'è un **mixer**: un riproduttore solo, aperto quanto
+  dura la partita, e gli effetti sommati in memoria. Si sovrappongono invece di
+  annullarsi, e partono nel blocco successivo — 23 ms, contro i 150-300 ms che
+  costava avviare un processo su un Pi. Vive solo mentre si gioca: a pannello
+  fermo non tiene occupata la scheda e non consuma niente.
+
+- **Il ciclo che scrive ha un freno.** In produzione il ritmo lo detta la
+  scheda audio, perché scrivere su un tubo pieno blocca. Ma se il riproduttore
+  consumasse più in fretta del tempo reale il ciclo girerebbe a vuoto, e su un
+  Pi la CPU bruciata sono righe chiare sul pannello. L'ha trovato una prova con
+  un riproduttore finto che consuma all'istante — 26 milioni di campioni in
+  0,8 secondi — non il pannello.
+
 ## [5.5.1]
 
 - **La ricompilazione di Doom falliva** con `multiple definition of

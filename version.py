@@ -1030,6 +1030,30 @@ Storico:
        si scrivono in un\'impronta dentro la cartella di compilazione, e
        cambiarle rende vecchio tutto. Si ricompila una volta sola, e le
        compilazioni successive restano incrementali.
+  5.6  Due difetti dell\'audio, con la stessa radice: **come il PCM arriva
+       alla scheda**.
+       *Il Game Boy suonava in ritardo.* Il muxer `alsa` di ffmpeg non accetta
+       nessuna opzione e apre un buffer fisso di 32768 campioni: a 48 kHz sono
+       **0,68 secondi**, piu\' i 340 ms del tubo. Per un avviso non conta
+       niente, in una partita si sente eccome. Adesso si usa `aplay`, che il
+       buffer lo prende come argomento — 80 ms — e il tubo si stringe a 16 KB.
+       `aplay` sta in `alsa-utils`, lo stesso pacchetto di `alsamixer` che il
+       manuale fa gia\' usare; se manca si ripiega su ffmpeg, perche\' in
+       ritardo e\' meglio che muto.
+       *Breakout aveva ancora suoni muti.* La causa era la regola "uno per
+       volta": un processo per effetto, una scheda ALSA che sta in mano a un
+       programma alla volta, e il secondo suono ravvicinato buttato via. Su
+       Breakout se ne perdeva circa un quinto.
+       Ora durante una partita c\'e\' un **mixer**: un riproduttore solo, aperto
+       quanto dura la partita, e gli effetti sommati in memoria. Si
+       sovrappongono invece di annullarsi, e partono nel blocco successivo —
+       23 ms invece dei 150-300 ms che costava avviare un processo. Vive solo
+       mentre si gioca: a pannello fermo non tiene occupata la scheda.
+       Il ciclo che scrive ha un freno suo. Il ritmo lo detta la scheda audio,
+       perche\' scrivere su un tubo pieno blocca; ma se il riproduttore
+       consumasse piu\' in fretta del tempo reale il ciclo girerebbe a vuoto, e
+       su un Pi la CPU bruciata sono righe chiare sul pannello. L\'ha trovato
+       una prova, non il pannello.
 """
 
-__version__ = "5.5.1"
+__version__ = "5.6"

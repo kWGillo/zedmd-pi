@@ -44,9 +44,12 @@ una voce a parte che si puo' spegnere.
 
 import os
 import re
+import shutil
+import struct
 import subprocess
 import threading
 import time
+import wave
 
 # I servizi che possono avere un suono. Fuori restano Media Player e Rolling
 # Banner, che non annunciano niente: compaiono a intervalli casuali per
@@ -232,6 +235,58 @@ def effetto(nome):
     return intero if os.path.isfile(intero) else ""
 
 
+# ------------------------------------------------- uscita PCM a bassa latenza
+
+# Quanto audio sta in volo prima di uscire dall'altoparlante. 80 ms non si
+# percepiscono in un gioco; il buffer di ffmpeg, che sono 0,68 secondi, si'.
+BUFFER_US = 80000
+PERIODO_US = 20000
+
+
+def comando_pcm(device, frequenza, canali):
+    """La riga di comando per riversare PCM grezzo su una scheda ALSA.
+
+    Si preferisce `aplay` **per la latenza, non per gusto**. Il muxer `alsa`
+    di ffmpeg non espone nessuna opzione: apre un buffer fisso di 32768
+    campioni, che a 48 kHz fanno 0,68 secondi di ritardo fra quello che
+    succede nel gioco e quello che si sente. Per un avviso non conta niente;
+    per il suono di un emulatore e' insopportabile.
+
+    `aplay` invece il buffer lo prende come argomento. Sta in `alsa-utils`,
+    che su Raspberry Pi OS c'e' quasi sempre — ed e' lo stesso pacchetto di
+    `alsamixer`, che il manuale dell'audio ti fa gia' usare per alzare il
+    volume della chiavetta.
+
+    Se non c'e' si ripiega su ffmpeg: meglio in ritardo che muto.
+    """
+    if shutil.which("aplay"):
+        return ["aplay", "-q", "-t", "raw", "-f", "S16_LE",
+                "-r", str(int(frequenza)), "-c", str(int(canali)),
+                "--buffer-time=%d" % BUFFER_US,
+                "--period-time=%d" % PERIODO_US,
+                "-D", device, "-"]
+    return ["ffmpeg", "-v", "error", "-nostdin",
+            "-f", "s16le", "-ar", str(int(frequenza)), "-ac", str(int(canali)),
+            "-i", "-", "-f", "alsa", device]
+
+
+def stringi_tubo(flusso, byte=16384):
+    """Rimpicciolisce il tubo verso il riproduttore.
+
+    Un tubo Linux tiene 64 KB per difetto: a 48 kHz stereo sono altri 340 ms
+    di ritardo, sopra a quello del riproduttore. Qui non serve accumulare —
+    se il riproduttore e' indietro vogliamo bloccarci, non fare magazzino.
+
+    Se il sistema non lascia farlo si tira dritto: e' un miglioramento, non un
+    requisito.
+    """
+    try:
+        import fcntl
+        fcntl.fcntl(flusso.fileno(), getattr(fcntl, "F_SETPIPE_SZ", 1031), byte)
+    except Exception:
+        pass
+
+
 # ------------------------------------------------------------ riproduzione
 
 _lucchetto = threading.Lock()
@@ -362,10 +417,224 @@ def suona_servizio(cfg, chiave):
     return partito
 
 
+# --------------------------------------------------- il mixer degli effetti
+
+# Gli effetti sono tutti a 22050 Hz, mono, 16 bit: li abbiamo fatti noi, e
+# averli tutti uguali e' quello che permette di sommarli senza convertire
+# niente.
+FREQ_EFFETTI = 22050
+BLOCCO = 512                 # 23 ms: il ritmo con cui si scrive
+VOCI_MASSIME = 8
+
+
+class Mixer:
+    """Un riproduttore solo, aperto per tutta la partita, e i suoni sommati.
+
+    Il perche' e' aritmetico. Un effetto lanciato come processo a se' costa
+    fra i 150 e i 300 ms di avvio su un Pi, e una scheda ALSA aperta in
+    `plughw` sta in mano a un programma alla volta: due effetti ravvicinati
+    non possono suonare insieme, e il secondo va buttato. Su Invaders, che ha
+    una cadenza continua, si perdeva quasi la meta' dei suoni; su Breakout
+    circa un quinto — abbastanza da sentire i mattoni muti ogni tanto.
+
+    Qui il processo e' uno e resta aperto: gli effetti diventano campioni
+    sommati in memoria, quindi si **sovrappongono** invece di annullarsi, e
+    partono nel blocco successivo — 23 ms, non 300.
+
+    Vive solo mentre c'e' una partita aperta. A pannello fermo non consuma
+    niente e non tiene occupata la scheda.
+    """
+
+    def __init__(self):
+        self._lucchetto = threading.Lock()
+        self._processo = None
+        self._voci = []          # [[campioni, posizione], ...]
+        self._stop = threading.Event()
+        self._thread = None
+        self._campioni = {}      # nome -> array di interi, letto una volta
+        self._volume = 1.0
+        self.errore = ""
+
+    # ---------------------------------------------------------- campioni
+
+    def _carica(self, nome):
+        """I campioni di un effetto, letti dal wav una volta sola."""
+        if nome in self._campioni:
+            return self._campioni[nome]
+        dati = None
+        percorso = effetto(nome)
+        if percorso:
+            try:
+                with wave.open(percorso) as w:
+                    if (w.getnchannels() == 1 and w.getsampwidth() == 2
+                            and w.getframerate() == FREQ_EFFETTI):
+                        grezzi = w.readframes(w.getnframes())
+                        dati = list(struct.unpack("<%dh" % (len(grezzi) // 2),
+                                                  grezzi))
+            except Exception:
+                dati = None
+        self._campioni[nome] = dati
+        return dati
+
+    # ------------------------------------------------------------ vita
+
+    def avvia(self, device, vol):
+        """Apre il riproduttore. Restituisce (ok, motivo)."""
+        with self._lucchetto:
+            if self._processo is not None and self._processo.poll() is None:
+                return True, ""
+            self._volume = max(0.0, min(1.0, vol))
+            try:
+                self._processo = subprocess.Popen(
+                    comando_pcm(device, FREQ_EFFETTI, 1),
+                    stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL)
+            except (OSError, subprocess.SubprocessError) as exc:
+                self._processo = None
+                self.errore = str(exc)
+                return False, str(exc)
+            stringi_tubo(self._processo.stdin)
+            self._voci = []
+            self._stop.clear()
+        self._thread = threading.Thread(target=self._ciclo, name="mixer",
+                                        daemon=True)
+        self._thread.start()
+        return True, ""
+
+    def acceso(self):
+        with self._lucchetto:
+            return self._processo is not None and self._processo.poll() is None
+
+    def ferma(self):
+        self._stop.set()
+        thread, self._thread = self._thread, None
+        if thread is not None and thread is not threading.current_thread():
+            thread.join(timeout=2.0)
+        with self._lucchetto:
+            processo, self._processo = self._processo, None
+            self._voci = []
+        if processo is None:
+            return
+        for chiudi in (lambda: processo.stdin.close(),
+                       processo.terminate):
+            try:
+                chiudi()
+            except Exception:
+                pass
+        try:
+            processo.wait(timeout=3)
+        except Exception:
+            pass
+
+    # ---------------------------------------------------------- suonare
+
+    def suona(self, nome):
+        """Aggiunge una voce. Non scarta mai, salvo troppe insieme."""
+        campioni = self._carica(nome)
+        if not campioni:
+            return False
+        with self._lucchetto:
+            if self._processo is None or self._processo.poll() is not None:
+                return False
+            # Il tetto non e' per la CPU: e' che sommare dieci onde quadre a
+            # volume pieno satura e basta, e si sente peggio di otto.
+            if len(self._voci) >= VOCI_MASSIME:
+                self._voci.pop(0)
+            self._voci.append([campioni, 0])
+        return True
+
+    def _ciclo(self):
+        """Scrive un blocco per volta, in tempo reale.
+
+        La scrittura sul tubo e' bloccante ed e' un pregio: quando il
+        riproduttore e' pieno ci ferma, e cosi' il ritmo lo detta la scheda
+        audio invece di un orologio nostro che andrebbe alla deriva.
+        """
+        silenzio = b"\x00\x00" * BLOCCO
+        guadagno = self._volume
+        # Il freno. Scrivere su un tubo pieno blocca, e in produzione basta
+        # quello: e' la scheda audio a dare il ritmo. Ma se il riproduttore
+        # consuma piu' in fretta del tempo reale — o muore lasciando il tubo
+        # scrivibile — questo ciclo girerebbe a vuoto bruciando CPU, che su un
+        # Pi vuol dire righe chiare sul pannello. Qui il tempo lo si conta
+        # anche da soli, e se siamo avanti si aspetta.
+        avvio = time.monotonic()
+        scritti = 0
+        while not self._stop.is_set():
+            avanti = (avvio + scritti / float(FREQ_EFFETTI)) - time.monotonic()
+            if avanti > 0.05:
+                time.sleep(avanti - 0.02)
+            with self._lucchetto:
+                processo = self._processo
+                if processo is None or processo.poll() is not None:
+                    break
+                vive = []
+                somma = [0] * BLOCCO
+                for voce in self._voci:
+                    campioni, posizione = voce
+                    resto = len(campioni) - posizione
+                    quanti = BLOCCO if resto > BLOCCO else resto
+                    for i in range(quanti):
+                        somma[i] += campioni[posizione + i]
+                    voce[1] = posizione + quanti
+                    if voce[1] < len(campioni):
+                        vive.append(voce)
+                self._voci = vive
+                niente = not vive and not any(somma)
+            if niente:
+                blocco = silenzio
+            else:
+                pezzi = []
+                for v in somma:
+                    v = int(v * guadagno)
+                    # Somma di piu' voci: si taglia agli estremi invece di
+                    # far girare il numero, che produrrebbe uno schiocco.
+                    if v > 32767:
+                        v = 32767
+                    elif v < -32768:
+                        v = -32768
+                    pezzi.append(v)
+                blocco = struct.pack("<%dh" % BLOCCO, *pezzi)
+            try:
+                processo.stdin.write(blocco)
+                processo.stdin.flush()
+            except Exception:
+                break
+            scritti += BLOCCO
+
+
+_mixer = Mixer()
+
+
+def effetti_avvia(cfg):
+    """Apre il mixer per una partita. Silenzioso se non si deve suonare."""
+    device = uscita_giochi(cfg)
+    if not device:
+        return False
+    ok, _motivo = _mixer.avvia(device, volume(cfg))
+    return ok
+
+
+def effetti_ferma():
+    _mixer.ferma()
+
+
+def effetti_accesi():
+    return _mixer.acceso()
+
+
 def suona_effetto(cfg, nome):
-    """Un effetto dei giochi. Silenzioso se gli effetti sono spenti."""
+    """Un effetto dei giochi. Silenzioso se gli effetti sono spenti.
+
+    Durante una partita passa dal mixer, che li somma invece di scartarli.
+    Fuori da una partita — il suono del primato quando la sessione si sta
+    gia' chiudendo — resta la strada del processo per volta, che li' va
+    benissimo: e' un suono solo e nessuno lo sta accavallando.
+    """
     if not _conf(cfg).get("giochi", True):
         return False
+    if _mixer.acceso():
+        return _mixer.suona(nome)
     percorso = effetto(nome)
     if not percorso:
         return False

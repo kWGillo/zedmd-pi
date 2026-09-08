@@ -138,6 +138,22 @@ punto eri arrivato.
 > 131 suoni al minuto contro 291. Invaders ha una cadenza continua, Breakout
 > solo eventi.
 
+### Il mixer (dalla 5.6)
+
+Fino alla 5.5 ogni effetto era un processo a sé, e una scheda ALSA aperta in
+`plughw` sta in mano a un programma alla volta: due suoni ravvicinati non
+potevano convivere, e il secondo veniva **buttato**. Su Breakout se ne perdeva
+circa un quinto — abbastanza da sentire mattoni muti.
+
+Durante una partita ora c'è un riproduttore solo, aperto quanto dura la
+partita, e gli effetti si **sommano in memoria**: si sovrappongono invece di
+annullarsi, e partono nel blocco successivo (23 ms) invece di pagare i 150-300
+ms che costa avviare un processo su un Pi.
+
+Vive solo mentre si gioca. A pannello fermo il mixer non esiste, non tiene
+occupata la scheda e non consuma niente — e gli avvisi dei servizi continuano
+a funzionare come sempre, con la loro regola del suono per volta.
+
 Si spengono tutti insieme dalla levetta **Effetti dei giochi** in
 Impostazioni.
 
@@ -215,6 +231,27 @@ suono.
 
 Non ha una levetta propria: segue quella degli **effetti dei giochi**. E tace
 quando la scheda è occupata dalla musica AirPlay, come tutto il resto.
+
+### La latenza, e perché serve `aplay`
+
+Nella 5.5 l'audio del Game Boy arrivava **in ritardo** rispetto all'immagine, e
+la colpa era di ffmpeg — ma non di un suo difetto.
+
+Il muxer `alsa` di ffmpeg **non accetta nessuna opzione**: apre un buffer fisso
+di 32768 campioni, che a 48 kHz fanno **0,68 secondi**. Aggiungi i 340 ms del
+tubo Linux, che di suo tiene 64 KB, e il conto è fatto. Per un campanello di
+mezzo secondo è irrilevante; per un emulatore è la distanza fra quello che si
+vede e quello che si sente.
+
+Dalla 5.6 il PCM va a `aplay`, che il buffer lo prende come argomento —
+**80 ms** — e il tubo si stringe a 16 KB. `aplay` sta in `alsa-utils`, lo
+stesso pacchetto di `alsamixer` che questo manuale ti fa già usare per alzare
+il volume della chiavetta: su Raspberry Pi OS c'è quasi sempre. Se manca, si
+ripiega su ffmpeg — in ritardo, ma non muto.
+
+Vale per il Game Boy e per il mixer degli effetti. Gli avvisi dei servizi
+restano su ffmpeg: leggono mp3, che `aplay` non sa fare, e mezzo secondo di
+buffer su un campanello non lo nota nessuno.
 
 # 4. Il DMD come cassa AirPlay
 
