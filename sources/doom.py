@@ -472,9 +472,18 @@ class DoomSource(Source):
         self._running = True
         self._errore = ""
         self._ultimo_tentativo = time.time()
+        # La presa **prima** dell'avvio, come per il Game Boy: fra il momento
+        # in cui la partita precedente molla il pannello e quello in cui
+        # questa lo prende, l'arbitro lo darebbe all'orologio. Qui il binario
+        # parte in un attimo e non si vedeva, ma lo schema era sbagliato
+        # uguale — e un giorno il binario sara' piu' lento.
+        if self.arbiter is not None:
+            self.arbiter.hold_on(self.name)
         # Si parte dentro il livello invece che dal menu: vedi `_comando`.
         if not self.riavvia(gioca=True):
             self._running = False
+            if self.arbiter is not None:
+                self.arbiter.hold_off(self.name)
             return False
         self._sessione = True
         if self.arbiter is not None:

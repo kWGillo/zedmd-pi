@@ -1076,6 +1076,28 @@ Storico:
        una sola condizione nel codice. Chi toglieva Doom dal giro si ritrovava
        PyBoy fuori, senza nessun rapporto fra le due cose. Difetto vecchio, non
        della 5.6, ma il sintomo e\' identico.
+  5.7  **L\'orologio compariva fra un gioco e l\'altro.** Nel giro del tasto
+       Start, dopo Doom, il pannello tornava all\'orologio per qualche secondo
+       e solo dopo partiva il Game Boy. Non era lentezza da sopportare: era
+       l\'ordine di due righe. `apri_sessione` chiedeva la presa del pannello
+       **dopo** aver avviato il processo, e avviare PyBoy vuol dire caricare
+       Python, numpy e PIL piu\' la ROM — secondi, non millesimi. In quei
+       secondi la partita precedente aveva gia\' mollato il pannello e la nuova
+       non l\'aveva ancora preso: l\'arbitro lo dava a chi c\'era, cioe\'
+       all\'orologio.
+       Adesso la presa arriva **prima** dell\'avvio, e se l\'avvio fallisce si
+       molla. Lo stesso schema c\'era in Doom, dove il binario parte in un
+       attimo e non si vedeva: corretto anche li\', perche\' era sbagliato
+       uguale.
+       E il pannello non resta fermo sull\'ultimo fotogramma della partita
+       precedente: durante il caricamento compare una schermata "GAME BOY" con
+       il nome della cartuccia. Chi guarda sa che sta partendo qualcosa.
+       **Documentazione allineata.** `docs/README.it.md` dichiarava ancora
+       "DMD Controller 1.10" e ripeteva una descrizione del progetto ferma a
+       quaranta versioni fa: adesso e\' soltanto l\'indice dei manuali. Nel
+       manuale completo entrano la scheda audio USB, le pagine web aggiunte
+       dalla 5.0 in poi e la tabella delle priorita\' completa di tutte e
+       undici le sorgenti.
 """
 
-__version__ = "5.6.1"
+__version__ = "5.7"

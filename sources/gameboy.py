@@ -29,6 +29,15 @@ from PIL import Image
 import suoni
 
 from .base import Source
+
+
+def centra_testo(disegna, larghezza, y, testo, font, colore):
+    """Scrive centrato orizzontalmente. Serve solo alla schermata d'attesa."""
+    riquadro = disegna.textbbox((0, 0), testo, font=font)
+    disegna.text(((larghezza - (riquadro[2] - riquadro[0])) // 2 - riquadro[0], y),
+                 testo, font=font, fill=colore)
+
+
 from .comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_RY, ABS_X, ABS_Y,
                       BTN_EAST, BTN_NORTH, BTN_SELECT, BTN_SOUTH, BTN_START,
                       BTN_TL, BTN_TL2, BTN_TR, BTN_TR2, BTN_WEST, BTN_THUMBL,
@@ -419,13 +428,50 @@ class GameBoySource(Source):
 
         self._running = True
         self._errore = ""
-        if not self._avvia_processo(rom):
-            self._running = False
-            return False
-        self._sessione = True
+        # **La presa del pannello si chiede prima di avviare l'emulatore.**
+        # PyBoy ci mette qualche secondo a partire — e' Python, con numpy e
+        # PIL da importare — e in quei secondi la partita precedente ha gia'
+        # mollato il pannello mentre questa non l'ha ancora preso. L'arbitro
+        # trovava il campo libero e ci rimetteva l'orologio: si usciva da Doom,
+        # comparivano l'ora e la data, e solo dopo arrivava il Game Boy.
+        # Doom non lo faceva vedere perche' e' un binario e parte in un attimo,
+        # ma lo schema era lo stesso.
         if self.arbiter is not None:
             self.arbiter.hold_on(self.name)
+        # E qualcosa da guardare mentre si aspetta, altrimenti resta congelato
+        # l'ultimo fotogramma del gioco di prima.
+        self._mostra_attesa(rom)
+        if not self._avvia_processo(rom):
+            self._running = False
+            if self.arbiter is not None:
+                self.arbiter.hold_off(self.name)
+            return False
+        self._sessione = True
         return True
+
+    def _mostra_attesa(self, rom):
+        """La schermata dei pochi secondi in cui PyBoy si sta caricando."""
+        try:
+            from PIL import ImageDraw
+            from .clock import _load_font
+            immagine = Image.new("RGB", (self.width, self.height), (0, 0, 0))
+            disegna = ImageDraw.Draw(immagine)
+            # I due verdi del Game Boy: quello chiaro per il titolo, quello
+            # scuro per la cartuccia. Chi guarda capisce cosa sta arrivando
+            # prima ancora di leggere.
+            titolo = _load_font(max(10, int(self.height * 0.34)))
+            piccolo = _load_font(max(7, int(self.height * 0.20)))
+            centra_testo(disegna, self.width, int(self.height * 0.12),
+                         "GAME BOY", titolo, (0xE0, 0xF8, 0xD0))
+            nome = os.path.splitext(os.path.basename(rom or ""))[0][:24]
+            centra_testo(disegna, self.width, int(self.height * 0.58),
+                         nome or "avvio...", piccolo, (0x88, 0xC0, 0x70))
+            with self._lock:
+                self._image = immagine
+                self._dirty = True
+        except Exception:
+            # Una schermata di cortesia non puo' impedire una partita.
+            pass
 
     def chiudi_sessione(self):
         aperta = self._sessione

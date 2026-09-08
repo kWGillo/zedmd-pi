@@ -1,4 +1,4 @@
-# DMD Controller 5.6.1
+# DMD Controller 5.7
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -381,6 +381,11 @@ compreso. La stessa presa la usa la gestione della libreria media, con la
 differenza che quella scade da sola se la pagina web smette di dare segni di
 vita.
 
+La presa si chiede **prima** di avviare il gioco, non dopo. Avviare PyBoy vuol
+dire caricare Python, numpy e PIL più la ROM: secondi in cui la partita
+precedente ha già mollato il pannello e la nuova non l'ha ancora preso, e in
+quel buco l'arbitro lo dava all'orologio. Era il difetto corretto nella 5.7.
+
 Sopra a tutto agiscono le fasce orarie: durante lo Sleep il display resta
 spento qualunque sia la sorgente vincente (salvo il risveglio su frame ZeDMD,
 se abilitato).
@@ -537,7 +542,8 @@ le tappe.
 | 5.5 | Doom suona davvero: il Makefile non compilava nessun modulo sonoro, e la levetta della 5.2 prometteva l'impossibile. Il Game Boy suona con la sua APU. Breakout ha una nota per fila di mattoni |
 | 5.5.1 | La ricompilazione di Doom falliva su `multiple definition`: il Makefile non rifaceva gli oggetti quando cambiavano le opzioni, non i sorgenti |
 | 5.6 | Audio del Game Boy in ritardo di 0,7 s (buffer fisso di ffmpeg) e effetti di Breakout scartati: `aplay` con buffer da 80 ms, e un mixer che somma gli effetti invece di buttarli |
-| **5.6.1** | **Il mixer della 5.6 non partiva (un import mancante nascosto da un `except`), e il Game Boy spariva dal giro del tasto Start se si toglieva Doom** |
+| 5.6.1 | Il mixer della 5.6 non partiva (un import mancante nascosto da un `except`), e il Game Boy spariva dal giro del tasto Start se si toglieva Doom |
+| **5.7** | **L'orologio non compare più fra un gioco e l'altro: la presa del pannello si chiede prima di avviare l'emulatore, non dopo. Schermata di attesa del Game Boy. Documentazione riallineata** |
 
 ---
 

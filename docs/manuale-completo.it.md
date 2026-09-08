@@ -82,6 +82,20 @@ export SLOW=3
 
 Per la Pi Zero W `export SLOW=1`, per la Pi 4 `export SLOW=5`.
 
+### 1.2b La scheda audio (facoltativa)
+
+Serve solo se vuoi il suono, ma se lo vuoi **deve** essere una scheda **USB**.
+L'audio analogico integrato del Raspberry non è utilizzabile: la libreria della
+matrice si prende il blocco PWM del chip, che è lo stesso dell'uscita jack —
+infatti la preparazione spegne il modulo `snd_bcm2835`, e senza spegnerlo la
+libreria non parte. Non è un ripiego, è l'unica strada.
+
+Va bene una chiavetta da pochi euro con chip C-Media o simili, purché abbia
+un'uscita stereo. Conviene installare anche `alsa-utils`: contiene `alsamixer`,
+che serve ad alzare il volume della chiavetta (spesso parte bassa o muta), e
+`aplay`, che il DMD usa per l'audio degli emulatori perché permette di
+richiedere un buffer piccolo. Dettagli in `docs/audio.it.md`.
+
 ### 1.3 La scheda SD
 
 Prima di procedere, una raccomandazione che nasce da un guasto reale: usa una
@@ -561,8 +575,41 @@ registro CSV dei passaggi con scaricamento, prova diagnostica di una rotta.
 appuntamenti si scrivono su Google, il pannello li mostra e basta. Guida
 completa in `docs/calendario.it.md`.
 
-**Servizi** — attivazione dei servizi, sorgente attualmente a schermo e
-possibilità di forzarne una.
+**Servizi** — attivazione dei servizi, sorgente attualmente a schermo,
+possibilità di forzarne una, il **suono di avviso** di ciascuno e
+l'interruttore generale di MQTT.
+
+**Musica** — copertura delle sorgenti, account Spotify, aspetto del player,
+stato di MQTT e delle entità di Home Assistant, e l'**uscita musicale**: con
+questa accesa la musica AirPlay esce davvero dalla scheda audio invece di
+essere soltanto raccontata sul pannello. Guida completa in
+`docs/now-playing.it.md` e `docs/audio.it.md`.
+
+**Banner** — i dieci testi scorrevoli, uno per riga, ciascuno con colore,
+dimensione, velocità e lampeggio propri.
+
+**Compleanni** — l'elenco delle date, compleanni e anniversari.
+
+**Scadenze** — le scadenze aperte con il loro semaforo, l'inserimento, il CSV,
+il registro di quelle completate e le soglie dei tre colori.
+
+**Rifiuti** — le voci del calendario della raccolta, i giorni e la cadenza di
+ciascuna, e le due tabelle delle eccezioni.
+
+**Rete** — le reti wifi visibili con segnale e cifratura, il collegamento
+attuale, gli indirizzi a cui il DMD risponde. Le password le custodisce
+NetworkManager, non il `config.json`. Guida completa in `docs/rete.it.md`.
+
+**Funcam** — la webcam sul pannello: scelta della telecamera, risoluzione,
+aspetto, i comandi per accendere e spegnere la ripresa, il pulsante fisico
+sulla Bonnet. Guida completa in `docs/telecamera.it.md`.
+
+**Giochi** — Breakout e Invaders, i comandi di tastiera e pad, e la scheda
+degli emulatori esterni che porta a Doom e al Game Boy. Guide in
+`docs/doom.it.md`, `docs/gameboy.it.md` e `docs/joypad.it.md`.
+
+**Aggiornamenti** — controllo e installazione della nuova versione da GitHub,
+con verifica dell'archivio e ripristino automatico se il servizio non riparte.
 
 ### 10.3 Lingua
 
@@ -583,9 +630,24 @@ stesso servizio e un arbitro sceglie chi vince:
 | Priorità | Sorgente |
 |---|---|
 | 100 | ZeDMD |
+| 90 | Anteprima (gestione media) |
 | 60 | Air Radar |
+| 59 | Google Calendar |
+| 58 | Now Playing |
+| 57 | Scadenze |
+| 56 | Compleanni |
+| 55 | Rolling Banner |
+| 51 | Funcam |
 | 50 | Media Player |
 | 10 | Orologio |
+
+**Nessuna coppia pareggia, e non è un caso**: a parità l'arbitro tiene chi si è
+registrato per primo, quindi la seconda non andrebbe mai a schermo. Una prova
+rifiuta i pareggi.
+
+Le **partite** — Doom, Game Boy, Breakout e Invaders — non partecipano a questa
+gara: prendono il pannello e lo tengono finché non si esce, sopra chiunque
+altro, ZeDMD compreso.
 
 ZeDMD prende il controllo **immediatamente** appena un client si connette o
 arriva un frame, e lo mantiene per `grace_seconds` dopo l'ultimo segnale. Il

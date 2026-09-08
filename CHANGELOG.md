@@ -2,6 +2,34 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [5.7]
+
+- **L'orologio compariva fra un gioco e l'altro.** Nel giro del tasto Start,
+  dopo Doom, il pannello tornava all'orologio per qualche secondo e solo dopo
+  partiva il Game Boy.
+
+  Non era lentezza da sopportare: era l'ordine di due righe. `apri_sessione`
+  chiedeva la presa del pannello **dopo** aver avviato il processo, e avviare
+  PyBoy vuol dire caricare Python, numpy e PIL più la ROM — secondi, non
+  millesimi. In quei secondi la partita precedente aveva già mollato il
+  pannello e la nuova non l'aveva ancora preso: l'arbitro lo dava a chi c'era,
+  cioè all'orologio.
+
+  Adesso la presa arriva **prima** dell'avvio, e se l'avvio fallisce si molla.
+  Lo stesso schema c'era in `sources/doom.py`, dove il binario parte in un
+  attimo e non si vedeva: corretto anche lì, perché era sbagliato uguale.
+
+- **Una schermata di attesa per il Game Boy.** Il pannello non resta fermo
+  sull'ultimo fotogramma della partita precedente: durante il caricamento
+  compare «GAME BOY» con il nome della cartuccia, nei verdi del DMG.
+
+- **Documentazione allineata.** `docs/README.it.md` dichiarava ancora *«DMD
+  Controller 1.10»* e ripeteva una descrizione del progetto ferma a quaranta
+  versioni fa: adesso è soltanto l'indice dei manuali, perché un documento che
+  ne ripete un altro invecchia in silenzio. Nel manuale completo entrano la
+  scheda audio USB (§1.2b), le pagine web aggiunte dalla 5.0 in poi (§10.2) e
+  la tabella delle priorità completa di tutte e undici le sorgenti (§10.4).
+
 ## [5.6.1]
 
 - **Il mixer della 5.6 non è mai partito.** `sources/giochi` importava `suoni`

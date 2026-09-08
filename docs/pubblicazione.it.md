@@ -159,7 +159,7 @@ git add -A
 ```
 
 ```bash
-git commit -m "1.6: cache della libreria media, Air Radar, OTA, installazione da GitHub"
+git commit -m "5.7: l'orologio non compare più fra un gioco e l'altro; documentazione riallineata"
 ```
 
 Cambia il messaggio a ogni versione: numero della versione e una riga su cosa
@@ -220,6 +220,57 @@ del Raspberry: se qui vedi il numero nuovo, l'OTA lo vedrà.
 
 ---
 
+## 7b. Quello che non sta dentro il pacchetto
+
+Tre informazioni si vedono su GitHub ma **non** stanno in nessun file del
+repository: vivono nelle impostazioni del progetto, quindi `git push` non le
+tocca e nessun aggiornamento le allinea da solo. Sono quelle che restano
+indietro di venti versioni senza che nessuno se ne accorga.
+
+### La descrizione (*About*)
+
+È la riga sotto il nome del repository, e la sola cosa che si legge nei
+risultati di ricerca di GitHub. Deve dire che cosa fa il progetto e per chi,
+non a che versione è.
+
+```bash
+gh repo edit kWGillo/zedmd-pi --description "DMD di rete compatibile ZeDMD per Raspberry Pi: pilota pannelli HUB75 S-PWM (FM6373 e simili) che ZeDMD non gestisce, e quando non si gioca resta un oggetto da salotto — orologio, radar aerei, musica in ascolto, calendario, Doom e Game Boy"
+```
+
+Si cambia solo quando cambia **che cosa** è il progetto, non a ogni versione.
+
+### Gli argomenti (*topics*)
+
+Sono le etichette che decidono se qualcuno che cerca «hub75 raspberry pi» ti
+trova. Il comando le riscrive tutte insieme, quindi vanno elencate per intero
+anche quelle che c'erano già:
+
+```bash
+gh repo edit kWGillo/zedmd-pi --add-topic batocera,dmd,hub75,led-matrix,pinball,raspberry-pi,virtual-pinball,zedmd,fm6373,shairport-sync,pyboy,doomgeneric,home-assistant,airplay
+```
+
+### La *Release*
+
+Il tag è l'unico posto dove la versione compare in modo permanente e
+scaricabile. Il testo lo prendi da `CHANGELOG.md`, in cima:
+
+```bash
+gh release create v5.7 --title "5.7" --notes-file <(sed -n '/^## \[5.7\]/,/^## \[5.6/p' CHANGELOG.md | sed '$d')
+```
+
+Se il tag esiste già, `gh release edit v5.7 --notes-file ...`.
+
+> **Controllo veloce, una riga.** Dopo la pubblicazione:
+>
+> ```bash
+> gh repo view kWGillo/zedmd-pi --json description,repositoryTopics,latestRelease
+> ```
+>
+> Se la descrizione parla di funzioni che non ci sono più, o l'ultima release
+> è di quattro versioni fa, sai che cosa sistemare.
+
+---
+
 ## 8. Aggiornare il Raspberry
 
 Dopo la pubblicazione non serve più trasferire niente a mano.
@@ -261,6 +312,8 @@ git add -A
 git commit -m "<versione>: <cosa è cambiato>"
 git push
 curl -s https://raw.githubusercontent.com/kWGillo/zedmd-pi/main/version.py | grep __version__
+gh release create v<versione> --title "<versione>" --notes-file <(sed -n "/^## \[<versione>\]/,/^## \[/p" CHANGELOG.md | sed '$d')
+gh repo view kWGillo/zedmd-pi --json description,repositoryTopics,latestRelease   # ← passo 7b
 ```
 
 ---
