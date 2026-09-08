@@ -1054,6 +1054,28 @@ Storico:
        consumasse piu\' in fretta del tempo reale il ciclo girerebbe a vuoto, e
        su un Pi la CPU bruciata sono righe chiare sul pannello. L\'ha trovato
        una prova, non il pannello.
+  5.6.1 **Il mixer della 5.6 non e\' mai partito.** `sources/giochi` importava
+       `suoni` dentro una funzione e non a livello di modulo: le due chiamate
+       nuove — quella che apre il mixer con la partita e quella che lo chiude —
+       riferivano un nome inesistente e sollevavano `NameError`. Il mio
+       `except Exception` lo raccoglieva, stampava una riga nel registro e
+       tirava dritto, quindi il gioco funzionava e gli effetti tornavano alla
+       strada vecchia, quella che ne butta uno su due.
+       Misurato sul percorso vero: **54% degli effetti perso** in nove secondi
+       di Breakout. Adesso zero.
+       Le prove non l\'avevano visto perche\' chiamavano `effetti_avvia`
+       direttamente, mai passando da `apri_sessione`. Ora una partita vera si
+       apre dentro la suite e si controlla che il mixer sia acceso — e che si
+       spenga da solo quando la partita finisce.
+       La lezione e\' sul `try/except`: avvolgere una chiamata nuova per non
+       far cadere il servizio ha trasformato un errore rumoroso in una
+       funzione che semplicemente non c\'era.
+       **Il Game Boy spariva dal giro del tasto Start.** In `elenco_ciclo`
+       c\'era un `return` anticipato quando "Doom nel giro" era spento, e si
+       portava via anche il Game Boy: due caselle indipendenti nella pagina,
+       una sola condizione nel codice. Chi toglieva Doom dal giro si ritrovava
+       PyBoy fuori, senza nessun rapporto fra le due cose. Difetto vecchio, non
+       della 5.6, ma il sintomo e\' identico.
 """
 
-__version__ = "5.6"
+__version__ = "5.6.1"

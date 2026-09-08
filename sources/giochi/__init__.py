@@ -20,6 +20,8 @@ import time
 
 from PIL import Image
 
+import suoni
+
 from ..base import Source
 from ..comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_X, BTN_EAST,
                        BTN_MODE, BTN_SELECT, BTN_SOUTH, BTN_START, BTN_TR,
@@ -240,17 +242,21 @@ class GiochiSource(Source):
         preme.
         """
         giro = list(NOMI)
-        if not self.conf().get("ciclo_doom"):
-            return giro
-        # Si **chiede** se Doom e' pronto, non ci si limita a controllare che
-        # qualcuno sappia rispondere: un Doom senza WAD dentro al giro sarebbe
-        # una casella su cui il tasto Start non fa niente.
-        try:
-            pronto = bool(self.doom_pronto and self.doom_pronto())
-        except Exception:
-            pronto = False
-        if pronto:
-            giro.append("doom")
+        # Le due caselle sono indipendenti, e va detto perche' prima non lo
+        # erano: qui c'era un `return` anticipato quando "Doom nel giro" era
+        # spento, e si portava via anche il Game Boy. Spegnere Doom faceva
+        # sparire PyBoy dal giro del tasto Start, senza nessun rapporto fra
+        # le due cose.
+        if self.conf().get("ciclo_doom"):
+            # Si **chiede** se Doom e' pronto, non ci si limita a controllare
+            # che qualcuno sappia rispondere: un Doom senza WAD dentro al giro
+            # sarebbe una casella su cui il tasto Start non fa niente.
+            try:
+                pronto = bool(self.doom_pronto and self.doom_pronto())
+            except Exception:
+                pronto = False
+            if pronto:
+                giro.append("doom")
         if self.conf().get("ciclo_gameboy", True):
             try:
                 pronto_gb = bool(self.gb_pronto and self.gb_pronto())
@@ -269,7 +275,6 @@ class GiochiSource(Source):
     apri_doom = None
     def _suona_effetto(self, nome):
         try:
-            import suoni
             suoni.suona_effetto(self.cfg, nome)
         except Exception as exc:                    # pragma: no cover
             print("[giochi] effetto non riprodotto: %s" % exc)

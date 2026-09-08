@@ -2,6 +2,31 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [5.6.1]
+
+- **Il mixer della 5.6 non è mai partito.** `sources/giochi` importava `suoni`
+  *dentro una funzione* e non a livello di modulo: le due chiamate nuove —
+  quella che apre il mixer con la partita e quella che lo chiude — riferivano
+  un nome inesistente e sollevavano `NameError`. Il `try/except` che avevo
+  messo per non far cadere il servizio lo raccoglieva, stampava una riga nel
+  registro e tirava dritto. Il gioco funzionava, e gli effetti tornavano alla
+  strada vecchia: quella che ne butta uno su due.
+
+  Misurato sul percorso vero: **54% degli effetti perso** in nove secondi di
+  Breakout. Ora zero.
+
+  Le prove non l'avevano visto perché chiamavano `effetti_avvia` direttamente,
+  senza mai passare da `apri_sessione`. Ora una partita vera si apre dentro la
+  suite, e si controlla che il mixer sia acceso e che si spenga da solo quando
+  la partita finisce.
+
+- **Il Game Boy spariva dal giro del tasto Start.** In `elenco_ciclo` c'era un
+  `return` anticipato quando *«Doom nel giro»* era spento, e si portava via
+  anche il Game Boy: due caselle indipendenti nella pagina, una sola condizione
+  nel codice. Chi toglieva Doom si ritrovava PyBoy fuori dal carosello senza
+  nessun rapporto fra le due cose. È un difetto vecchio, non della 5.6, ma il
+  sintomo è lo stesso.
+
 ## [5.6]
 
 Due difetti dell'audio con la stessa radice: **come il PCM arriva alla

@@ -46,7 +46,7 @@ ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 6e30dae484efe052f8cfb3a89545a245  sources/doom.py
 113ebc14ebd23c37974aa147e34c078b  sources/gameboy.py
-2ae9b81dd8b6ecd2c0f227dcb230d349  sources/giochi/__init__.py
+04b3931c789903d9bd946906973ba838  sources/giochi/__init__.py
 1ae61a11b831aaff6c3f30b82572247d  sources/giochi/base.py
 018e911289febd4efb970fba0d9e5626  sources/giochi/invasori.py
 e9e38d7384abd3a2a08d8aee12ee369e  sources/giochi/mattoni.py
@@ -97,7 +97,7 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-d6cf641978c906e7ca9afeb29a31ebee  version.py
+35c8b8b74c183bebae4a67905d7aaa16  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 6e78649395d1db3fdbc215979beebdf2  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py
