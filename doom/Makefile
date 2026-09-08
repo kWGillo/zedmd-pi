@@ -82,6 +82,32 @@ endif
 $(OUT): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $@ $(LIBS)
 
+# Gli oggetti dipendono dalle **opzioni**, non solo dai sorgenti.
+#
+# Senza questo, aggiungere -DFEATURE_SOUND non ricompila niente: nessun .c e'
+# cambiato, e make considera tutto aggiornato. Ma quella flag cambia il
+# significato dei sorgenti gia' compilati — `dummy.c` definisce uno stub di
+# `I_InitTimidityConfig` proprio quando FEATURE_SOUND **non** c'e' — e si
+# finisce a collegare oggetti incoerenti fra loro:
+#
+#   multiple definition of `I_InitTimidityConfig'
+#
+# che arriva in fondo, dopo due minuti di compilazione, e sembra un difetto
+# della libreria invece che una ricompilazione mancata.
+#
+# L'impronta contiene le opzioni in uso. Cambiarle riscrive il file, e da li'
+# ogni oggetto risulta vecchio: si ricompila tutto, una volta sola.
+IMPRONTA = $(OBJDIR)/.opzioni
+
+$(IMPRONTA): CONTROLLA | $(OBJDIR)
+	@printf '%s\n' '$(CFLAGS) $(LIBS)' | cmp -s - $@ 2>/dev/null \
+	  || printf '%s\n' '$(CFLAGS) $(LIBS)' > $@
+
+CONTROLLA: ;
+.PHONY: CONTROLLA
+
+$(OBJS): $(IMPRONTA)
+
 $(OBJDIR)/doomgeneric_dmd.o: doomgeneric_dmd.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 

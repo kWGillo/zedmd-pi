@@ -2,6 +2,24 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [5.5.1]
+
+- **La ricompilazione di Doom falliva** con `multiple definition of
+  'I_InitTimidityConfig'` — in fondo, dopo due minuti di attesa, con l'aria di
+  essere un difetto della libreria.
+
+  Non lo era: era il Makefile che non ricompilava abbastanza. La 5.5 aggiunge
+  `-DFEATURE_SOUND`, e quella flag cambia il **significato** dei sorgenti già
+  compilati — `dummy.c` definisce uno stub di `I_InitTimidityConfig` proprio
+  quando `FEATURE_SOUND` **non** c'è. Ma nessun `.c` era cambiato, quindi make
+  considerava aggiornati tutti gli oggetti e ricompilava solo i quattro file
+  nuovi. Al collegamento si incontravano lo stub vecchio e la funzione vera.
+
+  Ora gli oggetti dipendono anche dalle **opzioni**: quelle in uso finiscono in
+  un'impronta dentro la cartella di compilazione, e cambiarle rende vecchio
+  tutto. Si ricompila una volta sola; le compilazioni successive restano
+  incrementali.
+
 ## [5.5]
 
 - **Doom non poteva suonare, e l'avevo scritto io nel Makefile.** La 5.2 ha

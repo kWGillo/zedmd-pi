@@ -8,7 +8,7 @@ c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 5f2f4787b8e2d74d8432333347c70729  dmdconf.py
 6a24f2bd40a51bb6bcbe570d67526e6e  dmdd.py
-66331820442e8d4c50e10acba8bc50d4  doom/Makefile
+bb3118ed4b5ebb8d9f49cc8bbcd6f341  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
 7c5f28cafc9299975fcdb11e54937469  doom/setup_doom.sh
 df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
@@ -91,7 +91,7 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 7c0273ad8b84559e5569f20a8f7584f5  templates/settings.html
 0823432fc4a73241082966d4f4c9e760  templates/telecamera.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-eb0d5b8ee0b2370466046d97a26cd663  version.py
+18c331e1f865401a7ba08fa5fc19a77e  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 6e78649395d1db3fdbc215979beebdf2  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

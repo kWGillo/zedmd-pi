@@ -1017,6 +1017,19 @@ Storico:
        vengono disegnati: il video si puo\' saltare, l\'audio no. Segue la
        levetta degli effetti dei giochi, e tace quando la scheda e\' della
        musica AirPlay.
+  5.5.1 **La ricompilazione di Doom falliva** con `multiple definition of
+       I_InitTimidityConfig`, in fondo, dopo due minuti di attesa.
+       Non era un difetto della libreria: era il Makefile che non ricompilava
+       abbastanza. La 5.5 aggiunge `-DFEATURE_SOUND`, e quella flag cambia il
+       **significato** dei sorgenti — `dummy.c` definisce uno stub di
+       `I_InitTimidityConfig` proprio quando FEATURE_SOUND non c\'e\'. Ma
+       nessun `.c` era cambiato, quindi make considerava tutti gli oggetti
+       aggiornati e ricompilava solo i quattro file nuovi. Al collegamento si
+       incontravano lo stub vecchio e la funzione vera.
+       Adesso gli oggetti dipendono anche dalle **opzioni**: le opzioni in uso
+       si scrivono in un\'impronta dentro la cartella di compilazione, e
+       cambiarle rende vecchio tutto. Si ricompila una volta sola, e le
+       compilazioni successive restano incrementali.
 """
 
-__version__ = "5.5"
+__version__ = "5.5.1"

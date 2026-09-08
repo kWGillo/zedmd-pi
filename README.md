@@ -1,4 +1,4 @@
-# DMD Controller 5.5
+# DMD Controller 5.5.1
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -534,7 +534,8 @@ le tappe.
 | 5.2 | Audio: un avviso per servizio al momento della notifica, dodici effetti per Invaders e Breakout, la colonna sonora di Doom |
 | 5.3 | Il DMD diventa una cassa: la musica AirPlay esce dalla scheda audio. Corretta la scelta automatica dell'uscita, che poteva finire sulla scheda fittizia |
 | 5.4 | Cerchio (B) spara invece di uscire: era l'ultimo tasto frontale che chiudeva una partita. Il pulsante di prova dell'audio dice se l'interruttore generale è spento |
-| **5.5** | **Doom suona davvero: il Makefile non compilava nessun modulo sonoro, e la levetta della 5.2 prometteva l'impossibile. Il Game Boy suona con la sua APU. Breakout ha una nota per fila di mattoni** |
+| 5.5 | Doom suona davvero: il Makefile non compilava nessun modulo sonoro, e la levetta della 5.2 prometteva l'impossibile. Il Game Boy suona con la sua APU. Breakout ha una nota per fila di mattoni |
+| **5.5.1** | **La ricompilazione di Doom falliva su `multiple definition`: il Makefile non rifaceva gli oggetti quando cambiavano le opzioni, non i sorgenti** |
 
 ---
 

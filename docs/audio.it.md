@@ -163,6 +163,13 @@ argomenti compaiono solo se l'audio di Doom è spento.
 > di minuti e installa da sé le due librerie. L'aggiornamento via rete non
 > ricompila apposta — lo farebbe a ogni update, per niente. La pagina Doom
 > controlla che cosa ha collegato il binario e lo dice da sola.
+>
+> *Nota della 5.5.1.* La prima ricompilazione poteva fallire con `multiple
+> definition of 'I_InitTimidityConfig'`. Non era la libreria: `-DFEATURE_SOUND`
+> cambia il significato dei sorgenti (`dummy.c` definisce quello stub proprio
+> quando la flag manca) ma non tocca nessun `.c`, quindi make ricompilava solo
+> i file nuovi e collegava oggetti incoerenti. Ora gli oggetti dipendono anche
+> dalle opzioni e si ricompila tutto una volta sola.
 
 La scheda gliela passiamo dall'ambiente, non dalla riga di comando:
 
