@@ -2,6 +2,50 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [5.8]
+
+- **I satelliti.** Una sorgente nuova: il pannello avvisa **dieci minuti
+  prima** che la Stazione Spaziale passi sopra casa, lo ricorda a cinque, e
+  durante il passaggio mostra **dove guardare** — l'arco vero da dove sorge a
+  dove tramonta, con il puntino che ci scorre sopra — mentre l'ora lampeggia.
+
+  Non è un secondo Air Radar. Il radar racconta quello che passa perché è
+  interessante saperlo; questa sorgente esiste per **far uscire in terrazzo al
+  momento giusto**, e da lì discende ogni scelta.
+
+- **Parla poco, per costruzione.** Di sedicimila oggetti attivi a occhio nudo
+  se ne vedono pochissimi: serve che il satellite sia al sole mentre qui è già
+  buio. Quella condizione, più una tabella scritta a mano dei pochi di cui
+  conosciamo davvero la luminosità, porta sedicimila a **uno o due eventi al
+  giorno**.
+
+  La tabella non è un abbellimento, è *il filtro*: la magnitudine nei TLE non
+  c'è, e la fonte pubblica che la dava — i file di Mike McCants, lo standard
+  per vent'anni — è stata ritirata. Il gruppo *stations* di CelesTrak, che
+  sembrava contenere le due stazioni spaziali, ne contiene venti: per lo più
+  CubeSat rilasciati dalla ISS, invisibili a occhio nudo.
+
+- **Funziona senza rete.** Gli elementi orbitali si scaricano una volta ogni
+  sei ore, la posizione si calcola in casa con SGP4. CelesTrak chiede di non
+  interrogare più di una volta all'ora e di fermarsi al primo errore HTTP,
+  pena il blocco dell'indirizzo: il freno è nel codice e una prova lo difende.
+
+- **Le coordinate restano dove stanno.** Sono quelle dell'Air Radar — una casa
+  sola, un posto solo — e possono essere volutamente imprecise: spostarsi di
+  undici chilometri cambia gli orari di due secondi.
+
+- **Quattro difetti trovati sul campo**, prima che una riga arrivasse al
+  pannello: un passaggio già in corso spacciato per appena sorto; uno a
+  cavallo della finestra buttato via in silenzio; la Stazione contata tre
+  volte perché il catalogo numera a parte i moduli agganciati; e la
+  **bisezione del tramonto che andava dalla parte sbagliata**, scritta
+  pensando solo al bordo che sale. Quest'ultimo si vedeva solo lanciando due
+  volte lo stesso comando: il sorgere restava identico al secondo, il tramonto
+  ballava di decine di secondi.
+
+- Manca la pagina dedicata: elevazione minima, preavviso e cadenza si regolano
+  da `config.json`. Arriva nella prossima.
+
 ## [5.7]
 
 - **L'orologio compariva fra un gioco e l'altro.** Nel giro del tasto Start,

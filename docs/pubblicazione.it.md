@@ -231,19 +231,23 @@ indietro di venti versioni senza che nessuno se ne accorga.
 
 È la riga sotto il nome del repository, e la sola cosa che si legge nei
 risultati di ricerca di GitHub. Deve dire che cosa fa il progetto e per chi,
-non a che versione è.
+non a che versione è. **In inglese**, anche se i manuali sono in italiano: chi
+cerca «hub75 s-pwm raspberry» non scrive in italiano.
 
 ```bash
-gh repo edit kWGillo/zedmd-pi --description "DMD di rete compatibile ZeDMD per Raspberry Pi: pilota pannelli HUB75 S-PWM (FM6373 e simili) che ZeDMD non gestisce, e quando non si gioca resta un oggetto da salotto — orologio, radar aerei, musica in ascolto, calendario, Doom e Game Boy"
+gh repo edit kWGillo/zedmd-pi --description "ZeDMD-compatible network DMD for Raspberry Pi — drives S-PWM HUB75 panels (FM6373 and similar) that ZeDMD cannot, and between games it stays a living-room display: clock, flight radar, now playing, calendar, Doom and Game Boy"
 ```
 
 Si cambia solo quando cambia **che cosa** è il progetto, non a ogni versione.
+Quella di prima si fermava alla prima metà — i pannelli che ZeDMD non gestisce
+— e taceva tutto quello che il DMD fa quando non si gioca, che è poi il motivo
+per cui resta acceso.
 
 ### Gli argomenti (*topics*)
 
 Sono le etichette che decidono se qualcuno che cerca «hub75 raspberry pi» ti
-trova. Il comando le riscrive tutte insieme, quindi vanno elencate per intero
-anche quelle che c'erano già:
+trova. `--add-topic` **aggiunge**, non sostituisce: rielencare quelli che
+c'erano già non fa danno, e per toglierne uno serve `--remove-topic`.
 
 ```bash
 gh repo edit kWGillo/zedmd-pi --add-topic batocera,dmd,hub75,led-matrix,pinball,raspberry-pi,virtual-pinball,zedmd,fm6373,shairport-sync,pyboy,doomgeneric,home-assistant,airplay
@@ -252,7 +256,12 @@ gh repo edit kWGillo/zedmd-pi --add-topic batocera,dmd,hub75,led-matrix,pinball,
 ### La *Release*
 
 Il tag è l'unico posto dove la versione compare in modo permanente e
-scaricabile. Il testo lo prendi da `CHANGELOG.md`, in cima:
+scaricabile. Senza release, chi arriva sul repository può prendere solo lo
+stato attuale di `main`: non esiste «la 5.7» da scaricare, esiste «com'era
+oggi». Il testo delle note lo prendi da `CHANGELOG.md`, in cima.
+
+**Va fatta dopo il push**, non prima: il tag punta a quello che c'è su GitHub
+in quel momento.
 
 ```bash
 gh release create v5.7 --title "5.7" --notes-file <(sed -n '/^## \[5.7\]/,/^## \[5.6/p' CHANGELOG.md | sed '$d')

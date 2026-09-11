@@ -404,6 +404,35 @@ DEFAULTS = {
         "auto_check": True,
         "check_interval_hours": 24,
     },
+    # ------------------------------------------------------------- satelliti
+    #
+    # I passaggi visibili della Stazione Spaziale. Le coordinate non stanno
+    # qui: sono quelle dell'Air Radar, perche' la casa e' una sola e due
+    # posizioni che possono divergere sono due posizioni sbagliate.
+    "satelliti": {
+        # I gruppi di CelesTrak da scaricare. Solo le stazioni: i "cento piu'
+        # luminosi" sono per due terzi stadi di razzo con sigle illeggibili.
+        "gruppi": ["stazioni"],
+        # Sopra quanti gradi dall'orizzonte vale la pena annunciare. Dieci
+        # gradi vuol dire "sopra i tetti": piu' in basso ci sono case e alberi.
+        "elevazione_minima": 10.0,
+        # Quanto prima avvisare, e ogni quanto ricordarlo. Un passaggio dura
+        # dai due ai sette minuti: annunciarlo mentre succede vuol dire
+        # arrivare in terrazzo a cose finite.
+        "preavviso_minuti": 10,
+        "cadenza_minuti": 5,
+        # Quanto resta a schermo un promemoria. Non e' una sorgente che occupa
+        # il pannello per un quarto d'ora: sono due lampi brevi.
+        "durata_avviso_secondi": 20,
+        "finestra_ore": 24,
+        "ricalcola_minuti": 360,
+        "cartella_tle": "/var/lib/dmd/tle",
+        # Se acceso mostra anche gli oggetti di cui **non** conosciamo la
+        # luminosita': si vedranno annunci per CubeSat invisibili a occhio
+        # nudo. Sta qui per chi vuole sperimentare, non per l'uso normale.
+        "tutti_gli_oggetti": False,
+    },
+
     "services": {
         "zedmd": True,
         "clock": True,
@@ -424,6 +453,10 @@ DEFAULTS = {
         # Spento di suo, e non e' prudenza formale: e' una telecamera accesa
         # in soggiorno. Si accende quando qualcuno decide di accenderla.
         "webcam": False,
+        # Spento di suo perche' senza coordinate non ha niente da dire, e le
+        # coordinate non le mettiamo noi: le prende da quelle del radar,
+        # quando ci sono.
+        "satelliti": False,
     },
     "webcam": {
         # Vuoto = la prima telecamera collegata. Si scrive un /dev/videoN

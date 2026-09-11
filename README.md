@@ -1,4 +1,4 @@
-# DMD Controller 5.7
+# DMD Controller 5.8
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -40,6 +40,11 @@ un interruttore anche in Home Assistant.
 - **Rifiuti** — il calendario della raccolta nella colonna libera accanto
   all'orologio, calcolato da una cadenza fissa senza interrogare nessun
   portale.
+- **Satelliti** — avvisa dieci minuti prima che la Stazione Spaziale passi
+  sopra casa, lo ricorda a cinque, e durante il passaggio disegna l'arco del
+  cielo con il puntino che ci scorre sopra: si sa **quanto in alto** guardare.
+  Parla una o due volte al giorno, e solo per quello che si vede davvero a
+  occhio nudo.
 - **Funcam** — una webcam USB sul pannello, ridotta a quello che un computer
   di quarant'anni fa sapeva mostrare. Il servizio **arma** e basta: la ripresa
   parte da un pulsante fisico o dai comandi della pagina, mai dal solo
@@ -360,6 +365,7 @@ stesso servizio e un arbitro sceglie chi vince:
 |---|---|
 | 100 | ZeDMD |
 | 90 | Anteprima (gestione media) |
+| 61 | Satelliti |
 | 60 | Air Radar |
 | 59 | Google Calendar |
 | 58 | Now Playing |
@@ -543,7 +549,8 @@ le tappe.
 | 5.5.1 | La ricompilazione di Doom falliva su `multiple definition`: il Makefile non rifaceva gli oggetti quando cambiavano le opzioni, non i sorgenti |
 | 5.6 | Audio del Game Boy in ritardo di 0,7 s (buffer fisso di ffmpeg) e effetti di Breakout scartati: `aplay` con buffer da 80 ms, e un mixer che somma gli effetti invece di buttarli |
 | 5.6.1 | Il mixer della 5.6 non partiva (un import mancante nascosto da un `except`), e il Game Boy spariva dal giro del tasto Start se si toglieva Doom |
-| **5.7** | **L'orologio non compare più fra un gioco e l'altro: la presa del pannello si chiede prima di avviare l'emulatore, non dopo. Schermata di attesa del Game Boy. Documentazione riallineata** |
+| 5.7 | L'orologio non compare più fra un gioco e l'altro: la presa del pannello si chiede prima di avviare l'emulatore, non dopo. Schermata di attesa del Game Boy. Documentazione riallineata |
+| **5.8** | **Satelliti: il pannello avvisa dieci minuti prima che la Stazione Spaziale passi sopra casa e mostra dove guardare, con l'arco del passaggio e l'ora che lampeggia** |
 
 ---
 

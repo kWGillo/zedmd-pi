@@ -38,6 +38,14 @@ apt install -y python3 python3-pip python3-dev python3-numpy python3-pil \
                python3-flask python3-paho-mqtt cython3 fonts-dejavu-core \
                tzdata ffmpeg samba samba-common-bin
 
+# Calcolo orbitale per la sorgente Satelliti. Non e' in apt: si prende da pip,
+# che sui Raspberry a 64 bit ha la ruota gia' compilata. Se fallisce non si
+# ferma niente — il servizio parte lo stesso e la sorgente Satelliti dice da
+# sola che cosa manca.
+echo "==> Libreria di calcolo orbitale (sgp4)"
+pip install sgp4 --break-system-packages 2>/dev/null || pip install sgp4 || \
+  echo "    sgp4 non installata: la sorgente Satelliti restera' spenta"
+
 echo "==> Compilazione dei binding Python della libreria matrice"
 cd "$MATRIX_DIR"
 pip install . --break-system-packages 2>/dev/null || pip install .

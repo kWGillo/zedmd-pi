@@ -32,7 +32,8 @@ from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      CalendarioSource, ClockSource, DoomSource, GameBoySource,
                      GiochiSource, MediaPlayerSource, NowPlayingSource,
-                     PreviewSource, ScadenzeSource, TelecameraSource,
+                     PreviewSource, SatellitiSource, ScadenzeSource,
+                     TelecameraSource,
                      ZeDMDSource, controlla_rom, controlla_wad)
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
@@ -215,6 +216,10 @@ class Runtime:
         self.preview = PreviewSource(self.cfg, self.display.width,
                                      self.display.height, self.media)
         self.radar = AirRadarSource(self.cfg, self.display.width, self.display.height)
+        # I passaggi visibili della Stazione Spaziale. Priorita' 61, appena
+        # sopra il radar: un passaggio ha un orario, un aereo no.
+        self.satelliti = SatellitiSource(self.cfg, self.display.width,
+                                         self.display.height)
         # Doom prende e restituisce il pannello da solo, quindi conosce
         # l'arbitro: e' l'unica sorgente che lo fa. Non e' un servizio e non
         # compare fra gli interruttori — `enabled` resta False per sempre — e
@@ -283,7 +288,8 @@ class Runtime:
         # Now Playing, e Now Playing non deve sapere che esiste il suono.
         suoni.musica_in_corso = self._musica_in_corso
 
-        for source in (self.zedmd, self.preview, self.radar, self.player,
+        for source in (self.zedmd, self.preview, self.satelliti, self.radar,
+                       self.player,
                        self.birthdays, self.scadenze, self.calendario,
                        self.banner, self.telecamera, self.media,
                        self.doom, self.giochi, self.gameboy,

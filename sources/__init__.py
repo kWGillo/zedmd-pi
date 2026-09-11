@@ -23,8 +23,10 @@ from .scadenze import ScadenzeSource
 from .telecamera import TelecameraSource
 from .zedmd import ZeDMDSource
 
+from .satelliti import SatellitiSource
+
 __all__ = [
-    "Source", "ClockSource", "MediaPlayerSource", "ZeDMDSource", "AirRadarSource",
+    "SatellitiSource", "Source", "ClockSource", "MediaPlayerSource", "ZeDMDSource", "AirRadarSource",
     "BirthdaysSource", "PreviewSource", "HOLD_SECONDS",
     "DoomSource", "DOOM_TASTI", "DOOM_PULSANTI", "tastiere", "controlla_wad",
     "GiochiSource", "giochi_elenco", "ScadenzeSource", "CalendarioSource",

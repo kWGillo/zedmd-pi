@@ -1098,6 +1098,50 @@ Storico:
        manuale completo entrano la scheda audio USB, le pagine web aggiunte
        dalla 5.0 in poi e la tabella delle priorita\' completa di tutte e
        undici le sorgenti.
+  5.8  **I satelliti.** Il pannello avvisa dieci minuti prima che la Stazione
+       Spaziale passi sopra casa, lo ricorda a cinque, e durante il passaggio
+       mostra dove guardare con l\'ora che lampeggia.
+       Non e\' un secondo Air Radar. Il radar racconta quello che passa perche\'
+       e\' interessante saperlo; questa sorgente esiste per **far uscire in
+       terrazzo al momento giusto**, e da li\' discende ogni scelta.
+       *Perche\' parla poco.* Di sedicimila oggetti attivi, a occhio nudo se ne
+       vedono pochissimi: serve che il satellite sia al sole mentre qui e\'
+       gia\' buio. Quella condizione, piu\' la tabella dei pochi di cui
+       conosciamo davvero la luminosita\', porta sedicimila a **uno o due
+       eventi al giorno**. La magnitudine nei TLE non c\'e\' e la fonte
+       pubblica che la dava -- i file di Mike McCants -- e\' stata ritirata:
+       senza quella tabella "visibile" vorrebbe dire soltanto "illuminato", e
+       un CubeSat da dieci centimetri passerebbe il controllo come la
+       Stazione. Il gruppo *stations* di CelesTrak, che credevo fossero le due
+       stazioni, ne contiene venti: il pannello avrebbe mandato qualcuno a
+       cercare una scatoletta invisibile.
+       *Perche\' avvisa prima.* Un passaggio dura fra i due e i sette minuti,
+       misurati. Annunciarlo mentre succede vuol dire arrivare a cose finite.
+       *Perche\' durante il passaggio cambia mestiere.* Nei minuti in cui la
+       Stazione e\' in cielo il pannello non serve piu\' a ricordare: serve a
+       chi e\' fuori e sta cercando. Quindi disegna l\'arco vero del passaggio
+       -- da dove sorge a dove tramonta, l\'altezza sull\'orizzonte -- con il
+       puntino che ci scorre sopra. Il lampeggio va a secondi pari, la fase dei
+       due punti dell\'orologio: due cose che lampeggiano insieme sembrano un
+       battito, due sfasate sembrano un guasto.
+       Niente rete per funzionare: gli elementi orbitali si scaricano una volta
+       ogni sei ore e la posizione si calcola in casa, con SGP4. CelesTrak
+       chiede di non interrogare piu\' di una volta all\'ora e di fermarsi al
+       primo errore HTTP, pena il blocco dell\'indirizzo: il freno e\' scritto
+       nel codice e una prova lo difende.
+       Le coordinate sono quelle dell\'Air Radar -- una casa sola, un posto
+       solo -- e possono anche essere volutamente imprecise: spostarsi di
+       undici chilometri cambia gli orari di due secondi, misurati.
+       Quattro difetti trovati provando sul campo, prima che una riga
+       arrivasse al pannello: un passaggio gia\' in corso spacciato per appena
+       sorto; uno a cavallo della finestra buttato via; la Stazione contata tre
+       volte perche\' il catalogo numera a parte i moduli agganciati; e
+       soprattutto **la bisezione del tramonto che andava dalla parte
+       sbagliata**, scritta pensando solo al bordo che sale. Quest\'ultimo si
+       vedeva solo lanciando due volte lo stesso comando: il sorgere restava
+       identico al secondo, il tramonto ballava di decine di secondi.
+       Manca ancora la pagina dedicata: elevazione minima, preavviso e cadenza
+       si regolano da `config.json`. Arriva nella prossima.
 """
 
-__version__ = "5.7"
+__version__ = "5.8"

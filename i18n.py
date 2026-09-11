@@ -118,6 +118,20 @@ STRINGS = {
         "nessun compleanno nelle prossime %(hours)d ore",
         "no birthday in the next %(hours)d hours"),
 
+    # ------------------------------------------------------------- satelliti
+    "satelliti.in": ("FRA %(min)d MIN", "IN %(min)d MIN"),
+    "satelliti.manca": (
+        "manca la libreria sgp4: "
+        "sudo pip3 install sgp4 --break-system-packages",
+        "the sgp4 library is missing: "
+        "sudo pip3 install sgp4 --break-system-packages"),
+    "status.satelliti.next": (
+        "prossimo: %(name)s alle %(time)s, fino a %(elev)d gradi",
+        "next: %(name)s at %(time)s, up to %(elev)d degrees"),
+    "status.satelliti.none": (
+        "nessun passaggio visibile in vista",
+        "no visible pass coming up"),
+
     # ---------------------------------------------------------- profili pannello
     "preset.label": ("Profilo del pannello", "Panel profile"),
     "preset.custom": ("Personalizzata", "Custom"),
@@ -1530,6 +1544,11 @@ STRINGS = {
     "services.desc.webcam": (
         "La webcam sul pannello, dal vivo e con pochi colori.",
         "The webcam on the panel, live and in few colours."),
+    "services.desc.satelliti": (
+        "Avvisa dieci minuti prima che la Stazione Spaziale passi sopra casa, "
+        "e durante il passaggio mostra dove guardare.",
+        "Warns ten minutes before the Space Station flies over, and during "
+        "the pass shows where to look."),
     "nav.rete": ("Rete", "Network"),
     "rete.title": ("Rete wifi", "Wi-Fi network"),
     "rete.current": ("Collegamento attuale", "Current connection"),
