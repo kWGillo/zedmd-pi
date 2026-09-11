@@ -151,6 +151,18 @@ def post_json(url, payload, timeout=12):
 ROUTESET_URL = "https://api.adsb.lol/api/0/routeset"
 
 
+# Sotto questo non si scende, qualunque cosa dica la configurazione: e' un
+# servizio pubblico e gratuito, e interrogarlo dieci volte al secondo sarebbe
+# un modo rapido per farsi bloccare.
+INTERVALLO_MINIMO = 15
+
+# Pausa minima fra due interrogazioni anche quando la sfilata ha gia' consumato
+# tutto l'intervallo. Serve solo a non trasformare un ritardo in un ciclo che
+# gira a vuoto: in quel caso il radar e' gia' occupato a mostrare aerei, e le
+# richieste restano comunque una per sfilata.
+PAUSA_MINIMA = 1.0
+
+
 class AirRadarSource(Source):
     name = "air_radar"
     label = "Air Radar"
@@ -161,6 +173,9 @@ class AirRadarSource(Source):
         self._running = False
         self._thread = None
         self._wake = threading.Event()
+        # Quanti secondi sono passati davvero fra le ultime due interrogazioni.
+        self._cadenza = 0.0
+        self._inizio_precedente = 0.0
 
         self._lock = threading.Lock()
         self._image = None
@@ -225,6 +240,21 @@ class AirRadarSource(Source):
     def _loop(self):
         while self._running:
             cfg = self.cfg["air_radar"]
+            # L'intervallo si conta da **qui**, non dalla fine della sfilata.
+            # Prima era l'opposto, e non era un dettaglio: `_show_all` tiene
+            # ogni aereo a schermo per i suoi secondi, quindi sei aerei da
+            # dieci secondi aggiungevano un minuto intero fra un'interrogazione
+            # e la successiva. Chi leggeva "ogni 30 secondi" nella pagina ne
+            # otteneva novanta, e un aereo che attraversa il raggio in meno di
+            # quel tempo non veniva visto mai.
+            inizio = time.monotonic()
+            if self._inizio_precedente:
+                # La cadenza **misurata**, non quella configurata. Il difetto
+                # e' rimasto nascosto per versioni intere perche' nessuno
+                # poteva accorgersene: la pagina diceva "ogni 30 secondi" e
+                # nessuno mostrava i novanta veri. Adesso si legge.
+                self._cadenza = inizio - self._inizio_precedente
+            self._inizio_precedente = inizio
             try:
                 aircraft = self._poll(cfg)
                 self._show_all(aircraft, cfg)
@@ -232,8 +262,18 @@ class AirRadarSource(Source):
                 self._status = ("status.radar.error", {"error": str(exc)})
                 print("[airradar] %s" % exc)
 
-            interval = max(15, int(cfg["poll_interval"]))
-            self._wake.wait(interval)
+            try:
+                interval = max(INTERVALLO_MINIMO,
+                               float(cfg["poll_interval"]))
+            except (TypeError, ValueError):
+                # Un valore non numerico in configurazione non deve uccidere il
+                # thread: prima questa riga stava fuori dal `try` e un errore
+                # qui spegneva il radar per sempre, in silenzio.
+                interval = INTERVALLO_MINIMO
+            attesa = interval - (time.monotonic() - inizio)
+            # Se la sfilata ha gia' consumato tutto l'intervallo non si aspetta
+            # quasi niente: si e' in ritardo, e la cosa giusta e' ripartire.
+            self._wake.wait(max(PAUSA_MINIMA, attesa))
             self._wake.clear()
 
     def _poll(self, cfg):
@@ -315,7 +355,9 @@ class AirRadarSource(Source):
         # Lo stato si conserva come chiave e valori, non come frase gia'
         # composta: la lingua la decide chi lo legge, non chi lo scrive.
         self._status = ("status.radar.found",
-                        {"provider": used, "count": len(found), "radius": radius_km})
+                        {"provider": used, "count": len(found),
+                         "radius": radius_km,
+                         "cadence": int(round(self._cadenza))})
         return found
 
     # ------------------------------------------------------------------ registro CSV

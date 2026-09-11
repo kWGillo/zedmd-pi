@@ -33,6 +33,7 @@ import presets
 import ota
 import pulsante
 import rete
+import satelliti
 import suoni
 import webcam
 import spotifyapi
@@ -180,6 +181,22 @@ def create_app(runtime):
     # ------------------------------------------------------------ protocollo ZeDMD
     # Serviti anche qui per poterli provare con curl sulla porta 8080;
     # il client reale usa il server dedicato sulla porta 80.
+
+    def _bussola_web(gradi):
+        if gradi is None:
+            return "?"
+        punti = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+                 "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"]
+        return punti[int((gradi + 11.25) % 360 / 22.5)]
+
+    def _limite(valore, default, basso, alto, intero=False):
+        """Un numero dal modulo web, tenuto dentro i suoi estremi."""
+        try:
+            n = float(valore)
+        except (TypeError, ValueError):
+            return default
+        n = max(basso, min(alto, n))
+        return int(n) if intero else n
 
     def plain(body):
         return app.response_class(str(body), mimetype="text/plain")
@@ -2058,6 +2075,101 @@ def create_app(runtime):
         result = ("rotta di %s: %s" % (callsign, route) if route
                   else "nessuna rotta disponibile per %s" % callsign)
         return redirect(url_for("page_radar", callsign=callsign, result=result))
+
+    # ------------------------------------------------------------- satelliti
+
+    @app.route("/satelliti")
+    def page_satelliti():
+        sorgente = runtime.satelliti
+        conf = cfg["satelliti"]
+        lat, lon = sorgente._coordinate()
+        prossimi = []
+        for p in sorgente._passaggi[:12]:
+            motivo = ""
+            if not p.get("visibile") and lat is not None:
+                alto = satelliti.elevazione_sole(p["culmine"], lat, lon)
+                # Perche' non si vede: quasi sempre perche' c'e' ancora luce.
+                # Dirlo evita la domanda "e allora perche' non me l'ha detto?".
+                motivo = (i18n.translate("satelliti.why.sun",
+                                         current_language(),
+                                         sun=int(round(alto)))
+                          if alto > satelliti.BUIO_GRADI
+                          else i18n.translate("satelliti.why.shadow",
+                                              current_language()))
+            spegnimento = p.get("spegnimento")
+            prossimi.append({
+                "nome": p.get("breve", p["nome"]),
+                "sorge": p["sorge"].astimezone().strftime("%a %d %H:%M:%S"),
+                "durata": "%.1f" % p["durata_min"],
+                "elevazione": int(round(p["elevazione_massima"])),
+                "da": _bussola_web(p["azimut_sorge"]),
+                "a": _bussola_web(p["azimut_tramonta"]),
+                "visibile": bool(p.get("visibile")),
+                "motivo": motivo,
+                "spegnimento": (spegnimento.astimezone().strftime("%H:%M:%S")
+                                if spegnimento else ""),
+            })
+        tle = []
+        for chiave in (conf.get("gruppi") or []):
+            eta = satelliti.eta_dati(chiave, conf.get("cartella_tle", ""))
+            tle.append({
+                "gruppo": chiave,
+                "oggetti": len(satelliti.carica(chiave,
+                                                conf.get("cartella_tle", ""))),
+                "eta": ("%.1f h" % eta) if eta is not None else "",
+            })
+        return render_template(
+            "satelliti.html", cfg=cfg, conf=conf, prossimi=prossimi, tle=tle,
+            gruppi=sorted(satelliti.GRUPPI.items()),
+            registro=sorgente.info_registro(),
+            disponibile=satelliti.DISPONIBILE,
+            coordinate=lat is not None,
+            stato=sorgente.status(current_language()),
+            page="satelliti")
+
+    @app.route("/api/satelliti", methods=["POST"])
+    def api_satelliti():
+        conf = cfg["satelliti"]
+        conf["elevazione_minima"] = _limite(
+            request.form.get("elevazione_minima"),
+            conf["elevazione_minima"], 0.0, 80.0)
+        conf["preavviso_minuti"] = _limite(
+            request.form.get("preavviso_minuti"),
+            conf["preavviso_minuti"], 1, 60, intero=True)
+        conf["cadenza_minuti"] = _limite(
+            request.form.get("cadenza_minuti"),
+            conf["cadenza_minuti"], 1, 30, intero=True)
+        scelti = [k for k in satelliti.GRUPPI
+                  if request.form.get("gruppo_%s" % k) == "on"]
+        # Mai lasciare l'elenco vuoto: un servizio acceso che non guarda niente
+        # sembra rotto, e non lo e'.
+        conf["gruppi"] = scelti or list(satelliti.GRUPPI_PREDEFINITI)
+        conf["mostra_non_visibili"] = request.form.get("mostra_non_visibili") == "on"
+        conf["tutti_gli_oggetti"] = request.form.get("tutti_gli_oggetti") == "on"
+        dmdconf.save()
+        # I passaggi dipendono da questi numeri: ricalcolarli subito evita che
+        # la pagina mostri l'elenco vecchio accanto ai valori nuovi.
+        runtime.satelliti.ricalcola()
+        return redirect(url_for("page_satelliti"))
+
+    @app.route("/api/satelliti/log/toggle", methods=["POST"])
+    def api_satelliti_log_toggle():
+        cfg["satelliti"]["log_enabled"] = request.form.get("log_enabled") == "on"
+        dmdconf.save()
+        return redirect(url_for("page_satelliti"))
+
+    @app.route("/api/satelliti/log")
+    def api_satelliti_log():
+        info = runtime.satelliti.info_registro()
+        if not info["rows"]:
+            return plain("Nessun passaggio registrato.")
+        return send_file(info["path"], as_attachment=True,
+                         download_name="satelliti.csv", mimetype="text/csv")
+
+    @app.route("/api/satelliti/log/clear", methods=["POST"])
+    def api_satelliti_log_clear():
+        runtime.satelliti.svuota_registro()
+        return redirect(url_for("page_satelliti"))
 
     @app.route("/api/radar/log")
     def api_radar_log():

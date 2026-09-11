@@ -1,4 +1,4 @@
-# DMD Controller 5.8
+# DMD Controller 6.0
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -43,8 +43,13 @@ un interruttore anche in Home Assistant.
 - **Satelliti** — avvisa dieci minuti prima che la Stazione Spaziale passi
   sopra casa, lo ricorda a cinque, e durante il passaggio disegna l'arco del
   cielo con il puntino che ci scorre sopra: si sa **quanto in alto** guardare.
-  Parla una o due volte al giorno, e solo per quello che si vede davvero a
-  occhio nudo.
+  Parla una o due volte al giorno per quello che si vede davvero a occhio
+  nudo, e in grigio-azzurro — senza avvisi e senza lampeggio — anche per i
+  passaggi che ci sono ma non si vedono. Quando la Stazione sta per entrare
+  nell'ombra della Terra e sparire a metà cielo, il pannello lo sa in anticipo
+  e lo segna sull'arco. Un registro CSV conserva tutti i passaggi con
+  l'altezza del Sole accanto: è lì che si legge perché una sera è rimasto
+  muto.
 - **Funcam** — una webcam USB sul pannello, ridotta a quello che un computer
   di quarant'anni fa sapeva mostrare. Il servizio **arma** e basta: la ripresa
   parte da un pulsante fisico o dai comandi della pagina, mai dal solo
@@ -115,6 +120,7 @@ oppure si scaricano con `git clone` o dal pulsante *Code → Download ZIP*.
 | Funcam: la webcam sul pannello, con pochi colori | `docs/DMD_telecamera.pdf` |
 | Joypad: mappatura dei comandi | `docs/DMD_joypad.pdf` |
 | Audio: scheda USB, avvisi dei servizi, effetti dei giochi | `docs/DMD_audio.pdf` |
+| Satelliti: i passaggi della Stazione Spaziale, l'arco del cielo, il registro | `docs/DMD_satelliti.pdf` |
 
 I PDF **non** vengono installati in `/opt/dmd`: sul Raspberry non servono, e
 l'aggiornamento via rete copia solo ciò che il servizio esegue.
@@ -550,7 +556,10 @@ le tappe.
 | 5.6 | Audio del Game Boy in ritardo di 0,7 s (buffer fisso di ffmpeg) e effetti di Breakout scartati: `aplay` con buffer da 80 ms, e un mixer che somma gli effetti invece di buttarli |
 | 5.6.1 | Il mixer della 5.6 non partiva (un import mancante nascosto da un `except`), e il Game Boy spariva dal giro del tasto Start se si toglieva Doom |
 | 5.7 | L'orologio non compare più fra un gioco e l'altro: la presa del pannello si chiede prima di avviare l'emulatore, non dopo. Schermata di attesa del Game Boy. Documentazione riallineata |
-| **5.8** | **Satelliti: il pannello avvisa dieci minuti prima che la Stazione Spaziale passi sopra casa e mostra dove guardare, con l'arco del passaggio e l'ora che lampeggia** |
+| 5.8 | Satelliti: il pannello avvisa dieci minuti prima che la Stazione Spaziale passi sopra casa e mostra dove guardare, con l'arco del passaggio e l'ora che lampeggia |
+| 5.8.1 | Il radar contava l'intervallo dalla fine della sfilata invece che dall'inizio dell'interrogazione, e più aerei trovava meno spesso guardava. La cadenza misurata ora si legge nella riga di stato |
+| 5.8.2 | Registro CSV dei passaggi dei satelliti, con dentro anche quelli non visibili e l'altezza del Sole che spiega perché |
+| **6.0** | **I satelliti diventano un servizio completo: pagina dedicata, il terzo colore per i passaggi che non si vedono, e lo spegnimento in ombra segnato sull'arco** |
 
 ---
 

@@ -31,6 +31,8 @@ due cose che lampeggiano insieme sembrano un battito, due sfasate sembrano un
 guasto.
 """
 
+import csv
+import os
 import threading
 import time
 from datetime import datetime, timedelta, timezone
@@ -52,6 +54,27 @@ BIANCO = (0xFF, 0xFF, 0xFF)       # adesso
 GRIGIO = (0x70, 0x78, 0x88)
 ARCO = (0x40, 0x80, 0xD0)
 PUNTO = (0xFF, 0xF0, 0xC0)
+
+# Il terzo stato: un passaggio che c'e' ma non si vede. Grigio-azzurro spento,
+# niente preavviso, niente lampeggio. Il colore e l'assenza di lampeggio dicono
+# da soli che non e' un invito a uscire -- e intanto l'arco, che e' la parte
+# piu' bella da guardare, resta. Sono quattro comparse al giorno contro una.
+SPENTO = (0x50, 0x62, 0x88)
+SPENTO_CUPO = (0x2A, 0x34, 0x4C)
+ARCO_SPENTO = (0x22, 0x30, 0x50)
+
+# Dove il puntino sparisce entrando nell'ombra della Terra: un taglio sull'arco
+# e il resto disegnato in tono minore, perche' da li' in poi non c'e' piu'
+# niente da vedere.
+OMBRA = (0x80, 0x40, 0x30)
+
+# Le colonne del registro. L'ordine non si cambia a cuor leggero: un file gia'
+# scritto ha le sue, e aggiungerne una in mezzo produce righe disallineate.
+# Come per il radar, se cambiano il vecchio registro si mette da parte con la
+# data nel nome invece di rovinarlo.
+COLONNE_CSV = ["sorge", "nome", "norad", "gruppo", "durata_min",
+               "elevazione_massima", "azimut_sorge", "azimut_tramonta",
+               "magnitudine", "visibile", "sole_gradi"]
 
 PUNTI_BUSSOLA = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
                  "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"]
@@ -83,6 +106,11 @@ class SatellitiSource(Source):
         self._errore = ""
         self._ultimo_calcolo = 0.0
         self._ultima_firma = None
+        # I passaggi gia' scritti nel registro, per non riscriverli a ogni
+        # ricalcolo. La chiave e' il satellite piu' l'istante del sorgere al
+        # minuto: lo stesso passaggio ricalcolato sei ore dopo cade sullo
+        # stesso minuto.
+        self._registrati = set()
         self._wake = threading.Event()
         self._thread = None
         self._font_grande = _load_font(max(12, int(height * 0.46)))
@@ -138,12 +166,20 @@ class SatellitiSource(Source):
     def _conf(self):
         return self.cfg.get("satelliti", {})
 
-    def _prossimo(self, adesso=None):
-        """Il primo passaggio non ancora finito."""
+    def _prossimo(self, adesso=None, solo_visibili=True):
+        """Il primo passaggio non ancora finito.
+
+        Sul pannello vanno solo i visibili: annunciare un passaggio diurno
+        manderebbe qualcuno a cercare un puntino che non c'e'. Nel registro ci
+        finiscono tutti.
+        """
         adesso = adesso or datetime.now(timezone.utc)
         for p in self._passaggi:
-            if p["tramonta"] >= adesso:
-                return p
+            if p["tramonta"] < adesso:
+                continue
+            if solo_visibili and not p.get("visibile"):
+                continue
+            return p
         return None
 
     # ------------------------------------------------------------------ ciclo
@@ -152,6 +188,7 @@ class SatellitiSource(Source):
         while self._running:
             try:
                 self._aggiorna_dati()
+                self._registra_conclusi(datetime.now(timezone.utc))
                 self._disegna_se_serve()
             except Exception as exc:          # noqa: BLE001
                 # Un satellite che non si vede non deve spegnere il DMD.
@@ -202,12 +239,31 @@ class SatellitiSource(Source):
             return
 
         self._errore = ""
+        # **Tutti** i passaggi, non solo quelli visibili. Il filtro della
+        # visibilita' e' una scelta di cosa *mostrare*, non di cosa *sapere*:
+        # con due soli oggetti calcolarli tutti costa niente, e il registro
+        # puo' rispondere alla domanda vera -- "perche' stasera il DMD non ha
+        # detto niente?" -- con "perche' e' passata a 70 gradi alle 14:20, in
+        # pieno giorno".
         self._passaggi = satelliti.prossimi(
             elenco, lat, lon, datetime.now(timezone.utc),
             ore=int(conf.get("finestra_ore", 24)),
             elevazione_minima=float(conf.get("elevazione_minima", 10.0)),
-            solo_visibili=True, massimo=20,
+            solo_visibili=False, massimo=40,
             solo_noti=not bool(conf.get("tutti_gli_oggetti", False)))
+
+    def ricalcola(self):
+        """Butta via i passaggi e li rifa' al prossimo giro.
+
+        La chiama la pagina web dopo un salvataggio: elevazione minima e
+        gruppi cambiano l'elenco, e mostrare i passaggi vecchi accanto ai
+        valori nuovi e' il modo piu' rapido per far credere che il
+        salvataggio non abbia funzionato.
+        """
+        self._ultimo_calcolo = 0.0
+        self._passaggi = []
+        self._ultima_firma = None
+        self._wake.set()
 
     def _coordinate(self):
         """Le coordinate sono quelle del radar: una casa sola, un posto solo.
@@ -224,6 +280,106 @@ class SatellitiSource(Source):
             return None, None
         return lat, lon
 
+    # -------------------------------------------------------------- registro
+
+    def percorso_registro(self):
+        return self._conf().get("log_path", "/var/lib/dmd/satelliti.csv")
+
+    def _chiave(self, passaggio):
+        return (passaggio["norad"], passaggio["sorge"].strftime("%Y%m%d%H%M"))
+
+    def _registra_conclusi(self, adesso):
+        """Scrive nel registro i passaggi che sono appena finiti.
+
+        Si scrive **a cose fatte**, non al calcolo: un passaggio previsto non
+        e' un passaggio avvenuto, e un registro che mescola le due cose non
+        risponde piu' a nessuna domanda. E' la stessa regola del registro dei
+        voli: dentro c'e' quello che il DMD ha visto passare, non quello che
+        si aspettava.
+
+        Ci finiscono anche i **non visibili**, con la colonna che lo dice e
+        l'altezza del Sole che spiega perche'. E' l'unico modo per rispondere
+        a "stasera il pannello non ha detto niente": perche' la Stazione e'
+        passata alle due del pomeriggio.
+        """
+        if not self._conf().get("log_enabled", True):
+            return
+        nuovi = [p for p in self._passaggi
+                 if p["tramonta"] <= adesso and self._chiave(p) not in self._registrati]
+        if not nuovi:
+            return
+        percorso = self.percorso_registro()
+        try:
+            cartella = os.path.dirname(percorso)
+            if cartella:
+                os.makedirs(cartella, exist_ok=True)
+            nuovo_file = (not os.path.exists(percorso)
+                          or os.path.getsize(percorso) == 0)
+            if not nuovo_file and self._intestazione_cambiata(percorso):
+                storico = "%s.%s.csv" % (
+                    percorso[:-4] if percorso.endswith(".csv") else percorso,
+                    time.strftime("%Y%m%d-%H%M%S"))
+                try:
+                    os.rename(percorso, storico)
+                    print("[satelliti] registro precedente in %s" % storico)
+                    nuovo_file = True
+                except OSError:
+                    pass
+            with open(percorso, "a", newline="") as fh:
+                scrittore = csv.writer(fh)
+                if nuovo_file:
+                    scrittore.writerow(COLONNE_CSV)
+                for p in sorted(nuovi, key=lambda q: q["sorge"]):
+                    self._registrati.add(self._chiave(p))
+                    lat, lon = self._coordinate()
+                    sole = ""
+                    if lat is not None:
+                        sole = "%.1f" % satelliti.elevazione_sole(
+                            p["culmine"], lat, lon)
+                    scrittore.writerow([
+                        p["sorge"].astimezone().strftime("%Y-%m-%dT%H:%M:%S"),
+                        p.get("breve", p["nome"]),
+                        p["norad"],
+                        p.get("gruppo", ""),
+                        "%.1f" % p["durata_min"],
+                        "%.0f" % p["elevazione_massima"],
+                        bussola(p["azimut_sorge"]),
+                        bussola(p["azimut_tramonta"]),
+                        "" if p.get("magnitudine") is None else "%.1f" % p["magnitudine"],
+                        "si" if p.get("visibile") else "no",
+                        sole,
+                    ])
+        except OSError as exc:
+            print("[satelliti] registro non scrivibile: %s" % exc)
+
+    @staticmethod
+    def _intestazione_cambiata(percorso):
+        try:
+            with open(percorso, newline="") as fh:
+                prima = next(csv.reader(fh), [])
+        except (OSError, StopIteration):
+            return False
+        return prima != COLONNE_CSV
+
+    def info_registro(self):
+        """Quante righe ha il registro e quanto pesa, per la pagina web."""
+        percorso = self.percorso_registro()
+        try:
+            with open(percorso, newline="") as fh:
+                righe = max(0, sum(1 for _ in fh) - 1)
+            return {"path": percorso, "rows": righe,
+                    "size": os.path.getsize(percorso)}
+        except OSError:
+            return {"path": percorso, "rows": 0, "size": 0}
+
+    def svuota_registro(self):
+        try:
+            os.remove(self.percorso_registro())
+            self._registrati.clear()
+            return True
+        except OSError:
+            return False
+
     # --------------------------------------------------------------- disegno
 
     def _disegna_se_serve(self):
@@ -239,6 +395,14 @@ class SatellitiSource(Source):
             if stato == "avviso" and not self._nella_finestra(
                     passaggio, adesso, preavviso, cadenza):
                 stato = ""
+        if not stato and conf.get("mostra_non_visibili", True):
+            # Nessun passaggio visibile da annunciare: c'e' per caso qualcosa
+            # che sta passando adesso senza vedersi? Si mostra solo attorno al
+            # culmine, e per pochi secondi: e' una cartolina, non un avviso, e
+            # non deve tenere il pannello per sei minuti.
+            invisibile = self._invisibile_adesso(adesso)
+            if invisibile is not None:
+                passaggio, stato = invisibile, "spento"
         self._stato = stato
         if not stato:
             return
@@ -248,8 +412,8 @@ class SatellitiSource(Source):
             (passaggio["sorge"] - adesso).total_seconds() / 60.0))
         # La firma evita di ridisegnare cinquanta volte lo stesso fotogramma:
         # cambia quando cambia qualcosa che si vede.
-        if stato == "adesso":
-            firma = ("adesso", passaggio["sorge"], acceso,
+        if stato in ("adesso", "spento"):
+            firma = (stato, passaggio["sorge"], acceso and stato == "adesso",
                      int((adesso - passaggio["sorge"]).total_seconds()))
         else:
             firma = ("avviso", passaggio["sorge"], mancano)
@@ -259,11 +423,32 @@ class SatellitiSource(Source):
 
         if stato == "adesso":
             img = self._adesso(passaggio, adesso, acceso)
+        elif stato == "spento":
+            # L'ora non lampeggia: non sta succedendo niente che tu possa
+            # vedere, e un lampeggio direbbe il contrario.
+            img = self._adesso(passaggio, adesso, True, visibile=False)
         else:
             img = self._avviso(passaggio, mancano)
         with self._lock:
             self._image = img
             self._dirty = True
+
+    def _invisibile_adesso(self, adesso):
+        """Un passaggio non visibile che sta culminando proprio ora.
+
+        Si mostra attorno al **culmine** e non dal sorgere: e' l'istante in cui
+        il puntino sarebbe piu' alto, l'arco e' piu' bello da guardare, e
+        soprattutto dura pochi secondi invece di sei minuti. Il pannello ha
+        altre cose da dire.
+        """
+        durata = max(5, int(self._conf().get("durata_spento_secondi", 25)))
+        meta = timedelta(seconds=durata / 2.0)
+        for p in self._passaggi:
+            if p.get("visibile"):
+                continue
+            if p["culmine"] - meta <= adesso <= p["culmine"] + meta:
+                return p
+        return None
 
     def _nella_finestra(self, passaggio, adesso, preavviso, cadenza):
         """Il preavviso non resta appeso per dieci minuti.
@@ -310,7 +495,7 @@ class SatellitiSource(Source):
                     VERDE_CUPO, ancora="ra")
         return img
 
-    def _adesso(self, passaggio, quando, acceso):
+    def _adesso(self, passaggio, quando, acceso, visibile=True):
         """Durante il passaggio: dove guardare, adesso.
 
         A destra non c'e' un disegnino decorativo. L'asse orizzontale e' il
@@ -327,15 +512,32 @@ class SatellitiSource(Source):
         if vista is None:
             return img
 
+        testo_primo = BIANCO if visibile else SPENTO
+        testo_sotto = GRIGIO if visibile else SPENTO_CUPO
+        colore_arco = ARCO if visibile else ARCO_SPENTO
+        colore_punto = PUNTO if visibile else SPENTO
+
         nome = passaggio.get("breve", passaggio["nome"])[:8]
-        self._testo(d, 4, int(A * 0.01), nome, self._font_grande, BIANCO)
+        self._testo(d, 4, int(A * 0.01), nome, self._font_grande, testo_primo)
         if acceso:
             self._testo(d, 4, int(A * 0.47),
                         quando.astimezone().strftime("%H:%M"),
-                        self._font_medio, BIANCO)
-        self._testo(d, 4, int(A * 0.73),
-                    "ALT %d°" % round(vista["elevazione"]),
-                    self._font_piccolo, GRIGIO)
+                        self._font_medio, testo_primo)
+        if visibile:
+            sotto = "ALT %d°" % round(vista["elevazione"])
+            spegne = passaggio.get("spegnimento")
+            if spegne is not None and quando <= spegne:
+                # Negli ultimi secondi prima che sparisca, il pannello smette
+                # di dire quanto e' alta e dice quello che sta per succedere.
+                if (spegne - quando).total_seconds() <= 45:
+                    sotto = "SPARISCE %s" % spegne.astimezone().strftime("%H:%M")
+        else:
+            # Perche' non si vede: quasi sempre perche' c'e' ancora il Sole.
+            lat_s, lon_s = self._coordinate()
+            alt_sole = satelliti.elevazione_sole(quando, lat_s, lon_s)
+            sotto = ("SOLE %+d°" % round(alt_sole)) if alt_sole > -6 \
+                else "IN OMBRA"
+        self._testo(d, 4, int(A * 0.73), sotto, self._font_piccolo, testo_sotto)
 
         x0, x1 = int(L * 0.41), L - int(L * 0.06)
         # La base dell'arco lascia sotto lo spazio per le due sigle: su
@@ -360,18 +562,30 @@ class SatellitiSource(Source):
         d.line([(x0 - 4, base), (x1 + 4, base)], fill=(0x30, 0x34, 0x3C))
         punti = [(x0 + (x1 - x0) * f, base - (base - cima) * e / massima)
                  for f, e in campioni]
-        if len(punti) > 1:
-            d.line(punti, fill=ARCO, width=1)
+        spegne = passaggio.get("spegnimento") if visibile else None
+        if len(punti) > 1 and spegne is not None:
+            # L'arco si disegna in due pezzi: fino allo spegnimento com'e', da
+            # li' in poi in tono minore. Non e' decorazione -- dice che da quel
+            # punto non c'e' piu' niente da guardare.
+            quota_sp = (spegne - passaggio["sorge"]).total_seconds() / max(durata, 1.0)
+            taglio = min(max(quota_sp, 0.0), 1.0)
+            i_taglio = max(1, min(len(punti) - 1, int(round(taglio * (len(punti) - 1)))))
+            d.line(punti[:i_taglio + 1], fill=colore_arco, width=1)
+            d.line(punti[i_taglio:], fill=SPENTO_CUPO, width=1)
+            xs = punti[i_taglio][0]
+            d.line([(xs, cima - 2), (xs, base)], fill=OMBRA)
+        elif len(punti) > 1:
+            d.line(punti, fill=colore_arco, width=1)
 
         fatto = (quando - passaggio["sorge"]).total_seconds() / max(durata, 1.0)
         fatto = min(max(fatto, 0.0), 1.0)
         px = x0 + (x1 - x0) * fatto
         py = base - (base - cima) * max(0.0, vista["elevazione"]) / massima
         d.line([(px, base), (px, py)], fill=(0x22, 0x30, 0x48))
-        d.ellipse([px - 2, py - 2, px + 2, py + 2], fill=PUNTO)
+        d.ellipse([px - 2, py - 2, px + 2, py + 2], fill=colore_punto)
 
         self._testo(d, x0 - 4, base + 2, bussola(passaggio["azimut_sorge"]),
-                    self._font_piccolo, GRIGIO)
+                    self._font_piccolo, testo_sotto)
         self._testo(d, x1 + 4, base + 2, bussola(passaggio["azimut_tramonta"]),
-                    self._font_piccolo, GRIGIO, ancora="ra")
+                    self._font_piccolo, testo_sotto, ancora="ra")
         return img

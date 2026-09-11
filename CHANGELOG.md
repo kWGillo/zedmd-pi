@@ -2,6 +2,103 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [6.0]
+
+Numero tondo perché il DMD fa una cosa che prima non faceva: non mostra più
+soltanto quello che succede, **dice quando uscire a guardare**.
+
+- **Il terzo colore.** I passaggi che non si vedono sono **quattro al giorno
+  contro uno**: mostrarli cambia il servizio da «parla una volta al giorno» a
+  «parla cinque volte». Arrivano in **grigio-azzurro spento**, senza preavviso
+  e senza lampeggio, per venti secondi attorno al culmine — dove l'arco è più
+  bello da guardare. La riga sotto dice perché non si vede: `SOLE +21°` oppure
+  `IN OMBRA`.
+
+  Il colore e l'assenza di lampeggio dicono da soli che non è un invito a
+  uscire, ed è tutta la differenza fra un servizio più vivo e un servizio che
+  mente. Si spegne da una casella.
+
+- **Lo spegnimento in ombra.** Nel **13%** dei passaggi visibili la Stazione
+  non tramonta: entra nell'ombra della Terra e **sparisce di colpo a metà
+  cielo**, in tre o quattro secondi. È la cosa più spettacolare che faccia, e
+  chi non se l'aspetta pensa di aver perso di vista un aereo.
+
+  Adesso l'istante si calcola. Sull'arco c'è un **taglio** che segna il punto,
+  la curva oltre quel punto è in tono minore, e negli ultimi quarantacinque
+  secondi il pannello scrive **`SPARISCE 21:14`**.
+
+- **La pagina Satelliti.** Elevazione minima, preavviso, cadenza, famiglie, le
+  due caselle, l'età degli elementi orbitali, l'elenco dei prossimi passaggi
+  — con il motivo accanto a quelli invisibili — e i pulsanti del registro.
+
+  Con una regola scritta nel codice e difesa da una prova: togliendo tutte le
+  spunte alle famiglie ne resta una. Un servizio acceso che non guarda niente
+  non dà nessun errore: resta muto per sempre, e chi lo ha acceso pensa che
+  sia rotto.
+
+- **Il manuale** `docs/satelliti.it.md`, con il PDF: perché il servizio parla
+  poco, perché avvisa dieci minuti prima, perché la magnitudine è una tabella
+  scritta a mano, e la tabella che traduce l'elevazione in distanza (anche a
+  60 gradi la Stazione è a 225 km).
+
+## [5.8.2]
+
+- **Il registro dei passaggi dei satelliti**, in `/var/lib/dmd/satelliti.csv`.
+  Come quello dei voli, ma con una colonna che cambia il senso della cosa:
+  dentro ci finiscono anche i passaggi **non visibili**, con l'altezza del Sole
+  accanto.
+
+  Prima i non visibili non venivano nemmeno calcolati, si scartavano subito:
+  era il filtro al posto sbagliato. La visibilità è una scelta di cosa
+  **mostrare**, non di cosa **sapere** — e con due soli oggetti calcolarli
+  tutti costa niente.
+
+  Così il registro risponde alla domanda che altrimenti resta senza risposta:
+  *perché stasera il pannello non ha detto niente?* Perché la Stazione è
+  passata a 82 gradi alle 11:46, con il Sole a 21 gradi. Su tre giorni:
+  sedici passaggi, tre visibili.
+
+  Si scrive **a cose fatte**, non al calcolo: un passaggio previsto non è un
+  passaggio avvenuto. Stessa regola del registro dei voli.
+
+  Colonne: `sorge, nome, norad, gruppo, durata_min, elevazione_massima,
+  azimut_sorge, azimut_tramonta, magnitudine, visibile, sole_gradi`.
+
+## [5.8.1]
+
+- **Il radar non vedeva aerei che passavano davvero.** Segnalato dal campo:
+  aerei sopra casa, pannello muto, e premendo *«interroga adesso»* i voli
+  comparivano subito. La catena interrogazione → disegno funzionava: era la
+  **cadenza**.
+
+  Nel ciclo l'intervallo si contava dalla **fine della sfilata** invece che
+  dall'inizio dell'interrogazione. `_show_all` tiene ogni aereo a schermo per i
+  suoi secondi, quindi tre aerei da quindici secondi aggiungevano tre quarti di
+  minuto fra un'interrogazione e la successiva: chi leggeva *«ogni 40 secondi»*
+  ne otteneva ottantacinque.
+
+  Ed era un circolo vizioso, perché peggiorava proprio quando il radar era più
+  utile: **più aerei trovava, meno spesso guardava.**
+
+  Misurato su un caso vero — raggio 3 km in un corridoio di atterraggio — la
+  probabilità di vedere un aereo in avvicinamento passava dall'89% al **66%**
+  nei momenti di traffico. Con la correzione e venti secondi di intervallo si
+  arriva al 99%, e all'87% sui sorvoli alti e veloci.
+
+- **Un valore sbagliato non uccide più il radar.** `int(cfg["poll_interval"])`
+  stava fuori dal `try`: un numero scritto male in configurazione avrebbe fatto
+  morire il thread per sempre, senza una riga nel registro.
+
+- **La cadenza vera adesso si legge.** La riga di stato riporta i secondi
+  **misurati** fra due interrogazioni, non quelli configurati. È la ragione per
+  cui il difetto è rimasto nascosto per versioni intere: la pagina dichiarava
+  trenta secondi e nessuno mostrava i novanta veri.
+
+- **Intervallo predefinito da 30 a 20 secondi.** Con un raggio di pochi
+  chilometri un aereo di linea attraversa il cerchio in meno di mezzo minuto, e
+  interrogare più lentamente del transito vuol dire non vederlo mai. Sotto i 15
+  non si scende comunque: è un servizio gratuito della comunità.
+
 ## [5.8]
 
 - **I satelliti.** Una sorgente nuova: il pannello avvisa **dieci minuti

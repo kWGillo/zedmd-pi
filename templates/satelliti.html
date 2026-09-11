@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}{{ t('satelliti.title') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('satelliti.title') }}</h2>
+  <p class="hint">{{ t('satelliti.intro') }}</p>
+  {% if not disponibile %}
+  <p class="status err">{{ t('satelliti.manca') }}</p>
+  {% elif not coordinate %}
+  <p class="status err">{{ t('satelliti.nocoords') }}
+    <a href="{{ url_for('page_radar') }}">{{ t('nav.radar') }}</a></p>
+  {% else %}
+  <p class="status">{{ stato }}</p>
+  {% endif %}
+</section>
+
+{% if prossimi %}
+<section class="card">
+  <h2>{{ t('satelliti.next') }}</h2>
+  <p class="hint">{{ t('satelliti.next.hint') }}</p>
+  <table class="elenco">
+    <tr>
+      <th>{{ t('satelliti.col.sat') }}</th>
+      <th>{{ t('satelliti.col.rise') }}</th>
+      <th>{{ t('satelliti.col.len') }}</th>
+      <th>{{ t('satelliti.col.max') }}</th>
+      <th>{{ t('satelliti.col.dir') }}</th>
+      <th>{{ t('satelliti.col.vis') }}</th>
+    </tr>
+    {% for p in prossimi %}
+    <tr class="{{ 'visibile' if p.visibile else 'invisibile' }}">
+      <td>{{ p.nome }}</td>
+      <td>{{ p.sorge }}</td>
+      <td>{{ p.durata }}'</td>
+      <td>{{ p.elevazione }}&deg;</td>
+      <td>{{ p.da }} &rarr; {{ p.a }}</td>
+      <td>
+        {% if p.visibile %}<strong>{{ t('satelliti.vis.yes') }}</strong>
+          {% if p.spegnimento %}<br><small>{{ t('satelliti.vanishes', time=p.spegnimento) }}</small>{% endif %}
+        {% else %}{{ t('satelliti.vis.no') }}<br><small>{{ p.motivo }}</small>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</section>
+{% endif %}
+
+<section class="card">
+  <h2>{{ t('satelliti.settings') }}</h2>
+  <form method="post" action="{{ url_for('api_satelliti') }}">
+    <div class="row3">
+      <div>
+        <label for="elevazione_minima">{{ t('satelliti.elev') }}</label>
+        <input type="number" id="elevazione_minima" name="elevazione_minima"
+               min="0" max="80" step="1" value="{{ conf.elevazione_minima|round|int }}">
+        <p class="hint">{{ t('satelliti.elev.hint') }}</p>
+      </div>
+      <div>
+        <label for="preavviso_minuti">{{ t('satelliti.lead') }}</label>
+        <input type="number" id="preavviso_minuti" name="preavviso_minuti"
+               min="1" max="60" step="1" value="{{ conf.preavviso_minuti }}">
+        <p class="hint">{{ t('satelliti.lead.hint') }}</p>
+      </div>
+      <div>
+        <label for="cadenza_minuti">{{ t('satelliti.step') }}</label>
+        <input type="number" id="cadenza_minuti" name="cadenza_minuti"
+               min="1" max="30" step="1" value="{{ conf.cadenza_minuti }}">
+        <p class="hint">{{ t('satelliti.step.hint') }}</p>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div>
+        <label>{{ t('satelliti.groups') }}</label>
+        {% for chiave, etichetta in gruppi %}
+        <label class="check"><input type="checkbox" name="gruppo_{{ chiave }}"
+               {{ 'checked' if chiave in conf.gruppi }}> {{ etichetta }}</label>
+        {% endfor %}
+        <p class="hint">{{ t('satelliti.groups.hint') }}</p>
+      </div>
+      <div>
+        <label class="check"><input type="checkbox" name="mostra_non_visibili"
+               {{ 'checked' if conf.mostra_non_visibili }}>
+          {{ t('satelliti.showdim') }}</label>
+        <p class="hint">{{ t('satelliti.showdim.hint') }}</p>
+        <label class="check"><input type="checkbox" name="tutti_gli_oggetti"
+               {{ 'checked' if conf.tutti_gli_oggetti }}>
+          {{ t('satelliti.allobjects') }}</label>
+        <p class="hint">{{ t('satelliti.allobjects.hint') }}</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit">{{ t('common.save') }}</button>
+    </div>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('satelliti.tle') }}</h2>
+  <p class="hint">{{ t('satelliti.tle.hint') }}</p>
+  <table class="elenco">
+    <tr><th>{{ t('satelliti.col.group') }}</th>
+        <th>{{ t('satelliti.col.objects') }}</th>
+        <th>{{ t('satelliti.col.age') }}</th></tr>
+    {% for r in tle %}
+    <tr><td>{{ r.gruppo }}</td><td>{{ r.oggetti }}</td>
+        <td>{{ r.eta if r.eta else t('satelliti.tle.never') }}</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+<section class="card">
+  <h2>{{ t('satelliti.log') }}</h2>
+  <p class="hint">{{ t('satelliti.log.hint') }}</p>
+  <p class="status">{{ t('satelliti.log.rows', rows=registro.rows, size=(registro.size / 1024)|round(1)) }}</p>
+  <form method="post" action="{{ url_for('api_satelliti_log_toggle') }}" class="inline">
+    <label class="check"><input type="checkbox" name="log_enabled"
+           {{ 'checked' if conf.log_enabled }} onchange="this.form.submit()">
+      {{ t('satelliti.log.enabled') }}</label>
+  </form>
+  <div class="actions">
+    <a class="button" href="{{ url_for('api_satelliti_log') }}">{{ t('common.download') }}</a>
+  </div>
+  <form method="post" action="{{ url_for('api_satelliti_log_clear') }}">
+    <div class="actions">
+      <button type="submit" class="danger">{{ t('satelliti.log.clear') }}</button>
+    </div>
+  </form>
+</section>
+
+{% endblock %}

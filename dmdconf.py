@@ -288,7 +288,12 @@ DEFAULTS = {
         "longitude": 0.0,
         "radius_km": 3.0,
         "provider": "adsb.fi",
-        "poll_interval": 30,
+        # Venti secondi, non trenta. Con un raggio di pochi chilometri un
+        # aereo di linea attraversa il cerchio in meno di mezzo minuto:
+        # interrogare piu' lentamente del transito vuol dire non vederlo mai.
+        # Sotto i 15 non si scende comunque — e' un servizio gratuito della
+        # comunita'.
+        "poll_interval": 20,
         "display_seconds": 10,
         "cooldown": 600,
         "max_altitude_ft": 0,
@@ -427,6 +432,19 @@ DEFAULTS = {
         "finestra_ore": 24,
         "ricalcola_minuti": 360,
         "cartella_tle": "/var/lib/dmd/tle",
+        # Registro dei passaggi, come quello dei voli. Ci finiscono anche i
+        # passaggi **non** visibili, con la colonna che lo dice e l'altezza
+        # del Sole che spiega perche': e' l'unico modo per rispondere a
+        # "stasera il pannello non ha detto niente".
+        "log_enabled": True,
+        "log_path": "/var/lib/dmd/satelliti.csv",
+        # Mostrare anche i passaggi che non si vedono. Non e' riempitivo: sono
+        # quattro al giorno contro uno, e sul pannello arrivano in
+        # grigio-azzurro, senza preavviso e senza lampeggio -- il colore dice
+        # da solo che non e' un invito a uscire. Si vede l'arco, che e' la
+        # parte bella, e la riga sotto dice perche' non si vede.
+        "mostra_non_visibili": True,
+        "durata_spento_secondi": 25,
         # Se acceso mostra anche gli oggetti di cui **non** conosciamo la
         # luminosita': si vedranno annunci per CubeSat invisibili a occhio
         # nudo. Sta qui per chi vuole sperimentare, non per l'uso normale.

@@ -120,6 +120,106 @@ STRINGS = {
 
     # ------------------------------------------------------------- satelliti
     "satelliti.in": ("FRA %(min)d MIN", "IN %(min)d MIN"),
+    # --- pagina Satelliti
+    "nav.satelliti": ("Satelliti", "Satellites"),
+    "satelliti.title": ("Satelliti", "Satellites"),
+    "satelliti.intro": (
+        "Il pannello avvisa dieci minuti prima che la Stazione Spaziale passi "
+        "sopra casa, lo ricorda a cinque, e durante il passaggio mostra dove "
+        "guardare. Parla poco per scelta: solo per quello che si vede davvero "
+        "a occhio nudo.",
+        "The panel warns ten minutes before the Space Station flies over, "
+        "repeats at five, and during the pass shows where to look. It speaks "
+        "rarely on purpose: only for what is actually visible to the naked "
+        "eye."),
+    "satelliti.nocoords": (
+        "Mancano le coordinate: le prende da quelle dell'Air Radar.",
+        "Coordinates are missing: they come from the Air Radar ones."),
+    "satelliti.next": ("Prossimi passaggi", "Upcoming passes"),
+    "satelliti.next.hint": (
+        "Ci sono anche quelli che non si vedono, con il motivo accanto: e' li' "
+        "che si legge perche' una sera il pannello resta muto.",
+        "Invisible passes are listed too, with the reason: that is where you "
+        "read why the panel stays quiet on a given evening."),
+    "satelliti.col.sat": ("Satellite", "Satellite"),
+    "satelliti.col.rise": ("Sorge", "Rises"),
+    "satelliti.col.len": ("Durata", "Length"),
+    "satelliti.col.max": ("Max", "Max"),
+    "satelliti.col.dir": ("Da / a", "From / to"),
+    "satelliti.col.vis": ("Visibile", "Visible"),
+    "satelliti.col.group": ("Gruppo", "Group"),
+    "satelliti.col.objects": ("Oggetti", "Objects"),
+    "satelliti.col.age": ("Aggiornato", "Updated"),
+    "satelliti.vis.yes": ("si'", "yes"),
+    "satelliti.vis.no": ("no", "no"),
+    "satelliti.vanishes": ("sparisce alle %(time)s", "vanishes at %(time)s"),
+    "satelliti.why.sun": ("Sole a %(sun)+d\u00b0", "Sun at %(sun)+d\u00b0"),
+    "satelliti.why.shadow": ("in ombra", "in shadow"),
+    "satelliti.settings": ("Impostazioni", "Settings"),
+    "satelliti.elev": ("Elevazione minima", "Minimum elevation"),
+    "satelliti.elev.hint": (
+        "Quanti gradi sopra l'orizzonte. Dieci vuol dire \u00absopra i tetti\u00bb: "
+        "piu' in basso ci sono case e alberi. Non e' un raggio in chilometri: "
+        "un satellite a 60 gradi e' comunque a 225 km da qui.",
+        "Degrees above the horizon. Ten means \u00abover the rooftops\u00bb: lower "
+        "than that there are houses and trees. It is not a radius in "
+        "kilometres: a satellite at 60 degrees is still 225 km away."),
+    "satelliti.lead": ("Preavviso (min)", "Lead time (min)"),
+    "satelliti.lead.hint": (
+        "Un passaggio dura fra i due e i sette minuti: annunciarlo mentre "
+        "succede vuol dire arrivare in terrazzo a cose finite.",
+        "A pass lasts between two and seven minutes: announcing it while it "
+        "happens means reaching the balcony when it is over."),
+    "satelliti.step": ("Promemoria ogni (min)", "Reminder every (min)"),
+    "satelliti.step.hint": (
+        "Con preavviso 10 e cadenza 5 compaiono due avvisi: a T-10 e a T-5.",
+        "With lead 10 and step 5 there are two reminders: at T-10 and T-5."),
+    "satelliti.groups": ("Famiglie", "Families"),
+    "satelliti.groups.hint": (
+        "Le famiglie le pubblica CelesTrak. Piu' se ne scelgono, piu' il "
+        "calcolo e' lungo; e comunque parlano solo gli oggetti di luminosita' "
+        "nota.",
+        "Families are published by CelesTrak. The more you pick, the longer "
+        "the computation; only objects of known brightness get to speak "
+        "anyway."),
+    "satelliti.showdim": (
+        "Mostra anche i passaggi che non si vedono",
+        "Show passes that are not visible too"),
+    "satelliti.showdim.hint": (
+        "Sono quattro al giorno contro uno. Arrivano in grigio-azzurro, senza "
+        "preavviso e senza lampeggio: il colore dice da solo che non e' un "
+        "invito a uscire, e intanto si vede l'arco.",
+        "Four a day against one. They come in dim blue-grey, with no warning "
+        "and no blinking: the colour alone says it is not an invitation to go "
+        "outside, and meanwhile you still get the sky arc."),
+    "satelliti.allobjects": (
+        "Anche gli oggetti di luminosita' sconosciuta",
+        "Objects of unknown brightness too"),
+    "satelliti.allobjects.hint": (
+        "Sconsigliato: il gruppo delle stazioni contiene anche i CubeSat "
+        "rilasciati dalla ISS, invisibili a occhio nudo. Il pannello "
+        "manderebbe qualcuno a cercare una scatoletta da dieci centimetri.",
+        "Not recommended: the stations group also holds CubeSats released "
+        "from the ISS, invisible to the naked eye. The panel would send "
+        "someone looking for a ten-centimetre box."),
+    "satelliti.tle": ("Elementi orbitali", "Orbital elements"),
+    "satelliti.tle.hint": (
+        "Si scaricano da CelesTrak una volta ogni sei ore e invecchiano in "
+        "giorni, non in minuti: il pannello funziona anche con la rete giu'.",
+        "Downloaded from CelesTrak every six hours; they age over days, not "
+        "minutes, so the panel works with the network down."),
+    "satelliti.tle.never": ("mai", "never"),
+    "satelliti.log": ("Registro dei passaggi", "Pass log"),
+    "satelliti.log.hint": (
+        "Un CSV con tutti i passaggi a cose fatte, visibili e non, con "
+        "l'altezza del Sole che spiega perche'.",
+        "A CSV with every pass once it is over, visible or not, with the Sun "
+        "elevation explaining why."),
+    "satelliti.log.rows": ("%(rows)d passaggi, %(size)s kB",
+                           "%(rows)d passes, %(size)s kB"),
+    "satelliti.log.enabled": ("Registra i passaggi", "Log the passes"),
+    "satelliti.log.clear": ("Svuota il registro", "Clear the log"),
+
     "satelliti.manca": (
         "manca la libreria sgp4: "
         "sudo pip3 install sgp4 --break-system-packages",
@@ -203,6 +303,7 @@ STRINGS = {
     "nav.language": ("Lingua", "Language"),
     "footer.project": ("Progetto su GitHub", "Project on GitHub"),
     "footer.version": ("versione", "version"),
+    "common.download": ("Scarica il CSV", "Download the CSV"),
     "common.save": ("Salva", "Save"),
     "common.save_apply": ("Salva e applica", "Save and apply"),
     "common.apply": ("Applica", "Apply"),
@@ -263,8 +364,10 @@ STRINGS = {
     "status.radar.error": ("errore: %(error)s", "error: %(error)s"),
     "status.radar.nocoords": ("coordinate non impostate: apri la pagina Radar",
                               "coordinates not set: open the Radar page"),
-    "status.radar.found": ("%(provider)s: %(count)d aerei nel raggio di %(radius).1f km",
-                           "%(provider)s: %(count)d aircraft within %(radius).1f km"),
+    "status.radar.found": ("%(provider)s: %(count)d aerei nel raggio di %(radius).1f km, "
+                           "interrogato ogni %(cadence)d s",
+                           "%(provider)s: %(count)d aircraft within %(radius).1f km, "
+                           "polled every %(cadence)d s"),
     "status.radar.routes": ("rotte trovate %(found)d, non disponibili %(missing)d",
                             "routes found %(found)d, unavailable %(missing)d"),
     "status.nowplaying.idle": ("nessun brano in riproduzione", "nothing playing"),

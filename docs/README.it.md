@@ -31,6 +31,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`audio.it.md`](audio.it.md) · [PDF](DMD_audio.pdf) | La scheda audio USB, gli avvisi dei servizi, gli effetti dei giochi, l'audio di Doom e del Game Boy, il DMD come cassa AirPlay |
 | [`calendario.it.md`](calendario.it.md) · [PDF](DMD_calendario.pdf) | Google Calendar: collegamento, permessi, cosa finisce sul pannello |
 | [`telecamera.it.md`](telecamera.it.md) · [PDF](DMD_telecamera.pdf) | Funcam: la webcam sul pannello con pochi colori, e il pulsante fisico sulla Bonnet |
+| [`satelliti.it.md`](satelliti.it.md) · [PDF](DMD_satelliti.pdf) | I passaggi della Stazione Spaziale: preavviso, l'arco del cielo, lo spegnimento in ombra, il registro |
 
 ## I giochi
 

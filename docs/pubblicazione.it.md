@@ -159,7 +159,7 @@ git add -A
 ```
 
 ```bash
-git commit -m "5.7: l'orologio non compare più fra un gioco e l'altro; documentazione riallineata"
+git commit -m "6.0: i satelliti diventano un servizio completo; radar, cadenza corretta"
 ```
 
 Cambia il messaggio a ogni versione: numero della versione e una riga su cosa
@@ -235,7 +235,7 @@ non a che versione è. **In inglese**, anche se i manuali sono in italiano: chi
 cerca «hub75 s-pwm raspberry» non scrive in italiano.
 
 ```bash
-gh repo edit kWGillo/zedmd-pi --description "ZeDMD-compatible network DMD for Raspberry Pi — drives S-PWM HUB75 panels (FM6373 and similar) that ZeDMD cannot, and between games it stays a living-room display: clock, flight radar, now playing, calendar, Doom and Game Boy"
+gh repo edit kWGillo/zedmd-pi --description "ZeDMD-compatible network DMD for Raspberry Pi — drives S-PWM HUB75 panels (FM6373 and similar) that ZeDMD cannot, and between games it stays a living-room display: clock, flight radar, ISS pass alerts, now playing, calendar, Doom and Game Boy"
 ```
 
 Si cambia solo quando cambia **che cosa** è il progetto, non a ogni versione.
@@ -250,7 +250,7 @@ trova. `--add-topic` **aggiunge**, non sostituisce: rielencare quelli che
 c'erano già non fa danno, e per toglierne uno serve `--remove-topic`.
 
 ```bash
-gh repo edit kWGillo/zedmd-pi --add-topic batocera,dmd,hub75,led-matrix,pinball,raspberry-pi,virtual-pinball,zedmd,fm6373,shairport-sync,pyboy,doomgeneric,home-assistant,airplay
+gh repo edit kWGillo/zedmd-pi --add-topic batocera,dmd,hub75,led-matrix,pinball,raspberry-pi,virtual-pinball,zedmd,fm6373,shairport-sync,pyboy,doomgeneric,home-assistant,airplay,iss,satellite-tracking,sgp4
 ```
 
 ### La *Release*
@@ -264,10 +264,10 @@ oggi». Il testo delle note lo prendi da `CHANGELOG.md`, in cima.
 in quel momento.
 
 ```bash
-gh release create v5.7 --title "5.7" --notes-file <(sed -n '/^## \[5.7\]/,/^## \[5.6/p' CHANGELOG.md | sed '$d')
+gh release create v6.0 --title "6.0" --notes-file <(sed -n '/^## \[6.0\]/,/^## \[5.8.2/p' CHANGELOG.md | sed '$d')
 ```
 
-Se il tag esiste già, `gh release edit v5.7 --notes-file ...`.
+Se il tag esiste già, `gh release edit v6.0 --notes-file ...`.
 
 > **Controllo veloce, una riga.** Dopo la pubblicazione:
 >
