@@ -1653,6 +1653,17 @@ STRINGS = {
     "services.desc.webcam": (
         "La webcam sul pannello, dal vivo e con pochi colori.",
         "The webcam on the panel, live and in few colours."),
+    "services.desc.notifiche": (
+        "I messaggi che Home Assistant manda al pannello: la porta che si "
+        "apre, l'allarme inserito, la lavatrice finita.",
+        "Messages Home Assistant sends to the panel: the door opening, the "
+        "alarm armed, the washing machine done."),
+    "status.notifiche.waiting": (
+        "in ascolto su %(topic)s — %(shown)d mostrate, %(dropped)d scartate",
+        "listening on %(topic)s — %(shown)d shown, %(dropped)d dropped"),
+    "status.notifiche.showing": ("a schermo: %(text)s", "on screen: %(text)s"),
+    "status.notifiche.error": ("ultimo messaggio scartato: %(error)s",
+                               "last message dropped: %(error)s"),
     "services.desc.satelliti": (
         "Avvisa dieci minuti prima che la Stazione Spaziale passi sopra casa, "
         "e durante il passaggio mostra dove guardare.",

@@ -1,0 +1,313 @@
+# =========================================================================
+#  DMD Controller 6.1 - lo script di Home Assistant per parlare al pannello
+# =========================================================================
+#
+#  Il DMD ascolta un solo topic:  dmd/notifica
+#  Il contratto e' piccolo di proposito -- testo, livello, secondi -- perche'
+#  la politica sta qui, in Home Assistant, dove stanno gia' le automazioni.
+#  Duplicarla anche di la' vorrebbe dire due verita' che prima o poi
+#  divergono.
+#
+#  Perche' uno script invece di far pubblicare direttamente le automazioni:
+#  il giorno che cambi il topic, o vuoi che di notte non parli, o aggiungi il
+#  colore, cambi **un file**. Se ogni automazione costruisse il suo JSON,
+#  cambieresti quindici automazioni e ne dimenticheresti tre.
+#
+#  ------------------------------------------------------------------------
+#  COME SI INSTALLA
+#
+#  1. L'interruttore (facoltativo ma consigliato)
+#     Impostazioni -> Dispositivi e servizi -> Helper -> Crea helper
+#     -> Interruttore virtuale (toggle), nome:  DMD notifiche
+#     Deve venire  input_boolean.dmd_notifiche
+#     Serve a zittire il pannello senza spegnere niente: lo accendi e lo
+#     spegni dalle automazioni (ospiti, film, notte). Se non lo crei, lo
+#     script funziona lo stesso e non zittisce mai.
+#
+#  2. Lo script
+#     Impostazioni -> Automazioni e scene -> Script -> Crea script
+#     -> in alto a destra i tre puntini -> Modifica in YAML
+#     -> incolla il blocco  SCRIPT  qui sotto (senza la riga `script:`)
+#     -> Salva, nome:  DMD - invia notifica
+#
+#  3. La prova
+#     Strumenti per sviluppatori -> Azioni -> script.dmd_notifica
+#     testo: "Ciao dal salotto" -> Esegui azione.
+#     Se non compare niente: il servizio Notifiche e' acceso sul DMD?
+#     (pagina Servizi, oppure  switch.dmd_notifiche  qui in HA)
+#
+#  ------------------------------------------------------------------------
+#  I TRE LIVELLI - questa e' la parte che conta
+#
+#    info     azzurro, aspetta il suo turno come ogni altra sorgente.
+#             Il livello di tutti i giorni.
+#    avviso   arancione, aspetta il suo turno anche lui.
+#             Per le cose che vuoi notare ma che non sono urgenti.
+#    allarme  rosso e lampeggiante, **interrompe qualunque cosa**, anche una
+#             partita a Doom.
+#
+#  `allarme` e' scomodo da usare apposta. Se diventa il livello di tutti, il
+#  pannello smette di essere un oggetto da salotto e diventa una sveglia che
+#  non si spegne. Usalo per le tre o quattro cose che ti faresti svegliare
+#  per: allarme intrusione, fumo, acqua.
+#
+# =========================================================================
+
+
+# ------------------------------------------------------------------ SCRIPT
+# Da qui in giu' e' il blocco da incollare nell'editor YAML dello script.
+# (Se invece usi i package, tieni anche la riga `script:` e la chiave.)
+
+script:
+  dmd_notifica:
+    alias: DMD - invia notifica
+    icon: mdi:message-flash
+    # `queued`: se due cose succedono insieme, la seconda aspetta invece di
+    # cancellare la prima. Con `single` (il default) la porta che si apre
+    # mentre parte l'allarme farebbe sparire uno dei due messaggi.
+    mode: queued
+    max: 10
+    fields:
+      testo:
+        name: Testo
+        description: Il messaggio che compare sul pannello.
+        required: true
+        example: Porta d'ingresso aperta
+        selector:
+          text:
+      livello:
+        name: Livello
+        description: >-
+          info e avviso aspettano il loro turno; allarme interrompe
+          qualunque cosa, anche una partita.
+        default: info
+        selector:
+          select:
+            options:
+              - info
+              - avviso
+              - allarme
+      secondi:
+        name: Durata
+        description: Quanto resta a schermo. Da 2 a 120.
+        default: 8
+        selector:
+          number:
+            min: 2
+            max: 120
+            unit_of_measurement: s
+      colore:
+        name: Colore
+        description: >-
+          Facoltativo. Scavalca il colore del livello, in esadecimale.
+          Lascialo vuoto quasi sempre: il colore e' come si riconosce
+          l'urgenza da lontano, e cambiarlo a caso toglie il significato.
+        example: "#00ff88"
+        selector:
+          text:
+
+    sequence:
+      # Il silenziatore. Nota il doppio criterio:
+      #  - un allarme passa comunque, altrimenti basterebbe dimenticare
+      #    l'interruttore acceso per non sapere che e' entrato qualcuno;
+      #  - se l'helper non esiste, `states()` restituisce `unknown`, che non
+      #    e' `off`: lo script funziona anche senza averlo creato.
+      - alias: Le notifiche non sono state zittite (o e' un allarme)
+        condition: template
+        value_template: >-
+          {{ livello | default('info') == 'allarme'
+             or states('input_boolean.dmd_notifiche') != 'off' }}
+
+      # Il testo vuoto lo scarta anche il DMD, ma scartarlo qui costa meno e
+      # lo si vede nelle tracce dello script. Capita piu' spesso di quanto
+      # sembri: un template che rende "" perche' l'entita' non e' pronta.
+      - alias: C'e' davvero qualcosa da dire
+        condition: template
+        value_template: "{{ (testo | default('') | trim) != '' }}"
+
+      - alias: Pubblica sul topic del DMD
+        service: mqtt.publish
+        data:
+          # Se cambi il topic sul DMD (pagina Servizi -> Notifiche), cambialo
+          # qui. E' l'unico punto in cui compare.
+          topic: dmd/notifica
+          qos: 0
+          # `retain: false` e' importante. Con `true` il broker terrebbe
+          # l'ultimo messaggio e il DMD, a ogni riavvio, ti mostrerebbe di
+          # nuovo che la porta era aperta tre giorni fa.
+          retain: false
+          payload: >-
+            {{ ({
+                 'testo': testo | trim,
+                 'livello': livello | default('info'),
+                 'secondi': (secondi | default(8)) | int(8)
+               } if (colore | default('') | trim) == '' else {
+                 'testo': testo | trim,
+                 'livello': livello | default('info'),
+                 'secondi': (secondi | default(8)) | int(8),
+                 'colore': colore | trim
+               }) | to_json }}
+
+
+# ------------------------------------------------------- ESEMPI: AUTOMAZIONI
+# Impostazioni -> Automazioni e scene -> Crea automazione -> Modifica in YAML.
+# Cambia gli entity_id con i tuoi.
+#
+# La riga che sembra pedanteria e non lo e':
+#
+#     not_from: ["unknown", "unavailable"]
+#     not_to:   ["unknown", "unavailable"]
+#
+# Senza, ogni riavvio di Home Assistant fa passare i sensori da `unavailable`
+# al loro stato vero, e il DMD annuncia in fila che si sono aperte tutte le
+# porte di casa. E' la prima cosa che rompe una notifica in MQTT.
+#
+# Nota sulla sintassi: qui e nello script si usa la forma classica
+# (`trigger:` / `condition:` / `action:` / `service:`). Le versioni recenti
+# di Home Assistant scrivono `triggers:` / `actions:`, ma accettano
+# entrambe; la forma classica funziona anche sulle installazioni vecchie.
+
+automation:
+
+  # --------------------------------------------------------------- la porta
+  - alias: DMD - porta d'ingresso
+    id: dmd_porta_ingresso
+    mode: queued
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.porta_ingresso
+        not_from: ["unknown", "unavailable"]
+        not_to: ["unknown", "unavailable"]
+        # Due secondi: la porta che si apre e si richiude subito e' una cosa
+        # sola, non due notifiche.
+        for: "00:00:02"
+    action:
+      - service: script.dmd_notifica
+        data:
+          testo: >-
+            {{ 'Porta d''ingresso aperta' if trigger.to_state.state == 'on'
+               else 'Porta d''ingresso chiusa' }}
+          livello: info
+          secondi: 6
+
+  # ------------------------------------------------- la lavatrice ha finito
+  # L'esempio di una notifica che serve davvero: non sei in cucina, e la
+  # lavatrice non fa rumore quando **smette** di farlo.
+  - alias: DMD - lavatrice finita
+    id: dmd_lavatrice
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.lavatrice_potenza
+        below: 5
+        for: "00:03:00"
+    condition:
+      # Senza questa, la notifica parte anche all'accensione di HA, quando il
+      # sensore passa da `unavailable` a zero watt.
+      - condition: template
+        value_template: "{{ trigger.from_state.state | float(0) > 20 }}"
+    action:
+      - service: script.dmd_notifica
+        data:
+          testo: La lavatrice ha finito
+          livello: avviso
+          secondi: 10
+
+  # ---------------------------------------------------------- qualcuno torna
+  - alias: DMD - rientro
+    id: dmd_rientro
+    trigger:
+      - platform: state
+        entity_id:
+          - person.gillo
+        to: "home"
+        not_from: ["unknown", "unavailable"]
+    action:
+      - service: script.dmd_notifica
+        data:
+          testo: "Bentornato, {{ trigger.to_state.name }}"
+          livello: info
+
+  # ------------------------------------------------------------- l'allarme
+  # Qui il livello `allarme` e' giustificato: interrompe la partita, il film,
+  # l'orologio, qualunque cosa. Ed e' rosso e lampeggia.
+  - alias: DMD - allarme intrusione
+    id: dmd_allarme
+    trigger:
+      - platform: state
+        entity_id: alarm_control_panel.casa
+        to: "triggered"
+        # Anche qui, e qui piu' che altrove: al riavvio di Home Assistant la
+        # centrale passa da `unavailable` al suo stato vero. Se era in
+        # allarme, senza questa riga il pannello urla "INTRUSIONE" in rosso
+        # per un minuto, in un momento in cui non sta succedendo niente.
+        not_from: ["unknown", "unavailable"]
+    action:
+      - service: script.dmd_notifica
+        data:
+          testo: ALLARME - INTRUSIONE IN CASA
+          livello: allarme
+          secondi: 60
+
+  # ------------------------------------------------------------ il fumo
+  - alias: DMD - fumo rilevato
+    id: dmd_fumo
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.rilevatore_fumo
+        to: "on"
+        not_from: ["unknown", "unavailable"]
+    action:
+      - service: script.dmd_notifica
+        data:
+          testo: FUMO RILEVATO IN CUCINA
+          livello: allarme
+          secondi: 120
+
+  # ------------------------------------------------ il silenziatore notturno
+  # Perche' l'helper esista per qualcosa. Di notte il pannello e' gia' quasi
+  # spento dalle fasce orarie, ma un `avviso` arancione che scorre alle tre
+  # di notte sveglia lo stesso chi passa in corridoio.
+  # Gli allarmi passano comunque: e' scritto nella condizione dello script.
+  - alias: DMD - zittisci di notte
+    id: dmd_silenzio_notte
+    trigger:
+      - platform: time
+        at: "23:30:00"
+        id: zitto
+      - platform: time
+        at: "07:00:00"
+        id: parla
+    action:
+      - service: >-
+          {{ 'input_boolean.turn_off' if trigger.id == 'zitto'
+             else 'input_boolean.turn_on' }}
+        target:
+          entity_id: input_boolean.dmd_notifiche
+
+
+# --------------------------------------------------------------- L'HELPER
+# Se preferisci crearlo in YAML invece che dall'interfaccia, questa e' la
+# riga da mettere in configuration.yaml:
+#
+# input_boolean:
+#   dmd_notifiche:
+#     name: DMD notifiche
+#     icon: mdi:message-flash
+#     initial: true
+#
+# Nota su `initial: true`: rimettere l'interruttore acceso a ogni riavvio e'
+# voluto. Se resta spento e te ne dimentichi, il pannello tace per settimane
+# e non c'e' niente che te lo ricordi -- un servizio muto non da' errori.
+
+
+# ------------------------------------------------------------ LA PROVA SECCA
+# Senza passare da Home Assistant, dal Raspberry o da qualunque macchina:
+#
+#   mosquitto_pub -h 10.83.10.229 -u utente -P password \
+#                 -t dmd/notifica -m "ciao"
+#
+# Il testo semplice vale come notifica `info`: e' apposta, per provare al
+# volo senza costruire nessun JSON. E per l'allarme:
+#
+#   mosquitto_pub -h ... -t dmd/notifica \
+#     -m '{"testo":"Prova allarme","livello":"allarme","secondi":10}'

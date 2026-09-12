@@ -1,4 +1,4 @@
-# DMD Controller 6.0.1
+# DMD Controller 6.1
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -50,6 +50,12 @@ un interruttore anche in Home Assistant.
   e lo segna sull'arco. Un registro CSV conserva tutti i passaggi con
   l'altezza del Sole accanto: è lì che si legge perché una sera è rimasto
   muto.
+- **Notifiche** — i messaggi che **Home Assistant** manda al pannello: la
+  porta che si apre, la lavatrice che ha finito, l'allarme che scatta. Un solo
+  topic MQTT e tre livelli: `info` e `avviso` aspettano il loro turno come
+  ogni altra sorgente, `allarme` si prende il pannello anche a metà partita.
+  La politica — quando parlare, quando tacere, con che parole — sta in Home
+  Assistant, dove stanno già le automazioni.
 - **Funcam** — una webcam USB sul pannello, ridotta a quello che un computer
   di quarant'anni fa sapeva mostrare. Il servizio **arma** e basta: la ripresa
   parte da un pulsante fisico o dai comandi della pagina, mai dal solo
@@ -121,6 +127,7 @@ oppure si scaricano con `git clone` o dal pulsante *Code → Download ZIP*.
 | Joypad: mappatura dei comandi | `docs/DMD_joypad.pdf` |
 | Audio: scheda USB, avvisi dei servizi, effetti dei giochi | `docs/DMD_audio.pdf` |
 | Satelliti: i passaggi della Stazione Spaziale, l'arco del cielo, il registro | `docs/DMD_satelliti.pdf` |
+| Notifiche da Home Assistant: il topic, i tre livelli, lo script pronto | `docs/DMD_notifiche.pdf` |
 
 I PDF **non** vengono installati in `/opt/dmd`: sul Raspberry non servono, e
 l'aggiornamento via rete copia solo ciò che il servizio esegue.
@@ -560,7 +567,8 @@ le tappe.
 | 5.8.1 | Il radar contava l'intervallo dalla fine della sfilata invece che dall'inizio dell'interrogazione, e più aerei trovava meno spesso guardava. La cadenza misurata ora si legge nella riga di stato |
 | 5.8.2 | Registro CSV dei passaggi dei satelliti, con dentro anche quelli non visibili e l'altezza del Sole che spiega perché |
 | 6.0 | I satelliti diventano un servizio completo: pagina dedicata, il terzo colore per i passaggi che non si vedono, e lo spegnimento in ombra segnato sull'arco |
-| **6.0.1** | **Un cane da guardia riavvia il ciclo del radar se si ferma, e conta quante volte è successo: non è una cura, è la misura che dirà se il blocco esiste davvero** |
+| 6.0.1 | Un cane da guardia riavvia il ciclo del radar se si ferma, e conta quante volte è successo: non è una cura, è la misura che dirà se il blocco esiste davvero |
+| **6.1** | **Home Assistant può parlare al pannello: un topic, tre livelli, e solo `allarme` interrompe una partita. Corretti i sensori che mandavano una stringa vuota e facevano protestare HA cinquanta volte al giorno** |
 
 ---
 

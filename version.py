@@ -1232,6 +1232,31 @@ Storico:
        chiavi di traduzione inesistenti**, li' da versioni: sulla pagina Game
        Boy due etichette mostravano il nome grezzo della chiave, e su Now
        Playing il pulsante di salvataggio si chiamava "form.save".
+  6.1  **Home Assistant parla al pannello**, e i sensori smettono di mandare
+       il vuoto.
+       Fino a qui il DMD parlava tanto e ascoltava pochissimo: una trentina
+       di topic pubblicati, e in ascolto soltanto i comandi dei propri
+       interruttori. Ma in casa la cosa che sa di piu\' e\' Home Assistant --
+       chi c\'e\', se la porta e\' aperta, se l\'allarme e\' inserito -- e non ha
+       uno schermo in soggiorno. Il DMD ha lo schermo e non sa niente.
+       Il contratto e\' piccolo di proposito: un topic, un JSON con testo,
+       livello e secondi, tre livelli. La politica sta di la\', dove stanno
+       gia\' le automazioni.
+       **Sul livello si regge tutto**: decide il colore, il lampeggio e --
+       la cosa che conta -- se puo\' interrompere una partita. `info` e
+       `avviso` aspettano il loro turno; `allarme` prende il pannello con la
+       stessa presa degli emulatori. Ed e\' scomodo da usare apposta: se
+       diventasse il livello di tutti, il pannello sarebbe una sveglia che
+       non si spegne.
+       Nella stessa passata, il difetto che si vedeva solo dall\'altra parte:
+       cinquanta righe al giorno di `Invalid state message \'\'` nel registro
+       di Home Assistant. Un sensore `device_class: date` riceveva la
+       stringa vuota quando non c\'era nessuna scadenza. Il modo corretto di
+       dire "non lo so" e\' la stringa `None`. La prova che lo copre non
+       legge il codice: cattura i 71 messaggi veri e li valida contro la
+       dichiarazione di discovery con cui li abbiamo annunciati.
+       *Lo script pronto per Home Assistant*, `docs/ha/dmd_notifica.yaml`, e
+       il manuale `docs/notifiche.it.md` con il PDF.
 """
 
-__version__ = "6.0.1"
+__version__ = "6.1"

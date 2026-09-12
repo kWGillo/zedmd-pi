@@ -25,6 +25,13 @@ import time
 from version import __version__
 
 # Servizi esposti come interruttori. La chiave e' quella in `cfg["services"]`.
+# Come si dice "non lo so" a Home Assistant. Non e' la stringa vuota: per un
+# sensore tipizzato `""` e' un errore, e per uno non tipizzato diventa uno
+# stato vuoto invece che sconosciuto. La documentazione dell'integrazione MQTT
+# dice che la stringa `None` porta il sensore a `unknown`, ed e' questa.
+NIENTE = "None"
+
+
 SWITCHES = [
     ("zedmd", "ZeDMD"),
     ("mediaplayer", "Media Player"),
@@ -39,6 +46,7 @@ SWITCHES = [
     # cui questo interruttore vale la pena averlo in Home Assistant.
     ("webcam", "Funcam"),
     ("satelliti", "Satelliti"),
+    ("notifiche", "Notifiche"),
 ]
 
 # Night mode e Sleep mode non sono servizi: sono modi del display, e stanno in
@@ -436,14 +444,30 @@ class HassBridge:
             print("[hass] scadenze non leggibili: %s" % exc)
             return
         prima = elenco[0] if elenco else None
-        # In ISO, non nel formato italiano: e' quello che Home Assistant si
-        # aspetta da un sensore con device_class "date".
+        # Due regole, tutte e due di Home Assistant e tutte e due imparate a
+        # spese nostre.
+        #
+        # **In ISO**, non nel formato italiano: e' quello che si aspetta un
+        # sensore con device_class "date".
+        #
+        # **Il niente si dice `None`, non stringa vuota.** Per un sensore
+        # tipizzato `""` non e' una data, e Home Assistant scrive
+        # `Invalid state message '' from 'dmd/scadenze/prossima'` -- cinquanta
+        # righe di registro in dieci minuti, viste sul campo. La
+        # documentazione dice che il valore che porta un sensore a `unknown`
+        # e' la stringa `None`.
+        #
+        # Vale anche per i sensori **senza** device_class, dove non da'
+        # errore: con `""` lo stato diventa una stringa vuota invece di
+        # `unknown`, e sono due cose diverse: chi scrive
+        # `is_state(..., 'unknown')` in un'automazione non lo vedrebbe
+        # scattare mai.
         self._send("%s/scadenze/prossima" % base,
-                   prima["data"].isoformat() if prima else "", force)
+                   prima["data"].isoformat() if prima else NIENTE, force)
         self._send("%s/scadenze/titolo" % base,
-                   prima["titolo"] if prima else "", force)
+                   prima["titolo"] if prima else NIENTE, force)
         self._send("%s/scadenze/giorni" % base,
-                   str(prima["giorni"]) if prima else "", force)
+                   str(prima["giorni"]) if prima else NIENTE, force)
         self._send("%s/scadenze/semaforo" % base, stato, force)
         self._send("%s/scadenze/aperte" % base, str(len(elenco)), force)
         self._send("%s/scadenze/elenco" % base, _json.dumps({
@@ -552,8 +576,8 @@ class HassBridge:
             self._send("%s/rifiuti/%s/state" % (base, chiave),
                        "ON" if voce["esposizione"] else "OFF", force)
             self._send("%s/rifiuti/%s/prossima" % (base, chiave),
-                       voce["prossima"].isoformat() if voce["prossima"] else "",
-                       force)
+                       voce["prossima"].isoformat() if voce["prossima"]
+                       else NIENTE, force)
 
     def _azione_accesa(self, key):
         """Stato di un'azione, chiesto a chi la sta facendo.

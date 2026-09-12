@@ -32,7 +32,8 @@ from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      CalendarioSource, ClockSource, DoomSource, GameBoySource,
                      GiochiSource, MediaPlayerSource, NowPlayingSource,
-                     PreviewSource, SatellitiSource, ScadenzeSource,
+                     NotificheSource, PreviewSource, SatellitiSource,
+                     ScadenzeSource,
                      TelecameraSource,
                      ZeDMDSource, controlla_rom, controlla_wad)
 from version import __version__
@@ -220,6 +221,14 @@ class Runtime:
         # sopra il radar: un passaggio ha un orario, un aereo no.
         self.satelliti = SatellitiSource(self.cfg, self.display.width,
                                          self.display.height)
+        # Le notifiche da Home Assistant. Priorita' 70, sopra tutte le
+        # sorgenti che "tornano" (radar, satelliti, foto) perche' una notifica
+        # succede adesso o non succede piu'. Conosce l'arbitro come Doom e il
+        # Game Boy: serve al solo livello `allarme`, l'unico che puo'
+        # interrompere una partita.
+        self.notifiche = NotificheSource(self.cfg, self.display.width,
+                                         self.display.height)
+        self.notifiche.arbiter = self.arbiter
         # Doom prende e restituisce il pannello da solo, quindi conosce
         # l'arbitro: e' l'unica sorgente che lo fa. Non e' un servizio e non
         # compare fra gli interruttori — `enabled` resta False per sempre — e
@@ -288,7 +297,8 @@ class Runtime:
         # Now Playing, e Now Playing non deve sapere che esiste il suono.
         suoni.musica_in_corso = self._musica_in_corso
 
-        for source in (self.zedmd, self.preview, self.satelliti, self.radar,
+        for source in (self.zedmd, self.preview, self.notifiche,
+                       self.satelliti, self.radar,
                        self.player,
                        self.birthdays, self.scadenze, self.calendario,
                        self.banner, self.telecamera, self.media,
@@ -392,6 +402,14 @@ class Runtime:
         external = str(conf.get("external_topic") or "").strip("/")
         if external:
             self.mqtt.subscribe(external, self.nowplaying.handle_external)
+
+        # Il topic delle notifiche da Home Assistant. Sta qui e non dentro la
+        # sorgente perche' le iscrizioni si rifanno tutte insieme quando la
+        # connessione al broker viene riaperta dalla pagina web.
+        notifiche = str((self.cfg.get("notifiche") or {}).get("topic")
+                        or "").strip("/")
+        if notifiche:
+            self.mqtt.subscribe(notifiche, self.notifiche.handle_mqtt)
 
     def reconnect_mqtt(self):
         """Riapre la connessione dopo un cambio di impostazioni dalla web UI."""

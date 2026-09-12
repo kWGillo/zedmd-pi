@@ -32,6 +32,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`calendario.it.md`](calendario.it.md) · [PDF](DMD_calendario.pdf) | Google Calendar: collegamento, permessi, cosa finisce sul pannello |
 | [`telecamera.it.md`](telecamera.it.md) · [PDF](DMD_telecamera.pdf) | Funcam: la webcam sul pannello con pochi colori, e il pulsante fisico sulla Bonnet |
 | [`satelliti.it.md`](satelliti.it.md) · [PDF](DMD_satelliti.pdf) | I passaggi della Stazione Spaziale: preavviso, l'arco del cielo, lo spegnimento in ombra, il registro |
+| [`notifiche.it.md`](notifiche.it.md) · [PDF](DMD_notifiche.pdf) | Le notifiche da Home Assistant: il topic, i tre livelli, lo script e le automazioni pronte |
 
 ## I giochi
 
@@ -49,7 +50,11 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 
 ---
 
-I PDF si rigenerano dai `.md` con `pandoc` e `wkhtmltopdf`. **Non** vengono
+I PDF si rigenerano dai `.md` con [`mkpdf.sh`](mkpdf.sh), che usa `pandoc` e
+`wkhtmltopdf`. Lo script sta qui perché una volta è andato perso e ricostruirlo
+ha richiesto di dedurre lo stile misurando i colori e la larghezza del testo
+dentro un PDF già pubblicato: una mattinata per qualcosa che occupa due
+schermate. **Non** vengono
 installati in `/opt/dmd`: sul Raspberry non servono, e l'aggiornamento via rete
 copia soltanto ciò che il servizio esegue.
 

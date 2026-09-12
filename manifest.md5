@@ -9,8 +9,8 @@ d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
-b97e55390198d378d860bfdd0d867a0b  dmdconf.py
-5a7d79c1e8de1c981e1b0d12f4581cdf  dmdd.py
+0d69ea77f16ba4f5fcb2d0d49d5aac39  dmdconf.py
+176717bb13e3545e2d0d83f465dcf58b  dmdd.py
 bb3118ed4b5ebb8d9f49cc8bbcd6f341  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
 7c5f28cafc9299975fcdb11e54937469  doom/setup_doom.sh
@@ -20,8 +20,8 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 075e6985999ab1d4bbcca75759c692b7  gb/setup_gb.sh
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
-418894427fa9dea5ffb794b59f280216  hass.py
-b66332f79c1d134df945c0641fba1194  i18n.py
+268d783807ea7f023d6c5b4c2192056e  hass.py
+990d49176b8a55306cdfe02f90b59613  i18n.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
@@ -36,7 +36,7 @@ ac3fdf21dcb14c32efdc79f4baac04f3  rete.py
 5698878038d0f306ecebc25bde34d88c  scadenze.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 7ee163e5c89f7ac983b26ae09a1a4b92  setup_share.sh
-62aed8b516e90924c3c006221a6396a5  sources/__init__.py
+29bf3f1e65ce8db49484edf177b31f37  sources/__init__.py
 62241e40a43cbd28136497e0159fd1c4  sources/airradar.py
 4839d9f4d5cbf59bfe83a946f7c272ee  sources/anteprima.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
@@ -52,6 +52,7 @@ e3a2e149869954d460f24e11de8bdaf4  sources/gameboy.py
 018e911289febd4efb970fba0d9e5626  sources/giochi/invasori.py
 e9e38d7384abd3a2a08d8aee12ee369e  sources/giochi/mattoni.py
 8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
+354b4824b6bb74bdfbd9f3c0a85d4201  sources/notifiche.py
 552c44bff4e35f557dd92f658c84f897  sources/nowplaying.py
 75c9d0733759d383759f9964d09c9f1a  sources/satelliti.py
 2a73be667459d2a58f2ddab91ff91a98  sources/scadenze.py
@@ -100,7 +101,7 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-2aa046676d165a44906b3e3182fe9a81  version.py
+2f75cda6b95fdcfbfa20343588820fdb  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-7c31014132762f68e693e98541b602e8  webui.py
+f4f3da60ec7532e44d52c7d6bac19765  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

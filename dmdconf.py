@@ -409,6 +409,30 @@ DEFAULTS = {
         "auto_check": True,
         "check_interval_hours": 24,
     },
+    # ------------------------------------------------------------ notifiche
+    #
+    # I messaggi che arrivano da Home Assistant. Il contratto e' piccolo di
+    # proposito: un topic, un JSON con testo, livello e secondi. La politica
+    # -- quando parlare, quando tacere, con che parole -- sta di la', dove
+    # stanno gia' le automazioni.
+    "notifiche": {
+        "topic": "dmd/notifica",
+        "secondi": 8,
+        "velocita": 60,
+        "fps": 30,
+        "altezza": 0.5,
+        # Quante notifiche si accodano prima di buttare via la piu' vecchia.
+        # Una notifica di mezz'ora fa non interessa piu' a nessuno.
+        "massimo_in_coda": 20,
+        # Il colore dei tre livelli. Chi pubblica puo' scavalcarlo con il
+        # campo `colore`, ma non deve essere obbligato a saperne niente.
+        "colori": {
+            "info": "#7ad7ff",
+            "avviso": "#ffa000",
+            "allarme": "#ff2a20",
+        },
+    },
+
     # ------------------------------------------------------------- satelliti
     #
     # I passaggi visibili della Stazione Spaziale. Le coordinate non stanno
@@ -475,6 +499,10 @@ DEFAULTS = {
         # coordinate non le mettiamo noi: le prende da quelle del radar,
         # quando ci sono.
         "satelliti": False,
+        # Spento di suo: senza un'automazione in Home Assistant che pubblichi
+        # qualcosa, questa sorgente resta muta per sempre. Si accende quando
+        # dall'altra parte c'e' qualcuno che parla.
+        "notifiche": False,
     },
     "webcam": {
         # Vuoto = la prima telecamera collegata. Si scrive un /dev/videoN

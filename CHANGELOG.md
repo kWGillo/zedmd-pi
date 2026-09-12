@@ -2,6 +2,62 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [6.1]
+
+Il verso che mancava. Fino a qui il DMD parlava tanto e ascoltava pochissimo:
+pubblicava una trentina di topic verso Home Assistant e si iscriveva soltanto
+ai comandi dei propri interruttori. Ma in casa la cosa che sa di più è Home
+Assistant — sa chi c'è, se la porta è aperta, se l'allarme è inserito — e non
+ha uno schermo in soggiorno. Il DMD ha lo schermo e non sa niente.
+
+- **La casa parla al pannello.** Un solo topic (`dmd/notifica`), un JSON con
+  tre campi, tre livelli. La politica — quando parlare, quando tacere, con
+  che parole — sta in Home Assistant, dove stanno già le automazioni:
+  duplicarla anche qui vorrebbe dire due verità che prima o poi divergono.
+
+  **Sul livello si regge tutto.** Non è un'etichetta decorativa: decide il
+  colore, se lampeggia e — la cosa che conta — se può interrompere una
+  partita. `info` e `avviso` aspettano il loro turno come ogni altra
+  sorgente; `allarme` si prende il pannello anche mentre giochi a Doom, con
+  la stessa presa che usano gli emulatori. Ed è scomodo da usare apposta: se
+  diventasse il livello di tutti, il pannello smetterebbe di essere un
+  oggetto da soggiorno e diventerebbe una sveglia che non si spegne.
+
+  Un messaggio malformato non spegne niente: si conta fra gli scartati e si
+  dice nella riga di stato, invece di finire in un registro che nessuno
+  legge. E un payload che comincia con `{` **deve** essere JSON valido — con
+  il ripiego a testo semplice, un'automazione con un errore di battitura
+  faceva scorrere `{rotto` in soggiorno, e chi guarda il pannello non ha modo
+  di capire che il guasto è dall'altra parte.
+
+- **Lo script pronto per Home Assistant**, in `docs/ha/dmd_notifica.yaml`:
+  lo script `dmd_notifica`, cinque automazioni d'esempio e l'interruttore per
+  zittire il pannello senza spegnere niente — con gli allarmi che passano
+  comunque, perché altrimenti basterebbe dimenticare l'interruttore spento
+  per non sapere che è entrato qualcuno. *Il manuale*,
+  `docs/notifiche.it.md`, con il PDF.
+
+- **I sensori che mandavano il vuoto.** Dal registro di Home Assistant,
+  cinquanta righe al giorno di `Invalid state message '' from
+  'dmd/scadenze/prossima'`. Un sensore dichiarato `device_class: date`
+  riceveva una stringa vuota quando non c'era nessuna scadenza; HA prova a
+  leggerla come data e protesta. Il modo corretto di dire «non lo so» a Home
+  Assistant è la stringa `None`, che porta il sensore a *sconosciuto*.
+  Corretto nei quattro punti che lo facevano: scadenze (data, titolo,
+  giorni) e rifiuti.
+
+  Il difetto **non si vedeva da questa parte**: il DMD pubblicava senza
+  errori, il broker accettava, e solo il terzo anello della catena si
+  lamentava. Quindi la prova che lo copre non legge il codice: cattura i 71
+  messaggi veri e li valida contro la dichiarazione di discovery con cui li
+  abbiamo annunciati. Se dichiariamo un sensore come data, deve arrivargli
+  una data.
+
+- **Lo script che rigenera i PDF** ora sta nel repository
+  (`docs/mkpdf.sh`) invece che sulla macchina di chi pubblica. Era andato
+  perso, e ricostruirlo ha richiesto di dedurre lo stile misurando colori e
+  larghezza del testo dentro un PDF già pubblicato.
+
 ## [6.0.1]
 
 - **Un cane da guardia per il radar.** Sintomo dal campo, tre volte in tre

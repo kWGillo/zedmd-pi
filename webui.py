@@ -1330,6 +1330,8 @@ def create_app(runtime):
              "status": stato("telecamera")},
             {"key": "satelliti", "label": "Satelliti", "ready": True,
              "status": stato("satelliti")},
+            {"key": "notifiche", "label": "Notifiche", "ready": True,
+             "status": stato("notifiche")},
         ]
         for voce in services:
             voce["suono"] = voce["key"] in suoni.SERVIZI_CON_SUONO
