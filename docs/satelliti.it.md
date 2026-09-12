@@ -115,7 +115,7 @@ guasto.
 ### Come è fatto il preavviso
 
 ```
-ISS            FRA 5 MIN
+ISS              → 5 MIN
 SORGE 21:10  O 51° PER 5 MIN
 ```
 
@@ -131,6 +131,10 @@ Quattro informazioni, e ognuna risponde a una domanda diversa: **chi** passa,
 > grande lo prende il conto alla rovescia — l'unica cosa che serva in quel
 > momento — e l'ora scende sulla riga piccola con l'etichetta `SORGE`
 > davanti, dove non può essere scambiata per altro.
+>
+> E dalla 6.4 la freccia al posto di «FRA», segnalato guardando il
+> vetro: su un pannello a LED una parola corta in stampatello accanto a
+> un numero si legge come un'unità di misura.
 
 **`PER 5 MIN` è la durata visibile, non quella del passaggio.** Sono due cose
 diverse ogni volta che la Stazione entra nell'ombra della Terra prima di

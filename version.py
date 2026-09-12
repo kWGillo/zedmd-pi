@@ -1307,6 +1307,56 @@ Storico:
        risposte diverse dicono **quale meta\' funziona**, che e\' l\'unica cosa
        che si voglia sapere da un pulsante di prova. A servizio spento non
        finge: dice che e\' spento, invece di non far succedere niente.
+  6.4  **Una freccia al posto di "FRA"**, e le briciole dei Mac.
+       Segnalato dal campo guardando il vetro: *«quel FRA sta proprio
+       male»*. Aveva ragione per una ragione che si vede solo sul pannello --
+       su un LED le parole corte in stampatello si leggono come sigle, e una
+       sigla accanto a un numero sembra un\'unita\' di misura. La freccia non
+       si puo\' leggere male, ed e\' due caratteri piu\' corta.
+       Aggiunta una cintura di sicurezza sul conto alla rovescia: se il
+       passaggio e\' gia\' sorto, l\'avviso non si disegna. Non dovrebbe mai
+       succedere -- ci pensa la macchina a stati -- ma "fra 5 min" accanto a
+       "sorge 22:48" quando sono le 22:49 e\' una bugia, e sul vetro una
+       bugia non si distingue da un guasto.
+       **Le briciole dei Mac.** Ogni volta che un Mac copia qualcosa sulle
+       condivisioni lascia un `.DS_Store` e, per **ogni singolo file**, un
+       gemello invisibile che comincia con `._`. Su una libreria di migliaia
+       di foto raddoppiano le voci da elencare. Un giro dentro il servizio,
+       ogni dodici ore, le toglie.
+       Due scelte contano. La prima: si cancellano **nomi conosciuti**, non
+       "tutto quello che comincia con un punto" -- una condivisione e\' di chi
+       la usa, e una regola cieca si mangerebbe un `.stfolder` di Syncthing o
+       un `.git` senza che nessuno capisca perche\'. La seconda: un pulsante
+       **Guarda e basta**, perche\' questo e\' l\'unico punto del programma che
+       cancella file dell\'utente e chi vuole sapere cosa succederebbe deve
+       poterlo fare in un clic.
+       Le prove hanno trovato due difetti veri prima che partissero: il giro
+       di prova cancellava lo stesso le cartelle di Spotlight e del cestino
+       (il pulsante che serve a non fare danni ne faceva), e la libreria non
+       veniva pulita mai perche\' il percorso si leggeva dalla sezione di
+       configurazione sbagliata -- senza errori e senza messaggi.
+  6.5  **L\'arco del passaggio non e\' mai stato disegnato**, e il pannello
+       restava congelato.
+       Trovato grazie a una fotografia con dentro l\'ora esatta: alle
+       22:49:17 il pannello mostrava il promemoria "fra 5 minuti" di un
+       passaggio sorto alle 22:48:06. Il conto alla rovescia non era
+       sbagliato: era un fotogramma di sei minuti prima, rimasto li\'.
+       Il meccanismo: `_componi` costruiva il record del passaggio **senza**
+       l\'oggetto orbitale, e la schermata dell\'arco -- quella che serve a
+       chi e\' in terrazzo e sta cercando -- faceva `passaggio["sat"]` e
+       sollevava `KeyError: \'sat\'`. Ma `_stato` era gia\' scritto a
+       "adesso" **prima** del disegno: la sorgente continuava a dichiararsi
+       attiva, nessun\'altra poteva prendere il posto, e l\'ultimo fotogramma
+       buono restava sul vetro.
+       Quindi l\'arco non e\' mai comparso. Il segnale c\'era, e per due volte
+       l\'ho spiegato via: la riga di stato della pagina Servizi diceva
+       `\'sat\'`, con le virgolette, che e\' come Python scrive un KeyError.
+       Tre correzioni. Il record si porta dietro il satellite. **Un disegno
+       che fallisce molla il pannello**, perche\' chi non riesce a disegnare
+       non ha diritto di occupare lo schermo -- ed e\' la rete che copre la
+       classe, non il singolo caso. E i tre passi del ciclo hanno tre reti
+       separate, perche\' prima un errore nello scaricamento o nel registro
+       saltava anche il disegno.
 """
 
-__version__ = "6.3"
+__version__ = "6.5"

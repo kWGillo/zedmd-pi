@@ -25,6 +25,7 @@ import libcheck
 import mqttbus
 import nowplaying
 import ota
+import pulizia
 import spotifyapi
 import cassa
 import suoni
@@ -335,6 +336,13 @@ class Runtime:
                          "local": {}, "remote": {}, "behind": False, "checked": 0}
         self._ota_thread = threading.Thread(target=self._ota_loop, name="ota", daemon=True)
         self._ota_thread.start()
+
+        # Le briciole dei Mac nelle condivisioni. Vive qui dentro e non in un
+        # timer di systemd perche' l'aggiornamento via rete non esegue
+        # install.sh: un'unita' nuova non arriverebbe mai sulle macchine gia'
+        # installate, e la funzione resterebbe spenta senza dirlo.
+        self.pulitore = pulizia.Pulitore(self.cfg)
+        self.pulitore.start()
         self._blank_shown = False
         self._applied_brightness = None
         self.sleeping = False

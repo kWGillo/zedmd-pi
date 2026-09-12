@@ -3,6 +3,8 @@
 
 {% block content %}
 
+{% if result %}<div class="banner">{{ result }}</div>{% endif %}
+
 {% if not ffmpeg %}
 <div class="banner warn">{{ t('media.noffmpeg') }}</div>
 {% endif %}
@@ -92,6 +94,39 @@
     </label>
 
     <button type="submit">{{ t('common.save') }}</button>
+  </form>
+</section>
+
+{# La pulizia sta qui e non nelle Impostazioni perche' e' qui che si vedono le
+   briciole: la libreria e' la cartella che i Mac sporcano. #}
+<section class="card">
+  <h2>{{ t('pulizia.title') }}</h2>
+  <p class="hint">{{ t('pulizia.hint') }}</p>
+
+  {% if pulizia.ultimo.quando %}
+  <p class="status">{{ t('pulizia.last', count=pulizia.ultimo.file,
+                         when=pulizia.ultimo.quando | timestamp) }}
+    {%- if pulizia.ultimo.esempi %} — <code>{{ pulizia.ultimo.esempi | join(', ') }}</code>{% endif %}</p>
+  {% else %}
+  <p class="status">{{ t('pulizia.never') }}</p>
+  {% endif %}
+
+  <p class="hint">{{ t('pulizia.where') }}
+    {% for c in pulizia.cartelle %}<code>{{ c }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+
+  <form method="post" action="{{ url_for('api_pulizia') }}">
+    <label class="check">
+      <input type="checkbox" name="enabled" {{ 'checked' if cfg.pulizia.enabled }}>
+      {{ t('pulizia.enabled') }}
+    </label>
+    <div class="row3">
+      <div><label for="ore">{{ t('pulizia.hours') }}</label>
+        <input type="number" id="ore" name="ore" min="1" max="720"
+               value="{{ cfg.pulizia.ore }}"></div>
+    </div>
+    <button type="submit">{{ t('common.save') }}</button>
+    <button type="submit" name="guarda" value="1" class="ghost">{{ t('pulizia.look') }}</button>
+    <button type="submit" name="adesso" value="1" class="ghost">{{ t('pulizia.now') }}</button>
   </form>
 </section>
 

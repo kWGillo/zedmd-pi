@@ -2,6 +2,84 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [6.5]
+
+- **L'arco del passaggio non è mai stato disegnato**, e mentre non lo
+  disegnava teneva il pannello congelato.
+
+  Trovato grazie a una fotografia con dentro l'ora esatta. Alle **22:49:17**
+  il pannello mostrava `ISS → FRA 5 MIN / SORGE 22:48`: un promemoria «fra
+  cinque minuti» per un passaggio sorto alle 22:48:06, un minuto prima. Il
+  conto alla rovescia non era sbagliato — era un **fotogramma di sei minuti
+  prima**, rimasto lì.
+
+  Il meccanismo, una volta visto, è semplice e brutto: `_componi` costruiva il
+  record del passaggio senza l'oggetto orbitale, e `_adesso` — la schermata
+  dell'arco, quella che serve a chi è in terrazzo e sta cercando — faceva
+  `passaggio["sat"]` e sollevava `KeyError: 'sat'`. Ma `_stato` era già stato
+  scritto a `"adesso"` **prima** del disegno: la sorgente continuava a
+  dichiararsi attiva, nessun'altra poteva prendere il posto, e l'ultimo
+  fotogramma buono restava sul vetro finché il passaggio non finiva.
+
+  Conseguenza: **l'arco non è mai comparso**, in nessun passaggio, da quando
+  esiste. E il segnale c'era, scritto nella riga di stato della pagina
+  Servizi: diceva `'sat'`, con le virgolette, che è come Python scrive un
+  KeyError.
+
+  Tre correzioni, una per anello:
+
+  1. il record del passaggio si porta dietro il satellite che l'ha generato;
+  2. **un disegno che fallisce molla il pannello** — chi non riesce a
+     disegnare non ha diritto di occupare lo schermo. È la rete che copre la
+     *classe* del difetto e non il singolo caso, la stessa idea del cane da
+     guardia del radar;
+  3. i tre passi del ciclo hanno tre reti separate: prima un errore nello
+     scaricamento dei TLE o nella scrittura del registro — due cose che non
+     riguardano il vetro — saltava anche il disegno.
+
+  La prova costruisce un passaggio vero con la catena vera, usando un
+  satellite sintetico invece di un TLE scaricato, e disegna l'arco. Togliendo
+  la correzione torna rossa.
+
+## [6.4]
+
+- **Una freccia al posto di «FRA»** sul preavviso dei satelliti. Segnalato
+  guardando il vetro, e con ragione: su un pannello a LED le parole corte in
+  stampatello si leggono come sigle, e una sigla accanto a un numero sembra
+  un'unità di misura. `→ 5 MIN` non si può leggere male, ed è pure due
+  caratteri più corto.
+
+- **Una cintura di sicurezza sul conto alla rovescia.** Se il passaggio è già
+  sorto, l'avviso non si disegna. Non dovrebbe mai capitare — ci pensa la
+  macchina a stati — ma «fra 5 min» accanto a «sorge 22:48» quando sono le
+  22:49 è una bugia, e sul vetro una bugia non si distingue da un guasto.
+
+- **Le briciole dei Mac nelle condivisioni.** Ogni volta che un Mac copia
+  qualcosa su una condivisione SMB lascia un `.DS_Store` e, per **ogni
+  singolo file copiato**, un gemello invisibile che comincia con `._` con
+  dentro il resource fork. Su una libreria di migliaia di foto raddoppiano le
+  voci che il Raspberry deve elencare a ogni giro. Adesso un giro dentro il
+  servizio, ogni dodici ore, le toglie.
+
+  Due scelte che contano. **Si cancellano nomi conosciuti**, non «tutto quello
+  che comincia con un punto»: una cartella condivisa è di chi la usa, e una
+  regola cieca si mangerebbe un `.stfolder` di Syncthing o un `.git` senza che
+  nessuno capisca perché quella cosa ha smesso di funzionare. E c'è un
+  pulsante **Guarda e basta**, perché questo è l'unico punto del programma che
+  cancella file dell'utente, e chi vuole sapere cosa succederebbe prima che
+  succeda deve poterlo fare in un clic.
+
+  Sta dentro il servizio e non in un timer di systemd per la solita ragione:
+  l'aggiornamento via rete non esegue `install.sh`, e un'unità nuova non
+  arriverebbe mai sulle macchine già installate.
+
+  Le prove hanno trovato **due difetti veri** prima che il codice girasse: il
+  giro di prova cancellava lo stesso le cartelle di Spotlight e del cestino —
+  cioè il pulsante che serve a non fare danni ne faceva — e la libreria non
+  sarebbe stata pulita mai, perché il percorso veniva letto dalla sezione di
+  configurazione sbagliata. Nessuno dei due dava errore: semplicemente non
+  succedeva la cosa giusta.
+
 ## [6.3]
 
 - **Un pulsante per provare le notifiche**, nel riquadro *Notifiche* della

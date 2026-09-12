@@ -610,6 +610,13 @@ def _componi(voce, lat, lon, quota_km, soglia, prima, campioni, dopo):
     vista_tramonto = guarda(sat, tramonta, lat, lon, quota_km) or {}
     return {
         "nome": voce["nome"],
+        # L'oggetto orbitale che ha generato questo passaggio. Senza, la
+        # schermata del passaggio in corso -- l'arco con il puntino -- non
+        # puo' sapere dov'e' il satellite *adesso*, e infatti per quattro
+        # versioni ha sollevato `KeyError: 'sat'` a ogni fotogramma. Non si
+        # scrive nel registro CSV e non finisce in nessun JSON: la pagina web
+        # costruisce i suoi dizionari a parte.
+        "sat": sat,
         "breve": voce.get("breve", voce["nome"]),
         "noto": voce.get("noto", False),
         "norad": voce["norad"],

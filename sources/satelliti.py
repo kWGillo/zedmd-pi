@@ -186,14 +186,21 @@ class SatellitiSource(Source):
 
     def _loop(self):
         while self._running:
-            try:
-                self._aggiorna_dati()
-                self._registra_conclusi(datetime.now(timezone.utc))
-                self._disegna_se_serve()
-            except Exception as exc:          # noqa: BLE001
-                # Un satellite che non si vede non deve spegnere il DMD.
-                print("[satelliti] %s" % exc)
-                self._errore = str(exc)
+            # Tre passi separati, e tre reti separate. Prima erano dentro un
+            # unico `try`: un errore nello scaricamento o nella scrittura del
+            # registro -- due cose che non riguardano il vetro -- saltava il
+            # disegno, e il pannello restava fermo sull'ultimo fotogramma senza
+            # che niente lo dicesse.
+            for passo in (self._aggiorna_dati,
+                          lambda: self._registra_conclusi(
+                              datetime.now(timezone.utc)),
+                          self._disegna_se_serve):
+                try:
+                    passo()
+                except Exception as exc:      # noqa: BLE001
+                    # Un satellite che non si vede non deve spegnere il DMD.
+                    print("[satelliti] %s" % exc)
+                    self._errore = str(exc)
             # Mezzo secondo mentre c'e' qualcosa da mostrare: e' il ritmo del
             # lampeggio e dell'arco che si muove. Fuori dagli eventi non serve
             # affatto, e su un Pi il tempo di CPU sono righe chiare sul
@@ -408,8 +415,17 @@ class SatellitiSource(Source):
             return
 
         acceso = (adesso.second % 2 == 0)
-        mancano = int(round(
-            (passaggio["sorge"] - adesso).total_seconds() / 60.0))
+        secondi_mancanti = (passaggio["sorge"] - adesso).total_seconds()
+        mancano = int(round(secondi_mancanti / 60.0))
+        # Cintura di sicurezza, chiesta dal campo: un conto alla rovescia su
+        # un passaggio gia' sorto e' una bugia, e sul vetro una bugia non si
+        # distingue da un guasto. Lo stato "avviso" non dovrebbe mai arrivare
+        # qui con l'ora passata -- ci pensa `satelliti.stato` -- ma se un
+        # giorno ci arrivasse, meglio niente che "fra 5 min" accanto a
+        # "sorge 22:48" quando sono le 22:49.
+        if stato == "avviso" and secondi_mancanti <= 0:
+            self._stato = ""
+            return
         # La firma evita di ridisegnare cinquanta volte lo stesso fotogramma:
         # cambia quando cambia qualcosa che si vede.
         if stato in ("adesso", "spento"):
@@ -421,14 +437,31 @@ class SatellitiSource(Source):
             return
         self._ultima_firma = firma
 
-        if stato == "adesso":
-            img = self._adesso(passaggio, adesso, acceso)
-        elif stato == "spento":
-            # L'ora non lampeggia: non sta succedendo niente che tu possa
-            # vedere, e un lampeggio direbbe il contrario.
-            img = self._adesso(passaggio, adesso, True, visibile=False)
-        else:
-            img = self._avviso(passaggio, mancano)
+        try:
+            if stato == "adesso":
+                img = self._adesso(passaggio, adesso, acceso)
+            elif stato == "spento":
+                # L'ora non lampeggia: non sta succedendo niente che tu possa
+                # vedere, e un lampeggio direbbe il contrario.
+                img = self._adesso(passaggio, adesso, True, visibile=False)
+            else:
+                img = self._avviso(passaggio, mancano)
+        except Exception as exc:              # noqa: BLE001
+            # **Un disegno che fallisce deve mollare il pannello.** E' la
+            # lezione di una fotografia: alle 22:49:17 il pannello mostrava il
+            # promemoria "fra 5 minuti" di un passaggio sorto alle 22:48:06.
+            # Non era il conto alla rovescia sbagliato: era un fotogramma di
+            # sei minuti prima, rimasto li'. La sorgente aveva gia' scritto
+            # `_stato = "adesso"`, il disegno sollevava `KeyError: 'sat'`, e
+            # con lo stato acceso continuava a dichiararsi attiva: nessun'altra
+            # sorgente poteva prendere il posto, e l'ultimo fotogramma buono
+            # restava congelato sul vetro.
+            # Chi non riesce a disegnare non ha diritto di occupare lo schermo.
+            self._stato = ""
+            self._ultima_firma = None
+            self._errore = "disegno: %s" % exc
+            print("[satelliti] disegno fallito, pannello rilasciato: %s" % exc)
+            return
         with self._lock:
             self._image = img
             self._dirty = True

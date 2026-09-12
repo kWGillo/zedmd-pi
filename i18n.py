@@ -34,6 +34,37 @@ STRINGS = {
     "nav.settings": ("Impostazioni", "Settings"),
     "nav.clock": ("Orologio", "Clock"),
     "nav.media": ("Media", "Media"),
+    # La pulizia delle briciole dei Mac, nella pagina Media.
+    "pulizia.title": ("Briciole dei Mac", "Mac leftovers"),
+    "pulizia.hint": (
+        "Ogni volta che un Mac copia qualcosa sulle condivisioni si porta "
+        "dietro dei file che non gli ha chiesto nessuno: «.DS_Store» e, per "
+        "ogni singolo file copiato, un gemello invisibile che comincia con "
+        "«._». Su una libreria di migliaia di foto raddoppiano le voci da "
+        "elencare. Il DMD toglie quelli, e soltanto quelli: un file nascosto "
+        "che non sia una briciola conosciuta resta dov'è.",
+        "Every time a Mac copies something to the shares it brings along "
+        "files nobody asked for: «.DS_Store» and, for each copied file, an "
+        "invisible twin starting with «._». On a library of thousands of "
+        "photos they double the entries to list. The DMD removes those, and "
+        "only those: a hidden file that is not a known leftover stays where "
+        "it is."),
+    "pulizia.enabled": ("Pulisci da solo, ogni tanto",
+                        "Clean up by itself, every so often"),
+    "pulizia.hours": ("Ogni quante ore", "Every how many hours"),
+    "pulizia.where": ("Cartelle pulite:", "Folders cleaned:"),
+    "pulizia.never": ("Nessuna pulizia ancora fatta.", "No cleanup done yet."),
+    "pulizia.last": ("Ultima pulizia: %(count)d file tolti, %(when)s.",
+                     "Last cleanup: %(count)d files removed, %(when)s."),
+    "pulizia.look": ("Guarda e basta", "Just look"),
+    "pulizia.now": ("Pulisci adesso", "Clean now"),
+    "pulizia.found": ("Ci sono %(count)d briciole da togliere. Non ho "
+                      "cancellato niente.",
+                      "There are %(count)d leftovers to remove. Nothing was "
+                      "deleted."),
+    "pulizia.done": ("Tolti %(count)d file.", "Removed %(count)d files."),
+    "pulizia.clean": ("Nessuna briciola: le condivisioni sono pulite.",
+                      "No leftovers: the shares are clean."),
     "nav.banner": ("Banner", "Banner"),
     "nav.nowplaying": ("Musica", "Music"),
     # ------------------------------------------------------------- compleanni
@@ -119,7 +150,13 @@ STRINGS = {
         "no birthday in the next %(hours)d hours"),
 
     # ------------------------------------------------------------- satelliti
-    "satelliti.in": ("FRA %(min)d MIN", "IN %(min)d MIN"),
+    # La freccia al posto di "FRA". Segnalato dal campo: «quel FRA sta proprio
+    # male». Aveva ragione per una ragione che si vede solo sul vetro -- su un
+    # pannello a LED le parole corte in stampatello si leggono come sigle, e
+    # una sigla accanto a un numero sembra un'unita' di misura. La freccia non
+    # si puo' leggere male, ed e' due caratteri piu' corta: spazio guadagnato
+    # proprio nella riga che rischiava di affollarsi.
+    "satelliti.in": ("\u2192 %(min)d MIN", "\u2192 %(min)d MIN"),
     # Sul pannello, sotto il conto alla rovescia. L'etichetta esiste perche'
     # senza, `21:10` nella posizione dell'orologio veniva letto come "sono le
     # 21:10" invece che "sorge alle 21:10".

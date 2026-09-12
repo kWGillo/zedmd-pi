@@ -31,6 +31,7 @@ import scadenze
 import nowplaying
 import presets
 import ota
+import pulizia
 import pulsante
 import rete
 import satelliti
@@ -596,7 +597,41 @@ def create_app(runtime):
         return render_template(
             "media.html", cfg=cfg, total=elenco["total"],
             media_dir=elenco["media_dir"], ffmpeg=have_ffmpeg(),
+            pulizia={"ultimo": runtime.pulitore.ultimo,
+                     "cartelle": pulizia.cartelle(cfg)},
+            result=request.args.get("result", ""),
             status=runtime.media.status(current_language()), page="media")
+
+    @app.route("/api/pulizia", methods=["POST"])
+    def api_pulizia():
+        """Le briciole dei Mac: impostazioni, un giro subito, o solo guardare.
+
+        Il pulsante che **guarda e basta** esiste per una ragione sola: questo
+        e' l'unico posto del programma che cancella file dell'utente. Chi
+        vuole sapere cosa succederebbe prima che succeda deve poterlo fare, e
+        deve costargli un clic invece di una riga di shell.
+        """
+        conf = cfg["pulizia"]
+        conf["enabled"] = request.form.get("enabled") == "on"
+        try:
+            conf["ore"] = max(1, min(720, int(request.form.get("ore", 12))))
+        except ValueError:
+            conf["ore"] = 12
+        dmdconf.save()
+
+        chiave, valori = "", {}
+        if request.form.get("guarda"):
+            esito = runtime.pulitore.adesso(prova=True)
+            chiave = "pulizia.found" if esito["file"] else "pulizia.clean"
+            valori = {"count": esito["file"]}
+        elif request.form.get("adesso"):
+            esito = runtime.pulitore.adesso()
+            chiave = "pulizia.done" if esito["file"] else "pulizia.clean"
+            valori = {"count": esito["file"]}
+        if not chiave:
+            return redirect(url_for("page_media"))
+        return redirect(url_for("page_media", result=i18n.translate(
+            chiave, current_language(), **valori)))
 
     @app.route("/manager")
     def page_manager():

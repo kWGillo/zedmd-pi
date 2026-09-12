@@ -1,4 +1,4 @@
-# DMD Controller 6.3
+# DMD Controller 6.5
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -131,6 +131,25 @@ oppure si scaricano con `git clone` o dal pulsante *Code → Download ZIP*.
 
 I PDF **non** vengono installati in `/opt/dmd`: sul Raspberry non servono, e
 l'aggiornamento via rete copia solo ciò che il servizio esegue.
+
+---
+
+## Briciole dei Mac
+
+Ogni volta che un Mac copia qualcosa sulle condivisioni SMB lascia dietro di
+sé un `.DS_Store` e, per **ogni singolo file copiato**, un gemello invisibile
+che comincia con `._` — dentro c'è il resource fork. Su una libreria di
+migliaia di foto raddoppiano le voci da elencare a ogni giro del Media Player.
+
+Un giro dentro il servizio, ogni dodici ore, le toglie da `/srv/dmd/media`,
+`/srv/dmd/rom` e `/srv/dmd/doom`. Si regola nella pagina **Media**, dove c'è
+anche un pulsante *Guarda e basta* che conta le briciole senza cancellarle.
+
+Vengono tolti **nomi conosciuti** e soltanto quelli — `.DS_Store`, `._*`,
+`.apdisk`, e le cartelle `.Spotlight-V100`, `.Trashes`, `.fseventsd` e simili.
+Non «tutti i file che cominciano con un punto»: una cartella condivisa è di
+chi la usa, e una regola cieca si mangerebbe un `.stfolder` di Syncthing o un
+`.git` senza che nessuno capisca perché quella cosa ha smesso di funzionare.
 
 ---
 
@@ -570,7 +589,9 @@ le tappe.
 | 6.0.1 | Un cane da guardia riavvia il ciclo del radar se si ferma, e conta quante volte è successo: non è una cura, è la misura che dirà se il blocco esiste davvero |
 | 6.1 | Home Assistant può parlare al pannello: un topic, tre livelli, e solo `allarme` interrompe una partita. Corretti i sensori che mandavano una stringa vuota e facevano protestare HA cinquanta volte al giorno |
 | 6.2 | Il preavviso dei satelliti scriveva l'ora di sorgere nel posto dell'orologio e veniva letto come l'ora corrente: adesso in grande c'è il conto alla rovescia, e accanto la durata visibile. La configurazione MQTT passa dalla pagina Musica alla pagina Rete |
-| **6.3** | **Un pulsante di prova per le notifiche nella pagina Servizi: passa dal broker, così prova la catena e non solo il disegno, e dice quale metà funziona** |
+| 6.3 | Un pulsante di prova per le notifiche nella pagina Servizi: passa dal broker, così prova la catena e non solo il disegno, e dice quale metà funziona |
+| 6.4 | Una freccia al posto di «FRA» sul preavviso dei satelliti, e un giro periodico che toglie dalle condivisioni le briciole lasciate dai Mac |
+| **6.5** | **L'arco del passaggio non era mai stato disegnato: mancava l'oggetto orbitale nel record, e l'eccezione lasciava il pannello congelato sull'ultimo fotogramma. Adesso un disegno che fallisce molla il pannello** |
 
 ---
 

@@ -409,6 +409,25 @@ DEFAULTS = {
         "auto_check": True,
         "check_interval_hours": 24,
     },
+    # -------------------------------------------------------------- pulizia
+    #
+    # Le briciole che i Mac lasciano nelle condivisioni: `.DS_Store` e i file
+    # AppleDouble (`._qualcosa`), uno per ogni file copiato. Non fanno danno,
+    # ma su una libreria di migliaia di foto raddoppiano il numero di voci che
+    # il Raspberry deve elencare a ogni giro.
+    "pulizia": {
+        "enabled": True,
+        # Ogni quante ore. "Di tanto in dopo" e' abbastanza: le briciole si
+        # accumulano quando si copia, cioe' di rado.
+        "ore": 12,
+        # Vuoto = le condivisioni note, prese dalla configurazione. Si
+        # riempie solo per aggiungerne altre.
+        "cartelle": [],
+        # Il tetto per un solo giro: non e' contro i Mac, e' contro un errore
+        # nostro. Meglio accorgersene a cinquemila file che a mezza libreria.
+        "massimo": 5000,
+    },
+
     # ------------------------------------------------------------ notifiche
     #
     # I messaggi che arrivano da Home Assistant. Il contratto e' piccolo di
