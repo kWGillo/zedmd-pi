@@ -77,56 +77,26 @@
   {% endif %}
 </section>
 
-<form method="post" action="{{ url_for('api_mqtt') }}">
+{# Del blocco MQTT qui restano i due topic della musica, e solo quelli.
+   Broker, credenziali e Home Assistant sono passati alla pagina Rete: ci
+   passano gli interruttori, le scadenze, i rifiuti e le notifiche, non
+   soltanto il brano in ascolto, e cercarli sotto «Musica» era un
+   indovinello. #}
+<form method="post" action="{{ url_for('api_mqtt_musica') }}">
   <section class="card">
-    <h2>{{ t('nowplaying.broker') }}</h2>
-    <p class="hint">{{ t('nowplaying.broker.hint') }}</p>
-    {% if not cfg.mqtt.enabled or not mqtt.available %}
-    <p class="hint">{{ t('nowplaying.setup.hint',
-                         command='sudo /opt/dmd/setup_nowplaying.sh') }}</p>
-    {% endif %}
+    <h2>{{ t('nowplaying.topics') }}</h2>
+    <p class="hint">{{ t('nowplaying.topics.hint') }}</p>
 
-    {% if not mqtt.available %}
-    <p class="status">{{ t('nowplaying.mqtt.missing', package=mqtt.package) }}</p>
-    {% else %}
     <p class="status">
-      {% if not mqtt.enabled %}{{ t('nowplaying.mqtt.off') }}
+      {% if not mqtt.available %}{{ t('nowplaying.mqtt.missing', package=mqtt.package) }}
+      {% elif not mqtt.enabled %}{{ t('nowplaying.mqtt.off') }}
       {% elif mqtt.connected %}{{ t('nowplaying.mqtt.connected',
                                     host=mqtt.host, port=mqtt.port) }}
-        — {{ t('nowplaying.mqtt.messages', count=mqtt.messages) }}
       {% else %}{{ t('nowplaying.mqtt.disconnected') }}{% endif %}
       {% if mqtt.error %} — <code>{{ mqtt.error }}</code>{% endif %}
     </p>
-    {% endif %}
-
-    <label class="check">
-      <input type="checkbox" name="enabled" {{ 'checked' if cfg.mqtt.enabled }}>
-      {{ t('nowplaying.mqtt.enabled') }}
-    </label>
-
-    <div class="row3">
-      <div><label for="host">{{ t('nowplaying.mqtt.host') }}</label>
-        <input type="text" id="host" name="host" value="{{ cfg.mqtt.host }}"></div>
-      <div><label for="port">{{ t('common.port') }}</label>
-        <input type="number" id="port" name="port" min="1" max="65535"
-               value="{{ cfg.mqtt.port }}"></div>
-      <div><label for="client_id">{{ t('nowplaying.mqtt.client_id') }}</label>
-        <input type="text" id="client_id" name="client_id"
-               value="{{ cfg.mqtt.client_id }}"></div>
-    </div>
-
-    <div class="row3">
-      <div><label for="username">{{ t('nowplaying.mqtt.username') }}</label>
-        <input type="text" id="username" name="username"
-               value="{{ cfg.mqtt.username }}" autocomplete="off"></div>
-      <div><label for="password">{{ t('nowplaying.mqtt.password') }}</label>
-        <input type="password" id="password" name="password"
-               value="{{ cfg.mqtt.password }}" autocomplete="new-password"></div>
-      <div><label for="base_topic">{{ t('nowplaying.mqtt.base_topic') }}</label>
-        <input type="text" id="base_topic" name="base_topic"
-               value="{{ cfg.mqtt.base_topic }}"></div>
-    </div>
-    <p class="hint">{{ t('nowplaying.mqtt.password.hint') }}</p>
+    <p class="hint">{{ t('nowplaying.broker.moved') }}
+      <a href="{{ url_for('page_rete') }}">{{ t('nav.rete') }}</a>.</p>
 
     <label for="shairport_topic">{{ t('nowplaying.mqtt.shairport') }}</label>
     <input type="text" id="shairport_topic" name="shairport_topic"
@@ -137,42 +107,9 @@
     <input type="text" id="external_topic" name="external_topic"
            value="{{ cfg.mqtt.external_topic }}">
     <p class="hint">{{ t('nowplaying.mqtt.external.hint') }}</p>
-  </section>
-
-  <section class="card">
-    <h2>{{ t('nowplaying.hass') }}</h2>
-    <p class="hint">{{ t('nowplaying.hass.hint') }}</p>
-    <label class="check">
-      <input type="checkbox" name="discovery" {{ 'checked' if cfg.mqtt.discovery }}>
-      {{ t('nowplaying.hass.enabled') }}
-    </label>
-    <div class="row3">
-      <div><label for="discovery_prefix">{{ t('nowplaying.hass.prefix') }}</label>
-        <input type="text" id="discovery_prefix" name="discovery_prefix"
-               value="{{ cfg.mqtt.discovery_prefix }}"></div>
-      <div><label for="node_id">{{ t('nowplaying.hass.node') }}</label>
-        <input type="text" id="node_id" name="node_id"
-               value="{{ cfg.mqtt.node_id }}"></div>
-      <div><label for="device_name">{{ t('nowplaying.hass.device') }}</label>
-        <input type="text" id="device_name" name="device_name"
-               value="{{ cfg.mqtt.device_name }}"></div>
-    </div>
-    <button type="submit">{{ t('nowplaying.mqtt.apply') }}</button>
+    <button type="submit">{{ t('form.save') }}</button>
   </section>
 </form>
-
-<section class="card">
-  <h2>{{ t('nowplaying.hass.announce') }}</h2>
-  <p class="hint">{{ t('nowplaying.hass.birth',
-                       topic=cfg.mqtt.discovery_prefix ~ '/status') }}</p>
-  <form method="post" action="{{ url_for('api_hass_announce') }}">
-    <button type="submit" class="ghost">{{ t('nowplaying.hass.announce') }}</button>
-  </form>
-  <p class="hint">{{ t('nowplaying.hass.remove.hint') }}</p>
-  <form method="post" action="{{ url_for('api_hass_remove') }}">
-    <button type="submit" class="ghost">{{ t('nowplaying.hass.remove') }}</button>
-  </form>
-</section>
 
 <section class="card">
   <h2>{{ t('nowplaying.spotify') }}</h2>

@@ -142,7 +142,7 @@ systemctl is-active mosquitto
 
 `allow_anonymous true` va bene su una rete domestica dietro un router. Se il
 broker è raggiungibile da fuori, metti un utente e una password
-(`mosquitto_passwd`) e scrivili nella pagina Musica del DMD.
+(`mosquitto_passwd`) e scrivili nella pagina **Rete** del DMD.
 
 Prova che risponda:
 
@@ -344,11 +344,18 @@ monte del DMD e va risolto qui.
 # 5. Il DMD
 
 Aggiorna alla 1.10 (`sudo ./update.sh`, oppure il pulsante di aggiornamento
-nella pagina Impostazioni), poi apri la pagina **Musica**.
+nella pagina Impostazioni), poi apri la pagina **Rete**.
 
-**Broker MQTT** — indirizzo, porta, eventuali credenziali. Il topic di
+**Broker MQTT** — indirizzo, porta, eventuali credenziali. Salva: la riga di
+stato deve dire *connesso*.
+
+> Dalla 6.2 il modulo del broker sta nella pagina **Rete** e non più in
+> *Musica*: dal broker passano gli interruttori dei servizi, le scadenze, i
+> rifiuti e le notifiche, non soltanto il brano in ascolto.
+
+Poi apri la pagina **Musica**, riquadro *Topic della musica*: il topic di
 shairport-sync deve essere identico a quello scritto in
-`/etc/shairport-sync.conf`. Salva: la riga di stato deve dire *connesso*.
+`/etc/shairport-sync.conf`.
 
 **Servizi** — accendi *Now Playing* nella pagina Servizi.
 
@@ -444,7 +451,7 @@ secondo e due secondi e mezzo: al riavvio *tutti* i dispositivi MQTT della
 casa sentono lo stesso annuncio nello stesso istante, e se rispondessero
 insieme il broker prenderebbe una raffica.
 
-Nella pagina Musica ci sono comunque due pulsanti manuali:
+Nella pagina Rete ci sono comunque due pulsanti manuali:
 
 - **Ridichiara le entità** — scorciatoia, non dovrebbe mai servire.
 - **Rimuovi le entità** — cancella il dispositivo da Home Assistant. Serve se
@@ -585,7 +592,7 @@ Assistant deve puntare allo stesso broker, e il prefisso discovery deve
 essere quello che usa lei (di serie `homeassistant`). Riavviare Home
 Assistant è di solito sufficiente, perché i messaggi di discovery sono
 ritenuti dal broker e alla ripartenza lei li rilegge. Se proprio non compare,
-il pulsante **Ridichiara le entità** nella pagina Musica forza l'invio; per
+il pulsante **Ridichiara le entità** nella pagina Rete forza l'invio; per
 vedere che cosa arriva davvero:
 
 ```bash

@@ -423,6 +423,9 @@ def create_app(runtime):
         return render_template(
             "rete.html", cfg=cfg,
             stato=rete.stato(),
+            # Da qui si configura anche il broker: la pagina Musica non lo
+            # fa piu'.
+            mqtt=runtime.mqtt.status(),
             reti=rete.scansiona(forza=True) if cercare else [],
             cercato=cercare,
             conosciute=rete.conosciute(),
@@ -1750,14 +1753,22 @@ def create_app(runtime):
 
     @app.route("/api/mqtt", methods=["POST"])
     def api_mqtt():
+        """Il broker e Home Assistant. Il modulo sta nella pagina **Rete**.
+
+        I due topic della musica -- shairport ed esterno -- non si toccano da
+        qui: hanno il loro modulo nella pagina Musica e la loro rotta. E'
+        l'unico modo perche' due moduli su due pagine diverse possano
+        scrivere nella stessa sezione di configurazione senza cancellarsi a
+        vicenda: un campo assente da una richiesta varrebbe il suo valore
+        predefinito, e salvare il broker azzererebbe in silenzio il topic di
+        shairport.
+        """
         conf = cfg["mqtt"]
         conf["enabled"] = request.form.get("enabled") == "on"
         conf["discovery"] = request.form.get("discovery") == "on"
         for key, default in (("host", "127.0.0.1"), ("username", ""),
                              ("password", ""), ("client_id", "dmd"),
                              ("base_topic", "dmd"),
-                             ("shairport_topic", "shairport"),
-                             ("external_topic", ""),
                              ("discovery_prefix", "homeassistant"),
                              ("node_id", "dmd"),
                              ("device_name", "kWGillo DMD Server")):
@@ -1769,6 +1780,21 @@ def create_app(runtime):
         # Un topic di base vuoto produrrebbe percorsi che iniziano con "/":
         # meglio riportarlo al valore predefinito che pubblicare a vuoto.
         conf["base_topic"] = conf["base_topic"] or "dmd"
+        dmdconf.save()
+        runtime.reconnect_mqtt()
+        return redirect(url_for("page_rete"))
+
+    @app.route("/api/mqtt/musica", methods=["POST"])
+    def api_mqtt_musica():
+        """I due topic da cui arriva il brano in ascolto, e basta.
+
+        Non riconnette il broker: cambiare un topic vuol dire iscriversi
+        altrove, non rifare la connessione.
+        """
+        conf = cfg["mqtt"]
+        for key, default in (("shairport_topic", "shairport"),
+                             ("external_topic", "")):
+            conf[key] = request.form.get(key, conf.get(key, default)).strip()
         dmdconf.save()
         runtime.reconnect_mqtt()
         return redirect(url_for("page_nowplaying"))
@@ -1788,7 +1814,8 @@ def create_app(runtime):
         return _hass_result("nowplaying.hass.removed")
 
     def _hass_result(key):
-        return redirect(url_for("page_nowplaying", result=i18n.translate(
+        # Su Rete, dove ora sta il modulo di Home Assistant.
+        return redirect(url_for("page_rete", result=i18n.translate(
             key, current_language())))
 
     @app.route("/api/nowplaying", methods=["POST"])

@@ -30,9 +30,10 @@ pannello lo grida in rosso, interrompendo qualunque cosa stesse facendo.
 
 Niente di nuovo da installare. Servono due cose che probabilmente hai già:
 
-1. **MQTT configurato e connesso** sul DMD. Pagina *Musica* → sezione MQTT:
-   indirizzo del broker, utente, password. Se la riga dice `non connesso`, è
-   lì che si comincia — il resto di questa pagina non può funzionare.
+1. **MQTT configurato e connesso** sul DMD. Pagina *Rete* → sezione *Broker
+   MQTT*: indirizzo del broker, utente, password. Se la riga dice `non
+   connesso`, è lì che si comincia — il resto di questa pagina non può
+   funzionare.
 2. **Il servizio Notifiche acceso.** Pagina *Servizi* → *Notifiche*. Nasce
    spento: senza qualcuno che pubblichi resterebbe muto per sempre, e un
    servizio acceso che non riceve niente non dà nessun errore, è solo muto.
@@ -220,7 +221,7 @@ in ascolto su dmd/notifica — 12 mostrate, 0 scartate
 | Cosa vedi | Cosa vuol dire |
 |---|---|
 | Il servizio è spento | Accendilo in *Servizi* → *Notifiche* |
-| `non connesso` nella sezione MQTT | Il problema è prima: broker, indirizzo, password |
+| `non connesso` nella sezione MQTT (pagina *Rete*) | Il problema è prima: broker, indirizzo, password |
 | `in ascolto`, `0 mostrate`, `0 scartate` | Il messaggio non arriva: topic diverso fra HA e DMD, oppure l'automazione non è partita |
 | `0 mostrate`, **`n` scartate** | I messaggi arrivano ma sono malformati: la riga dice anche l'ultimo errore |
 | `ultimo messaggio scartato: manca il testo` | Un template di HA ha reso una stringa vuota |

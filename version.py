@@ -1257,6 +1257,41 @@ Storico:
        dichiarazione di discovery con cui li abbiamo annunciati.
        *Lo script pronto per Home Assistant*, `docs/ha/dmd_notifica.yaml`, e
        il manuale `docs/notifiche.it.md` con il PDF.
+  6.2  **Il pannello scriveva l\'ora nel posto dell\'orologio**, e MQTT
+       trasloca dalla pagina Musica alla pagina Rete.
+       Il primo e\' arrivato con una fotografia del pannello: il preavviso
+       diceva `ISS 21:10` in alto a destra e `FRA 5 MIN` sotto, e chi l\'ha
+       guardato ha capito "sono le 21:10, passa alle 21:15". Lettura
+       sbagliata e inevitabile: quel numero stava nella stessa posizione,
+       con lo stesso corpo e quasi lo stesso colore dell\'orologio che il
+       pannello mostra tutto il resto del tempo. Non era un\'ora messa male,
+       era un orario di evento nel posto dell\'orologio.
+       Adesso il posto grande lo prende il **conto alla rovescia**, che e\'
+       anche l\'unica cosa che serva in quel momento, e l\'ora scende sulla
+       riga piccola con `SORGE` davanti. Con i due corpi diversi le scritte
+       si allineano sulla linea di base, e se il nome e il conto si
+       toccherebbero il conto scende di corpo invece di sovrapporsi.
+       Nella stessa riga arriva la **durata**, che prima mancava apposta per
+       non affollare: ci torna perche\' decide se vale la pena uscire, ed e\'
+       quella **visibile** e non quella geometrica. Il passaggio delle 22:48
+       del 12 settembre durava 5,9 minuti sopra l\'orizzonte e quaranta
+       secondi prima di entrare nell\'ombra: il pannello scrive `PER 40 S`.
+       Il secondo e\' un trasloco. Il modulo del broker era nato dentro
+       *Musica* perche\' all\'inizio dal broker passavano solo i metadati di
+       AirPlay; oggi ci passano gli interruttori, la luminosita\', le
+       scadenze, i rifiuti e le notifiche. Cercarlo sotto "Musica" era un
+       indovinello -- la domanda e\' arrivata cosi\': *dove cavolo si
+       cambiano i dati di connessione mqtt?* -- e Rete e\' comunque la pagina
+       che si apre quando qualcosa non si collega. Nella pagina Musica
+       restano i due topic da cui arriva il brano, che li\' sono al posto
+       giusto.
+       Spostare un modulo di configurazione ha esattamente una trappola: i
+       due moduli scrivono nella stessa sezione, e un campo assente da una
+       richiesta vale il suo valore predefinito. Senza precauzioni, salvare
+       il broker avrebbe azzerato in silenzio il topic di shairport. Due
+       rotte separate, e due prove che lo verificano.
+       Il riquadro MQTT della pagina Servizi adesso ha un **collegamento**
+       alla pagina Rete, e non piu\' solo il nome scritto in una frase.
 """
 
-__version__ = "6.1"
+__version__ = "6.2"

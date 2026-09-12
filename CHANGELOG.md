@@ -2,6 +2,56 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [6.2]
+
+- **L'ora nel posto dell'orologio.** Il difetto è arrivato con una fotografia
+  del pannello: il preavviso di un passaggio della Stazione diceva `ISS 21:10`
+  in alto a destra e `FRA 5 MIN` sotto, e chi l'ha guardato ha capito «sono le
+  21:10, allora passa alle 21:15». Lettura sbagliata e inevitabile: quel
+  numero stava nella stessa posizione, con lo stesso corpo e quasi lo stesso
+  colore dell'orologio che il pannello mostra tutto il resto del tempo. Non
+  era un'ora scritta male, era **un orario di evento nel posto
+  dell'orologio**.
+
+  Adesso il posto grande lo prende il **conto alla rovescia** — anche perché è
+  l'unica cosa che serva in quel momento — e l'ora scende sulla riga piccola
+  con l'etichetta `SORGE` davanti, dove non può essere scambiata per altro.
+  Con due corpi diversi sulla stessa riga le scritte si allineano sulla linea
+  di base, e se il nome e il conto arrivassero a toccarsi il conto scende di
+  corpo invece di sovrapporsi: misurato a ogni disegno, non stimato.
+
+- **La durata, e quella giusta.** Sul preavviso mancava apposta, per non
+  affollare una riga che si legge da tre metri. Ci torna perché è quella che
+  decide se vale la pena infilarsi le scarpe — ed è la durata **visibile**,
+  non quella geometrica. Il passaggio delle 22:48 del 12 settembre durava 5,9
+  minuti sopra l'orizzonte e quaranta secondi prima di entrare nell'ombra
+  della Terra: il pannello scrive `PER 40 S`, perché `6 MIN` sarebbe stato un
+  invito a uscire per qualcosa che non c'era più.
+
+- **MQTT trasloca da Musica a Rete.** Il modulo del broker era nato dentro
+  *Musica* perché all'inizio dal broker passavano solo i metadati di AirPlay.
+  Oggi ci passano gli interruttori dei servizi, la luminosità, le scadenze, i
+  rifiuti e le notifiche in arrivo. Cercare l'indirizzo del broker sotto
+  «Musica» era diventato un indovinello, e la domanda è arrivata dal campo in
+  questi termini: *«dove cavolo si cambiano i dati di connessione mqtt?»*.
+  Rete è comunque la pagina che si apre quando qualcosa non si collega.
+
+  Nella pagina Musica restano i due topic da cui arriva il brano in ascolto:
+  lì sono al posto giusto, perché non dicono *come* ci si collega ma *da dove
+  arriva la musica*.
+
+  Spostare un modulo di configurazione ha esattamente una trappola: i due
+  moduli scrivono nella stessa sezione della configurazione, e un campo
+  assente da una richiesta vale il suo valore predefinito — salvare il broker
+  avrebbe azzerato in silenzio il topic di shairport, e salvare i topic
+  avrebbe spento il broker. Due rotte separate, e due prove che partono da una
+  configurazione riconoscibile e verificano che ognuna salvi la sua parte
+  senza toccare l'altra.
+
+- **Il riquadro MQTT della pagina Servizi ha un collegamento**, non più
+  soltanto il nome della pagina scritto in una frase. Era l'altra metà della
+  stessa domanda.
+
 ## [6.1]
 
 Il verso che mancava. Fino a qui il DMD parlava tanto e ascoltava pochissimo:

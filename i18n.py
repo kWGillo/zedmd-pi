@@ -120,6 +120,12 @@ STRINGS = {
 
     # ------------------------------------------------------------- satelliti
     "satelliti.in": ("FRA %(min)d MIN", "IN %(min)d MIN"),
+    # Sul pannello, sotto il conto alla rovescia. L'etichetta esiste perche'
+    # senza, `21:10` nella posizione dell'orologio veniva letto come "sono le
+    # 21:10" invece che "sorge alle 21:10".
+    "satelliti.rises": ("SORGE %(time)s", "RISES %(time)s"),
+    "satelliti.lasts.min": ("PER %(min)d MIN", "FOR %(min)d MIN"),
+    "satelliti.lasts.sec": ("PER %(sec)d S", "FOR %(sec)d S"),
     # --- pagina Satelliti
     "nav.satelliti": ("Satelliti", "Satellites"),
     "satelliti.title": ("Satelliti", "Satellites"),
@@ -813,17 +819,41 @@ STRINGS = {
         "on the panel without starting anything. It clears itself."),
     "nowplaying.test.button": ("Mostra un brano di prova", "Show a test track"),
 
+    # Le chiavi qui sotto tengono il prefisso `nowplaying.` per ragioni di
+    # anzianita': il modulo e' nato nella pagina Musica, dove il broker
+    # serviva solo ad AirPlay. Dalla 6.2 sta nella pagina Rete, ma
+    # rinominare venticinque chiavi per una questione di etichetta avrebbe
+    # prodotto un cambiamento grande e rischioso in cambio di niente: le
+    # chiavi sono identificatori, e questo commento e' piu' economico.
     "nowplaying.broker": ("Broker MQTT", "MQTT broker"),
     "nowplaying.broker.hint": (
-        "I metadati di AirPlay arrivano qui passando da un broker MQTT. Il "
-        "valore predefinito è un Mosquitto installato sul Raspberry stesso: "
-        "così la funzione lavora da sola, senza Home Assistant. Se hai già un "
-        "broker sotto Home Assistant, scrivi quel suo indirizzo e ottieni le "
-        "due cose insieme.",
-        "AirPlay metadata reaches the DMD through an MQTT broker. The default "
-        "is a Mosquitto running on the Raspberry Pi itself, so the feature "
-        "works on its own without Home Assistant. If you already run a broker "
-        "under Home Assistant, put its address here and get both at once."),
+        "Dal broker passa quasi tutto quello che il DMD dice e sente: il "
+        "brano in ascolto, gli interruttori dei servizi in Home Assistant, "
+        "le scadenze, i rifiuti e le notifiche che arrivano al pannello. Il "
+        "valore predefinito è un Mosquitto installato sul Raspberry stesso, "
+        "così la cosa lavora da sola; se hai già un broker sotto Home "
+        "Assistant, scrivi quel suo indirizzo e ottieni le due cose insieme.",
+        "Almost everything the DMD says and hears goes through the broker: "
+        "the track playing, the service switches in Home Assistant, the "
+        "deadlines, the waste calendar and the notifications that reach the "
+        "panel. The default is a Mosquitto running on the Raspberry Pi "
+        "itself, so it works on its own; if you already run a broker under "
+        "Home Assistant, put its address here and get both at once."),
+    # I due rimandi fra la pagina Rete e la pagina Musica. Finiscono davanti a
+    # un collegamento, quindi la frase si chiude con il nome della pagina.
+    "rete.mqtt.elsewhere": (
+        "I due topic da cui arriva il brano in ascolto si impostano in",
+        "The two topics the playing track comes from are set in"),
+    "nowplaying.broker.moved": (
+        "Broker, credenziali e Home Assistant si impostano in",
+        "Broker, credentials and Home Assistant are set in"),
+    "nowplaying.topics": ("Topic della musica", "Music topics"),
+    "nowplaying.topics.hint": (
+        "Da dove arriva il brano in ascolto. La connessione al broker è "
+        "un'altra cosa e sta altrove: qui ci sono solo i due topic.",
+        "Where the playing track comes from. Connecting to the broker is a "
+        "different matter and lives elsewhere: these are just the two "
+        "topics."),
     "nowplaying.mqtt.enabled": ("Collega il DMD al broker",
                                 "Connect the DMD to the broker"),
     "nowplaying.mqtt.host": ("Indirizzo", "Address"),
@@ -1288,13 +1318,13 @@ STRINGS = {
         "Spegnendolo il DMD saluta il broker e in Home Assistant il "
         "dispositivo passa a «non disponibile», invece di restare fermo "
         "sull'ultimo valore. Sul pannello non cambia niente: i servizi qui "
-        "sotto continuano per conto loro. Indirizzo, utente e topic si "
-        "impostano in Now Playing.",
+        "sotto continuano per conto loro. Indirizzo, utente e password si "
+        "impostano nella pagina Rete.",
         "Turning it off makes the DMD say goodbye to the broker, so in Home "
         "Assistant the device becomes «unavailable» instead of freezing on "
         "its last value. Nothing changes on the panel: the services below "
-        "carry on by themselves. Address, user and topics are set in Now "
-        "Playing."),
+        "carry on by themselves. Address, user and password are set on the "
+        "Network page."),
     "services.desc.zedmd": ("Riceve i frame DMD via rete da Batocera, dmdserver o VPX.",
                            "Receives DMD frames over the network from Batocera, dmdserver or VPX."),
     "services.desc.mediaplayer": ("Foto e video a rotazione dalla libreria, a intervalli casuali.",

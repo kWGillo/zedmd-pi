@@ -1,4 +1,4 @@
-# DMD Controller 6.1
+# DMD Controller 6.2
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -568,7 +568,8 @@ le tappe.
 | 5.8.2 | Registro CSV dei passaggi dei satelliti, con dentro anche quelli non visibili e l'altezza del Sole che spiega perché |
 | 6.0 | I satelliti diventano un servizio completo: pagina dedicata, il terzo colore per i passaggi che non si vedono, e lo spegnimento in ombra segnato sull'arco |
 | 6.0.1 | Un cane da guardia riavvia il ciclo del radar se si ferma, e conta quante volte è successo: non è una cura, è la misura che dirà se il blocco esiste davvero |
-| **6.1** | **Home Assistant può parlare al pannello: un topic, tre livelli, e solo `allarme` interrompe una partita. Corretti i sensori che mandavano una stringa vuota e facevano protestare HA cinquanta volte al giorno** |
+| 6.1 | Home Assistant può parlare al pannello: un topic, tre livelli, e solo `allarme` interrompe una partita. Corretti i sensori che mandavano una stringa vuota e facevano protestare HA cinquanta volte al giorno |
+| **6.2** | **Il preavviso dei satelliti scriveva l'ora di sorgere nel posto dell'orologio e veniva letto come l'ora corrente: adesso in grande c'è il conto alla rovescia, e accanto la durata visibile. La configurazione MQTT passa dalla pagina Musica alla pagina Rete** |
 
 ---
 

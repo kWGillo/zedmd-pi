@@ -104,13 +104,40 @@ indipendenti, nessuna ridondanza.
 
 | Quando | Che cosa si vede | Colore | Ora |
 |---|---|---|---|
-| **T−10 min** | nome, ora del passaggio, da dove sorge, quanto sale | verde acceso | fissa |
+| **T−10 min** | nome, fra quanto, ora di sorgere, dove, quanto sale, per quanto | verde acceso | fissa |
 | **T−5 min** | lo stesso, con il conto alla rovescia aggiornato | verde acceso | fissa |
 | **dal sorgere al tramonto** | l'arco del cielo con il puntino che si muove | bianco | **lampeggia** |
 
 Il lampeggio va a secondi pari, la stessa fase dei due punti dell'orologio:
 due cose che lampeggiano insieme sembrano un battito, due sfasate sembrano un
 guasto.
+
+### Come è fatto il preavviso
+
+```
+ISS            FRA 5 MIN
+SORGE 21:10  O 51° PER 5 MIN
+```
+
+Quattro informazioni, e ognuna risponde a una domanda diversa: **chi** passa,
+**fra quanto**, **a che ora e dove** guardare, **per quanto** starà lì.
+
+> **Perché il numero grande è il conto alla rovescia e non l'ora.** Fino alla
+> 6.1 in alto a destra c'era `21:10`, l'ora di sorgere. Stessa posizione,
+> stesso corpo e quasi stesso colore dell'orologio che quel pannello mostra
+> tutto il resto del tempo: chi passava in soggiorno leggeva «sono le 21:10»
+> e, insieme a «fra 5 min», concludeva che il passaggio fosse alle 21:15.
+> Segnalato dal campo, ed era l'unica lettura ragionevole. Adesso il posto
+> grande lo prende il conto alla rovescia — l'unica cosa che serva in quel
+> momento — e l'ora scende sulla riga piccola con l'etichetta `SORGE`
+> davanti, dove non può essere scambiata per altro.
+
+**`PER 5 MIN` è la durata visibile, non quella del passaggio.** Sono due cose
+diverse ogni volta che la Stazione entra nell'ombra della Terra prima di
+tramontare, e succede spesso. Un caso vero, la sera del 12 settembre: il
+passaggio delle 22:48 durava 5,9 minuti sopra l'orizzonte e **quaranta
+secondi** prima di sparire. Il pannello scrive `PER 40 S`, perché scrivere
+`6 MIN` sarebbe stato un invito a uscire per qualcosa che non c'era più.
 
 ### Perché dieci minuti prima
 

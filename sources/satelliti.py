@@ -470,27 +470,86 @@ class SatellitiSource(Source):
     def _testo(self, d, x, y, s, font, colore, ancora="la"):
         d.text((x, y), s, font=font, fill=colore, anchor=ancora)
 
-    def _avviso(self, passaggio, mancano):
-        """Tre informazioni e non una di piu': chi, a che ora, dove guardare.
+    def _larghezza(self, d, s, font):
+        riquadro = d.textbbox((0, 0), s, font=font)
+        return riquadro[2] - riquadro[0]
 
-        La quarta che verrebbe voglia di scrivere -- durata, magnitudine,
-        numero di catalogo -- e' quella che rende la riga illeggibile da tre
-        metri di distanza, che e' la distanza da cui questo pannello si
-        guarda.
+    def durata_visibile(self, passaggio):
+        """Quanti secondi dura davvero la parte che si vede.
+
+        **Non e' la durata geometrica**, ed e' la lezione di una sera vera:
+        il passaggio delle 22:48 del 12 settembre durava 5,9 minuti sopra
+        l'orizzonte, ma la Stazione entrava nell'ombra della Terra quaranta
+        secondi dopo essere sorta. Scrivere "6 MIN" su quel passaggio sarebbe
+        stato un invito a uscire per qualcosa che non c'era piu'.
+        """
+        fine = passaggio.get("spegnimento") or passaggio["tramonta"]
+        if fine > passaggio["tramonta"]:
+            fine = passaggio["tramonta"]
+        return max(0.0, (fine - passaggio["sorge"]).total_seconds())
+
+    def durata_breve(self, secondi, lang=None):
+        """La durata in una manciata di caratteri.
+
+        Sotto il minuto e mezzo si scrivono i secondi, arrotondati a cinque:
+        la differenza fra 38 e 43 secondi non cambia niente per chi sta
+        infilandosi le scarpe, e la falsa precisione occupa spazio.
+        """
+        if secondi < 90:
+            return self.t("satelliti.lasts.sec", lang,
+                          sec=int(round(secondi / 5.0) * 5))
+        return self.t("satelliti.lasts.min", lang,
+                      min=max(1, int(round(secondi / 60.0))))
+
+    def _avviso(self, passaggio, mancano):
+        """Il preavviso: fra quanto, di chi, dove guardare e per quanto.
+
+        La versione precedente scriveva l'**ora di sorgere** in grande a
+        destra -- stessa posizione, stesso corpo e quasi stesso colore
+        dell'orologio che questo pannello mostra tutto il resto del tempo.
+        Chi passava in salotto leggeva `21:10` come "sono le 21:10" e `FRA 5
+        MIN` come "allora passa alle 21:15". Segnalato dal campo, ed era
+        l'unica lettura ragionevole: avevo messo un orario di evento nel posto
+        dell'orologio.
+
+        Adesso il posto grande lo prende il **conto alla rovescia**, che e'
+        anche l'unica cosa che serve davvero in quel momento, e l'ora scende
+        sulla riga piccola con l'etichetta `SORGE` davanti, dove non puo'
+        essere scambiata per altro.
+
+        La quarta informazione -- la durata -- prima non c'era apposta, per
+        non affollare una riga che si legge da tre metri. Ci torna perche'
+        decide se vale la pena uscire, e perche' e' quella **visibile**: vedi
+        `durata_visibile`.
         """
         L, A = self.width, self.height
         img = Image.new("RGB", (L, A), (0, 0, 0))
         d = ImageDraw.Draw(img)
         nome = passaggio.get("breve", passaggio["nome"])[:12]
-        self._testo(d, 4, int(A * 0.02), nome, self._font_grande, VERDE)
-        ora = passaggio["sorge"].astimezone().strftime("%H:%M")
-        self._testo(d, L - 4, int(A * 0.02), ora, self._font_grande, VERDE,
-                    ancora="ra")
-        self._testo(d, 4, int(A * 0.62),
-                    self.t("satelliti.in", None, min=max(0, mancano)),
-                    self._font_medio, VERDE_CUPO)
-        dove = "%s  %d°" % (bussola(passaggio["azimut_sorge"]),
-                                 round(passaggio["elevazione_massima"]))
+        conto = self.t("satelliti.in", None, min=max(0, mancano))
+
+        # I nomi corti stanno tutti, ma `breve` arriva fino a dodici caratteri
+        # e in inglese il conto e' piu' lungo. Invece di fidarsi, si misura: se
+        # le due parole si toccherebbero, il conto scende di corpo. Meglio un
+        # numero piu' piccolo che due parole sovrapposte.
+        font_conto = self._font_grande
+        if (self._larghezza(d, nome, self._font_grande)
+                + self._larghezza(d, conto, font_conto) + 14 > L):
+            font_conto = self._font_medio
+
+        # Allineati sulla linea di base e non sul bordo superiore: con due
+        # corpi diversi il pareggio in alto si vede storto.
+        base = int(A * 0.02) + self._font_grande.getmetrics()[0]
+        self._testo(d, 4, base, nome, self._font_grande, VERDE, ancora="ls")
+        self._testo(d, L - 4, base, conto, font_conto, VERDE, ancora="rs")
+
+        sorge = self.t("satelliti.rises", None,
+                       time=passaggio["sorge"].astimezone().strftime("%H:%M"))
+        self._testo(d, 4, int(A * 0.66), sorge, self._font_piccolo, VERDE_CUPO)
+        dove = "%s  %d°  %s" % (
+            bussola(passaggio["azimut_sorge"]),
+            round(passaggio["elevazione_massima"]),
+            self.durata_breve(self.durata_visibile(passaggio)))
         self._testo(d, L - 4, int(A * 0.66), dove, self._font_piccolo,
                     VERDE_CUPO, ancora="ra")
         return img

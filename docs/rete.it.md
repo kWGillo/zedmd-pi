@@ -84,6 +84,27 @@ farebbe cadere la connessione all'istante, e per rimediare servirebbe di
 nuovo il monitor — cioè esattamente la situazione da cui questa pagina deve
 tirarti fuori. Se la vuoi togliere, collegati prima a un'altra.
 
+## Broker MQTT e Home Assistant
+
+In fondo alla pagina, dalla 6.2, c'è il collegamento al **broker MQTT**:
+indirizzo, porta, utente, password, topic di base, e le impostazioni di Home
+Assistant (discovery, prefisso, nome del dispositivo).
+
+Prima stava nella pagina *Musica*, perché all'inizio dal broker passavano solo
+i metadati di AirPlay. Oggi ci passano gli interruttori dei servizi, la
+luminosità, le scadenze, il calendario dei rifiuti e — dalla 6.1 — le
+notifiche che Home Assistant manda al pannello. Cercare l'indirizzo del broker
+sotto «Musica» era diventato un indovinello, e questa è comunque la pagina che
+si apre quando qualcosa non si collega.
+
+Nella pagina *Musica* restano i due topic da cui arriva il brano in ascolto —
+quello di shairport-sync e quello libero — perché lì sono al posto giusto: non
+dicono *come* ci si collega, dicono *da dove arriva la musica*.
+
+I dettagli su come configurare il broker stanno in
+[`now-playing.it.md`](now-playing.it.md); quelli sulle notifiche in arrivo in
+[`notifiche.it.md`](notifiche.it.md).
+
 # 4. Cosa succede quando premi «Collega»
 
 Qui c'è una cosa che vale la pena capire, perché altrimenti sembra che il

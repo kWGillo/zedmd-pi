@@ -49,7 +49,11 @@
     {%- else %}{{ t('nowplaying.mqtt.disconnected') }}{% endif %}
     {%- if mqtt.error %} — <code>{{ mqtt.error }}</code>{% endif %}
   </p>
-  <p class="hint">{{ t('services.mqtt.hint') }}</p>
+  {# Il collegamento, e non solo il nome della pagina. E' la domanda che e'
+     arrivata dal campo parola per parola: «dove si cambiano i dati di
+     connessione MQTT?». Scriverlo in una frase non bastava. #}
+  <p class="hint">{{ t('services.mqtt.hint') }}
+    <a href="{{ url_for('page_rete') }}">{{ t('nav.rete') }}</a> →</p>
 </section>
 
 {% for service in services %}
