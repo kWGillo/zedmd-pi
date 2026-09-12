@@ -176,6 +176,12 @@ class AirRadarSource(Source):
         # Quanti secondi sono passati davvero fra le ultime due interrogazioni.
         self._cadenza = 0.0
         self._inizio_precedente = 0.0
+        # Battito del ciclo: si aggiorna a ogni giro, riuscito o fallito. Serve
+        # al cane da guardia, che sta fuori di qui -- un ciclo fermo non puo'
+        # accorgersi da solo di essere fermo.
+        self._battito = 0.0
+        self._rianimazioni = 0
+        self._ultima_rianimazione = 0.0
 
         self._lock = threading.Lock()
         self._image = None
@@ -229,6 +235,16 @@ class AirRadarSource(Source):
             return self.t("status.disabled", lang)
         key, values = self._status
         text = self.t(key, lang, **values)
+        if self._rianimazioni:
+            # Si dice solo se e' successo. Un contatore a zero non merita di
+            # occupare la riga, ma uno diverso da zero e' la prova che il
+            # blocco esiste, ed e' la cosa piu' importante che questa riga
+            # possa dire.
+            text += " | " + self.t("status.radar.revived", lang,
+                                   count=self._rianimazioni,
+                                   when=time.strftime(
+                                       "%d/%m %H:%M",
+                                       time.localtime(self._ultima_rianimazione)))
         if self._routes_found or self._routes_missing:
             text += " | " + self.t("status.radar.routes", lang,
                                    found=self._routes_found,
@@ -248,6 +264,7 @@ class AirRadarSource(Source):
             # otteneva novanta, e un aereo che attraversa il raggio in meno di
             # quel tempo non veniva visto mai.
             inizio = time.monotonic()
+            self._battito = inizio
             if self._inizio_precedente:
                 # La cadenza **misurata**, non quella configurata. Il difetto
                 # e' rimasto nascosto per versioni intere perche' nessuno
@@ -275,6 +292,46 @@ class AirRadarSource(Source):
             # quasi niente: si e' in ritardo, e la cosa giusta e' ripartire.
             self._wake.wait(max(PAUSA_MINIMA, attesa))
             self._wake.clear()
+
+    def fermo_da(self):
+        """Da quanti secondi il ciclo non fa un giro. Zero se non e' partito."""
+        if not self._running or not self._battito:
+            return 0.0
+        return max(0.0, time.monotonic() - self._battito)
+
+    def soglia_blocco(self, cfg):
+        """Oltre quanti secondi di silenzio il ciclo si considera bloccato.
+
+        Generosa apposta: la sfilata degli aerei puo' durare a lungo, e fra un
+        giro e l'altro ci sta anche un provider lento. Quattro intervalli, e
+        mai meno di due minuti: se scatta, e' successo qualcosa di vero.
+        """
+        try:
+            intervallo = max(INTERVALLO_MINIMO, float(cfg["poll_interval"]))
+        except (TypeError, ValueError):
+            intervallo = INTERVALLO_MINIMO
+        return max(120.0, intervallo * 4 + 60.0)
+
+    def rianima(self):
+        """Rimette in piedi il ciclo quando si e' fermato.
+
+        Non e' una cura: e' una rete. Il difetto vero, se c'e', resta da
+        trovare -- e proprio per questo ogni rianimazione si conta e si
+        scrive nel registro. Se questo numero resta a zero per settimane,
+        vuol dire che il blocco non esisteva; se cresce, abbiamo finalmente
+        una traccia con un orario sopra.
+        """
+        print("[airradar] ciclo fermo da %.0f s: lo riavvio" % self.fermo_da())
+        self._rianimazioni += 1
+        self._ultima_rianimazione = time.time()
+        vecchio = self._thread
+        self._running = False
+        self._wake.set()
+        if vecchio is not None and vecchio.is_alive():
+            vecchio.join(timeout=2.0)
+        self._showing = False
+        self._thread = None
+        self.start()
 
     def _poll(self, cfg):
         """Interroga il provider scelto, con gli altri come riserva."""

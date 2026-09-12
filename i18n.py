@@ -304,6 +304,9 @@ STRINGS = {
     "footer.project": ("Progetto su GitHub", "Project on GitHub"),
     "footer.version": ("versione", "version"),
     "common.download": ("Scarica il CSV", "Download the CSV"),
+    # Alias storico: i template lo usano, e senza questa riga il pulsante di
+    # salvataggio di Now Playing si chiamava "form.save".
+    "form.save": ("Salva", "Save"),
     "common.save": ("Salva", "Save"),
     "common.save_apply": ("Salva e applica", "Save and apply"),
     "common.apply": ("Applica", "Apply"),
@@ -368,6 +371,9 @@ STRINGS = {
                            "interrogato ogni %(cadence)d s",
                            "%(provider)s: %(count)d aircraft within %(radius).1f km, "
                            "polled every %(cadence)d s"),
+    "status.radar.revived": (
+        "ciclo riavviato %(count)d volte, l'ultima il %(when)s",
+        "loop restarted %(count)d times, last on %(when)s"),
     "status.radar.routes": ("rotte trovate %(found)d, non disponibili %(missing)d",
                             "routes found %(found)d, unavailable %(missing)d"),
     "status.nowplaying.idle": ("nessun brano in riproduzione", "nothing playing"),
@@ -2086,6 +2092,9 @@ STRINGS = {
         "play from this page."),
     "doom.keyboard": ("Leggi la tastiera collegata al Raspberry",
                       "Read the keyboard plugged into the Raspberry Pi"),
+    "doom.keyboard.device": ("Tastiera da usare", "Keyboard to use"),
+    "doom.keyboard.read": ("Leggi la tastiera collegata al Raspberry",
+                           "Read the keyboard plugged into the Raspberry Pi"),
     "doom.pad.device": ("Joystick da usare", "Joystick to use"),
     "doom.pad.read": ("Leggi i joystick collegati al Raspberry",
                       "Read the joysticks plugged into the Raspberry Pi"),

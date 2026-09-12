@@ -1,4 +1,4 @@
-# DMD Controller 6.0
+# DMD Controller 6.0.1
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -559,7 +559,8 @@ le tappe.
 | 5.8 | Satelliti: il pannello avvisa dieci minuti prima che la Stazione Spaziale passi sopra casa e mostra dove guardare, con l'arco del passaggio e l'ora che lampeggia |
 | 5.8.1 | Il radar contava l'intervallo dalla fine della sfilata invece che dall'inizio dell'interrogazione, e più aerei trovava meno spesso guardava. La cadenza misurata ora si legge nella riga di stato |
 | 5.8.2 | Registro CSV dei passaggi dei satelliti, con dentro anche quelli non visibili e l'altezza del Sole che spiega perché |
-| **6.0** | **I satelliti diventano un servizio completo: pagina dedicata, il terzo colore per i passaggi che non si vedono, e lo spegnimento in ombra segnato sull'arco** |
+| 6.0 | I satelliti diventano un servizio completo: pagina dedicata, il terzo colore per i passaggi che non si vedono, e lo spegnimento in ombra segnato sull'arco |
+| **6.0.1** | **Un cane da guardia riavvia il ciclo del radar se si ferma, e conta quante volte è successo: non è una cura, è la misura che dirà se il blocco esiste davvero** |
 
 ---
 

@@ -2,6 +2,32 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [6.0.1]
+
+- **Un cane da guardia per il radar.** Sintomo dal campo, tre volte in tre
+  giorni: aerei sopra casa, pannello muto, e premendo *«interroga adesso»* i
+  voli comparivano. Due spiegazioni possibili, e i dati non bastavano a
+  separarle: il cerchio da 3 km troppo stretto per quello che si percepisce
+  come «sopra casa», oppure il ciclo del radar fermo.
+
+  Un ciclo fermo non può accorgersi da solo di essere fermo: serve qualcuno da
+  fuori. Ora il ciclo lascia un **battito** a ogni giro, e il giro principale
+  del servizio — che passa una volta al secondo — lo guarda. Se il battito è
+  vecchio più di quattro intervalli (e mai meno di due minuti: una sfilata di
+  aerei dura, e un cane da guardia nervoso sarebbe peggio del difetto
+  sorvegliato) il ciclo viene riavviato.
+
+  **Non è una cura**, ed è importante scriverlo: il difetto, se esiste, resta
+  da trovare. È una **misura**: ogni rianimazione lascia una riga nel registro
+  con un orario sopra, e la riga di stato la conta. Se quel numero resta a zero
+  per settimane, il blocco non c'era e la risposta era il raggio.
+
+- **Tre etichette che mancavano da versioni.** Una prova di fumo sui template
+  ha trovato tre chiavi di traduzione inesistenti: sulla pagina *Game Boy* due
+  etichette mostravano il nome grezzo della chiave (`doom.keyboard.device`,
+  `doom.keyboard.read`) e su *Now Playing* il pulsante di salvataggio si
+  chiamava `form.save`.
+
 ## [6.0]
 
 Numero tondo perché il DMD fa una cosa che prima non faceva: non mostra più

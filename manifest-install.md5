@@ -7,7 +7,7 @@ d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 b97e55390198d378d860bfdd0d867a0b  dmdconf.py
-9ae9d37210e22af9d0c73573106d5874  dmdd.py
+5a7d79c1e8de1c981e1b0d12f4581cdf  dmdd.py
 bb3118ed4b5ebb8d9f49cc8bbcd6f341  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
 7c5f28cafc9299975fcdb11e54937469  doom/setup_doom.sh
@@ -18,7 +18,7 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 418894427fa9dea5ffb794b59f280216  hass.py
-caac0f0fd4ba840adba20c6e5f1664ea  i18n.py
+b66332f79c1d134df945c0641fba1194  i18n.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
@@ -33,7 +33,7 @@ ac3fdf21dcb14c32efdc79f4baac04f3  rete.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 7ee163e5c89f7ac983b26ae09a1a4b92  setup_share.sh
 62aed8b516e90924c3c006221a6396a5  sources/__init__.py
-1d1f9e29acbbce62c1a368b5ce11d8a7  sources/airradar.py
+62241e40a43cbd28136497e0159fd1c4  sources/airradar.py
 4839d9f4d5cbf59bfe83a946f7c272ee  sources/anteprima.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
 55c9a31b9be438ad88d3a08b53fb1c9a  sources/base.py
@@ -94,7 +94,7 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 7c0273ad8b84559e5569f20a8f7584f5  templates/settings.html
 0823432fc4a73241082966d4f4c9e760  templates/telecamera.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-0620851c63d20f56622b91eaa1b8575b  version.py
+2aa046676d165a44906b3e3182fe9a81  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 7c31014132762f68e693e98541b602e8  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

@@ -1211,6 +1211,27 @@ Storico:
        Numero tondo perche\' il DMD fa una cosa che prima non faceva: non
        mostra piu\' soltanto quello che succede, **dice quando uscire a
        guardare**.
+  6.0.1 **Un cane da guardia per il radar**, e tre etichette che mancavano.
+       Il sintomo dal campo, tre volte in tre giorni: aerei sopra casa,
+       pannello muto, e premendo "interroga adesso" i voli comparivano. Due
+       spiegazioni possibili, e i dati raccolti non bastavano a separarle: il
+       cerchio da 3 km troppo stretto per quello che si percepisce come
+       "sopra casa", oppure il ciclo del radar fermo.
+       Un ciclo fermo non puo' accorgersi da solo di essere fermo: serve
+       qualcuno da fuori. Adesso il ciclo lascia un **battito** a ogni giro, e
+       il giro principale del servizio -- che passa una volta al secondo -- lo
+       guarda. Se il battito e' vecchio piu' di quattro intervalli (e mai meno
+       di due minuti: una sfilata di aerei dura, e un cane da guardia nervoso
+       sarebbe peggio del difetto) il ciclo viene riavviato.
+       Non e' una cura, ed e' importante scriverlo: il difetto, se esiste,
+       resta da trovare. Ma e' una **misura**: ogni rianimazione lascia una
+       riga nel registro con un orario, e la riga di stato la conta. Se quel
+       numero resta a zero per settimane, il blocco non c'era e la risposta
+       era il raggio.
+       Nella stessa passata, una prova di fumo sui template ha trovato **tre
+       chiavi di traduzione inesistenti**, li' da versioni: sulla pagina Game
+       Boy due etichette mostravano il nome grezzo della chiave, e su Now
+       Playing il pulsante di salvataggio si chiamava "form.save".
 """
 
-__version__ = "6.0"
+__version__ = "6.0.1"

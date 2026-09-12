@@ -569,6 +569,23 @@ class Runtime:
         except Exception as exc:
             print("[dmd] fasce dei servizi non applicate: %s" % exc)
 
+        # Cane da guardia del radar. Un ciclo fermo non puo' accorgersi da
+        # solo di essere fermo: qualcuno deve guardarlo da fuori, e questo
+        # giro passa una volta al secondo.
+        #
+        # Non e' una cura ed e' importante dirlo: il difetto, se esiste, resta
+        # da trovare. Ma un sintomo che si presenta ogni tre giorni non si
+        # insegue a mano, e ogni rianimazione lascia una riga nel registro con
+        # un orario sopra. Se il contatore resta a zero, il blocco non c'era.
+        try:
+            radar = self.radar
+            if (radar.enabled and radar._running
+                    and radar.fermo_da() > radar.soglia_blocco(
+                        self.cfg["air_radar"])):
+                radar.rianima()
+        except Exception as exc:
+            print("[dmd] cane da guardia del radar: %s" % exc)
+
         display = self.cfg["display"]
         now = time.localtime()
         minute = now.tm_hour * 60 + now.tm_min
