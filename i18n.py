@@ -1688,6 +1688,36 @@ STRINGS = {
         "apre, l'allarme inserito, la lavatrice finita.",
         "Messages Home Assistant sends to the panel: the door opening, the "
         "alarm armed, the washing machine done."),
+    # Il pulsante di prova nella pagina Servizi. Le due risposte sono
+    # diverse apposta: dicono **quale meta' della catena** ha funzionato, che
+    # e' l'unica cosa che si voglia sapere premendo un pulsante di prova.
+    "notifiche.prova": ("Manda una prova", "Send a test"),
+    "notifiche.prova.placeholder": ("Testo della notifica",
+                                    "Notification text"),
+    "notifiche.prova.testo": ("Prova dal pannello", "Test from the panel"),
+    "notifiche.livello.info": ("info", "info"),
+    "notifiche.livello.avviso": ("avviso", "warning"),
+    "notifiche.livello.allarme": ("allarme", "alarm"),
+    "notifiche.prova.broker": (
+        "Notifica pubblicata su %(topic)s e tornata indietro dal broker: "
+        "la catena funziona tutta, tranne il pezzo di Home Assistant che da "
+        "qui non si può provare.",
+        "Notification published on %(topic)s and received back from the "
+        "broker: the whole chain works, except the Home Assistant part, "
+        "which cannot be tested from here."),
+    "notifiche.prova.diretta": (
+        "Il broker non è raggiungibile: la notifica è stata consegnata "
+        "direttamente alla sorgente. Il pannello la mostra lo stesso, ma "
+        "quello che arriva da Home Assistant no — guarda la sezione MQTT "
+        "nella pagina Rete.",
+        "The broker is unreachable: the notification was handed straight to "
+        "the source. The panel still shows it, but nothing coming from Home "
+        "Assistant will — check the MQTT section on the Network page."),
+    "notifiche.prova.spento": (
+        "Il servizio Notifiche è spento: accendilo qui sopra, altrimenti la "
+        "prova non ha niente da mostrare.",
+        "The Notifications service is off: turn it on above, otherwise the "
+        "test has nothing to show."),
     "status.notifiche.waiting": (
         "in ascolto su %(topic)s — %(shown)d mostrate, %(dropped)d scartate",
         "listening on %(topic)s — %(shown)d shown, %(dropped)d dropped"),

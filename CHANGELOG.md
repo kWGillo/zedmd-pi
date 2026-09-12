@@ -2,6 +2,29 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [6.3]
+
+- **Un pulsante per provare le notifiche**, nel riquadro *Notifiche* della
+  pagina Servizi: un campo di testo, i tre livelli, e via. Nasce da una sera
+  di prove a vuoto — le notifiche arrivavano davvero, ma duravano dodici
+  secondi e chi guardava il pannello arrivava sempre tardi; e per rimandarne
+  una bisognava passare da Home Assistant, aprire *Strumenti per
+  sviluppatori*, cercare l'azione. Un servizio che non si può provare da solo
+  sembra rotto ogni volta che non lo guardi nell'istante giusto.
+
+  **Passa dal broker**, e questa è la scelta che conta: consegnare la
+  notifica dritta alla sorgente avrebbe provato soltanto il disegno, mentre
+  così si provano quasi tutti gli anelli — broker raggiungibile, iscrizione
+  viva, payload interpretato, pannello che disegna. Fuori resta solo Home
+  Assistant, che da lì non si potrebbe provare comunque.
+
+  Se il broker non risponde la notifica viene consegnata lo stesso, ma il
+  messaggio lo dice: **due risposte diverse dicono quale metà funziona**, che
+  è l'unica cosa che si voglia sapere premendo un pulsante di prova. Una sola
+  risposta buona per entrambi i casi nasconderebbe proprio il guasto che si
+  sta cercando. E a servizio spento il pulsante non finge: dice che è spento,
+  invece di non far succedere niente e sembrare rotto.
+
 ## [6.2]
 
 - **L'ora nel posto dell'orologio.** Il difetto è arrivato con una fotografia

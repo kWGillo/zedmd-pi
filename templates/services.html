@@ -3,6 +3,8 @@
 
 {% block content %}
 
+{% if result %}<div class="banner">{{ result }}</div>{% endif %}
+
 {% if sleeping or night %}
 <div class="banner">
   {% if sleeping %}{{ t('banner.sleep') }}{% else %}{{ t('banner.night') }}{% endif %}
@@ -82,6 +84,21 @@
     </select>
     <button type="submit">{{ t('common.apply') }}</button>
     <button type="submit" name="prova" value="1">{{ t('audio.play') }}</button>
+  </form>
+  {% endif %}
+  {# Il pulsante di prova esiste solo per le notifiche, ed e' l'unico
+     servizio che ne abbia bisogno: tutti gli altri si vedono da soli appena
+     li accendi, questo resta muto finche' qualcuno da fuori non parla. #}
+  {% if service.key == 'notifiche' %}
+  <form method="post" action="{{ url_for('api_notifiche_prova') }}" class="inline">
+    <input type="text" name="testo" autocomplete="off"
+           placeholder="{{ t('notifiche.prova.placeholder') }}">
+    <select name="livello">
+      <option value="info">{{ t('notifiche.livello.info') }}</option>
+      <option value="avviso" selected>{{ t('notifiche.livello.avviso') }}</option>
+      <option value="allarme">{{ t('notifiche.livello.allarme') }}</option>
+    </select>
+    <button type="submit">{{ t('notifiche.prova') }}</button>
   </form>
   {% endif %}
   {% if service.status %}<p class="status">{{ service.status }}</p>{% endif %}

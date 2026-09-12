@@ -169,6 +169,35 @@ Dentro ci sono tre cose che vale la pena conoscere:
 
 Se non compare niente, vedi il [capitolo 8](#8-quando-non-funziona).
 
+## 5.5 Il pulsante di prova sul DMD
+
+Dalla 6.3, nel riquadro *Notifiche* della pagina **Servizi** del DMD c'è un
+campo di testo, i tre livelli e un pulsante **Manda una prova**. Serve a
+rispondere alla domanda «funziona?» senza aprire Home Assistant.
+
+**Passa dal broker**, e non è un dettaglio: la notifica viene pubblicata sul
+topic e torna indietro per la stessa strada che fanno quelle vere. Così la
+prova copre quasi tutti gli anelli — broker raggiungibile, iscrizione viva,
+payload interpretato, pannello che disegna. Fuori resta solo Home Assistant,
+che da lì non si potrebbe provare comunque.
+
+Le risposte sono tre, e ognuna dice una cosa diversa:
+
+| Che cosa leggi | Che cosa vuol dire |
+|---|---|
+| *…pubblicata su `dmd/notifica` e tornata indietro dal broker* | Tutto a posto fino al pannello. Se le notifiche di Home Assistant non arrivano, il problema è di là |
+| *Il broker non è raggiungibile: consegnata direttamente…* | Il pannello la mostra, ma niente che venga da fuori arriverà. Vai alla sezione MQTT nella pagina *Rete* |
+| *Il servizio Notifiche è spento* | Accendilo, altrimenti la prova non ha niente da mostrare |
+
+Due risposte diverse per i primi due casi sono voluto: dicono **quale metà
+della catena funziona**, che è l'unica cosa che si voglia sapere premendo un
+pulsante di prova. Una sola risposta buona per entrambi nasconderebbe proprio
+il guasto che si sta cercando.
+
+> Il livello `allarme` si può scegliere anche qui, apposta: è l'unico che
+> interrompe una partita, ed è esattamente quello che vuoi verificare prima
+> di affidargli l'allarme di casa.
+
 # 6. Le automazioni
 
 Nel file ce ne sono cinque: la porta, la lavatrice, il rientro, l'allarme
@@ -227,6 +256,11 @@ in ascolto su dmd/notifica — 12 mostrate, 0 scartate
 | `ultimo messaggio scartato: manca il testo` | Un template di HA ha reso una stringa vuota |
 | `ultimo messaggio scartato: JSON non valido` | Un errore di battitura nel payload dello script |
 | Le notifiche compaiono ma mai durante una partita | È giusto così: solo `allarme` interrompe |
+
+Il primo posto dove guardare è il **pulsante di prova** nel riquadro
+*Notifiche* (vedi [5.5](#55-il-pulsante-di-prova-sul-dmd)): in un clic dice se
+la metà sul DMD funziona, e quindi se ha senso cercare il guasto in Home
+Assistant.
 
 La prova secca, che salta del tutto Home Assistant e dice se il guasto è di
 qua o di là:

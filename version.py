@@ -1292,6 +1292,21 @@ Storico:
        rotte separate, e due prove che lo verificano.
        Il riquadro MQTT della pagina Servizi adesso ha un **collegamento**
        alla pagina Rete, e non piu\' solo il nome scritto in una frase.
+  6.3  **Un pulsante per provare le notifiche**, nella pagina Servizi.
+       Nasce da una sera di prove a vuoto: le notifiche arrivavano davvero,
+       ma duravano dodici secondi e chi guardava il pannello arrivava tardi;
+       e per rimandarne una bisognava passare da Home Assistant, aprire
+       Strumenti per sviluppatori, cercare l\'azione. Un servizio che non si
+       puo\' provare da solo sembra rotto ogni volta che non lo guardi
+       nell\'istante giusto.
+       Il pulsante **passa dal broker** invece che consegnare dritto alla
+       sorgente, ed e\' tutto il punto: cosi\' prova quasi l\'intera catena --
+       broker raggiungibile, iscrizione viva, payload interpretato, disegno
+       sul pannello -- invece del solo disegno. Se il broker non c\'e\', la
+       notifica viene consegnata lo stesso ma il messaggio lo dice: due
+       risposte diverse dicono **quale meta\' funziona**, che e\' l\'unica cosa
+       che si voglia sapere da un pulsante di prova. A servizio spento non
+       finge: dice che e\' spento, invece di non far succedere niente.
 """
 
-__version__ = "6.2"
+__version__ = "6.3"

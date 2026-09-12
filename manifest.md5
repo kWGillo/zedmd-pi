@@ -21,7 +21,7 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 268d783807ea7f023d6c5b4c2192056e  hass.py
-bb84a32160e6ec800abd34414f1c6004  i18n.py
+0ff576668fe2e2cbcfb958bff16def2d  i18n.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
@@ -95,13 +95,13 @@ d9bd0353e2b3aa935ce82f1d6398acca  templates/radar.html
 f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 3cc9128fdb61285c9cb8770c8539fed3  templates/satelliti.html
 403872d6a716a4b13b8775cfbbdd355a  templates/scadenze.html
-6d288e5688ee44a4309c9a4dcc9e9bfa  templates/services.html
+5e553be6c76cae9c6d7a75efde0d04c7  templates/services.html
 7c0273ad8b84559e5569f20a8f7584f5  templates/settings.html
 0823432fc4a73241082966d4f4c9e760  templates/telecamera.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-5fea9753f7df32b2a11fd54d53a74d4b  version.py
+bf0b3636c3045eb3bbc827de1d7e6ed9  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-d5ad6f88bef757768db4e547275c84aa  webui.py
+3d88ae32f7a80e3e79d5c0f4ff57fb3b  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

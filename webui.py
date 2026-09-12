@@ -1344,7 +1344,55 @@ def create_app(runtime):
             audio=suoni.stato(cfg), suoni_file=suoni.file_disponibili(cfg),
             current=current.label if current else "—",
             mqtt=runtime.mqtt.status(),
+            result=request.args.get("result", ""),
             sleeping=runtime.sleeping, night=runtime.night, page="services")
+
+    @app.route("/api/notifiche/prova", methods=["POST"])
+    def api_notifiche_prova():
+        """Una notifica di prova, mandata a se' stessi.
+
+        Passa **dal broker** invece che dritta alla sorgente, ed e' il punto
+        di tutto il pulsante: cosi' prova quasi l'intera catena -- il broker
+        raggiungibile, l'iscrizione viva, il payload interpretato, il disegno
+        sul pannello. L'unico anello che resta fuori e' Home Assistant, che da
+        qui non si potrebbe provare comunque.
+
+        Se il broker non c'e', la notifica viene consegnata direttamente alla
+        sorgente e il messaggio lo dice. Due risposte diverse dicono **quale
+        meta' funziona**, che e' l'unica cosa che si voglia sapere da un
+        pulsante di prova; una sola risposta buona per entrambi i casi
+        nasconderebbe proprio il guasto che si sta cercando.
+        """
+        lingua = current_language()
+        if not (cfg.get("services") or {}).get("notifiche"):
+            # Il servizio spento non disegna niente: premere il pulsante e non
+            # vedere nulla sembrerebbe un guasto del pulsante.
+            return redirect(url_for("page_services", result=i18n.translate(
+                "notifiche.prova.spento", lingua)))
+
+        testo = (request.form.get("testo") or "").strip()
+        if not testo:
+            testo = i18n.translate("notifiche.prova.testo", lingua)
+        livello = request.form.get("livello", "avviso")
+        if livello not in ("info", "avviso", "allarme"):
+            livello = "avviso"
+        try:
+            secondi = max(2, min(120, int(request.form.get("secondi", 12))))
+        except ValueError:
+            secondi = 12
+        payload = json.dumps({"testo": testo, "livello": livello,
+                              "secondi": secondi}, ensure_ascii=False)
+        topic = str((cfg.get("notifiche") or {}).get("topic")
+                    or "dmd/notifica").strip("/")
+
+        passata = False
+        if cfg["mqtt"].get("enabled") and runtime.mqtt.connected:
+            passata = runtime.mqtt.publish(topic, payload)
+        if not passata:
+            runtime.notifiche.handle_mqtt(topic, payload)
+        return redirect(url_for("page_services", result=i18n.translate(
+            "notifiche.prova.broker" if passata else "notifiche.prova.diretta",
+            lingua, topic=topic)))
 
     # ---------------------------------------------- contatore delle richieste
     #
