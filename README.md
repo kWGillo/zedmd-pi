@@ -1,4 +1,4 @@
-# DMD Controller 6.5
+# DMD Controller 6.7
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -591,7 +591,9 @@ le tappe.
 | 6.2 | Il preavviso dei satelliti scriveva l'ora di sorgere nel posto dell'orologio e veniva letto come l'ora corrente: adesso in grande c'è il conto alla rovescia, e accanto la durata visibile. La configurazione MQTT passa dalla pagina Musica alla pagina Rete |
 | 6.3 | Un pulsante di prova per le notifiche nella pagina Servizi: passa dal broker, così prova la catena e non solo il disegno, e dice quale metà funziona |
 | 6.4 | Una freccia al posto di «FRA» sul preavviso dei satelliti, e un giro periodico che toglie dalle condivisioni le briciole lasciate dai Mac |
-| **6.5** | **L'arco del passaggio non era mai stato disegnato: mancava l'oggetto orbitale nel record, e l'eccezione lasciava il pannello congelato sull'ultimo fotogramma. Adesso un disegno che fallisce molla il pannello** |
+| 6.5 | L'arco del passaggio non era mai stato disegnato: mancava l'oggetto orbitale nel record, e l'eccezione lasciava il pannello congelato sull'ultimo fotogramma. Adesso un disegno che fallisce molla il pannello |
+| 6.6 | Il pannello compare in Home Assistant come tre entità `notify`, una per livello: le notifiche si scelgono da una tendina accanto al telefono, senza passare da uno script |
+| **6.7** | **Il raggio del radar era 1,85 km invece dei 3 dichiarati — il provider troncava le miglia nautiche. Trovato nei dati del registro, non nel codice. E un margine di cortesia che elenca gli aerei passati appena fuori** |
 
 ---
 

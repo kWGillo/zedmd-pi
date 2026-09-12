@@ -256,4 +256,25 @@
   </form>
 </section>
 
+
+{# Gli aerei passati appena fuori dal raggio. Non e' una funzione, e' una
+   risposta: la domanda "e' passato vicino e non l'ha visto, era fuori?"
+   e' arrivata tre volte, e prima si poteva rispondere solo misurando i
+   pixel di una schermata di FlightRadar. #}
+{% if vicini %}
+<section class="card">
+  <h2>{{ t('radar.vicini') }}</h2>
+  <p class="hint">{{ t('radar.vicini.hint', raggio=cfg.air_radar.radius_km) }}</p>
+  <table class="grid">
+    <tr><th>{{ t('radar.col.flight') }}</th><th>{{ t('radar.col.dist') }}</th>
+        <th>{{ t('radar.col.when') }}</th></tr>
+    {% for v in vicini %}
+    <tr><td class="mono">{{ v.nome }}</td>
+        <td class="mono">{{ '%.2f'|format(v.distanza) }} km</td>
+        <td>{{ v.quando | timestamp }}</td></tr>
+    {% endfor %}
+  </table>
+</section>
+{% endif %}
+
 {% endblock %}

@@ -111,13 +111,48 @@ di notte, il punteggio di Breakout non è la priorità.
 > non si spegne. Tienilo per le tre o quattro cose per cui ti faresti
 > svegliare: intrusione, fumo, acqua.
 
-# 5. Lo script in Home Assistant
+# 5. La via breve: il pannello nella tendina
+
+Dalla 6.6 il DMD **si dichiara da solo** a Home Assistant come tre entità
+`notify`, una per livello. Non devi installare niente: compaiono da sole
+insieme alle altre entità del DMD.
+
+| Entità | Che cosa fa |
+|---|---|
+| `notify.dmd_controller_notify_info` | azzurro, aspetta il suo turno |
+| `notify.dmd_controller_notify_avviso` | arancione, aspetta il suo turno |
+| `notify.dmd_controller_notify_allarme` | rosso, lampeggia, **interrompe tutto** |
+
+In un'automazione: *Aggiungi azione* → **Notifiche: invia un messaggio** →
+scegli **DMD - avviso** dalla tendina, scrivi il testo. Fine. Il pannello
+compare nell'elenco dei bersagli accanto al telefono, e **il livello è la
+scelta del bersaglio** invece di un campo da ricordare.
+
+```yaml
+action: notify.send_message
+target:
+  entity_id: notify.dmd_controller_notify_avviso
+data:
+  message: Porta di casa aperta
+```
+
+Sotto, ognuna pubblica su un topic per livello — `dmd/notifica/avviso` — e il
+DMD tratta il testo nudo come una notifica di quel livello. Non c'è nessun
+template da scrivere: è la ragione per cui i topic sono tre invece di uno con
+un `command_template` che costruisca il JSON.
+
+**Quando serve ancora lo script** (capitolo 6): se vuoi la durata diversa da
+quella predefinita, un colore tuo, o il silenziatore che zittisce il pannello
+lasciando passare gli allarmi. L'entità `notify` sa mandare solo un testo — ed
+è esattamente per questo che è comoda.
+
+# 6. Lo script in Home Assistant
 
 Il file pronto è [`ha/dmd_notifica.yaml`](ha/dmd_notifica.yaml): contiene lo
 script, cinque automazioni d'esempio e l'helper. Qui sotto c'è il perché e la
 procedura.
 
-## 5.1 Perché uno script e non quindici automazioni
+## 6.1 Perché uno script e non quindici automazioni
 
 Ogni automazione potrebbe pubblicare il suo JSON da sola. Ma il giorno che
 cambi il topic, o vuoi che di notte non parli, o aggiungi il colore, con lo
@@ -125,7 +160,7 @@ script cambi **un posto solo**. Senza, cambi quindici automazioni e ne
 dimentichi tre — e le tre dimenticate non danno errore, semplicemente non
 compaiono più.
 
-## 5.2 L'interruttore (facoltativo, consigliato)
+## 6.2 L'interruttore (facoltativo, consigliato)
 
 *Impostazioni* → *Dispositivi e servizi* → *Helper* → *Crea helper* →
 *Interruttore virtuale*, nome **DMD notifiche**. Deve venire
@@ -140,7 +175,7 @@ quello dice **se il servizio esiste**, questo dice **se la casa ha voglia di
 parlare adesso**. Due cose diverse, e l'automazione ha senso che tocchi la
 seconda.
 
-## 5.3 Lo script
+## 6.3 Lo script
 
 *Impostazioni* → *Automazioni e scene* → *Script* → *Crea script* → i tre
 puntini in alto a destra → **Modifica in YAML** → incolla il blocco `SCRIPT`
@@ -162,14 +197,14 @@ Dentro ci sono tre cose che vale la pena conoscere:
   DMD, a ogni riavvio, ti mostrerebbe di nuovo che la porta era aperta tre
   giorni fa.
 
-## 5.4 La prova
+## 6.4 La prova
 
 *Strumenti per sviluppatori* → *Azioni* → `script.dmd_notifica`, campo
 **testo**: `Ciao dal soggiorno` → *Esegui azione*.
 
-Se non compare niente, vedi il [capitolo 8](#8-quando-non-funziona).
+Se non compare niente, vedi il [capitolo 9](#9-quando-non-funziona).
 
-## 5.5 Il pulsante di prova sul DMD
+## 6.5 Il pulsante di prova sul DMD
 
 Dalla 6.3, nel riquadro *Notifiche* della pagina **Servizi** del DMD c'è un
 campo di testo, i tre livelli e un pulsante **Manda una prova**. Serve a
@@ -198,7 +233,7 @@ il guasto che si sta cercando.
 > interrompe una partita, ed è esattamente quello che vuoi verificare prima
 > di affidargli l'allarme di casa.
 
-# 6. Le automazioni
+# 7. Le automazioni
 
 Nel file ce ne sono cinque: la porta, la lavatrice, il rientro, l'allarme
 intrusione, il fumo. Si incollano da *Impostazioni* → *Automazioni e scene* →
@@ -229,7 +264,7 @@ condition:
     value_template: "{{ trigger.from_state.state | float(0) > 20 }}"
 ```
 
-# 7. Il silenziatore notturno
+# 8. Il silenziatore notturno
 
 L'ultima automazione del file spegne l'helper alle 23:30 e lo riaccende alle
 7:00. Di notte il pannello è già quasi spento dalle fasce orarie, ma un
@@ -239,7 +274,7 @@ corridoio.
 Gli allarmi passano comunque: è scritto nella condizione dello script, non
 nell'automazione, così vale sempre e non dipende da chi chiama.
 
-# 8. Quando non funziona
+# 9. Quando non funziona
 
 La riga di stato nella pagina *Servizi* dice quasi sempre dove si è rotto:
 
@@ -258,7 +293,7 @@ in ascolto su dmd/notifica — 12 mostrate, 0 scartate
 | Le notifiche compaiono ma mai durante una partita | È giusto così: solo `allarme` interrompe |
 
 Il primo posto dove guardare è il **pulsante di prova** nel riquadro
-*Notifiche* (vedi [5.5](#55-il-pulsante-di-prova-sul-dmd)): in un clic dice se
+*Notifiche* (vedi [6.5](#65-il-pulsante-di-prova-sul-dmd)): in un clic dice se
 la metà sul DMD funziona, e quindi se ha senso cercare il guasto in Home
 Assistant.
 
@@ -272,7 +307,7 @@ mosquitto_pub -h INDIRIZZO -u utente -P password -t dmd/notifica -m "prova"
 Se questo si vede e le automazioni no, il guasto è in Home Assistant. Se non
 si vede nemmeno questo, è sul DMD o sul broker.
 
-# 9. Quello che non fa, e perché
+# 10. Quello che non fa, e perché
 
 **Niente immagini né icone.** Il pannello è 256×64 con pixel grossi come
 lenticchie: un'icona leggibile mangerebbe un quarto della larghezza per dire
@@ -291,7 +326,7 @@ stata vista. Non saprebbe come: non c'è nessuno che prema un tasto.
 disturbare» configurabile di qua. Sta tutto nello script, di là, per la
 ragione del capitolo 1.
 
-# 10. Riassunto
+# 11. Riassunto
 
 | | |
 |---|---|

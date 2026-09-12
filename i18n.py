@@ -342,6 +342,19 @@ STRINGS = {
     "radar.unit.mi": ("miglia (mi)", "miles (mi)"),
     "radar.unit.nm": ("miglia nautiche (nm)", "nautical miles (nm)"),
     "nav.radar": ("Radar", "Radar"),
+    "radar.vicini": ("Passati appena fuori", "Passed just outside"),
+    "radar.vicini.hint": (
+        "Aerei visti oltre i %(raggio)s km ma entro il margine di cortesia: "
+        "non vanno sul pannello né nel registro. Servono a rispondere alla "
+        "domanda «è passato vicino e non l\'ha visto: quanto era lontano "
+        "davvero?» con un numero invece che a occhio.",
+        "Aircraft seen beyond %(raggio)s km but within the courtesy margin: "
+        "they do not reach the panel or the log. They are here to answer "
+        "«it flew close and the panel said nothing — how far was it really?» "
+        "with a number instead of a guess."),
+    "radar.col.flight": ("Volo", "Flight"),
+    "radar.col.dist": ("Distanza", "Distance"),
+    "radar.col.when": ("Quando", "When"),
     "nav.services": ("Servizi", "Services"),
     "nav.language": ("Lingua", "Language"),
     "footer.project": ("Progetto su GitHub", "Project on GitHub"),

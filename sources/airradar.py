@@ -198,6 +198,8 @@ class AirRadarSource(Source):
         self._font_small = _load_font(max(8, int(height * 0.20)))
         self._route_cache = {}
         self._routes_found = 0
+        # Gli aerei passati appena fuori dal raggio, solo in memoria.
+        self._vicini = []
         self._routes_missing = 0
 
     # ------------------------------------------------------------------ ciclo di vita
@@ -343,7 +345,29 @@ class AirRadarSource(Source):
             self._status = ("status.radar.nocoords", {})
             return []
         radius_km = max(0.5, float(cfg["radius_km"]))
-        params = {"lat": lat, "lon": lon, "nm": max(1.0, radius_km / KM_PER_NM)}
+        # **Il raggio chiesto al provider si arrotonda per eccesso a miglia
+        # intere.** Non e' un vezzo: i provider ADS-B tagliano la distanza
+        # all'intero, e con 3 km si chiedeva 1,6 NM ottenendo un cerchio da
+        # 1 NM -- 1,85 km invece di 3. Trovato nei dati e non nel codice: su
+        # 267 voli registrati, 266 stavano entro 1,85 km, con un taglio netto
+        # esattamente su un miglio nautico, e le posizioni formavano un disco
+        # pieno (assi 0,96 e 0,66 km) e non un corridoio di traffico.
+        # In area: due terzi di cielo in meno di quello scritto nella pagina.
+        # Si chiede piu' del necessario e si taglia qui sotto con la distanza
+        # vera: chiedere di piu' non costa niente, chiedere di meno fa perdere
+        # aerei in silenzio.
+        # Il margine di cortesia: si guarda un po' piu' in la' di quanto si
+        # mostra. Serve a una domanda che e' tornata tre volte -- *«e' passato
+        # vicino e non l'ha visto: era fuori dal raggio?»* -- e a cui finora
+        # si poteva rispondere solo misurando i pixel di una schermata di
+        # FlightRadar, che e' un modo pessimo di rispondere: la prima volta
+        # che ci ho provato ho sbagliato di due chilometri. Gli aerei appena
+        # fuori non vanno sul pannello e non vanno nel registro: restano in
+        # memoria, e la pagina Radar li elenca. Cosi' la domanda ha una
+        # risposta invece di un'opinione.
+        margine = max(0.0, float(cfg.get("margine_km", 2.0) or 0.0))
+        nm = math.ceil(max(1.0, (radius_km + margine) / KM_PER_NM))
+        params = {"lat": lat, "lon": lon, "nm": float(nm)}
 
         order = [cfg["provider"]] + [p for p in PROVIDERS if p != cfg["provider"]]
         payload = None
@@ -371,6 +395,8 @@ class AirRadarSource(Source):
                 continue
             distance = haversine_km(lat, lon, plane_lat, plane_lon)
             if distance > radius_km:
+                if distance <= radius_km + margine:
+                    self._ricorda_vicino(row, distance)
                 continue
 
             altitude = row.get("alt_baro")
@@ -446,6 +472,28 @@ class AirRadarSource(Source):
             return True
         except OSError:
             return False
+
+    def _ricorda_vicino(self, row, distance):
+        """Un aereo appena fuori dal raggio: si tiene, non si mostra.
+
+        Solo in memoria e solo gli ultimi: non e' un registro, e' una risposta
+        pronta alla domanda "quanto era lontano davvero".
+        """
+        nome = ((row.get("flight") or "").strip()
+                or (row.get("hex") or "").strip().upper())
+        if not nome:
+            return
+        adesso = time.time()
+        self._vicini = [v for v in self._vicini
+                        if v["nome"] != nome and adesso - v["quando"] < 3600]
+        self._vicini.append({"nome": nome, "distanza": distance,
+                             "quando": adesso,
+                             "quota": row.get("alt_baro")})
+        self._vicini = self._vicini[-12:]
+
+    def vicini(self):
+        """Gli aerei visti appena fuori dal raggio, dal piu' recente."""
+        return sorted(self._vicini, key=lambda v: -v["quando"])
 
     def _log_flights(self, aircraft, cfg):
         """Scrive una riga per ogni volo, una sola volta per passaggio."""

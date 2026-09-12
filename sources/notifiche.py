@@ -139,8 +139,16 @@ class NotificheSource(Source):
         registro che nessuno legge. E' la lezione del payload vuoto verso
         Home Assistant, applicata nel verso opposto.
         """
+        # Il livello puo' arrivare dal **topic**: `dmd/notifica/avviso`. Serve
+        # alle tre entita' notify di Home Assistant, che sanno mandare solo un
+        # testo -- e cosi' il livello e' la scelta del bersaglio nella tendina
+        # invece di un campo da ricordare. Un `livello` scritto dentro il JSON
+        # vince comunque: chi si prende la briga di dirlo esplicitamente sa
+        # quello che vuole.
+        coda = str(topic or "").rstrip("/").rsplit("/", 1)[-1].lower()
+        dal_topic = coda if coda in LIVELLI else ""
         try:
-            voce = self._interpreta(payload)
+            voce = self._interpreta(payload, dal_topic)
         except Exception as exc:          # noqa: BLE001
             self._scartate += 1
             self._ultimo_errore = str(exc)
@@ -158,7 +166,7 @@ class NotificheSource(Source):
         self._ultimo_errore = ""
         self._sveglia.set()
 
-    def _interpreta(self, payload):
+    def _interpreta(self, payload, livello_topic=""):
         if isinstance(payload, bytes):
             payload = payload.decode("utf-8", "replace")
         testo_grezzo = (payload or "").strip()
@@ -185,8 +193,8 @@ class NotificheSource(Source):
         testo = str(dati.get("testo") or dati.get("message") or "").strip()
         if not testo:
             raise ValueError("manca il testo")
-        livello = str(dati.get("livello")
-                      or dati.get("level") or LIVELLO_PREDEFINITO).lower()
+        livello = str(dati.get("livello") or dati.get("level")
+                      or livello_topic or LIVELLO_PREDEFINITO).lower()
         if livello not in LIVELLI:
             # Un livello inventato non fa cadere la notifica: si mostra al
             # minimo grado. Perdere il messaggio sarebbe peggio.

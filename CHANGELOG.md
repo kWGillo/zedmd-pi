@@ -2,6 +2,69 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [6.7]
+
+- **Il raggio del radar era un terzo di quello scritto nella pagina.** La
+  distanza si chiedeva al provider in miglia nautiche con la virgola — 3 km
+  sono 1,62 NM — e il provider la tronca all'intero. Un miglio: **1,85 km
+  invece di 3**, cioè due terzi di cielo in meno in area. Da sempre.
+
+  Non l'ha trovato una rilettura del codice: l'hanno trovato i dati. Nel
+  registro di nove giorni la distanza massima è 1,82–1,85 km **ogni singolo
+  giorno**, con il taglio esattamente su un miglio nautico; e le posizioni
+  registrate formano un disco pieno (assi 0,96 e 0,66 km) e non il corridoio
+  stretto che avrebbe spiegato la stessa cosa con la geometria del traffico.
+
+  Adesso si chiede il numero intero arrotondato per eccesso, e il taglio fine
+  lo fa la distanza calcolata qui: chiedere di più non costa niente, chiedere
+  di meno fa perdere aerei in silenzio.
+
+- **Il margine di cortesia.** Il radar guarda due chilometri più in là di
+  quanto mostra, e gli aerei che cadono in quella fascia restano in memoria:
+  la pagina Radar li elenca con la loro distanza vera. Non vanno sul pannello
+  e non vanno nel registro.
+
+  Nasce da una domanda tornata tre volte — *«è passato vicino e non l'ha
+  visto»* — a cui finora si poteva rispondere solo misurando i pixel di una
+  schermata di FlightRadar. Che è un pessimo modo di rispondere: la prima
+  volta che ci ho provato ho sbagliato di due chilometri, e ho accusato le
+  coordinate configurate che erano giuste a ottanta metri.
+
+- **Now Playing dice «non lo so» come tutti gli altri.** Quando non suona
+  niente il sensore mandava una stringa vuota, e in Home Assistant compariva
+  bianco come se fosse rotto. Adesso dice `None`, che HA traduce in
+  *sconosciuto*. È l'ultimo pezzo della correzione della 6.1, che allora si
+  era fermata ai topic e non aveva guardato i template della discovery.
+
+## [6.6]
+
+- **Il pannello compare in Home Assistant accanto al telefono.** Il DMD si
+  dichiara da solo come tre entità `notify`, una per livello. In
+  un'automazione: *Aggiungi azione* → *Notifiche: invia un messaggio* →
+  **DMD - avviso** dalla tendina, e il testo. Niente script da chiamare,
+  niente campo da ricordare, e **il livello diventa la scelta del bersaglio**.
+
+  Sotto, ogni entità pubblica su un topic per livello — `dmd/notifica/avviso`
+  — e il DMD tratta il testo nudo come una notifica di quel livello. Tre topic
+  invece di un `command_template` che costruisca il JSON, perché il DMD
+  accetta già testo semplice: una cosa in meno che possa avere un errore di
+  battitura, e una prova in meno da scrivere.
+
+  Due dettagli che sembrano pedanteria e non lo sono. Le iscrizioni sono tre,
+  esplicite: `dmd/notifica/#` coprirebbe **anche il topic padre**, per come è
+  scritta la specifica MQTT, e ogni messaggio arriverebbe due volte. E un
+  `livello` scritto dentro il JSON vince su quello del topic, altrimenti uno
+  script che pubblica sul topic generico non potrebbe più mandare un allarme.
+
+  Lo script resta, e serve ancora per la durata, il colore e il silenziatore:
+  un'entità `notify` sa mandare solo un testo — ed è esattamente per questo
+  che è comoda.
+
+  La prova che conta verifica l'errore classico delle discovery: che il topic
+  **dichiarato** sia lo stesso a cui il DMD **si iscrive**. Annunciarne uno e
+  ascoltarne un altro non dà nessun errore — il messaggio parte, il broker lo
+  accetta, e il pannello resta muto per sempre.
+
 ## [6.5]
 
 - **L'arco del passaggio non è mai stato disegnato**, e mentre non lo

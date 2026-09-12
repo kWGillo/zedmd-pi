@@ -418,6 +418,14 @@ class Runtime:
                         or "").strip("/")
         if notifiche:
             self.mqtt.subscribe(notifiche, self.notifiche.handle_mqtt)
+            # Un topic per livello, accanto a quello principale. Sono le tre
+            # entita' notify che Home Assistant vede nella tendina dei
+            # bersagli. Tre iscrizioni esplicite e non `notifiche + "/#"`:
+            # il carattere jolly, per come e' scritta la specifica, coprirebbe
+            # anche il topic padre e ogni messaggio arriverebbe due volte.
+            for livello in ("info", "avviso", "allarme"):
+                self.mqtt.subscribe("%s/%s" % (notifiche, livello),
+                                    self.notifiche.handle_mqtt)
 
     def reconnect_mqtt(self):
         """Riapre la connessione dopo un cambio di impostazioni dalla web UI."""

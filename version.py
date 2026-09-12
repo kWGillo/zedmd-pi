@@ -1357,6 +1357,47 @@ Storico:
        classe, non il singolo caso. E i tre passi del ciclo hanno tre reti
        separate, perche\' prima un errore nello scaricamento o nel registro
        saltava anche il disegno.
+  6.6  **Il pannello compare in Home Assistant accanto al telefono.**
+       Il DMD si dichiara come tre entita\' `notify`, una per livello. In
+       un\'automazione si sceglie "DMD - avviso" dalla tendina dei bersagli e
+       si scrive il testo: niente script da chiamare, niente campo da
+       ricordare, e **il livello e\' la scelta del bersaglio**.
+       Tre topic (`dmd/notifica/avviso`) invece di un `command_template` che
+       costruisca il JSON: il DMD accetta gia\' testo semplice come notifica
+       valida, quindi il livello sta nel nome del topic. Una cosa in meno che
+       possa avere un errore di battitura.
+       Tre iscrizioni esplicite e non un carattere jolly: `dmd/notifica/#`
+       coprirebbe anche il topic padre e ogni messaggio arriverebbe due volte.
+       Un `livello` scritto dentro il JSON vince comunque su quello del
+       topic, altrimenti uno script che pubblica sul topic generico non
+       potrebbe piu\' mandare un allarme.
+       Lo script resta e serve ancora: durata, colore e silenziatore. Le
+       entita\' `notify` sanno mandare solo un testo -- ed e\' per questo che
+       sono comode.
+  6.7  **Il raggio del radar era un terzo di quello scritto**, e il sensore
+       del brano in ascolto dice finalmente "non lo so".
+       Il raggio: la distanza si chiedeva al provider in miglia nautiche con
+       la virgola -- 3 km fanno 1,62 NM -- e il provider la tronca
+       all\'intero. Un miglio: **1,85 km invece di 3**, cioe\' due terzi di
+       cielo in meno in area, da sempre.
+       Non l\'ha trovato una rilettura del codice, l\'hanno trovato i dati:
+       nel registro di nove giorni la distanza massima e\' 1,82-1,85 km ogni
+       singolo giorno, con il taglio esattamente su un miglio nautico, e le
+       posizioni formano un disco pieno e non un corridoio di traffico.
+       Adesso si chiede il numero intero arrotondato per eccesso e il taglio
+       fine lo fa la distanza calcolata: chiedere di piu\' non costa niente,
+       chiedere di meno fa perdere aerei in silenzio.
+       **Il margine di cortesia.** Si guarda due chilometri piu\' in la\' di
+       quanto si mostra, e gli aerei che cadono in quella fascia restano in
+       memoria: la pagina Radar li elenca con la distanza vera. Nasce da una
+       domanda tornata tre volte -- *"e\' passato vicino e non l\'ha visto"* --
+       a cui finora si poteva rispondere solo misurando i pixel di una
+       schermata di FlightRadar. Cosi\' ha una risposta invece di un\'opinione.
+       **Now Playing**: quando non suona niente il sensore diceva stringa
+       vuota, e in Home Assistant compariva bianco come se fosse rotto. Ora
+       dice `None`, che HA traduce in *sconosciuto*. E\' l\'ultimo pezzo della
+       correzione della 6.1, che allora si era fermata ai topic e non aveva
+       guardato i template.
 """
 
-__version__ = "6.5"
+__version__ = "6.7"

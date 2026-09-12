@@ -287,6 +287,11 @@ DEFAULTS = {
         "latitude": 0.0,
         "longitude": 0.0,
         "radius_km": 3.0,
+        # Quanto guardare **oltre** il raggio, senza mostrarlo. Gli aerei che
+        # cadono in questa fascia non vanno sul pannello ne' nel registro: la
+        # pagina Radar li elenca con la loro distanza, e la domanda "era
+        # fuori dal raggio?" smette di essere un'opinione.
+        "margine_km": 2.0,
         "provider": "adsb.fi",
         # Venti secondi, non trenta. Con un raggio di pochi chilometri un
         # aereo di linea attraversa il cerchio in meno di mezzo minuto:

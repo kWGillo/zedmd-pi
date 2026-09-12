@@ -6,8 +6,8 @@ d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
-2046b335964ac61f6ab3900448f81260  dmdconf.py
-f6dd15d6b6e491da256420b4ff237ed9  dmdd.py
+b8fa7a70d33ab3de54e2e59887145fd8  dmdconf.py
+6960ac9ec2c45d775812b0eb55a1972a  dmdd.py
 bb3118ed4b5ebb8d9f49cc8bbcd6f341  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
 7c5f28cafc9299975fcdb11e54937469  doom/setup_doom.sh
@@ -17,8 +17,8 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 075e6985999ab1d4bbcca75759c692b7  gb/setup_gb.sh
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
-268d783807ea7f023d6c5b4c2192056e  hass.py
-6b4d0969c3c4675b9285f9863eec3faa  i18n.py
+d56a4f56a1a2028d01a7a024817ac0e3  hass.py
+345f930fb653accf0dbd9a3cb2eb000e  i18n.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
@@ -34,7 +34,7 @@ a1d8f7f59de7ddc70db9ab829de222dc  satelliti.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 7ee163e5c89f7ac983b26ae09a1a4b92  setup_share.sh
 29bf3f1e65ce8db49484edf177b31f37  sources/__init__.py
-62241e40a43cbd28136497e0159fd1c4  sources/airradar.py
+84d1be24f41aebb3d00e091d0ddfe021  sources/airradar.py
 4839d9f4d5cbf59bfe83a946f7c272ee  sources/anteprima.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
 55c9a31b9be438ad88d3a08b53fb1c9a  sources/base.py
@@ -49,7 +49,7 @@ e3a2e149869954d460f24e11de8bdaf4  sources/gameboy.py
 018e911289febd4efb970fba0d9e5626  sources/giochi/invasori.py
 e9e38d7384abd3a2a08d8aee12ee369e  sources/giochi/mattoni.py
 8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
-354b4824b6bb74bdfbd9f3c0a85d4201  sources/notifiche.py
+8de1147a9e524e5512d1bc24a5582b00  sources/notifiche.py
 552c44bff4e35f557dd92f658c84f897  sources/nowplaying.py
 8cf830f5889abce491dbcc6159bd5f6d  sources/satelliti.py
 2a73be667459d2a58f2ddab91ff91a98  sources/scadenze.py
@@ -87,7 +87,7 @@ e335f8f24edc17c812b333673ee4bdca  templates/doom.html
 c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
 250656c1e92734818935e7173907f894  templates/media.html
 3042ba34f2769d9ec3893ae79b74ed70  templates/nowplaying.html
-d9bd0353e2b3aa935ce82f1d6398acca  templates/radar.html
+6f220226298663779c2b518ee546c268  templates/radar.html
 685924490e771f355e0a6cc0eb58c756  templates/rete.html
 f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 3cc9128fdb61285c9cb8770c8539fed3  templates/satelliti.html
@@ -96,7 +96,7 @@ f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 7c0273ad8b84559e5569f20a8f7584f5  templates/settings.html
 0823432fc4a73241082966d4f4c9e760  templates/telecamera.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-8f00126a33ca7f7dcf25e9fe54335d43  version.py
+f7704078863e353c3fcc372c81af419e  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-a5a471da0b48cb6bb1394da158bb9dd0  webui.py
+2d211c5b862d950bb4437877b153a513  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

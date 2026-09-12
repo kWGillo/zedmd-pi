@@ -1303,6 +1303,7 @@ def create_app(runtime):
                                fields=FIELD_LIST, overflow_modes=OVERFLOW_MODES,
                                unit_keys=UNIT_KEYS,
                                log=runtime.radar.log_info(),
+                               vicini=runtime.radar.vicini(),
                                status=runtime.radar.status(current_language()),
                                probe_callsign=request.args.get("callsign", ""),
                                probe_result=request.args.get("result"),

@@ -32,6 +32,15 @@ from version import __version__
 NIENTE = "None"
 
 
+# I tre livelli, come entita' notify separate. Il nome e' quello che si legge
+# nella tendina di Home Assistant: "DMD - avviso" dice da solo cosa fara' il
+# pannello, mentre un unico "DMD" avrebbe richiesto di ricordare un campo.
+NOTIFY = [
+    ("info", "DMD - info", "mdi:message-outline"),
+    ("avviso", "DMD - avviso", "mdi:alert-outline"),
+    ("allarme", "DMD - allarme", "mdi:alert"),
+]
+
 SWITCHES = [
     ("zedmd", "ZeDMD"),
     ("mediaplayer", "Media Player"),
@@ -196,7 +205,12 @@ class HassBridge:
             "unique_id": "%s_nowplaying" % node,
             "object_id": "%s_nowplaying" % node,
             "state_topic": "%s/nowplaying/state" % base,
-            "value_template": "{{ value_json.title | default('', true) }}",
+            # Quando non suona niente il titolo e' vuoto, e un sensore con
+            # stato "" in Home Assistant compare bianco, come se fosse rotto.
+            # Si dice `None`, come gli altri: HA lo traduce in *sconosciuto*.
+            # E' l'ultimo pezzo della correzione della 6.1, che allora si era
+            # fermata ai topic e non aveva guardato i template.
+            "value_template": "{{ value_json.title | default('%s', true) }}" % NIENTE,
             "json_attributes_topic": "%s/nowplaying/state" % base,
             "icon": "mdi:music-note",
         })
@@ -261,8 +275,37 @@ class HassBridge:
         })
         self._config("number", "brightness", brightness)
 
+        # --------------------------------------------------------- notifiche
+        #
+        # Il pannello si dichiara come **entita' notify**, una per livello.
+        # Cosi' in Home Assistant compare accanto al telefono nel selettore
+        # dei bersagli: si sceglie da una tendina invece di chiamare uno
+        # script, e il livello e' la scelta del bersaglio invece di un campo
+        # da ricordare.
+        #
+        # Tre topic invece di un `command_template` che costruisca il JSON:
+        # il DMD accetta **testo semplice** come notifica valida, quindi il
+        # livello puo' stare nel topic e non serve nessun template. Una cosa
+        # in meno che possa avere un errore di battitura, e una prova in meno
+        # da scrivere.
+        for livello, etichetta, icona in NOTIFY:
+            voce = dict(common)
+            voce.update({
+                "name": etichetta,
+                "unique_id": "%s_notify_%s" % (node, livello),
+                "object_id": "%s_notify_%s" % (node, livello),
+                "command_topic": "%s/%s" % (self._topic_notifiche(), livello),
+                "icon": icona,
+            })
+            self._config("notify", "notify_%s" % livello, voce)
+
         self.announced = True
         return True
+
+    def _topic_notifiche(self):
+        """Il topic delle notifiche, senza barre di troppo."""
+        conf = self.cfg.get("notifiche") or {}
+        return str(conf.get("topic") or "dmd/notifica").strip("/")
 
     def _config(self, component, object_id, payload):
         topic = "%s/%s/%s/%s/config" % (self.prefix(), component,
@@ -279,6 +322,8 @@ class HassBridge:
         scad = [("sensor", "scad_%s" % k) for k, _, _, _ in self.SCADENZE]
         for component, object_id in ([("sensor", "nowplaying"),
                                       ("number", "brightness")] +
+                                     [("notify", "notify_%s" % k)
+                                      for k, _, _ in NOTIFY] +
                                      [("switch", key) for key, _ in SWITCHES] +
                                      [("switch", key) for key, _ in MODES] +
                                      [("switch", key) for key, _, _ in AZIONI] +
