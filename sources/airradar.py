@@ -200,6 +200,13 @@ class AirRadarSource(Source):
         self._routes_found = 0
         # Gli aerei passati appena fuori dal raggio, solo in memoria.
         self._vicini = []
+        # Quanti ne ha registrati oggi, e l'ultimo. Si tengono qui e non si
+        # rileggono dal CSV: il ponte MQTT pubblica ogni due secondi, e
+        # contare millesettecento righe di file a ogni giro per ottenere un
+        # numero che cambia due volte all'ora sarebbe uno spreco.
+        self._giorno = ""
+        self._oggi = 0
+        self._ultimo_volo = {}
         self._routes_missing = 0
 
     # ------------------------------------------------------------------ ciclo di vita
@@ -473,6 +480,35 @@ class AirRadarSource(Source):
         except OSError:
             return False
 
+    def _conta(self, plane):
+        """Tiene il conto di oggi e ricorda l'ultimo passato."""
+        oggi = time.strftime("%Y-%m-%d")
+        if oggi != self._giorno:
+            self._giorno = oggi
+            self._oggi = 0
+        self._oggi += 1
+        self._ultimo_volo = {
+            "volo": plane.get("flight") or plane.get("hex") or "",
+            "tipo": plane.get("type") or "",
+            "distanza_km": round(float(plane.get("distance") or 0.0), 2),
+            "quota_ft": plane.get("altitude"),
+            "rotta": plane.get("route") or "",
+            "quando": time.time(),
+        }
+
+    def riepilogo(self):
+        """I numeri che vanno in Home Assistant.
+
+        Non e' la riga di stato: quella e' una frase per gli occhi, questi
+        sono valori per le automazioni. Il conteggio di oggi si azzera da
+        solo a mezzanotte, senza bisogno che nessuno lo dica.
+        """
+        if time.strftime("%Y-%m-%d") != self._giorno:
+            return {"oggi": 0, "nel_raggio": self._seen,
+                    "ultimo": self._ultimo_volo}
+        return {"oggi": self._oggi, "nel_raggio": self._seen,
+                "ultimo": self._ultimo_volo}
+
     def _ricorda_vicino(self, row, distance):
         """Un aereo appena fuori dal raggio: si tiene, non si mostra.
 
@@ -533,6 +569,7 @@ class AirRadarSource(Source):
                 for plane in fresh:
                     key = plane["hex"] or plane["flight"]
                     self._logged[key] = now
+                    self._conta(plane)
                     route = plane.get("route") or ""
                     if not route and cfg.get("log_route", True) and plane["flight"]:
                         route = self._lookup_route(plane["flight"])

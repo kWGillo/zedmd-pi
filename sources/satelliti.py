@@ -182,6 +182,45 @@ class SatellitiSource(Source):
             return p
         return None
 
+    # ------------------------------------------------------- per Home Assistant
+
+    def riepilogo(self, ore=24):
+        """I passaggi delle prossime ore, in forma pubblicabile.
+
+        Senza l'oggetto orbitale, che non e' serializzabile e non serve a
+        nessuno di la'. Con **tutti** i passaggi e non solo i visibili: chi
+        costruisce un'automazione decide da se', e la differenza e' scritta
+        in ogni voce.
+
+        E' la risposta a una richiesta precisa: sapere dei passaggi **anche
+        con un giorno di anticipo**, non solo dieci minuti prima. Il calcolo
+        c'e' gia' -- la finestra e' di ventiquattro ore -- mancava solo il
+        modo di guardarlo da fuori.
+        """
+        adesso = datetime.now(timezone.utc)
+        limite = adesso + timedelta(hours=max(1, int(ore)))
+        fuori = []
+        for p in self._passaggi:
+            if p["tramonta"] < adesso or p["sorge"] > limite:
+                continue
+            spegnimento = p.get("spegnimento")
+            fuori.append({
+                "nome": p.get("breve") or p["nome"],
+                "norad": p.get("norad"),
+                "sorge": p["sorge"].astimezone().isoformat(),
+                "culmine": p["culmine"].astimezone().isoformat(),
+                "tramonta": p["tramonta"].astimezone().isoformat(),
+                "durata_min": round(p["durata_min"], 1),
+                "durata_visibile_s": int(round(self.durata_visibile(p))),
+                "elevazione_massima": int(round(p["elevazione_massima"])),
+                "da": bussola(p.get("azimut_sorge")),
+                "a": bussola(p.get("azimut_tramonta")),
+                "visibile": bool(p.get("visibile")),
+                "sparisce": (spegnimento.astimezone().isoformat()
+                             if spegnimento else None),
+            })
+        return fuori
+
     # ------------------------------------------------------------------ ciclo
 
     def _loop(self):

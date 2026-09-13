@@ -217,6 +217,29 @@ più o meno sopra casa. Un satellite sta a quattrocento chilometri:
 Anche a 60 gradi, quasi allo zenit, la Stazione è a **225 chilometri** da
 casa tua.
 
+### In Home Assistant
+
+Dalla 6.8 i passaggi non restano sul pannello: il DMD li pubblica.
+
+| Entità | Che cosa contiene |
+|---|---|
+| `sensor.dmd_controller_iss_prossimo` | l'**orario** del prossimo passaggio visibile |
+| `sensor.dmd_controller_iss_quanti` | quanti passaggi ci sono nelle prossime 24 ore |
+
+Lo stato del primo è un istante vero (`device_class: timestamp`), non una
+scritta: Home Assistant ci scrive «fra due ore» da solo, e un'automazione può
+agganciarcisi con un trigger sull'ora.
+
+Negli **attributi** c'è l'elenco completo delle ventiquattro ore — nome,
+sorgere, culmine, tramonto, durata, durata visibile, direzione, elevazione
+massima, e se è visibile o no. Ci sono anche i passaggi che non si vedono,
+dichiarati come tali: chi costruisce un'automazione decide da sé.
+
+```jinja
+{{ state_attr('sensor.dmd_controller_iss_prossimo', 'passaggi')
+   | selectattr('visibile') | list | count }}
+```
+
 ### Preavviso e cadenza
 
 Con preavviso 10 e cadenza 5 compaiono due promemoria: a T−10 e a T−5. Ogni

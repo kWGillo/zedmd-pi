@@ -1,4 +1,4 @@
-# DMD Controller 6.7
+# DMD Controller 6.8.1
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -131,6 +131,26 @@ oppure si scaricano con `git clone` o dal pulsante *Code → Download ZIP*.
 
 I PDF **non** vengono installati in `/opt/dmd`: sul Raspberry non servono, e
 l'aggiornamento via rete copia solo ciò che il servizio esegue.
+
+---
+
+## Che cosa finisce in Home Assistant
+
+Oltre agli interruttori dei servizi, alla luminosità, alle scadenze, ai
+rifiuti e al brano in ascolto, dalla 6.8 il DMD pubblica anche quello che vede
+in cielo:
+
+| Entità | Contenuto |
+|---|---|
+| `sensor…aerei_oggi` | quanti aerei sono stati registrati oggi, azzerato a mezzanotte |
+| `sensor…aerei_raggio` | quanti ce ne sono nel raggio in questo istante |
+| `sensor…ultimo_aereo` | l'ultimo passato, con rotta, quota e distanza negli attributi |
+| `sensor…iss_prossimo` | l'orario del prossimo passaggio visibile della Stazione |
+| `sensor…iss_quanti` | quanti passaggi ci sono nelle prossime 24 ore |
+
+L'orario del passaggio è un istante vero, quindi Home Assistant scrive «fra
+due ore» da solo; negli attributi c'è **l'elenco completo delle ventiquattro
+ore**, con durata, direzione, elevazione massima e visibilità di ciascuno.
 
 ---
 
@@ -593,7 +613,9 @@ le tappe.
 | 6.4 | Una freccia al posto di «FRA» sul preavviso dei satelliti, e un giro periodico che toglie dalle condivisioni le briciole lasciate dai Mac |
 | 6.5 | L'arco del passaggio non era mai stato disegnato: mancava l'oggetto orbitale nel record, e l'eccezione lasciava il pannello congelato sull'ultimo fotogramma. Adesso un disegno che fallisce molla il pannello |
 | 6.6 | Il pannello compare in Home Assistant come tre entità `notify`, una per livello: le notifiche si scelgono da una tendina accanto al telefono, senza passare da uno script |
-| **6.7** | **Il raggio del radar era 1,85 km invece dei 3 dichiarati — il provider troncava le miglia nautiche. Trovato nei dati del registro, non nel codice. E un margine di cortesia che elenca gli aerei passati appena fuori** |
+| 6.7 | Il raggio del radar era 1,85 km invece dei 3 dichiarati — il provider troncava le miglia nautiche. Trovato nei dati del registro, non nel codice. E un margine di cortesia che elenca gli aerei passati appena fuori |
+| 6.8 | Aerei e satelliti escono dal pannello: cinque entità in Home Assistant, con l'elenco dei passaggi della Stazione delle prossime ventiquattro ore |
+| **6.8.1** | **La procedura di pubblicazione dice anche le due cose che erano costate tempo: i cinque minuti di cache prima che l'OTA veda la versione nuova, e come si pubblicano più versioni in un push solo** |
 
 ---
 

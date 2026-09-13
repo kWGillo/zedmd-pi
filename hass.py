@@ -275,6 +275,75 @@ class HassBridge:
         })
         self._config("number", "brightness", brightness)
 
+        # ------------------------------------------------- aerei e satelliti
+        #
+        # I numeri che il DMD gia' conosce e teneva per se'. Il radar scrive
+        # un registro da millesettecento righe e i satelliti calcolano
+        # ventiquattro ore di passaggi: fino a qui si vedevano solo sul
+        # pannello e nella pagina web, cioe' solo se eri li' a guardare.
+        radar = dict(common)
+        radar.update({
+            "name": "Aerei oggi",
+            "unique_id": "%s_aerei_oggi" % node,
+            "object_id": "%s_aerei_oggi" % node,
+            "state_topic": "%s/radar/oggi" % base,
+            "state_class": "total_increasing",
+            "icon": "mdi:airplane",
+        })
+        self._config("sensor", "aerei_oggi", radar)
+
+        raggio = dict(common)
+        raggio.update({
+            "name": "Aerei nel raggio",
+            "unique_id": "%s_aerei_raggio" % node,
+            "object_id": "%s_aerei_raggio" % node,
+            "state_topic": "%s/radar/raggio" % base,
+            "state_class": "measurement",
+            "icon": "mdi:radar",
+        })
+        self._config("sensor", "aerei_raggio", raggio)
+
+        ultimo = dict(common)
+        ultimo.update({
+            "name": "Ultimo aereo",
+            "unique_id": "%s_ultimo_aereo" % node,
+            "object_id": "%s_ultimo_aereo" % node,
+            "state_topic": "%s/radar/ultimo" % base,
+            "value_template": "{{ value_json.volo | default('%s', true) }}" % NIENTE,
+            "json_attributes_topic": "%s/radar/ultimo" % base,
+            "icon": "mdi:airplane-marker",
+        })
+        self._config("sensor", "ultimo_aereo", ultimo)
+
+        # Il passaggio della Stazione: lo **stato e' l'orario**, cosi' in Home
+        # Assistant si legge "fra due ore" invece di una stringa da
+        # interpretare, e un'automazione puo' agganciarcisi con un trigger
+        # sull'ora. Gli attributi portano l'elenco delle prossime ventiquattro
+        # ore: e' la richiesta -- sapere dei passaggi **con un giorno di
+        # anticipo** e non dieci minuti prima.
+        iss = dict(common)
+        iss.update({
+            "name": "Prossimo passaggio",
+            "unique_id": "%s_iss_prossimo" % node,
+            "object_id": "%s_iss_prossimo" % node,
+            "state_topic": "%s/satelliti/prossimo" % base,
+            "device_class": "timestamp",
+            "json_attributes_topic": "%s/satelliti/elenco" % base,
+            "icon": "mdi:satellite-variant",
+        })
+        self._config("sensor", "iss_prossimo", iss)
+
+        quanti = dict(common)
+        quanti.update({
+            "name": "Passaggi in 24 ore",
+            "unique_id": "%s_iss_quanti" % node,
+            "object_id": "%s_iss_quanti" % node,
+            "state_topic": "%s/satelliti/quanti" % base,
+            "state_class": "measurement",
+            "icon": "mdi:orbit",
+        })
+        self._config("sensor", "iss_quanti", quanti)
+
         # --------------------------------------------------------- notifiche
         #
         # Il pannello si dichiara come **entita' notify**, una per livello.
@@ -324,6 +393,10 @@ class HassBridge:
                                       ("number", "brightness")] +
                                      [("notify", "notify_%s" % k)
                                       for k, _, _ in NOTIFY] +
+                                     [("sensor", k) for k in
+                                      ("aerei_oggi", "aerei_raggio",
+                                       "ultimo_aereo", "iss_prossimo",
+                                       "iss_quanti")] +
                                      [("switch", key) for key, _ in SWITCHES] +
                                      [("switch", key) for key, _ in MODES] +
                                      [("switch", key) for key, _, _ in AZIONI] +
@@ -355,6 +428,8 @@ class HassBridge:
         }, ensure_ascii=False)
         self._send("%s/nowplaying/state" % base, payload, force)
 
+        self._pubblica_cielo(base, force)
+
         services = self.cfg.get("services") or {}
         for key, _label in SWITCHES:
             value = "ON" if services.get(key) else "OFF"
@@ -374,6 +449,46 @@ class HassBridge:
 
         self._send("%s/brightness/state" % base,
                    str(self.cfg["display"]["brightness"]), force)
+
+    def _pubblica_cielo(self, base, force):
+        """Aerei e satelliti verso Home Assistant.
+
+        Non fa cadere niente se una sorgente non c'e' o non e' pronta: questi
+        sono numeri di contorno, e un servizio spento non deve impedire la
+        pubblicazione di tutto il resto.
+        """
+        try:
+            radar = self.runtime.radar.riepilogo()
+        except Exception:                       # noqa: BLE001
+            radar = None
+        if radar is not None:
+            self._send("%s/radar/oggi" % base, str(radar["oggi"]), force)
+            self._send("%s/radar/raggio" % base, str(radar["nel_raggio"]), force)
+            # Un oggetto JSON anche quando e' vuoto: gli attributi di Home
+            # Assistant devono essere un oggetto, e `{}` e' un oggetto.
+            self._send("%s/radar/ultimo" % base,
+                       json.dumps(radar["ultimo"] or {}, ensure_ascii=False),
+                       force)
+
+        try:
+            passaggi = self.runtime.satelliti.riepilogo()
+        except Exception:                       # noqa: BLE001
+            passaggi = None
+        if passaggi is not None:
+            visibili = [p for p in passaggi if p["visibile"]]
+            prossimo = visibili[0] if visibili else None
+            # Lo stato e' l'orario in ISO con il fuso: e' quello che vuole un
+            # sensore `device_class: timestamp`, ed e' cio' che permette a Home
+            # Assistant di scrivere "fra due ore" da solo. Niente passaggi
+            # visibili: `None`, che diventa *sconosciuto*.
+            self._send("%s/satelliti/prossimo" % base,
+                       prossimo["sorge"] if prossimo else NIENTE, force)
+            self._send("%s/satelliti/quanti" % base, str(len(passaggi)), force)
+            self._send("%s/satelliti/elenco" % base, json.dumps({
+                "prossimo": prossimo or {},
+                "visibili": len(visibili),
+                "passaggi": passaggi,
+            }, ensure_ascii=False), force)
 
     def _send(self, topic, payload, force):
         """Pubblica solo se il valore e' cambiato, salvo battito periodico.

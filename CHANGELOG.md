@@ -2,6 +2,64 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [6.8.1]
+
+- **La procedura di pubblicazione, con dentro anche gli inciampi.**
+  [`docs/pubblicazione.it.md`](docs/pubblicazione.it.md) descriveva bene il
+  caso normale e taceva le due cose che erano costate tempo davvero.
+
+  La prima: **dopo il push il DMD può dire «sei aggiornato» ancora per cinque
+  minuti.** Chiede la versione a `raw.githubusercontent.com`, che è una rete
+  di cache e serve il file con `max-age=300`. Su GitHub, nel browser, il file
+  nuovo si vede subito — ed è la trappola: sembra che l'aggiornamento
+  automatico sia rotto, e invece nessuno dei due ha torto. È successo con la
+  6.1. Ora c'è il comando che dice quello che vede il Raspberry, e non quello
+  che vede il browser.
+
+  La seconda: **che fare quando un push porta più versioni insieme.** Capita
+  sempre: si lavora per giorni, ogni correzione alza il numero, e su GitHub si
+  arriva quando si arriva. Un commit solo — uno per versione non
+  ricostruirebbe gli stadi intermedi, li falsificherebbe — e **nessun tag
+  intermedio**: un tag punta a un commit, e il commit è uno, quindi le
+  versioni di mezzo finirebbero tutte sullo stato dell'ultima. Una release
+  sola, con dentro le note di tutte le versioni che il push contiene.
+
+  E due etichette nuove sul repository, `mqtt` e `adsb`: sono le parole con
+  cui questa roba si cerca davvero, e non c'erano. La descrizione del progetto
+  dice adesso che Home Assistant parla **in due direzioni**, che dalla 6.6 non
+  è una funzione in più ma la differenza fra un dispositivo che si osserva e
+  uno che si usa.
+
+## [6.8]
+
+- **Aerei e satelliti escono dal pannello e vanno in Home Assistant.** Il DMD
+  sapeva già queste cose e se le teneva: il radar scrive un registro da
+  millesettecento voli, i satelliti calcolano ventiquattro ore di passaggi, e
+  tutto questo si vedeva solo sul vetro o nella pagina web — cioè solo se eri
+  lì a guardare nell'istante giusto.
+
+  Cinque entità nuove: **aerei registrati oggi** (azzerato da solo a
+  mezzanotte), **aerei nel raggio** in questo istante, **l'ultimo passato**
+  con rotta, quota e distanza negli attributi, **l'orario del prossimo
+  passaggio** della Stazione e **quanti ne restano nelle 24 ore**.
+
+  Due scelte che contano. Lo stato del passaggio è un **istante vero**
+  (`device_class: timestamp`) e non una scritta: Home Assistant ci scrive
+  «fra due ore» da solo, e un'automazione ci si aggancia con un trigger
+  sull'ora — con una stringa qualunque il sensore sarebbe inutile senza dare
+  errore. E negli attributi c'è **l'elenco completo delle ventiquattro ore**,
+  che era poi la richiesta: sapere dei passaggi con un giorno di anticipo, non
+  dieci minuti prima.
+
+  Nell'elenco ci sono anche i passaggi che non si vedono, dichiarati come
+  tali. Sul pannello non vanno — manderebbero qualcuno a cercare un puntino
+  che non c'è — ma chi costruisce un'automazione decide da sé.
+
+  Il conteggio degli aerei si tiene in memoria e non si rilegge dal CSV: il
+  ponte MQTT pubblica ogni due secondi, e contare millesettecento righe di
+  file a ogni giro per un numero che cambia due volte all'ora sarebbe stato
+  uno spreco silenzioso.
+
 ## [6.7]
 
 - **Il raggio del radar era un terzo di quello scritto nella pagina.** La

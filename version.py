@@ -1398,6 +1398,30 @@ Storico:
        dice `None`, che HA traduce in *sconosciuto*. E\' l\'ultimo pezzo della
        correzione della 6.1, che allora si era fermata ai topic e non aveva
        guardato i template.
+  6.8  **Aerei e satelliti escono dal pannello.** Il DMD sapeva gia\' queste
+       cose e se le teneva: un registro da millesettecento voli e
+       ventiquattro ore di passaggi calcolati, visibili solo sul vetro o
+       nella pagina web -- cioe\' solo se eri li\' a guardare.
+       Cinque entita\' nuove in Home Assistant: aerei registrati oggi (che si
+       azzera da solo a mezzanotte), aerei nel raggio adesso, l\'ultimo
+       passato con rotta e quota, l\'orario del prossimo passaggio della
+       Stazione e quanti ne restano nelle ventiquattro ore.
+       Due scelte che contano. Lo stato del passaggio e\' un **istante vero**
+       (`device_class: timestamp`) e non una scritta: Home Assistant ci
+       scrive "fra due ore" da solo, e un\'automazione ci si aggancia con un
+       trigger sull\'ora. E negli attributi c\'e\' **l\'elenco completo delle
+       ventiquattro ore** -- era la richiesta: sapere dei passaggi con un
+       giorno di anticipo, non dieci minuti prima.
+       Ci sono anche i passaggi che non si vedono, dichiarati come tali: sul
+       pannello non vanno, ma chi costruisce un\'automazione decide da se\'.
+  6.8.1 La procedura di pubblicazione sapeva tutto tranne le due cose che
+       erano costate tempo davvero. La prima: dopo il push il Raspberry puo\'
+       dire "sei aggiornato" per cinque minuti buoni, perche\' chiede la
+       versione a una rete di cache che risponde con quella vecchia mentre su
+       GitHub il file nuovo si vede gia\'. La seconda: che cosa fare quando un
+       push porta piu\' versioni insieme -- un commit solo, una release sola, e
+       nessun tag intermedio, che punterebbe comunque allo stato finale e
+       sarebbe una bugia scaricabile.
 """
 
-__version__ = "6.7"
+__version__ = "6.8.1"
