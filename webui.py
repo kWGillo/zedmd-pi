@@ -1409,6 +1409,8 @@ def create_app(runtime):
         conf["ogni_ore"] = numero("ogni_ore", 4, 1, 24)
         conf["regione"] = (request.form.get("regione") or "").strip()
         conf["allerte"] = request.form.get("allerte") == "on"
+        unita = (request.form.get("unita") or "C").strip().upper()
+        conf["unita"] = "F" if unita.startswith("F") else "C"
         dmdconf.save()
         # Il thread del meteo dorme un minuto alla volta: si sveglia subito,
         # altrimenti un'ora appena impostata potrebbe passare inosservata.

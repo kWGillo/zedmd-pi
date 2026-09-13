@@ -59,21 +59,46 @@ giardino.
 
 ## Che cosa si vede
 
+Le due finestre hanno lo stesso impianto, e non è pigrizia: la prima cosa che
+si guarda è sempre la stessa — **quanti gradi fa** — e cambia il contorno, non
+la risposta alla prima domanda.
+
 | | Bollettino del mattino | Aggiornamento |
 |---|---|---|
-| icona | grande, a sinistra | grande, a sinistra |
-| in alto | `OGGI` e che tempo farà | che tempo fa adesso |
-| in mezzo | **massima** e **minima**, grandi | **temperatura adesso**, grande, e l'umidità |
-| in basso | umidità, probabilità di pioggia, alba e tramonto | massima e minima, piccole |
+| a sinistra | icona | icona |
+| in alto a sinistra | `OGGI` e che tempo farà | che tempo fa adesso |
+| in alto a destra | ▲ **massima** ▼ **minima** | ▲ **massima** ▼ **minima** |
+| **in mezzo, grande** | **temperatura adesso** e umidità | **temperatura adesso** e umidità |
+| in basso | probabilità di pioggia, alba e tramonto | temperatura percepita, se diversa |
 
-I due numeri che contano hanno due colori opposti e si riconoscono senza
+I due numeri della giornata hanno due colori opposti e si riconoscono senza
 leggere l'etichetta: il caldo è ambra, il freddo azzurro. È la stessa grammatica
 dell'orologio — ora ambra, data azzurra — quindi il pannello resta coerente con
-se stesso. Per questo non c'è scritto «MAX» e «MIN»: due parole in più
-ruberebbero spazio ai numeri, che sono la ragione per cui si guarda.
+se stesso. Le frecce sono **disegnate**, non scritte: i caratteri di freccia
+esistono ma non tutti i font li hanno, e una freccia che diventa un rettangolo
+vuoto è peggio di nessuna freccia.
+
+L'unità si scrive **una volta sola**, sul numero grande: ripeterla accanto a
+massima e minima riempirebbe la riga di lettere invece che di numeri, e nessuno
+cambia scala fra una riga e l'altra.
+
+L'umidità sta accanto alla temperatura e non in fondo, perché è un numero che
+si legge *insieme* a quella: ventisei gradi con il settanta per cento sono
+un'altra giornata rispetto a ventisei asciutti.
 
 La probabilità di pioggia compare **solo se c'è**. Uno zero per cento non è
-un'informazione, è rumore.
+un'informazione, è rumore. Lo stesso vale per la temperatura percepita: si
+scrive solo quando si discosta di almeno un grado e mezzo da quella vera —
+«18 gradi, percepiti 18» è una riga sprecata, mentre con vento o afa quella
+differenza è il motivo per cui uno si mette la giacca.
+
+### Celsius o Fahrenheit
+
+Si sceglie nella scheda del Meteo. Le previsioni si chiedono **sempre** in
+Celsius e si convertono al momento di scrivere: così cambiare unità non
+invalida la previsione già scaricata, e non costa una chiamata in più. Su MQTT
+esce comunque Celsius, che è quello che Home Assistant sa riconvertire da solo
+secondo le impostazioni di chi guarda.
 
 ### Il puntino in alto a destra
 

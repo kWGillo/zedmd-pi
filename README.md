@@ -1,4 +1,4 @@
-# DMD Controller 7.0
+# DMD Controller 7.1
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -655,7 +655,8 @@ le tappe.
 | 6.8 | Aerei e satelliti escono dal pannello: cinque entità in Home Assistant, con l'elenco dei passaggi della Stazione delle prossime ventiquattro ore |
 | 6.8.1 | La procedura di pubblicazione dice anche le due cose che erano costate tempo: i cinque minuti di cache prima che l'OTA veda la versione nuova, e come si pubblicano più versioni in un push solo |
 | 6.9 | Tre comandi che mentivano, corretti: il cursore della luminosità durante il Night mode, lo spegnimento del pannello che non esisteva, il Game Boy che non compariva in Home Assistant. E il totale dei voli su MQTT |
-| **7.0** | **Il meteo: bollettino della giornata al mattino, aggiornamento ogni poche ore, icone disegnate pixel per pixel, e le allerte di MeteoAlarm. La posizione passa dal Radar alle Impostazioni, perché la usano in tre** |
+| 7.0 | Il meteo: bollettino della giornata al mattino, aggiornamento ogni poche ore, icone disegnate pixel per pixel, e le allerte di MeteoAlarm. La posizione passa dal Radar alle Impostazioni, perché la usano in tre |
+| **7.1** | **La finestra del meteo ridisegnata guardandola accesa: i gradi di adesso grandi al centro con l'umidità, massima e minima in alto a destra con le frecce, e l'unità — che prima mancava del tutto** |
 
 ---
 

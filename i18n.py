@@ -1858,12 +1858,15 @@ STRINGS = {
     "meteo.source": (
         "Le previsioni arrivano da Open-Meteo, che non chiede nessuna chiave: "
         "non c'è nessun segreto da custodire sul Raspberry. La posizione è "
-        "quella della pagina Radar e non esce mai dal Pi se non come "
-        "coordinate nella richiesta.",
+        "quella di Impostazioni — la stessa che usano il radar e i satelliti — "
+        "e non esce mai dal Pi se non come coordinate nella richiesta.",
         "Forecasts come from Open-Meteo, which needs no API key: there is no "
-        "secret to keep on the Raspberry. The position is the one on the "
-        "Radar page, and it never leaves the Pi except as coordinates in the "
-        "request."),
+        "secret to keep on the Raspberry. The position is the one in Settings "
+        "— the same one the radar and the satellites use — and it never "
+        "leaves the Pi except as coordinates in the request."),
+    "meteo.unit": ("Unità della temperatura", "Temperature unit"),
+    "meteo.unit.c": ("Celsius (°C)", "Celsius (°C)"),
+    "meteo.unit.f": ("Fahrenheit (°F)", "Fahrenheit (°F)"),
     "meteo.region": ("Regione per le allerte", "Region for alerts"),
     "meteo.region.none": ("— nessuna, niente allerte —",
                           "— none, no alerts —"),

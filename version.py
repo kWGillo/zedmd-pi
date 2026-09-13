@@ -1486,6 +1486,27 @@ Storico:
        del radar: chi accendeva i satelliti la cercava nella pagina sbagliata.
        La migrazione copia e non cancella: una posizione persa in un
        aggiornamento vuol dire tre servizi muti e nessuna spiegazione.
+  7.1  **Tre cose viste guardando la 7.0 accesa**, che e\' l\'unico collaudo che
+       conta davvero: nessuna delle tre l\'avrebbe trovata una suite.
+       La finestra del meteo e\' ridisegnata, e la segnalazione che pesa di
+       piu\' era "non si capisce la temperatura attuale". Aveva ragione, ed era
+       un difetto di impostazione: il bollettino mostrava massima e minima
+       grandi al centro, che si leggevano come il dato di adesso -- e quello
+       vero non c\'era da nessuna parte. Ora al centro, grande, ci sono i gradi
+       di adesso con accanto l\'umidita\', salita li\' dalla riga in fondo dove
+       non la guardava nessuno; in alto a destra massima e minima, piccole, con
+       una freccia ciascuna, **disegnata** e non scritta perche\' un carattere
+       di freccia che manca dal font diventa un rettangolo vuoto. E c\'e\'
+       l\'unita\', che prima mancava del tutto, scritta una volta sola sul
+       numero grande: Celsius o Fahrenheit si sceglie nella pagina, e la
+       conversione si fa al momento di scrivere, cosi\' cambiarla non butta via
+       la previsione gia\' scaricata.
+       Tre pulsanti che si toccavano: lo stacco passa da dodici a sedici. Su
+       due pulsanti corti non si era mai notato, su tre lunghi si\'.
+       E una frase che era diventata falsa: la scheda del meteo diceva ancora
+       che la posizione sta nella pagina Radar, dove non sta piu\' dalla 7.0.
+       Il codice si aggiorna perche\' altrimenti non funziona, le frasi no --
+       nessuno le compila.
 """
 
-__version__ = "7.0"
+__version__ = "7.1"

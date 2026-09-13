@@ -120,15 +120,24 @@
       <option value="{{ nome }}" {{ 'selected' if cfg.meteo.regione == nome }}>{{ nome }}</option>
       {% endfor %}
     </select>
+    <label for="unita">{{ t('meteo.unit') }}</label>
+    <select id="unita" name="unita">
+      <option value="C" {{ 'selected' if cfg.meteo.unita != 'F' }}>{{ t('meteo.unit.c') }}</option>
+      <option value="F" {{ 'selected' if cfg.meteo.unita == 'F' }}>{{ t('meteo.unit.f') }}</option>
+    </select>
     <label class="check"><input type="checkbox" name="allerte"
            {{ 'checked' if cfg.meteo.allerte }}> {{ t('meteo.alerts') }}</label>
     <button type="submit">{{ t('common.apply') }}</button>
   </form>
-  <form method="post" action="{{ url_for('api_meteo_prova') }}" class="inline">
-    <button type="submit" name="modo" value="aggiornamento">{{ t('meteo.test') }}</button>
-    <button type="submit" name="modo" value="bollettino" class="ghost">{{ t('meteo.test.bulletin') }}</button>
-    <button type="submit" name="modo" value="allerta" class="ghost">{{ t('meteo.test.alert') }}</button>
-  </form>
+  {# I tre pulsanti in una riga loro, con lo stacco fra l'uno e l'altro: nella
+     `form.inline` di sopra si toccavano, ed e' arrivata la segnalazione. #}
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_meteo_prova') }}" class="actions">
+      <button type="submit" name="modo" value="aggiornamento">{{ t('meteo.test') }}</button>
+      <button type="submit" name="modo" value="bollettino" class="ghost">{{ t('meteo.test.bulletin') }}</button>
+      <button type="submit" name="modo" value="allerta" class="ghost">{{ t('meteo.test.alert') }}</button>
+    </form>
+  </div>
   <p class="hint">{{ t('meteo.source') }}</p>
   <p class="hint">{{ t('meteo.alert.source') }}</p>
   {% endif %}

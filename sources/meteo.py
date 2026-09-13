@@ -367,14 +367,81 @@ class MeteoSource(Source):
         return ((self.cfg.get("web") or {}).get("language")
                 or (self.cfg.get("clock") or {}).get("language") or "it")
 
-    @staticmethod
-    def _gradi(valore):
+    def unita(self):
+        """"C" o "F". La previsione arriva sempre in Celsius: si converte qui."""
+        scelta = str(self.conf().get("unita", "C") or "C").upper()
+        return "F" if scelta.startswith("F") else "C"
+
+    def _gradi(self, valore, unita=True):
         """Una temperatura come si scrive su un cartello, non come esce da un
-        sensore: interi. Il mezzo grado non lo sente nessuno e ruba due
-        caratteri ai numeri che contano."""
+        sensore: intera. Il mezzo grado non lo sente nessuno e ruba due
+        caratteri ai numeri che contano.
+
+        `unita` decide se aggiungere `C` o `F` dopo il grado. Si scrive **una
+        volta sola** per schermata, sul numero grande: ripeterla accanto a
+        massima e minima riempirebbe la riga di lettere invece che di numeri, e
+        nessuno cambia scala fra una riga e l'altra.
+        """
         if valore is None:
             return "--"
-        return "%d°" % int(round(valore))
+        gradi = float(valore)
+        scala = self.unita()
+        if scala == "F":
+            gradi = gradi * 9.0 / 5.0 + 32.0
+        return "%d°%s" % (int(round(gradi)), scala if unita else "")
+
+    def _freccia(self, d, x, y, lato, su, colore):
+        """Il triangolino prima di massima e minima.
+
+        Disegnato invece che scritto: i caratteri di freccia esistono ma non
+        tutti i font li hanno, e una freccia che diventa un rettangolo vuoto e'
+        peggio di nessuna freccia. Un triangolo di cinque pixel non puo'
+        mancare da nessun font, perche' non viene da un font.
+        """
+        meta = lato / 2.0
+        if su:
+            punti = [(x + meta, y), (x + lato, y + lato), (x, y + lato)]
+        else:
+            punti = [(x + meta, y + lato), (x + lato, y), (x, y)]
+        d.polygon(punti, fill=colore)
+
+    def _estremi(self, d, destra, y, oggi):
+        """Massima e minima in alto a destra, ciascuna con la sua freccia.
+
+        Sono la cornice della giornata, non il dato del momento: stanno
+        piccole, in un angolo, e si leggono quando servono. Il numero grande al
+        centro resta quello di adesso, che e' la domanda a cui il pannello deve
+        rispondere per primo.
+        """
+        font = self._font_piccolo
+        lato = max(3, int(self.height * 0.09))
+        pezzi = []
+        for su, valore, colore in ((True, oggi.get("massima"), CALDO),
+                                   (False, oggi.get("minima"), FREDDO)):
+            testo = self._gradi(valore, unita=False)
+            pezzi.append((su, testo, colore,
+                          lato + 3 + self._largo(d, testo, font)))
+        totale = sum(p[3] for p in pezzi) + 8
+        x = destra - totale
+        for su, testo, colore, largo in pezzi:
+            self._freccia(d, x, y + 3, lato, su, colore)
+            d.text((x + lato + 3, y), testo, font=font, fill=colore)
+            x += largo + 8
+        return totale
+
+    def _centrato(self, d, centro, y, pezzi):
+        """Scrive una fila di testi centrata su `centro`.
+
+        `pezzi` e' una lista di (testo, font, colore, scarto_verticale). Il
+        gruppo si misura intero e **poi** si posiziona: centrare ogni pezzo per
+        conto suo li accavallerebbe.
+        """
+        larghezze = [self._largo(d, t, f) for t, f, _c, _dy in pezzi]
+        totale = sum(larghezze) + 10 * (len(pezzi) - 1)
+        x = centro - totale / 2.0
+        for (testo, font, colore, dy), largo in zip(pezzi, larghezze):
+            d.text((x, y + dy), testo, font=font, fill=colore)
+            x += largo + 10
 
     def _largo(self, d, testo, font):
         try:
@@ -383,106 +450,131 @@ class MeteoSource(Source):
         except AttributeError:            # pragma: no cover - PIL molto vecchia
             return d.textsize(testo, font=font)[0]
 
+    def _scheletro(self, d, codice, notte, oggi):
+        """La parte comune alle due finestre, e il motivo per cui e' comune.
+
+        Le due schermate rispondono a domande diverse -- la giornata e
+        l'adesso -- ma la prima cosa che si guarda e' la stessa: **quanti
+        gradi fa**. Segnalato dal campo guardando il bollettino: massima e
+        minima grandi al centro si leggevano come la temperatura di adesso, e
+        quella vera non c'era da nessuna parte.
+
+        Adesso l'impianto e' uno: icona a sinistra, la cornice della giornata
+        piccola in alto a destra, e in mezzo -- grande e centrato -- il dato
+        del momento. Cambia il contorno, non la risposta alla prima domanda.
+
+        Torna (sinistra, centro) dell'area utile.
+        """
+        lato = int(self.height * 0.62)
+        icone.disegna(d, meteo.icona(codice, notte=notte),
+                      3, (self.height - lato) // 2, lato)
+        sinistra = 3 + lato + 5
+        centro = sinistra + (self.width - 3 - sinistra) / 2.0
+        self._estremi(d, self.width - 3, 1, oggi)
+        return sinistra, centro
+
     def _bollettino(self, d, dati):
-        """La giornata intera: icona grande, massima, minima, umidita'."""
+        """La giornata: cornice in alto, gradi di adesso in mezzo, ore sotto."""
         lang = self._lingua()
         oggi = dati.get("oggi") or {}
         adesso = dati.get("adesso") or {}
-        codice = oggi.get("codice")
-        if codice is None:
-            codice = adesso.get("codice")
+        codice_giorno = oggi.get("codice")
+        if codice_giorno is None:
+            codice_giorno = adesso.get("codice")
 
-        lato = int(self.height * 0.72)
-        icone.disegna(d, meteo.icona(codice, notte=False),
-                      4, (self.height - lato) // 2, lato)
-        sinistra = 4 + lato + 6
+        sinistra, centro = self._scheletro(d, codice_giorno, False, oggi)
 
+        # In alto a sinistra che tempo fa oggi, accorciato se serve: lo spazio
+        # finisce dove cominciano massima e minima.
         titolo = "OGGI" if str(lang).startswith("it") else "TODAY"
-        d.text((sinistra, 1), titolo, font=self._font_piccolo, fill=SPENTO)
-        largo_titolo = self._largo(d, titolo, self._font_piccolo)
-        descrizione = meteo.descrizione(codice, lang)
-        d.text((sinistra + largo_titolo + 6, 1), descrizione,
+        testa = "%s %s" % (titolo, meteo.descrizione(codice_giorno, lang))
+        d.text((sinistra, 1),
+               self._taglia(d, testa, self._font_piccolo,
+                            self.width * 0.34),
                font=self._font_piccolo, fill=TESTO)
 
-        # I due numeri, grandi e affiancati. Non c'e' l'etichetta "MAX" e
-        # "MIN": il colore la dice, e due parole in piu' ruberebbero lo spazio
-        # ai numeri, che sono la ragione per cui si guarda.
-        y = int(self.height * 0.26)
-        massima = self._gradi(oggi.get("massima"))
-        d.text((sinistra, y), massima, font=self._font_grande, fill=CALDO)
-        x = sinistra + self._largo(d, massima, self._font_grande) + 10
-        d.text((x, y), self._gradi(oggi.get("minima")),
-               font=self._font_grande, fill=FREDDO)
+        self._centro_gradi(d, centro, adesso, oggi)
 
-        # Riga bassa: umidita', e la pioggia solo se ce n'e'. Una probabilita'
-        # di pioggia dello zero per cento non e' un'informazione, e' rumore.
+        # Riga bassa, centrata: la pioggia solo se ce n'e' -- uno zero per
+        # cento non e' un'informazione, e' rumore -- poi alba e tramonto.
         basso = self.height - int(self.height * 0.19) - 1
         pezzi = []
-        umidita = oggi.get("umidita")
-        if umidita is None:
-            umidita = adesso.get("umidita")
-        if umidita is not None:
-            pezzi.append(("UM %d%%" % umidita, UMIDO))
         pioggia = oggi.get("pioggia_probabile")
         if pioggia:
             pezzi.append(("%s %d%%" % ("PIOGGIA" if str(lang).startswith("it")
-                                       else "RAIN", pioggia), FREDDO))
+                                       else "RAIN", pioggia),
+                          self._font_piccolo, FREDDO, 0))
         alba, tramonto = self._ore(oggi.get("alba")), self._ore(oggi.get("tramonto"))
         if alba and tramonto:
-            pezzi.append(("%s-%s" % (alba, tramonto), SPENTO))
-
-        x = sinistra
-        for testo, colore in pezzi:
-            largo = self._largo(d, testo, self._font_piccolo)
-            if x + largo > self.width - 2:
-                # Non si scrive fuori dal pannello: si smette. Meglio tre
-                # informazioni che quattro di cui una tagliata a meta'.
-                break
-            d.text((x, basso), testo, font=self._font_piccolo, fill=colore)
-            x += largo + 8
+            pezzi.append(("%s - %s" % (alba, tramonto),
+                          self._font_piccolo, SPENTO, 0))
+        if pezzi:
+            self._centrato(d, centro, basso, pezzi)
 
         self._eta(d)
         self._tacca_allerta(d)
 
     def _aggiornamento(self, d, dati):
-        """Adesso: pochi numeri, grandi."""
+        """Adesso: gli stessi gradi grandi in mezzo, e che tempo fa in cima."""
         lang = self._lingua()
         adesso = dati.get("adesso") or {}
         oggi = dati.get("oggi") or {}
         codice = adesso.get("codice")
         notte = not adesso.get("giorno", True)
 
-        lato = int(self.height * 0.72)
-        icone.disegna(d, meteo.icona(codice, notte=notte),
-                      4, (self.height - lato) // 2, lato)
-        sinistra = 4 + lato + 6
-
-        d.text((sinistra, 1), meteo.descrizione(codice, lang),
+        sinistra, centro = self._scheletro(d, codice, notte, oggi)
+        d.text((sinistra, 1),
+               self._taglia(d, meteo.descrizione(codice, lang),
+                            self._font_piccolo, self.width * 0.34),
                font=self._font_piccolo, fill=TESTO)
 
-        y = int(self.height * 0.24)
-        temperatura = self._gradi(adesso.get("temperatura"))
-        d.text((sinistra, y), temperatura, font=self._font_grande, fill=CALDO)
-        x = sinistra + self._largo(d, temperatura, self._font_grande) + 12
+        self._centro_gradi(d, centro, adesso, oggi)
 
-        umidita = adesso.get("umidita")
-        if umidita is not None:
-            d.text((x, y + int(self.height * 0.12)), "UM %d%%" % umidita,
-                   font=self._font_medio, fill=UMIDO)
-
-        # La massima e la minima anche qui, ma piccole e con i **loro** colori:
-        # scritte tutte grigie come "24° / 12°" costringerebbero a ricordare
-        # quale viene prima. Ambra e azzurro lo dicono senza etichette, ed e' la
-        # stessa grammatica del bollettino: chi ha visto l'una capisce l'altra.
-        basso = self.height - int(self.height * 0.19) - 1
-        massima = self._gradi(oggi.get("massima"))
-        d.text((sinistra, basso), massima, font=self._font_piccolo, fill=CALDO)
-        x = sinistra + self._largo(d, massima, self._font_piccolo) + 6
-        d.text((x, basso), self._gradi(oggi.get("minima")),
-               font=self._font_piccolo, fill=FREDDO)
+        # Sotto, centrata, la temperatura percepita -- ma solo quando e'
+        # diversa davvero. "18 gradi, percepiti 18" e' una riga sprecata; con
+        # vento o afa quella differenza e' il motivo per cui uno si mette la
+        # giacca.
+        percepita = adesso.get("percepita")
+        vera = adesso.get("temperatura")
+        if (percepita is not None and vera is not None
+                and abs(percepita - vera) >= 1.5):
+            basso = self.height - int(self.height * 0.19) - 1
+            etichetta = "PERCEPITI" if str(lang).startswith("it") else "FEELS"
+            self._centrato(d, centro, basso,
+                           [("%s %s" % (etichetta,
+                                        self._gradi(percepita, unita=False)),
+                             self._font_piccolo, SPENTO, 0)])
 
         self._eta(d)
         self._tacca_allerta(d)
+
+    def _centro_gradi(self, d, centro, adesso, oggi):
+        """Il blocco centrale: i gradi di adesso e l'umidita', affiancati.
+
+        L'umidita' e' salita qui dalla riga in basso su segnalazione dal
+        campo, e la segnalazione aveva ragione: e' un numero che si legge
+        insieme alla temperatura -- ventisei gradi con il settanta per cento
+        sono un'altra giornata rispetto a ventisei asciutti -- e in fondo alla
+        schermata, piccola, non la guardava nessuno.
+
+        I due numeri hanno corpi diversi e sono allineati sulla **linea di
+        base**: con due corpi diversi il pareggio in alto si vede storto.
+        """
+        temperatura = adesso.get("temperatura")
+        if temperatura is None:
+            temperatura = oggi.get("massima")
+        testo = self._gradi(temperatura)
+        pezzi = [(testo, self._font_grande, CALDO, 0)]
+        umidita = adesso.get("umidita")
+        if umidita is None:
+            umidita = oggi.get("umidita")
+        if umidita is not None:
+            # Lo scarto verticale allinea la base dell'umidita' con quella dei
+            # gradi: e' la differenza fra le due altezze di carattere.
+            scarto = (self._font_grande.getmetrics()[0]
+                      - self._font_medio.getmetrics()[0])
+            pezzi.append(("%d%%" % umidita, self._font_medio, UMIDO, scarto))
+        self._centrato(d, centro, int(self.height * 0.26), pezzi)
 
     def _eta(self, d):
         """Un puntino in alto a destra quando la previsione e' vecchia.

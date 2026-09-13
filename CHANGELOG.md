@@ -2,6 +2,58 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [7.1]
+
+Tre segnalazioni arrivate guardando la 7.0 **accesa**, che è l'unico collaudo
+che conta davvero. Nessuna delle tre l'avrebbe trovata una suite: due si vedono
+solo su un vetro da 256×64 in un salotto, e la terza è una frase che aveva
+smesso di dire la verità.
+
+- **La finestra del meteo, ridisegnata dopo la prima sera sul vetro.** Sette
+  segnalazioni dal campo, e la più importante è: *«non si capisce la
+  temperatura attuale»*. Aveva ragione, ed era un difetto di impostazione: il
+  bollettino mostrava massima e minima grandi al centro, che si leggevano come
+  il dato di adesso — e quello vero non c'era da nessuna parte.
+
+  Adesso le due finestre hanno lo stesso impianto, e non è pigrizia: la prima
+  cosa che si guarda è sempre la stessa. In mezzo, grande e centrata, la
+  **temperatura di adesso** con accanto l'**umidità** — che è salita lì dalla
+  riga in fondo, dove non la guardava nessuno, e ci sta bene perché è un numero
+  che si legge insieme alla temperatura: ventisei gradi con il settanta per
+  cento sono un'altra giornata rispetto a ventisei asciutti. In alto a destra,
+  piccole, massima e minima con una **freccia** ciascuna.
+
+  Le frecce sono disegnate, non scritte: i caratteri di freccia esistono ma non
+  tutti i font li hanno, e una freccia che diventa un rettangolo vuoto è peggio
+  di nessuna freccia.
+
+  E c'è l'**unità**, che prima mancava del tutto — scritta una volta sola, sul
+  numero grande: ripeterla accanto a massima e minima riempirebbe la riga di
+  lettere invece che di numeri. Si sceglie fra Celsius e Fahrenheit nella
+  scheda del Meteo; le previsioni si chiedono sempre in Celsius e si convertono
+  al momento di scrivere, così cambiare unità non invalida la previsione già
+  scaricata e non costa una chiamata.
+
+  In basso, la temperatura percepita — ma solo quando differisce di almeno un
+  grado e mezzo. «18 gradi, percepiti 18» è una riga sprecata; con vento o afa
+  quella differenza è il motivo per cui uno si mette la giacca.
+
+  La prova di tutto questo non guarda il testo: conta i **pixel accesi** per
+  fascia orizzontale e pretende che la centrale sia la più luminosa, perché è
+  lì che sta il numero che deve rispondere per primo.
+
+- **Tre pulsanti che si toccavano.** Nella scheda del Meteo i tasti di prova
+  stavano a dodici pixel l'uno dall'altro e si leggevano come un blocco unico.
+  Su due pulsanti corti non si era mai notato; su tre lunghi, sì. Lo stacco
+  passa a sedici.
+
+- **Un testo che era diventato falso.** La scheda del Meteo diceva ancora che
+  la posizione «è quella della pagina Radar», dove non sta più dalla 7.0. È il
+  prezzo tipico di uno spostamento: il codice si aggiorna perché altrimenti non
+  funziona, le frasi no — nessuno le compila. L'ha trovato una schermata, non
+  una prova: nessuna suite controlla che quello che c'è scritto sia ancora
+  vero.
+
 ## [7.0]
 
 - **Il meteo.** Due finestre, e la differenza non è la quantità di dati ma a

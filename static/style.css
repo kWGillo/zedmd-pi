@@ -265,8 +265,13 @@ table.files form { margin: 0; }
 .fields label.check { margin: 6px 0; font-size: 14px; }
 @media (max-width: 560px) { .fields { grid-template-columns: 1fr; } }
 
-.actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+/* 7.0: lo stacco passa da 12 a 16, e i pulsanti prendono un po' d'aria
+   attorno. Segnalazione dal campo guardando la scheda del meteo: tre pulsanti
+   larghi con dodici pixel in mezzo si leggono come un blocco unico, e ci si
+   clicca sopra per sbaglio. Su due pulsanti corti non si notava. */
+.actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 16px; }
 .actions form { margin: 0; }
+.actions .actions { margin-top: 0; }
 /* 5.3: lo stacco lo mette la riga, non i tasti. Senza questa, due form
    affiancati mostravano i pulsanti sfalsati in verticale; e con
    `form.inline`, che azzera il margine, si toccavano proprio. */

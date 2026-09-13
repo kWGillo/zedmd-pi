@@ -573,6 +573,11 @@ DEFAULTS = {
         "allerte": True,
         "regione": "",
         "paese": "italy",
+        # "C" o "F". Le previsioni si chiedono **sempre** in Celsius e si
+        # convertono al momento di scrivere: cosi' cambiare unita' non
+        # invalida la previsione gia' scaricata, e su MQTT esce comunque
+        # Celsius, che e' quello che Home Assistant sa riconvertire da solo.
+        "unita": "C",
     },
     "webcam": {
         # Vuoto = la prima telecamera collegata. Si scrive un /dev/videoN

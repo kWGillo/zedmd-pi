@@ -159,7 +159,7 @@ git add -A
 ```
 
 ```bash
-git commit -m "7.0: il meteo, con bollettino, aggiornamenti e allerte; la posizione passa alle Impostazioni"
+git commit -m "7.1: la finestra del meteo ridisegnata dopo la prima sera sul vetro"
 ```
 
 Cambia il messaggio a ogni versione: numero della versione e una riga su cosa
@@ -287,15 +287,15 @@ oggi». Il testo delle note lo prendi da `CHANGELOG.md`, in cima.
 in quel momento.
 
 ```bash
-gh release create v7.0 --title "7.0" --notes-file <(sed -n '/^## \[7.0\]/,/^## \[6.7\]/p' CHANGELOG.md | sed '$d')
+gh release create v7.1 --title "7.1" --notes-file <(sed -n '/^## \[7.1\]/,/^## \[7.0\]/p' CHANGELOG.md | sed '$d')
 ```
 
-Se il tag esiste già, `gh release edit v7.0 --notes-file ...`.
+Se il tag esiste già, `gh release edit v7.1 --notes-file ...`.
 
-> L'intervallo arriva fino alla **6.7** e non alla 6.9, e non è un errore: su
-> GitHub l'ultima pubblicata è la 6.7, quindi questo push porta 6.8, 6.8.1, 6.9
-> e 7.0 tutte insieme. La regola è al paragrafo qui sotto; il numero da cui
-> partire lo dice il comando `curl` di fine pagina, non la memoria.
+> L'intervallo si ferma alla **7.0** perché su GitHub la 7.0 c'è già: questo
+> push porta solo la 7.1. Il numero da cui partire lo dice il comando `curl`
+> di fine pagina, non la memoria — ed è il motivo per cui va letto **prima**
+> del push e non dopo.
 
 ### Quando si pubblicano più versioni insieme
 
