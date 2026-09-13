@@ -1,4 +1,4 @@
-# DMD Controller 6.8.1
+# DMD Controller 6.9
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -143,6 +143,7 @@ in cielo:
 | Entità | Contenuto |
 |---|---|
 | `sensor…aerei_oggi` | quanti aerei sono stati registrati oggi, azzerato a mezzanotte |
+| `sensor…aerei_totale` | quanti in tutto, da quando esiste il registro |
 | `sensor…aerei_raggio` | quanti ce ne sono nel raggio in questo istante |
 | `sensor…ultimo_aereo` | l'ultimo passato, con rotta, quota e distanza negli attributi |
 | `sensor…iss_prossimo` | l'orario del prossimo passaggio visibile della Stazione |
@@ -151,6 +152,18 @@ in cielo:
 L'orario del passaggio è un istante vero, quindi Home Assistant scrive «fra
 due ore» da solo; negli attributi c'è **l'elenco completo delle ventiquattro
 ore**, con durata, direzione, elevazione massima e visibilità di ciascuno.
+
+Dalla 6.9 si comandano da lì anche il pannello e il Game Boy:
+
+| Entità | Che cosa fa |
+|---|---|
+| `switch…display_acceso` | **Display**: spegne il vetro lasciando acceso tutto il resto. ON vuol dire acceso |
+| `switch…gameboy` | avvia PyBoy con la cartuccia già configurata, e torna OFF da solo se la partita finisce per inattività |
+
+E la **luminosità** si dichiara non disponibile per la durata del Night mode,
+perché lì la luminosità applicata è quella notturna e il cursore non avrebbe
+effetto. Un comando che arrivasse comunque viene rifiutato, non accettato e
+ignorato: un comando che mente è peggio di un comando assente.
 
 ---
 
@@ -615,7 +628,8 @@ le tappe.
 | 6.6 | Il pannello compare in Home Assistant come tre entità `notify`, una per livello: le notifiche si scelgono da una tendina accanto al telefono, senza passare da uno script |
 | 6.7 | Il raggio del radar era 1,85 km invece dei 3 dichiarati — il provider troncava le miglia nautiche. Trovato nei dati del registro, non nel codice. E un margine di cortesia che elenca gli aerei passati appena fuori |
 | 6.8 | Aerei e satelliti escono dal pannello: cinque entità in Home Assistant, con l'elenco dei passaggi della Stazione delle prossime ventiquattro ore |
-| **6.8.1** | **La procedura di pubblicazione dice anche le due cose che erano costate tempo: i cinque minuti di cache prima che l'OTA veda la versione nuova, e come si pubblicano più versioni in un push solo** |
+| 6.8.1 | La procedura di pubblicazione dice anche le due cose che erano costate tempo: i cinque minuti di cache prima che l'OTA veda la versione nuova, e come si pubblicano più versioni in un push solo |
+| **6.9** | **Tre comandi che mentivano, corretti: il cursore della luminosità durante il Night mode, lo spegnimento del pannello che non esisteva, il Game Boy che non compariva in Home Assistant. E il totale dei voli su MQTT** |
 
 ---
 

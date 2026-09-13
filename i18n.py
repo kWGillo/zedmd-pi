@@ -380,6 +380,12 @@ STRINGS = {
                      "Sleep mode active: display off."),
     "banner.night": ("Night mode attivo: luminosità ridotta.",
                      "Night mode active: reduced brightness."),
+    # Distinto da quello di Sleep mode, e non per pignoleria: uno spegnimento
+    # deciso a mano non si annulla da solo a un orario, e chi trova il pannello
+    # nero deve sapere quale delle due cose sta guardando.
+    "banner.off": ("Pannello spento a mano: resta così finché non lo riaccendi.",
+                   "Panel switched off by hand: it stays off until you turn "
+                   "it back on."),
 
     # ------------------------------------------------------------ stati servizi
     "status.disabled": ("disabilitato", "disabled"),
@@ -445,6 +451,29 @@ STRINGS = {
         "viene salvata automaticamente.",
         "Daytime reference value. Changes apply to the panel immediately and "
         "are saved automatically."),
+
+    "settings.brightness.night": (
+        "Night mode è attivo: il pannello sta usando la luminosità notturna "
+        "({valore}%), quindi questo cursore non avrebbe effetto ed è "
+        "disattivato. La luminosità notturna si cambia qui sotto.",
+        "Night mode is on: the panel is using the night brightness "
+        "({valore}%), so this slider would do nothing and is disabled. "
+        "The night brightness is set below."),
+
+    "settings.power": ("Pannello", "Panel"),
+    "settings.power.on": ("Il pannello è acceso", "The panel is on"),
+    "settings.power.off": ("Il pannello è spento", "The panel is off"),
+    "settings.power.turn_off": ("Spegni il pannello", "Turn the panel off"),
+    "settings.power.turn_on": ("Accendi il pannello", "Turn the panel on"),
+    "settings.power.hint": (
+        "Spegne solo il vetro: il Raspberry resta acceso e continua a fare "
+        "tutto, il radar registra, le notifiche arrivano e questa pagina "
+        "risponde. Lo spegnimento dura finché non si riaccende — anche dopo "
+        "un riavvio — e si comanda anche da Home Assistant.",
+        "This turns off the glass only: the Raspberry stays on and keeps "
+        "working, the radar keeps logging, notifications still arrive and "
+        "this page still answers. It stays off until turned back on — across "
+        "restarts too — and it can also be switched from Home Assistant."),
 
     "settings.modes": ("Night mode e Sleep mode", "Night mode and Sleep mode"),
     "settings.night": ("Night mode — abbassa la luminosità in una fascia oraria",

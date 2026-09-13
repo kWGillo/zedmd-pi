@@ -62,10 +62,27 @@ SWITCHES = [
 # un'altra sezione della configurazione. Da Home Assistant pero' si comandano
 # allo stesso modo, quindi hanno gli stessi topic e la stessa forma — cambia
 # solo dove va scritto il valore.
+#
+# Ogni riga: chiave del topic, etichetta, chiave nella configurazione, e se
+# **ON in Home Assistant corrisponde a falso** nella configurazione. Il
+# rovesciamento serve a una sola voce ed e' l'unico modo onesto di scriverla:
+# la configurazione dice `off`, perche' il valore normale di un impianto e'
+# "acceso" e le impostazioni si scrivono come eccezioni; Home Assistant invece
+# deve mostrare un interruttore che si chiama "Display" e che quando e' ON
+# significa che il pannello e' acceso. Nessuno accetterebbe un interruttore
+# chiamato "Display spento" da tenere OFF.
 MODES = [
-    ("night_enabled", "Night mode"),
-    ("sleep_enabled", "Sleep mode"),
+    ("night_enabled", "Night mode", "night_enabled", False),
+    ("sleep_enabled", "Sleep mode", "sleep_enabled", False),
+    ("display_acceso", "Display", "off", True),
 ]
+
+# Le icone dei modi, per chiave.
+ICONE_MODI = {
+    "night_enabled": "mdi:weather-night",
+    "sleep_enabled": "mdi:power-sleep",
+    "display_acceso": "mdi:monitor",
+}
 
 # Interruttori che non corrispondono a una voce di configurazione ma a
 # **qualcosa che sta succedendo**. Doom non e' un servizio da accendere: e' una
@@ -75,6 +92,13 @@ MODES = [
 # resta convinto che si stia ancora giocando.
 AZIONI = [
     ("doom", "Doom", "mdi:pistol"),
+    # Il Game Boy era rimasto fuori, e per una ragione che si vede solo
+    # guardando da dove arrivano gli altri: i giochi scritti per il pannello
+    # si costruiscono dall'elenco di `sources.giochi`, e PyBoy non e' in
+    # quell'elenco -- e' un runtime a se', con il suo processo e le sue
+    # cartucce. Acceso da qui parte con la ROM configurata, come premere il
+    # tasto della console senza cambiare cartuccia.
+    ("gameboy", "Game Boy", "mdi:nintendo-game-boy"),
 ]
 
 # I giochi scritti per il pannello sono azioni come Doom: una partita che
@@ -247,7 +271,7 @@ class HassBridge:
         self._annuncia_rifiuti(common, base, node)
         self._annuncia_scadenze(common, base, node)
 
-        for key, label in MODES:
+        for key, label, _chiave, _rovescio in MODES:
             entity = dict(common)
             entity.update({
                 "name": label,
@@ -257,12 +281,23 @@ class HassBridge:
                 "command_topic": "%s/service/%s/set" % (base, key),
                 "payload_on": "ON",
                 "payload_off": "OFF",
-                "icon": "mdi:weather-night" if key.startswith("night")
-                        else "mdi:power-sleep",
+                "icon": ICONE_MODI.get(key, "mdi:toggle-switch"),
             })
             self._config("switch", key, entity)
 
+        # La luminosita' e' l'unica entita' con **due** condizioni di
+        # disponibilita', e non e' un vezzo: e' la correzione di un comando che
+        # mentiva. Con Night mode acceso il pannello usa la luminosita'
+        # notturna, e quello principale non fa niente -- si muoveva, non
+        # cambiava niente, e faceva pensare che il pannello fosse guasto. Un
+        # comando che non agisce e' peggio di un comando assente.
+        #
+        # `availability_mode: all` vuol dire che devono valere tutte e due: il
+        # DMD acceso **e** il Night mode spento. In Home Assistant il cursore
+        # diventa grigio per la durata della fascia notturna, che e'
+        # esattamente quello che sta succedendo.
         brightness = dict(common)
+        brightness.pop("availability_topic", None)
         brightness.update({
             "name": "Luminosità",
             "unique_id": "%s_brightness" % node,
@@ -272,6 +307,15 @@ class HassBridge:
             "min": 0, "max": 100, "step": 1,
             "unit_of_measurement": "%",
             "icon": "mdi:brightness-6",
+            "availability_mode": "all",
+            "availability": [
+                {"topic": availability,
+                 "payload_available": "online",
+                 "payload_not_available": "offline"},
+                {"topic": "%s/brightness/available" % base,
+                 "payload_available": "online",
+                 "payload_not_available": "offline"},
+            ],
         })
         self._config("number", "brightness", brightness)
 
@@ -291,6 +335,21 @@ class HassBridge:
             "icon": "mdi:airplane",
         })
         self._config("sensor", "aerei_oggi", radar)
+
+        # Il totale del registro. `aerei_oggi` risponde a "che giornata e'
+        # stata", questo a "quanti ne ho visti da quando l'ho acceso": e' il
+        # numero che cresce e non torna indietro, quello da mettere su una
+        # scheda e guardare ogni tanto.
+        totale = dict(common)
+        totale.update({
+            "name": "Aerei in totale",
+            "unique_id": "%s_aerei_totale" % node,
+            "object_id": "%s_aerei_totale" % node,
+            "state_topic": "%s/radar/totale" % base,
+            "state_class": "total_increasing",
+            "icon": "mdi:counter",
+        })
+        self._config("sensor", "aerei_totale", totale)
 
         raggio = dict(common)
         raggio.update({
@@ -394,11 +453,11 @@ class HassBridge:
                                      [("notify", "notify_%s" % k)
                                       for k, _, _ in NOTIFY] +
                                      [("sensor", k) for k in
-                                      ("aerei_oggi", "aerei_raggio",
-                                       "ultimo_aereo", "iss_prossimo",
-                                       "iss_quanti")] +
+                                      ("aerei_oggi", "aerei_totale",
+                                       "aerei_raggio", "ultimo_aereo",
+                                       "iss_prossimo", "iss_quanti")] +
                                      [("switch", key) for key, _ in SWITCHES] +
-                                     [("switch", key) for key, _ in MODES] +
+                                     [("switch", key) for key, _, _, _ in MODES] +
                                      [("switch", key) for key, _, _ in AZIONI] +
                                      [("binary_sensor", "rif_%s" % c) for c in noti] +
                                      [("sensor", "rifdata_%s" % c) for c in noti] +
@@ -436,9 +495,12 @@ class HassBridge:
             self._send("%s/service/%s/state" % (base, key), value, force)
 
         display = self.cfg.get("display") or {}
-        for key, _label in MODES:
-            value = "ON" if display.get(key) else "OFF"
-            self._send("%s/service/%s/state" % (base, key), value, force)
+        for key, _label, chiave, rovescio in MODES:
+            acceso = bool(display.get(chiave))
+            if rovescio:
+                acceso = not acceso
+            self._send("%s/service/%s/state" % (base, key),
+                       "ON" if acceso else "OFF", force)
 
         for key, _label, _icona in AZIONI:
             self._send("%s/service/%s/state" % (base, key),
@@ -449,6 +511,13 @@ class HassBridge:
 
         self._send("%s/brightness/state" % base,
                    str(self.cfg["display"]["brightness"]), force)
+        # Durante il Night mode il cursore non ha effetto, e lo si dice invece
+        # di lasciarlo muovere a vuoto. Si guarda il **runtime**, non la
+        # configurazione: `night_enabled` e' solo la fascia oraria, `night` e'
+        # se in questo momento ci siamo dentro davvero.
+        notte = bool(getattr(self.runtime, "night", False))
+        self._send("%s/brightness/available" % base,
+                   "offline" if notte else "online", force)
 
     def _pubblica_cielo(self, base, force):
         """Aerei e satelliti verso Home Assistant.
@@ -464,6 +533,8 @@ class HassBridge:
         if radar is not None:
             self._send("%s/radar/oggi" % base, str(radar["oggi"]), force)
             self._send("%s/radar/raggio" % base, str(radar["nel_raggio"]), force)
+            self._send("%s/radar/totale" % base,
+                       str(radar.get("totale") or 0), force)
             # Un oggetto JSON anche quando e' vuoto: gli attributi di Home
             # Assistant devono essere un oggetto, e `{}` e' un oggetto.
             self._send("%s/radar/ultimo" % base,
@@ -750,6 +821,9 @@ class HassBridge:
             if key == "doom":
                 doom = getattr(self.runtime, "doom", None)
                 return bool(doom and doom.in_sessione())
+            if key == "gameboy":
+                gameboy = getattr(self.runtime, "gameboy", None)
+                return bool(gameboy and gameboy.in_sessione())
             if key.startswith(GIOCO_PREFISSO):
                 giochi = getattr(self.runtime, "giochi", None)
                 if giochi is None or not giochi.in_sessione():
@@ -763,6 +837,9 @@ class HassBridge:
         """Esegue un'azione. Restituisce True se e' stata gestita."""
         if key == "doom":
             cosa, nome = "doom", ""
+        elif key == "gameboy":
+            # Nome vuoto: la sorgente prende la cartuccia gia' configurata.
+            cosa, nome = "gameboy", ""
         elif key.startswith(GIOCO_PREFISSO):
             cosa, nome = "giochi", key[len(GIOCO_PREFISSO):]
         else:
@@ -796,12 +873,14 @@ class HassBridge:
         if self._azione(key, acceso):
             return
 
-        modi = dict(MODES)
+        modi = {k: (chiave, rovescio) for k, _l, chiave, rovescio in MODES}
         if key in modi:
-            # Night e Sleep non sono servizi da avviare o fermare: sono modi
-            # del display, che il ciclo di rendering rilegge da solo a ogni
-            # secondo. Qui basta scrivere il valore.
-            self.cfg["display"][key] = acceso
+            # Night, Sleep e l'accensione del pannello non sono servizi da
+            # avviare o fermare: sono modi del display, che il ciclo di
+            # rendering rilegge da solo a ogni secondo. Qui basta scrivere il
+            # valore, eventualmente rovesciato.
+            chiave, rovescio = modi[key]
+            self.cfg["display"][chiave] = (not acceso) if rovescio else acceso
         elif key in self.cfg.get("services", {}):
             self.cfg["services"][key] = acceso
         else:
@@ -819,6 +898,14 @@ class HassBridge:
     def _on_brightness(self, _topic, payload):
         raw = payload.decode("utf-8", "replace") if isinstance(payload, bytes) \
             else str(payload)
+        # Dichiarare l'entita' non disponibile ferma l'interfaccia di Home
+        # Assistant, non un'automazione che pubblichi sul topic lo stesso.
+        # Qui si rifiuta comunque: accettare e non applicare sarebbe di nuovo
+        # il comando che mente, solo un piano piu' sotto.
+        if getattr(self.runtime, "night", False):
+            print("[hass] luminosita' ignorata: Night mode attivo")
+            self.publish_state(force=True)
+            return
         try:
             self.runtime.set_brightness(int(float(raw.strip())))
         except (TypeError, ValueError):

@@ -68,6 +68,14 @@ DEFAULTS = {
         "sleep_start": "01:00",
         "sleep_end": "06:00",
         "sleep_wake_on_zedmd": True,
+        # Spegnimento a mano del pannello. Non e' Sleep mode: quello segue un
+        # orario, questo e' una decisione presa adesso e che dura finche' non
+        # si cambia idea -- anche dopo un riavvio, che e' voluto: uno
+        # spegnimento che si annulla da solo aggiornando il servizio non
+        # sarebbe uno spegnimento. Il Raspberry resta acceso e continua a fare
+        # tutto -- il radar registra, le notifiche arrivano, la pagina web
+        # risponde -- e' solo il vetro a essere nero.
+        "off": False,
     },
     "clock": {
         "time_color": "#ff8c1a",

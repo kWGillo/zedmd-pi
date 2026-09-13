@@ -1422,6 +1422,30 @@ Storico:
        push porta piu\' versioni insieme -- un commit solo, una release sola, e
        nessun tag intermedio, che punterebbe comunque allo stato finale e
        sarebbe una bugia scaricabile.
+  6.9  **Quattro segnalazioni dal campo, e tre erano comandi che mentivano.**
+       Il cursore della luminosita' restava manovrabile durante il Night
+       mode, dove la luminosita' applicata e' quella notturna: si muoveva,
+       non cambiava niente, e faceva pensare che il pannello fosse guasto.
+       Adesso e\' disabilitato nella pagina e dichiarato **non disponibile**
+       in Home Assistant, con due condizioni invece di una; e un comando che
+       arrivi lo stesso viene rifiutato invece che accettato e ignorato.
+       Mancava un modo di spegnere il pannello: chi voleva il buio doveva
+       staccare la spina a un Raspberry acceso. Adesso c\'e\' un interruttore
+       che spegne **solo il vetro** -- il radar registra, le notifiche
+       arrivano, la pagina web risponde -- e che vince su tutte le eccezioni
+       di Sleep mode, perche\' se sono io ad aver premuto "spegni" quelle
+       cortesie diventano un pannello che non si spegne.
+       Il Game Boy non compariva in Home Assistant: i giochi del pannello si
+       costruiscono dall\'elenco di `sources.giochi` e PyBoy non e\' li\'
+       dentro, e\' un runtime a se\'. Adesso c\'e\', e parte con la cartuccia
+       gia\' configurata.
+       E il totale dei voli registrati esce su MQTT, contato una volta sola e
+       poi tenuto a mente.
+       Sotto, senza ancora farsi vedere, c\'e\' `pianeti.py`: posizioni dei
+       pianeti e della Luna senza nessuna rete e senza dipendenze nuove,
+       verificate contro un\'effemeride indipendente su quattro anni e quattro
+       posti della Terra -- scarto massimo 2,8 primi d\'arco. E\' la base della
+       finestra del cielo.
 """
 
-__version__ = "6.8.1"
+__version__ = "6.9"

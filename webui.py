@@ -1493,8 +1493,38 @@ def create_app(runtime):
 
     @app.route("/api/brightness", methods=["POST"])
     def api_brightness():
+        # Con Night mode attivo la luminosita' applicata e' quella notturna, e
+        # scrivere qui il valore diurno non cambierebbe niente sul vetro. La
+        # pagina disabilita gia' il cursore; questa riga serve per chi arriva
+        # lo stesso -- una scheda rimasta aperta da prima della mezzanotte,
+        # per esempio. Meglio un rifiuto dichiarato di un'obbedienza finta.
+        if getattr(runtime, "night", False):
+            return jsonify(ok=False, motivo="night",
+                           value=cfg["display"]["night_brightness"])
         value = runtime.set_brightness(int(request.form.get("value", 50)))
         return jsonify(ok=True, value=value)
+
+    @app.route("/api/display/power", methods=["POST"])
+    def api_display_power():
+        """Spegne o accende il pannello, lasciando acceso tutto il resto.
+
+        Non spegne il Raspberry: il radar continua a registrare, le notifiche
+        arrivano, questa pagina risponde. E' solo il vetro che diventa nero, e
+        si torna indietro dallo stesso pulsante o da Home Assistant.
+        """
+        acceso = request.form.get("acceso") == "1"
+        cfg["display"]["off"] = not acceso
+        dmdconf.save()
+        # Il ciclo di rendering rilegge la configurazione una volta al secondo:
+        # non serve svegliarlo, serve solo che al risveglio ridisegni tutto,
+        # perche' l'immagine sul pannello non e' piu' quella che credeva.
+        runtime._ridisegna()
+        runtime._applied_brightness = None
+        try:
+            runtime.hass.publish_state(force=True)
+        except Exception as exc:      # noqa: BLE001
+            print("[webui] stato display non pubblicato: %s" % exc)
+        return redirect(request.form.get("next") or url_for("page_settings"))
 
     @app.route("/api/display", methods=["POST"])
     def api_display():

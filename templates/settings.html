@@ -7,20 +7,40 @@
 <div class="banner">{{ result }}</div>
 {% endif %}
 
-{% if sleeping or night %}
+{% if cfg.display.off or sleeping or night %}
 <div class="banner">
-  {% if sleeping %}{{ t('banner.sleep') }}{% else %}{{ t('banner.night') }}{% endif %}
+  {% if cfg.display.off %}{{ t('banner.off') }}
+  {% elif sleeping %}{{ t('banner.sleep') }}
+  {% else %}{{ t('banner.night') }}{% endif %}
 </div>
 {% endif %}
+
+<section class="card">
+  <h2>{{ t('settings.power') }}</h2>
+  <p>{{ t('settings.power.on') if not cfg.display.off else t('settings.power.off') }}</p>
+  <form method="post" action="{{ url_for('api_display_power') }}">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <input type="hidden" name="acceso" value="{{ '0' if not cfg.display.off else '1' }}">
+    <button type="submit" class="{{ 'ghost' if not cfg.display.off else '' }}">
+      {{ t('settings.power.turn_off') if not cfg.display.off else t('settings.power.turn_on') }}
+    </button>
+  </form>
+  <p class="hint">{{ t('settings.power.hint') }}</p>
+</section>
 
 <section class="card">
   <h2>{{ t('settings.brightness') }}</h2>
   <div class="slider-row">
     <input type="range" id="brightness" min="0" max="100" step="1"
-           value="{{ cfg.display.brightness }}">
+           value="{{ cfg.display.brightness }}"
+           {{ 'disabled' if night }}>
     <output id="brightness-value">{{ cfg.display.brightness }}%</output>
   </div>
+  {% if night %}
+  <p class="hint">{{ t('settings.brightness.night', valore=cfg.display.night_brightness) }}</p>
+  {% else %}
   <p class="hint">{{ t('settings.brightness.hint') }}</p>
+  {% endif %}
 </section>
 
 <section class="card">

@@ -2,6 +2,73 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [6.9]
+
+- **Il cursore della luminosità non mente più durante il Night mode.** Con
+  Night mode attivo il pannello usa la luminosità notturna, ma il cursore
+  principale restava manovrabile: si muoveva, non cambiava niente, e faceva
+  pensare che il pannello fosse guasto. Un comando che accetta e non agisce è
+  peggio di un comando assente, perché non dà nemmeno un errore da cercare.
+
+  Adesso nella pagina è disabilitato per la durata della fascia notturna, e
+  dice il perché e quanto vale la luminosità in uso. In Home Assistant
+  l'entità si dichiara **non disponibile**, con due condizioni invece di una
+  (`availability_mode: all`): il DMD acceso *e* il Night mode spento. E un
+  comando che arrivasse lo stesso — un'automazione che pubblica sul topic —
+  viene rifiutato con una riga nel registro, invece di essere accettato e
+  ignorato.
+
+- **Un interruttore per spegnere il pannello.** Mancava del tutto: chi voleva
+  il buio doveva staccare la spina a un Raspberry acceso, che è il modo
+  classico di rovinare la scheda SD. Spegne **solo il vetro**: il radar
+  continua a registrare, le notifiche arrivano, la pagina web risponde.
+
+  Vince su tutte le eccezioni di Sleep mode. Una partita aperta impedisce a
+  Sleep mode di spegnere il pannello in faccia a chi sta giocando — giusto —
+  ma se sono io ad aver premuto «spegni», quella cortesia diventerebbe un
+  pannello che non si spegne e non si capisce perché. E resta spento anche
+  dopo un riavvio del servizio: uno spegnimento che si annulla da solo
+  aggiornando il DMD non sarebbe uno spegnimento.
+
+  In Home Assistant è un interruttore che si chiama **Display**, e ON vuol
+  dire acceso. La configurazione dentro dice `off`, perché le impostazioni si
+  scrivono come eccezioni, ma nessuno accetterebbe un interruttore chiamato
+  «Display spento» da tenere OFF.
+
+- **Il Game Boy compare in Home Assistant.** Doom e i giochi scritti per il
+  pannello avevano il loro interruttore, PyBoy no — ed era rimasto fuori per
+  una ragione che si vede solo guardando da dove arrivano gli altri: i giochi
+  del pannello si costruiscono dall'elenco di `sources.giochi`, e PyBoy non è
+  in quell'elenco, è un runtime a sé con il suo processo e le sue cartucce.
+  Acceso da Home Assistant parte con la ROM già configurata, come premere il
+  tasto della console senza cambiare cartuccia.
+
+- **Il totale dei voli registrati esce su MQTT.** `Aerei oggi` risponde a «che
+  giornata è stata», questo a «quanti ne ho visti da quando l'ho acceso». Si
+  conta il registro una volta sola e poi si tiene il numero a mente: il ponte
+  pubblica ogni due secondi, e rileggere migliaia di righe per un valore che
+  cambia due volte all'ora sarebbe stato lo stesso spreco silenzioso già
+  evitato per il conteggio di oggi.
+
+- **`pianeti.py`: dove sono i pianeti e la Luna, senza rete.** Non fa ancora
+  niente di visibile — è la base della finestra del cielo — ma è completo e
+  verificato. Posizioni dalla tabella JPL degli elementi approssimati, Luna
+  con la serie di Meeus, magnitudini con le formule classiche. Nessuna
+  dipendenza nuova: solo `math`, perché l'aggiornamento via rete non esegue
+  `install.sh`.
+
+  Verificato contro `pyephem` — effemeridi complete, scritte da altri — su
+  quattro anni, quattro posti della Terra e quattro ore del giorno: lo scarto
+  massimo è di **2,8 primi d'arco** per i pianeti e **1,4** per la Luna, un
+  ventesimo del diametro della Luna piena.
+
+  E il confronto ha trovato subito un difetto che il ragionamento non aveva
+  visto: gli elementi dei pianeti sono riferiti all'equinozio J2000, la serie
+  lunare a quello **della data**. Applicare la precessione a entrambi sembra
+  coerente ed è sbagliato per la Luna di mezzo grado — una luna piena intera,
+  scritta sul pannello con la stessa sicurezza. Nella suite il difetto viene
+  rimesso apposta, per vedere la prova diventare rossa.
+
 ## [6.8.1]
 
 - **La procedura di pubblicazione, con dentro anche gli inciampi.**

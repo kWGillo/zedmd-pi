@@ -5,9 +5,11 @@
 
 {% if result %}<div class="banner">{{ result }}</div>{% endif %}
 
-{% if sleeping or night %}
+{% if cfg.display.off or sleeping or night %}
 <div class="banner">
-  {% if sleeping %}{{ t('banner.sleep') }}{% else %}{{ t('banner.night') }}{% endif %}
+  {% if cfg.display.off %}{{ t('banner.off') }}
+  {% elif sleeping %}{{ t('banner.sleep') }}
+  {% else %}{{ t('banner.night') }}{% endif %}
 </div>
 {% endif %}
 

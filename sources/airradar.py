@@ -208,6 +208,11 @@ class AirRadarSource(Source):
         self._oggi = 0
         self._ultimo_volo = {}
         self._routes_missing = 0
+        # Il totale storico si conta **una volta sola**, leggendo il registro,
+        # e poi si tiene a mente incrementandolo. `None` vuol dire "non ancora
+        # contato": succede all'avvio e dopo che il registro e' stato azzerato
+        # o messo da parte, e il conto riparte dal file vero.
+        self._totale = None
 
     # ------------------------------------------------------------------ ciclo di vita
 
@@ -476,17 +481,39 @@ class AirRadarSource(Source):
     def clear_log(self):
         try:
             os.remove(self.log_path())
+            self._totale = None
             return True
         except OSError:
             return False
 
+    def totale(self):
+        """Quanti voli ci sono nel registro, in tutto.
+
+        Si legge il file una volta sola e poi si tiene il numero a mente. Il
+        ponte MQTT pubblica ogni due secondi: contare a ogni giro le righe di
+        un file che ne ha migliaia, per un numero che cambia due volte
+        all'ora, sarebbe uno spreco silenzioso -- lo stesso ragionamento gia'
+        fatto per il conteggio di oggi.
+
+        E' il totale del registro **corrente**. Quando le colonne cambiano, il
+        registro precedente viene messo da parte con la data nel nome e questo
+        riparte da zero: i dati non si perdono, ma non sono piu' in questo
+        conto. E' la stessa cosa che dice la pagina Radar, quindi i due numeri
+        non si contraddicono mai.
+        """
+        if self._totale is None:
+            self._totale = int(self.log_info().get("rows") or 0)
+        return self._totale
+
     def _conta(self, plane):
-        """Tiene il conto di oggi e ricorda l'ultimo passato."""
+        """Tiene il conto di oggi e del totale, e ricorda l'ultimo passato."""
         oggi = time.strftime("%Y-%m-%d")
         if oggi != self._giorno:
             self._giorno = oggi
             self._oggi = 0
         self._oggi += 1
+        if self._totale is not None:
+            self._totale += 1
         self._ultimo_volo = {
             "volo": plane.get("flight") or plane.get("hex") or "",
             "tipo": plane.get("type") or "",
@@ -505,9 +532,9 @@ class AirRadarSource(Source):
         """
         if time.strftime("%Y-%m-%d") != self._giorno:
             return {"oggi": 0, "nel_raggio": self._seen,
-                    "ultimo": self._ultimo_volo}
+                    "ultimo": self._ultimo_volo, "totale": self.totale()}
         return {"oggi": self._oggi, "nel_raggio": self._seen,
-                "ultimo": self._ultimo_volo}
+                "ultimo": self._ultimo_volo, "totale": self.totale()}
 
     def _ricorda_vicino(self, row, distance):
         """Un aereo appena fuori dal raggio: si tiene, non si mostra.
@@ -562,6 +589,9 @@ class AirRadarSource(Source):
                 except OSError:
                     pass
                 is_new = True
+                # Il registro riparte da zero: il totale a mente non vale piu'
+                # e si ricontera' dal file nuovo alla prima richiesta.
+                self._totale = None
             with open(path, "a", newline="") as handle:
                 writer = csv.writer(handle)
                 if is_new:

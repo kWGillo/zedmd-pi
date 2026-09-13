@@ -346,6 +346,7 @@ class Runtime:
         self._blank_shown = False
         self._applied_brightness = None
         self.sleeping = False
+        self.display_off = bool((self.cfg.get("display") or {}).get("off"))
         self.night = False
         # Impronta dell'ultimo frame mandato al pannello, e due contatori per
         # sapere quanto lavoro ci stiamo risparmiando. Vedi _cambiato().
@@ -637,10 +638,19 @@ class Runtime:
         if self.arbiter.holding():
             sleeping = False
 
+        # Lo spegnimento a mano viene **dopo** tutte le eccezioni, e vince su
+        # tutte: se qualcuno ha deciso adesso che il pannello deve stare
+        # spento, non lo risveglia ne' un frame da Batocera ne' una partita
+        # aperta. Sleep mode e' un orario, questo e' una decisione.
+        spento = bool(display.get("off"))
+        if spento:
+            sleeping = True
+
         night = display["night_enabled"] and in_window(
             minute, parse_hhmm(display["night_start"]), parse_hhmm(display["night_end"]))
 
         self.sleeping = sleeping
+        self.display_off = spento
         self.night = night
 
         target = display["night_brightness"] if night else display["brightness"]
