@@ -27,7 +27,10 @@ from .satelliti import SatellitiSource
 
 from .notifiche import NotificheSource
 
+from .meteo import MeteoSource
+
 __all__ = [
+    "MeteoSource",
     "NotificheSource", "SatellitiSource", "Source", "ClockSource", "MediaPlayerSource", "ZeDMDSource", "AirRadarSource",
     "BirthdaysSource", "PreviewSource", "HOLD_SECONDS",
     "DoomSource", "DOOM_TASTI", "DOOM_PULSANTI", "tastiere", "controlla_wad",

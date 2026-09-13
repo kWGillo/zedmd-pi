@@ -159,7 +159,7 @@ git add -A
 ```
 
 ```bash
-git commit -m "6.8.1: aerei e satelliti in Home Assistant; procedura di pubblicazione completata"
+git commit -m "7.0: il meteo, con bollettino, aggiornamenti e allerte; la posizione passa alle Impostazioni"
 ```
 
 Cambia il messaggio a ogni versione: numero della versione e una riga su cosa
@@ -250,6 +250,14 @@ sensori e basta. Adesso Home Assistant può anche parlargli — tre entità
 cielo. Non è una funzione in più nell'elenco: è la differenza fra un
 dispositivo che si osserva e uno che si usa.
 
+Con la 7.0 vale la pena nominare anche il **meteo**, per lo stesso motivo: un
+oggetto da salotto che al mattino racconta la giornata e avvisa di un'allerta
+non è più soltanto un DMD con delle funzioni in più.
+
+```bash
+gh repo edit kWGillo/zedmd-pi --description "ZeDMD-compatible network DMD for Raspberry Pi — drives S-PWM HUB75 panels (FM6373 and similar) that ZeDMD cannot, and between games it stays a living-room display: clock, weather and severe-weather alerts, flight radar, ISS pass alerts, now playing, calendar, Doom and Game Boy, with two-way Home Assistant integration over MQTT"
+```
+
 ### Gli argomenti (*topics*)
 
 Sono le etichette che decidono se qualcuno che cerca «hub75 raspberry pi» ti
@@ -260,8 +268,13 @@ c'erano già non fa danno, e per toglierne uno serve `--remove-topic`.
 gh repo edit kWGillo/zedmd-pi --add-topic batocera,dmd,hub75,led-matrix,pinball,raspberry-pi,virtual-pinball,zedmd,fm6373,shairport-sync,pyboy,doomgeneric,home-assistant,airplay,iss,satellite-tracking,sgp4,mqtt,adsb
 ```
 
-`mqtt` e `adsb` sono arrivati con la 6.8.1: sono le due parole con cui si
-cerca davvero questa roba, e prima non c'erano.
+`mqtt` e `adsb` sono arrivati con la 6.8.1, `weather` e `meteoalarm` con la
+7.0: sono le parole con cui si cerca davvero questa roba, e prima non
+c'erano.
+
+```bash
+gh repo edit kWGillo/zedmd-pi --add-topic weather,meteoalarm,open-meteo
+```
 
 ### La *Release*
 
@@ -274,10 +287,15 @@ oggi». Il testo delle note lo prendi da `CHANGELOG.md`, in cima.
 in quel momento.
 
 ```bash
-gh release create v6.8.1 --title "6.8.1" --notes-file <(sed -n '/^## \[6.8.1\]/,/^## \[6.7\]/p' CHANGELOG.md | sed '$d')
+gh release create v7.0 --title "7.0" --notes-file <(sed -n '/^## \[7.0\]/,/^## \[6.7\]/p' CHANGELOG.md | sed '$d')
 ```
 
-Se il tag esiste già, `gh release edit v6.8.1 --notes-file ...`.
+Se il tag esiste già, `gh release edit v7.0 --notes-file ...`.
+
+> L'intervallo arriva fino alla **6.7** e non alla 6.9, e non è un errore: su
+> GitHub l'ultima pubblicata è la 6.7, quindi questo push porta 6.8, 6.8.1, 6.9
+> e 7.0 tutte insieme. La regola è al paragrafo qui sotto; il numero da cui
+> partire lo dice il comando `curl` di fine pagina, non la memoria.
 
 ### Quando si pubblicano più versioni insieme
 

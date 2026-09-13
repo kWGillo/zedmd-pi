@@ -460,6 +460,24 @@ STRINGS = {
         "({valore}%), so this slider would do nothing and is disabled. "
         "The night brightness is set below."),
 
+    "settings.position": ("Posizione del DMD", "Where the DMD is"),
+    "settings.position.hint": (
+        "Una posizione sola per tre servizi: il radar la usa per sapere quali "
+        "aerei sono vicini, i satelliti per calcolare i passaggi, il meteo per "
+        "le previsioni. Lasciarla a zero li tiene tutti e tre in silenzio. "
+        "Fino alla 6.9 stava nella pagina Radar, dove sembrava una preferenza "
+        "del radar.",
+        "One position for three services: the radar uses it to know which "
+        "aircraft are nearby, the satellites to compute passes, the weather "
+        "for the forecast. Leaving it at zero keeps all three silent. Until "
+        "6.9 it lived on the Radar page, where it looked like a radar "
+        "setting."),
+    "radar.coords.moved": (
+        "Le coordinate sono passate in Impostazioni, perché le usano anche i "
+        "satelliti e il meteo. Adesso sono %(lat)s, %(lon)s.",
+        "The coordinates moved to Settings, because the satellites and the "
+        "weather use them too. They are now %(lat)s, %(lon)s."),
+
     "settings.power": ("Pannello", "Panel"),
     "settings.power.on": ("Il pannello è acceso", "The panel is on"),
     "settings.power.off": ("Il pannello è spento", "The panel is off"),
@@ -1808,6 +1826,61 @@ STRINGS = {
         "e durante il passaggio mostra dove guardare.",
         "Warns ten minutes before the Space Station flies over, and during "
         "the pass shows where to look."),
+    # ---------------------------------------------------------------- meteo
+    "services.meteo": ("Meteo", "Weather"),
+    "services.desc.meteo": (
+        "Al mattino il bollettino della giornata — massima, minima, umidità — "
+        "e poi un aggiornamento ogni poche ore. Usa le coordinate del radar.",
+        "A morning bulletin for the day — high, low, humidity — then an "
+        "update every few hours. It uses the radar coordinates."),
+    "meteo.status.ok": (
+        "%(temperatura)s %(descrizione)s · oggi %(massima)s / %(minima)s · "
+        "dato di %(minuti)d minuti fa",
+        "%(temperatura)s %(descrizione)s · today %(massima)s / %(minima)s · "
+        "data from %(minuti)d minutes ago"),
+    "meteo.status.waiting": ("in attesa della prima previsione",
+                             "waiting for the first forecast"),
+    "meteo.status.nopos": (
+        "nessuna posizione: si configura nella pagina Radar",
+        "no position set: configure it on the Radar page"),
+    "meteo.status.error": ("previsione non aggiornata: %(motivo)s",
+                           "forecast not updated: %(motivo)s"),
+    "meteo.title": ("Meteo", "Weather"),
+    "meteo.hour": ("Ora del bollettino del mattino",
+                   "Morning bulletin hour"),
+    "meteo.every": ("Aggiornamento ogni (ore)", "Update every (hours)"),
+    "meteo.duration.bulletin": ("Durata del bollettino (secondi)",
+                                "Bulletin duration (seconds)"),
+    "meteo.duration.update": ("Durata dell'aggiornamento (secondi)",
+                              "Update duration (seconds)"),
+    "meteo.test": ("Mostra adesso sul pannello", "Show on the panel now"),
+    "meteo.test.bulletin": ("Prova il bollettino", "Try the bulletin"),
+    "meteo.source": (
+        "Le previsioni arrivano da Open-Meteo, che non chiede nessuna chiave: "
+        "non c'è nessun segreto da custodire sul Raspberry. La posizione è "
+        "quella della pagina Radar e non esce mai dal Pi se non come "
+        "coordinate nella richiesta.",
+        "Forecasts come from Open-Meteo, which needs no API key: there is no "
+        "secret to keep on the Raspberry. The position is the one on the "
+        "Radar page, and it never leaves the Pi except as coordinates in the "
+        "request."),
+    "meteo.region": ("Regione per le allerte", "Region for alerts"),
+    "meteo.region.none": ("— nessuna, niente allerte —",
+                          "— none, no alerts —"),
+    "meteo.alerts": ("Mostra le allerte", "Show alerts"),
+    "meteo.test.alert": ("Prova l'allerta", "Try the alert"),
+    "meteo.alert.source": (
+        "Le allerte arrivano da MeteoAlarm, che per l'Italia raccoglie quelle "
+        "della Protezione Civile. Senza una regione scelta non se ne mostra "
+        "nessuna: il feed copre il paese intero, e l'allerta di un'altra "
+        "regione non è un'approssimazione, è un allarme falso.",
+        "Alerts come from MeteoAlarm, which for Italy collects the Civil "
+        "Protection warnings. With no region selected none are shown: the "
+        "feed covers the whole country, and another region's warning is not "
+        "an approximation, it is a false alarm."),
+    "meteo.status.alert": ("allerta %(livello)s: %(evento)s",
+                           "%(livello)s alert: %(evento)s"),
+
     "nav.rete": ("Rete", "Network"),
     "rete.title": ("Rete wifi", "Wi-Fi network"),
     "rete.current": ("Collegamento attuale", "Current connection"),

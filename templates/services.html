@@ -103,6 +103,35 @@
     <button type="submit">{{ t('notifiche.prova') }}</button>
   </form>
   {% endif %}
+  {# Il meteo ha le sue due impostazioni qui e non in una pagina a parte: sono
+     due numeri, e una pagina intera per due numeri si dimentica di esistere. #}
+  {% if service.key == 'meteo' %}
+  <form method="post" action="{{ url_for('api_meteo') }}" class="inline">
+    <label for="ora_bollettino">{{ t('meteo.hour') }}</label>
+    <input type="number" id="ora_bollettino" name="ora_bollettino" min="0" max="23"
+           value="{{ cfg.meteo.ora_bollettino }}">
+    <label for="ogni_ore">{{ t('meteo.every') }}</label>
+    <input type="number" id="ogni_ore" name="ogni_ore" min="1" max="24"
+           value="{{ cfg.meteo.ogni_ore }}">
+    <label for="regione">{{ t('meteo.region') }}</label>
+    <select id="regione" name="regione">
+      <option value="" {{ 'selected' if not cfg.meteo.regione }}>{{ t('meteo.region.none') }}</option>
+      {% for nome in regioni %}
+      <option value="{{ nome }}" {{ 'selected' if cfg.meteo.regione == nome }}>{{ nome }}</option>
+      {% endfor %}
+    </select>
+    <label class="check"><input type="checkbox" name="allerte"
+           {{ 'checked' if cfg.meteo.allerte }}> {{ t('meteo.alerts') }}</label>
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+  <form method="post" action="{{ url_for('api_meteo_prova') }}" class="inline">
+    <button type="submit" name="modo" value="aggiornamento">{{ t('meteo.test') }}</button>
+    <button type="submit" name="modo" value="bollettino" class="ghost">{{ t('meteo.test.bulletin') }}</button>
+    <button type="submit" name="modo" value="allerta" class="ghost">{{ t('meteo.test.alert') }}</button>
+  </form>
+  <p class="hint">{{ t('meteo.source') }}</p>
+  <p class="hint">{{ t('meteo.alert.source') }}</p>
+  {% endif %}
   {% if service.status %}<p class="status">{{ service.status }}</p>{% endif %}
   {% if not service.ready %}
   <p class="badge">{{ t('services.soon') }}</p>

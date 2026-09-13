@@ -32,7 +32,8 @@ import suoni
 from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      CalendarioSource, ClockSource, DoomSource, GameBoySource,
-                     GiochiSource, MediaPlayerSource, NowPlayingSource,
+                     GiochiSource, MediaPlayerSource, MeteoSource,
+                     NowPlayingSource,
                      NotificheSource, PreviewSource, SatellitiSource,
                      ScadenzeSource,
                      TelecameraSource,
@@ -230,6 +231,10 @@ class Runtime:
         self.notifiche = NotificheSource(self.cfg, self.display.width,
                                          self.display.height)
         self.notifiche.arbiter = self.arbiter
+        # Il meteo. Priorita' 54, sotto il Rolling Banner: fra due cose non
+        # urgenti ha la precedenza quella che una persona ha scritto apposta.
+        self.meteo = MeteoSource(self.cfg, self.display.width,
+                                 self.display.height)
         # Doom prende e restituisce il pannello da solo, quindi conosce
         # l'arbitro: e' l'unica sorgente che lo fa. Non e' un servizio e non
         # compare fra gli interruttori — `enabled` resta False per sempre — e
@@ -300,6 +305,7 @@ class Runtime:
 
         for source in (self.zedmd, self.preview, self.notifiche,
                        self.satelliti, self.radar,
+                       self.meteo,
                        self.player,
                        self.birthdays, self.scadenze, self.calendario,
                        self.banner, self.telecamera, self.media,

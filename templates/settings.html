@@ -16,6 +16,24 @@
 {% endif %}
 
 <section class="card">
+  <h2>{{ t('settings.position') }}</h2>
+  <form method="post" action="{{ url_for('api_posizione') }}">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <div class="row2">
+      <div><label for="latitude">{{ t('radar.lat') }}</label>
+        <input type="text" id="latitude" name="latitude"
+               value="{{ cfg.posizione.latitude }}"></div>
+      <div><label for="longitude">{{ t('radar.lon') }}</label>
+        <input type="text" id="longitude" name="longitude"
+               value="{{ cfg.posizione.longitude }}"></div>
+    </div>
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+  <p class="hint">{{ t('settings.position.hint') }}</p>
+  <p class="hint">{{ t('radar.coords.hint', path='/etc/dmd/config.json') }}</p>
+</section>
+
+<section class="card">
   <h2>{{ t('settings.power') }}</h2>
   <p>{{ t('settings.power.on') if not cfg.display.off else t('settings.power.off') }}</p>
   <form method="post" action="{{ url_for('api_display_power') }}">

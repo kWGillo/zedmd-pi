@@ -1,4 +1,4 @@
-# DMD Controller 6.9
+# DMD Controller 7.0
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -56,6 +56,15 @@ un interruttore anche in Home Assistant.
   ogni altra sorgente, `allarme` si prende il pannello anche a metà partita.
   La politica — quando parlare, quando tacere, con che parole — sta in Home
   Assistant, dove stanno già le automazioni.
+- **Meteo** — al mattino il bollettino della giornata, poi un aggiornamento
+  ogni poche ore. Massima, minima, umidità, probabilità di pioggia e un'icona
+  disegnata pixel per pixel. Le previsioni arrivano da Open-Meteo, che non
+  chiede nessuna chiave: non c'è nessun segreto da custodire sul Raspberry. E
+  le **allerte** di MeteoAlarm, che per l'Italia raccoglie quelle della
+  Protezione Civile: l'avviso prende tutto il pannello, compare quando arriva e
+  poi resta come una tacca colorata nell'angolo. Senza una regione scelta non
+  se ne mostra nessuna — l'allerta di un'altra regione non è
+  un'approssimazione, è un allarme falso.
 - **Funcam** — una webcam USB sul pannello, ridotta a quello che un computer
   di quarant'anni fa sapeva mostrare. Il servizio **arma** e basta: la ripresa
   parte da un pulsante fisico o dai comandi della pagina, mai dal solo
@@ -152,6 +161,22 @@ in cielo:
 L'orario del passaggio è un istante vero, quindi Home Assistant scrive «fra
 due ore» da solo; negli attributi c'è **l'elenco completo delle ventiquattro
 ore**, con durata, direzione, elevazione massima e visibilità di ciascuno.
+
+Dalla 7.0 c'è anche il meteo — che **non** è un doppione di una stazione in
+giardino: quella misura un punto, questo prevede le prossime ore, ed è su una
+previsione che si costruisce un'automazione come chiudere la tapparella *prima*
+del temporale:
+
+| Entità | Contenuto |
+|---|---|
+| `sensor…meteo_temperatura` | la temperatura adesso |
+| `sensor…meteo_umidita` | l'umidità adesso |
+| `sensor…meteo_massima` / `…meteo_minima` | la massima e la minima previste per oggi |
+| `sensor…meteo_condizione` | che tempo fa, a parole, con tutto il resto negli attributi |
+| `sensor…meteo_allerta` | il livello dell'allerta — `giallo`, `arancione`, `rosso` — con zona e orari negli attributi |
+
+Lo stato dell'allerta è il **livello** e non il testo, perché è la parola su
+cui si scrive una condizione in un'automazione ed è normalizzata.
 
 Dalla 6.9 si comandano da lì anche il pannello e il Game Boy:
 
@@ -629,7 +654,8 @@ le tappe.
 | 6.7 | Il raggio del radar era 1,85 km invece dei 3 dichiarati — il provider troncava le miglia nautiche. Trovato nei dati del registro, non nel codice. E un margine di cortesia che elenca gli aerei passati appena fuori |
 | 6.8 | Aerei e satelliti escono dal pannello: cinque entità in Home Assistant, con l'elenco dei passaggi della Stazione delle prossime ventiquattro ore |
 | 6.8.1 | La procedura di pubblicazione dice anche le due cose che erano costate tempo: i cinque minuti di cache prima che l'OTA veda la versione nuova, e come si pubblicano più versioni in un push solo |
-| **6.9** | **Tre comandi che mentivano, corretti: il cursore della luminosità durante il Night mode, lo spegnimento del pannello che non esisteva, il Game Boy che non compariva in Home Assistant. E il totale dei voli su MQTT** |
+| 6.9 | Tre comandi che mentivano, corretti: il cursore della luminosità durante il Night mode, lo spegnimento del pannello che non esisteva, il Game Boy che non compariva in Home Assistant. E il totale dei voli su MQTT |
+| **7.0** | **Il meteo: bollettino della giornata al mattino, aggiornamento ogni poche ore, icone disegnate pixel per pixel, e le allerte di MeteoAlarm. La posizione passa dal Radar alle Impostazioni, perché la usano in tre** |
 
 ---
 

@@ -289,9 +289,25 @@ DEFAULTS = {
         "session_timeout": 300,
     },
 
+    # Dove sta questo DMD. Una posizione sola per tutto il progetto: la usano
+    # il radar, i satelliti e il meteo, e finche' e' stata una voce dentro
+    # `air_radar` sembrava una preferenza del radar -- chi accendeva i
+    # satelliti andava a cercarla nella pagina sbagliata.
+    #
+    # Nessuna coordinata preimpostata, mai. Il valore vero vive soltanto qui,
+    # nella configurazione locale, e non esiste da nessuna parte nel codice
+    # distribuito. Zero-zero sta in mezzo all'Atlantico ed e' il modo in cui il
+    # progetto dice "nessuno l'ha ancora messa": ogni servizio che ne ha
+    # bisogno se ne accorge e tace invece di mostrare il golfo di Guinea.
+    "posizione": {
+        "latitude": 0.0,
+        "longitude": 0.0,
+    },
+
     "air_radar": {
-        # Nessuna posizione preimpostata: va indicata dall'utente nella web UI.
-        # Il servizio non interroga nulla finche' le coordinate sono a zero.
+        # Le coordinate **non** stanno piu' qui: vedi `posizione`. Le due
+        # chiavi restano, a zero, perche' una configurazione salvata da una
+        # versione precedente le contiene e la migrazione le legge da li'.
         "latitude": 0.0,
         "longitude": 0.0,
         "radius_km": 3.0,
@@ -535,6 +551,28 @@ DEFAULTS = {
         # qualcosa, questa sorgente resta muta per sempre. Si accende quando
         # dall'altra parte c'e' qualcuno che parla.
         "notifiche": False,
+        # Come i satelliti: senza coordinate non ha niente da dire, e le
+        # coordinate non le mettiamo noi.
+        "meteo": False,
+    },
+    "meteo": {
+        # L'ora del bollettino del mattino, quello che racconta la giornata.
+        # Sette e' l'ora della colazione; chi si alza alle cinque lo sposta.
+        "ora_bollettino": 7,
+        # Ogni quante ore l'aggiornamento breve. Quattro vuol dire cinque o sei
+        # finestre al giorno: abbastanza da essere utile, poche abbastanza da
+        # continuare a guardarle. Un meteo sempre acceso diventa sfondo.
+        "ogni_ore": 4,
+        "durata_bollettino": 22,
+        "durata_aggiornamento": 12,
+        "durata_allerta": 25,
+        # Le allerte di MeteoAlarm. Il feed copre un paese intero e divide per
+        # regione: senza regione scelta non si mostra **niente**, e non tutto.
+        # Far comparire l'allerta della Sicilia a chi sta in Piemonte non e'
+        # un'approssimazione, e' un allarme falso.
+        "allerte": True,
+        "regione": "",
+        "paese": "italy",
     },
     "webcam": {
         # Vuoto = la prima telecamera collegata. Si scrive un /dev/videoN
@@ -685,6 +723,23 @@ def _migrate(raw):
         raw["webcam"]["stile"] = "colori"
         raw["webcam"].setdefault("livelli_colore", 2)
 
+    # 7.0: la posizione esce da `air_radar` e diventa una voce sua.
+    #
+    # Era una preferenza del radar quando il radar era l'unico a usarla. Poi
+    # sono arrivati i satelliti e il meteo, e chi accendeva i satelliti andava
+    # a cercare le coordinate nella pagina sbagliata -- o peggio, non le
+    # trovava e concludeva che il servizio fosse rotto.
+    #
+    # La migrazione copia e **non cancella**: le due chiavi vecchie restano
+    # dove sono, a disposizione di una configurazione che venisse riletta da
+    # una versione precedente dopo un ripristino. Una posizione persa vuol dire
+    # tre servizi muti e nessun messaggio che spieghi perche'.
+    vecchio = raw.get("air_radar") or {}
+    nuovo = raw.setdefault("posizione", {})
+    for chiave in ("latitude", "longitude"):
+        if not nuovo.get(chiave) and vecchio.get(chiave):
+            nuovo[chiave] = vecchio[chiave]
+
     # 1.9: le dieci caselle del Rolling banner devono esserci sempre, anche
     # in una configurazione salvata prima che la funzione esistesse.
     from sources.banner import normalize_list
@@ -739,6 +794,33 @@ def _migrate(raw):
         if os.path.exists(candidato):
             doom["wad"] = candidato
     return raw
+
+
+def posizione(cfg=None):
+    """Dove sta il DMD: (latitudine, longitudine), oppure None.
+
+    Un punto solo per tutto il progetto. `None` vuol dire "nessuno l'ha ancora
+    messa", e ogni servizio che ne ha bisogno la tratta come tale: il radar non
+    interroga, i satelliti non calcolano, il meteo non chiede. Zero-zero non e'
+    un posto, e' l'assenza di un posto -- e il golfo di Guinea non aiuta
+    nessuno a capire che manca una configurazione.
+
+    Legge dalla voce nuova e ricade su quella vecchia dentro `air_radar`: la
+    migrazione copia gia' all'avvio, ma questa funzione viene chiamata anche
+    con dizionari costruiti a mano nelle prove, che la migrazione non l'hanno
+    vista.
+    """
+    cfg = cfg if cfg is not None else load()
+    for sezione in ("posizione", "air_radar"):
+        dati = cfg.get(sezione) or {}
+        try:
+            lat = float(dati.get("latitude") or 0.0)
+            lon = float(dati.get("longitude") or 0.0)
+        except (TypeError, ValueError):
+            continue
+        if abs(lat) >= 0.01 or abs(lon) >= 0.01:
+            return lat, lon
+    return None
 
 
 def load():
@@ -823,6 +905,12 @@ def snapshot(include_position=True):
     import copy
     data = copy.deepcopy(load())
     if not include_position:
+        # Si azzerano **tutti e due** i posti in cui la posizione puo' stare:
+        # quello nuovo e quello vecchio lasciato dalla migrazione. Azzerarne
+        # uno solo darebbe un file che sembra ripulito e non lo e', che e'
+        # peggio di uno che non lo e' e si vede.
+        data["posizione"]["latitude"] = 0.0
+        data["posizione"]["longitude"] = 0.0
         data["air_radar"]["latitude"] = 0.0
         data["air_radar"]["longitude"] = 0.0
     if isinstance(data.get("mqtt"), dict):

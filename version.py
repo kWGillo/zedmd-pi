@@ -1446,6 +1446,46 @@ Storico:
        verificate contro un\'effemeride indipendente su quattro anni e quattro
        posti della Terra -- scarto massimo 2,8 primi d\'arco. E\' la base della
        finestra del cielo.
+  7.0  **Il meteo.** Due finestre, e la differenza non e\' la quantita\' di
+       dati ma a che domanda rispondono: al mattino il bollettino della
+       giornata -- massima, minima, umidita\', pioggia, alba e tramonto --
+       che risponde a "come mi vesto"; poi ogni poche ore un aggiornamento
+       con la temperatura di adesso, grande, che risponde a "adesso".
+       Non e\' sempre acceso, ed e\' la scelta che conta di piu\': un meteo
+       fisso sul pannello smette di essere guardato dopo due giorni, diventa
+       sfondo. E non prende mai il pannello a forza -- priorita\' 54, sotto
+       il banner e molto sotto il radar.
+       Le previsioni arrivano da Open-Meteo, che **non chiede nessuna
+       chiave**: non e\' una comodita\', e\' che non c\'e\' nessun segreto da
+       custodire sul Raspberry. La posizione e\' quella gia\' configurata nel
+       radar, e nel codice non ne esiste nessuna.
+       Le icone sono disegnate con cerchi e linee invece che caricate da
+       file: a trenta pixel un PNG scalato e\' una poltiglia. Sono meno dei
+       codici meteo, perche\' due icone identiche con due nomi diversi
+       sarebbero una bugia grafica.
+       Ci sono anche le **allerte**, e come si sia scelta la fonte vale quanto
+       la funzione: sulla carta le tre strade possibili erano tutte incerte --
+       MeteoAlarm risultava aver dismesso il feed, MeteoGate non dichiarava
+       l\'accesso libero, il repository del Dipartimento si definiva in fase di
+       caricamento. Invece di indovinare si e\' chiesto, con tre `curl` dal
+       Raspberry: il feed dato per morto risponde 200, l\'API per posizione no.
+       Nessuna delle due cose stava scritta da nessuna parte.
+       L\'avviso prende tutto il pannello e compare quando arriva, poi vive in
+       una tacca nell\'angolo: uno che ricompare ogni minuto smette di essere
+       un avviso in mezza giornata. La regione si sceglie a mano, e senza
+       regione non si mostra **niente** -- non tutto: l\'allerta di un\'altra
+       regione non e\' un\'approssimazione, e\' un allarme falso.
+       Corretti i **nomi lunghi dei satelliti**, che finivano sopra l\'arco del
+       passaggio: il troncamento a otto caratteri non era una misura, era una
+       speranza. Adesso si misura, si rimpicciolisce il corpo prima di
+       tagliare, e quando si taglia lo si dice con i puntini. Difetto vecchio
+       quanto la funzione, mai visto perche\' l\'unico nome mai comparso era
+       "ISS".
+       E la **posizione** esce dalla pagina Radar. La usano in tre -- radar,
+       satelliti e meteo -- e tenerla li\' la faceva sembrare una preferenza
+       del radar: chi accendeva i satelliti la cercava nella pagina sbagliata.
+       La migrazione copia e non cancella: una posizione persa in un
+       aggiornamento vuol dire tre servizi muti e nessuna spiegazione.
 """
 
-__version__ = "6.9"
+__version__ = "7.0"

@@ -33,6 +33,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`telecamera.it.md`](telecamera.it.md) · [PDF](DMD_telecamera.pdf) | Funcam: la webcam sul pannello con pochi colori, e il pulsante fisico sulla Bonnet |
 | [`satelliti.it.md`](satelliti.it.md) · [PDF](DMD_satelliti.pdf) | I passaggi della Stazione Spaziale: preavviso, l'arco del cielo, lo spegnimento in ombra, il registro |
 | [`notifiche.it.md`](notifiche.it.md) · [PDF](DMD_notifiche.pdf) | Le notifiche da Home Assistant: il topic, i tre livelli, lo script e le automazioni pronte |
+| [`meteo.it.md`](meteo.it.md) · [PDF](DMD_meteo.pdf) | Il bollettino del mattino e l'aggiornamento ogni poche ore, le icone disegnate, e perché l'allerta della Protezione Civile non c'è ancora |
 
 ## I giochi
 

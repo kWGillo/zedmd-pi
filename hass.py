@@ -56,6 +56,7 @@ SWITCHES = [
     ("webcam", "Funcam"),
     ("satelliti", "Satelliti"),
     ("notifiche", "Notifiche"),
+    ("meteo", "Meteo"),
 ]
 
 # Night mode e Sleep mode non sono servizi: sono modi del display, e stanno in
@@ -351,6 +352,43 @@ class HassBridge:
         })
         self._config("sensor", "aerei_totale", totale)
 
+        # Il meteo. Cinque valori, e nessuno di questi e' un doppione di quello
+        # che Home Assistant sa gia': chi ha una stazione meteo in giardino ha
+        # il dato **misurato** in un punto, questo e' quello **previsto** per le
+        # prossime ore, che e' la cosa su cui si costruiscono le automazioni --
+        # chiudere la tapparella prima del temporale, non dopo.
+        for chiave, etichetta, topic, extra in (
+                ("meteo_temperatura", "Temperatura", "adesso",
+                 {"device_class": "temperature", "unit_of_measurement": "°C",
+                  "state_class": "measurement"}),
+                ("meteo_umidita", "Umidità", "umidita",
+                 {"device_class": "humidity", "unit_of_measurement": "%",
+                  "state_class": "measurement"}),
+                ("meteo_massima", "Massima di oggi", "massima",
+                 {"device_class": "temperature", "unit_of_measurement": "°C"}),
+                ("meteo_minima", "Minima di oggi", "minima",
+                 {"device_class": "temperature", "unit_of_measurement": "°C"}),
+                ("meteo_condizione", "Condizione", "condizione",
+                 {"icon": "mdi:weather-partly-cloudy",
+                  "json_attributes_topic": "%s/meteo/dettaglio" % base}),
+                # L'allerta e' l'unica entita' meteo per cui valga la pena
+                # scrivere un'automazione che **fa** qualcosa invece di
+                # mostrare un numero: chiudere una tapparella, spegnere
+                # l'irrigazione, mandare un messaggio a chi e' fuori.
+                ("meteo_allerta", "Allerta", "allerta",
+                 {"icon": "mdi:weather-lightning-rainy",
+                  "json_attributes_topic": "%s/meteo/allerta_dettaglio" % base}),
+        ):
+            entity = dict(common)
+            entity.update({
+                "name": etichetta,
+                "unique_id": "%s_%s" % (node, chiave),
+                "object_id": "%s_%s" % (node, chiave),
+                "state_topic": "%s/meteo/%s" % (base, topic),
+            })
+            entity.update(extra)
+            self._config("sensor", chiave, entity)
+
         raggio = dict(common)
         raggio.update({
             "name": "Aerei nel raggio",
@@ -455,7 +493,10 @@ class HassBridge:
                                      [("sensor", k) for k in
                                       ("aerei_oggi", "aerei_totale",
                                        "aerei_raggio", "ultimo_aereo",
-                                       "iss_prossimo", "iss_quanti")] +
+                                       "iss_prossimo", "iss_quanti",
+                                       "meteo_temperatura", "meteo_umidita",
+                                       "meteo_massima", "meteo_minima",
+                                       "meteo_condizione", "meteo_allerta")] +
                                      [("switch", key) for key, _ in SWITCHES] +
                                      [("switch", key) for key, _, _, _ in MODES] +
                                      [("switch", key) for key, _, _ in AZIONI] +
@@ -540,6 +581,34 @@ class HassBridge:
             self._send("%s/radar/ultimo" % base,
                        json.dumps(radar["ultimo"] or {}, ensure_ascii=False),
                        force)
+
+        try:
+            previsione = self.runtime.meteo.riepilogo()
+        except Exception:                       # noqa: BLE001
+            previsione = None
+        if previsione is not None:
+            for topic, chiave in (("adesso", "temperatura"),
+                                  ("umidita", "umidita"),
+                                  ("massima", "massima"),
+                                  ("minima", "minima")):
+                valore = previsione.get(chiave)
+                # `None` e non stringa vuota: e' la lezione della 6.1, pagata
+                # con cinquanta righe di registro in Home Assistant al giorno.
+                self._send("%s/meteo/%s" % (base, topic),
+                           NIENTE if valore is None else str(valore), force)
+            self._send("%s/meteo/condizione" % base,
+                       previsione.get("descrizione") or NIENTE, force)
+            self._send("%s/meteo/dettaglio" % base,
+                       json.dumps(previsione, ensure_ascii=False), force)
+            # Lo stato dell'allerta e' il **livello**, non il testo: e' la
+            # parola su cui si scrive una condizione in un'automazione, ed e'
+            # normalizzata. Il testo, la zona e gli orari stanno negli
+            # attributi, dove servono a chi legge e non a chi decide.
+            avviso = previsione.get("allerta")
+            self._send("%s/meteo/allerta" % base,
+                       (avviso or {}).get("livello") or NIENTE, force)
+            self._send("%s/meteo/allerta_dettaglio" % base,
+                       json.dumps(avviso or {}, ensure_ascii=False), force)
 
         try:
             passaggi = self.runtime.satelliti.riepilogo()

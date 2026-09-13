@@ -3,8 +3,9 @@
 
 {% block content %}
 
-{% if not cfg.air_radar.latitude and not cfg.air_radar.longitude %}
-<div class="banner">{{ t('radar.nocoords') }}</div>
+{% if not cfg.posizione.latitude and not cfg.posizione.longitude %}
+<div class="banner">{{ t('radar.nocoords') }}
+  <a href="{{ url_for('page_settings') }}">{{ t('nav.settings') }}</a> →</div>
 {% endif %}
 
 <section class="card">
@@ -30,13 +31,14 @@
   <h2>{{ t('radar.position') }}</h2>
   <form method="post" action="{{ url_for('api_radar') }}">
 
-    <div class="row2">
-      <div><label for="latitude">{{ t('radar.lat') }}</label>
-        <input type="text" id="latitude" name="latitude" value="{{ cfg.air_radar.latitude }}"></div>
-      <div><label for="longitude">{{ t('radar.lon') }}</label>
-        <input type="text" id="longitude" name="longitude" value="{{ cfg.air_radar.longitude }}"></div>
-    </div>
-    <p class="hint">{{ t('radar.coords.hint', path='/etc/dmd/config.json') }}</p>
+    {# Le coordinate non stanno piu' qui: le usano il radar, i satelliti e il
+       meteo, e tenerle in questa pagina le faceva sembrare una preferenza del
+       radar. Il collegamento resta, perche' e' qui che si continuera' a
+       cercarle per un po'. #}
+    <p class="hint">{{ t('radar.coords.moved',
+                          lat=cfg.posizione.latitude,
+                          lon=cfg.posizione.longitude) }}
+      <a href="{{ url_for('page_settings') }}">{{ t('nav.settings') }}</a> →</p>
 
     <div class="row3">
       <div><label for="radius_km">{{ t('radar.radius') }}</label>

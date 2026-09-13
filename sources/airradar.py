@@ -349,13 +349,18 @@ class AirRadarSource(Source):
 
     def _poll(self, cfg):
         """Interroga il provider scelto, con gli altri come riserva."""
-        lat = float(cfg["latitude"])
-        lon = float(cfg["longitude"])
-
+        # La posizione arriva dalla voce del progetto, non da quella del radar:
+        # dalla 7.0 la usano in tre -- radar, satelliti e meteo -- e tenerla
+        # dentro `air_radar` la faceva sembrare una preferenza di questa
+        # pagina. `cfg` qui e' gia' la sezione `air_radar`, quindi si risale
+        # alla configurazione intera.
+        import dmdconf
+        dove = dmdconf.posizione(self.cfg)
         # Coordinate non impostate: nessuna interrogazione, nessun dato inviato.
-        if abs(lat) < 0.0001 and abs(lon) < 0.0001:
+        if dove is None:
             self._status = ("status.radar.nocoords", {})
             return []
+        lat, lon = dove
         radius_km = max(0.5, float(cfg["radius_km"]))
         # **Il raggio chiesto al provider si arrotonda per eccesso a miglia
         # intere.** Non e' un vezzo: i provider ADS-B tagliano la distanza

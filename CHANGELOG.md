@@ -2,6 +2,154 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [7.0]
+
+- **Il meteo.** Due finestre, e la differenza non è la quantità di dati ma a
+  che domanda rispondono. Al mattino il **bollettino della giornata** —
+  massima, minima, umidità, probabilità di pioggia, alba e tramonto — che
+  risponde a *come mi vesto*. Poi ogni poche ore un **aggiornamento** con la
+  temperatura di adesso, grande, che risponde a *adesso*.
+
+  Non è sempre acceso, ed è la scelta che conta di più. Un pannello che mostra
+  il meteo tutto il giorno smette di essere guardato dopo due giorni: diventa
+  sfondo. Quattro o cinque finestre al giorno, invece, si leggono — la stessa
+  ragione per cui i Compleanni e le Scadenze parlano poco.
+
+  E non prende mai il pannello a forza: priorità 54, sotto il Rolling Banner e
+  molto sotto il radar. Il meteo non è mai urgente al punto da interrompere una
+  partita o il passaggio della Stazione. Una prova legge l'albero sintattico
+  del modulo per verificare che `hold_on` non ci sia — e che la sorgente non
+  conosca nemmeno l'arbitro, quindi non potrebbe prenderlo neanche volendo.
+
+- **Le previsioni arrivano da Open-Meteo, che non chiede nessuna chiave.** Non
+  è una comodità, è una proprietà di sicurezza: non c'è nessun segreto da
+  custodire sul Raspberry, niente da togliere dalla configurazione esportata,
+  niente che possa finire in una schermata o in un registro. Tutti gli altri
+  problemi di riservatezza di questo progetto si sono risolti *togliendo* cose
+  — le coordinate dal codice, la password dal file esportato, i token in un
+  file a parte. Qui non c'è proprio niente da togliere.
+
+  La posizione è quella già configurata nella pagina Radar. Se è a zero, il
+  meteo non chiede niente a nessuno e lo dice: zero-zero sta in mezzo
+  all'Atlantico, e il meteo del golfo di Guinea non aiuterebbe nessuno a capire
+  che manca una configurazione.
+
+- **Le icone sono disegnate, non caricate.** A una trentina di pixel un PNG
+  scalato diventa una poltiglia: le forme si riconoscono per i bordi, e i bordi
+  a trenta pixel sono due o tre pixel. Tredici icone fatte di cerchi, linee e
+  poligoni — e sono **meno dei codici meteo**, perché a quella dimensione la
+  differenza fra pioviggine moderata e intensa non si può disegnare, e due
+  icone identiche con due nomi diversi sarebbero una bugia grafica.
+
+  Di notte cambia una cosa sola: con il cielo sereno si disegna la Luna. Una
+  nuvola di notte resta una nuvola.
+
+- **Un puntino quando la previsione è vecchia.** Distingue *fa diciotto gradi*
+  da *faceva diciotto gradi stamattina, poi è caduta la rete*. Non una frase:
+  chi guarda di sfuggita non la leggerebbe, e chi nota il puntino va a vedere
+  la pagina Servizi, dove c'è scritto per esteso.
+
+- **Cinque entità in Home Assistant**, e nessuna è un doppione di una stazione
+  meteo in giardino: quella misura un punto, questa prevede le prossime ore. È
+  su una previsione che si costruisce un'automazione come chiudere la
+  tapparella *prima* del temporale.
+
+- **Le allerte meteo, e come si è deciso da dove prenderle.** Sulla carta le
+  fonti erano tre e tutte incerte: MeteoAlarm risultava aver dismesso il feed
+  RSS; il successore MeteoGate non documentava l'accesso libero; il repository
+  del Dipartimento della Protezione Civile — che pubblica ogni giorno il
+  bollettino sulle 156 zone di allerta — dichiarava sé stesso *«in fase di
+  caricamento»* con la sezione sul formato dei dati vuota.
+
+  La scelta era fra indovinare e chiedere. Si è chiesto: tre `curl` dal
+  Raspberry, che ha la rete libera. Il feed dato per morto risponde **200**;
+  l'API per posizione risponde **Not Found**. Nessuna delle due cose si poteva
+  sapere leggendo la documentazione — ed è il motivo per cui questa versione ha
+  le allerte invece di una funzione vuota con una spiegazione.
+
+  Il feed è Atom con dentro **CAP 1.2**: ogni avviso porta il codice della zona
+  (`IT018`), il nome in chiaro (`Sicilia`), il tipo di evento, la gravità
+  normalizzata e gli orari di inizio e scadenza. L'avviso prende **tutto il
+  pannello**, con la barra colorata a sinistra e il triangolo: una striscia in
+  cima al bollettino si legge come un'etichetta, un pannello intero si legge
+  come un avviso, e chi passa in corridoio deve capire che c'è qualcosa prima
+  di aver letto una parola.
+
+  Compare **quando arriva**, non al prossimo giro delle quattro ore, e poi non
+  si ripete: vive in una tacca colorata nell'angolo delle altre finestre. Un
+  avviso che ricompare ogni minuto smette di essere un avviso in mezza
+  giornata.
+
+  **La regione si sceglie a mano**, da una tendina. Il feed copre il paese
+  intero, e senza regione non si mostra *niente* — non tutto: far comparire
+  l'allerta della Sicilia a chi sta in Piemonte non è un'approssimazione, è un
+  allarme falso. Il confronto è sul nome e tollerante ad accenti, maiuscole e
+  apostrofi, perché `Valle d'Aosta`, `Valle d’Aosta` e `valle daosta` sono la
+  stessa cosa per chiunque tranne che per un confronto fra stringhe.
+
+  Due difetti li ha trovati la suite, non il ragionamento. Il primo: con gli
+  apostrofi trasformati in spazi, `valle daosta` non trovava più la Valle
+  d'Aosta. Il secondo, peggiore: la regola di tolleranza accettava qualunque
+  parola contenuta nel nome, e così **«Aosta» prendeva gli allarmi della Valle
+  d'Aosta** — una regione che riceve gli avvisi di un'altra, che in un impianto
+  di allerte è il difetto più grave possibile. Ora la regione scelta dev'essere
+  l'*inizio* del nome della zona.
+
+  E quello che non si mostra conta quanto quello che si mostra: gli avvisi
+  scaduti, quelli annullati, e le prove di sistema (`Test`, `Exercise`) — che
+  esistono nello standard CAP proprio perché chi li riceve non li mostri.
+
+- **I nomi lunghi dei satelliti finivano sopra l'arco.** Segnalato dal campo
+  con una foto: `OKEAN-O` scritto a corpo pieno si sovrapponeva alla curva del
+  passaggio. Il difetto era vecchio quanto la funzione e non si era mai visto,
+  perché l'unico nome mai comparso era `ISS` — tre caratteri, che ci stanno
+  ovunque. È bastato accendere «tutti gli oggetti» perché saltasse fuori.
+
+  Il troncamento a otto caratteri che c'era prima non era una misura, era una
+  speranza: otto caratteri stretti e otto larghi occupano larghezze diverse.
+  Adesso si misura davvero, e si rimpicciolisce il corpo prima di tagliare —
+  un nome piccolo si legge ancora, un nome tagliato non si riconosce. Quando
+  proprio si taglia, si dice con i puntini: `SPACEMOBILE-00` è un nome
+  plausibile e sbagliato, `SPACEMOBILE-0…` è un nome incompleto e si vede.
+
+  Nel preavviso è cambiata anche la priorità dello spazio: prima il nome
+  prendeva il corpo pieno e il conto alla rovescia si rimpiccioliva per stargli
+  dietro. Adesso è il contrario, perché il conto è la cosa che serve in quel
+  momento e il nome è il contorno.
+
+  La prova non guarda il testo, guarda i **pixel**: nella colonna dove comincia
+  l'arco non ci dev'essere niente acceso, con cinque nomi da tre a venti
+  caratteri. E verifica anche il contrario, che `ISS` resti grande:
+  rimpicciolire tutto per prudenza renderebbe illeggibile da tre metri anche il
+  caso normale.
+
+- **Una posizione sola per tre servizi.** Le coordinate stavano nella pagina
+  Radar, e finché il radar era l'unico a usarle andava bene. Poi sono arrivati
+  i satelliti, e adesso il meteo: la stessa informazione serve a tre servizi, e
+  chi accendeva i satelliti andava a cercarla nella pagina sbagliata — o non la
+  trovava e concludeva che il servizio fosse rotto.
+
+  Adesso sta in **Impostazioni**, e le pagine che la usavano ci rimandano. La
+  migrazione copia il valore vecchio e **non lo cancella**: se qualcuno
+  ripristina un backup su una versione precedente, quella deve ancora trovarlo
+  dov'era. Una posizione persa in un aggiornamento vuol dire tre servizi muti e
+  nessun messaggio che spieghi perché.
+
+  E l'esportazione senza posizione azzera **tutti e due** i posti in cui può
+  trovarsi: azzerarne uno solo darebbe un file che *sembra* ripulito e non lo
+  è, che è peggio di uno che non lo è e si vede.
+
+- **Quello che la suite prova, e quello che non prova.** Non prova che diciotto
+  gradi siano diciotto gradi: quello lo dice Open-Meteo e non abbiamo modo di
+  contraddirlo. Prova che una risposta **mutilata** — colonne mancanti, valori
+  nulli, tipi sbagliati, liste più corte del previsto — produca un bollettino
+  con meno numeri invece di un'eccezione; che la rete giù non cancelli la
+  previsione di stamattina; che non si richieda **specialmente quando
+  fallisce**, che è il caso in cui il codice ingenuo martella un servizio
+  gratuito fino a farsi bloccare; e che il disegno non scriva mai fuori dal
+  pannello, nemmeno con una descrizione lunga e temperature a due cifre sotto
+  zero.
+
 ## [6.9]
 
 - **Il cursore della luminosità non mente più durante il Night mode.** Con

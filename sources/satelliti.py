@@ -319,12 +319,12 @@ class SatellitiSource(Source):
         imprecise -- spostarsi di undici chilometri cambia gli orari di due
         secondi, misurati.
         """
-        radar = self.cfg.get("air_radar", {})
-        lat = float(radar.get("latitude", 0.0) or 0.0)
-        lon = float(radar.get("longitude", 0.0) or 0.0)
-        if lat == 0.0 and lon == 0.0:
-            return None, None
-        return lat, lon
+        # Dalla 7.0 la posizione non e' piu' una voce del radar ma del
+        # progetto: la usano in tre, e cercarla nella pagina del radar era il
+        # modo piu' rapido per non trovarla.
+        import dmdconf
+        dove = dmdconf.posizione(self.cfg)
+        return dove if dove is not None else (None, None)
 
     # -------------------------------------------------------------- registro
 
@@ -546,6 +546,38 @@ class SatellitiSource(Source):
         riquadro = d.textbbox((0, 0), s, font=font)
         return riquadro[2] - riquadro[0]
 
+    def _nome_che_entra(self, d, nome, disponibile):
+        """Il nome del satellite e il corpo con cui ci sta. Torna (testo, font).
+
+        Segnalato dal campo con una foto: `OKEAN-O` scritto a corpo pieno
+        finiva **sopra l'arco**. Il difetto era vecchio quanto la funzione e non
+        si era mai visto, perche' l'unico nome mai comparso era `ISS` -- tre
+        caratteri, che ci stanno ovunque. E' bastato accendere «tutti gli
+        oggetti» perche' saltasse fuori.
+
+        La lezione e' sempre la stessa: il troncamento a otto caratteri che
+        c'era prima non e' una misura, e' una speranza. Otto caratteri stretti
+        e otto larghi occupano larghezze diverse, e su un pannello non c'e'
+        margine per sbagliare. Qui si misura davvero: prima si prova a
+        rimpicciolire il corpo -- un nome piccolo si legge ancora -- e solo
+        all'ultimo si taglia, perche' un nome tagliato e' un nome che non si
+        riconosce.
+        """
+        nome = (nome or "").strip()
+        for font in (self._font_grande, self._font_medio, self._font_piccolo):
+            if self._larghezza(d, nome, font) <= disponibile:
+                return nome, font
+        # Quando si taglia, si dice che si e' tagliato. `SPACEMOBILE-00` e'
+        # un nome plausibile e sbagliato; `SPACEMOBILE-0…` e' un nome
+        # incompleto, e si vede. Su un pannello che serve a far riconoscere
+        # una cosa in cielo, la differenza conta.
+        font = self._font_piccolo
+        accorciato = nome
+        while accorciato and self._larghezza(d, accorciato + "…",
+                                             font) > disponibile:
+            accorciato = accorciato[:-1]
+        return (accorciato.rstrip() + "…") if accorciato else "", font
+
     def durata_visibile(self, passaggio):
         """Quanti secondi dura davvero la parte che si vede.
 
@@ -597,22 +629,23 @@ class SatellitiSource(Source):
         L, A = self.width, self.height
         img = Image.new("RGB", (L, A), (0, 0, 0))
         d = ImageDraw.Draw(img)
-        nome = passaggio.get("breve", passaggio["nome"])[:12]
         conto = self.t("satelliti.in", None, min=max(0, mancano))
 
-        # I nomi corti stanno tutti, ma `breve` arriva fino a dodici caratteri
-        # e in inglese il conto e' piu' lungo. Invece di fidarsi, si misura: se
-        # le due parole si toccherebbero, il conto scende di corpo. Meglio un
-        # numero piu' piccolo che due parole sovrapposte.
+        # Il conto alla rovescia e' la cosa che serve davvero in questo
+        # momento, quindi si prende lo spazio per primo e il nome si adatta a
+        # quello che resta. Prima era il contrario -- nome a corpo pieno e
+        # conto rimpicciolito -- e con un nome lungo si rimpiccioliva la cosa
+        # importante per far posto a quella di contorno.
         font_conto = self._font_grande
-        if (self._larghezza(d, nome, self._font_grande)
-                + self._larghezza(d, conto, font_conto) + 14 > L):
-            font_conto = self._font_medio
+        largo_conto = self._larghezza(d, conto, font_conto)
+        nome, font_nome = self._nome_che_entra(
+            d, passaggio.get("breve", passaggio["nome"]),
+            L - largo_conto - 18)
 
         # Allineati sulla linea di base e non sul bordo superiore: con due
         # corpi diversi il pareggio in alto si vede storto.
         base = int(A * 0.02) + self._font_grande.getmetrics()[0]
-        self._testo(d, 4, base, nome, self._font_grande, VERDE, ancora="ls")
+        self._testo(d, 4, base, nome, font_nome, VERDE, ancora="ls")
         self._testo(d, L - 4, base, conto, font_conto, VERDE, ancora="rs")
 
         sorge = self.t("satelliti.rises", None,
@@ -648,8 +681,13 @@ class SatellitiSource(Source):
         colore_arco = ARCO if visibile else ARCO_SPENTO
         colore_punto = PUNTO if visibile else SPENTO
 
-        nome = passaggio.get("breve", passaggio["nome"])[:8]
-        self._testo(d, 4, int(A * 0.01), nome, self._font_grande, testo_primo)
+        # Lo spazio del nome finisce dove comincia l'arco, e l'arco comincia a
+        # `L * 0.41`. Il valore si ricava da li' invece di essere scritto due
+        # volte: se un giorno l'arco si sposta, il nome lo segue da solo.
+        x0_arco = int(L * 0.41)
+        nome, font_nome = self._nome_che_entra(
+            d, passaggio.get("breve", passaggio["nome"]), x0_arco - 10)
+        self._testo(d, 4, int(A * 0.01), nome, font_nome, testo_primo)
         if acceso:
             self._testo(d, 4, int(A * 0.47),
                         quando.astimezone().strftime("%H:%M"),
@@ -670,7 +708,7 @@ class SatellitiSource(Source):
                 else "IN OMBRA"
         self._testo(d, 4, int(A * 0.73), sotto, self._font_piccolo, testo_sotto)
 
-        x0, x1 = int(L * 0.41), L - int(L * 0.06)
+        x0, x1 = x0_arco, L - int(L * 0.06)
         # La base dell'arco lascia sotto lo spazio per le due sigle: su
         # sessantaquattro pixel un carattere che sborda non si vede "un po'",
         # sparisce.

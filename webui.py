@@ -1371,17 +1371,70 @@ def create_app(runtime):
              "status": stato("satelliti")},
             {"key": "notifiche", "label": "Notifiche", "ready": True,
              "status": stato("notifiche")},
+            {"key": "meteo", "label": "Meteo", "ready": True,
+             "status": stato("meteo")},
         ]
         for voce in services:
             voce["suono"] = voce["key"] in suoni.SERVIZI_CON_SUONO
+        # Alle venti regioni note si aggiungono quelle che il feed sta davvero
+        # nominando adesso: se MeteoAlarm scrive un nome diverso da quello che
+        # ci aspettiamo, si vede nella tendina invece di doverlo indovinare.
+        try:
+            import allerte
+            regioni = sorted(set(allerte.REGIONI_IT)
+                             | set(runtime.meteo._meteo.allerte.zone_viste()))
+        except Exception:      # noqa: BLE001
+            regioni = []
         current = runtime.arbiter.current
         return render_template(
-            "services.html", cfg=cfg, services=services,
+            "services.html", cfg=cfg, services=services, regioni=regioni,
             audio=suoni.stato(cfg), suoni_file=suoni.file_disponibili(cfg),
             current=current.label if current else "—",
             mqtt=runtime.mqtt.status(),
             result=request.args.get("result", ""),
             sleeping=runtime.sleeping, night=runtime.night, page="services")
+
+    @app.route("/api/meteo", methods=["POST"])
+    def api_meteo():
+        conf = cfg.setdefault("meteo", {})
+
+        def numero(nome, predefinito, minimo, massimo):
+            try:
+                valore = int(request.form.get(nome, predefinito))
+            except (TypeError, ValueError):
+                return predefinito
+            return max(minimo, min(massimo, valore))
+
+        conf["ora_bollettino"] = numero("ora_bollettino", 7, 0, 23)
+        conf["ogni_ore"] = numero("ogni_ore", 4, 1, 24)
+        conf["regione"] = (request.form.get("regione") or "").strip()
+        conf["allerte"] = request.form.get("allerte") == "on"
+        dmdconf.save()
+        # Il thread del meteo dorme un minuto alla volta: si sveglia subito,
+        # altrimenti un'ora appena impostata potrebbe passare inosservata.
+        try:
+            runtime.meteo._wake.set()
+        except Exception:      # noqa: BLE001
+            pass
+        return redirect(url_for("page_services"))
+
+    @app.route("/api/meteo/prova", methods=["POST"])
+    def api_meteo_prova():
+        """Mostra subito il meteo sul pannello.
+
+        Vale per il meteo la stessa ragione del pulsante delle notifiche: e'
+        una sorgente che parla poche volte al giorno, e senza un modo di
+        chiamarla a comando l'unico modo di sapere se funziona sarebbe
+        aspettare le sette del mattino.
+        """
+        modo = request.form.get("modo") or "aggiornamento"
+        try:
+            fatto, motivo = runtime.meteo.mostra_adesso(
+                modo, 22 if modo == "bollettino" else 12)
+        except Exception as exc:      # noqa: BLE001
+            fatto, motivo = False, str(exc)
+        return redirect(url_for("page_services",
+                                result=motivo if not fatto else ""))
 
     @app.route("/api/notifiche/prova", methods=["POST"])
     def api_notifiche_prova():
@@ -1503,6 +1556,34 @@ def create_app(runtime):
                            value=cfg["display"]["night_brightness"])
         value = runtime.set_brightness(int(request.form.get("value", 50)))
         return jsonify(ok=True, value=value)
+
+    @app.route("/api/posizione", methods=["POST"])
+    def api_posizione():
+        """Dove sta il DMD. Una volta sola, per tre servizi.
+
+        Stava sotto il Radar, e finche' il radar era l'unico a usarla andava
+        bene. Con i satelliti e il meteo e' diventata la cosa che si cerca
+        nella pagina sbagliata: sta qui, dove si cercano le impostazioni del
+        DMD, e le tre pagine ci rimandano.
+        """
+        dove = cfg.setdefault("posizione", {})
+        for chiave, basso, alto in (("latitude", -90.0, 90.0),
+                                    ("longitude", -180.0, 180.0)):
+            grezzo = (request.form.get(chiave) or "").strip().replace(",", ".")
+            try:
+                dove[chiave] = max(basso, min(alto, float(grezzo)))
+            except ValueError:
+                # Campo vuoto o illeggibile: si azzera, che e' il modo in cui
+                # il progetto dice "nessuna posizione". Non si tiene il valore
+                # vecchio: chi cancella il campo sta chiedendo di cancellarla.
+                dove[chiave] = 0.0
+        # Le due chiavi di prima si tengono allineate finche' esistono: una
+        # configurazione esportata adesso e reimportata su una versione
+        # precedente deve continuare a funzionare.
+        cfg["air_radar"]["latitude"] = dove["latitude"]
+        cfg["air_radar"]["longitude"] = dove["longitude"]
+        dmdconf.save()
+        return redirect(request.form.get("next") or url_for("page_settings"))
 
     @app.route("/api/display/power", methods=["POST"])
     def api_display_power():
@@ -2102,9 +2183,10 @@ def create_app(runtime):
     @app.route("/api/radar", methods=["POST"])
     def api_radar():
         radar = cfg["air_radar"]
-        for key, low, high, default in (("latitude", -90.0, 90.0, 0.0),
-                                        ("longitude", -180.0, 180.0, 0.0),
-                                        ("radius_km", 0.5, 400.0, 3.0)):
+        # Le coordinate non si leggono piu' da questo modulo: dalla 7.0 stanno
+        # in Impostazioni, perche' le usano in tre. Qui resta il raggio, che e'
+        # davvero una preferenza del radar.
+        for key, low, high, default in (("radius_km", 0.5, 400.0, 3.0),):
             try:
                 radar[key] = max(low, min(high, float(request.form.get(key, default)
                                                      .replace(",", "."))))
@@ -2211,9 +2293,9 @@ def create_app(runtime):
             return redirect(url_for("page_radar"))
         radar = runtime.radar
         radar._route_cache.pop(callsign, None)
+        dove = dmdconf.posizione(cfg) or (0.0, 0.0)
         radar.resolve_routes([{"flight": callsign,
-                               "lat": cfg["air_radar"]["latitude"],
-                               "lon": cfg["air_radar"]["longitude"]}])
+                               "lat": dove[0], "lon": dove[1]}])
         route = radar._route_cache.get(callsign) or radar._lookup_route(callsign)
         result = ("rotta di %s: %s" % (callsign, route) if route
                   else "nessuna rotta disponibile per %s" % callsign)
