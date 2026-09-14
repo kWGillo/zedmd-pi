@@ -19,9 +19,15 @@ fa in questo istante e l'icona. Massima e minima restano, piccole, di contorno.
 ## Perché non è sempre acceso
 
 Un pannello che mostra il meteo tutto il giorno smette di essere guardato dopo
-due giorni: diventa sfondo. Una finestra che compare quattro volte al giorno e
-poi se ne va, invece, la si legge. È la stessa ragione per cui i Compleanni e
-le Scadenze parlano poco.
+due giorni: diventa sfondo. Una finestra che compare ogni tanto e poi se ne va,
+invece, la si legge. È la stessa ragione per cui i Compleanni e le Scadenze
+parlano poco.
+
+> **Fino alla 7.4 però il pendolo era andato troppo dall'altra parte.** Contando
+> una giornata intera: sette apparizioni in ventiquattro ore, 94 secondi su
+> 86400 — lo 0,11% del tempo. Non «discreto»: invisibile. Dalla 7.5 il meteo
+> gira come il Rolling Banner, ogni venti minuti, e l'1% del tempo è la misura
+> giusta fra l'essere sfondo e il non esserci.
 
 E non prende mai il pannello a forza. Il meteo non è urgente: nessuno deve
 sapere la temperatura *adesso* al punto da interrompere una partita o il
@@ -241,12 +247,22 @@ spegnere l'irrigazione, mandare un messaggio a chi è fuori.
 
 ## Configurazione
 
-Sta nella pagina **Servizi**, nella scheda del Meteo, e sono due numeri:
+Sta nella pagina **Servizi**, nella scheda del Meteo, e sono tre numeri:
 
 - **ora del bollettino del mattino** — sette è l'ora della colazione; chi si
   alza alle cinque la sposta;
-- **aggiornamento ogni quante ore** — quattro vuol dire cinque o sei finestre
-  al giorno.
+- **compare ogni (minuti)** — ogni quanto il meteo prende il pannello, usando i
+  dati che ha già. Venti è il valore di partenza; **0 spegne il giro** e lascia
+  solo il bollettino, gli aggiornamenti e le allerte, cioè il comportamento di
+  prima della 7.5;
+- **dati richiesti ogni (ore)** — ogni quanto si interroga Open-Meteo.
+
+**Le due righe centrali sono cose diverse, e confonderle era il difetto.** Una
+previsione non cambia ogni venti minuti, quindi rimostrarla non richiede di
+richiederla: alzare la frequenza con cui il meteo compare **non aumenta di una
+sola chiamata** il traffico verso Open-Meteo. Abbassare invece le ore della
+terza riga sì, e quel servizio è gratuito e non chiede niente in cambio: non
+c'è motivo di stringerla sotto le quattro ore.
 
 Due pulsanti fanno comparire subito le due finestre sul pannello: vale la
 stessa ragione del pulsante di prova delle notifiche, cioè che senza un modo di

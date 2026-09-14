@@ -3,7 +3,7 @@
 4884b249008a42c68fbd2c1b934c0a68  aeroporti.csv
 ebdccc3875a93eba4f6eb06f6912436c  allerte.py
 13e95841fe78d3774935f35182209ae3  autotune.py
-762a115eeca80eaa64ee48a88507baca  cassa.py
+8f611004ff344bdd285b2a5b25b2888d  cassa.py
 d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 112957993893543e06c2302cfb040d28  config.json
@@ -11,7 +11,7 @@ f4da634c02da1d2d9c2bf600287d09c3  copertine.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
-610b734ba08de82c78ad757efe6773e4  dmdconf.py
+56b0794fa06d70c542988f0187358bf4  dmdconf.py
 a415ab6ce0a1379393b161b20feb2eab  dmdd.py
 bb3118ed4b5ebb8d9f49cc8bbcd6f341  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
@@ -23,7 +23,7 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 bec22746fc005f4a3b919e5d784a9b5a  hass.py
-179fb736fac8ba3f4de0168f46836454  i18n.py
+afafd6ccb52f27eabbc1523e393df2a8  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
@@ -59,7 +59,7 @@ e3a2e149869954d460f24e11de8bdaf4  sources/gameboy.py
 018e911289febd4efb970fba0d9e5626  sources/giochi/invasori.py
 6d27b2178e100860bdfeb612c60dffd1  sources/giochi/mattoni.py
 8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
-9c42e67d3be5d396d776c0914d702c99  sources/meteo.py
+3235dc7fa44a91fd6b571a5c51679094  sources/meteo.py
 8de1147a9e524e5512d1bc24a5582b00  sources/notifiche.py
 48225cc518aa6df9897f3fa93880a8ba  sources/nowplaying.py
 e6c140b184dd15f3c391ec123180f25e  sources/satelliti.py
@@ -103,13 +103,13 @@ c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
 f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 c80b972bd47827c7383979aafb7fecc8  templates/satelliti.html
 403872d6a716a4b13b8775cfbbdd355a  templates/scadenze.html
-664b4ccd0278cbf59e8e11293313964c  templates/services.html
+9fe8392f08d3e1144ed93eee2e0db27b  templates/services.html
 9543d12bd37d3dadb1d4b0634607dfa5  templates/settings.html
 0823432fc4a73241082966d4f4c9e760  templates/telecamera.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-e7553616de829aff616c1011a7d57027  version.py
+10514346218f522358534037e31cf53d  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-bb6b474e1dedbb843161307f6f822bf6  webui.py
+ec4799722a21f26bfcd30dbb7026d369  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

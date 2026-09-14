@@ -2,6 +2,71 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [7.6]
+
+- **La musica AirPlay esce davvero da una scheda che non fa 44100 Hz.** La
+  7.4.1 ripiegava sul convertitore di ALSA (`plughw:`), e sul campo il
+  risultato è stato il peggiore possibile: dispositivo aperto, nessun errore,
+  nessuna musica.
+
+  Il motivo è che shairport-sync non si limita a scrivere campioni: legge dal
+  dispositivo il **ritardo** e con quello tiene la sincronia. Attraverso il
+  plugin `plug` quel numero non è più quello vero, e shairport-sync insegue un
+  bersaglio che si muove. La strada giusta era dire la verità alla scheda
+  invece di nascondergliela — accesso esclusivo `hw:` più `output_rate` alla
+  frequenza che la scheda sa fare davvero, lasciando il ricampionamento a
+  shairport-sync, che ha soxr compilato dentro.
+
+  **Provato a mano sul Raspberry prima di scriverlo nel codice.** Con
+  `output_device = "hw:1,0"` e `output_rate = 48000` la musica esce.
+
+  Ordine dei tentativi: 44100 in accesso esclusivo; poi 48000, 96000 e 88200
+  sempre in esclusivo con ricampionamento; e solo come terza spiaggia il
+  convertitore. Le due righe si sanno anche **togliere**: collegando poi una
+  scheda che i 44100 li fa, un `output_rate` dimenticato la inchioderebbe a
+  una frequenza che non le serve più. Una configurazione va saputa disfare,
+  non solo fare.
+
+- **I dieci minuti per vedere la cassa fra i device AirPlay non erano un
+  guasto.** Interrogando l'mDNS direttamente dal Raspberry, il DMD si annuncia
+  **subito**, insieme alle altre otto casse di casa. È la cache Bonjour
+  dell'iPhone, che dopo un riavvio di shairport-sync tiene la voce vecchia
+  finché non scade. Sul telefono si risolve in cinque secondi di modalità
+  aereo; e il DMD riavvia shairport-sync solo quando la sua configurazione
+  cambia davvero, quindi a regime non succede.
+
+## [7.5]
+
+- **Il meteo si vede.** La segnalazione era «è veramente raro vedere il
+  meteo», e non era un'impressione da discutere: facendo scorrere una
+  giornata intera davanti alla sorgente vera e contando, erano **sette
+  apparizioni in ventiquattro ore — 94 secondi su 86400, cioè lo 0,11% del
+  tempo.** Praticamente mai.
+
+  La causa era che un solo numero faceva due mestieri. `ogni_ore` decideva
+  insieme quando **chiedere** i dati a Open-Meteo e quando **mostrarli**, e le
+  due cose non hanno lo stesso ritmo: una previsione non cambia ogni venti
+  minuti, ma per rimostrarla non c'è nessun bisogno di richiederla — quella
+  che si ha in mano va benissimo, ed è già marcata con la sua età.
+
+  I due orologi adesso sono separati:
+
+  | | | |
+  |---|---|---|
+  | **Dati richiesti ogni** | 4 ore | quante volte si interroga Open-Meteo |
+  | **Compare ogni** | 20 minuti | quante volte il meteo prende il pannello |
+
+  Misurato dopo la correzione: **72 apparizioni al giorno, l'1% del tempo, e
+  le chiamate alla rete restano sette** — identiche a prima. Gli intervalli
+  sono regolari al minuto, non a raffica. Il bollettino del mattino resta uno
+  solo e alle sette, e le allerte mantengono la precedenza su tutto: qualunque
+  finestra rimette a zero l'orologio del giro, perché ripresentarsi venti
+  secondi dopo un'allerta con lo stesso meteo sarebbe insistenza, non
+  informazione.
+
+  Scrivendo **0** nel campo nuovo si torna esattamente al comportamento della
+  7.4, per chi il meteo lo preferiva raro.
+
 ## [7.4.1]
 
 - **Una scheda audio che non sa fare 44100 Hz adesso suona lo stesso.**

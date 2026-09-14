@@ -633,10 +633,21 @@ DEFAULTS = {
         # L'ora del bollettino del mattino, quello che racconta la giornata.
         # Sette e' l'ora della colazione; chi si alza alle cinque lo sposta.
         "ora_bollettino": 7,
-        # Ogni quante ore l'aggiornamento breve. Quattro vuol dire cinque o sei
-        # finestre al giorno: abbastanza da essere utile, poche abbastanza da
-        # continuare a guardarle. Un meteo sempre acceso diventa sfondo.
+        # Ogni quante ore si **chiedono** i dati a Open-Meteo. Quattro bastano
+        # e avanzano: una previsione non cambia ogni venti minuti, e ogni
+        # chiamata in piu' e' traffico verso un servizio gratuito che non
+        # chiede niente in cambio.
         "ogni_ore": 4,
+        # Ogni quanti minuti il meteo **prende il pannello**, con i dati che
+        # ha gia' in mano. E' una cosa diversa dalla riga qui sopra, e fino
+        # alla 7.4 erano la stessa: con il solo `ogni_ore` il meteo compariva
+        # sei volte al giorno, un minuto e mezzo su ventiquattro ore, cioe'
+        # praticamente mai. Adesso gira come il Rolling Banner.
+        #
+        # Zero spegne il giro e lascia solo il bollettino del mattino, gli
+        # aggiornamenti a ogni chiamata e le allerte: e' il comportamento
+        # della 7.4, per chi lo preferiva.
+        "ogni_minuti": 20,
         "durata_bollettino": 22,
         "durata_aggiornamento": 12,
         "durata_allerta": 25,

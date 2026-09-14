@@ -83,6 +83,10 @@ class MeteoSource(Source):
         # per tutta l'ora.
         self._bollettino_dato = ""
         self._ultimo_aggiornamento = 0.0
+        # Quando il meteo ha preso il pannello l'ultima volta. E' un orologio
+        # diverso da quello qui sopra: uno conta le chiamate alla rete, questo
+        # le apparizioni.
+        self._ultimo_mostrato = 0.0
         # L'identificativo dell'ultima allerta gia' mostrata. Serve a farla
         # comparire **quando arriva**, senza aspettare il prossimo giro delle
         # quattro ore, e senza ripeterla per tutta la sua durata: un avviso che
@@ -158,10 +162,26 @@ class MeteoSource(Source):
         ora_bollettino = int(conf.get("ora_bollettino", 7) or 7)
         ogni = max(1, int(conf.get("ogni_ore", 4) or 4))
 
+        # Due orologi, e la distinzione e' il senso di questa parte.
+        #
+        #   `ogni_ore`     ogni quanto si **chiedono** i dati a Open-Meteo
+        #   `ogni_minuti`  ogni quanto il meteo **prende il pannello**
+        #
+        # Fino alla 7.4 erano la stessa cosa, ed e' il motivo per cui il meteo
+        # non si vedeva mai: un bollettino la mattina piu' un aggiornamento
+        # ogni quattro ore fanno sei apparizioni al giorno, un minuto e mezzo
+        # su ventiquattro ore. Ma la previsione non cambia ogni venti minuti,
+        # e non c'e' nessun bisogno di chiederla di nuovo per rimostrarla:
+        # quella in mano va benissimo, ed e' gia' marcata con la sua eta'.
+        ogni_minuti = max(0, int(conf.get("ogni_minuti", 20) or 0))
+
         oggi = adesso.strftime("%Y-%m-%d")
         tocca_bollettino = (adesso.hour == ora_bollettino
                             and self._bollettino_dato != oggi)
         scaduto = (time.time() - self._ultimo_aggiornamento) >= ogni * 3600
+        tocca_giro = (ogni_minuti > 0
+                      and (time.time() - self._ultimo_mostrato)
+                      >= ogni_minuti * 60)
 
         # Le allerte si guardano a ogni giro, non ogni quattro ore: il modulo
         # ha il suo freno di mezz'ora e non chiama piu' del dovuto, ma un
@@ -172,6 +192,13 @@ class MeteoSource(Source):
             return
 
         if not tocca_bollettino and not scaduto:
+            # Niente da chiedere alla rete. Ma se e' l'ora del giro periodico
+            # si mostra lo stesso quello che si ha gia': e' il caso normale,
+            # non l'eccezione — fra una chiamata e l'altra passano ore e di
+            # giri ce ne stanno decine.
+            if tocca_giro and self._meteo.dati() is not None:
+                self._apri("aggiornamento",
+                           int(conf.get("durata_aggiornamento", 12) or 12))
             return
 
         # I dati si chiedono **prima** di aprire la finestra: una finestra che
@@ -234,6 +261,10 @@ class MeteoSource(Source):
             self._image = immagine
             self._dirty = True
         self._fino_a = time.time() + max(4, secondi)
+        # Qualunque finestra rimette a zero l'orologio del giro periodico: dopo
+        # un'allerta o il bollettino del mattino, ripresentarsi venti secondi
+        # dopo con lo stesso meteo sarebbe insistenza, non informazione.
+        self._ultimo_mostrato = time.time()
 
     def mostra_adesso(self, modo="aggiornamento", secondi=12):
         """Apre la finestra subito. E' il pulsante di prova della pagina web."""

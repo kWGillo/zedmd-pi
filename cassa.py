@@ -132,6 +132,49 @@ def _scrivi_campo(blocco, nome, valore):
     return blocco[:apertura + 1] + "\n    " + riga + blocco[apertura + 1:]
 
 
+def _imposta_riga(blocco, nome, valore):
+    """Scrive `nome = valore;` dentro un blocco, oppure lo **toglie**.
+
+    `valore` gia' formattato — `48000` per un numero, `"S16"` virgolette
+    comprese per una stringa. `None` cancella la riga.
+
+    Il toglierla conta quanto lo scriverla: passando da una scheda che ha
+    bisogno del ricampionamento a una che non ne ha bisogno, un `output_rate`
+    dimenticato la inchioderebbe a una frequenza che non le serve piu'. Una
+    configurazione va saputa disfare, non solo fare.
+    """
+    riga = re.compile(r"[ \t]*\b%s\s*=\s*[^;\n]*;[ \t]*\n?" % re.escape(nome))
+    trovato = riga.search(blocco)
+    if valore is None:
+        return blocco[:trovato.start()] + blocco[trovato.end():] if trovato else blocco
+    nuova = "    %s = %s;\n" % (nome, valore)
+    if trovato:
+        return blocco[:trovato.start()] + nuova + blocco[trovato.end():]
+    apertura = blocco.index("{")
+    return blocco[:apertura + 1] + "\n" + nuova.rstrip("\n") + blocco[apertura + 1:]
+
+
+def _scrivi_alsa(testo, device, frequenza=None):
+    """La configurazione con `output_device`, e il ricampionamento se serve.
+
+    Con `frequenza` a None le due righe del ricampionamento vengono tolte:
+    e' il caso normale, la scheda fa i 44100 di AirPlay e non c'e' niente da
+    convertire.
+    """
+    testo = _sostituisci(testo, device)
+    dove = _blocco(testo, "alsa")
+    if dove is None:                       # non dovrebbe: `_sostituisci` lo crea
+        return testo
+    blocco = testo[dove[0]:dove[1]]
+    if frequenza:
+        blocco = _imposta_riga(blocco, "output_rate", str(int(frequenza)))
+        blocco = _imposta_riga(blocco, "output_format", '"S16"')
+    else:
+        blocco = _imposta_riga(blocco, "output_rate", None)
+        blocco = _imposta_riga(blocco, "output_format", None)
+    return testo[:dove[0]] + blocco + testo[dove[1]:]
+
+
 def installato():
     """Vero se c'e' qualcosa da configurare: il programma e la sua conf."""
     return bool(shutil.which("shairport-sync")) and os.path.isfile(CONF)
@@ -205,7 +248,14 @@ def accettabili(device):
     return [scelto, con_convertitore(scelto)] if scelto else []
 
 
-def prova(device, durata=0.4):
+# Le frequenze a cui si prova a far ricampionare shairport-sync, quando la
+# scheda i 44100 di AirPlay non li fa. 48000 e' quella che hanno praticamente
+# tutte; le altre due sono multipli esatti di 44100 e 48000, e su un DAC che
+# le regge il ricampionamento costa meno.
+RIPIEGHI = (48000, 96000, 88200)
+
+
+def prova(device, durata=0.4, frequenza=None):
     """Suona un tono sul dispositivo, nel formato di AirPlay. (ok, motivo).
 
     Non e' una formalita': e' l'unico modo di sapere *prima* se la scheda
@@ -217,7 +267,7 @@ def prova(device, durata=0.4):
     comando = ["ffmpeg", "-v", "error", "-nostdin",
                "-f", "lavfi",
                "-i", "sine=frequency=880:duration=%.2f" % durata,
-               "-ar", str(FREQUENZA), "-ac", str(CANALI),
+               "-ar", str(int(frequenza or FREQUENZA)), "-ac", str(CANALI),
                "-f", "alsa", device]
     try:
         esito = subprocess.run(comando, capture_output=True, timeout=15)
@@ -284,23 +334,36 @@ def imposta(device, acceso):
         device = esclusivo(device)
         if not device:
             return False, "nessuna scheda audio"
+        frequenza = None
         ok, motivo = prova(device)
         if not ok:
-            # La scheda non regge 44100 in accesso esclusivo. Prima di
-            # arrendersi si prova la stessa scheda **con il convertitore di
-            # ALSA davanti**, che e' l'unica strada che resta.
+            # La scheda non regge i 44100 di AirPlay in accesso esclusivo.
+            # **Prima di nasconderle il formato, le si dice la verita'.**
             #
-            # Non e' un ripiego alla leggera: la preferenza per `hw:` spiegata
-            # in cima resta giusta, e con `plughw:` shairport-sync non vede
-            # piu' che cosa la scheda sappia fare davvero. Ma quel dettaglio
-            # conta per la sincronizzazione di un gruppo multi-room; con una
-            # cassa sola non esiste, e l'alternativa qui e' il silenzio.
+            # shairport-sync sa ricampionare da solo — questa installazione e'
+            # compilata con soxr — e dichiarargli `output_rate` e' la strada
+            # che la sua documentazione indica per le schede cosi'. Gli si
+            # lascia l'accesso esclusivo, quindi continua a leggere dal
+            # dispositivo il ritardo **vero**, che e' il numero con cui tiene
+            # la sincronia.
             #
-            # Il caso e' reale e non teorico: una chiavetta USB "full speed"
-            # da pochi euro dichiara `Rates: 8000, 48000` e basta. AirPlay
-            # trasmette a 44100 e non a un'altra frequenza, quindi senza
-            # convertitore quella scheda non puo' suonare musica AirPlay --
-            # mai, in nessuna configurazione.
+            # Il convertitore di ALSA, che si prova dopo, quel numero glielo
+            # falsa: il dispositivo si apre, non da' nessun errore, e non esce
+            # musica. E' successo davvero, ed e' il motivo per cui questo
+            # tentativo viene prima.
+            for candidata in RIPIEGHI:
+                ok_alt, _motivo_alt = prova(device, frequenza=candidata)
+                if ok_alt:
+                    frequenza = candidata
+                    ok = True
+                    break
+        if not ok:
+            # Terza spiaggia: il convertitore di ALSA. Si arriva qui solo se
+            # la scheda non regge nessuna delle frequenze di ripiego, cioe'
+            # quasi mai. Resta perche' e' meglio di niente, non perche' sia
+            # una buona idea: `plughw:` falsa il ritardo riportato, e con
+            # quello shairport-sync puo' aprire il dispositivo, non dare
+            # nessun errore e non far uscire musica.
             alternativo = con_convertitore(device)
             ok_plug, _motivo_plug = prova(alternativo)
             if not ok_plug:
@@ -310,13 +373,15 @@ def imposta(device, acceso):
                 # esclusiva, che e' la causa vera.
                 return False, motivo
             device = alternativo
+            frequenza = None
     else:
         device = FINTO
+        frequenza = None
     testo = _leggi()
     if not testo:
         return False, "configurazione di shairport-sync illeggibile"
     try:
-        _scrivi(_sostituisci(testo, device))
+        _scrivi(_scrivi_alsa(testo, device, frequenza))
     except OSError as exc:
         return False, str(exc)
     scorda()

@@ -1408,6 +1408,9 @@ def create_app(runtime):
 
         conf["ora_bollettino"] = numero("ora_bollettino", 7, 0, 23)
         conf["ogni_ore"] = numero("ogni_ore", 4, 1, 24)
+        # Zero è valido e vuol dire "niente giro periodico": non si può
+        # limitare dal basso a 1, o si perderebbe quella scelta.
+        conf["ogni_minuti"] = numero("ogni_minuti", 20, 0, 720)
         conf["regione"] = (request.form.get("regione") or "").strip()
         conf["allerte"] = request.form.get("allerte") == "on"
         unita = (request.form.get("unita") or "C").strip().upper()

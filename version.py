@@ -1616,6 +1616,43 @@ Storico:
         scheda scelta in Impostazioni -- "USB Audio", non `plughw:1,0` -- in
         tutti e due gli stati, e se le due configurazioni divergono lo dice
         invece di lasciarlo indovinare.
+  7.5  **Il meteo si vede.** La segnalazione era "e\' veramente raro vedere il
+       meteo", e non era un\'impressione: contando una giornata intera erano
+       **sette apparizioni in ventiquattro ore, 94 secondi su 86400 -- lo
+       0,11% del tempo.** Praticamente mai.
+       La causa era che un solo numero faceva due mestieri: `ogni_ore`
+       decideva insieme quando **chiedere** i dati a Open-Meteo e quando
+       **mostrarli**. Ma una previsione non cambia ogni venti minuti, e per
+       rimostrarla non c\'e\' nessun bisogno di richiederla. I due orologi
+       adesso sono separati: i dati si chiedono ogni quattro ore come prima,
+       e il meteo prende il pannello ogni venti minuti, come fa il Rolling
+       Banner.
+       Misurato dopo: **72 apparizioni al giorno, l\'1% del tempo, e le
+       chiamate alla rete restano sette** -- identiche a prima, perche\' il
+       giro disegna quello che ha gia\' in casa. Il bollettino del mattino
+       resta uno solo e alle sette; le allerte mantengono la precedenza.
+       Scrivendo 0 nel campo nuovo si torna esattamente al comportamento
+       della 7.4, per chi il meteo lo preferiva raro.
+  7.6  **La musica AirPlay esce davvero da una scheda che non fa 44100 Hz.**
+       La 7.4.1 ripiegava sul convertitore di ALSA (`plughw:`), e sul campo il
+       risultato e\' stato: dispositivo aperto, nessun errore, nessuna musica.
+       Il motivo e\' che shairport-sync non si limita a scrivere campioni —
+       legge dal dispositivo il **ritardo** e con quello tiene la sincronia —
+       e attraverso il plugin `plug` quel numero non e\' piu\' quello vero.
+       La strada giusta era dire la verita\' alla scheda invece di nasconderla:
+       accesso esclusivo `hw:` piu\' `output_rate` alla frequenza che la scheda
+       sa fare, e il ricampionamento lo fa shairport-sync con soxr, che questa
+       installazione ha compilato dentro. Provato a mano sul Raspberry prima
+       di scriverlo nel codice: la musica esce.
+       Ordine dei tentativi: 44100 in esclusivo, poi 48000/96000/88200 in
+       esclusivo con ricampionamento, e solo come terza spiaggia il
+       convertitore. Le due righe si sanno anche **togliere**: collegando poi
+       una scheda che i 44100 li fa, un `output_rate` dimenticato la
+       inchioderebbe a una frequenza che non le serve piu\'.
+       La cassa che ci metteva dieci minuti a comparire fra i device AirPlay
+       non era un guasto: e\' la cache Bonjour dell\'iPhone dopo un riavvio di
+       shairport-sync. Verificato interrogando l\'mDNS dal Raspberry — si
+       annuncia subito, insieme alle altre otto casse di casa.
 """
 
-__version__ = "7.4.1"
+__version__ = "7.6"

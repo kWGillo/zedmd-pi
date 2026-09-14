@@ -110,6 +110,9 @@
     <label for="ora_bollettino">{{ t('meteo.hour') }}</label>
     <input type="number" id="ora_bollettino" name="ora_bollettino" min="0" max="23"
            value="{{ cfg.meteo.ora_bollettino }}">
+    <label for="ogni_minuti">{{ t('meteo.rotation') }}</label>
+    <input type="number" id="ogni_minuti" name="ogni_minuti" min="0" max="720"
+           value="{{ cfg.meteo.ogni_minuti }}">
     <label for="ogni_ore">{{ t('meteo.every') }}</label>
     <input type="number" id="ogni_ore" name="ogni_ore" min="1" max="24"
            value="{{ cfg.meteo.ogni_ore }}">

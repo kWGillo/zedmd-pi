@@ -1,4 +1,4 @@
-# DMD Controller 7.4
+# DMD Controller 7.6
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -673,7 +673,10 @@ le tappe.
 | 7.1 | La finestra del meteo ridisegnata guardandola accesa: i gradi di adesso grandi al centro con l'umidità, massima e minima in alto a destra con le frecce, e l'unità — che prima mancava del tutto |
 | 7.2 | I satelliti diventano un servizio notturno: un cancello sull'altezza del Sole, messo più in alto della soglia di visibilità perché il preavviso scatta dieci minuti prima. Ferma il vetro, non il calcolo né i sensori |
 | 7.3 | La copertina del brano, passata dalla riduzione di livelli che rende guardabile la Funcam — perché sui mezzi toni questo pannello ha sempre avuto ragione. E Now Playing può andare a rotazione con le foto |
-| **7.4** | **I metadati di AirPlay lasciano la rete: shairport-sync scrive in una pipe locale e il DMD la legge — due programmi sulla stessa macchina non hanno motivo di parlarsi attraverso un server. Breakout non copre più i propri suoni, la scheda audio automatica non è più l'HDMI scollegata, e di notte il pannello abbassa la voce** |
+| 7.4 | I metadati di AirPlay lasciano la rete: shairport-sync scrive in una pipe locale e il DMD la legge — due programmi sulla stessa macchina non hanno motivo di parlarsi attraverso un server. Breakout non copre più i propri suoni, la scheda audio automatica non è più l'HDMI scollegata, e di notte il pannello abbassa la voce |
+| 7.4.1 | Una scheda audio che non sa fare i 44100 Hz di AirPlay adesso suona lo stesso, con il convertitore di ALSA davanti: la chiavetta USB di casa dichiara `Rates: 8000, 48000` |
+| 7.5 | Il meteo si vede: era sette volte al giorno, lo 0,11% del tempo. I due orologi — ogni quanto si chiedono i dati e ogni quanto si mostrano — erano lo stesso numero. Adesso 72 apparizioni al giorno con le stesse sette chiamate alla rete |
+| **7.6** | **La musica AirPlay esce anche da una scheda che non fa i 44100 Hz: accesso esclusivo più `output_rate`, con il ricampionamento fatto da shairport-sync. Il convertitore di ALSA apriva il dispositivo senza errori e non suonava** |
 
 ---
 
