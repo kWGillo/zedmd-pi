@@ -22,6 +22,7 @@ import dmdconf
 import fasce
 import hass
 import libcheck
+import metadati
 import mqttbus
 import nowplaying
 import ota
@@ -299,6 +300,10 @@ class Runtime:
         # sapere come si costruisce un'altra, solo chiederle un numero.
         self.player.media = self.media
         self.mqtt = mqttbus.MqttBus(self.cfg)
+        # Nasce qui e non in `_start_metadati` perche' `shutdown` la nomina:
+        # un arresto che arriva mentre l'avvio e' ancora a meta' non deve
+        # inciampare su un attributo che non esiste ancora.
+        self.metadati = None
         self.spotify = spotifyapi.SpotifyPoller(self.cfg, self.nowplaying)
         self.hass = hass.HassBridge(self.cfg, self.mqtt, self)
 
@@ -307,6 +312,14 @@ class Runtime:
         # collegamento si fa qui perche' `suoni` non deve sapere che esiste
         # Now Playing, e Now Playing non deve sapere che esiste il suono.
         suoni.musica_in_corso = self._musica_in_corso
+        # E la fascia notturna, con lo stesso patto: `suoni` non sa che cosa
+        # sia il night mode, sa solo che ogni tanto deve abbassare la voce.
+        # La fascia la calcola gia' `_apply_modes` per la luminosita'.
+        # `getattr` e non `self.night`: questa riga sta **prima** del punto in
+        # cui l'attributo nasce, qualche decina di righe piu' in giu'. Oggi
+        # nessuno la chiama cosi' presto, ma una riga che si rompe se qualcuno
+        # sposta un blocco e' una trappola per il prossimo.
+        suoni.notte_in_corso = lambda: getattr(self, "night", False)
 
         for source in (self.zedmd, self.preview, self.notifiche,
                        self.satelliti, self.radar,
@@ -328,6 +341,8 @@ class Runtime:
         self.gameboy.start()
 
         self._start_audio()
+        self._start_metadati()
+        self._riallinea_cassa()
 
         # Handshake ZeDMD sulla porta 80: server dedicato, non Flask.
         self.zedmd_http = ZeDMDHttpServer(
@@ -383,6 +398,58 @@ class Runtime:
             return brano["source"] == "airplay" and brano["playing"]
         except Exception:
             return False
+
+    def _start_metadati(self):
+        """La pipe locale di shairport-sync: i metadati presi dove nascono.
+
+        Due programmi sulla stessa macchina non hanno motivo di parlarsi
+        attraverso un server di rete. Questa strada e' la principale dalla
+        7.4; MQTT resta acceso accanto e continua a funzionare, e chi ha gia'
+        tutto configurato non si accorge del cambio — le due strade finiscono
+        nella stessa funzione.
+
+        Se shairport-sync c'e' ma non scrive ancora nella pipe, glielo si
+        chiede: e' una scrittura sola nella sua configurazione e un riavvio,
+        e la volta dopo non serve piu'. E' anche l'unico modo perche' una
+        macchina gia' installata riceva la funzione, visto che
+        l'aggiornamento via rete non esegue nessuno script.
+        """
+        self.metadati = metadati.Metadati(self.cfg,
+                                          self.nowplaying.handle_shairport)
+        if not self.metadati.voluta():
+            return
+        percorso = self.metadati.percorso()
+        try:
+            if cassa.installato() and not cassa.metadati_attivi(percorso):
+                ok, motivo = cassa.abilita_metadati(percorso)
+                if ok:
+                    print("[dmd] shairport-sync ora scrive i metadati in %s"
+                          % percorso)
+                else:
+                    print("[dmd] pipe dei metadati non attivata: %s" % motivo)
+        except Exception as exc:
+            print("[dmd] pipe dei metadati non attivata: %s" % exc)
+        try:
+            self.metadati.start()
+        except Exception as exc:
+            print("[dmd] lettore dei metadati non avviato: %s" % exc)
+
+    def _riallinea_cassa(self):
+        """L'uscita musicale segue la scheda scelta in Impostazioni.
+
+        All'avvio e non solo alla pressione dell'interruttore: una scheda
+        cambiata a servizio fermo, o un file di configurazione ripristinato da
+        un backup, non lasciano nessuno a riallineare.
+        """
+        try:
+            fatto, motivo = cassa.riconcilia(suoni.uscita(self.cfg))
+            if fatto:
+                print("[dmd] uscita musicale riportata su %s"
+                      % cassa.uscita_attuale())
+            elif motivo:
+                print("[dmd] uscita musicale non riallineata: %s" % motivo)
+        except Exception as exc:
+            print("[dmd] uscita musicale non riallineata: %s" % exc)
 
     def _start_audio(self):
         """Collega il bus MQTT, le sottoscrizioni e il poller di Spotify.
@@ -783,9 +850,11 @@ class Runtime:
         if not self.running:
             return
         self.running = False
-        for closing in (self.zedmd_http, self.spotify, self.hass, self.mqtt):
+        for closing in (self.zedmd_http, self.spotify, self.hass, self.mqtt,
+                        self.metadati):
             try:
-                closing.stop()
+                if closing is not None:
+                    closing.stop()
             except Exception:
                 pass
         for source in self.arbiter.sources.values():

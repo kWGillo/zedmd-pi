@@ -1,4 +1,4 @@
-# DMD Controller 7.3
+# DMD Controller 7.4
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -34,7 +34,11 @@ un interruttore anche in Home Assistant.
   Dalla 7.3 con la **copertina**, ridotta di livelli come la Funcam perché sui
   mezzi toni questo pannello ha sempre avuto ragione, e con la possibilità di
   andare **a rotazione** con le foto invece di tenersi il vetro per tutto il
-  tempo in cui suona.
+  tempo in cui suona. Dalla 7.4 i metadati di AirPlay arrivano da una **pipe
+  locale** invece che dal broker: shairport-sync e il DMD girano sulla stessa
+  macchina, e farli parlare via rete voleva dire tenere allineati un indirizzo
+  e una password in due file diversi. Chi non usa Home Assistant ora può
+  spegnere MQTT senza perdere la musica.
 - **Rolling Banner** — dieci testi scorrevoli a comparsa periodica, ciascuno
   con colore, dimensione, velocità e lampeggio propri.
 - **Compleanni** — l'augurio compare da solo nel giorno giusto.
@@ -668,7 +672,8 @@ le tappe.
 | 7.0 | Il meteo: bollettino della giornata al mattino, aggiornamento ogni poche ore, icone disegnate pixel per pixel, e le allerte di MeteoAlarm. La posizione passa dal Radar alle Impostazioni, perché la usano in tre |
 | 7.1 | La finestra del meteo ridisegnata guardandola accesa: i gradi di adesso grandi al centro con l'umidità, massima e minima in alto a destra con le frecce, e l'unità — che prima mancava del tutto |
 | 7.2 | I satelliti diventano un servizio notturno: un cancello sull'altezza del Sole, messo più in alto della soglia di visibilità perché il preavviso scatta dieci minuti prima. Ferma il vetro, non il calcolo né i sensori |
-| **7.3** | **La copertina del brano, passata dalla riduzione di livelli che rende guardabile la Funcam — perché sui mezzi toni questo pannello ha sempre avuto ragione. E Now Playing può andare a rotazione con le foto** |
+| 7.3 | La copertina del brano, passata dalla riduzione di livelli che rende guardabile la Funcam — perché sui mezzi toni questo pannello ha sempre avuto ragione. E Now Playing può andare a rotazione con le foto |
+| **7.4** | **I metadati di AirPlay lasciano la rete: shairport-sync scrive in una pipe locale e il DMD la legge — due programmi sulla stessa macchina non hanno motivo di parlarsi attraverso un server. Breakout non copre più i propri suoni, la scheda audio automatica non è più l'HDMI scollegata, e di notte il pannello abbassa la voce** |
 
 ---
 

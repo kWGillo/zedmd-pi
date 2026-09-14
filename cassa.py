@@ -81,6 +81,57 @@ def _leggi():
         return ""
 
 
+def _blocco(testo, nome):
+    """Dove comincia e dove finisce il blocco `nome = { ... }`. O None.
+
+    Si contano le graffe invece di fidarsi di un'espressione regolare: i
+    blocchi di questo file possono contenerne altri, e `.*?` si fermerebbe
+    alla prima chiusa che incontra — cioe' a meta' del blocco sbagliato. Le
+    stringhe fra virgolette si saltano, perche' una graffa dentro un nome di
+    file non e' una graffa del formato.
+    """
+    inizio = re.search(r"\b%s\s*=\s*\{" % re.escape(nome), testo)
+    if not inizio:
+        return None
+    profondita = 0
+    dentro_stringa = False
+    indice = inizio.end() - 1
+    while indice < len(testo):
+        carattere = testo[indice]
+        if dentro_stringa:
+            if carattere == "\\":
+                indice += 2
+                continue
+            if carattere == '"':
+                dentro_stringa = False
+        elif carattere == '"':
+            dentro_stringa = True
+        elif carattere == "{":
+            profondita += 1
+        elif carattere == "}":
+            profondita -= 1
+            if profondita == 0:
+                return (inizio.start(), indice + 1)
+        indice += 1
+    return None
+
+
+def _campo(blocco, nome):
+    """Il valore di `nome = "..."` dentro un blocco, o ""."""
+    trovato = re.search(r"\b%s\s*=\s*\"([^\"]*)\"" % re.escape(nome), blocco)
+    return trovato.group(1).strip() if trovato else ""
+
+
+def _scrivi_campo(blocco, nome, valore):
+    """Cambia `nome = "valore"` dentro un blocco, o lo aggiunge in cima."""
+    riga = '%s = "%s";' % (nome, valore)
+    trovato = re.search(r"(\b%s\s*=\s*\")([^\"]*)(\")" % re.escape(nome), blocco)
+    if trovato:
+        return blocco[:trovato.start(2)] + valore + blocco[trovato.end(2):]
+    apertura = blocco.index("{")
+    return blocco[:apertura + 1] + "\n    " + riga + blocco[apertura + 1:]
+
+
 def installato():
     """Vero se c'e' qualcosa da configurare: il programma e la sua conf."""
     return bool(shutil.which("shairport-sync")) and os.path.isfile(CONF)
@@ -231,7 +282,124 @@ def imposta(device, acceso):
     return _riavvia()
 
 
+# ------------------------------------------------------- la pipe dei metadati
+
+# Il percorso predefinito di shairport-sync. Si ripete qui invece di importare
+# `metadati` perche' questo modulo non deve dipendere da quello: si occupa di
+# un file di configurazione, non di leggere niente.
+PIPE = "/tmp/shairport-sync-metadata"
+
+
+def metadati_stato():
+    """Come sta la pipe nella configurazione: (accesa, percorso)."""
+    testo = _leggi()
+    if not testo:
+        return (False, "")
+    dove = _blocco(testo, "metadata")
+    if dove is None:
+        return (False, "")
+    blocco = testo[dove[0]:dove[1]]
+    acceso = _campo(blocco, "enabled").lower() in ("yes", "true", "1")
+    return (acceso, _campo(blocco, "pipe_name") or PIPE)
+
+
+def metadati_attivi(percorso=None):
+    """Vero se shairport-sync sta gia' scrivendo nella pipe che leggiamo noi.
+
+    Il percorso conta quanto l'interruttore: una pipe accesa che scrive
+    altrove vale esattamente come spenta, e senza confrontarlo si
+    dichiarerebbe tutto a posto mentre il pannello resta vuoto. E' lo stesso
+    errore del broker, con un nome diverso.
+    """
+    acceso, dove = metadati_stato()
+    if not acceso:
+        return False
+    return dove == (percorso or PIPE)
+
+
+def abilita_metadati(percorso=None):
+    """Chiede a shairport-sync di scrivere i metadati nella pipe. (ok, motivo).
+
+    Tocca **solo** il blocco `metadata`, come `imposta` tocca solo
+    `output_device`: nel blocco `mqtt` di questo file c'e' la password del
+    broker, e riscrivere la configurazione da zero vorrebbe dire o perderla o
+    maneggiarla. Non serve ne' l'una ne' l'altra cosa per accendere una pipe.
+    """
+    percorso = percorso or PIPE
+    if not installato():
+        return False, "shairport-sync non e' installato"
+    testo = _leggi()
+    if not testo:
+        return False, "configurazione di shairport-sync illeggibile"
+
+    dove = _blocco(testo, "metadata")
+    if dove is None:
+        coda = ("\n\n// Aggiunto dal DMD Controller: i metadati del brano "
+                "arrivano\n// da qui invece che dal broker. Vedi metadati.py.\n"
+                "metadata = {\n"
+                '    enabled = "yes";\n'
+                # La copertina no, per adesso: e' il pezzo piu' pesante che
+                # passi da questa pipe e il pannello non la usa ancora da
+                # questa strada. Accenderla vorrebbe dire far attraversare
+                # centinaia di kilobyte per brano a una FIFO, per buttarli.
+                '    include_cover_art = "no";\n'
+                '    pipe_name = "%s";\n'
+                "};\n" % percorso)
+        nuovo = testo.rstrip() + coda
+    else:
+        blocco = testo[dove[0]:dove[1]]
+        blocco = _scrivi_campo(blocco, "enabled", "yes")
+        blocco = _scrivi_campo(blocco, "pipe_name", percorso)
+        nuovo = testo[:dove[0]] + blocco + testo[dove[1]:]
+
+    try:
+        _scrivi(nuovo)
+    except OSError as exc:
+        return False, str(exc)
+
+    # La FIFO la crea shairport-sync all'avvio, ma crearla adesso toglie di
+    # mezzo la finestra in cui la pagina direbbe "la pipe non c'e'" mentre in
+    # realta' e' tutto a posto e manca solo un istante.
+    try:
+        if not os.path.exists(percorso):
+            os.mkfifo(percorso, 0o666)
+            os.chmod(percorso, 0o666)
+    except OSError:
+        pass
+
+    return _riavvia()
+
+
+def riconcilia(device):
+    """Riallinea l'uscita di shairport-sync alla scheda scelta. (fatto, motivo).
+
+    L'interruttore dell'uscita musicale **fotografa** la scheda nell'istante
+    in cui lo si preme, e fin qui era tutto: cambiando poi scheda in
+    Impostazioni, shairport-sync restava su quella vecchia e nessuno lo
+    diceva. La musica finiva in un'uscita che non suona, e sul pannello non
+    compariva nessun errore — la stessa malattia dell'indirizzo del broker,
+    con un altro nome.
+
+    Comanda Impostazioni, sempre. Qui non si decide niente: si va a vedere se
+    i due sono d'accordo e, se non lo sono, si riporta shairport-sync su
+    quello che ha scelto l'utente.
+
+    Non fa niente a uscita musicale spenta: li' la scheda giusta e' quella
+    fittizia, ed e' gia' quella che c'e' scritta.
+    """
+    if not installato() or not attiva():
+        return False, ""
+    voluto = esclusivo(device)
+    if not voluto:
+        return False, "nessuna scheda audio"
+    if uscita_attuale() == voluto:
+        return False, ""
+    return imposta(device, True)
+
+
 def stato(cfg=None):
     """Quel che serve alla pagina Now Playing."""
+    acceso, dove = metadati_stato()
     return {"installato": installato(), "attiva": attiva(),
-            "uscita": uscita_attuale(), "finto": FINTO}
+            "uscita": uscita_attuale(), "finto": FINTO,
+            "metadati": acceso, "pipe": dove}

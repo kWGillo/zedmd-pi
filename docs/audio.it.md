@@ -347,10 +347,32 @@ Il riquadro **Audio** ha quattro comandi.
 avvisi, né giochi, né Doom.
 
 **Uscita audio** — le schede viste dal kernel, lette da `/proc/asound/cards`.
-Lasciando *«L'ultima collegata»* il DMD prende l'ultima della lista: con una
-chiavetta USB
-appena infilata è quasi sempre quella giusta, visto che la scheda 0 è l'audio
-interno che con questo pannello non si può usare comunque.
+Lasciando *«L'ultima collegata»* il DMD sceglie da sé, e la regola ha **due
+livelli**: prima le schede vere e proprie — una chiavetta USB, un DAC — e solo
+se non ce n'è nessuna le uscite interne del Raspberry. Dentro ogni livello
+vale l'ultima della lista, che con una chiavetta appena infilata è quasi
+sempre quella giusta.
+
+> **Perché due livelli e non uno.** Fino alla 7.3 la regola era «l'ultima
+> scheda non fittizia», scritta quando in quell'elenco c'erano solo la scheda
+> finta e la chiavetta. Su un Pi 4 con Now Playing installato l'elenco vero è:
+>
+> ```
+>  0 [Dummy    ]: Dummy - Dummy
+>  1 [Audio    ]: USB-Audio - USB Audio
+>  2 [vc4hdmi0 ]: vc4-hdmi - vc4-hdmi-0
+>  3 [vc4hdmi1 ]: vc4-hdmi - vc4-hdmi-1
+> ```
+>
+> Le due uscite HDMI si registrano **dopo** la USB, quindi «l'ultima» era
+> `plughw:3,0`: ogni avviso finiva in un'uscita HDMI a cui non è collegato
+> niente. Silenzio perfetto, e nessun errore da leggere.
+
+Le uscite interne restano in elenco e si possono scegliere a mano — su
+un'altra macchina potrebbero servire davvero — ma non sono mai la scelta
+automatica. L'HDMI vuole un cavo che qui non c'è, e il jack non può funzionare
+comunque: la libreria della matrice si prende lo stesso blocco PWM, e
+l'installazione lo disattiva apposta (§ 1).
 
 Se la scheda che avevi scelto viene staccata, il DMD **non ripiega su
 un'altra**: resta muto e lo dice in pagina. Suonare dall'altoparlante
@@ -363,10 +385,37 @@ per gli altri programmi e non ha bisogno di `alsamixer`.
 
 **Prova il suono** — suona un effetto sulla scheda scelta. Funziona **anche a
 suono spento**, apposta: serve proprio a capire se l'audio funziona *prima* di
-accenderlo.
+accenderlo. E usa sempre il volume di giorno: un pulsante di prova che di
+notte suona il silenzio non prova niente, anzi fa credere che la scheda sia
+rotta.
 
 Accanto ci sono le due levette **Effetti dei giochi (Breakout, Invaders)** e
 **Audio di Doom**, che sono i § 3.2 e § 3.3.
+
+## Il volume in modalità notte
+
+Nel riquadro **Night mode e Sleep mode** c'è un quarto campo accanto alla
+luminosità notturna: **Volume %**, predefinito **0, cioè muto**.
+
+Vale solo se il Night mode è acceso, e riguarda quello che il pannello dice
+**di sua iniziativa** — un aereo di passaggio, un compleanno, una notifica.
+Non riguarda una partita: quella è una cosa che stai facendo tu adesso, e
+zittirla sarebbe come spegnere il pannello a chi ci sta giocando davanti. È la
+stessa eccezione che lo Sleep mode fa già per chi tiene il pannello occupato.
+
+**Sleep mode e display spento non compaiono in questo discorso perché sono già
+silenziosi**, e non per una regola sull'audio: lì il ciclo principale si ferma
+prima di scegliere una sorgente, e l'avviso nasce proprio nel momento in cui
+una sorgente prende il pannello. Se il pannello non lo prende nessuno, non c'è
+niente da annunciare. Il Night mode era l'unica delle tre fasce in cui alle
+tre di notte un aereo di passaggio suonava a volume pieno.
+
+Se apri la pagina mentre il Night mode è in corso, lo slider del volume
+continua a mostrare **il valore di giorno**, con un avviso sopra che spiega
+cosa sta succedendo. Non è una distrazione: se mostrasse il volume in vigore,
+aprire la pagina di notte e premere Salva scriverebbe zero in configurazione
+per sempre — che è esattamente l'inganno dello slider della luminosità durante
+il Night mode, già pagato una volta in questo progetto.
 
 Se ffmpeg fallisce — scheda staccata a metà, file illeggibile — l'ultima riga
 del suo errore compare sotto il riquadro. Il silenzio non resta mai senza

@@ -64,6 +64,17 @@ DEFAULTS = {
         "night_start": "22:00",
         "night_end": "07:00",
         "night_brightness": 15,
+        # E il volume, con la stessa logica della luminosita': di notte il DMD
+        # abbassa la voce insieme alla luce. Zero = muto, ed e' il predefinito
+        # perche' un avviso a volume pieno alle tre di notte non lo vuole
+        # nessuno -- vale solo se il night mode e' acceso, quindi chi non lo
+        # usa non se ne accorge.
+        #
+        # Vale per quello che il DMD dice **di sua iniziativa**: un aereo, un
+        # compleanno, una notifica. Non per una partita, che e' una cosa che
+        # stai facendo tu adesso -- la stessa eccezione che Sleep mode fa gia'
+        # per chi tiene il pannello occupato.
+        "night_volume": 0.0,
         "sleep_enabled": False,
         "sleep_start": "01:00",
         "sleep_end": "06:00",
@@ -381,6 +392,21 @@ DEFAULTS = {
         # annunciano la pausa: durante la riproduzione normale il silenzio di
         # decine di secondi e' normale, quindi il valore va tenuto largo.
         "advance_timeout": 600,
+        # I metadati di AirPlay letti dalla pipe locale di shairport-sync
+        # invece che dal broker. E' la strada principale dalla 7.4: i due
+        # programmi girano sulla stessa macchina, e farli parlare via rete
+        # voleva dire tenere allineati un indirizzo e una password in due file
+        # diversi -- che e' esattamente quello che si e' rotto.
+        #
+        # MQTT resta acceso e continua a funzionare: chi ha gia' tutto
+        # configurato non deve toccare niente, e le due strade finiscono nella
+        # stessa funzione. Spegnendo questa si torna al comportamento di
+        # prima.
+        "pipe": True,
+        # Vuoto = il percorso predefinito di shairport-sync,
+        # /tmp/shairport-sync-metadata. Si scrive qui solo se lo si e'
+        # spostato a mano.
+        "pipe_percorso": "",
         "title_color": "#ffffff",
         "artist_color": "#00ffff",
         "album_color": "#0000ff",

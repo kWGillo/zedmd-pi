@@ -1295,6 +1295,7 @@ def create_app(runtime):
             authorize_url=request.args.get("authorize", ""),
             result=request.args.get("result", ""),
             audio=suoni.stato(cfg), cassa=cassa.stato(cfg),
+            metadati=(runtime.metadati.status() if runtime.metadati else None),
             status=runtime.player.status(current_language()), page="nowplaying")
 
     @app.route("/radar")
@@ -1623,6 +1624,14 @@ def create_app(runtime):
             display["night_brightness"] = max(0, min(100, int(request.form.get("night_brightness", 15))))
         except ValueError:
             display["night_brightness"] = 15
+        # Il volume notturno si scrive in percentuale nella pagina e si
+        # conserva da 0 a 1, come tutti gli altri volumi del progetto: la
+        # percentuale e' un fatto della pagina, non della configurazione.
+        try:
+            display["night_volume"] = max(0, min(100, int(
+                request.form.get("night_volume", 0)))) / 100.0
+        except ValueError:
+            display["night_volume"] = 0.0
         dmdconf.save()
         runtime._applied_brightness = None
         return redirect(url_for("page_settings"))
@@ -1854,6 +1863,14 @@ def create_app(runtime):
         except ValueError:
             conf["volume"] = 0.7
         dmdconf.save()
+        # Se l'uscita musicale e' accesa, shairport-sync deve seguire la
+        # scheda scelta qui. Senza questa riga la cambiavi in Impostazioni e
+        # la musica continuava a uscire da quella di prima, in silenzio e
+        # senza un errore da leggere.
+        try:
+            cassa.riconcilia(suoni.uscita(cfg))
+        except Exception as exc:
+            print("[cassa] uscita musicale non riallineata: %s" % exc)
         return redirect(url_for("page_settings"))
 
     @app.route("/api/audio/prova", methods=["POST"])
@@ -1865,7 +1882,11 @@ def create_app(runtime):
         solo momento in cui serve.
         """
         percorso = suoni.effetto("livello")
-        partito, motivo = suoni.riproduci(cfg, percorso, forza=True)
+        # Volume impostato, non quello in vigore: di notte quello in vigore e'
+        # zero, e un pulsante di prova che suona il silenzio non prova niente
+        # — anzi, fa credere che la scheda sia rotta.
+        partito, motivo = suoni.riproduci(cfg, percorso, forza=True,
+                                          vol=suoni.volume_impostato(cfg))
         if not partito:
             chiave = "audio.failed"
         elif not suoni.acceso(cfg):
@@ -1896,7 +1917,8 @@ def create_app(runtime):
         if request.form.get("prova") == "1":
             percorso = suoni.percorso_servizio(cfg, chiave)
             if percorso:
-                suoni.riproduci(cfg, percorso, forza=True)
+                suoni.riproduci(cfg, percorso, forza=True,
+                                vol=suoni.volume_impostato(cfg))
         return redirect(url_for("page_services"))
 
     @app.route("/api/restart", methods=["POST"])
@@ -2069,6 +2091,31 @@ def create_app(runtime):
             chiave = "cassa.failed"
         return redirect(url_for("page_nowplaying", result=i18n.translate(
             chiave, current_language(), error=motivo)))
+
+    @app.route("/api/nowplaying/metadati", methods=["POST"])
+    def api_nowplaying_metadati():
+        """(Ri)attiva la pipe dei metadati e riapre il lettore.
+
+        Normalmente non serve premerlo: il DMD la attiva da solo all'avvio se
+        manca. Esiste per quando qualcuno ha rimesso mano a
+        /etc/shairport-sync.conf, o per rimettere in moto le cose senza
+        riavviare il servizio intero.
+        """
+        percorso = (runtime.metadati.percorso() if runtime.metadati
+                    else cassa.PIPE)
+        ok, motivo = cassa.abilita_metadati(percorso)
+        if ok and runtime.metadati is not None:
+            # Il lettore va riaperto: il riavvio di shairport-sync ricrea la
+            # FIFO, e il descrittore che avevamo in mano guarda un file che
+            # non esiste piu'.
+            try:
+                runtime.metadati.stop()
+                runtime.metadati.start()
+            except Exception as exc:
+                print("[metadati] lettore non riaperto: %s" % exc)
+        return redirect(url_for("page_nowplaying", result=i18n.translate(
+            "metadati.on" if ok else "metadati.failed",
+            current_language(), error=motivo, percorso=percorso)))
 
     @app.route("/api/nowplaying/test", methods=["POST"])
     def api_nowplaying_test():

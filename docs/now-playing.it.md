@@ -50,22 +50,62 @@ casi c'è il **topic esterno**, spiegato al capitolo 6.
   iPhone / iPad / Mac
           │  AirPlay 2
           ▼
-  shairport-sync ──── audio ───▶  scheda audio fittizia (nel nulla)
+  shairport-sync ──── audio ───▶  scheda audio (o quella fittizia)
           │
           │  metadati
-          ▼
-     broker MQTT  ◀──────────  Home Assistant (facoltativo)
-          │
-          ▼
-     DMD Controller  ──────▶  pannello 256 × 64
-          │
-          └──────────────────▶  entità in Home Assistant
+          ├──── pipe locale ─────────────┐
+          │     /tmp/shairport-sync-...  │
+          │                              ▼
+          └──── broker MQTT ────────▶  DMD Controller ──▶ pannello 256 × 64
+                     ▲                        │
+                     │                        └──────────▶ entità in HA
+              Home Assistant
+               (facoltativo)
 ```
 
-Il broker MQTT è il punto d'incontro. Il valore predefinito è un Mosquitto
-installato **sul Raspberry stesso**: così tutto funziona senza Home
-Assistant. Chi Home Assistant ce l'ha già, scrive l'indirizzo di quel broker
-e ottiene le due cose insieme, senza installare Mosquitto due volte.
+**Due strade per la stessa cosa, e la prima è quella giusta.**
+
+La **pipe locale** è la strada principale dalla 7.4. shairport-sync e il DMD
+girano sulla stessa macchina: i metadati passano da un file, senza indirizzi,
+porte o password da tenere allineati. Il DMD la attiva da solo al primo avvio
+— scrive il blocco `metadata` in `/etc/shairport-sync.conf` e riavvia il
+servizio — e dalla pagina Musica si vede se sta arrivando qualcosa.
+
+Il **broker MQTT** continua a funzionare esattamente come prima, accanto alla
+pipe. Resta il punto d'incontro per tutto il resto del dialogo con Home
+Assistant — interruttori, sensori, notifiche — ma **non è più necessario per
+la musica**: chi Home Assistant non lo usa può spegnere MQTT del tutto e Now
+Playing continua a funzionare. Chi invece lo usa scrive l'indirizzo del broker
+di Home Assistant e ottiene le due cose insieme, senza installare Mosquitto
+due volte.
+
+> **Perché è cambiato.** Fino alla 7.3 il broker era l'unica strada, e ha
+> prodotto un guasto istruttivo. Il broker di casa ha cambiato indirizzo; la
+> pagina web ha aggiornato la configurazione del DMD;
+> `/etc/shairport-sync.conf` è rimasto a puntare a quello vecchio. Il telefono
+> vedeva la cassa, la musica usciva, e il pannello restava vuoto — **senza un
+> errore da nessuna parte**, perché dal punto di vista di ognuno dei due
+> programmi andava tutto bene. Due file che devono dire la stessa cosa, e
+> nessuno incaricato di tenerli allineati, sono un guasto che aspetta il suo
+> momento.
+
+## Se i metadati non arrivano
+
+Nella pagina **Musica**, riquadro «Metadati del brano», tre righe dicono dove
+si è rotto:
+
+| riga | che cosa vuol dire se è «no» |
+|---|---|
+| shairport-sync ci scrive | il blocco `metadata` non c'è, o punta a un'altra pipe. Premi «Riattiva la pipe» |
+| il DMD la sta leggendo | la FIFO non esiste o non è leggibile; il motivo è scritto lì accanto |
+| elementi ricevuti: 0 | la pipe è a posto ma non sta suonando niente, ed è normale. Metti musica |
+
+Dalla riga di comando, la stessa cosa in due comandi:
+
+```bash
+sudo grep -A4 '^metadata' /etc/shairport-sync.conf
+ls -l /tmp/shairport-sync-metadata
+```
 
 # Il modo veloce
 

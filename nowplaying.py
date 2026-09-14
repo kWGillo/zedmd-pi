@@ -342,7 +342,10 @@ class NowPlaying:
             self.update("airplay", artist=text, active=True)
         elif leaf in ("album", "asal"):
             self.update("airplay", album=text, active=True)
-        elif leaf == "client_name":
+        elif leaf in ("client_name", "snam"):
+            # `snam` e' lo stesso dato letto dalla pipe dei metadati invece
+            # che dal topic leggibile: shairport-sync lo chiama cosi' nei
+            # codici a quattro lettere.
             self.update("airplay", client=text)
         elif leaf == "prgr":
             values = parse_progress(text)

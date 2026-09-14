@@ -1547,6 +1547,48 @@ Storico:
        tot foto invece di tenerlo per tutto il tempo in cui suona. Il conto e\'
        sui media mostrati e il contatore c\'era gia\'. Senza Media Player acceso
        decade a "sempre": senza foto non c\'e\' niente da dividere.
+  7.4  **I metadati di AirPlay smettono di passare dalla rete.** Now Playing
+       non partiva: il telefono vedeva la cassa, la musica usciva, e il
+       pannello restava vuoto senza un errore da nessuna parte. La causa: il
+       broker di casa aveva cambiato indirizzo, la pagina web aveva aggiornato
+       la configurazione del DMD, e /etc/shairport-sync.conf era rimasto a
+       puntare a quello vecchio. Due file che devono dire la stessa cosa e
+       nessuno che li tenga allineati.
+       La domanda giusta pero\' era un\'altra, ed e\' arrivata da fuori: perche\'
+       due programmi sulla **stessa macchina** si parlano attraverso un server
+       di rete? shairport-sync sa gia\' scrivere i metadati in una pipe locale,
+       e i codici a quattro lettere che ne escono sono gli stessi che il DMD
+       gestisce da sempre. Niente indirizzo, niente password, niente da tenere
+       allineato, e il DMD configura shairport-sync da solo al primo avvio.
+       MQTT resta e continua a funzionare -- chi ha gia\' tutto configurato non
+       tocca niente, e le due strade finiscono nella stessa funzione -- ma chi
+       non usa Home Assistant adesso puo\' spegnerlo senza perdere la musica.
+       **Breakout perdeva i suoi suoni.** Con la palla ferma sulla racchetta,
+       prima del lancio, quel ramo veniva attraversato a ogni fotogramma e ci
+       suonava dentro: trenta "racchetta" al secondo da 50 ms l\'uno. Era il
+       ronzio continuo prima di premere fuoco, ed era anche il motivo per cui
+       i mattoni non si sentivano -- il mixer tiene otto voci e restava pieno
+       di copie dello stesso colpo, sommate fino a saturare. Misurato: venti
+       secondi di partita erano 438 chiamate, di cui 433 di troppo. Ora sono 7.
+       **La scheda audio automatica era quella sbagliata.** La regola diceva
+       "l\'ultima scheda non fittizia" ed era stata scritta quando in elenco ce
+       n\'erano due; su un Pi 4 le due uscite vc4-hdmi si registrano dopo la
+       chiavetta USB e le passavano davanti, mandando ogni avviso in un\'uscita
+       HDMI a cui non e\' collegato niente. Ora le uscite interne del Raspberry
+       sono l\'ultima risorsa, non la prima scelta.
+       **Di notte il DMD abbassa la voce.** Sleep mode e display spento erano
+       gia\' silenziosi -- li\' il ciclo si ferma prima di arrivare al punto in
+       cui il suono nasce -- ma il night mode lasciava tutto al lavoro, solo
+       piu\' fioco: alle tre di notte un aereo di passaggio suonava a volume
+       pieno. C\'e\' un volume notturno, predefinito zero, con la stessa forma
+       della luminosita\' notturna. Vale per quello che il pannello dice di sua
+       iniziativa, non per una partita, che e\' una cosa che stai facendo tu. E
+       lo slider della pagina continua a mostrare il volume di giorno: lo
+       stesso inganno dello slider della luminosita\' non si ripete.
+       **L\'uscita musicale segue la scheda scelta in Impostazioni.**
+       L\'interruttore la fotografava una volta sola: cambiando scheda dopo,
+       shairport-sync restava sulla vecchia, in silenzio. Stessa malattia
+       dell\'indirizzo del broker, stessa cura.
 """
 
-__version__ = "7.3"
+__version__ = "7.4"

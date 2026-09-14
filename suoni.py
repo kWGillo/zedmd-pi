@@ -88,6 +88,11 @@ _alsa = None
 # deve conoscerlo — sa solo che ogni tanto la scheda e' di qualcun altro.
 musica_in_corso = lambda: False
 
+# E chi sa dire se adesso e' la fascia notturna. Stesso patto: questo modulo
+# non sa che cosa sia il night mode, sa solo che ogni tanto deve abbassare la
+# voce. Lo imposta `dmdd`, che la fascia la calcola gia' per la luminosita'.
+notte_in_corso = lambda: False
+
 
 def disponibile():
     """Vero se ffmpeg sa scrivere su ALSA su questa macchina.
@@ -125,6 +130,26 @@ def _finta(nome, breve):
     return "dummy" in ("%s %s" % (nome, breve)).lower()
 
 
+# Le uscite che il Raspberry ha di suo. Non sono finte — esistono e il kernel
+# le elenca — ma su **questa** macchina non possono suonare:
+#
+#   vc4-hdmi    escono dal cavo HDMI, e qui non c'e' nessun cavo HDMI: il
+#               pannello e' collegato al bonnet, non a un monitor.
+#   bcm2835     e' l'uscita analogica del jack, e la libreria della matrice si
+#               prende lo stesso blocco PWM. L'installazione la disattiva
+#               apposta.
+#
+# Restano elencate perche' una macchina diversa potrebbe usarle davvero, ma
+# non devono mai essere la scelta automatica: ci finisce l'audio e non lo
+# sente nessuno, senza un errore da leggere.
+_INTERNE = ("hdmi", "bcm2835", "headphones")
+
+
+def _interna(nome, breve):
+    testo = ("%s %s" % (nome, breve)).lower()
+    return any(marchio in testo for marchio in _INTERNE)
+
+
 def dispositivi():
     """Le schede audio viste dal kernel: [{"alsa", "nome", "indice", "finta"}].
 
@@ -148,7 +173,8 @@ def dispositivi():
         fuori.append({"indice": indice,
                       "alsa": "plughw:%d,0" % indice,
                       "nome": lungo or breve,
-                      "finta": _finta(lungo, breve)})
+                      "finta": _finta(lungo, breve),
+                      "interna": _interna(lungo, breve)})
     return fuori
 
 
@@ -173,21 +199,83 @@ def uscita(cfg):
     il risultato sarebbe silenzio perfetto senza un solo errore da leggere.
     Chi la sceglie a mano viene comunque accontentato: e' un modo legittimo
     di zittire il DMD lasciando acceso tutto il resto.
+
+    **E salta anche le uscite interne del Raspberry**, e questa riga e' nata
+    da una macchina vera. Su un Pi 4 con Now Playing installato il kernel
+    elenca:
+
+        0 Dummy    1 USB Audio    2 vc4hdmi0    3 vc4hdmi1
+
+    La regola precedente diceva "l'ultima scheda non fittizia" ed era stata
+    scritta quando in quell'elenco c'erano solo Dummy e la chiavetta. Le due
+    vc4-hdmi si registrano **dopo** la USB, quindi passavano davanti: il DMD
+    proponeva `plughw:3,0` e mandava ogni avviso in un'uscita HDMI a cui non
+    e' attaccato niente. Silenzio perfetto, di nuovo, e di nuovo senza un
+    errore da leggere.
+
+    Quindi due livelli, non uno: prima le schede vere e proprie, e solo se
+    non ce n'e' nessuna le uscite interne. Dentro ogni livello vale ancora
+    l'ultima, che con una chiavetta appena infilata e' quasi sempre quella
+    giusta.
     """
     voluto = str(_conf(cfg).get("device") or "").strip()
     schede = dispositivi()
     presenti = [d["alsa"] for d in schede]
     if voluto:
         return voluto if voluto in presenti else ""
-    vere = [d["alsa"] for d in schede if not d["finta"]]
-    return vere[-1] if vere else ""
+    vere = [d for d in schede if not d["finta"]]
+    esterne = [d["alsa"] for d in vere if not d["interna"]]
+    if esterne:
+        return esterne[-1]
+    interne = [d["alsa"] for d in vere]
+    return interne[-1] if interne else ""
 
 
-def volume(cfg):
+def volume_impostato(cfg):
+    """Il volume scritto in configurazione. E' quello che vale lo slider."""
     try:
         return max(0.0, min(1.0, float(_conf(cfg).get("volume", 0.7))))
     except (TypeError, ValueError):
         return 0.7
+
+
+def volume_notturno(cfg):
+    """Il volume durante la modalita' notte. Predefinito 0, cioe' muto."""
+    try:
+        return max(0.0, min(1.0, float((cfg or {}).get("display", {})
+                                       .get("night_volume", 0.0))))
+    except (TypeError, ValueError, AttributeError):
+        return 0.0
+
+
+def volume(cfg):
+    """Il volume **adesso**, per un avviso che parte dal DMD.
+
+    Di notte comanda `night_volume`, esattamente come per la luminosita'
+    comanda `night_brightness`: e' la stessa idea applicata all'altra uscita.
+    Con lo zero predefinito il DMD di notte guarda e tace.
+
+    Sleep mode e display spento non compaiono qui, e non e' una dimenticanza:
+    li' non suona gia' niente, perche' il ciclo di `dmdd` si ferma prima di
+    scegliere una sorgente e il suono nasce proprio da quel momento. Il night
+    mode invece lascia il pannello al lavoro, solo piu' fioco — ed e' l'unica
+    delle tre fasce in cui alle tre di notte un aereo ti suonava l'avviso a
+    volume pieno.
+    """
+    if _notte():
+        return volume_notturno(cfg)
+    return volume_impostato(cfg)
+
+
+def volume_giochi(cfg):
+    """Il volume di una partita, che la notte non tocca.
+
+    Una partita e' una cosa che stai facendo con le mani, adesso: non e' il
+    DMD che parla da solo. Zittirla sarebbe come spegnere il pannello a chi
+    ci sta giocando davanti — ed e' esattamente l'eccezione che lo sleep mode
+    fa gia' per chi tiene il pannello occupato.
+    """
+    return volume_impostato(cfg)
 
 
 # ---------------------------------------------------------------- catalogo
@@ -325,6 +413,14 @@ def _musica():
         return False
 
 
+def _notte():
+    """Come `notte_in_corso`, ma senza poter far cadere una riproduzione."""
+    try:
+        return bool(notte_in_corso())
+    except Exception:
+        return False
+
+
 def in_corso():
     with _lucchetto:
         return _processo is not None and _processo.poll() is None
@@ -335,12 +431,17 @@ def ultimo_errore():
         return _ultimo_errore
 
 
-def riproduci(cfg, percorso, forza=False):
+def riproduci(cfg, percorso, forza=False, vol=None):
     """Suona un file. Restituisce (partito, motivo).
 
     `forza` salta il controllo dell'interruttore generale: lo usa il pulsante
     di prova nella pagina, che serve proprio a capire se l'audio funziona
     prima di accenderlo.
+
+    `vol` lo decide chi chiama, e non e' un dettaglio: e' il modo in cui si
+    distingue **il DMD che parla da solo** — e che di notte deve tacere — da
+    un suono che stai producendo tu, con le mani, in questo momento. Chi non
+    lo passa ottiene il primo dei due, che e' il caso normale.
     """
     global _processo, _ultimo_errore
     if not percorso or not os.path.isfile(percorso):
@@ -352,6 +453,12 @@ def riproduci(cfg, percorso, forza=False):
         # campanello sopra la musica non lo vuole nessuno. La notifica sul
         # pannello si vede lo stesso: qui si perde solo il suono.
         return False, "musica in corso"
+    if vol is None:
+        vol = volume(cfg)
+    if not forza and vol <= 0.0:
+        # Aprire ffmpeg per produrre silenzio e' lavoro sprecato su una
+        # macchina che ha un pannello da tenere fermo.
+        return False, "silenzio notturno" if _notte() else "volume a zero"
     device = uscita(cfg)
     if not device:
         return False, "nessuna scheda audio"
@@ -362,7 +469,7 @@ def riproduci(cfg, percorso, forza=False):
             return False, "un suono e' gia' in corso"
         comando = ["ffmpeg", "-v", "error", "-nostdin",
                    "-t", str(DURATA_MASSIMA), "-i", percorso,
-                   "-filter:a", "volume=%.2f" % volume(cfg),
+                   "-filter:a", "volume=%.2f" % vol,
                    "-f", "alsa", device]
         try:
             _processo = subprocess.Popen(comando, stdin=subprocess.DEVNULL,
@@ -611,7 +718,7 @@ def effetti_avvia(cfg):
     device = uscita_giochi(cfg)
     if not device:
         return False
-    ok, _motivo = _mixer.avvia(device, volume(cfg))
+    ok, _motivo = _mixer.avvia(device, volume_giochi(cfg))
     return ok
 
 
@@ -638,7 +745,7 @@ def suona_effetto(cfg, nome):
     percorso = effetto(nome)
     if not percorso:
         return False
-    partito, _motivo = riproduci(cfg, percorso)
+    partito, _motivo = riproduci(cfg, percorso, vol=volume_giochi(cfg))
     return partito
 
 
@@ -690,8 +797,20 @@ def uscita_giochi(cfg):
 
 
 def stato(cfg):
-    """Quel che serve alle pagine."""
+    """Quel che serve alle pagine.
+
+    `volume` e' quello **impostato**, non quello in vigore adesso, e la
+    differenza conta: lo slider della pagina mostra questo valore e lo
+    risalva appena tocchi qualcos'altro. Se qui rispondessimo con il volume
+    notturno, aprire la pagina di notte e premere Salva scriverebbe zero in
+    configurazione per sempre. E' lo stesso inganno dello slider della
+    luminosita' durante il night mode, che abbiamo gia' pagato una volta.
+
+    Il volume in vigore lo si legge da `notte` e `volume_notturno`, che
+    servono alla pagina per dirlo a parole invece di farlo di nascosto.
+    """
     return {"disponibile": disponibile(), "acceso": acceso(cfg),
             "dispositivi": dispositivi(), "uscita": uscita(cfg),
-            "volume": volume(cfg), "errore": ultimo_errore(),
+            "volume": volume_impostato(cfg), "errore": ultimo_errore(),
+            "notte": _notte(), "volume_notturno": volume_notturno(cfg),
             "effetti": os.path.isdir(CARTELLA_EFFETTI)}

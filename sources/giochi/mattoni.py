@@ -98,7 +98,13 @@ class Mattoni(Gioco):
         if self.attaccata:
             self.bx = self.racchetta + RACCHETTA_L / 2
             self.by = float(RACCHETTA_Y - PALLA)
-            self.suona("racchetta")
+            # Qui NON si suona. La palla non sta rimbalzando: sta ferma,
+            # appoggiata alla racchetta, e questo ramo lo attraversa ogni
+            # fotogramma. Suonarci dentro voleva dire trenta "racchetta" al
+            # secondo — un ronzio continuo prima del lancio, e per il resto
+            # della partita un mixer sempre pieno che copriva i mattoni.
+            # Il suono del lancio c'e' gia', e arriva quando premi: e'
+            # `lancio`, dentro `_lancia()`.
             if "fuoco" in tasti:
                 self._lancia()
             return

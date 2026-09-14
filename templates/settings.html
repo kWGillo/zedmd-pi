@@ -84,7 +84,7 @@
       <input type="checkbox" name="night_enabled" {{ 'checked' if cfg.display.night_enabled }}>
       {{ t('settings.night') }}
     </label>
-    <div class="row3">
+    <div class="row4">
       <div><label for="night_start">{{ t('common.from') }}</label>
         <input type="time" id="night_start" name="night_start" value="{{ cfg.display.night_start }}"></div>
       <div><label for="night_end">{{ t('common.to') }}</label>
@@ -92,7 +92,11 @@
       <div><label for="night_brightness">{{ t('settings.brightness') }}</label>
         <input type="number" id="night_brightness" name="night_brightness" min="0" max="100"
                value="{{ cfg.display.night_brightness }}"></div>
+      <div><label for="night_volume">{{ t('settings.night.volume') }}</label>
+        <input type="number" id="night_volume" name="night_volume" min="0" max="100" step="5"
+               value="{{ (cfg.display.night_volume * 100) | round | int }}"></div>
     </div>
+    <p class="hint">{{ t('settings.night.volume.hint') }}</p>
 
     <label class="check">
       <input type="checkbox" name="sleep_enabled" {{ 'checked' if cfg.display.sleep_enabled }}>
@@ -145,6 +149,12 @@
   {% endif %}
   {% if audio.errore %}
   <p class="status">{{ t('audio.error', error=audio.errore) }}</p>
+  {% endif %}
+  {# Detto adesso, e non lasciato capire dallo slider. Chi apre questa pagina
+     di notte deve leggere perche' il DMD tace, invece di trovare un volume
+     scritto 80 e un pannello muto e dedurne un guasto. #}
+  {% if audio.notte %}
+  <p class="status">{{ t('audio.notte', valore=(audio.volume_notturno * 100) | round | int) }}</p>
   {% endif %}
 
   <form method="post" action="{{ url_for('api_audio') }}">

@@ -2,6 +2,95 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [7.4]
+
+- **Now Playing non partiva, e la causa era un indirizzo scritto in due
+  posti.** Il telefono vedeva la cassa, la musica usciva, e sul pannello non
+  compariva niente — senza un errore da nessuna parte, perché dal punto di
+  vista di ognuno dei due programmi andava tutto bene. Il broker di casa aveva
+  cambiato indirizzo, la pagina web aveva aggiornato la configurazione del
+  DMD, e `/etc/shairport-sync.conf` era rimasto a puntare a quello vecchio.
+  Due file che devono dire la stessa cosa, e nessuno incaricato di tenerli
+  allineati.
+
+- **La domanda giusta però era un'altra: perché due programmi sulla stessa
+  macchina si parlano attraverso un server di rete?** shairport-sync sa già
+  scrivere i metadati in una pipe locale, e i codici a quattro lettere che ne
+  escono — `minm`, `asar`, `asal`, `prgr`, `pfls` — sono *gli stessi* che il
+  DMD gestisce da sempre. Nessun indirizzo, nessuna porta, nessuna password,
+  niente da tenere allineato. Il DMD configura shairport-sync da solo al primo
+  avvio: è una scrittura nel suo file e un riavvio, e la volta dopo non serve
+  più. È anche l'unico modo perché una macchina già installata riceva la
+  funzione, visto che l'aggiornamento via rete non esegue nessuno script.
+
+  **MQTT resta e continua a funzionare esattamente come prima.** Chi ha già
+  tutto configurato non deve toccare niente: le due strade finiscono nella
+  stessa funzione. Ma chi non usa Home Assistant adesso può spegnere MQTT
+  senza perdere la musica, e prima non era vero.
+
+  Il parser ha una prova che parte dai casi cattivi e non da quelli buoni:
+  l'elemento che arriva spezzato fra due letture, il base64 che va a capo, la
+  copertina binaria che non deve essere rovinata da una decodifica in utf-8,
+  la spazzatura prima del primo elemento, il tetto alla memoria. L'ultima non
+  simula niente: crea una FIFO vera, ci scrive dentro come farebbe
+  shairport-sync, e guarda che dall'altra parte esca il brano.
+
+- **Breakout perdeva i suoi suoni, e i due sintomi erano un bug solo.** Con la
+  palla ferma appoggiata alla racchetta, prima del lancio, quel ramo viene
+  attraversato a ogni fotogramma — e ci suonava dentro: trenta `racchetta.wav`
+  al secondo, da 50 ms l'uno. Era il ronzio continuo e sovrapposto prima di
+  premere fuoco. Ed era anche il motivo per cui i mattoni non si sentivano: il
+  mixer tiene otto voci insieme e restava perennemente pieno di copie dello
+  stesso colpo, sommate fino a saturare — i mattoni li suonava, ma dentro un
+  segnale già clippato non si sentivano.
+
+  Misurato prima e dopo, su una partita vera di venti secondi: **438 chiamate,
+  di cui 433 di troppo; adesso 7.** Invaders, che non si era mai lamentato,
+  stava a 2 al secondo da sempre. La prova gioca davvero una partita — la
+  logica del gioco non legge niente da sola — e conta le chiamate invece di
+  ascoltarle: se un domani un gioco supera la soglia di sovrapposizione, lo
+  dice una misura e non un orecchio.
+
+- **La scelta automatica della scheda audio mandava tutto in un'uscita HDMI
+  scollegata.** La regola diceva "l'ultima scheda non fittizia", ed era stata
+  scritta quando in elenco c'erano solo la scheda finta e la chiavetta USB. Su
+  un Pi 4 l'elenco vero è `0 Dummy, 1 USB Audio, 2 vc4hdmi0, 3 vc4hdmi1`: le
+  due uscite HDMI si registrano **dopo** la USB e le passavano davanti.
+  Silenzio perfetto, senza un errore da leggere. Ora le uscite interne del
+  Raspberry — l'HDMI e il jack, che con questo pannello non può funzionare
+  perché la libreria della matrice si prende lo stesso blocco PWM — sono
+  l'ultima risorsa e non la prima scelta. Chi ne sceglie una a mano viene
+  accontentato lo stesso.
+
+- **Di notte il DMD abbassa la voce.** Sleep mode e display spento erano già
+  silenziosi, ma non per una regola sull'audio: lì il ciclo si ferma prima di
+  scegliere una sorgente, e il suono nasce proprio da quel momento. Il night
+  mode invece lascia il pannello al lavoro, solo più fioco — e alle tre di
+  notte un aereo di passaggio suonava l'avviso a volume pieno.
+
+  C'è un **volume notturno**, con la stessa forma della luminosità notturna e
+  predefinito **0, cioè muto**. Vale per quello che il pannello dice di sua
+  iniziativa: un aereo, un compleanno, una notifica. Non per una partita, che
+  è una cosa che stai facendo tu adesso — la stessa eccezione che lo Sleep
+  mode fa già per chi tiene il pannello occupato.
+
+  E lo slider della pagina continua a mostrare il volume di giorno. Non è un
+  dettaglio: se mostrasse quello in vigore, aprire la pagina di notte e
+  premere Salva scriverebbe zero in configurazione per sempre. È lo stesso
+  inganno dello slider della luminosità durante il night mode, che questo
+  progetto ha già pagato una volta.
+
+- **L'uscita musicale segue la scheda scelta in Impostazioni.** L'interruttore
+  la fotografava una volta sola, nell'istante in cui lo si premeva: cambiando
+  scheda dopo, shairport-sync restava sulla vecchia e nessuno lo diceva.
+  Stessa malattia dell'indirizzo del broker, stessa cura — comanda
+  Impostazioni, e il riallineamento avviene al salvataggio e a ogni avvio.
+
+- La riga in gergo ALSA sotto l'uscita musicale — `hw:3,0` e basta — è
+  riscritta in italiano. Sembrava un campo da compilare, ed è stata letta come
+  una seconda scelta della scheda audio: la scheda si sceglie in un posto
+  solo, che è Impostazioni.
+
 ## [7.3]
 
 - **La copertina del brano sul pannello — e una decisione ribaltata, con

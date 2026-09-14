@@ -514,6 +514,19 @@ STRINGS = {
     "settings.modes": ("Night mode e Sleep mode", "Night mode and Sleep mode"),
     "settings.night": ("Night mode — abbassa la luminosità in una fascia oraria",
                        "Night mode — lowers brightness during a time range"),
+    "settings.night.volume": ("Volume %", "Volume %"),
+    "settings.night.volume.hint": (
+        "Il volume che il DMD usa per i propri avvisi durante il Night mode: "
+        "0 vuol dire muto, ed è il valore predefinito. Vale per quello che il "
+        "pannello dice di sua iniziativa — un aereo, un compleanno, una "
+        "notifica — non per una partita, che stai facendo tu. Sleep mode e "
+        "display spento sono già silenziosi di loro: lì non succede niente da "
+        "annunciare.",
+        "The volume the DMD uses for its own alerts during Night mode: 0 means "
+        "muted, and that is the default. It applies to what the panel says on "
+        "its own — a plane, a birthday, a notification — not to a game, which "
+        "is you. Sleep mode and a switched-off display are already silent: "
+        "nothing happens there to announce."),
     "settings.sleep": ("Sleep mode — spegne il display in una fascia oraria",
                        "Sleep mode — turns the display off during a time range"),
     "settings.wake": ("Risveglia il display se arrivano frame da Batocera durante lo Sleep",
@@ -1540,6 +1553,13 @@ STRINGS = {
         "qui non tocca gli altri programmi.",
         "It applies to the sound the DMD produces, not to the system mixer: "
         "raising it here does not affect other programs."),
+    "audio.notte": (
+        "Adesso è attivo il Night mode: gli avvisi del DMD escono al "
+        "%(valore)s%% del volume. Il valore qui sotto resta quello di giorno, "
+        "e non è stato cambiato. Le partite non sono toccate.",
+        "Night mode is active right now: the DMD's own alerts play at "
+        "%(valore)s%% volume. The value below is the daytime one and has not "
+        "been changed. Games are not affected."),
     "audio.giochi": ("Effetti dei giochi (Breakout, Invaders)",
                      "Game effects (Breakout, Invaders)"),
     "audio.doom": ("Audio di Doom", "Doom audio"),
@@ -1589,8 +1609,52 @@ STRINGS = {
         "While music is playing the service chimes stay silent: the card "
         "belongs to shairport-sync, and a chime over the music is not "
         "something anyone wants. Panel notifications still appear."),
-    "cassa.current": ("Uscita di shairport-sync adesso: %(device)s",
-                      "shairport-sync output right now: %(device)s"),
+    # Non è una scelta da fare qui: la scheda si sceglie in Impostazioni, e
+    # questa riga dice soltanto dove sta andando la musica adesso. Scritta
+    # com'era — solo `hw:3,0` — sembrava un campo da compilare.
+    "cassa.current.vera": (
+        "La musica sta uscendo dalla scheda scelta in Impostazioni:",
+        "Music is playing through the card chosen in Settings:"),
+    "cassa.current.finta": (
+        "La musica sta andando nella scheda fittizia, cioè non si sente. "
+        "Restano i metadati sul pannello. Uscita attuale:",
+        "Music is going to the dummy card, so nothing is heard. The metadata "
+        "still reaches the panel. Current output:"),
+
+    "metadati.title": ("Metadati del brano", "Track metadata"),
+    "metadati.intro": (
+        "Da dove il pannello sa che cosa stai ascoltando. shairport-sync e il "
+        "DMD girano sulla stessa macchina, quindi i metadati passano da una "
+        "pipe locale: nessun broker, nessun indirizzo e nessuna password da "
+        "tenere allineati in due file. Il DMD la attiva da solo al primo "
+        "avvio. MQTT continua a funzionare come prima, accanto a questa.",
+        "Where the panel learns what you are listening to. shairport-sync and "
+        "the DMD run on the same machine, so metadata goes through a local "
+        "pipe: no broker, no address and no password to keep in sync across "
+        "two files. The DMD enables it by itself on first start. MQTT keeps "
+        "working alongside it."),
+    "metadati.pipe": ("Pipe", "Pipe"),
+    "metadati.scrive": ("shairport-sync ci scrive", "shairport-sync writes to it"),
+    "metadati.legge": ("il DMD la sta leggendo", "the DMD is reading it"),
+    "metadati.ok": ("Funziona: %(quanti)s elementi ricevuti da quando il "
+                    "servizio è partito.",
+                    "Working: %(quanti)s items received since the service "
+                    "started."),
+    "metadati.attesa": (
+        "In ascolto. Finché non metti musica non arriva niente, ed è normale.",
+        "Listening. Nothing arrives until you play something, which is "
+        "normal."),
+    "metadati.rotta": ("La pipe non si riesce a leggere: %(error)s",
+                       "The pipe cannot be read: %(error)s"),
+    "metadati.spenta": (
+        "Lettura della pipe disattivata: i metadati arrivano solo dal broker.",
+        "Pipe reading is off: metadata arrives only through the broker."),
+    "metadati.button": ("Riattiva la pipe", "Re-enable the pipe"),
+    "metadati.on": ("Pipe attivata su %(percorso)s e shairport-sync riavviato.",
+                    "Pipe enabled on %(percorso)s and shairport-sync "
+                    "restarted."),
+    "metadati.failed": ("Non è stato cambiato niente: %(error)s",
+                        "Nothing was changed: %(error)s"),
     "cassa.missing": (
         "shairport-sync non risulta installato: questo interruttore serve "
         "dopo aver lanciato setup_nowplaying.sh.",
