@@ -2026,6 +2026,24 @@ def create_app(runtime):
         except ValueError:
             conf["hold_seconds"] = 90
         conf["safe_colors"] = request.form.get("safe_colors") == "on"
+        conf["artwork"] = request.form.get("artwork") == "on"
+        conf["artwork_base"] = (request.form.get("artwork_base") or "").strip()
+
+        def numero(nome, predefinito, minimo, massimo):
+            try:
+                return max(minimo, min(massimo,
+                                       int(request.form.get(nome, predefinito))))
+            except (TypeError, ValueError):
+                return predefinito
+
+        # Zero e' un valore valido e vuol dire "colore pieno": non si puo'
+        # limitare dal basso a 2, o si perderebbe la scelta di non ridurre.
+        livelli = numero("artwork_livelli", 4, 0, 6)
+        conf["artwork_livelli"] = livelli if livelli == 0 else max(2, livelli)
+        modo = (request.form.get("modo") or "sempre").strip().lower()
+        conf["modo"] = "rotazione" if modo.startswith("rot") else "sempre"
+        conf["ogni_n_media"] = numero("ogni_n_media", 5, 1, 100)
+        conf["durata_turno"] = numero("durata_turno", 20, 5, 300)
         dmdconf.save()
         runtime.player.invalidate()
         return redirect(url_for("page_nowplaying"))

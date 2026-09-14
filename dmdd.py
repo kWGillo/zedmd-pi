@@ -293,6 +293,11 @@ class Runtime:
         self.nowplaying = nowplaying.NowPlaying(self.cfg)
         self.player = NowPlayingSource(self.cfg, self.display.width,
                                        self.display.height, self.nowplaying)
+        # Il Media Player, per la rotazione: Now Playing deve poter chiedere
+        # quante foto sono passate. Il collegamento si fa qui e non dentro la
+        # sorgente, come per l'arbitro delle notifiche: una sorgente non deve
+        # sapere come si costruisce un'altra, solo chiederle un numero.
+        self.player.media = self.media
         self.mqtt = mqttbus.MqttBus(self.cfg)
         self.spotify = spotifyapi.SpotifyPoller(self.cfg, self.nowplaying)
         self.hass = hass.HassBridge(self.cfg, self.mqtt, self)

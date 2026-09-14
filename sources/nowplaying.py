@@ -28,6 +28,7 @@ import time
 
 from PIL import Image, ImageDraw, ImageFont
 
+import copertine
 from .base import Source
 from .clock import _load_font, parse_color
 
@@ -118,6 +119,21 @@ class NowPlayingSource(Source):
         self._signature = None
         self._scroll_start = 0.0
         self._scroll_key = None
+        self._copertine = copertine.Copertine(cfg)
+        # La larghezza su cui si impagina il testo. E' tutto il pannello quando
+        # non c'e' copertina, e quello che avanza quando c'e'. Sta in un
+        # attributo invece che in un parametro perche' la impaginazione passa
+        # per quattro metodi: farla scendere a mano vorrebbe dire cambiare
+        # quattro firme per un numero che non cambia mai a meta' disegno.
+        self._area = width
+        # Rotazione: da quanti media fa e' toccato l'ultimo turno, e fino a
+        # quando dura quello aperto.
+        self._ultimo_turno = 0
+        self._turno_fino_a = 0.0
+        # Il Media Player, per sapere quante foto sono passate. Lo attacca il
+        # runtime, come fa con l'arbitro per le notifiche: questa sorgente non
+        # deve sapere come si costruisce, solo chiederle un numero.
+        self.media = None
 
         self._font_title = _load_font(max(8, int(height * TITLE_RATIO)))
         self._font_artist = _load_font(max(7, int(height * ARTIST_RATIO)))
@@ -129,9 +145,11 @@ class NowPlayingSource(Source):
     def start(self):
         self._running = True
         self._signature = None
+        self._copertine.start()
 
     def stop(self):
         self._running = False
+        self._copertine.stop()
 
     def invalidate(self):
         self._signature = None
@@ -152,7 +170,55 @@ class NowPlayingSource(Source):
         if not self._running or self.state is None:
             return False
         track = self.state.snapshot()
-        return bool(track["title"] or track["artist"])
+        if not (track["title"] or track["artist"]):
+            return False
+        return self._turno_aperto()
+
+    # ------------------------------------------------------------ rotazione
+
+    def modo(self):
+        """`sempre` come da sempre, oppure `rotazione`."""
+        scelto = str(self.settings().get("modo", "sempre") or "sempre").lower()
+        return "rotazione" if scelto.startswith("rot") else "sempre"
+
+    def _turno_aperto(self):
+        """In rotazione: vero solo durante il proprio turno.
+
+        La rotazione conta i **media gia' mostrati**, non i minuti, e il
+        contatore non l'ha inventato questa funzione: il Media Player lo tiene
+        gia' per la sua riga di stato. Era la strada piu' corta e per una volta
+        era anche quella giusta -- "uno ogni cinque foto" e' una frase sui
+        media, e misurarla in minuti avrebbe dato un numero diverso ogni volta
+        che si cambia la durata delle foto.
+
+        **Senza Media Player acceso la rotazione decade a `sempre`**, e non e'
+        una scorciatoia: la rotazione esiste per dividere il pannello con le
+        foto. Se le foto non ci sono non c'e' niente da dividere, e tacere
+        sarebbe solo un servizio che non si vede mai.
+        """
+        if self.modo() != "rotazione":
+            return True
+        media = getattr(self, "media", None)
+        if media is None or not getattr(media, "enabled", False):
+            return True
+        adesso = time.monotonic()
+        if adesso < self._turno_fino_a:
+            return True
+        try:
+            passati = int(getattr(media, "_shown", 0))
+            ogni = max(1, int(self.settings().get("ogni_n_media", 5) or 5))
+            durata = max(5, int(self.settings().get("durata_turno", 20) or 20))
+        except (TypeError, ValueError):
+            return True
+        if passati - self._ultimo_turno < ogni:
+            return False
+        self._ultimo_turno = passati
+        self._turno_fino_a = adesso + durata
+        # Il turno comincia adesso: il fotogramma va rifatto, altrimenti si
+        # riparte da quello di due foto fa -- con la posizione del brano ferma
+        # a dov'era.
+        self._signature = None
+        return True
 
     def status(self, lang=None):
         if not self._running:
@@ -178,37 +244,74 @@ class NowPlayingSource(Source):
         if not (track["title"] or track["artist"]):
             return None
 
+        # Lo spazio per il titolo e' quello che resta **dopo** la copertina:
+        # misurarlo sul pannello intero vorrebbe dire non far scorrere titoli
+        # che in realta' non ci stanno piu'.
+        arte = self.copertina(track)
+        larghezza_utile = self.width - (arte.size[0] if arte is not None else 0)
         title_width = text_width(track["title"], self._font_title)
-        scrolling = title_width > self.width - 6
+        scrolling = title_width > larghezza_utile - 6
 
         # Il titolo che scorre va ridisegnato a ogni giro; tutto il resto solo
         # quando cambia qualcosa di visibile. Il tempo si arrotonda al secondo
         # perche' e' la risoluzione con cui viene scritto.
         signature = (track["title"], track["artist"], track["album"],
                      track["playing"], int(track["position"]),
-                     int(track["duration"]))
+                     int(track["duration"]),
+                     # La copertina arriva **dopo**, da un thread. Senza queste
+                     # due voci il fotogramma disegnato senza immagine
+                     # resterebbe valido per sempre e la copertina non
+                     # comparirebbe mai: la firma direbbe "niente e' cambiato"
+                     # mentre l'unica cosa cambiata sta in cache.
+                     track.get("artwork", ""),
+                     self.copertina(track) is not None)
         if not scrolling and signature == self._signature:
             return None
         self._signature = signature
 
         return self.render(track, scrolling)
 
+    def copertina(self, track):
+        """L'immagine pronta per questo brano, o None. Non scarica mai."""
+        return self._copertine.per(track.get("artwork", ""), self.height,
+                                   self.width)
+
     def render(self, track, scrolling=None):
         image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
-        draw = ImageDraw.Draw(image)
-        margin = max(1, self.width // 85)          # 3 px su un pannello da 256
+
+        # La copertina, se c'e'. **Se non c'e' non succede niente**, ed e' il
+        # caso normale: non tutte le sorgenti la espongono e un ingresso HDMI
+        # non ce l'ha proprio. Senza immagine l'impaginazione torna esattamente
+        # quella di prima, a tutta larghezza -- non una versione ridotta di
+        # quella con la copertina.
+        arte = self.copertina(track)
+        sinistra = 0
+        if arte is not None:
+            image.paste(arte, (0, 0))
+            sinistra = arte.size[0] + max(2, self.width // 64)
+
+        self._area = self.width - sinistra
+        # Il testo si disegna su una tela sua, larga quanto lo spazio che
+        # resta, e poi si incolla. Cosi' tutto il codice di impaginazione --
+        # il titolo che scorre, la barra del tempo, le righe che si impilano
+        # dalle metriche dei font -- continua a lavorare come se il pannello
+        # fosse largo cosi', senza sapere che esiste una copertina.
+        tela = Image.new("RGB", (self._area, self.height), (0, 0, 0))
+        draw = ImageDraw.Draw(tela)
+        margin = max(1, self._area // 85)
 
         rows = self._layout()
-        self._draw_title(image, track, margin, rows, scrolling)
+        self._draw_title(tela, track, margin, rows, scrolling)
 
         if rows["artist"] is not None:
-            draw_text(image, (margin, rows["artist"]), track["artist"],
+            draw_text(tela, (margin, rows["artist"]), track["artist"],
                       self._font_artist, self.color("artist_color"))
         if rows["album"] is not None:
-            draw_text(image, (margin, rows["album"]), track["album"],
+            draw_text(tela, (margin, rows["album"]), track["album"],
                       self._font_album, self.color("album_color"))
 
-        self._draw_transport(image, draw, track, margin, rows)
+        self._draw_transport(tela, draw, track, margin, rows)
+        image.paste(tela, (sinistra, 0))
         return image
 
     @staticmethod
@@ -271,7 +374,7 @@ class NowPlayingSource(Source):
 
     def _draw_title(self, image, track, margin, rows, scrolling):
         title = track["title"] or track["artist"]
-        area = self.width - 2 * margin
+        area = self._area - 2 * margin
         width = text_width(title, self._font_title)
         band = max(1, int(self.height * TITLE_RATIO) + 3)
 
@@ -289,7 +392,7 @@ class NowPlayingSource(Source):
             self._scroll_key = title
             self._scroll_start = time.monotonic()
 
-        gap = max(12, int(self.width * SCROLL_GAP))
+        gap = max(12, int(self._area * SCROLL_GAP))
         period = width + gap
         elapsed = max(0.0, time.monotonic() - self._scroll_start - SCROLL_HOLD)
         offset = int(elapsed * SCROLL_SPEED) % period
@@ -338,7 +441,7 @@ class NowPlayingSource(Source):
         total_w = text_width(total, self._font_time)
 
         draw_text(image, (left, y), elapsed, self._font_time, artist_color)
-        right = self.width - margin - total_w
+        right = self._area - margin - total_w
         draw_text(image, (right, y), total, self._font_time, album_color)
 
         # Lo spazio riservato al tempo trascorso e' quello della durata, non

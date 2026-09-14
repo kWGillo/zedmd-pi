@@ -75,6 +75,12 @@ def empty_track():
         "title": "", "artist": "", "album": "",
         "duration": 0.0, "position": 0.0,
         "playing": False, "source": "", "client": "",
+        # L'indirizzo della copertina, non l'immagine: qui dentro non si
+        # scarica niente. Chi disegna lo passa alla cache, che risponde
+        # subito con quello che ha -- e se non ha niente, il pannello si fa
+        # senza. Vuoto e' la normalita': non tutte le sorgenti la espongono,
+        # e un ingresso HDMI non ce l'ha proprio.
+        "artwork": "",
         "updated": 0.0, "stale": False,
     }
 
@@ -88,6 +94,7 @@ class _SourceState:
         self.artist = ""
         self.album = ""
         self.client = ""
+        self.artwork = ""
         self.duration = 0.0
         self.playing = False
         self.active = False          # sessione aperta, anche senza metadati
@@ -169,11 +176,13 @@ class _SourceState:
             "duration": self.duration, "position": self.position(timeout),
             "playing": self.playing and credibile, "source": self.name,
             "client": self.client, "updated": self.updated,
+            "artwork": self.artwork,
             "stale": not credibile,
         }
 
     def reset(self):
         self.title = self.artist = self.album = ""
+        self.artwork = ""
         self.duration = 0.0
         self.playing = False
         self.active = False
@@ -265,7 +274,7 @@ class NowPlaying:
             return
         with self._lock:
             state = self._sources[source]
-            for key in ("title", "artist", "album", "client"):
+            for key in ("title", "artist", "album", "client", "artwork"):
                 if key in fields:
                     setattr(state, key, _clean(fields[key]))
             if "duration" in fields and fields["duration"] is not None:
@@ -392,6 +401,14 @@ class NowPlaying:
             title=data.get("title", data.get("media_title", "")),
             artist=data.get("artist", data.get("media_artist", "")),
             album=data.get("album", data.get("media_album_name", "")),
+            # Tre nomi per la stessa cosa, e non e' indecisione: `entity_picture`
+            # e' quello che Home Assistant mette negli attributi di un
+            # media_player, `media_image_url` quello che usano altre
+            # integrazioni, `artwork` quello che scriverebbe una persona.
+            # Accettarli tutti e tre costa una riga e toglie una domanda.
+            artwork=(data.get("artwork")
+                     or data.get("entity_picture")
+                     or data.get("media_image_url") or ""),
             duration=data.get("duration", data.get("media_duration")),
             position=data.get("position", data.get("media_position")),
             playing=bool(data.get("playing",

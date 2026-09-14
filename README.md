@@ -1,4 +1,4 @@
-# DMD Controller 7.2
+# DMD Controller 7.3
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -28,7 +28,13 @@ un interruttore anche in Home Assistant.
   tramite le API pubbliche ADS-B della comunità, con le sigle tradotte in nomi
   leggibili e un registro CSV dei passaggi.
 - **Now Playing** — il brano in ascolto da AirPlay 2 (shairport-sync),
-  dall'API di Spotify o da un topic MQTT libero.
+  dall'API di Spotify o da un topic MQTT libero — quest'ultimo parla già il
+  dialetto di Home Assistant, quindi un'automazione basta a mandare sul
+  pannello quello che suona su una Apple TV o su un amplificatore di rete.
+  Dalla 7.3 con la **copertina**, ridotta di livelli come la Funcam perché sui
+  mezzi toni questo pannello ha sempre avuto ragione, e con la possibilità di
+  andare **a rotazione** con le foto invece di tenersi il vetro per tutto il
+  tempo in cui suona.
 - **Rolling Banner** — dieci testi scorrevoli a comparsa periodica, ciascuno
   con colore, dimensione, velocità e lampeggio propri.
 - **Compleanni** — l'augurio compare da solo nel giorno giusto.
@@ -661,7 +667,8 @@ le tappe.
 | 6.9 | Tre comandi che mentivano, corretti: il cursore della luminosità durante il Night mode, lo spegnimento del pannello che non esisteva, il Game Boy che non compariva in Home Assistant. E il totale dei voli su MQTT |
 | 7.0 | Il meteo: bollettino della giornata al mattino, aggiornamento ogni poche ore, icone disegnate pixel per pixel, e le allerte di MeteoAlarm. La posizione passa dal Radar alle Impostazioni, perché la usano in tre |
 | 7.1 | La finestra del meteo ridisegnata guardandola accesa: i gradi di adesso grandi al centro con l'umidità, massima e minima in alto a destra con le frecce, e l'unità — che prima mancava del tutto |
-| **7.2** | **I satelliti diventano un servizio notturno: un cancello sull'altezza del Sole, messo più in alto della soglia di visibilità perché il preavviso scatta dieci minuti prima. Ferma il vetro, non il calcolo né i sensori** |
+| 7.2 | I satelliti diventano un servizio notturno: un cancello sull'altezza del Sole, messo più in alto della soglia di visibilità perché il preavviso scatta dieci minuti prima. Ferma il vetro, non il calcolo né i sensori |
+| **7.3** | **La copertina del brano, passata dalla riduzione di livelli che rende guardabile la Funcam — perché sui mezzi toni questo pannello ha sempre avuto ragione. E Now Playing può andare a rotazione con le foto** |
 
 ---
 

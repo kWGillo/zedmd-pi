@@ -1524,6 +1524,29 @@ Storico:
        E ferma il vetro, non il resto: i passaggi si calcolano lo stesso, il
        registro si scrive, i sensori pubblicano, e la pagina risponde alle nove
        del mattino a "quando passa stasera".
+  7.3  **La copertina del brano, e una decisione ribaltata con cautela.** Fino
+       alla 7.2 la copertina non si mostrava, e il motivo scritto nel progetto
+       era buono: e\' fatta quasi solo di mezzi toni, il contenuto peggiore
+       possibile per un pannello S-PWM -- lo stesso motivo per cui esiste
+       `safe_colors`. Quella decisione non e\' stata cancellata ma aggirata con
+       uno strumento gia\' in casa: la Funcam mostra una telecamera su questo
+       stesso vetro riducendo i livelli per canale, e la copertina passa dalla
+       stessa riduzione. Quattro livelli di serie, due danno gli otto colori
+       pieni, zero lascia com\'e\'.
+       L\'altezza e\' fissa e la larghezza no, cosi\' una copertina quadrata e
+       una locandina 16:9 vanno bene tutte e due senza dover scegliere fra
+       tagliare e mettere le bande nere.
+       Non si scarica mai dove si disegna: chiedere una copertina guarda in
+       cache, mette in coda e torna subito. Due difetti trovati dalle prove --
+       la stessa immagine chiesta piu\' volte con un server lento, e il limite
+       dei livelli copiato dalla Funcam a otto quando la tavolozza di PIL ne
+       regge 256: veniva troncata e una faccia color pelle diventava verde.
+       Nessuna credenziale: l\'indirizzo di Home Assistant porta dentro di se\'
+       un token firmato.
+       E **la rotazione**: il brano puo\' prendere il pannello una volta ogni
+       tot foto invece di tenerlo per tutto il tempo in cui suona. Il conto e\'
+       sui media mostrati e il contatore c\'era gia\'. Senza Media Player acceso
+       decade a "sempre": senza foto non c\'e\' niente da dividere.
 """
 
-__version__ = "7.2"
+__version__ = "7.3"

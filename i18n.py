@@ -1150,12 +1150,61 @@ STRINGS = {
         "How long a paused track stays on screen before handing the display "
         "back. A playing track never expires on its own."),
     "nowplaying.nocover": (
-        "La copertina dell'album non viene mostrata di proposito: a 64 pixel "
-        "sarebbe illeggibile, ed essendo fatta quasi solo di mezzi toni "
-        "sarebbe il contenuto peggiore possibile per questo pannello.",
-        "Album artwork is deliberately not shown: at 64 pixels it would be "
-        "unreadable, and being made almost entirely of mid-tones it would be "
-        "the worst possible content for this panel."),
+        "Fino alla 7.2 la copertina non veniva mostrata, e il motivo era buono: "
+        "è fatta quasi solo di mezzi toni, cioè il contenuto peggiore possibile "
+        "per questo pannello — lo stesso motivo per cui esistono i colori "
+        "sicuri. Adesso si mostra, ma passando dalla stessa riduzione di "
+        "livelli che rende guardabile la Funcam. Se vedi righe chiare o "
+        "sfarfallio quando compare una copertina, abbassa i livelli.",
+        "Until 7.2 the artwork was not shown, and the reason was a good one: "
+        "it is made almost entirely of mid-tones, the worst possible content "
+        "for this panel — the same reason safe colours exist. It is shown now, "
+        "but through the same level reduction that makes the Funcam watchable. "
+        "If you see light rows or flicker when artwork appears, lower the "
+        "levels."),
+    "nowplaying.artwork": ("Mostra la copertina", "Show the artwork"),
+    "nowplaying.artwork.base": ("Indirizzo di Home Assistant",
+                                "Home Assistant address"),
+    "nowplaying.artwork.base.hint": (
+        "Serve solo se la sorgente manda un indirizzo relativo, come fa "
+        "`entity_picture` di Home Assistant. Non è una credenziale: quel "
+        "collegamento porta dentro di sé un token firmato, quindi sul "
+        "Raspberry non resta nessun segreto da custodire. Vuoto: niente "
+        "copertine dagli indirizzi relativi.",
+        "Only needed if the source sends a relative address, as Home "
+        "Assistant's `entity_picture` does. It is not a credential: that link "
+        "carries a signed token inside itself, so no secret is kept on the "
+        "Raspberry. Empty: no artwork from relative addresses."),
+    "nowplaying.artwork.levels": ("Livelli di colore", "Colour levels"),
+    "nowplaying.artwork.levels.hint": (
+        "Da 2 a 6 livelli per canale, oppure 0 per lasciare l'immagine "
+        "com'è. Due danno gli otto colori pieni, gli unici che non "
+        "sfarfallano mai; quattro tengono la copertina riconoscibile "
+        "togliendo la maggior parte dei mezzi toni. Sopra sei la tavolozza "
+        "non ci sta: PIL ne tiene 256 e sette livelli ne vorrebbero 343.",
+        "From 2 to 6 levels per channel, or 0 to leave the image as it is. "
+        "Two give the eight full colours, the only ones that never flicker; "
+        "four keep the artwork recognisable while removing most mid-tones. "
+        "Above six the palette does not fit: PIL holds 256 colours and seven "
+        "levels would need 343."),
+    "nowplaying.mode": ("Quando si vede", "When it shows"),
+    "nowplaying.mode.always": ("Sempre, finché suona",
+                               "Always, while something plays"),
+    "nowplaying.mode.rotation": ("A rotazione con le foto",
+                                 "In rotation with the photos"),
+    "nowplaying.mode.every": ("Una volta ogni (media)", "Once every (media)"),
+    "nowplaying.mode.duration": ("Per (secondi)", "For (seconds)"),
+    "nowplaying.mode.hint": (
+        "In rotazione il brano prende il pannello una volta ogni tot foto, "
+        "invece di tenerlo per tutto il tempo in cui suona. Il conto è sui "
+        "media mostrati, non sui minuti: «uno ogni cinque foto» è una frase "
+        "sulle foto. Se il Media Player è spento non c'è niente con cui "
+        "alternarsi e si torna a «sempre».",
+        "In rotation the track takes the panel once every so many photos, "
+        "instead of holding it for as long as music plays. The count is on "
+        "media shown, not minutes: \"one every five photos\" is a sentence "
+        "about photos. If the Media Player is off there is nothing to take "
+        "turns with, and it falls back to \"always\"."),
     "nowplaying.panel.playing": ("in riproduzione", "playing"),
     "nowplaying.panel.paused": ("in pausa", "paused"),
 

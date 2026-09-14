@@ -219,7 +219,39 @@
       {{ t('nowplaying.safe_colors') }}
     </label>
     <p class="hint">{{ t('nowplaying.safe_colors.hint') }}</p>
+
+    <label class="check">
+      <input type="checkbox" name="artwork"
+             {{ 'checked' if cfg.nowplaying.artwork }}>
+      {{ t('nowplaying.artwork') }}
+    </label>
+    <div class="row2">
+      <div><label for="artwork_base">{{ t('nowplaying.artwork.base') }}</label>
+        <input type="text" id="artwork_base" name="artwork_base"
+               placeholder="http://homeassistant.local:8123"
+               value="{{ cfg.nowplaying.artwork_base }}"></div>
+      <div><label for="artwork_livelli">{{ t('nowplaying.artwork.levels') }}</label>
+        <input type="number" id="artwork_livelli" name="artwork_livelli"
+               min="0" max="6" value="{{ cfg.nowplaying.artwork_livelli }}"></div>
+    </div>
+    <p class="hint">{{ t('nowplaying.artwork.base.hint') }}</p>
+    <p class="hint">{{ t('nowplaying.artwork.levels.hint') }}</p>
     <p class="hint">{{ t('nowplaying.nocover') }}</p>
+
+    <label for="modo">{{ t('nowplaying.mode') }}</label>
+    <select id="modo" name="modo">
+      <option value="sempre" {{ 'selected' if cfg.nowplaying.modo != 'rotazione' }}>{{ t('nowplaying.mode.always') }}</option>
+      <option value="rotazione" {{ 'selected' if cfg.nowplaying.modo == 'rotazione' }}>{{ t('nowplaying.mode.rotation') }}</option>
+    </select>
+    <div class="row2">
+      <div><label for="ogni_n_media">{{ t('nowplaying.mode.every') }}</label>
+        <input type="number" id="ogni_n_media" name="ogni_n_media" min="1" max="100"
+               value="{{ cfg.nowplaying.ogni_n_media }}"></div>
+      <div><label for="durata_turno">{{ t('nowplaying.mode.duration') }}</label>
+        <input type="number" id="durata_turno" name="durata_turno" min="5" max="300"
+               value="{{ cfg.nowplaying.durata_turno }}"></div>
+    </div>
+    <p class="hint">{{ t('nowplaying.mode.hint') }}</p>
 
     <button type="submit">{{ t('common.save') }}</button>
   </section>

@@ -515,15 +515,68 @@ Quando più sorgenti hanno qualcosa da dire, comanda AirPlay: se sta
 arrivando un flusso audio qui, quello è senza dubbio ciò che si sta
 ascoltando. A parità, vince chi sta suonando su chi è in pausa.
 
-# 8. Perché non c'è la copertina dell'album
+# 8. La copertina dell'album
 
-È una scelta, non una mancanza. A 64 pixel di lato una copertina è
-illeggibile, ma soprattutto è fatta quasi solo di **mezzi toni** — ed è
-esattamente il contenuto che su un pannello S-PWM a refresh basso produce lo
-sfarfallio. Mettere una miniatura in permanenza sullo schermo significherebbe
-tenerci il caso peggiore.
+Fino alla 7.2 **non c'era**, e non per dimenticanza. A 64 pixel di lato una
+copertina è illeggibile, ma soprattutto è fatta quasi solo di **mezzi toni** —
+ed è esattamente il contenuto che su un pannello S-PWM a refresh basso produce
+lo sfarfallio. Tenerne una in permanenza sullo schermo significava tenerci il
+caso peggiore.
 
-Per la stessa ragione il player si disegna in due modi particolari:
+Quel ragionamento non è stato cancellato: è stato **aggirato con uno strumento
+già in casa**. La Funcam mostra una telecamera su questo stesso vetro
+riducendo i livelli di colore per canale, e funziona. La copertina passa dalla
+stessa riduzione.
+
+| Livelli | Che cosa resta |
+|---|---|
+| 0 | l'immagine com'è — da provare, non da dare per buono |
+| 6 | 216 colori, quasi indistinguibile dall'originale |
+| **4** | il valore di partenza: riconoscibile, con la maggior parte dei mezzi toni tolti |
+| 3 | più ruvida, molti meno mezzi toni |
+| 2 | gli otto colori pieni, gli stessi dei *colori sicuri*: non sfarfallano mai |
+
+Il disordine (Floyd-Steinberg) non è un abbellimento: senza, una faccia in
+otto colori diventa una macchia di campiture piatte; con, l'occhio rimette
+insieme le sfumature da solo. È lo stesso motivo per cui la Funcam è
+guardabile.
+
+Sopra sei livelli non si sale, e il limite non è estetico: PIL tiene al
+massimo **256 colori** in una tavolozza, e sette livelli per canale ne
+vorrebbero 343. Con la tavolozza troncata sparivano le combinazioni con molto
+rosso, e una faccia color pelle diventava **verde**.
+
+**Se vedi righe chiare o sfarfallio quando compare una copertina, abbassa i
+livelli.** È il sintomo che questo progetto insegue da sempre, e qui il
+rimedio è un numero.
+
+## Da dove arriva
+
+Dall'indirizzo che manda la sorgente insieme al titolo: `entity_picture` di
+Home Assistant, `media_image_url` di altre integrazioni, o `artwork` per chi
+scrive il JSON a mano. Se l'indirizzo è relativo — come quello di Home
+Assistant — serve sapere dove sta HA, e si scrive nella pagina.
+
+Non è una credenziale: quel collegamento porta **dentro di sé** un token
+firmato, quindi sul Raspberry non resta nessun segreto da custodire. È il
+motivo per cui è stata scelta questa strada e non una con un token a vita
+lunga in configurazione.
+
+**L'altezza è fissa al pannello, la larghezza segue la proporzione.** Una
+copertina di un disco è quadrata, una locandina di Apple TV no: fissare
+l'altezza evita di dover scegliere fra tagliare e mettere le bande nere. C'è
+un tetto a metà pannello, perché una panoramica alta 64 sarebbe larga
+centoquaranta e lascerebbe i titoli senza spazio.
+
+E **non tutte le sorgenti la espongono** — un ingresso HDMI del Denon non ce
+l'ha proprio. Senza immagine l'impaginazione torna esattamente quella di
+sempre, a tutta larghezza: non una versione ridotta di quella con la
+copertina.
+
+# 8b. Come si disegna il resto
+
+Per la stessa ragione dei mezzi toni, il player si disegna in due modi
+particolari:
 
 **Testo senza antialiasing.** PIL sfuma i bordi delle lettere, e ogni
 sfumatura è un pixel a intensità intermedia. Il testo qui passa da una

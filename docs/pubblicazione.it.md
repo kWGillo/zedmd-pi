@@ -5,6 +5,70 @@ portarlo sul repository **https://github.com/kWGillo/zedmd-pi**.
 
 Si esegue **sul Mac**, non sul Raspberry.
 
+---
+
+## Per la versione di adesso: 7.3
+
+I comandi già compilati, in ordine, **uno alla volta**. Il resto della pagina
+spiega il perché di ognuno; questo blocco serve quando il perché lo sai già.
+
+```bash
+curl -s https://raw.githubusercontent.com/kWGillo/zedmd-pi/refs/heads/main/version.py | grep __version__
+```
+*Dice qual è l'ultima versione già pubblicata. Serve **prima** del push, per
+sapere dove far cominciare le note della release. Il percorso lungo
+(`refs/heads/main`) salta la cache: quello corto può rispondere con il numero
+vecchio per cinque minuti.*
+
+```bash
+cd ~/Downloads && ls ~/Downloads/*.tar.gz
+```
+```bash
+tar xzf zedmd-pi.tar.gz
+```
+```bash
+cd ~/Downloads/zedmd-pi-repo && git pull
+```
+```bash
+find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
+```
+```bash
+cp -R ~/Downloads/zedmd-pi/. .
+```
+```bash
+pwd && grep __version__ version.py && git remote -v
+```
+*Devono comparire `7.3`, il percorso giusto e il remote. Se manca qualcosa,
+fermati: il passo 2 dice cosa è successo.*
+
+```bash
+git add -A && git status
+```
+```bash
+git commit -m "7.3: la copertina del brano e la rotazione con le foto"
+```
+*L'`add` **prima** del commit. Al contrario, il commit dice «no changes added
+to commit», non crea niente, e il push che segue risponde «Everything
+up-to-date» — che sembra una conferma e non lo è.*
+
+```bash
+git push
+```
+```bash
+curl -s https://raw.githubusercontent.com/kWGillo/zedmd-pi/refs/heads/main/version.py | grep __version__
+```
+*Deve dire `7.3`. Se dice ancora il numero vecchio, il commit non è partito:
+non è la cache, perché questo percorso la salta.*
+
+```bash
+gh release create v7.3 --title "7.3" --notes-file <(sed -n '/^## \[7.3\]/,/^## \[7.2\]/p' CHANGELOG.md | sed '$d')
+```
+*Se risponde `gh auth login`, `git push` è comunque andato: `gh` ha
+un'autenticazione sua. Fai il login e ridai **solo** questo comando.*
+
+Poi sul Raspberry, *Impostazioni → Controlla ora* — ma **dopo cinque minuti**:
+il passo 8 spiega perché.
+
 > **Regola d'oro:** incolla **un comando alla volta**. Quando in una sequenza
 > incollata tutta insieme un `cd` fallisce, i comandi successivi vengono
 > eseguiti nella cartella sbagliata. È così che era finito un `git init` dentro
@@ -159,7 +223,7 @@ git add -A
 ```
 
 ```bash
-git commit -m "7.2: i satelliti diventano un servizio notturno"
+git commit -m "7.3: la copertina del brano e la rotazione con le foto"
 ```
 
 Cambia il messaggio a ogni versione: numero della versione e una riga su cosa
@@ -287,10 +351,10 @@ oggi». Il testo delle note lo prendi da `CHANGELOG.md`, in cima.
 in quel momento.
 
 ```bash
-gh release create v7.2 --title "7.2" --notes-file <(sed -n '/^## \[7.2\]/,/^## \[7.1\]/p' CHANGELOG.md | sed '$d')
+gh release create v7.3 --title "7.3" --notes-file <(sed -n '/^## \[7.3\]/,/^## \[7.2\]/p' CHANGELOG.md | sed '$d')
 ```
 
-Se il tag esiste già, `gh release edit v7.2 --notes-file ...`.
+Se il tag esiste già, `gh release edit v7.3 --notes-file ...`.
 
 > L'intervallo si ferma alla **7.0** perché su GitHub la 7.0 c'è già: questo
 > push porta solo la 7.1. Il numero da cui partire lo dice il comando `curl`
@@ -425,6 +489,13 @@ spiega perché.
 | `git init` eseguito per sbaglio in `~/Downloads` | `cd` fallito e comandi incollati in blocco | `rm -rf ~/Downloads/.git` |
 | il DMD dice «sei aggiornato» subito dopo il push | la cache di `raw.githubusercontent.com`, cinque minuti | aspetta e ripremi *Controlla ora*; passo 8 |
 | `To get started with GitHub CLI, please run: gh auth login` | `git push` è andato, ma `gh` ha un'autenticazione sua: `git` usa le credenziali del portachiavi, `gh` un suo token | `gh auth login`, poi **solo** il comando della release — il push non va rifatto |
+| `no changes added to commit` seguito da `Everything up-to-date` | il `git commit` è stato dato **prima** del `git add`: non ha creato nessun commit, e il push successivo non aveva niente da mandare | `git commit -m "..."` adesso, poi `git push`. I file sono già in stage |
+
+> **`Everything up-to-date` non è una conferma.** È la risposta a «non c'è
+> niente da mandare», che quando ti aspetti di pubblicare qualcosa vuol dire
+> quasi sempre che il commit non è stato fatto. Il controllo vero è il `curl`
+> in fondo al passo 7: se risponde ancora il numero vecchio, su GitHub non è
+> arrivato niente — qualunque cosa abbia detto `git push`.
 
 Quest'ultima riga merita attenzione: un `git init` in `~/Downloads` trasforma
 l'intera cartella Download in un repository, e un `git add -A` successivo

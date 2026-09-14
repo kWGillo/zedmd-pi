@@ -388,6 +388,43 @@ DEFAULTS = {
         # Ogni componente portata a 0 o 255: restano gli otto colori pieni,
         # gli unici che su questo pannello non producono sfarfallio.
         "safe_colors": True,
+        # La copertina del brano. L'indirizzo lo manda la sorgente insieme al
+        # titolo: qui si decide solo se scaricarlo e disegnarlo.
+        "artwork": True,
+        # Dove sta Home Assistant, per gli indirizzi relativi. `entity_picture`
+        # e' una strada -- `/api/media_player_proxy/...` -- non un indirizzo
+        # intero: senza questo non si sa a chi chiederla. Vuoto vuol dire
+        # niente copertine dagli indirizzi relativi, e nessun tentativo di
+        # indovinare un host.
+        #
+        # Non e' una credenziale: quell'indirizzo porta **dentro di se'** un
+        # token firmato da Home Assistant, quindi sul Raspberry non resta
+        # nessun segreto da custodire. Se un giorno servisse un token vero,
+        # questa strada andrebbe riprogettata invece che allargata.
+        "artwork_base": "",
+        # Il tetto alla larghezza, in pixel. Zero vuol dire meta' pannello.
+        # Serve perche' l'altezza e' fissa e la larghezza no: una locandina
+        # panoramica alta 64 sarebbe larga centoquaranta e lascerebbe i titoli
+        # senza spazio.
+        "artwork_larghezza_massima": 0,
+        # Livelli di colore per canale, come la Funcam. **Non e' una
+        # preferenza estetica**: fino alla 7.2 la copertina non si mostrava
+        # affatto, e il motivo scritto nel progetto era che e' fatta quasi solo
+        # di mezzi toni, cioe' il contenuto peggiore possibile per un pannello
+        # S-PWM -- lo stesso motivo per cui esiste `safe_colors`.
+        #
+        # Quattro livelli con il disordine di Floyd-Steinberg tengono la
+        # copertina riconoscibile togliendo la maggior parte dei mezzi toni.
+        # Due danno gli otto colori pieni, quelli che non sfarfallano mai.
+        # Zero lascia l'immagine com'e': da provare, non da dare per buono.
+        "artwork_livelli": 4,
+        # `sempre` come e' sempre stato, oppure `rotazione`: in rotazione il
+        # brano prende il pannello una volta ogni `ogni_n_media` foto, per
+        # `durata_turno` secondi. Senza Media Player acceso non c'e' niente
+        # con cui alternarsi, e la rotazione decade a `sempre`.
+        "modo": "sempre",
+        "ogni_n_media": 5,
+        "durata_turno": 20,
     },
     "spotify": {
         # Copre la musica che non passa da AirPlay: Spotify Connect verso

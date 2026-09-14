@@ -2,6 +2,77 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [7.3]
+
+- **La copertina del brano sul pannello — e una decisione ribaltata, con
+  cautela.** Fino alla 7.2 la copertina *non* si mostrava, e nel progetto
+  c'era scritto perché: è fatta quasi solo di mezzi toni, cioè il contenuto
+  peggiore possibile per un pannello S-PWM. Non era una svista: metà della
+  storia di questo progetto è una caccia allo sfarfallio causato dai mezzi
+  toni, e `safe_colors` esiste esattamente per quello.
+
+  Quella decisione non è stata cancellata ma **aggirata con uno strumento già
+  in casa**: la Funcam mostra una telecamera su questo stesso vetro riducendo
+  i livelli di colore per canale, e funziona. La copertina passa dalla stessa
+  riduzione. A quattro livelli — il valore di partenza — resta riconoscibile
+  con la maggior parte dei mezzi toni tolti; a due restano gli otto colori
+  pieni, quelli che non sfarfallano mai; a zero si lascia com'è, da provare e
+  non da dare per buono.
+
+  Il disordine di Floyd-Steinberg non è un abbellimento: senza, una faccia in
+  otto colori diventa una macchia di campiture piatte. Con, l'occhio rimette
+  insieme le sfumature da solo.
+
+- **L'altezza è fissa, la larghezza no.** Una copertina di un disco è quadrata,
+  una locandina di Apple TV no. Forzare il quadrato vorrebbe dire tagliare o
+  mettere le bande nere — una decisione da prendere, e sbagliata in tutti e due
+  i modi. Fissando l'altezza al pannello e lasciando libera la larghezza non
+  serve nessuna decisione, con un tetto a metà pannello perché una panoramica
+  alta 64 sarebbe larga centoquaranta e lascerebbe i titoli senza spazio.
+
+- **Non si scarica mai dove si disegna.** Il ciclo gira a trenta fotogrammi al
+  secondo; una richiesta HTTP può metterci dieci secondi a fallire. Chiedere
+  una copertina non scarica e non aspetta: guarda in cache, mette in coda e
+  torna subito. Una prova misura i millisecondi di cinquanta richieste invece
+  di fidarsi del commento.
+
+  Due difetti trovati dalle prove, non dal ragionamento. Il primo: con un
+  server lento la stessa copertina veniva chiesta più volte, perché fra
+  l'uscita dalla coda e l'arrivo in cache l'indirizzo non stava in nessuno dei
+  due posti. Il secondo, più istruttivo: il limite dei livelli era stato
+  copiato dalla Funcam a otto, ma la Funcam quantizza con l'aritmetica mentre
+  qui si usa una tavolozza — e PIL ne tiene **256 colori**, mentre otto livelli
+  ne vorrebbero 512. La tavolozza veniva troncata, le combinazioni con molto
+  rosso sparivano, e **una faccia color pelle diventava verde**. Il limite è
+  sei.
+
+- **Nessuna credenziale, ed è il motivo della strada scelta.** L'indirizzo
+  delle copertine di Home Assistant porta *dentro di sé* un token firmato: si
+  scarica senza intestazione di autenticazione, quindi sul Raspberry non resta
+  nessun segreto. Se un giorno servisse un token a vita lunga, questa strada
+  andrebbe riprogettata invece che allargata.
+
+- **La rotazione: una volta ogni N foto.** Modalità nuova per Now Playing:
+  `sempre` come è sempre stato, oppure `rotazione`, in cui il brano prende il
+  pannello una volta ogni tot media invece di tenerlo per tutto il tempo in cui
+  suona.
+
+  Il conto è sui **media mostrati**, non sui minuti, e il contatore non è stato
+  inventato per l'occasione: il Media Player lo teneva già per la sua riga di
+  stato. Era la strada più corta e per una volta era anche quella giusta —
+  «uno ogni cinque foto» è una frase sulle foto, e misurarla in minuti avrebbe
+  dato un numero diverso a ogni cambio di durata.
+
+  Senza Media Player acceso la rotazione **decade a `sempre`**: la rotazione
+  esiste per dividere il pannello con le foto, e senza foto non c'è niente da
+  dividere. La priorità resta 58: è una modalità della sorgente, non un
+  rimescolamento dell'arbitro.
+
+- **E senza copertina il pannello è esattamente quello di prima.** Non tutte
+  le sorgenti la espongono — un ingresso HDMI non ce l'ha proprio — quindi
+  metà della suite non prova la funzione nuova: prova che senza di essa
+  l'impaginazione sia identica a quella di ieri, e non una versione ristretta.
+
 ## [7.2]
 
 - **I satelliti diventano un servizio notturno, e lo dicono.** La segnalazione
