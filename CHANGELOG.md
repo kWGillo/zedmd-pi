@@ -2,6 +2,55 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [7.2]
+
+- **I satelliti diventano un servizio notturno, e lo dicono.** La segnalazione
+  era *«non ha senso che venga mostrato di giorno»*, e aveva ragione — ma la
+  causa era più stretta di così, e vale la pena scriverla perché è il motivo
+  per cui il rimedio è questo e non un altro.
+
+  I passaggi **visibili** non potevano già comparire di giorno: «visibile»
+  significa satellite illuminato dal Sole mentre qui è buio, con il buio
+  fissato a −6° di altezza solare. Quello che compariva era la **cartolina**
+  grigio-azzurra dei passaggi che ci sono e non si vedono, che non aveva
+  nessuna condizione di buio: la ISS che passa a 70° alle 14:20 finiva sul
+  vetro. Di notte quella cartolina serve — risponde a «perché stasera il DMD
+  non ha detto niente?» — di giorno è rumore che ruba il pannello al meteo e
+  alle foto.
+
+  Ora c'è un cancello sull'altezza del Sole, regolabile nella pagina
+  Satelliti: a **3°** sopra l'orizzonte il servizio si apre un quarto d'ora
+  prima del tramonto e si chiude poco dopo l'alba; a `0` esattamente al
+  tramonto; a `90` non si chiude mai, che è com'era prima.
+
+- **La soglia non è −6°, e questa è la scelta di progetto che conta.**
+  Verrebbe naturale riusare quella della visibilità, e sarebbe un difetto: il
+  preavviso scatta **dieci minuti prima** che il satellite sorga, e in dieci
+  minuti il Sole scende di due o tre gradi. Con il cancello a −6° un passaggio
+  che diventa visibile appena sotto quella soglia avrebbe il suo preavviso
+  soppresso, perché dieci minuti prima il Sole stava a −3° — cioè sparirebbe
+  proprio l'avviso della prima sera, quello più comodo, e nessuno saprebbe
+  dire perché.
+
+  Una prova misura quanto scende davvero il Sole in dieci minuti attorno al
+  tramonto e pretende che il margine sia più largo di quella discesa. Così
+  resta vera anche se un giorno si cambiasse il preavviso: diventerebbe rossa
+  qui, invece di far scoprire l'avviso mancante sul terrazzo.
+
+- **Il cancello ferma il vetro, non il resto.** I passaggi si continuano a
+  calcolare, il registro a scrivere, i sensori MQTT a pubblicare, e la pagina
+  Satelliti risponde alle nove del mattino alla domanda «quando passa
+  stasera». È la regola che il modulo aveva già scritta e che qui si applica
+  al Sole: il filtro è una scelta di cosa **mostrare**, non di cosa **sapere**.
+  Se al tramonto il servizio si svegliasse senza sapere niente, perderebbe il
+  primo passaggio della sera — cioè proprio quello per cui esiste. Una prova
+  legge l'albero sintattico del modulo e verifica che `e_notte` compaia nel
+  disegno e **non** negli altri tre.
+
+- **E la riga di stato lo dice.** *«in attesa del tramonto (Sole a 45°, soglia
+  3°)»*, accanto al prossimo passaggio che resta scritto. Un servizio acceso
+  che non mostra niente e non spiega perché sembra rotto.
+
 ## [7.1]
 
 Tre segnalazioni arrivate guardando la 7.0 **accesa**, che è l'unico collaudo

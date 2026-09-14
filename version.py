@@ -1507,6 +1507,23 @@ Storico:
        che la posizione sta nella pagina Radar, dove non sta piu\' dalla 7.0.
        Il codice si aggiorna perche\' altrimenti non funziona, le frasi no --
        nessuno le compila.
+  7.2  **I satelliti diventano un servizio notturno.** La segnalazione era
+       "non ha senso che venga mostrato di giorno", e la causa era piu\' stretta
+       di cosi\': i passaggi visibili erano gia\' confinati alla notte per
+       costruzione -- visibile vuol dire illuminato mentre qui e\' buio -- e
+       quello che compariva di giorno era la cartolina grigio-azzurra dei
+       passaggi che ci sono e non si vedono, che di condizioni sul buio non ne
+       aveva nessuna.
+       Adesso c\'e\' un cancello sull\'altezza del Sole, regolabile: a 3 gradi
+       sopra l\'orizzonte si apre un quarto d\'ora prima del tramonto, a 0 al
+       tramonto, a 90 non si chiude mai.
+       La soglia **non** e\' quella della visibilita\', ed e\' la scelta che
+       conta: il preavviso scatta dieci minuti prima che il satellite sorga, e
+       in dieci minuti il Sole scende di due o tre gradi. Con il cancello a -6
+       sparirebbe proprio l\'avviso della prima sera.
+       E ferma il vetro, non il resto: i passaggi si calcolano lo stesso, il
+       registro si scrive, i sensori pubblicano, e la pagina risponde alle nove
+       del mattino a "quando passa stasera".
 """
 
-__version__ = "7.1"
+__version__ = "7.2"

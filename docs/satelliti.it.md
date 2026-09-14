@@ -263,6 +263,43 @@ sola riempivano l'elenco con 252 passaggi.
 Sconsigliato, e sta nella pagina per chi vuole sperimentare. Acceso, il
 pannello annuncia anche i CubeSat: passaggi veri, oggetti invisibili.
 
+### Sole al massimo a (gradi)
+
+Sopra questa altezza del Sole il pannello non mostra i satelliti. A **3** — il
+valore di partenza — il servizio si apre un quarto d'ora prima del tramonto e
+si chiude poco dopo l'alba; a `0` esattamente al tramonto; a `90` non si chiude
+mai, che è com'era prima della 7.2.
+
+**Perché serviva.** I passaggi visibili erano già confinati alla notte per
+costruzione: «visibile» vuol dire satellite illuminato dal Sole mentre qui è
+buio. Quello che compariva di giorno era il terzo colore — la cartolina dei
+passaggi che ci sono e non si vedono — che di condizioni sul buio non ne aveva
+nessuna. Di notte quella cartolina serve, e risponde alla domanda vera:
+*perché stasera il DMD non ha detto niente?* Di giorno è rumore che ruba il
+pannello al meteo e alle foto.
+
+**Perché la soglia non è −6°**, cioè quella con cui si decide se un passaggio
+si vede. Verrebbe naturale riusarla, e sarebbe un difetto. Il preavviso scatta
+dieci minuti prima che il satellite sorga, e in dieci minuti il Sole scende di
+due o tre gradi: un passaggio che diventa visibile appena sotto i −6° avrebbe
+il suo preavviso soppresso, perché dieci minuti prima il Sole stava a −3°.
+Sparirebbe proprio l'avviso della prima sera — quello più comodo — e nessuno
+saprebbe dire perché. Il cancello sta quindi **più in alto** della visibilità,
+con il margine dalla parte giusta: si apre presto e lascia che sia la
+visibilità vera a decidere se c'è qualcosa da dire.
+
+**Che cosa ferma, e che cosa no.** Ferma soltanto il vetro. I passaggi si
+continuano a calcolare, il registro a scrivere, i sensori MQTT a pubblicare, e
+questa pagina risponde alle nove del mattino alla domanda «quando passa
+stasera». È la stessa regola di sempre: il filtro è una scelta di cosa
+**mostrare**, non di cosa **sapere**. Se al tramonto il servizio si svegliasse
+senza sapere niente, perderebbe il primo passaggio della sera — cioè proprio
+quello per cui esiste.
+
+Quando il cancello è chiuso la riga di stato lo dice: *«in attesa del tramonto
+(Sole a 45°, soglia 3°)»*. Un servizio acceso che non mostra niente e non
+spiega perché sembra rotto.
+
 ---
 
 ## Il registro

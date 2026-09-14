@@ -1,4 +1,4 @@
-# DMD Controller 7.1
+# DMD Controller 7.2
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -49,7 +49,11 @@ un interruttore anche in Home Assistant.
   nell'ombra della Terra e sparire a metà cielo, il pannello lo sa in anticipo
   e lo segna sull'arco. Un registro CSV conserva tutti i passaggi con
   l'altezza del Sole accanto: è lì che si legge perché una sera è rimasto
-  muto.
+  muto. Dalla 7.2 è **un servizio notturno**: il pannello si apre un quarto
+  d'ora prima del tramonto e si chiude poco dopo l'alba. I passaggi si
+  continuano a calcolare di giorno, e la pagina risponde alle nove del mattino
+  alla domanda «quando passa stasera» — il cancello decide cosa *mostrare*,
+  non cosa sapere.
 - **Notifiche** — i messaggi che **Home Assistant** manda al pannello: la
   porta che si apre, la lavatrice che ha finito, l'allarme che scatta. Un solo
   topic MQTT e tre livelli: `info` e `avviso` aspettano il loro turno come
@@ -656,7 +660,8 @@ le tappe.
 | 6.8.1 | La procedura di pubblicazione dice anche le due cose che erano costate tempo: i cinque minuti di cache prima che l'OTA veda la versione nuova, e come si pubblicano più versioni in un push solo |
 | 6.9 | Tre comandi che mentivano, corretti: il cursore della luminosità durante il Night mode, lo spegnimento del pannello che non esisteva, il Game Boy che non compariva in Home Assistant. E il totale dei voli su MQTT |
 | 7.0 | Il meteo: bollettino della giornata al mattino, aggiornamento ogni poche ore, icone disegnate pixel per pixel, e le allerte di MeteoAlarm. La posizione passa dal Radar alle Impostazioni, perché la usano in tre |
-| **7.1** | **La finestra del meteo ridisegnata guardandola accesa: i gradi di adesso grandi al centro con l'umidità, massima e minima in alto a destra con le frecce, e l'unità — che prima mancava del tutto** |
+| 7.1 | La finestra del meteo ridisegnata guardandola accesa: i gradi di adesso grandi al centro con l'umidità, massima e minima in alto a destra con le frecce, e l'unità — che prima mancava del tutto |
+| **7.2** | **I satelliti diventano un servizio notturno: un cancello sull'altezza del Sole, messo più in alto della soglia di visibilità perché il preavviso scatta dieci minuti prima. Ferma il vetro, non il calcolo né i sensori** |
 
 ---
 

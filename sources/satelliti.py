@@ -155,16 +155,69 @@ class SatellitiSource(Source):
         if self._errore:
             return self._errore
         prossimo = self._prossimo()
+        # Il cancello si dice, non si subisce. Un servizio acceso che non
+        # mostra niente e non spiega perche' sembra rotto, ed e' la ragione per
+        # cui questa riga esiste: «in attesa del tramonto» e' un'informazione,
+        # il silenzio no.
+        coda = ""
+        if not self.e_notte():
+            lat, lon = self._coordinate()
+            alto = (satelliti.elevazione_sole(datetime.now(timezone.utc),
+                                              lat, lon)
+                    if lat is not None else 0.0)
+            coda = " · " + self.t("satelliti.attesa.buio", lang,
+                                  sole=int(round(alto)),
+                                  soglia=int(round(self.sole_massimo())))
         if prossimo is None:
-            return self.t("status.satelliti.none", lang)
+            return self.t("status.satelliti.none", lang) + coda
         quando = prossimo["sorge"].astimezone()
         return self.t("status.satelliti.next", lang,
                       name=prossimo.get("breve", prossimo["nome"]),
                       time=quando.strftime("%H:%M"),
-                      elev=int(round(prossimo["elevazione_massima"])))
+                      elev=int(round(prossimo["elevazione_massima"]))) + coda
 
     def _conf(self):
         return self.cfg.get("satelliti", {})
+
+    def sole_massimo(self):
+        """Quanto in alto puo' stare il Sole perche' il pannello parli ancora.
+
+        In gradi sopra l'orizzonte: a `3` il servizio si apre un quarto d'ora
+        prima del tramonto, a `0` esattamente al tramonto, a `90` non si chiude
+        mai -- che e' il comportamento di prima della 7.2.
+        """
+        try:
+            return float(self._conf().get("sole_massimo", 3.0))
+        except (TypeError, ValueError):
+            return 3.0
+
+    def e_notte(self, adesso=None):
+        """Vero se il pannello puo' mostrare i satelliti, adesso.
+
+        **Perche' la soglia non e' quella della visibilita'.** Verrebbe
+        naturale riusare i −6 gradi con cui si decide se un passaggio si vede,
+        e sarebbe un difetto: il preavviso scatta dieci minuti prima che il
+        satellite sorga, e in dieci minuti il Sole scende di due o tre gradi.
+        Un passaggio che diventa visibile appena sotto i −6 avrebbe il suo
+        preavviso soppresso, perche' dieci minuti prima il Sole stava a −3 --
+        cioe' proprio l'avviso della prima sera, quello piu' comodo, sparirebbe
+        e nessuno saprebbe dire perche'.
+
+        Quindi il cancello sta **piu' in alto** della visibilita', con il
+        margine dalla parte giusta: si apre presto e lascia che sia la
+        visibilita' vera a decidere se c'e' qualcosa da dire.
+        """
+        soglia = self.sole_massimo()
+        if soglia >= 90.0:
+            return True
+        lat, lon = self._coordinate()
+        if lat is None:
+            # Senza coordinate non si sa dove sia il Sole. Il servizio non ha
+            # comunque niente da dire, e questo non e' il posto per decidere
+            # perche': si lascia passare e ci pensa chi cerca i passaggi.
+            return True
+        adesso = adesso or datetime.now(timezone.utc)
+        return satelliti.elevazione_sole(adesso, lat, lon) <= soglia
 
     def _prossimo(self, adesso=None, solo_visibili=True):
         """Il primo passaggio non ancora finito.
@@ -430,6 +483,18 @@ class SatellitiSource(Source):
 
     def _disegna_se_serve(self):
         adesso = datetime.now(timezone.utc)
+        # Il cancello sul buio sta **qui** e non piu' in su, ed e' voluto: i
+        # due passi precedenti del ciclo -- calcolare i passaggi e scrivere il
+        # registro -- continuano anche di giorno.
+        #
+        # Se si fermasse tutto, al tramonto il servizio si sveglierebbe senza
+        # sapere niente e perderebbe il primo passaggio della sera, che e'
+        # proprio quello per cui esiste. E la pagina Satelliti deve poter
+        # rispondere alle nove del mattino alla domanda "quando passa stasera".
+        # Il filtro e' una scelta di cosa **mostrare**, non di cosa **sapere**.
+        if not self.e_notte(adesso):
+            self._stato = ""
+            return
         passaggio = self._prossimo(adesso)
         conf = self._conf()
         preavviso = int(conf.get("preavviso_minuti", satelliti.PREAVVISO_MIN))

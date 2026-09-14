@@ -2373,6 +2373,12 @@ def create_app(runtime):
         conf["gruppi"] = scelti or list(satelliti.GRUPPI_PREDEFINITI)
         conf["mostra_non_visibili"] = request.form.get("mostra_non_visibili") == "on"
         conf["tutti_gli_oggetti"] = request.form.get("tutti_gli_oggetti") == "on"
+        # Da -18 (notte astronomica piena) a 90 (mai chiuso). Il limite basso
+        # non e' zero: chi vuole il buio vero deve poterlo chiedere, anche se
+        # cosi' perde gli avvisi della prima sera.
+        conf["sole_massimo"] = _limite(
+            request.form.get("sole_massimo"),
+            conf.get("sole_massimo", 3.0), -18.0, 90.0)
         dmdconf.save()
         # I passaggi dipendono da questi numeri: ricalcolarli subito evita che
         # la pagina mostri l'elenco vecchio accanto ai valori nuovi.

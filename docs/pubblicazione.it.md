@@ -159,7 +159,7 @@ git add -A
 ```
 
 ```bash
-git commit -m "7.1: la finestra del meteo ridisegnata dopo la prima sera sul vetro"
+git commit -m "7.2: i satelliti diventano un servizio notturno"
 ```
 
 Cambia il messaggio a ogni versione: numero della versione e una riga su cosa
@@ -287,10 +287,10 @@ oggi». Il testo delle note lo prendi da `CHANGELOG.md`, in cima.
 in quel momento.
 
 ```bash
-gh release create v7.1 --title "7.1" --notes-file <(sed -n '/^## \[7.1\]/,/^## \[7.0\]/p' CHANGELOG.md | sed '$d')
+gh release create v7.2 --title "7.2" --notes-file <(sed -n '/^## \[7.2\]/,/^## \[7.1\]/p' CHANGELOG.md | sed '$d')
 ```
 
-Se il tag esiste già, `gh release edit v7.1 --notes-file ...`.
+Se il tag esiste già, `gh release edit v7.2 --notes-file ...`.
 
 > L'intervallo si ferma alla **7.0** perché su GitHub la 7.0 c'è già: questo
 > push porta solo la 7.1. Il numero da cui partire lo dice il comando `curl`
@@ -424,6 +424,7 @@ spiega perché.
 | `Updates were rejected` | il remoto è avanti | passo 6 |
 | `git init` eseguito per sbaglio in `~/Downloads` | `cd` fallito e comandi incollati in blocco | `rm -rf ~/Downloads/.git` |
 | il DMD dice «sei aggiornato» subito dopo il push | la cache di `raw.githubusercontent.com`, cinque minuti | aspetta e ripremi *Controlla ora*; passo 8 |
+| `To get started with GitHub CLI, please run: gh auth login` | `git push` è andato, ma `gh` ha un'autenticazione sua: `git` usa le credenziali del portachiavi, `gh` un suo token | `gh auth login`, poi **solo** il comando della release — il push non va rifatto |
 
 Quest'ultima riga merita attenzione: un `git init` in `~/Downloads` trasforma
 l'intera cartella Download in un repository, e un `git add -A` successivo

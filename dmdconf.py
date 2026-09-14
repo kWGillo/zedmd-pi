@@ -521,6 +521,17 @@ DEFAULTS = {
         # luminosita': si vedranno annunci per CubeSat invisibili a occhio
         # nudo. Sta qui per chi vuole sperimentare, non per l'uso normale.
         "tutti_gli_oggetti": False,
+        # Quanto in alto puo' stare il Sole perche' il pannello mostri ancora i
+        # satelliti, in gradi sopra l'orizzonte. A 3 il servizio si apre un
+        # quarto d'ora prima del tramonto e si chiude poco dopo l'alba; a 0
+        # esattamente al tramonto; a 90 non si chiude mai, che e' com'era prima
+        # della 7.2.
+        #
+        # Non e' -6, la soglia con cui si decide se un passaggio si vede, e la
+        # differenza e' il punto: il preavviso scatta dieci minuti prima che il
+        # satellite sorga, e in dieci minuti il Sole scende di due o tre gradi.
+        # Con il cancello a -6 sparirebbe proprio l'avviso della prima sera.
+        "sole_massimo": 3.0,
     },
 
     "services": {

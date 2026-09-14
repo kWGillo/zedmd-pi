@@ -245,6 +245,24 @@ STRINGS = {
         "Not recommended: the stations group also holds CubeSats released "
         "from the ISS, invisible to the naked eye. The panel would send "
         "someone looking for a ten-centimetre box."),
+    "satelliti.sunmax": ("Sole al massimo a (gradi)",
+                         "Sun at most at (degrees)"),
+    "satelliti.sunmax.hint": (
+        "Sopra questa altezza del Sole il pannello non mostra i satelliti: di "
+        "giorno non c'è niente da vedere e la finestra ruberebbe spazio agli "
+        "altri servizi. A 3 si apre un quarto d'ora prima del tramonto, a 0 "
+        "esattamente al tramonto, a 90 non si chiude mai. Il calcolo dei "
+        "passaggi, il registro e i sensori MQTT continuano comunque: il "
+        "cancello decide cosa **mostrare**, non cosa sapere.",
+        "Above this sun elevation the panel does not show satellites: there is "
+        "nothing to see in daylight and the window would take space from the "
+        "other services. At 3 it opens a quarter of an hour before sunset, at "
+        "0 exactly at sunset, at 90 it never closes. Pass computation, the log "
+        "and the MQTT sensors keep running regardless: the gate decides what "
+        "to **show**, not what to know."),
+    "satelliti.attesa.buio": (
+        "in attesa del tramonto (Sole a %(sole)d°, soglia %(soglia)d°)",
+        "waiting for sunset (sun at %(sole)d°, threshold %(soglia)d°)"),
     "satelliti.tle": ("Elementi orbitali", "Orbital elements"),
     "satelliti.tle.hint": (
         "Si scaricano da CelesTrak una volta ogni sei ore e invecchiano in "

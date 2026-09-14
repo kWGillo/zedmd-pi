@@ -89,6 +89,10 @@
                {{ 'checked' if conf.tutti_gli_oggetti }}>
           {{ t('satelliti.allobjects') }}</label>
         <p class="hint">{{ t('satelliti.allobjects.hint') }}</p>
+        <label for="sole_massimo">{{ t('satelliti.sunmax') }}</label>
+        <input type="text" id="sole_massimo" name="sole_massimo"
+               value="{{ conf.sole_massimo }}">
+        <p class="hint">{{ t('satelliti.sunmax.hint') }}</p>
       </div>
     </div>
 
