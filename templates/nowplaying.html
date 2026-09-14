@@ -75,11 +75,26 @@
   {# Non piu' `hw:3,0` e basta: quella riga sembrava un campo da compilare, e
      una volta e' stata letta come una seconda scelta della scheda audio. La
      scheda si sceglie in Impostazioni, in un posto solo. #}
-  {% if cassa.uscita %}
+  {# La domanda a cui questa riga deve rispondere è «da quale scheda esce la
+     musica», non «che stringa c'è scritta in shairport-sync.conf». Mostrare
+     `hw:CARD=Dummy` era vero e inutile: sembrava che il DMD avesse scelto la
+     scheda finta, mentre era solo l'interruttore spento. #}
+  {% if cassa.nome %}
   <p class="hint">
-    {% if cassa.attiva %}{{ t('cassa.current.vera') }}{% else %}{{ t('cassa.current.finta') }}{% endif %}
-    <code>{{ cassa.uscita }}</code>
+    {% if cassa.attiva %}
+      {{ t('cassa.esce.da', scheda=cassa.nome) }}
+      {% if cassa.convertitore %}{{ t('cassa.convertitore') }}{% endif %}
+    {% else %}
+      {{ t('cassa.nessuna.uscita', scheda=cassa.nome) }}
+    {% endif %}
   </p>
+  {% elif cassa.uscita %}
+  <p class="hint">{{ t('cassa.senza.scheda') }}</p>
+  {% endif %}
+
+  {% if not cassa.allineata %}
+  <p class="status">{{ t('cassa.divergenza',
+                        adesso=cassa.uscita, voluta=cassa.voluta) }}</p>
   {% endif %}
 </section>
 

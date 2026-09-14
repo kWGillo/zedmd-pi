@@ -2,7 +2,7 @@
 4884b249008a42c68fbd2c1b934c0a68  aeroporti.csv
 ebdccc3875a93eba4f6eb06f6912436c  allerte.py
 13e95841fe78d3774935f35182209ae3  autotune.py
-080102449b7b6104594d681a2635acf6  cassa.py
+762a115eeca80eaa64ee48a88507baca  cassa.py
 d2931b107de1ea74a1fd1cf6a35a222a  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 f4da634c02da1d2d9c2bf600287d09c3  copertine.py
@@ -20,7 +20,7 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 bec22746fc005f4a3b919e5d784a9b5a  hass.py
-15f220d40b532dfcae8457e1b95ec252  i18n.py
+179fb736fac8ba3f4de0168f46836454  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
@@ -65,7 +65,7 @@ e6c140b184dd15f3c391ec123180f25e  sources/satelliti.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 c750104c1eaa178d6958982586e89855  staccato.py
 f234e48e50e03fd1a4b357e790f8114f  static/style.css
-1995ae3ab586126780601dd87446b8a8  suoni.py
+7fb445cff701644af906ecf047097993  suoni.py
 b2e39a45b2319abd500f8c72019d34c0  suoni/colpito.wav
 9bee0b8537ca225025bed746c4134033  suoni/lancio.wav
 682aeaffd20379a0664b243e9dfa810c  suoni/livello.wav
@@ -93,7 +93,7 @@ e335f8f24edc17c812b333673ee4bdca  templates/doom.html
 617182e06f97124c3114f359afa76a1b  templates/giochi.html
 c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
 250656c1e92734818935e7173907f894  templates/media.html
-f2016109da95136d8a6452c95f3ea980  templates/nowplaying.html
+1afebeaf02ae99c7b4791d865301e21b  templates/nowplaying.html
 5a361e3c1d53535a9274520033a03635  templates/radar.html
 685924490e771f355e0a6cc0eb58c756  templates/rete.html
 f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
@@ -103,7 +103,7 @@ c80b972bd47827c7383979aafb7fecc8  templates/satelliti.html
 9543d12bd37d3dadb1d4b0634607dfa5  templates/settings.html
 0823432fc4a73241082966d4f4c9e760  templates/telecamera.html
 6ea1607951a2a38b696fbfd84db6f6d7  templates/updates.html
-0bb3e9cd1e41ec3a0c1fcf27a8d0feb1  version.py
+e7553616de829aff616c1011a7d57027  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-8320ee387e7c9d009c176f7b9b29802e  webui.py
+bb6b474e1dedbb843161307f6f822bf6  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

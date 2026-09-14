@@ -185,6 +185,26 @@ def esclusivo(device):
     return device[4:] if device.startswith("plug") else device
 
 
+def con_convertitore(device):
+    """Da `hw:1,0` a `plughw:1,0`: la stessa scheda, con ALSA davanti."""
+    device = (device or "").strip()
+    if not device or device.startswith("plug"):
+        return device
+    return "plug" + device
+
+
+def accettabili(device):
+    """Le due grafie valide per questa scheda: esclusiva e con convertitore.
+
+    Servono tutte e due a chi confronta. Dopo un ripiego sul convertitore la
+    configurazione contiene `plughw:1,0`, e un controllo che si aspetta solo
+    `hw:1,0` concluderebbe che le due parti sono disallineate — riscrivendo e
+    riavviando shairport-sync a ogni avvio, per sempre.
+    """
+    scelto = esclusivo(device)
+    return [scelto, con_convertitore(scelto)] if scelto else []
+
+
 def prova(device, durata=0.4):
     """Suona un tono sul dispositivo, nel formato di AirPlay. (ok, motivo).
 
@@ -266,9 +286,30 @@ def imposta(device, acceso):
             return False, "nessuna scheda audio"
         ok, motivo = prova(device)
         if not ok:
-            # Non si tocca niente: meglio un interruttore che non scatta di
-            # una cassa AirPlay che non suona piu' e nessuno sa perche'.
-            return False, motivo
+            # La scheda non regge 44100 in accesso esclusivo. Prima di
+            # arrendersi si prova la stessa scheda **con il convertitore di
+            # ALSA davanti**, che e' l'unica strada che resta.
+            #
+            # Non e' un ripiego alla leggera: la preferenza per `hw:` spiegata
+            # in cima resta giusta, e con `plughw:` shairport-sync non vede
+            # piu' che cosa la scheda sappia fare davvero. Ma quel dettaglio
+            # conta per la sincronizzazione di un gruppo multi-room; con una
+            # cassa sola non esiste, e l'alternativa qui e' il silenzio.
+            #
+            # Il caso e' reale e non teorico: una chiavetta USB "full speed"
+            # da pochi euro dichiara `Rates: 8000, 48000` e basta. AirPlay
+            # trasmette a 44100 e non a un'altra frequenza, quindi senza
+            # convertitore quella scheda non puo' suonare musica AirPlay --
+            # mai, in nessuna configurazione.
+            alternativo = con_convertitore(device)
+            ok_plug, _motivo_plug = prova(alternativo)
+            if not ok_plug:
+                # Non si tocca niente: meglio un interruttore che non scatta
+                # di una cassa AirPlay che non suona piu' e nessuno sa
+                # perche'. Il motivo che si riporta e' quello della prova
+                # esclusiva, che e' la causa vera.
+                return False, motivo
+            device = alternativo
     else:
         device = FINTO
     testo = _leggi()
@@ -389,17 +430,36 @@ def riconcilia(device):
     """
     if not installato() or not attiva():
         return False, ""
-    voluto = esclusivo(device)
-    if not voluto:
+    if not esclusivo(device):
         return False, "nessuna scheda audio"
-    if uscita_attuale() == voluto:
+    # Tutte e due le grafie vanno bene: dopo un ripiego sul convertitore qui
+    # c'e' scritto `plughw:1,0`, ed e' la scelta giusta, non un disallineamento
+    # da correggere a ogni avvio.
+    if uscita_attuale() in accettabili(device):
         return False, ""
     return imposta(device, True)
 
 
 def stato(cfg=None):
-    """Quel che serve alla pagina Now Playing."""
+    """Quel che serve alla pagina Now Playing.
+
+    `uscita` e' il dispositivo scritto **adesso** in shairport-sync; `voluta`
+    e' quello che dice Impostazioni. Sono due cose diverse e la pagina deve
+    poterle distinguere: quando differiscono c'e' qualcosa da dire, e finora
+    non lo diceva nessuno.
+    """
     acceso, dove = metadati_stato()
-    return {"installato": installato(), "attiva": attiva(),
-            "uscita": uscita_attuale(), "finto": FINTO,
-            "metadati": acceso, "pipe": dove}
+    scelta = suoni.uscita(cfg or {})
+    attuale = uscita_attuale()
+    accesa = attiva()
+    return {"installato": installato(), "attiva": accesa,
+            "uscita": attuale, "finto": FINTO,
+            "metadati": acceso, "pipe": dove,
+            "voluta": esclusivo(scelta), "nome": suoni.nome_uscita(cfg or {}),
+            # Vero se shairport-sync sta usando la scheda scelta **con il
+            # convertitore**: la pagina lo dice, perche' e' un compromesso e
+            # chi lo subisce ha diritto di saperlo.
+            "convertitore": accesa and attuale.startswith("plug"),
+            # A interruttore spento non c'e' niente da allineare: la scheda
+            # giusta e' quella fittizia, ed e' gia' quella che c'e' scritta.
+            "allineata": (not accesa) or attuale in accettabili(scelta)}

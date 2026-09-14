@@ -392,6 +392,31 @@ rotta.
 Accanto ci sono le due levette **Effetti dei giochi (Breakout, Invaders)** e
 **Audio di Doom**, che sono i § 3.2 e § 3.3.
 
+## Se la scheda non sa fare 44100 Hz
+
+AirPlay trasmette a **44100 Hz e a nient'altro**. Molte chiavette USB
+economiche non ce l'hanno: si vede in un comando, dove `1` è il numero della
+scheda.
+
+```bash
+cat /proc/asound/card1/stream0
+```
+
+Se sotto `Playback:` la riga `Rates:` non contiene 44100 — per esempio
+`Rates: 8000, 48000` — quella scheda in accesso esclusivo non può riprodurre
+musica AirPlay, mai, in nessuna configurazione.
+
+Il DMD prova prima l'accesso esclusivo (`hw:`, § 2) e, se fallisce, riprova la
+stessa scheda con il **convertitore di ALSA** davanti (`plughw:`). Con il
+convertitore shairport-sync non vede più che cosa la scheda sappia fare, e ci
+rimette un filo di precisione nella sincronizzazione fra più casse — che con
+una cassa sola non esiste. L'alternativa era il silenzio, quindi si accende e
+lo si dice nella pagina.
+
+Se anche con il convertitore non suona, l'interruttore **non scatta** e sotto
+compare la riga di errore di ffmpeg. Meglio un interruttore che non si accende
+di una cassa che non suona e nessuno sa perché.
+
 ## Il volume in modalità notte
 
 Nel riquadro **Night mode e Sleep mode** c'è un quarto campo accanto alla

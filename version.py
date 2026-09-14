@@ -1589,6 +1589,33 @@ Storico:
        L\'interruttore la fotografava una volta sola: cambiando scheda dopo,
        shairport-sync restava sulla vecchia, in silenzio. Stessa malattia
        dell\'indirizzo del broker, stessa cura.
+  7.4.1 **Una scheda che non sa fare 44100 Hz adesso suona lo stesso.** La
+        7.4, correggendo la scelta automatica, ha finalmente puntato la
+        chiavetta USB invece dell\'HDMI -- e ha scoperto che quella chiavetta
+        dichiara `Rates: 8000, 48000`. AirPlay trasmette a 44100 e a
+        nient\'altro, quindi in accesso esclusivo ffmpeg rispondeva "sample
+        rate 44100 not available" e l\'interruttore dell\'uscita musicale si
+        ridisattivava da solo a ogni salvataggio. Non era un difetto nuovo:
+        era quello vecchio che diventava visibile, perche\' prima si provava
+        l\'HDMI, che si apre senza protestare e non suona niente.
+        Adesso, se la prova esclusiva fallisce, si riprova la stessa scheda
+        con il convertitore di ALSA davanti. La preferenza per `hw:` resta
+        giusta -- con `plughw:` shairport-sync non vede piu\' che cosa la
+        scheda sappia fare -- ma quel dettaglio conta per la sincronizzazione
+        fra piu\' casse, che con una cassa sola non esiste. L\'alternativa era
+        il silenzio. E la pagina lo dice: un compromesso taciuto e\' una
+        sorpresa rimandata.
+        La trappola di questa correzione era il riallineamento: in
+        configurazione finisce `plughw:1,0`, e un confronto che si aspettava
+        `hw:1,0` avrebbe riscritto e riavviato shairport-sync a ogni avvio del
+        DMD, per sempre. Una prova lo verifica su tre avvii di fila.
+        **E la riga dell\'uscita musicale dice finalmente la cosa giusta.** Era
+        gia\' stata riscritta una volta e mostrava ancora il dispositivo di
+        shairport-sync: a interruttore spento leggevi `hw:CARD=Dummy` e
+        sembrava che il DMD avesse scelto la scheda finta. Adesso nomina la
+        scheda scelta in Impostazioni -- "USB Audio", non `plughw:1,0` -- in
+        tutti e due gli stati, e se le due configurazioni divergono lo dice
+        invece di lasciarlo indovinare.
 """
 
-__version__ = "7.4"
+__version__ = "7.4.1"

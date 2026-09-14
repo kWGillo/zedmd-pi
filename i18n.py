@@ -1612,14 +1612,27 @@ STRINGS = {
     # Non è una scelta da fare qui: la scheda si sceglie in Impostazioni, e
     # questa riga dice soltanto dove sta andando la musica adesso. Scritta
     # com'era — solo `hw:3,0` — sembrava un campo da compilare.
-    "cassa.current.vera": (
-        "La musica sta uscendo dalla scheda scelta in Impostazioni:",
-        "Music is playing through the card chosen in Settings:"),
-    "cassa.current.finta": (
-        "La musica sta andando nella scheda fittizia, cioè non si sente. "
-        "Restano i metadati sul pannello. Uscita attuale:",
-        "Music is going to the dummy card, so nothing is heard. The metadata "
-        "still reaches the panel. Current output:"),
+    "cassa.esce.da": (
+        "La musica esce da «%(scheda)s», la scheda scelta in Impostazioni.",
+        "Music plays through “%(scheda)s”, the card chosen in Settings."),
+    "cassa.nessuna.uscita": (
+        "Adesso la musica non si sente: resta solo il brano sul pannello. "
+        "Accendendo l'interruttore uscirà da «%(scheda)s», la scheda scelta "
+        "in Impostazioni.",
+        "Right now the music is not audible: only the track reaches the "
+        "panel. Turning the switch on will play it through “%(scheda)s”, the "
+        "card chosen in Settings."),
+    "cassa.senza.scheda": (
+        "Non c'è nessuna scheda audio utilizzabile: scegline una in "
+        "Impostazioni, oppure collegane una.",
+        "There is no usable sound card: choose one in Settings, or plug one "
+        "in."),
+    "cassa.divergenza": (
+        "Attenzione: shairport-sync sta usando %(adesso)s, mentre in "
+        "Impostazioni è scelta %(voluta)s. Salva di nuovo l'uscita musicale "
+        "per riallinearle.",
+        "Warning: shairport-sync is using %(adesso)s while Settings selects "
+        "%(voluta)s. Save the music output again to realign them."),
 
     "metadati.title": ("Metadati del brano", "Track metadata"),
     "metadati.intro": (
@@ -1665,6 +1678,21 @@ STRINGS = {
         "scheda regge il formato di AirPlay.",
         "Music output on. The tone you heard proves the card handles the "
         "AirPlay format."),
+    "cassa.on.convertitore": (
+        "Uscita musicale accesa, con il convertitore di ALSA davanti alla "
+        "scheda. La tua scheda non sa fare i 44100 Hz di AirPlay, quindi la "
+        "frequenza la converte ALSA: si perde un filo di precisione nella "
+        "sincronizzazione fra più casse, che con una cassa sola non esiste. "
+        "Il tono che hai sentito è la prova che adesso suona.",
+        "Music output on, with the ALSA converter in front of the card. Your "
+        "card cannot do AirPlay's 44100 Hz, so ALSA converts the rate: this "
+        "costs a little precision when syncing several speakers, which with a "
+        "single speaker does not exist. The tone you heard proves it plays."),
+    "cassa.convertitore": (
+        "La frequenza passa dal convertitore di ALSA: questa scheda non fa i "
+        "44100 Hz di AirPlay.",
+        "The rate goes through the ALSA converter: this card cannot do "
+        "AirPlay's 44100 Hz."),
     "cassa.off": ("Uscita musicale spenta: la musica torna alla scheda "
                   "fittizia e restano i soli metadati.",
                   "Music output off: audio goes back to the dummy card and "

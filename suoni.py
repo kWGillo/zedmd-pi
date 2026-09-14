@@ -231,6 +231,21 @@ def uscita(cfg):
     return interne[-1] if interne else ""
 
 
+def nome_uscita(cfg):
+    """Il nome leggibile della scheda scelta, non il suo indirizzo ALSA.
+
+    `plughw:1,0` e' giusto e non dice niente. Le pagine devono poter scrivere
+    "USB Audio", che e' la stessa cosa detta a qualcuno.
+    """
+    scelta = uscita(cfg)
+    if not scelta:
+        return ""
+    for scheda in dispositivi():
+        if scheda["alsa"] == scelta:
+            return scheda["nome"]
+    return scelta
+
+
 def volume_impostato(cfg):
     """Il volume scritto in configurazione. E' quello che vale lo slider."""
     try:
@@ -811,6 +826,7 @@ def stato(cfg):
     """
     return {"disponibile": disponibile(), "acceso": acceso(cfg),
             "dispositivi": dispositivi(), "uscita": uscita(cfg),
+            "nome": nome_uscita(cfg),
             "volume": volume_impostato(cfg), "errore": ultimo_errore(),
             "notte": _notte(), "volume_notturno": volume_notturno(cfg),
             "effetti": os.path.isdir(CARTELLA_EFFETTI)}

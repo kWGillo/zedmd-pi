@@ -2085,8 +2085,14 @@ def create_app(runtime):
         """
         acceso = request.form.get("cassa") == "on"
         ok, motivo = cassa.imposta(suoni.uscita(cfg), acceso)
-        if ok:
-            chiave = "cassa.on" if acceso else "cassa.off"
+        if ok and acceso:
+            # Se si è dovuto ripiegare sul convertitore lo si dice: è un
+            # compromesso, e un compromesso taciuto è una sorpresa rimandata.
+            chiave = ("cassa.on.convertitore"
+                      if cassa.uscita_attuale().startswith("plug")
+                      else "cassa.on")
+        elif ok:
+            chiave = "cassa.off"
         else:
             chiave = "cassa.failed"
         return redirect(url_for("page_nowplaying", result=i18n.translate(

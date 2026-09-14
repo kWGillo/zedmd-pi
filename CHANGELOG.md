@@ -2,6 +2,44 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [7.4.1]
+
+- **Una scheda audio che non sa fare 44100 Hz adesso suona lo stesso.**
+  Correggendo la scelta automatica, la 7.4 ha finalmente puntato la chiavetta
+  USB invece dell'uscita HDMI — e ha scoperto che quella chiavetta dichiara:
+
+  ```
+  Playback:  Rates: 8000, 48000
+  ```
+
+  AirPlay trasmette a 44100 e a nient'altro. In accesso esclusivo ffmpeg
+  rispondeva `sample rate 44100 not available, nearest is 48000`, e
+  l'interruttore dell'uscita musicale si ridisattivava da solo a ogni
+  salvataggio. **Non era un difetto nuovo**: era quello vecchio che diventava
+  visibile, perché prima si provava l'HDMI — che si apre senza protestare e
+  non suona niente.
+
+  Ora, se la prova in accesso esclusivo fallisce, si riprova la stessa scheda
+  con il convertitore di ALSA davanti. La preferenza per `hw:` resta giusta —
+  con `plughw:` shairport-sync non vede più che cosa la scheda sappia fare
+  davvero — ma quel dettaglio conta per la sincronizzazione fra più casse, che
+  con una cassa sola non esiste, e l'alternativa qui era il silenzio. La
+  pagina lo scrive quando succede: un compromesso taciuto è una sorpresa
+  rimandata.
+
+  La trappola di questa correzione stava nel riallineamento introdotto dalla
+  7.4: dopo il ripiego in configurazione c'è `plughw:1,0`, e un confronto che
+  si aspettasse `hw:1,0` avrebbe riscritto e riavviato shairport-sync **a ogni
+  avvio del DMD, per sempre**. Una prova lo verifica su tre avvii di fila.
+
+- **La riga dell'uscita musicale dice finalmente la cosa giusta.** Era già
+  stata riscritta una volta, e mostrava ancora il dispositivo di
+  shairport-sync: a interruttore spento si leggeva `hw:CARD=Dummy` e sembrava
+  che il DMD avesse scelto la scheda finta. Ora nomina la scheda scelta in
+  Impostazioni — «USB Audio», non `plughw:1,0` — in tutti e due gli stati, dice
+  da quale scheda *uscirebbe* la musica quando l'interruttore è spento, e se le
+  due configurazioni divergono lo segnala invece di lasciarlo indovinare.
+
 ## [7.4]
 
 - **Now Playing non partiva, e la causa era un indirizzo scritto in due
