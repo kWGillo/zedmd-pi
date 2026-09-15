@@ -825,6 +825,41 @@ def uscita_giochi(cfg):
     return uscita(cfg)
 
 
+# --------------------------------------------------- il livello della scheda
+
+def livello_scheda(cfg):
+    """Il volume hardware della scheda scelta, in percentuale. None se ignoto.
+
+    Esiste per un guasto vero, costato due ore. La chiavetta USB del DMD si
+    era presentata con il suo controllo `PCM` a **-20 dB** -- un decimo
+    dell'ampiezza -- e quel livello penalizzava tutto insieme: musica AirPlay,
+    avvisi dei servizi, effetti dei giochi. Nessuna pagina lo mostrava, quindi
+    non c'era modo di scoprirlo dall'interfaccia: si poteva solo inciampare in
+    `amixer` da riga di comando.
+
+    Un numero che il programma puo' leggere e l'utente no e' esattamente la
+    classe di difetti che questo progetto continua a pagare.
+    """
+    scelta = uscita(cfg)
+    if not scelta or not shutil.which("amixer"):
+        return None
+    numero = re.search(r"(\d+)", scelta.split(":", 1)[-1])
+    if not numero:
+        return None
+    try:
+        esito = subprocess.run(["amixer", "-c", numero.group(1)],
+                               capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if esito.returncode:
+        return None
+    # Si prende la prima percentuale di riproduzione che compare. Le schede
+    # hanno controlli diversi -- PCM, Speaker, Master -- e cercarne uno per
+    # nome vorrebbe dire un elenco da tenere aggiornato per sempre.
+    trovato = re.search(r"Playback \d+ \[(\d+)%\]", esito.stdout)
+    return int(trovato.group(1)) if trovato else None
+
+
 def stato(cfg):
     """Quel che serve alle pagine.
 
@@ -843,4 +878,5 @@ def stato(cfg):
             "nome": nome_uscita(cfg),
             "volume": volume_impostato(cfg), "errore": ultimo_errore(),
             "notte": _notte(), "volume_notturno": volume_notturno(cfg),
+            "livello": livello_scheda(cfg),
             "effetti": os.path.isdir(CARTELLA_EFFETTI)}

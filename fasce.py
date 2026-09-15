@@ -67,3 +67,81 @@ def fascia_media(cfg):
     conf = cfg.get("mediaplayer") or {}
     return (str(conf.get("timer_start") or MEDIA_INIZIO),
             str(conf.get("timer_end") or MEDIA_FINE))
+
+
+# ------------------------------------------------------- fasce per servizio
+
+# Dalla 8.1 ogni servizio puo' avere la sua fascia oraria. La regola resta
+# questa, una sola: cambia soltanto da dove si leggono gli estremi.
+#
+# **Il flag viene prima di tutto.** Spento -- che e' il predefinito -- il
+# servizio lavora sempre, cioe' come si e' sempre comportato: chi aggiorna non
+# si accorge di niente finche' non accende una fascia lui.
+#
+# Il Media Player e' l'unico che una fascia ce l'aveva gia', sotto
+# `mediaplayer.timer_*`. Quei campi restano dov'erano e questa funzione li
+# legge da li': spostarli avrebbe voluto dire o perdere l'impostazione di chi
+# aggiorna, o tenerne due copie che prima o poi divergono.
+
+PREDEFINITA = {"enabled": False, "inizio": "08:00", "fine": "23:00"}
+
+
+def fascia(cfg, nome):
+    """La fascia di un servizio: (accesa, inizio, fine). Sempre tre valori."""
+    if nome == "mediaplayer":
+        conf = (cfg or {}).get("mediaplayer") or {}
+        return (bool(conf.get("timer_enabled")),
+                str(conf.get("timer_start") or MEDIA_INIZIO),
+                str(conf.get("timer_end") or MEDIA_FINE))
+    voce = ((cfg or {}).get("timing") or {}).get(nome) or {}
+    return (bool(voce.get("enabled")),
+            str(voce.get("inizio") or PREDEFINITA["inizio"]),
+            str(voce.get("fine") or PREDEFINITA["fine"]))
+
+
+def consentito(cfg, nome, adesso=None):
+    """True se questo servizio puo' lavorare in questo momento.
+
+    Non sa niente ne' dello Sleep ne' del night mode, ed e' voluto: quelli
+    agiscono **a valle**, sul pannello, qualunque sorgente abbia vinto.
+    Sommarli qui vorrebbe dire scrivere la stessa precedenza in due posti, e
+    prima o poi in due modi diversi.
+    """
+    accesa, inizio, fine = fascia(cfg, nome)
+    if not accesa:
+        return True
+    return in_window(minuto(adesso), parse_hhmm(inizio), parse_hhmm(fine))
+
+
+def scrivi_fascia(cfg, nome, accesa, inizio, fine):
+    """Salva la fascia di un servizio, dove quel servizio la tiene."""
+    if nome == "mediaplayer":
+        conf = cfg.setdefault("mediaplayer", {})
+        conf["timer_enabled"] = bool(accesa)
+        conf["timer_start"] = inizio
+        conf["timer_end"] = fine
+        return
+    voce = cfg.setdefault("timing", {}).setdefault(nome, {})
+    voce["enabled"] = bool(accesa)
+    voce["inizio"] = inizio
+    voce["fine"] = fine
+
+
+def perche_fermo(cfg, nome, acceso, adesso=None):
+    """Perche' questo servizio non sta lavorando adesso. "" se lavora.
+
+    E' la ragione per cui la pagina Timing esiste. Aggiungere una fascia a
+    quindici servizi moltiplica per quindici i modi in cui un servizio puo'
+    non comparire: senza una colonna che risponda, fra un mese ci si chiede
+    "perche' non vedo le scadenze" e si ricomincia a indovinare. E' gia'
+    successo con il meteo, dove la colpa e' stata data a una fascia che non
+    c'entrava niente.
+    """
+    if not acceso:
+        return "spento"
+    accesa, inizio, fine = fascia(cfg, nome)
+    if not accesa:
+        return ""
+    if in_window(minuto(adesso), parse_hhmm(inizio), parse_hhmm(fine)):
+        return ""
+    return "fuori fascia %s-%s" % (inizio, fine)

@@ -79,6 +79,11 @@ DEFAULTS = {
         "sleep_start": "01:00",
         "sleep_end": "06:00",
         "sleep_wake_on_zedmd": True,
+        # E lo stesso per una partita aperta a mano. Sono due cose diverse:
+        # i frame da Batocera arrivano da soli, una partita la apre qualcuno
+        # che e' li' davanti -- e spegnergli il pannello in faccia perche'
+        # sono le due di notte e' proprio il caso in cui lo Sleep sbaglia.
+        "sleep_wake_on_giochi": True,
         # Spegnimento a mano del pannello. Non e' Sleep mode: quello segue un
         # orario, questo e' una decisione presa adesso e che dura finche' non
         # si cambia idea -- anche dopo un riavvio, che e' voluto: uno
@@ -600,6 +605,16 @@ DEFAULTS = {
     # La sveglia. Le voci nascono spente: un orario predefinito che suona da
     # solo il giorno dopo l'aggiornamento sarebbe uno scherzo, non un valore
     # di fabbrica.
+    # Le fasce orarie dei servizi, una voce per servizio che ne ha una accesa.
+    # Vuoto = nessuno ha fasce, cioe' tutti lavorano sempre: e' il
+    # comportamento di sempre, e chi aggiorna non si accorge di niente.
+    #
+    # Il Media Player non sta qui: la sua fascia esisteva gia' dalla 3.5 sotto
+    # `mediaplayer.timer_*` e resta li'. Spostarla avrebbe voluto dire o
+    # perdere l'impostazione di chi aggiorna, o tenerne due copie che prima o
+    # poi divergono. La pagina Timing le mostra insieme lo stesso: dove un dato
+    # e' scritto e' un fatto del programma, non dell'utente.
+    "timing": {},
     "sveglia": {
         "colore": "#ff3b30",
         # Per quanto suona un timer scaduto. Piu' corta di una sveglia: chi ha

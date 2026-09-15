@@ -1389,13 +1389,64 @@ def create_app(runtime):
         except Exception:      # noqa: BLE001
             regioni = []
         current = runtime.arbiter.current
+        vista = request.args.get("vista", "servizi")
+        if vista not in ("servizi", "timing", "suoni"):
+            vista = "servizi"
         return render_template(
             "services.html", cfg=cfg, services=services, regioni=regioni,
             audio=suoni.stato(cfg), suoni_file=suoni.file_disponibili(cfg),
             current=current.label if current else "—",
             mqtt=runtime.mqtt.status(),
+            vista=vista, timing=_timing(services),
             result=request.args.get("result", ""),
             sleeping=runtime.sleeping, night=runtime.night, page="services")
+
+    def _timing(services):
+        """Le fasce dei servizi, ciascuna con il motivo per cui e' ferma.
+
+        Il motivo e' il punto di questa pagina. Senza, una fascia oraria per
+        ogni servizio moltiplica per quindici i modi in cui un servizio puo'
+        non comparire, e la domanda «perche' non vedo X» torna ogni volta.
+        """
+        fuori = []
+        for voce in services:
+            if not voce["ready"]:
+                continue
+            chiave = voce["key"]
+            accesa, inizio, fine = fasce.fascia(cfg, chiave)
+            fuori.append({
+                "key": chiave, "label": voce["label"],
+                "fascia_accesa": accesa, "inizio": inizio, "fine": fine,
+                "motivo": fasce.perche_fermo(
+                    cfg, chiave, bool(cfg["services"].get(chiave))),
+            })
+        return fuori
+
+    @app.route("/api/timing", methods=["POST"])
+    def api_timing():
+        """La fascia di un servizio solo, quello indicato da `key`.
+
+        Un modulo per servizio e non uno per tutti: con un modulo unico, un
+        campo assente dalla richiesta varrebbe il suo predefinito, e salvare
+        la fascia del meteo azzererebbe in silenzio quelle degli altri
+        quattordici. E' la stessa ragione delle sveglie e dei topic musicali.
+        """
+        chiave = request.form.get("key", "")
+        if chiave not in cfg["services"]:
+            return redirect(url_for("page_services", vista="timing"))
+        fasce.scrivi_fascia(
+            cfg, chiave,
+            request.form.get("sempre") != "on",
+            request.form.get("inizio", fasce.PREDEFINITA["inizio"]),
+            request.form.get("fine", fasce.PREDEFINITA["fine"]))
+        dmdconf.save()
+        # La fascia e l'interruttore sono la stessa domanda, e la risposta la
+        # da' l'arbitro: senza questa riga il servizio resterebbe come stava
+        # fino al giro successivo del ciclo.
+        runtime.arbiter.apply_services()
+        return redirect(url_for("page_services", vista="timing",
+                                result=i18n.translate("timing.salvata",
+                                                      current_language())))
 
     @app.route("/sveglia")
     def page_sveglia():

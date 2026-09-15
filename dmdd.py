@@ -129,10 +129,12 @@ class Arbiter:
         e' che l'interruttore lo gira una persona e la fascia scade da sola,
         quindi il ciclo richiama apply_services una volta al secondo: e'
         idempotente, agisce solo quando lo stato cambia davvero.
+
+        Dalla 8.1 la fascia ce l'hanno **tutti** i servizi, non solo il Media
+        Player, e questa riga e' rimasta una sola: era gia' il cancello unico,
+        bastava generalizzare la regola invece di aggiungerne un'altra.
         """
-        if name == "mediaplayer":
-            return fasce.media_consentito(self.cfg)
-        return True
+        return fasce.consentito(self.cfg, name)
 
     # ------------------------------------------------------- presa del pannello
 
@@ -806,8 +808,15 @@ class Runtime:
         # Chi ha preso il pannello lo sta guardando adesso — sta scegliendo un
         # file o sta giocando: se capita nella fascia notturna, spegnerglielo
         # in faccia non aiuta.
-        if self.arbiter.holding():
-            sleeping = False
+        #
+        # Dalla 8.1 questa eccezione ha una casella, accanto a quella dei frame
+        # da Batocera. Sono due cose diverse e meritavano due interruttori: i
+        # frame arrivano da soli, una partita la apre qualcuno che e' li'
+        # davanti. Chi la spegne vuole che alle due di notte il pannello resti
+        # nero comunque, ed e' una scelta legittima.
+        if sleeping and self.arbiter.holding():
+            if display.get("sleep_wake_on_giochi", True):
+                sleeping = False
 
         # Lo spegnimento a mano viene **dopo** tutte le eccezioni, e vince su
         # tutte: se qualcuno ha deciso adesso che il pannello deve stare

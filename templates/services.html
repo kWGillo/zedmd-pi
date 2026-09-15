@@ -13,6 +13,22 @@
 </div>
 {% endif %}
 
+{# Tre viste della stessa lista, non tre pagine. Timing e Suoni non sono un
+   altro argomento rispetto ai Servizi: sono altre due colonne della stessa
+   tabella — se un servizio è acceso, quando è acceso, che suono fa. Metterli
+   nel menu avrebbe aggiunto due voci a un menu che sul telefono sta già su
+   tre righe; metterli sotto Impostazioni li avrebbe separati dai servizi a
+   cui si riferiscono. #}
+<nav class="schede">
+  <a href="{{ url_for('page_services') }}"
+     class="{{ 'on' if vista == 'servizi' }}">{{ t('services.title') }}</a>
+  <a href="{{ url_for('page_services', vista='timing') }}"
+     class="{{ 'on' if vista == 'timing' }}">{{ t('timing.title') }}</a>
+  <a href="{{ url_for('page_services', vista='suoni') }}"
+     class="{{ 'on' if vista == 'suoni' }}">{{ t('suoni.title') }}</a>
+</nav>
+
+{% if vista == 'servizi' %}
 <section class="card">
   <h2>{{ t('services.onscreen') }}</h2>
   <p class="current">{{ t('services.current') }} <strong>{{ current }}</strong></p>
@@ -73,21 +89,6 @@
     </form>
   </div>
   <p class="desc">{{ t('services.desc.' ~ service.key) }}</p>
-  {% if service.suono and cfg.audio.enabled %}
-  <form method="post" action="{{ url_for('api_audio_servizio') }}" class="inline">
-    <input type="hidden" name="key" value="{{ service.key }}">
-    <select name="file">
-      <option value="">{{ t('audio.none') }}</option>
-      {% for voce in suoni_file %}
-      <option value="{{ voce.nome }}"
-              {{ 'selected' if cfg.audio.servizi.get(service.key) == voce.nome }}>
-        {{ voce.nome }}</option>
-      {% endfor %}
-    </select>
-    <button type="submit">{{ t('common.apply') }}</button>
-    <button type="submit" name="prova" value="1">{{ t('audio.play') }}</button>
-  </form>
-  {% endif %}
   {# Il pulsante di prova esiste solo per le notifiche, ed e' l'unico
      servizio che ne abbia bisogno: tutti gli altri si vedono da soli appena
      li accendi, questo resta muto finche' qualcuno da fuori non parla. #}
@@ -150,5 +151,135 @@
   {% endif %}
 </section>
 {% endfor %}
+
+{% elif vista == 'timing' %}
+
+<section class="card">
+  <h2>{{ t('timing.title') }}</h2>
+  <p class="hint">{{ t('timing.intro') }}</p>
+  <p class="hint">{{ t('timing.avviso') }}</p>
+</section>
+
+{# Night mode e Sleep mode vengono per primi: non sono servizi, sono modi del
+   display, e agiscono **a valle** su qualunque sorgente abbia vinto. Stanno
+   qui perché la domanda è la stessa — quando il pannello fa cosa — e averli
+   in un'altra pagina voleva dire cercarli in due posti. #}
+<section class="card">
+  <h2>{{ t('settings.modes') }}</h2>
+  <form method="post" action="{{ url_for('api_display') }}">
+    <input type="hidden" name="brightness" value="{{ cfg.display.brightness }}">
+
+    <label class="check">
+      <input type="checkbox" name="night_enabled" {{ 'checked' if cfg.display.night_enabled }}>
+      {{ t('settings.night') }}</label>
+    <div class="row4">
+      <div><label for="night_start">{{ t('common.from') }}</label>
+        <input type="time" id="night_start" name="night_start" value="{{ cfg.display.night_start }}"></div>
+      <div><label for="night_end">{{ t('common.to') }}</label>
+        <input type="time" id="night_end" name="night_end" value="{{ cfg.display.night_end }}"></div>
+      <div><label for="night_brightness">{{ t('settings.brightness') }}</label>
+        <input type="number" id="night_brightness" name="night_brightness" min="0" max="100"
+               value="{{ cfg.display.night_brightness }}"></div>
+      <div><label for="night_volume">{{ t('settings.night.volume') }}</label>
+        <input type="number" id="night_volume" name="night_volume" min="0" max="100" step="5"
+               value="{{ (cfg.display.night_volume * 100) | round | int }}"></div>
+    </div>
+    <p class="hint">{{ t('settings.night.volume.hint') }}</p>
+
+    <label class="check">
+      <input type="checkbox" name="sleep_enabled" {{ 'checked' if cfg.display.sleep_enabled }}>
+      {{ t('settings.sleep') }}</label>
+    <div class="row2">
+      <div><label for="sleep_start">{{ t('common.from') }}</label>
+        <input type="time" id="sleep_start" name="sleep_start" value="{{ cfg.display.sleep_start }}"></div>
+      <div><label for="sleep_end">{{ t('common.to') }}</label>
+        <input type="time" id="sleep_end" name="sleep_end" value="{{ cfg.display.sleep_end }}"></div>
+    </div>
+
+    <label class="check">
+      <input type="checkbox" name="sleep_wake_on_zedmd" {{ 'checked' if cfg.display.sleep_wake_on_zedmd }}>
+      {{ t('settings.wake') }}</label>
+    <label class="check">
+      <input type="checkbox" name="sleep_wake_on_giochi" {{ 'checked' if cfg.display.sleep_wake_on_giochi }}>
+      {{ t('settings.wake.giochi') }}</label>
+
+    <p class="hint">{{ t('settings.modes.hint') }}</p>
+    <p class="hint">{{ t('timing.sveglia.nota') }}</p>
+    <button type="submit">{{ t('form.save') }}</button>
+  </form>
+</section>
+
+{% for voce in timing %}
+<section class="card service">
+  <div class="service-head">
+    <h2>{{ voce.label }}</h2>
+    {# La colonna che dà senso a questa pagina: non gli orari, ma se adesso
+       sta lavorando e, se no, chi lo sta fermando. Aggiungere una fascia a
+       quindici servizi moltiplica per quindici i modi in cui uno può non
+       comparire — è già successo col meteo, dove la colpa è stata data a una
+       fascia che non c'entrava niente. #}
+    <span class="badge {{ 'on' if not voce.motivo }}">
+      {{ t('timing.ora.attivo') if not voce.motivo else voce.motivo }}</span>
+  </div>
+  <form method="post" action="{{ url_for('api_timing') }}">
+    <input type="hidden" name="key" value="{{ voce.key }}">
+    <label class="check">
+      <input type="checkbox" name="sempre" {{ '' if voce.fascia_accesa else 'checked' }}>
+      {{ t('timing.sempre') }}</label>
+    <div class="row3">
+      <div><label for="da_{{ voce.key }}">{{ t('common.from') }}</label>
+        <input type="time" id="da_{{ voce.key }}" name="inizio" value="{{ voce.inizio }}"></div>
+      <div><label for="a_{{ voce.key }}">{{ t('common.to') }}</label>
+        <input type="time" id="a_{{ voce.key }}" name="fine" value="{{ voce.fine }}"></div>
+      <div><label>&nbsp;</label>
+        <button type="submit">{{ t('form.save') }}</button></div>
+    </div>
+  </form>
+</section>
+{% endfor %}
+
+{% else %}
+
+<section class="card">
+  <h2>{{ t('suoni.title') }}</h2>
+  <p class="hint">{{ t('suoni.intro') }}</p>
+  {% if not cfg.audio.enabled %}
+  <p class="status">{{ t('audio.off') }}</p>
+  {% endif %}
+  {% if not suoni_file %}
+  <p class="status">{{ t('suoni.vuoto') }}</p>
+  {% endif %}
+</section>
+
+{% for service in services %}{% if service.suono %}
+<section class="card service">
+  <div class="service-head">
+    <h2>{{ service.label }}</h2>
+    <span class="badge {{ 'on' if cfg.audio.servizi.get(service.key) }}">
+      {{ cfg.audio.servizi.get(service.key) or t('audio.none') }}</span>
+  </div>
+  <form method="post" action="{{ url_for('api_audio_servizio') }}" class="inline">
+    <input type="hidden" name="key" value="{{ service.key }}">
+    <select name="file">
+      <option value="">{{ t('audio.none') }}</option>
+      {% for voce in suoni_file %}
+      <option value="{{ voce.nome }}"
+              {{ 'selected' if cfg.audio.servizi.get(service.key) == voce.nome }}>
+        {{ voce.nome }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">{{ t('common.apply') }}</button>
+    <button type="submit" name="prova" value="1">{{ t('audio.play') }}</button>
+  </form>
+</section>
+{% endif %}{% endfor %}
+
+<section class="card">
+  <h2>{{ t('suoni.sveglia.title') }}</h2>
+  <p class="hint">{{ t('suoni.sveglia.hint') }}
+    <a href="{{ url_for('page_sveglia') }}">{{ t('nav.sveglia') }}</a> →</p>
+</section>
+
+{% endif %}
 
 {% endblock %}

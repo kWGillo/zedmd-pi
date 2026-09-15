@@ -78,46 +78,13 @@
 
 <section class="card">
   <h2>{{ t('settings.modes') }}</h2>
-  <form method="post" action="{{ url_for('api_display') }}">
-
-    <label class="check">
-      <input type="checkbox" name="night_enabled" {{ 'checked' if cfg.display.night_enabled }}>
-      {{ t('settings.night') }}
-    </label>
-    <div class="row4">
-      <div><label for="night_start">{{ t('common.from') }}</label>
-        <input type="time" id="night_start" name="night_start" value="{{ cfg.display.night_start }}"></div>
-      <div><label for="night_end">{{ t('common.to') }}</label>
-        <input type="time" id="night_end" name="night_end" value="{{ cfg.display.night_end }}"></div>
-      <div><label for="night_brightness">{{ t('settings.brightness') }}</label>
-        <input type="number" id="night_brightness" name="night_brightness" min="0" max="100"
-               value="{{ cfg.display.night_brightness }}"></div>
-      <div><label for="night_volume">{{ t('settings.night.volume') }}</label>
-        <input type="number" id="night_volume" name="night_volume" min="0" max="100" step="5"
-               value="{{ (cfg.display.night_volume * 100) | round | int }}"></div>
-    </div>
-    <p class="hint">{{ t('settings.night.volume.hint') }}</p>
-
-    <label class="check">
-      <input type="checkbox" name="sleep_enabled" {{ 'checked' if cfg.display.sleep_enabled }}>
-      {{ t('settings.sleep') }}
-    </label>
-    <div class="row3">
-      <div><label for="sleep_start">{{ t('common.from') }}</label>
-        <input type="time" id="sleep_start" name="sleep_start" value="{{ cfg.display.sleep_start }}"></div>
-      <div><label for="sleep_end">{{ t('common.to') }}</label>
-        <input type="time" id="sleep_end" name="sleep_end" value="{{ cfg.display.sleep_end }}"></div>
-      <div></div>
-    </div>
-
-    <label class="check">
-      <input type="checkbox" name="sleep_wake_on_zedmd" {{ 'checked' if cfg.display.sleep_wake_on_zedmd }}>
-      {{ t('settings.wake') }}
-    </label>
-
-    <button type="submit">{{ t('common.save') }}</button>
-  </form>
-  <p class="hint">{{ t('settings.modes.hint') }}</p>
+  {# Night mode e Sleep mode si sono spostati nella scheda Timing della pagina
+     Servizi, insieme alle fasce di tutti gli altri servizi. La domanda è la
+     stessa — quando il pannello fa cosa — e averla in due pagine voleva dire
+     cercarla in due posti. Qui resta il collegamento: una funzione che
+     scompare senza dire dov'è andata è peggio di una funzione scomoda. #}
+  <p class="hint">{{ t('settings.modes.spostati') }}
+    <a href="{{ url_for('page_services', vista='timing') }}">{{ t('timing.title') }}</a> →</p>
 </section>
 
 <section class="card">
@@ -174,9 +141,27 @@
     <p class="hint">{{ t('audio.device.hint') }}</p>
 
     <label for="volume">{{ t('audio.volume') }}</label>
-    <input type="number" id="volume" name="volume" min="0" max="100"
-           value="{{ (cfg.audio.volume * 100) | round | int }}">
+    {# Slider e non casella: un volume si cerca a orecchio, e il numero esatto
+       non lo sa nessuno prima di averlo sentito. La casella accanto resta
+       perché il valore si possa comunque leggere. #}
+    <div class="color-row">
+      <input type="range" id="volume" name="volume" min="0" max="100" step="5"
+             value="{{ (cfg.audio.volume * 100) | round | int }}"
+             oninput="this.nextElementSibling.value = this.value + '%'">
+      <output>{{ (cfg.audio.volume * 100) | round | int }}%</output>
+    </div>
     <p class="hint">{{ t('audio.volume.hint') }}</p>
+
+    {# Il livello hardware della scheda. Esiste per un guasto vero: la
+       chiavetta si era presentata a −20 dB, un decimo dell'ampiezza, e quel
+       numero penalizzava musica, avvisi e giochi insieme senza che nessuna
+       pagina lo mostrasse. Ci sono volute due ore per inciampare in `amixer`. #}
+    {% if audio.livello is not none %}
+    <p class="hint">
+      {{ t('audio.livello', valore=audio.livello) }}
+      {% if audio.livello < 70 %}<strong>{{ t('audio.livello.basso') }}</strong>{% endif %}
+    </p>
+    {% endif %}
 
     <label class="check">
       <input type="checkbox" name="giochi" {{ 'checked' if cfg.audio.giochi }}>

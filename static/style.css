@@ -525,3 +525,19 @@ table.scadenze tr.stato-scaduta .giorni { color: #ff8080; }
 table.scadenze tr.stato-giallo .giorni { color: #ffc81e; }
 table.scadenze tr.stato-verde .giorni { color: #28dc46; }
 table.scadenze tr.stato-scaduta b { color: #ff8080; }
+
+/* Le tre viste della pagina Servizi. Schede e non voci di menu: Timing e
+   Suoni non sono un altro argomento rispetto ai Servizi, sono altre due
+   colonne della stessa tabella. */
+nav.schede { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; }
+nav.schede a {
+  padding: 8px 16px; border: 1px solid var(--line); border-radius: 999px;
+  color: var(--muted); text-decoration: none; font-size: 14px;
+}
+nav.schede a.on {
+  background: var(--accent); border-color: var(--accent); color: #101418;
+  font-weight: 600;
+}
+/* Verde quando il servizio sta lavorando adesso, spento quando qualcosa lo
+   ferma: da lontano si legge prima il colore del testo. */
+.badge.on { background: rgba(40,220,70,.14); border-color: #1f7a30; color: #7fe58f; }

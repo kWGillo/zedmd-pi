@@ -1701,6 +1701,30 @@ Storico:
        chiude la scheda audio, quindi con Doom che suona la sveglia lampeggia
        ma non si sente. Fra una sveglia muta e una partita persa vale di piu\'
        la partita.
+  8.1  **Le finestre che avevo lasciato in coda per due versioni.** La pagina
+       Servizi diventa **tre schede**: Servizi, Timing, Suoni. Non tre voci di
+       menu e non tre sottopagine di Impostazioni -- sono tre colonne della
+       stessa tabella: se un servizio e\' acceso, quando e\' acceso, che suono fa.
+       *Timing* da\' a ogni servizio una fascia oraria, con il flag "sempre
+       attivo" acceso di suo, e si porta dentro Night mode, Sleep mode e la
+       fascia del Media Player, che stavano in tre pagine diverse. La regola
+       e\' rimasta una sola: `Arbiter.consentito` era gia\' il cancello unico,
+       bastava generalizzare `fasce` invece di aggiungere un secondo
+       meccanismo.
+       La colonna che conta pero\' non sono gli orari: e\' quella che dice se un
+       servizio sta lavorando **adesso** e, se no, chi lo sta fermando. Senza,
+       una fascia per servizio moltiplica per quindici i modi in cui qualcosa
+       puo\' non comparire -- ed e\' gia\' successo col meteo, dove la colpa e\'
+       stata data a una fascia che non c\'entrava niente.
+       *Suoni* raccoglie in un posto solo le scelte che erano sparse nelle
+       schede dei singoli servizi.
+       **Il volume diventa uno slider**, e accanto compare il livello hardware
+       della scheda -- quello che a -20 dB aveva zittito tutto per una serata
+       senza che nessuna pagina lo mostrasse. Sotto il 70% la pagina dice anche
+       come alzarlo.
+       Nuova casella: risvegliare il display se qualcuno **apre una partita**
+       durante lo Sleep. Era gia\' il comportamento, ma cablato: adesso e\' una
+       scelta, accanto a quella dei frame da Batocera.
 """
 
-__version__ = "8.0"
+__version__ = "8.1"

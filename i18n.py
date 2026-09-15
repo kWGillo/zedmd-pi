@@ -514,6 +514,57 @@ STRINGS = {
     "settings.modes": ("Night mode e Sleep mode", "Night mode and Sleep mode"),
     "settings.night": ("Night mode — abbassa la luminosità in una fascia oraria",
                        "Night mode — lowers brightness during a time range"),
+    "settings.modes.spostati": (
+        "Night mode, Sleep mode e le fasce orarie di tutti i servizi stanno "
+        "adesso in un posto solo:",
+        "Night mode, Sleep mode and every service's time window now live in "
+        "one place:"),
+    "timing.title": ("Timing", "Timing"),
+    "timing.intro": (
+        "Quando ogni servizio può prendere il pannello. Il valore predefinito "
+        "è «sempre»: finché non accendi una fascia, tutto si comporta come si "
+        "è sempre comportato.",
+        "When each service may take the panel. The default is “always”: until "
+        "you switch a window on, everything behaves as it always has."),
+    "timing.avviso": (
+        "La colonna a destra dice se il servizio sta lavorando **adesso** e, "
+        "se no, chi lo sta fermando. È il motivo per cui questa pagina esiste: "
+        "una fascia per servizio moltiplica i modi in cui qualcosa può non "
+        "comparire, e senza una risposta scritta si finisce a indovinare.",
+        "The right-hand column says whether the service is working **right "
+        "now** and, if not, what is stopping it. That is why this page exists: "
+        "a window per service multiplies the ways something can fail to show "
+        "up, and without a written answer you end up guessing."),
+    "timing.sempre": ("Sempre attivo", "Always on"),
+    "timing.ora.attivo": ("attivo adesso", "on right now"),
+    "timing.salvata": ("Fascia salvata.", "Window saved."),
+    "timing.sveglia.nota": (
+        "La Sveglia non rispetta né Night mode né Sleep: mentre squilla non "
+        "esiste nessuna fascia, luminosità diurna compresa. È l'unico servizio "
+        "che esiste per interrompere.",
+        "The Alarm obeys neither Night mode nor Sleep: while it rings no "
+        "window applies, daytime brightness included. It is the only service "
+        "that exists in order to interrupt."),
+    "settings.wake.giochi": (
+        "Risveglia il display se qualcuno apre una partita durante lo Sleep",
+        "Wake the display if someone opens a game during Sleep"),
+    "suoni.title": ("Suoni", "Sounds"),
+    "suoni.intro": (
+        "Il suono che ogni servizio fa quando prende il pannello. Il momento è "
+        "quello: una volta, quando compare — non mentre ci resta.",
+        "The sound each service makes when it takes the panel. That is the "
+        "moment: once, when it appears — not while it stays."),
+    "suoni.vuoto": (
+        "Non c'è nessun file nella libreria media: copiane qualcuno nella "
+        "condivisione di rete e ricompariranno qui.",
+        "There are no files in the media library: copy some into the network "
+        "share and they will show up here."),
+    "suoni.sveglia.title": ("E la sveglia?", "What about the alarm?"),
+    "suoni.sveglia.hint": (
+        "Il suono della sveglia si sceglie per ogni orario, insieme al resto, "
+        "nella sua pagina:",
+        "The alarm sound is chosen per time, together with everything else, on "
+        "its own page:"),
     "nav.sveglia": ("Sveglia", "Alarm"),
     "timer.title": ("Timer", "Timer"),
     "timer.intro": (
@@ -1655,6 +1706,15 @@ STRINGS = {
         "qui non tocca gli altri programmi.",
         "It applies to the sound the DMD produces, not to the system mixer: "
         "raising it here does not affect other programs."),
+    "audio.livello": (
+        "Livello hardware della scheda: %(valore)s%%.",
+        "Card hardware level: %(valore)s%%."),
+    "audio.livello.basso": (
+        "È basso, e penalizza tutto insieme — musica, avvisi e giochi. "
+        "Si alza con «amixer -c N set PCM 100%» e si fissa con «alsactl store».",
+        "That is low, and it penalises everything at once — music, alerts and "
+        "games. Raise it with “amixer -c N set PCM 100%” and keep it with "
+        "“alsactl store”."),
     "audio.notte": (
         "Adesso è attivo il Night mode: gli avvisi del DMD escono al "
         "%(valore)s%% del volume. Il valore qui sotto resta quello di giorno, "

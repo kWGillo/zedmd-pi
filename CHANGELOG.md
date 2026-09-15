@@ -2,6 +2,48 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [8.1]
+
+- **La pagina Servizi diventa tre schede: Servizi · Timing · Suoni.** Non tre
+  voci di menu — che su un telefono sta già su tre righe — e non tre
+  sottopagine di Impostazioni, che le avrebbe separate dai servizi a cui si
+  riferiscono. Sono **tre colonne della stessa tabella**: se un servizio è
+  acceso, quando è acceso, che suono fa.
+
+- **Timing.** Ogni servizio ha la sua fascia oraria, con «sempre attivo» acceso
+  di suo: finché non ne accendi una, tutto si comporta come si è sempre
+  comportato. Si porta dentro anche Night mode, Sleep mode e la fascia del
+  Media Player, che stavano in tre pagine diverse.
+
+  La regola è rimasta **una sola**: `Arbiter.consentito` era già il cancello
+  unico attraversato da tutti — la pagina web, Home Assistant, l'avvio — e
+  bastava generalizzare `fasce` invece di aggiungere un secondo meccanismo. La
+  fascia del Media Player resta scritta dov'era, sotto `mediaplayer.timer_*`:
+  spostarla avrebbe voluto dire o perdere l'impostazione di chi aggiorna, o
+  tenerne due copie che prima o poi divergono.
+
+  **La colonna che conta non sono gli orari.** È quella a destra, che dice se
+  il servizio sta lavorando *adesso* e, se no, chi lo sta fermando. Aggiungere
+  una fascia a quindici servizi moltiplica per quindici i modi in cui qualcosa
+  può non comparire: senza una risposta scritta si finisce a indovinare, ed è
+  già successo col meteo — dove la colpa è stata data a una fascia che non
+  c'entrava niente.
+
+- **Suoni.** Le scelte dei suoni erano sparse nelle schede dei singoli servizi,
+  una per riquadro, in mezzo a tutto il resto. Adesso stanno in un posto solo,
+  ciascuna con il nome del file assegnato in evidenza.
+
+- **Il volume è uno slider.** Un volume si cerca a orecchio, e il numero esatto
+  non lo sa nessuno prima di averlo sentito. Accanto compare il **livello
+  hardware della scheda** — quello che a −20 dB aveva zittito musica, avvisi e
+  giochi insieme per una serata intera senza che nessuna pagina lo mostrasse —
+  e sotto il 70% la pagina dice anche come alzarlo.
+
+- Casella nuova: **risvegliare il display se qualcuno apre una partita durante
+  lo Sleep**. Era già il comportamento, ma cablato nel codice. Sono due cose
+  diverse da quella dei frame da Batocera: quelli arrivano da soli, una partita
+  la apre qualcuno che è lì davanti.
+
 ## [8.0]
 
 - **Il timer.** Una sveglia si mette *a un'ora*; un timer *fra quanto*. La

@@ -1,4 +1,4 @@
-# DMD Controller 8.0
+# DMD Controller 8.1
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -678,7 +678,8 @@ le tappe.
 | 7.5 | Il meteo si vede: era sette volte al giorno, lo 0,11% del tempo. I due orologi — ogni quanto si chiedono i dati e ogni quanto si mostrano — erano lo stesso numero. Adesso 72 apparizioni al giorno con le stesse sette chiamate alla rete |
 | 7.6 | La musica AirPlay esce anche da una scheda che non fa i 44100 Hz: accesso esclusivo più `output_rate`, con il ricampionamento fatto da shairport-sync. Il convertitore di ALSA apriva il dispositivo senza errori e non suonava |
 | 7.7 | La sveglia: quattro orari, l'orologio che lampeggia, il pulsante della Funcam che la ferma. Tre eccezioni volute — vince su Sleep, sul display spento e sul volume notturno, perché è l'unico servizio che esiste per interrompere |
-| **8.0** | **Il timer — la pasta non scade alle 20:47 — e le partite che si congelano davvero mentre la sveglia squilla: Breakout con una variabile, Doom e il Game Boy con un segnale. Correzione di un ragionamento sbagliato, demolito da una frase sulla pasta** |
+| 8.0 | Il timer — la pasta non scade alle 20:47 — e le partite che si congelano davvero mentre la sveglia squilla: Breakout con una variabile, Doom e il Game Boy con un segnale. Correzione di un ragionamento sbagliato, demolito da una frase sulla pasta |
+| **8.1** | **Servizi diventa tre schede — Servizi, Timing, Suoni — con una fascia oraria per ogni servizio e, soprattutto, una colonna che dice se sta lavorando adesso e chi lo sta fermando. Volume a slider, con il livello hardware della scheda accanto** |
 
 ---
 
