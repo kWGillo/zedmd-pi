@@ -318,18 +318,32 @@ def file_disponibili(cfg):
     return fuori
 
 
-def percorso_servizio(cfg, chiave):
-    """Il file assegnato a un servizio, se esiste ancora."""
-    scelto = ((_conf(cfg).get("servizi") or {}).get(chiave) or "").strip()
+def percorso_media(cfg, scelto):
+    """Il percorso di un file della libreria media, se esiste ancora.
+
+    Sta a parte da `percorso_servizio` perche' i servizi non sono piu' gli
+    unici a scegliere un file: dalla 7.7 lo fa anche la sveglia, e quella non
+    e' un servizio della tabella `audio.servizi`. La regola di sicurezza —
+    il nome non puo' uscire dalla libreria — deve valere per tutti e due, e
+    una regola di sicurezza scritta in due copie prima o poi diverge.
+    """
+    scelto = (scelto or "").strip()
     if not scelto:
         return ""
     base = ((cfg or {}).get("mediaplayer") or {}).get("media_dir") or ""
+    if not base:
+        return ""
     intero = os.path.normpath(os.path.join(base, scelto))
     # Il nome arriva dalla configurazione, che si puo' anche importare da un
     # file: non deve poter uscire dalla libreria media.
     if not intero.startswith(os.path.normpath(base) + os.sep):
         return ""
     return intero if os.path.isfile(intero) else ""
+
+
+def percorso_servizio(cfg, chiave):
+    """Il file assegnato a un servizio, se esiste ancora."""
+    return percorso_media(cfg, (_conf(cfg).get("servizi") or {}).get(chiave))
 
 
 def effetto(nome):

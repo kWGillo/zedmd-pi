@@ -29,8 +29,10 @@ from .notifiche import NotificheSource
 
 from .meteo import MeteoSource
 
+from .sveglia import SvegliaSource, QUANTE as SVEGLIE_QUANTE, normalizza as normalizza_sveglia
+
 __all__ = [
-    "MeteoSource",
+    "MeteoSource", "SvegliaSource", "SVEGLIE_QUANTE", "normalizza_sveglia",
     "NotificheSource", "SatellitiSource", "Source", "ClockSource", "MediaPlayerSource", "ZeDMDSource", "AirRadarSource",
     "BirthdaysSource", "PreviewSource", "HOLD_SECONDS",
     "DoomSource", "DOOM_TASTI", "DOOM_PULSANTI", "tastiere", "controlla_wad",

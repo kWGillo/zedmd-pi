@@ -44,6 +44,8 @@ import time
 
 from PIL import Image
 
+import congela
+
 from .base import Source
 
 LARGHEZZA = 256
@@ -344,6 +346,22 @@ class DoomSource(Source):
                                         name="doom-video", daemon=True)
         self._thread.start()
         return True
+
+    # ------------------------------------------------------- congelamento
+
+    def sospendi(self):
+        """Ferma il processo senza chiudere la partita. Lo chiede la sveglia."""
+        fatto, motivo = congela.sospendi(self._proc)
+        if motivo and not fatto:
+            print("[%s] non sospeso: %s" % (self.name, motivo))
+        return fatto
+
+    def riprendi(self):
+        """Fa ripartire il processo da dov'era."""
+        fatto, motivo = congela.riprendi(self._proc)
+        if motivo and not fatto:
+            print("[%s] non ripreso: %s" % (self.name, motivo))
+        return fatto
 
     def _ferma_processo(self):
         proc, self._proc = self._proc, None

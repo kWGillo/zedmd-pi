@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}{{ t('sveglia.title') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('sveglia.title') }}</h2>
+  <p class="hint">{{ t('sveglia.intro') }}</p>
+
+  {% if result %}<p class="status">{{ result }}</p>{% endif %}
+
+  {% if not cfg.services.sveglia %}
+  <p class="status">{{ t('sveglia.servizio.spento') }}</p>
+  {% endif %}
+
+  {% if sveglia.suona %}
+  <p class="status">{{ t('sveglia.suona.adesso', ora=sveglia.adesso) }}</p>
+  <form method="post" action="{{ url_for('api_sveglia_zittisci') }}">
+    <button type="submit">{{ t('sveglia.zittisci') }}</button>
+  </form>
+  {% elif sveglia.prossima %}
+  <p class="status">{{ t('sveglia.prossima', ora=sveglia.prossima,
+                         quando=prossima_testo) }}</p>
+  {% else %}
+  <p class="status">{{ t('sveglia.nessuna') }}</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ t('timer.title') }}</h2>
+  <p class="hint">{{ t('timer.intro') }}</p>
+
+  {% if sveglia.timer %}
+  <p class="status">{{ t('timer.in.corso', resta=sveglia.timer_testo,
+                         nome=sveglia.timer_nome) }}</p>
+  <form method="post" action="{{ url_for('api_timer_ferma') }}">
+    <button type="submit" class="ghost">{{ t('timer.annulla') }}</button>
+  </form>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('api_timer') }}">
+    <label for="nome_timer">{{ t('timer.nome') }}</label>
+    <input type="text" id="nome_timer" name="nome" maxlength="24"
+           placeholder="{{ t('timer.nome.esempio') }}">
+    {# I pulsanti rapidi vengono prima del campo libero: in cucina si preme,
+       non si digita, e le mani sono bagnate. #}
+    <div class="giorni">
+      {% for m in cfg.sveglia.timer_rapidi %}
+      <button type="submit" name="minuti" value="{{ m }}">{{ t('timer.minuti', n=m) }}</button>
+      {% endfor %}
+    </div>
+    <label for="minuti_liberi">{{ t('timer.altro') }}</label>
+    <div class="row2">
+      <input type="number" id="minuti_liberi" name="minuti" min="1" max="1440"
+             step="1" placeholder="20">
+      <button type="submit">{{ t('timer.avvia') }}</button>
+    </div>
+  </form>
+</section>
+
+{# Una scheda per sveglia, non una tabella: su un telefono una tabella con
+   ora, sette giorni, suono e durata esce dal margine, ed e' esattamente il
+   difetto segnalato. Qui ogni riquadro sta in colonna e si stringe da se'. #}
+{% for voce in sveglia.voci %}
+<section class="card">
+  <h2>{{ t('sveglia.numero', n=loop.index) }}</h2>
+  <form method="post" action="{{ url_for('api_sveglia') }}">
+    <input type="hidden" name="indice" value="{{ loop.index0 }}">
+
+    <label class="check">
+      <input type="checkbox" name="enabled" {{ 'checked' if voce.enabled }}>
+      {{ t('sveglia.attiva') }}</label>
+
+    <div class="row2">
+      <div><label for="ora{{ loop.index0 }}">{{ t('sveglia.ora') }}</label>
+        <input type="time" id="ora{{ loop.index0 }}" name="ora" value="{{ voce.ora }}"></div>
+      <div><label for="durata{{ loop.index0 }}">{{ t('sveglia.durata') }}</label>
+        <input type="number" id="durata{{ loop.index0 }}" name="durata"
+               min="10" max="3600" step="10" value="{{ voce.durata }}"></div>
+    </div>
+
+    <label>{{ t('sveglia.giorni') }}</label>
+    <div class="giorni">
+      {% for g in range(7) %}
+      <label class="giorno">
+        <input type="checkbox" name="giorni" value="{{ g }}"
+               {{ 'checked' if g in voce.giorni }}>
+        {{ nomi_giorni[g] }}</label>
+      {% endfor %}
+    </div>
+
+    <label for="suono{{ loop.index0 }}">{{ t('sveglia.suono') }}</label>
+    <select id="suono{{ loop.index0 }}" name="suono">
+      <option value="" {{ 'selected' if not voce.suono }}>
+        {{ t('sveglia.suono.predefinito') }}</option>
+      {% for file in suoni_file %}
+      <option value="{{ file.nome }}" {{ 'selected' if voce.suono == file.nome }}>
+        {{ file.nome }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="etichetta{{ loop.index0 }}">{{ t('sveglia.etichetta') }}</label>
+    <input type="text" id="etichetta{{ loop.index0 }}" name="etichetta"
+           maxlength="24" value="{{ voce.etichetta }}"
+           placeholder="{{ t('sveglia.etichetta.esempio') }}">
+
+    <button type="submit">{{ t('form.save') }}</button>
+  </form>
+</section>
+{% endfor %}
+
+<section class="card">
+  <h2>{{ t('sveglia.prova.title') }}</h2>
+  <p class="hint">{{ t('sveglia.prova.hint') }}</p>
+  <form method="post" action="{{ url_for('api_sveglia_prova') }}">
+    <button type="submit" class="ghost">{{ t('sveglia.prova.button') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('sveglia.regole.title') }}</h2>
+  <p class="hint">{{ t('sveglia.regole.sleep') }}</p>
+  <p class="hint">{{ t('sveglia.regole.volume') }}</p>
+  <p class="hint">{{ t('sveglia.regole.audio') }}</p>
+  <p class="hint">{{ t('sveglia.regole.pulsante') }}</p>
+</section>
+
+{% endblock %}

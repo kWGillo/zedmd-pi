@@ -114,6 +114,9 @@ class GiochiSource(Source):
         self._sessione = False
         self._thread = None
         self._stop = threading.Event()
+        # Partita congelata: il tempo del gioco non passa, ma la sessione
+        # resta aperta e il pannello, quando torna, riparte da dov'era.
+        self._congelato = threading.Event()
         self._premuti = set()
         self._ultimo_comando = 0.0
 
@@ -273,6 +276,23 @@ class GiochiSource(Source):
     # l'unico che lo sa e' lui.
     doom_pronto = None
     apri_doom = None
+    def sospendi(self):
+        """Ferma il tempo della partita, senza chiuderla."""
+        self._congelato.set()
+
+    def riprendi(self):
+        """Fa ripartire la partita da dov'era.
+
+        I tasti premuti si dimenticano: se la sveglia e' scattata mentre
+        tenevi premuto a destra, al risveglio la racchetta non deve partire
+        da sola verso il muro.
+        """
+        self._premuti.clear()
+        self._congelato.clear()
+
+    def congelata(self):
+        return self._congelato.is_set()
+
     def _suona_effetto(self, nome):
         try:
             suoni.suona_effetto(self.cfg, nome)
@@ -549,6 +569,19 @@ class GiochiSource(Source):
             gioco = self._gioco
             if gioco is None:
                 break
+            if self._congelato.is_set():
+                # Congelata: la partita esiste ancora, ma il tempo non passa.
+                # Serve alla sveglia — se squilla mentre stai giocando il
+                # pannello e' suo e tu non sei piu' davanti: lasciar correre
+                # la palla vorrebbe dire tornare e trovarsi morti.
+                #
+                # Si riparte dal giro dopo senza curarsi di `dt`: al risveglio
+                # il primo intervallo sarebbe enorme, ma `min(0.1, ...)` qui
+                # sopra lo tronca gia' — e' la stessa protezione scritta per
+                # le pause lunghe.
+                time.sleep(periodo)
+                precedente = time.time()
+                continue
             try:
                 gioco.passo(dt, set(self._premuti))
                 immagine = gioco.disegna()

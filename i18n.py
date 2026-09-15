@@ -514,6 +514,108 @@ STRINGS = {
     "settings.modes": ("Night mode e Sleep mode", "Night mode and Sleep mode"),
     "settings.night": ("Night mode — abbassa la luminosità in una fascia oraria",
                        "Night mode — lowers brightness during a time range"),
+    "nav.sveglia": ("Sveglia", "Alarm"),
+    "timer.title": ("Timer", "Timer"),
+    "timer.intro": (
+        "Un conto alla rovescia, per le cose che non scadono a un'ora ma "
+        "«fra quanto»: la pasta non scade alle 20:47. Quando finisce squilla "
+        "come una sveglia, e si ferma allo stesso modo.",
+        "A countdown, for things that are not due at a time but «in how "
+        "long»: pasta is not due at 8:47 p.m. When it ends it rings like an "
+        "alarm, and stops the same way."),
+    "timer.nome": ("Per cosa (facoltativo)", "What for (optional)"),
+    "timer.nome.esempio": ("Pasta", "Pasta"),
+    "timer.minuti": ("%(n)s min", "%(n)s min"),
+    "timer.altro": ("Oppure scrivi i minuti", "Or type the minutes"),
+    "timer.avvia": ("Avvia", "Start"),
+    "timer.annulla": ("Annulla il timer", "Cancel the timer"),
+    "timer.in.corso": ("Timer in corso: mancano %(resta)s%(nome)s.",
+                       "Timer running: %(resta)s left%(nome)s."),
+    "timer.avviato": ("Timer avviato: %(minuti)s minuti.",
+                      "Timer started: %(minuti)s minutes."),
+    "timer.no": ("Timer non avviato: %(error)s", "Timer not started: %(error)s"),
+    "timer.annullato": ("Timer annullato.", "Timer cancelled."),
+    "timer.nessuno": ("Non c'era nessun timer in corso.",
+                      "There was no timer running."),
+    "status.sveglia.timer": ("timer: mancano %(minuti)s",
+                             "timer: %(minuti)s left"),
+    "sveglia.title": ("Sveglia", "Alarm clock"),
+    "sveglia.intro": (
+        "Fino a quattro orari. Quando uno scatta il pannello diventa un "
+        "orologio che lampeggia e la scheda audio suona, finché non premi il "
+        "pulsante della Funcam.",
+        "Up to four times. When one goes off the panel becomes a blinking "
+        "clock and the sound card rings, until you press the Funcam button."),
+    "sveglia.servizio.spento": (
+        "Il servizio Sveglia è spento nella pagina Servizi: gli orari qui "
+        "sotto restano salvati ma non suonerà niente.",
+        "The Alarm service is off in the Services page: the times below are "
+        "saved but nothing will ring."),
+    "sveglia.numero": ("Sveglia %(n)s", "Alarm %(n)s"),
+    "sveglia.attiva": ("Attiva", "On"),
+    "sveglia.ora": ("Ora", "Time"),
+    "sveglia.giorni": ("Giorni", "Days"),
+    "sveglia.durata": ("Suona per (secondi)", "Rings for (seconds)"),
+    "sveglia.suono": ("Suono", "Sound"),
+    "sveglia.suono.predefinito": ("Suono del programma",
+                                  "Built-in sound"),
+    "sveglia.etichetta": ("Etichetta (facoltativa)", "Label (optional)"),
+    "sveglia.etichetta.esempio": ("Lavoro", "Work"),
+    "sveglia.salvata": ("Sveglia %(n)s salvata.", "Alarm %(n)s saved."),
+    "sveglia.suona.adesso": ("STA SUONANDO la sveglia delle %(ora)s.",
+                             "The %(ora)s alarm IS RINGING."),
+    "sveglia.zittisci": ("Ferma la sveglia", "Stop the alarm"),
+    "sveglia.zittita": ("Sveglia fermata.", "Alarm stopped."),
+    "sveglia.gia.zitta": ("Non stava suonando niente.",
+                          "Nothing was ringing."),
+    "sveglia.prossima": ("Prossima sveglia: %(ora)s di %(quando)s.",
+                         "Next alarm: %(ora)s on %(quando)s."),
+    "sveglia.nessuna": ("Nessuna sveglia attiva.", "No alarm is on."),
+    "sveglia.prova.title": ("Prova", "Test"),
+    "sveglia.prova.hint": (
+        "Fa squillare adesso per quindici secondi, con il suono della prima "
+        "sveglia attiva. Senza, l'unico modo di sapere se funziona sarebbe "
+        "metterla e andare a dormire.",
+        "Rings now for fifteen seconds, using the sound of the first enabled "
+        "alarm. Without this, the only way to know it works would be to set "
+        "it and go to bed."),
+    "sveglia.prova.button": ("Fai squillare adesso", "Ring now"),
+    "sveglia.prova.ok": ("Sta squillando: premi il pulsante della Funcam, "
+                         "oppure aspetta quindici secondi.",
+                         "Ringing: press the Funcam button, or wait fifteen "
+                         "seconds."),
+    "sveglia.prova.no": ("Non è partita: %(error)s", "It did not start: %(error)s"),
+    "sveglia.regole.title": ("Che cosa la ferma e che cosa no",
+                             "What stops it and what does not"),
+    "sveglia.regole.sleep": (
+        "Passa sopra allo Sleep mode e al display spento a mano. Spegnere il "
+        "pannello è una decisione sul presente; mettere una sveglia è una "
+        "promessa fatta prima per dopo, e fra le due vince la promessa.",
+        "It overrides Sleep mode and a manually switched-off display. "
+        "Switching the panel off is a decision about now; setting an alarm is "
+        "a promise made earlier for later, and the promise wins."),
+    "sveglia.regole.volume": (
+        "Il volume notturno non la tocca: suona al volume di giorno. Il Night "
+        "mode abbassa la voce perché un aereo alle tre non merita di "
+        "svegliarti — una sveglia si mette apposta per farlo.",
+        "The night volume does not apply: it rings at the daytime volume. "
+        "Night mode lowers the voice because a plane at 3 a.m. does not "
+        "deserve to wake you — an alarm is set precisely to do that."),
+    "sveglia.regole.audio": (
+        "Se l'audio generale è spento non suona, e il pannello lampeggia lo "
+        "stesso. Chi ha spento il suono non vuole sentire niente.",
+        "If sound is off globally it will not ring, and the panel blinks "
+        "anyway. Whoever turned sound off wants silence."),
+    "sveglia.regole.pulsante": (
+        "La ferma il pulsante della Funcam, che sul cabinato c'è già: mentre "
+        "squilla quel pulsante è suo, e premerlo non scatta nessuna foto.",
+        "The Funcam button stops it — the one already on the cabinet. While "
+        "ringing, that button belongs to the alarm and pressing it takes no "
+        "picture."),
+    "status.sveglia.suona": ("sta suonando (%(ora)s)", "ringing (%(ora)s)"),
+    "status.sveglia.prossima": ("prossima: %(ora)s di %(giorno)s",
+                                "next: %(ora)s on %(giorno)s"),
+    "status.sveglia.nessuna": ("nessuna sveglia attiva", "no alarm set"),
     "settings.night.volume": ("Volume %", "Volume %"),
     "settings.night.volume.hint": (
         "Il volume che il DMD usa per i propri avvisi durante il Night mode: "

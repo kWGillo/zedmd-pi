@@ -36,7 +36,7 @@ from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      GiochiSource, MediaPlayerSource, MeteoSource,
                      NowPlayingSource,
                      NotificheSource, PreviewSource, SatellitiSource,
-                     ScadenzeSource,
+                     ScadenzeSource, SvegliaSource,
                      TelecameraSource,
                      ZeDMDSource, controlla_rom, controlla_wad)
 from version import __version__
@@ -52,6 +52,24 @@ FPS = 30
 # importa non si accorgono dello spostamento.
 parse_hhmm = fasce.parse_hhmm
 in_window = fasce.in_window
+
+
+def modi_effettivi(sleeping, spento, night, squilla):
+    """Le tre fasce dopo che la sveglia ha detto la sua. (dorme, spento, notte).
+
+    Sta fuori dalla classe per una ragione sola: **una regola che si puo'
+    chiamare si puo' anche provare.** Dentro `_update_modes` sarebbe rimasta
+    in mezzo alla lettura dell'orologio e al calcolo della luminosita', e
+    l'unico modo di verificarla sarebbe stato mettere una sveglia vera e
+    aspettare le sette.
+
+    La regola in se' e' di una riga: mentre la sveglia squilla non c'e'
+    nessuna fascia. Non dorme, non e' spento, e la luminosita' torna quella di
+    giorno -- una sveglia che si vede al quindici per cento e' mezza sveglia.
+    """
+    if not squilla:
+        return (sleeping, spento, night)
+    return (False, False, False)
 
 
 # Quanto dura la gestione media senza notizie dal browser. La pagina manda un
@@ -287,6 +305,17 @@ class Runtime:
         self.clock = ClockSource(self.cfg, self.display.width, self.display.height)
         self.telecamera = TelecameraSource(self.cfg, self.display.width,
                                            self.display.height)
+        self.sveglia = SvegliaSource(self.cfg, self.display.width,
+                                     self.display.height)
+        # Chi suona, e chi si prende il pulsante. Gli stessi due ganci di
+        # sempre: la sveglia non sa come e' fatto l'audio e la telecamera non
+        # sa che esista una sveglia -- li mette in comunicazione il runtime,
+        # che e' l'unico a conoscerle entrambe.
+        self.sveglia.suona = self._suona_sveglia
+        self.telecamera.intercetta = self.sveglia.zittisci
+        # Se ci sono partite congelate adesso. Serve ad agire solo sui cambi
+        # di stato invece che a ogni giro del ciclo.
+        self._partite_congelate = False
 
         # Il brano corrente e chi lo disegna sono due cose distinte: lo stato
         # viene aggiornato anche a servizio spento, cosi' Home Assistant lo
@@ -314,14 +343,15 @@ class Runtime:
         suoni.musica_in_corso = self._musica_in_corso
         # E la fascia notturna, con lo stesso patto: `suoni` non sa che cosa
         # sia il night mode, sa solo che ogni tanto deve abbassare la voce.
-        # La fascia la calcola gia' `_apply_modes` per la luminosita'.
+        # La fascia la calcola gia' `_update_modes` per la luminosita'.
         # `getattr` e non `self.night`: questa riga sta **prima** del punto in
         # cui l'attributo nasce, qualche decina di righe piu' in giu'. Oggi
         # nessuno la chiama cosi' presto, ma una riga che si rompe se qualcuno
         # sposta un blocco e' una trappola per il prossimo.
         suoni.notte_in_corso = lambda: getattr(self, "night", False)
 
-        for source in (self.zedmd, self.preview, self.notifiche,
+        for source in (self.sveglia,
+                       self.zedmd, self.preview, self.notifiche,
                        self.satelliti, self.radar,
                        self.meteo,
                        self.player,
@@ -381,6 +411,69 @@ class Runtime:
         self.frame_saltati = 0
 
     # ------------------------------------------------------------------ musica
+
+    def _congela_partite(self, squilla):
+        """Mentre la sveglia suona, le partite aperte stanno ferme.
+
+        La prima stesura di questa funzione non esisteva, e il motivo era un
+        ragionamento sbagliato: «le sveglie suonano al mattino, chi sta
+        giocando a Doom alle sette?». La risposta e' arrivata in una frase --
+        *metti che devo ricordarmi di scolare la pasta e mentre cucino decido
+        di giocare a Doom* -- e ha demolito la premessa: una sveglia serve
+        soprattutto **mentre si e' occupati a fare altro**.
+
+        Peggio, si diceva che i giochi scritti per il pannello si congelassero
+        da soli perche' li disegna il ciclo principale. Non e' vero: hanno un
+        thread loro, come Doom e il Game Boy, e continuano a giocare anche a
+        pannello altrui. Tornavi e ti trovavi morto in tutti e tre i casi.
+
+        Si agisce solo sui **cambi di stato**: sospendere un processo gia'
+        sospeso, trenta volte al secondo, sarebbe traffico di segnali per
+        niente.
+        """
+        if squilla == self._partite_congelate:
+            return
+        self._partite_congelate = squilla
+        for nome in ("giochi", "doom", "gameboy"):
+            sorgente = getattr(self, nome, None)
+            if sorgente is None:
+                continue
+            try:
+                if squilla:
+                    sorgente.sospendi()
+                else:
+                    sorgente.riprendi()
+            except Exception as exc:      # pragma: no cover
+                # Una partita che non si lascia congelare non deve impedire
+                # alla sveglia di suonare: al massimo si perde quella partita.
+                print("[sveglia] %s non congelato: %s" % (nome, exc))
+
+    def _suona_sveglia(self, scelto):
+        """Il suono della sveglia. (partito, motivo).
+
+        Due differenze da tutti gli altri avvisi, e sono volute.
+
+        **Il volume e' quello di giorno**, sempre: `volume_impostato` e non
+        `volume`. Il night mode abbassa la voce del DMD perche' un aereo alle
+        tre di notte non merita di svegliarti — una sveglia si mette apposta
+        per farlo, e sarebbe l'unico caso in cui quel silenzio fa danno.
+
+        **Passa sopra la musica** con `forza`, che salta anche il controllo
+        "un brano sta suonando". Ma prima si guarda l'interruttore generale
+        dell'audio a mano: chi ha spento il suono non vuole sentire niente, e
+        quella regola vale anche per la sveglia. Il pannello lampeggia lo
+        stesso, che e' meta' della funzione.
+        """
+        if not suoni.acceso(self.cfg):
+            return False, "audio spento"
+        percorso = suoni.percorso_media(self.cfg, scelto)
+        if not percorso:
+            # Nessun file scelto, o scelto e poi cancellato dalla libreria:
+            # si usa un effetto del programma, che c'e' sempre. Una sveglia
+            # muta perche' manca un file non e' una sveglia.
+            percorso = suoni.effetto("livello")
+        return suoni.riproduci(self.cfg, percorso, forza=True,
+                               vol=suoni.volume_impostato(self.cfg))
 
     def _musica_in_corso(self):
         """Vero se un brano AirPlay sta uscendo dalla nostra scheda audio.
@@ -726,6 +819,32 @@ class Runtime:
 
         night = display["night_enabled"] and in_window(
             minute, parse_hhmm(display["night_start"]), parse_hhmm(display["night_end"]))
+
+        # **La sveglia viene dopo tutto e vince su tutto**, spegnimento a mano
+        # compreso. Tre motivi, e nessuno e' una comodita':
+        #
+        # 1. Il ciclo principale, quando dorme, si ferma *prima* di chiedere
+        #    all'arbitro chi debba comparire. Una sorgente qualunque, per
+        #    quanto prioritaria, non verrebbe nemmeno interrogata: una sveglia
+        #    alle 7 con lo Sleep fino alle 8 non suonerebbe mai, cioe' proprio
+        #    nel caso in cui serve.
+        # 2. Spegnere il pannello e' una decisione sul presente; mettere una
+        #    sveglia e' una promessa fatta prima per dopo. Fra le due vince la
+        #    promessa -- e chi non la vuole spegne la sveglia, non il display.
+        # 3. Anche la luminosita' torna quella di giorno: una sveglia che si
+        #    vede al quindici per cento e' mezza sveglia.
+        #
+        # `controlla()` non e' solo una domanda: e' anche il punto in cui la
+        # sveglia parte. Deve quindi essere chiamata **sempre**, anche mentre
+        # si dorme, ed e' l'unica ragione per cui sta qui e non nell'arbitro.
+        try:
+            squilla = self.sveglia.controlla()
+        except Exception as exc:          # pragma: no cover
+            print("[sveglia] controllo fallito: %s" % exc)
+            squilla = False
+        self._congela_partite(squilla)
+        sleeping, spento, night = modi_effettivi(sleeping, spento, night,
+                                                 squilla)
 
         self.sleeping = sleeping
         self.display_off = spento

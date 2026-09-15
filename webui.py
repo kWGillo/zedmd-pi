@@ -1374,6 +1374,8 @@ def create_app(runtime):
              "status": stato("notifiche")},
             {"key": "meteo", "label": "Meteo", "ready": True,
              "status": stato("meteo")},
+            {"key": "sveglia", "label": "Sveglia", "ready": True,
+             "status": stato("sveglia")},
         ]
         for voce in services:
             voce["suono"] = voce["key"] in suoni.SERVIZI_CON_SUONO
@@ -1394,6 +1396,114 @@ def create_app(runtime):
             mqtt=runtime.mqtt.status(),
             result=request.args.get("result", ""),
             sleeping=runtime.sleeping, night=runtime.night, page="services")
+
+    @app.route("/sveglia")
+    def page_sveglia():
+        riepilogo = runtime.sveglia.riepilogo()
+        quando = riepilogo.get("prossima_quando") or 0
+        return render_template(
+            "sveglia.html", cfg=cfg, sveglia=riepilogo,
+            suoni_file=suoni.file_disponibili(cfg),
+            nomi_giorni=_nomi_giorni(current_language()),
+            prossima_testo=(time.strftime("%a %d/%m", time.localtime(quando))
+                            if quando else ""),
+            result=request.args.get("result", ""), page="sveglia")
+
+    def _nomi_giorni(lang):
+        """Le tre lettere di ogni giorno, lunedi' per primo.
+
+        Non si usa `%a` di strftime: dipende dalla localizzazione del sistema,
+        che su un Raspberry appena installato e' inglese anche quando la
+        pagina e' in italiano. Qui la lingua e' quella scelta nella pagina.
+        """
+        from sources import DAY_NAMES
+        nomi = DAY_NAMES.get(lang) or DAY_NAMES.get("it") or []
+        if len(nomi) >= 7:
+            return [str(n)[:3] for n in nomi]
+        return ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"]
+
+    @app.route("/api/sveglia", methods=["POST"])
+    def api_sveglia():
+        """Una sveglia sola, quella indicata da `indice`.
+
+        Un modulo per sveglia e non uno per tutte: con un modulo unico, un
+        campo assente dalla richiesta varrebbe il suo predefinito, e salvare
+        la prima sveglia azzererebbe in silenzio le altre tre. E' la stessa
+        ragione per cui i topic della musica hanno una rotta propria.
+        """
+        from sources import SVEGLIE_QUANTE, normalizza_sveglia
+        try:
+            indice = int(request.form.get("indice", -1))
+        except ValueError:
+            indice = -1
+        if not 0 <= indice < SVEGLIE_QUANTE:
+            return redirect(url_for("page_sveglia"))
+
+        conf = cfg.setdefault("sveglia", {})
+        voci = list(conf.get("voci") or [])
+        while len(voci) <= indice:
+            voci.append({})
+        giorni = [g for g in request.form.getlist("giorni") if g.isdigit()]
+        voci[indice] = normalizza_sveglia({
+            "enabled": request.form.get("enabled") == "on",
+            "ora": request.form.get("ora", "07:00"),
+            "giorni": [int(g) for g in giorni],
+            "suono": request.form.get("suono", ""),
+            "etichetta": request.form.get("etichetta", ""),
+            "durata": request.form.get("durata", 120),
+        })
+        # `minuto` e' un comodo calcolato, non un dato: scriverlo in
+        # configurazione vorrebbe dire avere due verita' sullo stesso orario.
+        voci[indice].pop("minuto", None)
+        conf["voci"] = voci[:SVEGLIE_QUANTE]
+        dmdconf.save()
+        return redirect(url_for("page_sveglia", result=i18n.translate(
+            "sveglia.salvata", current_language(), n=indice + 1)))
+
+    @app.route("/api/sveglia/zittisci", methods=["POST"])
+    def api_sveglia_zittisci():
+        fermata = runtime.sveglia.zittisci()
+        return redirect(url_for("page_sveglia", result=i18n.translate(
+            "sveglia.zittita" if fermata else "sveglia.gia.zitta",
+            current_language())))
+
+    @app.route("/api/timer", methods=["POST"])
+    def api_timer():
+        """Avvia un conto alla rovescia.
+
+        I pulsanti rapidi e il campo libero mandano lo stesso nome, `minuti`:
+        il modulo ne contiene piu' d'uno e il browser manda **tutti** quelli
+        compilati, quindi si prende il primo valore utile invece del primo in
+        assoluto -- altrimenti premere "5 minuti" con il campo libero vuoto
+        manderebbe una stringa vuota e non partirebbe niente.
+        """
+        scelto = next((v for v in request.form.getlist("minuti")
+                       if str(v).strip()), "")
+        ok, motivo = runtime.sveglia.avvia_timer(
+            scelto, request.form.get("nome", ""))
+        return redirect(url_for("page_sveglia", result=i18n.translate(
+            "timer.avviato" if ok else "timer.no", current_language(),
+            minuti=scelto, error=motivo)))
+
+    @app.route("/api/timer/ferma", methods=["POST"])
+    def api_timer_ferma():
+        c_era = runtime.sveglia.ferma_timer()
+        return redirect(url_for("page_sveglia", result=i18n.translate(
+            "timer.annullato" if c_era else "timer.nessuno",
+            current_language())))
+
+    @app.route("/api/sveglia/prova", methods=["POST"])
+    def api_sveglia_prova():
+        """Fa squillare adesso, per capire com'e' senza aspettare le sette.
+
+        Vale la stessa ragione del pulsante di prova delle notifiche: senza,
+        l'unico modo di sapere se la sveglia funziona sarebbe metterla e
+        andare a dormire.
+        """
+        ok, motivo = runtime.sveglia.prova()
+        return redirect(url_for("page_sveglia", result=i18n.translate(
+            "sveglia.prova.ok" if ok else "sveglia.prova.no",
+            current_language(), error=motivo)))
 
     @app.route("/api/meteo", methods=["POST"])
     def api_meteo():

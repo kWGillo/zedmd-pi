@@ -1653,6 +1653,54 @@ Storico:
        non era un guasto: e\' la cache Bonjour dell\'iPhone dopo un riavvio di
        shairport-sync. Verificato interrogando l\'mDNS dal Raspberry — si
        annuncia subito, insieme alle altre otto casse di casa.
+  7.7  **La sveglia.** Il DMD sta in soggiorno, e\' acceso tutta la notte, ha un
+       orologio grande e una scheda audio: tutto quello che serve c\'era gia\',
+       mancava di metterlo insieme. Quattro orari con i loro giorni; quando uno
+       scatta il pannello diventa un orologio che lampeggia e la scheda suona,
+       finche\' non si preme il pulsante della Funcam -- che mentre squilla
+       appartiene alla sveglia e non scatta nessuna foto.
+       Ha **tre eccezioni che nessun altro servizio ha**, e ognuna e\' stata
+       necessaria. Vince sullo Sleep mode, perche\' il ciclo principale quando
+       dorme si ferma prima di interpellare l\'arbitro: una sveglia alle 7 con
+       lo Sleep fino alle 8 non suonerebbe mai, cioe\' proprio nel caso in cui
+       serve. Vince sul display spento a mano, perche\' spegnere il pannello e\'
+       una decisione sul presente e mettere una sveglia e\' una promessa fatta
+       prima per dopo. E non la tocca il volume notturno, che esiste perche\' un
+       aereo alle tre non merita di svegliarti -- mentre una sveglia si mette
+       apposta per farlo.
+       Resta dentro una regola sola: ad audio generale spento non suona, e il
+       pannello lampeggia lo stesso.
+       La regola delle tre eccezioni sta in una funzione a se\', e non e\'
+       pignoleria: dentro il calcolo delle fasce sarebbe stata verificabile
+       solo mettendo una sveglia vera e aspettando. Le prove fanno scorrere una
+       settimana intera davanti alla sorgente e contano gli squilli -- cinque
+       per una sveglia feriale, non trentacinque.
+  8.0  **La sveglia diventa completa, e tre errori miei vengono corretti.**
+       *Il timer.* Una sveglia si mette a un\'ora, un timer **fra quanto**: la
+       pasta non scade alle 20:47. Quattro durate pronte da premere piu\' un
+       campo libero, un nome facoltativo che compare sul pannello quando
+       squilla, e uno solo per volta -- due timer che scadono insieme darebbero
+       un unico squillo con due motivi.
+       *Le partite si congelano davvero.* La 7.7 non congelava niente, con la
+       motivazione che «le sveglie suonano al mattino, chi gioca a Doom alle
+       sette?». La risposta e\' arrivata in una frase -- *metti che devo
+       ricordarmi di scolare la pasta e mentre cucino decido di giocare a
+       Doom* -- e ha demolito la premessa: una sveglia serve soprattutto
+       mentre si e\' occupati a fare altro. E la stessa stesura affermava che i
+       giochi interni si fermassero da soli: falso, hanno un thread loro come
+       Doom e il Game Boy. Si tornava e ci si trovava morti in tutti e tre i
+       casi. Adesso Breakout e Invaders si congelano con una variabile, i due
+       processi esterni con SIGSTOP.
+       *Le caselle degli orari uscivano dal bordo su iPhone.* Non bastava
+       `width: 100%`: `input[type=time]` ha una larghezza minima propria -- il
+       selettore nativo di iOS -- e una colonna di grid nasce con `min-width:
+       auto`, cioe\' "non stringerti sotto il tuo contenuto". Il campo
+       allargava la colonna, la colonna la griglia, e la griglia usciva dalla
+       scheda.
+       Resta un limite scritto invece che risolto: un processo sospeso non
+       chiude la scheda audio, quindi con Doom che suona la sveglia lampeggia
+       ma non si sente. Fra una sveglia muta e una partita persa vale di piu\'
+       la partita.
 """
 
-__version__ = "7.6"
+__version__ = "8.0"

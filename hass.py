@@ -57,6 +57,12 @@ SWITCHES = [
     ("satelliti", "Satelliti"),
     ("notifiche", "Notifiche"),
     ("meteo", "Meteo"),
+    # La sveglia e' un servizio come gli altri: l'interruttore dice se gli
+    # orari valgono, non se sta squillando adesso. Per fermare uno squillo in
+    # corso c'e' l'azione, piu' sotto -- sono due cose diverse e vanno tenute
+    # separate, altrimenti spegnere la sveglia di stamattina cancellerebbe
+    # anche quella di domani.
+    ("sveglia", "Sveglia"),
 ]
 
 # Night mode e Sleep mode non sono servizi: sono modi del display, e stanno in
@@ -100,6 +106,11 @@ AZIONI = [
     # cartucce. Acceso da qui parte con la ROM configurata, come premere il
     # tasto della console senza cambiare cartuccia.
     ("gameboy", "Game Boy", "mdi:nintendo-game-boy"),
+    # Fermare la sveglia che sta squillando. E' un'azione e non un
+    # interruttore perche' non ha uno stato da mantenere: si preme mentre
+    # suona, e dopo non c'e' niente da tenere acceso. Il pulsante fisico della
+    # Funcam fa la stessa cosa; questo serve dall'altra stanza.
+    ("sveglia_stop", "Ferma la sveglia", "mdi:alarm-off"),
 ]
 
 # I giochi scritti per il pannello sono azioni come Doom: una partita che
@@ -893,6 +904,13 @@ class HassBridge:
             if key == "gameboy":
                 gameboy = getattr(self.runtime, "gameboy", None)
                 return bool(gameboy and gameboy.in_sessione())
+            if key == "sveglia_stop":
+                # Acceso vuol dire "c'e' qualcosa da fermare": cosi' in Home
+                # Assistant l'interruttore si accende da solo quando la
+                # sveglia squilla, e si puo' costruirci sopra un'automazione
+                # senza dover inventare un sensore in piu'.
+                sveglia = getattr(self.runtime, "sveglia", None)
+                return bool(sveglia and sveglia.suonando())
             if key.startswith(GIOCO_PREFISSO):
                 giochi = getattr(self.runtime, "giochi", None)
                 if giochi is None or not giochi.in_sessione():
@@ -904,6 +922,16 @@ class HassBridge:
 
     def _azione(self, key, acceso):
         """Esegue un'azione. Restituisce True se e' stata gestita."""
+        if key == "sveglia_stop":
+            # Solo lo spegnimento fa qualcosa: "accendere" una sveglia da qui
+            # vorrebbe dire farla squillare adesso, che non e' quello che
+            # chiede chi tocca un interruttore chiamato "ferma la sveglia".
+            if not acceso:
+                sveglia = getattr(self.runtime, "sveglia", None)
+                if sveglia is not None:
+                    sveglia.zittisci()
+            self.publish_state(force=True)
+            return True
         if key == "doom":
             cosa, nome = "doom", ""
         elif key == "gameboy":

@@ -220,6 +220,24 @@ input[type=time], input[type=number], input[type=file] {
   border: 1px solid var(--line); border-radius: 8px; color: var(--text); font-size: 15px;
 }
 
+/* I campi devono potersi stringere. Misurato su iPhone, dove le caselle degli
+   orari uscivano dal bordo destro della scheda.
+
+   `width: 100%` non basta, e il motivo sono due regole che si sommano.
+   Primo: `input[type=time]` ha una larghezza **minima propria** — quella del
+   selettore nativo di iOS — e nessuna percentuale lo fa scendere sotto il suo
+   min-content. Secondo: una colonna di grid nasce con `min-width: auto`, che
+   vuol dire «non stringerti sotto il tuo contenuto». Cosi' il campo allargava
+   la colonna, la colonna allargava la griglia, e la griglia usciva dalla
+   scheda. `min-width: 0` toglie quel divieto; l'aspetto nativo si spegne
+   perche' e' lui a portarsi dietro la larghezza, e queste caselle hanno gia'
+   il loro sfondo e il loro bordo. */
+.row2 > *, .row3 > *, .row4 > *, .color-row > * { min-width: 0; }
+input, select, textarea { max-width: 100%; min-width: 0; }
+input[type=time], input[type=number], input[type=date] {
+  -webkit-appearance: none; appearance: none;
+}
+
 input[type=color] {
   width: 64px; height: 40px; padding: 2px; background: #0d1117;
   border: 1px solid var(--line); border-radius: 8px; cursor: pointer;

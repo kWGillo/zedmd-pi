@@ -65,6 +65,9 @@ class TelecameraSource(Source):
         self._immagine = None
 
         self._pulsante = None
+        # Chi puo' prendersi un clic prima di noi. Restituisce True se se
+        # l'e' preso. Lo attacca il runtime; di suo non c'e' nessuno.
+        self.intercetta = None
         # Acceso o spento **secondo il pulsante**. Senza pulsante non conta:
         # comanda il servizio, come e' sempre stato.
         self._dal_vivo = False
@@ -140,7 +143,20 @@ class TelecameraSource(Source):
     # -------------------------------------------------------------- pulsante
 
     def _clic(self):
-        """Un clic: accende, oppure scatta fra tre secondi."""
+        """Un clic: accende, oppure scatta fra tre secondi.
+
+        Prima pero' si chiede a `intercetta` se qualcun altro abbia diritto a
+        questo clic. Oggi e' la sveglia: mentre squilla il pulsante e' suo, e
+        premerlo la ferma invece di accendere la telecamera. Il gancio lo
+        attacca il runtime — la telecamera non sa che esista una sveglia, sa
+        solo che ogni tanto il pulsante non e' suo.
+        """
+        if self.intercetta is not None:
+            try:
+                if self.intercetta():
+                    return
+            except Exception as exc:      # pragma: no cover
+                print("[webcam] intercettazione fallita: %s" % exc)
         if not self.enabled:
             return
         if not self._dal_vivo:

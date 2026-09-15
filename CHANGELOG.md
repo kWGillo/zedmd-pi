@@ -2,6 +2,108 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [8.0]
+
+- **Il timer.** Una sveglia si mette *a un'ora*; un timer *fra quanto*. La
+  pasta non scade alle 20:47, scade fra nove minuti, e nessuno vuole guardare
+  l'orologio e fare la somma con le mani bagnate.
+
+  Quattro durate pronte da premere — i pulsanti vengono prima del campo libero
+  apposta: in cucina si preme, non si digita — più un campo per scriverne una
+  qualsiasi, e un nome facoltativo («Pasta», «Forno») che compare sul pannello
+  quando squilla: serve a sapere *perché* sta suonando, non solo che sta
+  suonando. Uno solo per volta: due che scadono insieme darebbero un unico
+  squillo con due motivi, cioè un'informazione persa.
+
+- **Le partite si congelano davvero, e questa è la correzione di un errore
+  mio.** La 7.7 non congelava niente, con la motivazione che «le sveglie
+  suonano al mattino, e chi sta giocando a Doom alle sette?». La risposta è
+  arrivata in una frase — *metti che devo ricordarmi di scolare la pasta e
+  mentre cucino decido di giocare a Doom* — e ha demolito la premessa: una
+  sveglia serve soprattutto **mentre si è occupati a fare altro**.
+
+  Peggio: la stessa stesura affermava che i giochi scritti per il pannello si
+  fermassero da soli, perché li disegna il ciclo principale. **Non è vero.**
+  Hanno un thread loro, esattamente come Doom e il Game Boy, e continuano a
+  giocare anche a pannello altrui. Si tornava e ci si trovava morti in tutti e
+  tre i casi.
+
+  Ora Breakout e Invaders si congelano con una variabile — la sessione resta
+  aperta, il tempo del gioco non passa, e al risveglio la palla riparte da
+  dov'era, con i tasti premuti dimenticati perché la racchetta non parta da
+  sola verso il muro. Doom e il Game Boy si sospendono con `SIGSTOP` e
+  ripartono con `SIGCONT`, senza sapere niente di quello che è successo.
+
+  **Un limite resta, ed è scritto invece che risolto:** un processo sospeso non
+  chiude i file che teneva aperti, scheda audio compresa. Se Doom sta suonando
+  quando la sveglia scatta, la scheda resta sua e la sveglia lampeggia ma non
+  si sente. Liberarla vorrebbe dire chiudere la partita, e fra una sveglia muta
+  e una partita persa vale di più la partita.
+
+- **Le caselle degli orari uscivano dal bordo destro delle schede su iPhone.**
+  Segnalato con una foto, e la causa sono due regole che si sommano.
+  `input[type=time]` ha una **larghezza minima propria** — quella del selettore
+  nativo di iOS — e nessuna percentuale lo fa scendere sotto il suo min-content;
+  e una colonna di grid nasce con `min-width: auto`, che vuol dire «non
+  stringerti sotto il tuo contenuto». Il campo allargava la colonna, la colonna
+  allargava la griglia, e la griglia usciva dalla scheda. `width: 100%`, che
+  c'era già, non poteva farci niente.
+
+## [7.7]
+
+- **La sveglia.** Il DMD sta in soggiorno, è acceso tutta la notte, ha un
+  orologio grande e una scheda audio. Tutto quello che serve a una sveglia
+  c'era già: mancava di metterlo insieme.
+
+  Quattro orari, ciascuno con i suoi giorni della settimana, il suo suono e
+  la sua durata. Quando uno scatta il pannello diventa un orologio che
+  lampeggia e la scheda audio suona, finché non si preme il **pulsante della
+  Funcam** — che sul cabinato c'era già, e che mentre la sveglia squilla
+  appartiene a lei: un clic la ferma e non scatta nessuna foto. La decisione
+  sta in un punto solo, con la telecamera che non sa nemmeno che esista una
+  sveglia.
+
+- **Tre eccezioni che nessun altro servizio ha**, e ognuna è stata necessaria.
+
+  *Vince sullo Sleep mode.* Il ciclo principale, quando dorme, si ferma
+  **prima** di chiedere all'arbitro chi debba comparire: una sorgente
+  qualunque, per quanto prioritaria, non verrebbe nemmeno interrogata. Una
+  sveglia alle 7 con lo Sleep fino alle 8 non suonerebbe mai — cioè proprio
+  nel caso in cui serve di più.
+
+  *Vince sul display spento a mano.* Spegnere il pannello è una decisione sul
+  presente; mettere una sveglia è una promessa fatta prima per dopo. Fra le
+  due vince la promessa, e chi non la vuole spegne la sveglia.
+
+  *Non la tocca il volume notturno.* Quel silenzio esiste perché un aereo alle
+  tre di notte non merita di svegliarti. Una sveglia si mette apposta per
+  farlo: sarebbe l'unico caso in cui quella regola fa danno. Anche la
+  luminosità torna quella di giorno — una sveglia che si vede al quindici per
+  cento è mezza sveglia.
+
+  Resta dentro **una** regola, ed è giusto: ad audio generale spento non
+  suona, e il pannello lampeggia lo stesso. Chi ha spento il suono vuole
+  silenzio.
+
+- **La regola delle tre eccezioni sta in una funzione a sé**, fuori dal calcolo
+  delle fasce. Non è pignoleria: lì dentro sarebbe rimasta in mezzo alla
+  lettura dell'orologio e al calcolo della luminosità, e l'unico modo di
+  verificarla sarebbe stato mettere una sveglia vera e aspettare le sette. Una
+  regola che si può chiamare si può anche provare.
+
+- Le prove fanno scorrere **una settimana intera** davanti alla sorgente vera,
+  un minuto per giro, con un orologio finto, e contano gli squilli: cinque per
+  una sveglia feriale, non trentacinque né uno. Più il caso in cui si parte
+  sessanta volte nello stesso minuto, quello in cui nessuno risponde, il ritmo
+  con cui bussa il suono, il lampeggio che deve avere anche la metà spenta, e
+  cinque configurazioni storte che non devono far cadere il servizio alle 7 del
+  mattino.
+
+- In Home Assistant arrivano due entità distinte: l'**interruttore** del
+  servizio, che dice se gli orari valgono, e l'**azione «Ferma la sveglia»**,
+  che si accende da sola mentre squilla. Fermare lo squillo di stamattina non
+  deve cancellare la sveglia di domani.
+
 ## [7.6]
 
 - **La musica AirPlay esce davvero da una scheda che non fa 44100 Hz.** La

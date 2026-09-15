@@ -1,4 +1,4 @@
-# DMD Controller 7.6
+# DMD Controller 8.0
 
 Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
 Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
@@ -676,7 +676,9 @@ le tappe.
 | 7.4 | I metadati di AirPlay lasciano la rete: shairport-sync scrive in una pipe locale e il DMD la legge — due programmi sulla stessa macchina non hanno motivo di parlarsi attraverso un server. Breakout non copre più i propri suoni, la scheda audio automatica non è più l'HDMI scollegata, e di notte il pannello abbassa la voce |
 | 7.4.1 | Una scheda audio che non sa fare i 44100 Hz di AirPlay adesso suona lo stesso, con il convertitore di ALSA davanti: la chiavetta USB di casa dichiara `Rates: 8000, 48000` |
 | 7.5 | Il meteo si vede: era sette volte al giorno, lo 0,11% del tempo. I due orologi — ogni quanto si chiedono i dati e ogni quanto si mostrano — erano lo stesso numero. Adesso 72 apparizioni al giorno con le stesse sette chiamate alla rete |
-| **7.6** | **La musica AirPlay esce anche da una scheda che non fa i 44100 Hz: accesso esclusivo più `output_rate`, con il ricampionamento fatto da shairport-sync. Il convertitore di ALSA apriva il dispositivo senza errori e non suonava** |
+| 7.6 | La musica AirPlay esce anche da una scheda che non fa i 44100 Hz: accesso esclusivo più `output_rate`, con il ricampionamento fatto da shairport-sync. Il convertitore di ALSA apriva il dispositivo senza errori e non suonava |
+| 7.7 | La sveglia: quattro orari, l'orologio che lampeggia, il pulsante della Funcam che la ferma. Tre eccezioni volute — vince su Sleep, sul display spento e sul volume notturno, perché è l'unico servizio che esiste per interrompere |
+| **8.0** | **Il timer — la pasta non scade alle 20:47 — e le partite che si congelano davvero mentre la sveglia squilla: Breakout con una variabile, Doom e il Game Boy con un segnale. Correzione di un ragionamento sbagliato, demolito da una frase sulla pasta** |
 
 ---
 

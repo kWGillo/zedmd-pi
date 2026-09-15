@@ -597,8 +597,36 @@ DEFAULTS = {
         "sole_massimo": 3.0,
     },
 
+    # La sveglia. Le voci nascono spente: un orario predefinito che suona da
+    # solo il giorno dopo l'aggiornamento sarebbe uno scherzo, non un valore
+    # di fabbrica.
+    "sveglia": {
+        "colore": "#ff3b30",
+        # Per quanto suona un timer scaduto. Piu' corta di una sveglia: chi ha
+        # messo un timer e' in casa e a pochi metri, non sta dormendo.
+        "durata_timer": 90,
+        # Le durate proposte dalla pagina, in minuti. Un elenco e non un campo
+        # libero perche' con le mani bagnate si preme, non si digita -- il
+        # campo libero c'e' lo stesso, accanto.
+        "timer_rapidi": [3, 5, 10, 15],
+        "voci": [
+            {"enabled": False, "ora": "07:00", "giorni": [0, 1, 2, 3, 4],
+             "suono": "", "etichetta": "", "durata": 120},
+            {"enabled": False, "ora": "08:30", "giorni": [5, 6],
+             "suono": "", "etichetta": "", "durata": 120},
+            {"enabled": False, "ora": "07:00", "giorni": [],
+             "suono": "", "etichetta": "", "durata": 120},
+            {"enabled": False, "ora": "07:00", "giorni": [],
+             "suono": "", "etichetta": "", "durata": 120},
+        ],
+    },
     "services": {
         "zedmd": True,
+        # Acceso di suo, e non e' una contraddizione con le voci spente: qui
+        # si dice che il servizio esiste, non che qualcuno debba svegliarsi.
+        # Con tutte le voci spente non succede niente, e chi imposta un orario
+        # si aspetta che suoni senza dover accendere un secondo interruttore.
+        "sveglia": True,
         "clock": True,
         "mediaplayer": False,
         "banner": False,
