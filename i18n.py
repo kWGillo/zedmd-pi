@@ -2422,6 +2422,11 @@ STRINGS = {
         "ancora dire niente.",
         "GitHub\u2019s answer can be up to five minutes stale: right after a "
         "release, \u201cyou are up to date\u201d does not mean anything yet."),
+    "meteo.status.vista": (
+        "vista %(minuti)d min fa (%(comparse)d volte, %(perse)d turni persi)",
+        "seen %(minuti)d min ago (%(comparse)d times, %(perse)d turns lost)"),
+    "meteo.giorno.oggi": ("OGGI", "TODAY"),
+    "meteo.giorno.domani": ("DOMANI", "TOMORROW"),
     "giochi.audio": ("Audio della partita", "Game audio"),
     "giochi.audio.hint": (
         "Quanti effetti ha chiesto il gioco e quanti ne sono usciti davvero "

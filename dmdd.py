@@ -959,6 +959,14 @@ class Runtime:
                         winner._dirty = True
                     if hasattr(winner, "invalidate"):
                         winner.invalidate()
+                    # E deve sapere che adesso la stanno guardando davvero.
+                    # E' l'unico istante in cui questo si sa, ed e' diverso
+                    # da "ha qualcosa da mostrare": fra i due c'e' l'arbitro.
+                    try:
+                        winner.in_onda()
+                    except Exception as exc:      # pragma: no cover
+                        print("[arbitro] in_onda fallita per %s: %s"
+                              % (winner.name, exc))
 
             if winner is None:
                 if not self._blank_shown:

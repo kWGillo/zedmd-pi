@@ -2,6 +2,58 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [8.3]
+
+- **Il meteo adesso dice di quando parla.** Accanto a massima e minima c'è una
+  parola — **OGGI** o **DOMANI** — e dopo il tramonto l'intera schermata passa
+  al giorno dopo: icona, descrizione, estremi, probabilità di pioggia, alba e
+  tramonto vengono tutti dallo stesso giorno.
+
+  Non era solo ambiguità. Di sera quei due numeri erano **passati**: la massima
+  di oggi alle dieci di sera l'hai già vissuta, e la minima quotidiana è quella
+  della notte scorsa. Era cronaca presentata come previsione.
+
+  La soglia è il tramonto vero, che il DMD ha già nei dati, non un orario
+  fisso: d'estate il passaggio è alle nove e mezza, d'inverno alle cinque —
+  cioè quando cambia davvero la giornata di chi guarda. Senza la previsione del
+  giorno dopo non si inventa niente: si resta su oggi e si scrive OGGI.
+
+- **E si fa vedere davvero.** «Sono dieci minuti che guardo il DMD e non ho mai
+  visto le previsioni.» Dieci minuti con un giro da venti non provano niente da
+  soli, quindi si è contato — e sotto c'era un difetto vero.
+
+  Il meteo ha priorità 54, il Rolling Banner 55, e il banner con i valori
+  predefiniti occupa il **38% della giornata**. Il meteo segnava il turno come
+  speso *nell'istante in cui apriva la finestra*, non quando il pannello era
+  davvero suo: se in quel momento c'era il banner, la finestra si apriva e si
+  chiudeva senza che nessuno vedesse niente, e il turno successivo era fra venti
+  minuti. Simulando una giornata: **48 comparse vere e 460 turni bruciati a
+  vuoto**.
+
+  Adesso il turno lo consuma `in_onda()`, un aggancio nuovo su tutte le sorgenti
+  che il ciclo di rendering chiama quando l'arbitro assegna il pannello — l'unico
+  istante in cui si sa che qualcuno sta guardando. Perdere il turno costa
+  sessanta secondi invece di venti minuti. E chi arriva a schermo a metà finestra
+  la ottiene intera, invece dei tre secondi avanzati dal banner.
+
+- **Il giro passa da venti a dieci minuti**, con migrazione automatica per chi
+  ha ancora il vecchio predefinito esatto — chi ha scritto un numero suo lo
+  tiene. Misurato su una giornata simulata: da 48 a **139 comparse al giorno**,
+  il 2% del tempo del pannello.
+
+- **Quello che invece non si è fatto, ed è la parte che vale.** La proposta era
+  di alzare anche la priorità del meteo. Con il turno bruciato corretto, passare
+  davanti al banner vale **quattro comparse al giorno su 139** — e costa banner
+  tagliati a metà frase, perché l'arbitro rivaluta a ogni fotogramma. La
+  priorità non era la leva: era il turno.
+
+- Minore, ma si vedeva: il puntino che segnala una previsione vecchia stava in
+  alto a destra, addosso al grado della minima. Due cose diverse nello stesso
+  millimetro, e sembrava un difetto del pannello. Adesso sta in basso. E la
+  descrizione del cielo non si tronca più prima del necessario: lo spazio
+  disponibile si misura invece di stimarlo con una frazione fissa, perché quel
+  blocco cambia larghezza con l'etichetta del giorno e con la lingua.
+
 ## [8.2]
 
 - **I suoni di Breakout, rifatti dalla parte che li faceva sparire.** La

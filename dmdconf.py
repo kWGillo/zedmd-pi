@@ -690,7 +690,13 @@ DEFAULTS = {
         # Zero spegne il giro e lascia solo il bollettino del mattino, gli
         # aggiornamenti a ogni chiamata e le allerte: e' il comportamento
         # della 7.4, per chi lo preferiva.
-        "ogni_minuti": 20,
+        #
+        # Dalla 8.3 sono dieci e non venti. Venti erano stati scelti quando il
+        # turno si bruciava anche senza mostrarsi: con quel difetto le
+        # comparse vere erano 48 al giorno invece delle 72 previste, cioe' una
+        # ogni mezz'ora. Corretto quello, dieci minuti danno circa 139
+        # comparse al giorno e il due per cento del tempo del pannello.
+        "ogni_minuti": 10,
         "durata_bollettino": 22,
         "durata_aggiornamento": 12,
         "durata_allerta": 25,
@@ -920,6 +926,18 @@ def _migrate(raw):
     # pannello, quel numero vale piu' del nostro e non si tocca.
     if doom.get("gamma") == 0.70:
         doom["gamma"] = 1.15
+
+    # 8.3: il giro del meteo passa da venti a dieci minuti.
+    #
+    # Stessa regola del gamma di Doom qui sopra: si corregge **solo** chi ha
+    # ancora il vecchio predefinito esatto. Venti era il numero scelto quando
+    # una finestra persa costava un turno intero; adesso che una finestra
+    # persa costa un minuto, venti sono il doppio del necessario. Chi ha
+    # scritto un numero suo lo tiene: e' una sua decisione e vale piu' della
+    # nostra.
+    meteo_conf = raw.setdefault("meteo", {})
+    if meteo_conf.get("ogni_minuti") == 20:
+        meteo_conf["ogni_minuti"] = 10
 
     wad = doom.get("wad") or ""
     if wad and not os.path.exists(wad):

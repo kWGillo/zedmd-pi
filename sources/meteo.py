@@ -83,10 +83,30 @@ class MeteoSource(Source):
         # per tutta l'ora.
         self._bollettino_dato = ""
         self._ultimo_aggiornamento = 0.0
-        # Quando il meteo ha preso il pannello l'ultima volta. E' un orologio
-        # diverso da quello qui sopra: uno conta le chiamate alla rete, questo
-        # le apparizioni.
+        # Quando il meteo e' andato **a schermo** l'ultima volta. E' un
+        # orologio diverso da quello qui sopra: uno conta le chiamate alla
+        # rete, questo le comparse vere.
+        #
+        # Fino alla 8.2 lo segnava `_apri`, cioe' il momento in cui il meteo
+        # *decideva* di mostrarsi. Ma fra la decisione e il pannello c'e'
+        # l'arbitro, e il meteo ha priorita' 54: se in quell'istante c'era il
+        # Rolling Banner, la finestra si apriva e si chiudeva senza che
+        # nessuno vedesse niente -- e il turno era comunque speso, con il
+        # prossimo fra venti minuti. Simulando una giornata: 48 comparse vere
+        # e **460 turni bruciati a vuoto**. Adesso lo segna `in_onda()`, che
+        # e' l'unico posto in cui si sa che il pannello e' davvero nostro.
         self._ultimo_mostrato = 0.0
+        # La finestra aperta adesso: fino a quando, quanto doveva durare, e se
+        # qualcuno l'ha vista. Serve a due cose: riprovare subito quando si
+        # perde il turno, e dare la durata intera a chi arriva a schermo a
+        # meta' finestra invece dei tre secondi avanzati.
+        self._durata = 0.0
+        self._vista = False
+        # I numeri per la pagina web: quante volte ci si e' mostrati davvero e
+        # quante si e' perso il turno. Senza, "non vedo mai il meteo" resta
+        # un'impressione contro un'altra impressione.
+        self._comparse = 0
+        self._perse = 0
         # L'identificativo dell'ultima allerta gia' mostrata. Serve a farla
         # comparire **quando arriva**, senza aspettare il prossimo giro delle
         # quattro ore, e senza ripeterla per tutta la sua durata: un avviso che
@@ -137,6 +157,25 @@ class MeteoSource(Source):
             self._dirty = False
             return self._image
 
+    def in_onda(self):
+        """Adesso il pannello e' nostro: il turno si consuma qui.
+
+        E si allunga la finestra. Il caso e' questo: il meteo apre i suoi
+        dodici secondi, il banner ne occupa nove, e al meteo ne resterebbero
+        tre -- il tempo di accorgersi che c'era qualcosa e vederlo sparire.
+        Arrivando a schermo la finestra riparte per intero. Una volta sola:
+        se il banner si intromette di nuovo a meta', non si ricomincia da
+        capo all'infinito.
+        """
+        if self._vista:
+            return
+        self._vista = True
+        self._comparse += 1
+        adesso = time.time()
+        self._ultimo_mostrato = adesso
+        if self._durata:
+            self._fino_a = adesso + self._durata
+
     # ------------------------------------------------------------------ ciclo
 
     def _loop(self):
@@ -179,7 +218,14 @@ class MeteoSource(Source):
         tocca_bollettino = (adesso.hour == ora_bollettino
                             and self._bollettino_dato != oggi)
         scaduto = (time.time() - self._ultimo_aggiornamento) >= ogni * 3600
+        # `_ultimo_mostrato` adesso vuol dire "l'ultima volta che ci hanno
+        # visto". Quindi questa riga, senza cambiare una virgola, fa anche il
+        # lavoro nuovo: se l'ultima finestra e' passata a vuoto il conto non
+        # si e' azzerato, la condizione resta vera e al giro dopo -- un
+        # minuto -- si riprova. Perdere il turno costa sessanta secondi
+        # invece di venti minuti.
         tocca_giro = (ogni_minuti > 0
+                      and not self.active()
                       and (time.time() - self._ultimo_mostrato)
                       >= ogni_minuti * 60)
 
@@ -260,11 +306,15 @@ class MeteoSource(Source):
         with self._lock:
             self._image = immagine
             self._dirty = True
-        self._fino_a = time.time() + max(4, secondi)
-        # Qualunque finestra rimette a zero l'orologio del giro periodico: dopo
-        # un'allerta o il bollettino del mattino, ripresentarsi venti secondi
-        # dopo con lo stesso meteo sarebbe insistenza, non informazione.
-        self._ultimo_mostrato = time.time()
+        # Se una finestra precedente non e' mai arrivata a schermo, adesso si
+        # sa: la si conta come persa prima di sostituirla.
+        if self._durata and not self._vista:
+            self._perse += 1
+        self._durata = float(max(4, secondi))
+        self._vista = False
+        self._fino_a = time.time() + self._durata
+        # L'orologio del giro periodico **non** si tocca qui: lo tocca
+        # `in_onda()`. Aprire una finestra non e' essersi mostrati.
 
     def mostra_adesso(self, modo="aggiornamento", secondi=12):
         """Apre la finestra subito. E' il pulsante di prova della pagina web."""
@@ -436,7 +486,42 @@ class MeteoSource(Source):
             punti = [(x + meta, y + lato), (x + lato, y), (x, y)]
         d.polygon(punti, fill=colore)
 
-    def _estremi(self, d, destra, y, oggi):
+    def _orizzonte(self, dati, adesso=None):
+        """A quale giorno si riferiscono massima, minima e pioggia. E come si chiama.
+
+        Nasce da una domanda che non aveva risposta guardando il pannello: *la
+        mattina immagino che le previsioni siano della giornata, ma la sera non
+        so se parlano delle prossime ore o del giorno dopo.* Aveva ragione, e il
+        difetto era peggiore dell'ambiguita': di sera quei numeri erano
+        **passati**. La massima di oggi alle dieci di sera l'hai gia' vissuta,
+        e la minima quotidiana e' quella della notte scorsa. Erano cronaca
+        presentata come previsione.
+
+        La regola e' il tramonto, non un'ora fissa, e il tramonto il DMD ce
+        l'ha gia' nei dati: cosi' d'estate il passaggio e' alle nove e mezza e
+        d'inverno alle cinque, che e' quando cambia davvero la giornata di chi
+        guarda. Se il dato manca si ripiega sulle diciannove, che e' una sera
+        ragionevole a qualunque latitudine in cui questo pannello stia acceso.
+
+        Torna (etichetta, giorno).
+        """
+        oggi = (dati or {}).get("oggi") or {}
+        domani = (dati or {}).get("domani") or {}
+        adesso = adesso or datetime.now()
+        sera = False
+        tramonto = self._ore(oggi.get("tramonto"))
+        if tramonto:
+            ore, minuti = int(tramonto[:2]), int(tramonto[3:5])
+            sera = (adesso.hour, adesso.minute) >= (ore, minuti)
+        else:
+            sera = adesso.hour >= 19
+        # Senza i dati di domani non si inventa niente: si resta su oggi e si
+        # scrive OGGI, che e' ambiguo ma vero.
+        if sera and domani.get("massima") is not None:
+            return self.t("meteo.giorno.domani"), domani
+        return self.t("meteo.giorno.oggi"), oggi
+
+    def _estremi(self, d, destra, y, oggi, etichetta=""):
         """Massima e minima in alto a destra, ciascuna con la sua freccia.
 
         Sono la cornice della giornata, non il dato del momento: stanno
@@ -452,8 +537,15 @@ class MeteoSource(Source):
             testo = self._gradi(valore, unita=False)
             pezzi.append((su, testo, colore,
                           lato + 3 + self._largo(d, testo, font)))
-        totale = sum(p[3] for p in pezzi) + 8
+        largo_etichetta = (self._largo(d, etichetta, font) + 6) if etichetta else 0
+        totale = sum(p[3] for p in pezzi) + 8 + largo_etichetta
         x = destra - totale
+        if etichetta:
+            # La parola sta **prima** delle frecce e nello stesso grigio del
+            # resto della cornice: e' il soggetto della frase che segue, non un
+            # dato in piu' da leggere. "DOMANI 24 15" si legge tutto insieme.
+            d.text((x, y), etichetta, font=font, fill=SPENTO)
+            x += largo_etichetta
         for su, testo, colore, largo in pezzi:
             self._freccia(d, x, y + 3, lato, su, colore)
             d.text((x + lato + 3, y), testo, font=font, fill=colore)
@@ -481,7 +573,7 @@ class MeteoSource(Source):
         except AttributeError:            # pragma: no cover - PIL molto vecchia
             return d.textsize(testo, font=font)[0]
 
-    def _scheletro(self, d, codice, notte, oggi):
+    def _scheletro(self, d, codice, notte, oggi, etichetta=""):
         """La parte comune alle due finestre, e il motivo per cui e' comune.
 
         Le due schermate rispondono a domande diverse -- la giornata e
@@ -494,48 +586,61 @@ class MeteoSource(Source):
         piccola in alto a destra, e in mezzo -- grande e centrato -- il dato
         del momento. Cambia il contorno, non la risposta alla prima domanda.
 
-        Torna (sinistra, centro) dell'area utile.
+        Torna (sinistra, centro, spazio) dell'area utile. `spazio` e' quanto
+        resta alla riga in alto prima di incontrare massima e minima: si
+        misura invece di stimarlo con una frazione della larghezza, perche'
+        quel blocco cambia larghezza con l'etichetta del giorno e con la
+        lingua -- TOMORROW e' piu' lungo di DOMANI -- e una frazione fissa o
+        troncava troppo o faceva toccare le due parti.
         """
         lato = int(self.height * 0.62)
         icone.disegna(d, meteo.icona(codice, notte=notte),
                       3, (self.height - lato) // 2, lato)
         sinistra = 3 + lato + 5
         centro = sinistra + (self.width - 3 - sinistra) / 2.0
-        self._estremi(d, self.width - 3, 1, oggi)
-        return sinistra, centro
+        largo = self._estremi(d, self.width - 3, 1, oggi, etichetta)
+        spazio = max(20, self.width - 3 - largo - 6 - sinistra)
+        return sinistra, centro, spazio
 
     def _bollettino(self, d, dati):
         """La giornata: cornice in alto, gradi di adesso in mezzo, ore sotto."""
         lang = self._lingua()
-        oggi = dati.get("oggi") or {}
         adesso = dati.get("adesso") or {}
-        codice_giorno = oggi.get("codice")
+        # Il bollettino racconta **una giornata**, e quale sia lo decide il
+        # tramonto: prima e' quella in corso, dopo e' quella che viene. Tutto
+        # quello che sta sotto -- icona, descrizione, estremi, pioggia, alba e
+        # tramonto -- viene da questo stesso giorno, altrimenti il pannello
+        # mescolerebbe due giorni senza dirlo.
+        etichetta, giorno = self._orizzonte(dati)
+        codice_giorno = giorno.get("codice")
         if codice_giorno is None:
             codice_giorno = adesso.get("codice")
 
-        sinistra, centro = self._scheletro(d, codice_giorno, False, oggi)
+        sinistra, centro, spazio = self._scheletro(d, codice_giorno, False,
+                                                   giorno, etichetta)
 
-        # In alto a sinistra che tempo fa oggi, accorciato se serve: lo spazio
-        # finisce dove cominciano massima e minima.
-        titolo = "OGGI" if str(lang).startswith("it") else "TODAY"
-        testa = "%s %s" % (titolo, meteo.descrizione(codice_giorno, lang))
+        # In alto a sinistra che tempo fa, accorciato se serve: lo spazio
+        # finisce dove comincia l'etichetta del giorno. La parola OGGI stava
+        # qui e se n'e' andata accanto a massima e minima: e' la' che serviva,
+        # ed e' li' che adesso vale anche per la schermata di aggiornamento.
         d.text((sinistra, 1),
-               self._taglia(d, testa, self._font_piccolo,
-                            self.width * 0.34),
+               self._taglia(d, meteo.descrizione(codice_giorno, lang),
+                            self._font_piccolo, spazio),
                font=self._font_piccolo, fill=TESTO)
 
-        self._centro_gradi(d, centro, adesso, oggi)
+        self._centro_gradi(d, centro, adesso, giorno)
 
         # Riga bassa, centrata: la pioggia solo se ce n'e' -- uno zero per
         # cento non e' un'informazione, e' rumore -- poi alba e tramonto.
         basso = self.height - int(self.height * 0.19) - 1
         pezzi = []
-        pioggia = oggi.get("pioggia_probabile")
+        pioggia = giorno.get("pioggia_probabile")
         if pioggia:
             pezzi.append(("%s %d%%" % ("PIOGGIA" if str(lang).startswith("it")
                                        else "RAIN", pioggia),
                           self._font_piccolo, FREDDO, 0))
-        alba, tramonto = self._ore(oggi.get("alba")), self._ore(oggi.get("tramonto"))
+        alba, tramonto = (self._ore(giorno.get("alba")),
+                          self._ore(giorno.get("tramonto")))
         if alba and tramonto:
             pezzi.append(("%s - %s" % (alba, tramonto),
                           self._font_piccolo, SPENTO, 0))
@@ -549,17 +654,22 @@ class MeteoSource(Source):
         """Adesso: gli stessi gradi grandi in mezzo, e che tempo fa in cima."""
         lang = self._lingua()
         adesso = dati.get("adesso") or {}
-        oggi = dati.get("oggi") or {}
+        # L'icona e la descrizione sono il cielo di **adesso** e non hanno
+        # bisogno di etichette: si guarda fuori dalla finestra e si verifica.
+        # Massima e minima invece sono una previsione, e fino alla 8.2 non
+        # dicevano di quando: adesso lo dicono.
+        etichetta, giorno = self._orizzonte(dati)
         codice = adesso.get("codice")
         notte = not adesso.get("giorno", True)
 
-        sinistra, centro = self._scheletro(d, codice, notte, oggi)
+        sinistra, centro, spazio = self._scheletro(d, codice, notte, giorno,
+                                                   etichetta)
         d.text((sinistra, 1),
                self._taglia(d, meteo.descrizione(codice, lang),
-                            self._font_piccolo, self.width * 0.34),
+                            self._font_piccolo, spazio),
                font=self._font_piccolo, fill=TESTO)
 
-        self._centro_gradi(d, centro, adesso, oggi)
+        self._centro_gradi(d, centro, adesso, giorno)
 
         # Sotto, centrata, la temperatura percepita -- ma solo quando e'
         # diversa davvero. "18 gradi, percepiti 18" e' una riga sprecata; con
@@ -617,7 +727,12 @@ class MeteoSource(Source):
         """
         if self._meteo.fresca():
             return
-        d.rectangle([self.width - 4, 1, self.width - 2, 3], fill=VECCHIO)
+        # In **basso** a destra, non in alto. In alto stava addosso al grado
+        # della minima: due cose diverse nello stesso millimetro, e il puntino
+        # sembrava un difetto del pannello invece di un avviso. L'angolo in
+        # basso a destra e' l'unico sempre vuoto in tutte e tre le schermate.
+        d.rectangle([self.width - 4, self.height - 4,
+                     self.width - 2, self.height - 2], fill=VECCHIO)
 
     @staticmethod
     def _ore(iso):
@@ -655,6 +770,15 @@ class MeteoSource(Source):
                 evento=(_allerte.descrizione_evento(avviso,
                                                     lang or self._lingua())
                         if _allerte else avviso.get("evento") or "")) + " · "
+        # Quando ci si e' fatti vedere l'ultima volta. E' l'unica riga che
+        # risponde a "non vedo mai il meteo" con un numero invece che con
+        # un'opinione, e vale quanto tutto il resto messo insieme.
+        coda = ""
+        if self._ultimo_mostrato:
+            coda = " · " + self.t(
+                "meteo.status.vista", lang,
+                minuti=int((time.time() - self._ultimo_mostrato) / 60),
+                comparse=self._comparse, perse=self._perse)
         return prefisso + self.t(
             "meteo.status.ok", lang,
             temperatura=self._gradi(adesso.get("temperatura")),
@@ -662,7 +786,7 @@ class MeteoSource(Source):
                                           lang or self._lingua()),
             massima=self._gradi(oggi.get("massima")),
             minima=self._gradi(oggi.get("minima")),
-            minuti=int((eta or 0) * 60))
+            minuti=int((eta or 0) * 60)) + coda
 
     def riepilogo(self):
         """I numeri per Home Assistant. None se non c'e' ancora niente."""
@@ -682,4 +806,11 @@ class MeteoSource(Source):
             "pioggia_probabile": oggi.get("pioggia_probabile"),
             "eta_ore": self._meteo.eta_ore(),
             "allerta": self._meteo.allerta(),
+            # Le comparse vere e i turni persi: servono a Home Assistant
+            # quanto alla pagina, e sono la misura di un difetto che e'
+            # rimasto invisibile finche' nessuno li ha contati.
+            "comparse": self._comparse,
+            "turni_persi": self._perse,
+            "vista_da_minuti": (int((time.time() - self._ultimo_mostrato) / 60)
+                                if self._ultimo_mostrato else None),
         }

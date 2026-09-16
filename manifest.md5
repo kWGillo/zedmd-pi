@@ -12,8 +12,8 @@ f4da634c02da1d2d9c2bf600287d09c3  copertine.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
-0de0aeda5d97fc35cbff10881a5cf064  dmdconf.py
-8f435e3a6913888f90462b512c2cbe94  dmdd.py
+1cffcad9e2ec9db97d226b9ca116508e  dmdconf.py
+b2c30fcd92491543699e6764afc038d5  dmdd.py
 bb3118ed4b5ebb8d9f49cc8bbcd6f341  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
 7c5f28cafc9299975fcdb11e54937469  doom/setup_doom.sh
@@ -24,7 +24,7 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 b697bd1ed14d88357914d8c98f79298f  hass.py
-6eacdf5cc6f6cbcd7a8e422092065cd1  i18n.py
+6b2f85103a39fbffb45a99788af165ed  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
@@ -48,7 +48,7 @@ fa91fbad5a9022a3fe6432b40a2c6c4e  sources/__init__.py
 9b5e85692d8b54d863b5c16bba8a07eb  sources/airradar.py
 4839d9f4d5cbf59bfe83a946f7c272ee  sources/anteprima.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
-55c9a31b9be438ad88d3a08b53fb1c9a  sources/base.py
+d231417597b54592614b20b12ac8b82d  sources/base.py
 ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 02c92fa004848e415f45d369e2f8c4c9  sources/clock.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
@@ -60,7 +60,7 @@ e54626ed58bafd5b7886bdf0eb9eee34  sources/giochi/__init__.py
 018e911289febd4efb970fba0d9e5626  sources/giochi/invasori.py
 6d27b2178e100860bdfeb612c60dffd1  sources/giochi/mattoni.py
 8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
-3235dc7fa44a91fd6b571a5c51679094  sources/meteo.py
+68c99d84392c0d355c170897eb0bcc42  sources/meteo.py
 8de1147a9e524e5512d1bc24a5582b00  sources/notifiche.py
 48225cc518aa6df9897f3fa93880a8ba  sources/nowplaying.py
 e6c140b184dd15f3c391ec123180f25e  sources/satelliti.py
@@ -112,7 +112,7 @@ f4fc1e288700e25a7980dd00d4d931a6  templates/sveglia.html
 0bbe7fbc76fd30b03e559158b71225d0  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-127e4b11f9ffe74dd948b61945ab98c2  version.py
+ebbccfec83a320021aec6f980c63fab4  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 1c6062261c1363107eb9f7c8139cb8c1  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

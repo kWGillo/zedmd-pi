@@ -45,6 +45,23 @@ class Source:
         """Immagine PIL RGB (width x height) oppure None se nulla di nuovo."""
         return None
 
+    def in_onda(self):
+        """Il pannello e' appena passato a questa sorgente.
+
+        Serve a distinguere due cose che fino alla 8.2 erano confuse: *ho
+        deciso di mostrare qualcosa* e *qualcuno l'ha visto*. Sono diverse,
+        perche' fra le due c'e' l'arbitro: una sorgente puo' aprire la sua
+        finestra, restare accesa per tutta la sua durata e non andare mai a
+        schermo perche' qualcuno con priorita' maggiore teneva il pannello.
+
+        Chi conta i propri turni deve contarli **qui**, non quando apre la
+        finestra. Il meteo lo faceva nel posto sbagliato e si e' misurato il
+        prezzo: 460 turni bruciati al giorno contro 48 comparse vere.
+
+        Predefinito: non fare niente. La maggior parte delle sorgenti non ha
+        bisogno di saperlo.
+        """
+
     def status(self, lang=None):
         """Riga di stato mostrata nella web UI, nella lingua richiesta."""
         return self.t("status.disabled", lang)

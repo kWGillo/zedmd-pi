@@ -1774,6 +1774,46 @@ Storico:
        resa in percentuale, i buchi della scheda, le cadute e le riaperture
        del riproduttore, e le sue ultime righe di errore. "Ne salta troppi"
        adesso e' una domanda con una risposta, non un'impressione.
+  8.3  **Il meteo dice di quando parla, e si fa vedere davvero.**
+       *L'orizzonte.* Il pannello mostrava massima e minima senza dire a
+       quale giorno appartenessero: la mattina si immagina che siano di oggi,
+       la sera non si sa piu' se parlano delle prossime ore o del giorno dopo.
+       E di sera erano peggio che ambigue, erano **passate**: la massima di
+       oggi alle dieci di sera l'hai gia' vissuta, e la minima quotidiana e'
+       quella della notte scorsa. Cronaca presentata come previsione.
+       Adesso c'e' una parola accanto alle frecce -- OGGI o DOMANI -- e dopo
+       il tramonto tutta la schermata passa al giorno dopo: icona,
+       descrizione, estremi, pioggia, alba e tramonto vengono tutti dallo
+       stesso giorno. La regola e' il tramonto vero, che sta gia' nei dati,
+       non un'ora fissa: d'estate il passaggio e' alle nove e mezza, d'inverno
+       alle cinque. La parola OGGI se n'e' andata dal titolo del bollettino,
+       dove valeva per una schermata sola, ed e' finita dove vale per tutte e
+       due.
+       *E il turno bruciato.* «Sono dieci minuti che guardo il DMD e non ho
+       mai visto le previsioni.» Il meteo ha priorita' 54 e il Rolling Banner
+       55, e il banner coi valori predefiniti occupa il 38% della giornata.
+       Il meteo segnava il turno come speso **nell'istante in cui apriva la
+       finestra**, non quando il pannello era davvero suo: se in quel momento
+       c'era il banner, la finestra si apriva e si chiudeva senza che nessuno
+       vedesse niente, e il prossimo turno era fra venti minuti. Simulando una
+       giornata: 48 comparse vere e **460 turni bruciati a vuoto**.
+       Adesso il turno lo consuma `in_onda()`, un aggancio nuovo sulle
+       sorgenti che il ciclo di rendering chiama quando l'arbitro assegna il
+       pannello -- l'unico istante in cui si sa che qualcuno sta guardando.
+       Perdere il turno costa sessanta secondi invece di venti minuti, e chi
+       arriva a schermo a meta' finestra la ottiene intera invece dei tre
+       secondi avanzati.
+       *E il giro scende a dieci minuti*, con migrazione per chi ha ancora
+       il vecchio predefinito esatto. Misurato: da 48 a 139 comparse al
+       giorno, il due per cento del tempo del pannello.
+       **Quello che invece non si e' fatto, ed e' la parte utile.** La
+       proposta era di alzare anche la priorita' del meteo. La simulazione
+       dice che, corretto il turno bruciato, passare davanti al banner vale
+       **quattro comparse al giorno su 139** -- e costa banner tagliati a
+       meta' frase, perche' l'arbitro rivaluta a ogni fotogramma. La
+       priorita' non era la leva: era il turno.
+       Minore, ma si vedeva: il puntino della previsione vecchia stava in alto
+       a destra, addosso al grado della minima. Adesso sta in basso.
 """
 
-__version__ = "8.2"
+__version__ = "8.3"
