@@ -1868,6 +1868,33 @@ Storico:
        fatto; questo dice quello che ha fatto. E' l'unico modo di rispondere
        a "questi suoni sono usciti dal DMD o no?" quando i contatori dicono di
        si' e l'orecchio dice di no.
+  8.6  **Il video lo dimostra: un mattone rotto senza nessun suono.**
+       Filmato del pannello, quaranta secondi, audio e immagine insieme. Il
+       punteggio sullo HUD e' un testimone che non si puo' contestare: fra
+       34,0 e 34,5 secondi passa da 001130 a 001140, cioe' **un mattone
+       rotto**. Nello spettro dell'audio, in quella finestra, tutte e sette le
+       note del gioco stanno al livello del rumore di fondo (rapporto 9-20);
+       nelle finestre in cui i suoni ci sono lo stesso rapporto vale 60-500.
+       Quel mattone non ha suonato.
+       E non e' un caso isolato. Contando i suoni dalla loro nota, con la
+       soglia tarata sulla parte buona del filmato: **racchetta 1,56 al
+       secondo prima della palla persa, 0,16 dopo; muro 2,78 prima, 0,32
+       dopo.** Sette secondi e mezzo di silenzio totale dal rilancio, e poi i
+       suoni tornano. La segnalazione dal campo era esatta in ogni dettaglio.
+       **E una causa l'ha messa la 8.5, cioe' io.** Il regolatore nuovo punta
+       a tenere nell'anello della scheda un cuscino di `CUSCINO_ANELLO`
+       millisecondi, e quel valore era calcolato come cuscino meno tubo: con
+       il tubo al minimo faceva **30 ms**. La chiavetta del DMD lavora con
+       periodi da 25 ms, e `delay` comprende anche i fotogrammi gia'
+       consegnati al ferro: un bersaglio di 30 ms e' poco piu' di **un solo
+       periodo** e non si raggiunge mai. Il regolatore restava in attesa fino
+       a mezzo secondo e scriveva un blocco ogni tanto invece di trenta al
+       secondo. La scheda a secco, il gioco muto.
+       Adesso il bersaglio e' il cuscino intero -- 120 ms, quasi cinque
+       periodi -- il tubo non si sottrae piu', e l'attesa massima scende da
+       mezzo secondo a 150 ms, cosi' un errore dello stesso tipo non puo' piu'
+       zittire niente. Una prova nuova rifiuta qualunque bersaglio sotto tre
+       periodi.
 """
 
-__version__ = "8.5"
+__version__ = "8.6"

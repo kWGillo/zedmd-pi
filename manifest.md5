@@ -71,7 +71,7 @@ de7ee2495ed06fbae5a24e7de31e756f  sources/telecamera.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 c750104c1eaa178d6958982586e89855  staccato.py
 b44159427ba239fe05347960209d3bdc  static/style.css
-d06237e90ad30053d9d32b59a6689598  suoni.py
+329635d621b551057db2bf99f84506d0  suoni.py
 b2e39a45b2319abd500f8c72019d34c0  suoni/colpito.wav
 9bee0b8537ca225025bed746c4134033  suoni/lancio.wav
 682aeaffd20379a0664b243e9dfa810c  suoni/livello.wav
@@ -112,7 +112,7 @@ f4fc1e288700e25a7980dd00d4d931a6  templates/sveglia.html
 0bbe7fbc76fd30b03e559158b71225d0  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-2da11597698b35214dfa35d16feccca4  version.py
+5b3c043bf178a9cb2bfeaef109b10e2e  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 1c6062261c1363107eb9f7c8139cb8c1  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

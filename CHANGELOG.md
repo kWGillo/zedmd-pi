@@ -2,6 +2,43 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [8.6]
+
+- **Il video lo dimostra: un mattone rotto, e nessun suono.** Quaranta secondi
+  di filmato del pannello, con l'audio. Il punteggio sullo HUD è un testimone
+  che non si può contestare: fra 34,0 e 34,5 secondi passa da `001130` a
+  `001140` — **un mattone rotto**, provato dai dieci punti. Nello spettro
+  dell'audio, in quella finestra, tutte e sette le note del gioco stanno al
+  livello del rumore di fondo: rapporto banda/fondo fra 9 e 20. Nelle finestre
+  in cui i suoni si sentono, lo stesso rapporto vale fra 60 e 500. Quel mattone
+  non ha suonato.
+
+- **E non è un caso isolato.** Riconoscendo i suoni dalla loro nota — ogni
+  effetto ha una frequenza sua — e tarando la soglia sulla parte buona del
+  filmato: **racchetta 1,56 al secondo prima della palla persa, 0,16 dopo;
+  muro 2,78 prima, 0,32 dopo.** Sette secondi e mezzo di silenzio totale dal
+  rilancio, poi i suoni tornano. La segnalazione dal campo era esatta in ogni
+  dettaglio, compreso il «dopo aver perso la palla».
+
+- **Una delle cause l'ha introdotta la 8.5, cioè io.** Il regolatore nuovo
+  tiene nell'anello della scheda un cuscino di `CUSCINO_ANELLO` millisecondi, e
+  quel valore era calcolato come *cuscino meno tubo*: con il tubo al minimo
+  faceva **30 ms**. La chiavetta del DMD lavora con periodi da 1200 fotogrammi
+  a 48000 Hz, cioè 25 ms, e `delay` comprende anche quello che è già stato
+  consegnato al ferro: un bersaglio di 30 ms è poco più di **un solo periodo** e
+  non si raggiunge mai. Il regolatore restava in attesa fino a mezzo secondo e
+  scriveva un blocco ogni tanto invece di trenta al secondo — la scheda a
+  secco, il gioco muto.
+
+  Adesso il bersaglio è il cuscino intero, 120 ms, quasi cinque periodi. Il
+  tubo resta al minimo per non nascondere ritardo, ma non si sottrae più: il
+  ritardo peggiore possibile è 213 ms. E l'attesa massima del regolatore scende
+  da mezzo secondo a 150 ms, così un errore dello stesso tipo può rallentare,
+  non ammutolire.
+
+- Una prova nuova rifiuta qualunque bersaglio più basso di tre periodi: questa
+  lezione sta in un controllo, non in un commento.
+
 ## [8.5]
 
 - **La scheda audio non ha mai fatto un buco.** Leggendo `/proc/asound` sul DMD

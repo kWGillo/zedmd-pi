@@ -617,7 +617,19 @@ TUBO_SECONDI = TUBO_EFFETTI / 2.0 / FREQ_EFFETTI
 # GIL come noi. Quindi la difesa contro una nostra pausa vale la somma dei
 # due, mentre il ritardo che si sente vale anch'esso la somma dei due. Si
 # punta l'anello a quello che resta dopo aver contato il tubo.
-CUSCINO_ANELLO = max(0.03, CUSCINO - TUBO_SECONDI)
+# **Mai sotto un paio di periodi della scheda.** Qui c'era
+# `CUSCINO - TUBO_SECONDI`, che con il tubo al minimo faceva 30 ms, e 30 ms e'
+# poco piu' di **un solo periodo** (25 ms sulla chiavetta del DMD). Un
+# bersaglio cosi' basso non si raggiunge mai -- `delay` comprende anche i
+# fotogrammi gia' consegnati al ferro -- e il regolatore resta in attesa a
+# scrivere un blocco ogni mezzo secondo invece di trenta al secondo: la scheda
+# va a secco e il gioco ammutolisce. E' successo davvero, si sente nel video
+# della 8.5, e l'ho messo io.
+#
+# Il bersaglio giusto e' il cuscino intero nell'anello. Il tubo resta al minimo
+# per non nascondere ritardo, ma non si sottrae: sommandoli il ritardo
+# peggiore resta poco sopra i duecento millesimi, che e' il prezzo giusto.
+CUSCINO_ANELLO = max(0.08, CUSCINO)
 
 # Una voce che ha aspettato piu' di questo mentre il riproduttore era giu'
 # non si suona piu': un rumore di racchetta che arriva mezzo secondo dopo il
@@ -1157,7 +1169,10 @@ class Mixer:
                 # solo salire piu' piano. Mezzo secondo di tetto, perche' un
                 # flusso che si ferma e non riparte non deve poter bloccare
                 # questo ciclo per sempre.
-                scadenza = time.monotonic() + 0.5
+                # Il tetto e' corto apposta: se un domani il bersaglio
+                # tornasse irraggiungibile, il danno e' una pausa da 150 ms e
+                # non mezzo secondo di silenzio a ogni blocco.
+                scadenza = time.monotonic() + 0.15
                 while not self._stop.is_set() and time.monotonic() < scadenza:
                     time.sleep(0.01)
                     ritardo = ritardo_alsa(self._device, self._freq_scheda)
