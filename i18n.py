@@ -2445,6 +2445,8 @@ STRINGS = {
     "giochi.audio.vuoti": ("Buchi della scheda (underrun)",
                            "Card gaps (underrun)"),
     "giochi.audio.cuscino": ("Cuscino", "Cushion"),
+    "giochi.audio.buffer": ("Buffer concesso dalla scheda",
+                            "Buffer granted by the card"),
     "giochi.audio.spento": (
         "Il mixer non e' aperto: la partita e' muta.",
         "The mixer is not open: this game is silent."),

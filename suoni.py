@@ -379,7 +379,15 @@ def comando_pcm(device, frequenza, canali,
     Se non c'e' si ripiega su ffmpeg: meglio in ritardo che muto.
     """
     if shutil.which("aplay"):
-        return ["aplay", "-q", "-t", "raw", "-f", "S16_LE",
+        # `-v` e non `-q`, e vale la pena scriverlo perche' era un errore mio.
+        # `aplay` stampa `underrun!!!` **solo** in modalita' prolissa: con
+        # `-q` il contatore dei buchi non poteva accendersi nemmeno con la
+        # scheda che restava a secco ogni tre secondi. Era un contatore cieco
+        # spacciato per una prova. In prolisso stampa anche il riepilogo di
+        # come ha negoziato il flusso -- formato, frequenza, dimensione del
+        # buffer -- che e' esattamente quello che serve per sapere se il
+        # cuscino che crediamo di avere ce l'ha davvero concesso la scheda.
+        return ["aplay", "-v", "-t", "raw", "-f", "S16_LE",
                 "-r", str(int(frequenza)), "-c", str(int(canali)),
                 "--buffer-time=%d" % int(buffer_us),
                 "--period-time=%d" % int(periodo_us),
@@ -597,6 +605,20 @@ CUSCINO = 0.12
 BUFFER_EFFETTI_US = 250000
 PERIODO_EFFETTI_US = 25000
 
+# Quanto tubo fra noi e il riproduttore. Il minimo che Linux concede e' una
+# pagina; di piu' sarebbe ritardo che nessuno puo' misurare, perche' `/proc`
+# racconta la scheda e non il tubo.
+TUBO_EFFETTI = 4096
+TUBO_SECONDI = TUBO_EFFETTI / 2.0 / FREQ_EFFETTI
+
+# Il cuscino si regola sull'anello della scheda, ma il cuscino **vero** e'
+# anello piu' tubo: quello che sta nel tubo entra nell'anello appena c'e'
+# posto, e a passarlo e' `aplay`, che e' un programma in C e non aspetta il
+# GIL come noi. Quindi la difesa contro una nostra pausa vale la somma dei
+# due, mentre il ritardo che si sente vale anch'esso la somma dei due. Si
+# punta l'anello a quello che resta dopo aver contato il tubo.
+CUSCINO_ANELLO = max(0.03, CUSCINO - TUBO_SECONDI)
+
 # Una voce che ha aspettato piu' di questo mentre il riproduttore era giu'
 # non si suona piu': un rumore di racchetta che arriva mezzo secondo dopo il
 # colpo non e' un suono recuperato, e' un suono sbagliato.
@@ -618,6 +640,85 @@ RIAVVIO_LIMITE = 60.0
 # finivano in /dev/null, ed e' il motivo per cui questo problema e' rimasto
 # invisibile cosi' a lungo.
 RIGHE_TENUTE = 20
+
+# Le righe con cui `aplay -v` racconta come ha negoziato il flusso. Non sono
+# errori: vanno tenute a parte, altrimenti la pagina mostrerebbe "buffer_size:
+# 5512" come se fosse un guasto.
+_SETUP = ("plug pcm", "hardware pcm", "its setup is", "stream", "access",
+          "format", "subformat", "channels", "rate", "exact rate",
+          "msbits", "buffer_size", "period_size", "period_time",
+          "buffer_time", "periods", "tick_time", "appl_ptr", "avail_min",
+          "start_threshold", "stop_threshold", "silence", "period_step",
+          "sleep_min", "boundary", "rate_num", "rate_den", "info :",
+          "playing raw data")
+
+
+def _indice_scheda(device):
+    """Il numero di scheda ALSA dentro `plughw:1,0`. None se non si capisce."""
+    trovato = re.search(r"(?:plug)?hw:(?:CARD=)?(\d+)", str(device or ""))
+    return int(trovato.group(1)) if trovato else None
+
+
+def ritardo_alsa(device, frequenza=None):
+    """Quanti secondi di audio la scheda ha ancora da suonare. None se non si sa.
+
+    E' l'orologio giusto, e la 8.4 ha dimostrato sul campo perche' il nostro
+    non lo e'. Il mixer si dava il ritmo con `time.monotonic()`: scrivo un
+    blocco ogni 23 ms, quindi dopo un minuto avro' scritto un minuto di audio.
+    Sembra ovvio e non lo e', perche' **la scheda non va al nostro ritmo**.
+    Gli effetti sono a 22050 Hz mono e la chiavetta suona a 48000 stereo: in
+    mezzo c'e' una conversione, e la conversione piu' il quarzo della scheda
+    fanno un errore piccolo e sempre nello stesso verso. Un errore piccolo che
+    si accumula riempie qualunque coda: misurato sul DMD, l'anello della
+    scheda stava **pieno al 99%** -- 250 ms su 250 -- piu' quello che c'era
+    nel tubo.
+
+    ALSA il conto giusto ce l'ha e lo pubblica: `delay` in `/proc` dice quanti
+    fotogrammi deve ancora suonare. Regolandosi su quello, il ritardo resta
+    dove lo si mette, qualunque cosa facciano i due orologi.
+    """
+    indice = _indice_scheda(device)
+    if indice is None:
+        return None
+    if not frequenza:
+        frequenza = frequenza_alsa(device)
+        if not frequenza:
+            return None
+    try:
+        with open("/proc/asound/card%d/pcm0p/sub0/status" % indice) as handle:
+            stato = handle.read()
+    except OSError:
+        return None
+    if "RUNNING" not in stato:
+        # Fermo o in avvio: non c'e' un ritardo da leggere, e zero sarebbe una
+        # bugia che farebbe scrivere a raffica.
+        return None
+    quanti = re.search(r"delay\s*:\s*(-?\d+)", stato)
+    if not quanti:
+        return None
+    return max(0.0, int(quanti.group(1)) / float(frequenza))
+
+
+def frequenza_alsa(device):
+    """A che frequenza sta suonando la scheda. Si legge una volta per flusso.
+
+    Sta a parte da `ritardo_alsa` perche' il ritardo si guarda a ogni blocco,
+    trenta volte al secondo, e la frequenza non cambia mai dentro un flusso:
+    rileggerla ogni volta vorrebbe dire raddoppiare i file aperti per niente.
+    """
+    indice = _indice_scheda(device)
+    if indice is None:
+        return None
+    try:
+        with open("/proc/asound/card%d/pcm0p/sub0/hw_params" % indice) as handle:
+            parametri = handle.read()
+    except OSError:
+        return None
+    trovato = re.search(r"^rate:\s*(\d+)", parametri, re.M)
+    if not trovato:
+        return None
+    valore = int(trovato.group(1))
+    return valore if valore > 0 else None
 
 
 class Mixer:
@@ -670,6 +771,9 @@ class Mixer:
         self._arreso = False     # la scheda non torna: si e' smesso di provare
         self._silenzio = b"\x00\x00" * BLOCCO
         self._righe = collections.deque(maxlen=RIGHE_TENUTE)
+        self._setup = collections.deque(maxlen=40)
+        self._registro = None
+        self._freq_scheda = None
         self.errore = ""
         self._conti = {"chiesti": 0, "resi": 0, "scartati": 0, "scaduti": 0,
                        "mancanti": 0, "morti": 0, "riavvii": 0, "vuoti": 0}
@@ -731,11 +835,21 @@ class Mixer:
                 testo = riga.decode("utf8", "replace").rstrip()
                 if not testo:
                     continue
-                self._righe.append(testo)
-                if "underrun" in testo.lower():
+                basso = testo.lower()
+                if "underrun" in basso or "xrun" in basso:
+                    # Un buco vero: la scheda e' arrivata a fondo coda e ha
+                    # messo silenzio. E' il suono che sparisce.
                     self._conti["vuoti"] += 1
+                    self._righe.append(testo)
+                elif any(marca in basso for marca in _SETUP):
+                    # Il riepilogo di come e' stato negoziato il flusso. Non
+                    # e' un errore e non deve finire nella riga rossa della
+                    # pagina: si tiene da parte, perche' dice se il buffer
+                    # chiesto e' stato concesso.
+                    self._setup.append(testo)
                 else:
                     self.errore = testo
+                    self._righe.append(testo)
         except Exception:
             pass
 
@@ -750,12 +864,41 @@ class Mixer:
         except (OSError, subprocess.SubprocessError) as exc:
             self.errore = str(exc)
             return False, str(exc)
-        stringi_tubo(processo.stdin)
+        # Il tubo piccolo, e adesso si sa perche'. Quello che sta nel tubo e'
+        # ritardo invisibile: `/proc` racconta l'anello della scheda ma non il
+        # tubo, quindi un tubo grande sfugge alla regolazione. 4096 byte e' il
+        # minimo che Linux concede (una pagina) e valgono 93 ms a 22050 mono.
+        stringi_tubo(processo.stdin, TUBO_EFFETTI)
+        # Flusso nuovo, frequenza da rileggere: dopo un riavvio la scheda
+        # potrebbe averne negoziata un'altra.
+        self._freq_scheda = None
         threading.Thread(target=self._leggi_errori, args=(processo,),
                          name="mixer-errori", daemon=True).start()
         with self._lucchetto:
             self._processo = processo
         return True, ""
+
+    def registra(self, percorso):
+        """Scrive su file una copia di tutto quello che va alla scheda.
+
+        PCM grezzo 22050 Hz mono 16 bit: esattamente quello che si da\' in
+        pasto ad `aplay`. Si riapre a ogni partita, perche\' un registro che
+        cresce per giorni su una scheda SD non e\' una diagnosi, e\' un guasto
+        nuovo.
+        """
+        try:
+            self._registro = open(percorso, "wb")
+        except OSError as exc:
+            self._registro = None
+            print("[suoni] registro non aperto: %s" % exc)
+
+    def _chiudi_registro(self):
+        registro, self._registro = self._registro, None
+        if registro is not None:
+            try:
+                registro.close()
+            except Exception:
+                pass
 
     def avvia(self, device, vol):
         """Apre il riproduttore per una partita. Restituisce (ok, motivo)."""
@@ -848,6 +991,7 @@ class Mixer:
         if thread is not None and thread is not threading.current_thread():
             thread.join(timeout=2.0)
         self._chiudi_processo()
+        self._chiudi_registro()
         with self._lucchetto:
             self._voci = []
 
@@ -938,6 +1082,11 @@ class Mixer:
         self._conti["morti"] += 1
         if motivo:
             self.errore = motivo
+        # Nel registro, sempre. Una morte del riproduttore a meta' partita e'
+        # la cosa che rende muto Breakout, ed e' rimasta invisibile per
+        # versioni intere perche' non la scriveva nessuno da nessuna parte.
+        print("[suoni] riproduttore caduto (%d volta/e): %s"
+              % (self._conti["morti"], self.errore or "motivo sconosciuto"))
         self._chiudi_processo()
         self._butta_vecchie()
         scadenza = time.monotonic() + RIAVVIO_LIMITE
@@ -954,6 +1103,7 @@ class Mixer:
                 # adesso, non quando riprenderanno a suonare in ritardo.
                 self._conti["riavvii"] += 1
                 self._butta_vecchie()
+                print("[suoni] scheda riaperta dopo %d tentativo/i" % tentativo)
                 return True
         with self._lucchetto:
             self._arreso = True
@@ -974,14 +1124,60 @@ class Mixer:
         """
         avvio = time.monotonic()
         scritti = 0
+        blocchi = 0
+        ritardo = None
         while not self._stop.is_set():
+            # Primo freno: il nostro orologio. Vale sempre, e da solo basta
+            # nei primi secondi, quando la scheda non ha ancora un ritardo da
+            # leggere.
             avanti = (avvio + scritti / float(FREQ_EFFETTI)) - time.monotonic()
             if avanti > CUSCINO:
                 time.sleep(avanti - CUSCINO)
+            # Secondo freno, ed e' quello che conta: l'orologio della scheda.
+            # Si guarda una decina di volte al secondo -- sono due file di
+            # `/proc`, non costano niente -- e se la scheda ha gia' piu' di un
+            # cuscino da suonare si aspetta che lo consumi. Senza questo, la
+            # differenza fra i due orologi si accumula e la coda si riempie
+            # fino all'orlo: sul DMD e' stata misurata piena al 99%, cioe' un
+            # quarto di secondo di ritardo piu' il tubo. I suoni uscivano
+            # tutti, ma cosi' in ritardo da sembrare di un altro colpo.
+            # A ogni blocco, non ogni quattro: con il controllo ogni quattro
+            # si scrivono fino a tre blocchi -- settanta millesimi -- dopo che
+            # la coda ha gia' passato il cuscino, e la misura diceva che
+            # bastavano a sforare. Costa la lettura di un file di `/proc`,
+            # trenta volte al secondo; la frequenza invece si legge una volta
+            # sola per flusso, che e' il file che costava davvero.
+            if self._freq_scheda is None:
+                self._freq_scheda = frequenza_alsa(self._device)
+            ritardo = ritardo_alsa(self._device, self._freq_scheda)
+            if ritardo is not None and ritardo > CUSCINO_ANELLO:
+                # Si aspetta **davvero** che la scheda consumi, rileggendo il
+                # ritardo invece di stimarlo: dormire un pezzetto e scrivere
+                # comunque il blocco successivo non fa scendere la coda, la fa
+                # solo salire piu' piano. Mezzo secondo di tetto, perche' un
+                # flusso che si ferma e non riparte non deve poter bloccare
+                # questo ciclo per sempre.
+                scadenza = time.monotonic() + 0.5
+                while not self._stop.is_set() and time.monotonic() < scadenza:
+                    time.sleep(0.01)
+                    ritardo = ritardo_alsa(self._device, self._freq_scheda)
+                    if ritardo is None or ritardo <= CUSCINO_ANELLO:
+                        break
+            blocchi += 1
             with self._lucchetto:
                 processo = self._processo
             morto = processo is None or processo.poll() is not None
             blocco = None if morto else self._prossimo_blocco()
+            if not morto and self._registro is not None:
+                # Una copia esatta di quello che va alla scheda. Serve a una
+                # domanda sola, che per settimane non ha avuto risposta:
+                # *questi suoni sono usciti dal DMD, si' o no?* Un contatore
+                # dice quello che il programma crede di aver fatto; questo
+                # dice quello che ha fatto.
+                try:
+                    self._registro.write(blocco)
+                except Exception:
+                    self._registro = None
             if not morto:
                 try:
                     processo.stdin.write(blocco)
@@ -1010,20 +1206,44 @@ class Mixer:
         dati.update({"acceso": self.acceso(), "voluto": voluto,
                      "arreso": arreso, "device": device, "voci": voci,
                      "cuscino": CUSCINO, "errore": self.errore,
-                     "righe": list(self._righe)[-5:]})
+                     "righe": list(self._righe)[-5:],
+                     "setup": list(self._setup),
+                     "buffer_ms": self._buffer_concesso()})
+        vero = ritardo_alsa(device)
+        dati["ritardo_ms"] = int(round(vero * 1000)) if vero is not None else None
         # Quanti dei suoni chiesti sono davvero usciti. E' il numero che la
         # domanda "ne salta troppi" chiedeva da sempre.
         chiesti = dati["chiesti"]
         dati["resa"] = round(100.0 * dati["resi"] / chiesti, 1) if chiesti else 100.0
         return dati
 
+    def _buffer_concesso(self):
+        """Quanti millisecondi di buffer ci ha dato davvero la scheda.
+
+        Si chiedono BUFFER_EFFETTI_US, ma ALSA concede quello che puo' e non
+        lo dice a nessuno. Se ci ha dato molto meno, il cuscino su cui
+        contiamo non esiste e i suoni saltano senza che nessuno capisca
+        perche'. `aplay -v` lo stampa: `buffer_size: 5512`, in campioni.
+        """
+        for riga in self._setup:
+            if "buffer_size" in riga.lower():
+                cifre = "".join(c for c in riga if c.isdigit())
+                if cifre:
+                    return int(round(1000.0 * int(cifre) / FREQ_EFFETTI))
+        return None
+
     def azzera(self):
         for chiave in self._conti:
             self._conti[chiave] = 0
         self._righe.clear()
+        self._setup.clear()
 
 
 _mixer = Mixer()
+
+
+# Dove finisce la registrazione degli effetti, quando la si accende.
+REGISTRO_EFFETTI = "/tmp/dmd-effetti.raw"
 
 
 def effetti_avvia(cfg):
@@ -1033,6 +1253,12 @@ def effetti_avvia(cfg):
         return False
     _mixer.azzera()
     ok, _motivo = _mixer.avvia(device, volume_giochi(cfg))
+    # Una levetta che non compare in nessuna pagina, e va bene cosi\': serve a
+    # rispondere a "questi suoni sono usciti o no?" quando i contatori dicono
+    # di si\' e l\'orecchio dice di no. Si accende a mano in configurazione,
+    # sotto `audio.registra_effetti`, e scrive PCM grezzo per tutta la partita.
+    if ok and _conf(cfg).get("registra_effetti"):
+        _mixer.registra(REGISTRO_EFFETTI)
     return ok
 
 

@@ -1814,6 +1814,60 @@ Storico:
        priorita' non era la leva: era il turno.
        Minore, ma si vedeva: il puntino della previsione vecchia stava in alto
        a destra, addosso al grado della minima. Adesso sta in basso.
+  8.4  **Dove NON sono i suoni di Breakout.** Versione di strumenti, non di
+       rimedi: i due sospettati principali sono stati scagionati con dei
+       numeri, e il terzo non si poteva nemmeno guardare.
+       *Il gioco e' innocente.* La domanda giusta e' arrivata dal campo --
+       «possiamo contare i contatti della palla e il numero di suoni
+       emessi?». Contarli dalle stesse righe che suonano non proverebbe
+       niente, quindi i contatti si rilevano dalla fisica: un mattone in
+       meno, la velocita' che cambia segno, la palla riportata sul bordo.
+       Quattro partite intere, tutte le vite: **510 contatti, 510 suoni**. E
+       mai piu' di un suono per fotogramma, il che manda in soffitta anche
+       l'ipotesi dei grappoli sommati dal limitatore.
+       *Il mixer e' innocente.* Campionando i contatori durante una partita
+       vera sul DMD: 90 chiesti, 90 resi, zero morti, zero riavvii, mixer
+       sempre acceso -- mentre chi giocava sentiva sparire i suoni.
+       *E il contatore dei buchi era cieco.* Leggeva gli `underrun!!!` di
+       `aplay`, che `aplay` stampa **solo** in modalita' prolissa -- e gli si
+       passava `-q`. Quello zero non poteva accendersi nemmeno con la scheda
+       che restava a secco di continuo: era un contatore cieco spacciato per
+       una prova, ed era mio. Adesso `aplay` va in prolisso, i buchi si
+       contano davvero, e dal suo riepilogo si legge **quanto buffer ha
+       concesso la scheda**: si chiedono 250 ms, ma ALSA da' quello che puo' e
+       non lo dice a nessuno. Se il cuscino su cui contiamo non esiste, adesso
+       si vede nella pagina Giochi accanto agli altri numeri.
+       Le righe di `aplay` vengono ora divise in tre: buchi, riepilogo della
+       negoziazione, errori veri. Prima un innocuo `buffer_size: 5512`
+       sarebbe finito nella riga rossa della pagina come se fosse un guasto.
+  8.5  **La scheda non ha mai fatto un buco: la coda si riempiva.**
+       Misurato sul DMD in `/proc/asound` mentre si giocava: `state: RUNNING`
+       per 58 secondi, **nessun XRUN**, e `buffer_size 12003` a 48000 Hz --
+       i 250 ms chiesti, concessi per intero. Ma `delay` stava fra 229 e 263
+       ms, cioe' l'anello era **pieno al 99%** tutto il tempo, piu' i 372 ms
+       che poteva tenere il tubo: fino a sei decimi di secondo fra il colpo e
+       il suono.
+       La causa e' una riga della 8.2, mia. Il mixer si dava il ritmo con
+       `time.monotonic()` -- scrivo un blocco ogni 23 ms, dopo un minuto avro'
+       scritto un minuto -- e la scheda non va al nostro ritmo: gli effetti
+       sono 22050 mono, la chiavetta suona 48000 stereo, e la conversione piu'
+       il quarzo fanno un errore piccolo e sempre nello stesso verso. Un
+       errore piccolo che si accumula riempie qualunque coda, e da li' in poi
+       il ritardo e' il massimo possibile per costruzione.
+       Adesso il ritmo lo detta **l'orologio della scheda**: ALSA pubblica in
+       `/proc` quanti fotogrammi le restano da suonare, e il mixer smette di
+       scrivere finche' non sono scesi sotto il cuscino. Il tubo passa al
+       minimo che Linux concede (4096 byte, 93 ms) perche' quello che sta nel
+       tubo e' ritardo che `/proc` non racconta. Misurato al banco con una
+       scheda che deriva dello 0,4%: senza regolatore la coda cresce e si
+       assesta al 90% dell'anello, con il regolatore la mediana cala del 31%
+       e a fine corsa sta molto piu' in basso.
+       **E una registrazione, per finirla.** `audio.registra_effetti` fa
+       scrivere in `/tmp/dmd-effetti.raw` una copia esatta di quello che va
+       alla scheda. I contatori dicono quello che il programma crede di aver
+       fatto; questo dice quello che ha fatto. E' l'unico modo di rispondere
+       a "questi suoni sono usciti dal DMD o no?" quando i contatori dicono di
+       si' e l'orecchio dice di no.
 """
 
-__version__ = "8.3"
+__version__ = "8.5"

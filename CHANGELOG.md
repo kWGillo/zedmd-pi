@@ -2,6 +2,84 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [8.5]
+
+- **La scheda audio non ha mai fatto un buco.** Leggendo `/proc/asound` sul DMD
+  mentre si giocava: `state: RUNNING` per 58 secondi di fila, **nessun XRUN**, e
+  `buffer_size 12003` frame a 48000 Hz — i 250 ms richiesti, concessi per
+  intero. Nessun suono è mai stato tagliato dalla scheda.
+
+- **Ma la coda era piena al 99%.** `delay` stava fra 229 e 263 ms su 250 di
+  capienza, per tutto il tempo, più i 372 ms che poteva tenere il tubo verso
+  `aplay`: fino a **sei decimi di secondo** fra il colpo e il suono.
+
+  La causa è una riga della 8.2, mia. Il mixer si dava il ritmo con
+  `time.monotonic()` — scrivo un blocco ogni 23 ms, quindi dopo un minuto avrò
+  scritto un minuto di audio. Sembra ovvio e non lo è: **la scheda non va al
+  ritmo del nostro orologio.** Gli effetti sono a 22050 Hz mono e la chiavetta
+  suona a 48000 stereo; la conversione più il quarzo fanno un errore piccolo e
+  sempre nello stesso verso. Un errore piccolo che si accumula riempie
+  qualunque coda, e da lì in poi il ritardo è il massimo possibile per
+  costruzione.
+
+- **Adesso il ritmo lo detta l'orologio della scheda.** ALSA pubblica in
+  `/proc` quanti fotogrammi le restano da suonare: il mixer lo legge a ogni
+  blocco e smette di scrivere finché non sono scesi sotto il cuscino. La
+  frequenza si legge una volta sola per flusso, perché quella non cambia e il
+  file costa. Il tubo passa al minimo che Linux concede — 4096 byte, 93 ms —
+  perché quello che sta nel tubo è ritardo che `/proc` non racconta, e il
+  cuscino vero è anello più tubo.
+
+  Misurato al banco con una scheda che deriva dello 0,4%: senza regolatore la
+  coda cresce e si assesta al **90% dell'anello**; con il regolatore la mediana
+  cala del 31% e a fine corsa resta molto più in basso.
+
+- **E una registrazione, per chiudere la questione.** Accendendo
+  `audio.registra_effetti` in configurazione, il mixer scrive in
+  `/tmp/dmd-effetti.raw` una copia esatta di quello che manda alla scheda — PCM
+  grezzo 22050 mono. I contatori dicono quello che il programma *crede* di aver
+  fatto; il file dice quello che ha fatto. È l'unico modo di rispondere a
+  «questi suoni sono usciti dal DMD o no?» quando i contatori dicono di sì e
+  l'orecchio dice di no.
+
+## [8.4]
+
+Versione di **strumenti, non di rimedi**: i suoni di Breakout continuano a
+mancare sul campo, e invece di spedire una correzione a indovinare si sono
+scagionati i sospettati uno per uno.
+
+- **Il gioco è innocente, e la prova è quella che hai chiesto tu.** «Possiamo
+  contare i contatti della palla con gli oggetti o il cursore e il numero di
+  suoni emessi?» Sì — a patto di non contare i contatti dalle stesse righe che
+  suonano, che sarebbe verificare che il codice è uguale a sé stesso. Qui i
+  contatti si rilevano dalla **fisica**: un mattone in meno, la velocità che
+  cambia segno, la palla riportata esattamente sul bordo. Quattro partite
+  intere, tutte le vite: **510 contatti, 510 suoni**. Nessun contatto muto, e
+  mai più di un suono per fotogramma — il che manda in soffitta anche
+  l'ipotesi dei suoni a grappolo schiacciati dal limitatore.
+
+- **Il mixer è innocente.** Campionando i contatori durante una partita vera:
+  90 suoni chiesti, 90 resi, zero morti del riproduttore, zero riavvii, mixer
+  sempre acceso — mentre chi stava giocando sentiva sparire i suoni.
+
+- **E il contatore dei buchi era cieco.** Leggeva gli `underrun!!!` che stampa
+  `aplay`, ma `aplay` quei messaggi li stampa **solo in modalità prolissa**, e
+  gli si passava `-q`. Quello `vuoti 0` non poteva accendersi nemmeno con la
+  scheda che restava a secco ogni tre secondi: era un contatore cieco
+  spacciato per una prova, ed era mio. Adesso `aplay` va in prolisso e i buchi
+  si contano per davvero.
+
+- **E si vede quanto buffer ha concesso la scheda.** Se ne chiedono 250 ms, ma
+  ALSA dà quello che può e non lo dice a nessuno. Dal riepilogo di `aplay -v`
+  si legge il `buffer_size` reale, e la pagina Giochi lo mostra in
+  millisecondi accanto al cuscino richiesto. Se i due numeri non si somigliano,
+  il cuscino su cui conta il mixer non esiste — ed è la prima cosa da guardare
+  la prossima volta.
+
+- Le righe di `aplay` vengono ora divise in tre categorie: buchi, riepilogo
+  della negoziazione, errori veri. Senza, un innocuo `buffer_size: 5512`
+  sarebbe finito nella riga rossa della pagina come se fosse un guasto.
+
 ## [8.3]
 
 - **Il meteo adesso dice di quando parla.** Accanto a massima e minima c'è una

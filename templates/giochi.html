@@ -63,6 +63,7 @@
     <li><span>{{ t('giochi.audio.morti') }}</span><b id="a_morti">–</b></li>
     <li><span>{{ t('giochi.audio.riavvii') }}</span><b id="a_riavvii">–</b></li>
     <li><span>{{ t('giochi.audio.cuscino') }}</span><b id="a_cuscino">–</b></li>
+    <li><span>{{ t('giochi.audio.buffer') }}</span><b id="a_buffer">–</b></li>
   </ul>
   <p class="hint" id="audio_errore"></p>
 </section>
@@ -219,6 +220,7 @@
     testo("a_morti", a.morti);
     testo("a_riavvii", a.riavvii);
     testo("a_cuscino", Math.round((a.cuscino || 0) * 1000) + " ms");
+    testo("a_buffer", a.buffer_ms ? (a.buffer_ms + " ms") : "–");
     var avviso = document.getElementById("audio_avviso");
     if (avviso) {
       if (a.arreso) { avviso.textContent = {{ t('giochi.audio.arreso') | tojson }}; }

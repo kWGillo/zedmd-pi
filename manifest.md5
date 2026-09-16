@@ -24,7 +24,7 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 b697bd1ed14d88357914d8c98f79298f  hass.py
-6b2f85103a39fbffb45a99788af165ed  i18n.py
+63c54ae80dda50be356c744234085894  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
@@ -71,7 +71,7 @@ de7ee2495ed06fbae5a24e7de31e756f  sources/telecamera.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 c750104c1eaa178d6958982586e89855  staccato.py
 b44159427ba239fe05347960209d3bdc  static/style.css
-ec2f7ec76a2a2bd685d77dcbf3373fdd  suoni.py
+d06237e90ad30053d9d32b59a6689598  suoni.py
 b2e39a45b2319abd500f8c72019d34c0  suoni/colpito.wav
 9bee0b8537ca225025bed746c4134033  suoni/lancio.wav
 682aeaffd20379a0664b243e9dfa810c  suoni/livello.wav
@@ -96,7 +96,7 @@ f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
 73c2b6f65a59fbc627244fd38ac6ca5d  templates/clock.html
 e335f8f24edc17c812b333673ee4bdca  templates/doom.html
 856a6ac0a358de34d3026f01599c3a1d  templates/gameboy.html
-04dd0ce6165ba7aa95b456aca38e5889  templates/giochi.html
+cb7f0f3c1130dcb8ef42d19a8cbe7d54  templates/giochi.html
 c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
 250656c1e92734818935e7173907f894  templates/media.html
 1afebeaf02ae99c7b4791d865301e21b  templates/nowplaying.html
@@ -112,7 +112,7 @@ f4fc1e288700e25a7980dd00d4d931a6  templates/sveglia.html
 0bbe7fbc76fd30b03e559158b71225d0  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-ebbccfec83a320021aec6f980c63fab4  version.py
+2da11597698b35214dfa35d16feccca4  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 1c6062261c1363107eb9f7c8139cb8c1  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py
