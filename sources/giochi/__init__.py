@@ -398,7 +398,14 @@ class GiochiSource(Source):
         # chiuso quando si esce. A pannello fermo non tiene occupata la
         # scheda audio e non consuma niente.
         try:
-            suoni.effetti_avvia(self.cfg)
+            if not suoni.effetti_avvia(self.cfg):
+                # Non e' un errore: puo' voler dire audio spento, effetti dei
+                # giochi spenti, o la scheda occupata dalla musica. Ma va
+                # detto, perche' da qui in poi la partita sara' muta e prima
+                # non lo sapeva nessuno.
+                print("[giochi] partita muta: %s"
+                      % (suoni.effetti_stato().get("errore")
+                         or "audio non disponibile"))
         except Exception as exc:                    # pragma: no cover
             print("[giochi] mixer non avviato: %s" % exc)
         self._sessione = True
@@ -616,6 +623,13 @@ class GiochiSource(Source):
         base.update(gioco.stato() if gioco else
                     {"punteggio": 0, "vite": 0, "livello": 0,
                      "record": 0, "finita": False})
+        # I numeri del mixer viaggiano con lo stato della partita perche' e'
+        # li' che servono: "ne salta troppi" si verifica guardando quanti ne
+        # ha chiesti il gioco e quanti ne sono usciti davvero.
+        try:
+            base["audio"] = suoni.effetti_stato()
+        except Exception:                           # pragma: no cover
+            base["audio"] = {}
         return base
 
     def status(self, lang=None):

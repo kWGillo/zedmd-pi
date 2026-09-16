@@ -16,9 +16,14 @@ spiega il perché di ognuno; questo blocco serve quando il perché lo sai già.
 curl -s https://raw.githubusercontent.com/kWGillo/zedmd-pi/refs/heads/main/version.py | grep __version__
 ```
 *Dice qual è l'ultima versione già pubblicata. Serve **prima** del push, per
-sapere dove far cominciare le note della release. Il percorso lungo
-(`refs/heads/main`) salta la cache: quello corto può rispondere con il numero
-vecchio per cinque minuti.*
+sapere dove far cominciare le note della release.*
+
+> **Correzione.** Qui c'era scritto che il percorso lungo (`refs/heads/main`)
+> salta la cache e quello corto no. **È falso, ed è stato misurato:** tutti e
+> due rispondono con `cache-control: max-age=300`. Non esiste un percorso di
+> `raw.githubusercontent.com` che risponda sempre aggiornato; la cache di
+> cinque minuti vale per entrambi. Per sapere subito e con certezza cosa c'è
+> sul ramo, si guarda la pagina del commit su GitHub, non `raw`.
 
 ```bash
 cd ~/Downloads && ls ~/Downloads/*.tar.gz
@@ -57,8 +62,10 @@ git push
 ```bash
 curl -s https://raw.githubusercontent.com/kWGillo/zedmd-pi/refs/heads/main/version.py | grep __version__
 ```
-*Deve dire `7.3`. Se dice ancora il numero vecchio, il commit non è partito:
-non è la cache, perché questo percorso la salta.*
+*Deve dire `7.3`. Se dice ancora il numero vecchio **non si può concludere
+niente**: questo percorso ha la stessa cache da cinque minuti dell'altro. Per
+sapere se il push è partito si guarda `git log origin/main -1` oppure la
+pagina del commit su GitHub.*
 
 ```bash
 gh release create v7.3 --title "7.3" --notes-file <(sed -n '/^## \[7.3\]/,/^## \[7.2\]/p' CHANGELOG.md | sed '$d')

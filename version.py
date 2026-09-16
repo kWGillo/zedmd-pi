@@ -1725,6 +1725,55 @@ Storico:
        Nuova casella: risvegliare il display se qualcuno **apre una partita**
        durante lo Sleep. Era gia\' il comportamento, ma cablato: adesso e\' una
        scelta, accanto a quella dei frame da Batocera.
+  8.2  **I suoni di Breakout, rifatti dalla parte che li faceva sparire.**
+       La richiesta era netta: ripartire da capo, devono andare sempre. Il
+       punto di partenza pero' non poteva essere il gioco -- misurando, la
+       logica di Breakout chiede i suoi suoni e li chiede una volta sola.
+       Sparivano dopo, lungo la strada, e la strada aveva tre buche.
+       *Il riproduttore poteva morire senza che nessuno lo sapesse.* La scheda
+       audio del DMD e' una sola. Se quando si preme Start c'e' un avviso di
+       un servizio che la sta usando, `aplay` parte, non riesce ad aprirla ed
+       esce. `Popen` pero' riesce sempre, quindi `avvia()` rispondeva "tutto
+       bene", e il motivo vero -- *Device or resource busy* -- finiva in
+       `/dev/null` perche' lo stderr era buttato via. Da quel momento ogni
+       effetto della partita ripiegava sulla vecchia strada del processo per
+       volta, che ne suona uno e **scarta tutti quelli che si sovrappongono**.
+       Breakout i suoni li fa a grappoli -- muro, mattone e racchetta possono
+       capitare dentro lo stesso frame -- e ne perdeva a manciate; Invaders,
+       che li fa spaziati, quasi no. E' esattamente la differenza che si
+       sentiva, ed e' il motivo per cui era sempre e solo Breakout.
+       Adesso la morte del riproduttore si vede, si conta e **si ripara**: si
+       riapre la scheda finche' non torna libera, per un minuto, e i suoni
+       chiesti nel frattempo aspettano in coda invece di prendere la strada
+       che li scartava. Quelli che aspettano piu' di mezzo secondo si buttano:
+       una racchetta che arriva in ritardo non e' un suono recuperato.
+       *Il cuscino era di venti millesimi di secondo.* Fra il mixer e
+       l'altoparlante c'e' una coda, ed e' l'unica difesa contro un ritardo
+       del thread: quando la coda finisce, la scheda mette silenzio. In ALSA
+       si chiama underrun, per chi gioca e' "il suono e' saltato". La misura
+       diceva 20-60 ms, e sul Pi il GIL e' uno solo -- Pillow lo tiene per
+       tutta la durata di ogni operazione, e il pannello ridisegna 256x64
+       trenta volte al secondo. Il cuscino adesso e' dichiarato e vale 120 ms:
+       misurati dal banco, 133 ms fra il mattone e il suono. Si paga un
+       ritardo che non si distingue da subito -- una cassa Bluetooth ne
+       aggiunge di piu' -- e si compra un audio che una pausa di ottanta
+       millesimi non buca piu'.
+       *Il tetto di otto voci buttava la piu' vecchia.* Otto voci insieme
+       vogliono dire otto suoni dentro 55 ms: non succede mai, quindi quel
+       tetto non ha mai protetto niente e poteva solo far sparire un suono.
+       Adesso e' 24, ed e' un freno di sicurezza, non una regola. Quando piu'
+       suoni coincidono il blocco si abbassa quel tanto che basta invece di
+       tagliare i picchi, cosi' cinque mattoni insieme si sentono come cinque
+       mattoni e non come uno schiocco.
+       *E l'ultimo suono della partita usciva davvero.* Il primato suona
+       mentre la partita si sta gia' chiudendo, e la riga dopo spegneva il
+       riproduttore: con un cuscino davanti, "la riga dopo" vuol dire sempre.
+       Adesso si aspetta che la coda sia uscita.
+       **I numeri, finalmente.** La pagina Giochi mostra durante la partita
+       quanti effetti ha chiesto il gioco, quanti ne sono usciti davvero, la
+       resa in percentuale, i buchi della scheda, le cadute e le riaperture
+       del riproduttore, e le sue ultime righe di errore. "Ne salta troppi"
+       adesso e' una domanda con una risposta, non un'impressione.
 """
 
-__version__ = "8.1"
+__version__ = "8.2"

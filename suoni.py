@@ -42,6 +42,7 @@ misura nemmeno; l'audio continuo di Doom si', ed e' il motivo per cui e'
 una voce a parte che si puo' spegnere.
 """
 
+import collections
 import os
 import re
 import shutil
@@ -360,7 +361,8 @@ BUFFER_US = 80000
 PERIODO_US = 20000
 
 
-def comando_pcm(device, frequenza, canali):
+def comando_pcm(device, frequenza, canali,
+                buffer_us=BUFFER_US, periodo_us=PERIODO_US):
     """La riga di comando per riversare PCM grezzo su una scheda ALSA.
 
     Si preferisce `aplay` **per la latenza, non per gusto**. Il muxer `alsa`
@@ -379,8 +381,8 @@ def comando_pcm(device, frequenza, canali):
     if shutil.which("aplay"):
         return ["aplay", "-q", "-t", "raw", "-f", "S16_LE",
                 "-r", str(int(frequenza)), "-c", str(int(canali)),
-                "--buffer-time=%d" % BUFFER_US,
-                "--period-time=%d" % PERIODO_US,
+                "--buffer-time=%d" % int(buffer_us),
+                "--period-time=%d" % int(periodo_us),
                 "-D", device, "-"]
     return ["ffmpeg", "-v", "error", "-nostdin",
             "-f", "s16le", "-ar", str(int(frequenza)), "-ac", str(int(canali)),
@@ -560,22 +562,95 @@ def suona_servizio(cfg, chiave):
 # niente.
 FREQ_EFFETTI = 22050
 BLOCCO = 512                 # 23 ms: il ritmo con cui si scrive
-VOCI_MASSIME = 8
+
+# Quante voci si tengono insieme. Il vecchio tetto era 8 e la voce piu'
+# vecchia veniva buttata: con effetti da 55 ms vuol dire otto suoni dentro lo
+# stesso 55 ms, cioe' 145 al secondo. Non succede mai, quindi quel tetto non
+# ha mai protetto niente e poteva solo far sparire un suono. Qui e' alto
+# perche' resti un freno di sicurezza e non una regola di funzionamento, e
+# ogni voce buttata si conta.
+VOCI_MASSIME = 24
+
+# **Il cuscino.** E' la correzione piu' importante di questa versione, quindi
+# vale la pena scrivere perche'.
+#
+# Fra il mixer e l'altoparlante c'e' una coda: quello che abbiamo gia' scritto
+# e che la scheda non ha ancora suonato. Quella coda e' l'unica difesa contro
+# un nostro ritardo. Se il thread del mixer resta fermo piu' a lungo della
+# coda — e su un Pi resta fermo, perche' il GIL e' uno solo e il pannello
+# ridisegna 256x64 trenta volte al secondo — la scheda arriva a fondo coda,
+# non trova niente da suonare e mette silenzio. In ALSA si chiama underrun, e
+# per chi gioca e' esattamente "il suono e' saltato".
+#
+# La versione precedente teneva un cuscino di 20-50 ms: misurato, non
+# supposto. Bastava una pausa di venti millesimi per bucare l'audio, ed e'
+# una pausa che sul Pi capita di continuo.
+#
+# Il prezzo del cuscino e' il ritardo: un mattone si sente CUSCINO
+# millisecondi dopo averlo colpito. A 120 ms non si distingue da subito —
+# una cassa Bluetooth qualunque ne aggiunge di piu' — mentre un suono che
+# manca si sente benissimo. Il baratto e' tutto a favore del cuscino.
+CUSCINO = 0.12
+
+# Il buffer della scheda deve poter contenere il cuscino con del margine,
+# altrimenti il freno diventa lui.
+BUFFER_EFFETTI_US = 250000
+PERIODO_EFFETTI_US = 25000
+
+# Una voce che ha aspettato piu' di questo mentre il riproduttore era giu'
+# non si suona piu': un rumore di racchetta che arriva mezzo secondo dopo il
+# colpo non e' un suono recuperato, e' un suono sbagliato.
+ETA_MASSIMA = 0.5
+
+# Quanto si aspetta fra un tentativo di riapertura e il successivo, e per
+# quanto tempo si insiste prima di arrendersi. Quindici secondi sono la
+# durata massima di un avviso di un servizio (DURATA_MASSIMA): se la scheda
+# e' occupata da quello, dobbiamo sopravvivergli.
+# Quanto si aspetta, alla chiusura di una partita, che gli ultimi suoni
+# siano davvero usciti prima di spegnere il riproduttore.
+ATTESA_SVUOTO = 1.5
+
+RIAVVIO_ATTESA = 0.4
+RIAVVIO_LENTO = 2.0
+RIAVVIO_LIMITE = 60.0
+
+# Quante righe di errore del riproduttore si tengono da parte. Prima
+# finivano in /dev/null, ed e' il motivo per cui questo problema e' rimasto
+# invisibile cosi' a lungo.
+RIGHE_TENUTE = 20
 
 
 class Mixer:
     """Un riproduttore solo, aperto per tutta la partita, e i suoni sommati.
 
     Il perche' e' aritmetico. Un effetto lanciato come processo a se' costa
-    fra i 150 e i 300 ms di avvio su un Pi, e una scheda ALSA aperta in
-    `plughw` sta in mano a un programma alla volta: due effetti ravvicinati
-    non possono suonare insieme, e il secondo va buttato. Su Invaders, che ha
-    una cadenza continua, si perdeva quasi la meta' dei suoni; su Breakout
-    circa un quinto — abbastanza da sentire i mattoni muti ogni tanto.
+    fra i 150 e i 300 ms di avvio su un Pi, e una scheda ALSA sta in mano a
+    un programma alla volta: due effetti ravvicinati non possono suonare
+    insieme, e il secondo va buttato. Qui il processo e' uno e resta aperto:
+    gli effetti diventano campioni sommati in memoria, quindi si
+    **sovrappongono** invece di annullarsi.
 
-    Qui il processo e' uno e resta aperto: gli effetti diventano campioni
-    sommati in memoria, quindi si **sovrappongono** invece di annullarsi, e
-    partono nel blocco successivo — 23 ms, non 300.
+    Le tre cose che prima potevano far sparire un suono, e che qui non
+    possono piu'
+    ------------------------------------------------------------------
+    1. **Il riproduttore poteva morire e nessuno se ne accorgeva.** `Popen`
+       riesce sempre: `aplay` parte, poi scopre che la scheda e' occupata —
+       da un avviso di un servizio, dalla musica — ed esce. `avvia()`
+       rispondeva "tutto bene", il suo errore andava in `/dev/null`, e da
+       quel momento ogni effetto della partita ripiegava sulla strada del
+       processo per volta, che scarta tutto quello che si sovrappone.
+       Breakout, che i suoni li fa a grappoli, ne perdeva a manciate;
+       Invaders, che li fa spaziati, quasi no. E' esattamente la differenza
+       che si sentiva. Adesso la morte del riproduttore si vede, si conta e
+       si **ripara**: si riapre finche' la scheda non torna libera.
+    2. **Il cuscino era di venti millisecondi.** Vedi `CUSCINO`.
+    3. **Il tetto di otto voci buttava la piu' vecchia.** Vedi
+       `VOCI_MASSIME`.
+
+    Tutto quello che passa di qui si conta: chiesti, resi davvero, buttati,
+    scaduti, riaperture, righe di errore del riproduttore. La pagina Giochi
+    li mostra, cosi' la prossima volta la domanda "ne salta troppi" ha una
+    risposta invece di un'ipotesi.
 
     Vive solo mentre c'e' una partita aperta. A pannello fermo non consuma
     niente e non tiene occupata la scheda.
@@ -584,17 +659,33 @@ class Mixer:
     def __init__(self):
         self._lucchetto = threading.Lock()
         self._processo = None
-        self._voci = []          # [[campioni, posizione], ...]
+        self._voci = []          # [[campioni, posizione, nato, nome], ...]
         self._stop = threading.Event()
         self._thread = None
-        self._campioni = {}      # nome -> array di interi, letto una volta
+        self._campioni = {}      # nome -> lista di interi, letta una volta
+        self._pacchi = {}        # nome -> byte gia' pronti, al volume giusto
+        self._device = ""
         self._volume = 1.0
+        self._voluto = False     # c'e' una partita che vuole il mixer
+        self._arreso = False     # la scheda non torna: si e' smesso di provare
+        self._silenzio = b"\x00\x00" * BLOCCO
+        self._righe = collections.deque(maxlen=RIGHE_TENUTE)
         self.errore = ""
+        self._conti = {"chiesti": 0, "resi": 0, "scartati": 0, "scaduti": 0,
+                       "mancanti": 0, "morti": 0, "riavvii": 0, "vuoti": 0}
 
     # ---------------------------------------------------------- campioni
 
     def _carica(self, nome):
-        """I campioni di un effetto, letti dal wav una volta sola."""
+        """I campioni di un effetto, letti dal wav una volta sola.
+
+        Insieme ai campioni si prepara il **pacco**: gli stessi campioni gia'
+        moltiplicati per il volume e gia' impacchettati in byte. Serve alla
+        via veloce del mixaggio — quando c'e' una voce sola, che e' il caso
+        normale, il blocco da scrivere e' una fetta di questo pacco e non
+        costa niente. Prima ogni blocco passava per due cicli Python da 512
+        giri anche per un suono solo, ed e' tempo tolto al cuscino.
+        """
         if nome in self._campioni:
             return self._campioni[nome]
         dati = None
@@ -610,49 +701,109 @@ class Mixer:
             except Exception:
                 dati = None
         self._campioni[nome] = dati
+        if dati:
+            self._impacchetta(nome, dati)
         return dati
+
+    def _impacchetta(self, nome, dati):
+        guadagno = self._volume
+        if guadagno >= 0.999:
+            scalati = dati
+        else:
+            scalati = [int(v * guadagno) for v in dati]
+        try:
+            self._pacchi[nome] = struct.pack("<%dh" % len(scalati), *scalati)
+        except Exception:
+            self._pacchi.pop(nome, None)
 
     # ------------------------------------------------------------ vita
 
+    def _leggi_errori(self, processo):
+        """Tiene da parte quello che il riproduttore scrive su stderr.
+
+        Una riga sola conta piu' di tutte le altre: `underrun!!!`. Vuol dire
+        che la scheda e' arrivata a fondo coda e ha messo silenzio, cioe' che
+        un pezzo di suono non e' uscito. Finche' finiva in `/dev/null` era
+        una cosa che si poteva solo sospettare.
+        """
+        try:
+            for riga in processo.stderr:
+                testo = riga.decode("utf8", "replace").rstrip()
+                if not testo:
+                    continue
+                self._righe.append(testo)
+                if "underrun" in testo.lower():
+                    self._conti["vuoti"] += 1
+                else:
+                    self.errore = testo
+        except Exception:
+            pass
+
+    def _apri(self):
+        """Apre il riproduttore. Non avvia il ciclo: quello e' di `avvia`."""
+        try:
+            processo = subprocess.Popen(
+                comando_pcm(self._device, FREQ_EFFETTI, 1,
+                            BUFFER_EFFETTI_US, PERIODO_EFFETTI_US),
+                stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE)
+        except (OSError, subprocess.SubprocessError) as exc:
+            self.errore = str(exc)
+            return False, str(exc)
+        stringi_tubo(processo.stdin)
+        threading.Thread(target=self._leggi_errori, args=(processo,),
+                         name="mixer-errori", daemon=True).start()
+        with self._lucchetto:
+            self._processo = processo
+        return True, ""
+
     def avvia(self, device, vol):
-        """Apre il riproduttore. Restituisce (ok, motivo)."""
+        """Apre il riproduttore per una partita. Restituisce (ok, motivo)."""
         with self._lucchetto:
             if self._processo is not None and self._processo.poll() is None:
                 return True, ""
-            self._volume = max(0.0, min(1.0, vol))
-            try:
-                self._processo = subprocess.Popen(
-                    comando_pcm(device, FREQ_EFFETTI, 1),
-                    stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL)
-            except (OSError, subprocess.SubprocessError) as exc:
-                self._processo = None
-                self.errore = str(exc)
-                return False, str(exc)
-            stringi_tubo(self._processo.stdin)
+            if abs(float(vol) - self._volume) > 1e-9:
+                # Il volume e' cotto dentro i pacchi: cambiandolo vanno rifatti.
+                self._pacchi.clear()
+            self._volume = max(0.0, min(1.0, float(vol)))
+            self._device = device
+            self._voluto = True
+            self._arreso = False
             self._voci = []
+            self.errore = ""
             self._stop.clear()
+        ok, motivo = self._apri()
+        if not ok:
+            with self._lucchetto:
+                self._voluto = False
+            return False, motivo
         self._thread = threading.Thread(target=self._ciclo, name="mixer",
                                         daemon=True)
         self._thread.start()
         return True, ""
 
     def acceso(self):
+        """C'e' un riproduttore vivo in questo momento."""
         with self._lucchetto:
             return self._processo is not None and self._processo.poll() is None
 
-    def ferma(self):
-        self._stop.set()
-        thread, self._thread = self._thread, None
-        if thread is not None and thread is not threading.current_thread():
-            thread.join(timeout=2.0)
+    def in_servizio(self):
+        """C'e' una partita che vuole il mixer e non si e' ancora arreso.
+
+        Non e' `acceso()`, e la differenza e' il punto di tutto: fra la morte
+        del riproduttore e la sua riapertura il mixer non e' acceso ma e'
+        **in servizio**, e i suoni chiesti in quel momento si mettono in coda
+        invece di prendere la vecchia strada che li scartava.
+        """
+        with self._lucchetto:
+            return self._voluto and not self._arreso
+
+    def _chiudi_processo(self):
         with self._lucchetto:
             processo, self._processo = self._processo, None
-            self._voci = []
         if processo is None:
             return
-        for chiudi in (lambda: processo.stdin.close(),
-                       processo.terminate):
+        for chiudi in (lambda: processo.stdin.close(), processo.terminate):
             try:
                 chiudi()
             except Exception:
@@ -662,81 +813,214 @@ class Mixer:
         except Exception:
             pass
 
+    def svuota(self, attesa=ATTESA_SVUOTO):
+        """Aspetta che le voci in coda siano uscite davvero.
+
+        Serve a un caso solo, ed e' un caso che si sentiva: il suono del
+        primato parte mentre la partita si sta gia' chiudendo, e subito dopo
+        si chiude il mixer. Senza questa attesa il riproduttore veniva ucciso
+        prima di aver suonato quello che gli era appena stato dato — e con un
+        cuscino di CUSCINO millisecondi davanti, "subito dopo" vuol dire
+        sempre. Si aspetta che la coda si svuoti, piu' il tempo che il
+        cuscino gia' scritto impieghi ad arrivare all'altoparlante.
+        """
+        with self._lucchetto:
+            se_ne_erano = bool(self._voci)
+        if not se_ne_erano:
+            # Niente in coda: chiudere subito e' giusto, e mezzo secondo di
+            # attesa a ogni cambio di gioco si noterebbe.
+            return
+        scadenza = time.monotonic() + attesa
+        while time.monotonic() < scadenza:
+            with self._lucchetto:
+                if not self._voci:
+                    break
+                if self._processo is None or self._arreso:
+                    return
+            time.sleep(0.02)
+        time.sleep(CUSCINO + 0.03)
+
+    def ferma(self):
+        self._stop.set()
+        with self._lucchetto:
+            self._voluto = False
+        thread, self._thread = self._thread, None
+        if thread is not None and thread is not threading.current_thread():
+            thread.join(timeout=2.0)
+        self._chiudi_processo()
+        with self._lucchetto:
+            self._voci = []
+
     # ---------------------------------------------------------- suonare
 
     def suona(self, nome):
-        """Aggiunge una voce. Non scarta mai, salvo troppe insieme."""
+        """Mette una voce in coda. Non scarta, salvo casi da contare."""
+        self._conti["chiesti"] += 1
         campioni = self._carica(nome)
         if not campioni:
+            self._conti["mancanti"] += 1
             return False
         with self._lucchetto:
-            if self._processo is None or self._processo.poll() is not None:
+            if not self._voluto or self._arreso:
                 return False
-            # Il tetto non e' per la CPU: e' che sommare dieci onde quadre a
-            # volume pieno satura e basta, e si sente peggio di otto.
             if len(self._voci) >= VOCI_MASSIME:
                 self._voci.pop(0)
-            self._voci.append([campioni, 0])
+                self._conti["scartati"] += 1
+            self._voci.append([campioni, 0, time.monotonic(), nome])
         return True
 
-    def _ciclo(self):
-        """Scrive un blocco per volta, in tempo reale.
+    # --------------------------------------------------------- mixaggio
 
-        La scrittura sul tubo e' bloccante ed e' un pregio: quando il
-        riproduttore e' pieno ci ferma, e cosi' il ritmo lo detta la scheda
-        audio invece di un orologio nostro che andrebbe alla deriva.
+    def _prossimo_blocco(self):
+        """I prossimi BLOCCO campioni, gia' in byte.
+
+        Tre strade, dalla piu' frequente alla piu' rara: niente da suonare —
+        silenzio gia' pronto; una voce sola — una fetta del suo pacco, cioe'
+        una copia di memoria; piu' voci — si sommano davvero.
         """
-        silenzio = b"\x00\x00" * BLOCCO
+        with self._lucchetto:
+            vive = []
+            attive = []
+            for voce in self._voci:
+                campioni, posizione, _nato, nome = voce
+                resto = len(campioni) - posizione
+                quanti = BLOCCO if resto > BLOCCO else resto
+                if posizione == 0:
+                    self._conti["resi"] += 1
+                attive.append((nome, campioni, posizione, quanti))
+                voce[1] = posizione + quanti
+                if voce[1] < len(campioni):
+                    vive.append(voce)
+            self._voci = vive
+        if not attive:
+            return self._silenzio
+        if len(attive) == 1:
+            nome, _campioni, posizione, quanti = attive[0]
+            pacco = self._pacchi.get(nome)
+            if pacco is not None:
+                pezzo = pacco[posizione * 2:(posizione + quanti) * 2]
+                if quanti < BLOCCO:
+                    pezzo += b"\x00\x00" * (BLOCCO - quanti)
+                return pezzo
+        somma = [0] * BLOCCO
+        for _nome, campioni, posizione, quanti in attive:
+            for i in range(quanti):
+                somma[i] += campioni[posizione + i]
+        # Invece di tagliare i picchi — che e' distorsione, e su due mattoni
+        # insieme si sente — si abbassa il blocco quel tanto che basta a
+        # farlo stare dentro. Dura 23 ms e nessuno lo percepisce come un calo
+        # di volume, ma nessun campione viene stroncato.
+        picco = max(max(somma), -min(somma))
         guadagno = self._volume
-        # Il freno. Scrivere su un tubo pieno blocca, e in produzione basta
-        # quello: e' la scheda audio a dare il ritmo. Ma se il riproduttore
-        # consuma piu' in fretta del tempo reale — o muore lasciando il tubo
-        # scrivibile — questo ciclo girerebbe a vuoto bruciando CPU, che su un
-        # Pi vuol dire righe chiare sul pannello. Qui il tempo lo si conta
-        # anche da soli, e se siamo avanti si aspetta.
+        if picco * guadagno > 32767:
+            guadagno = 32767.0 / picco
+        return struct.pack("<%dh" % BLOCCO, *[int(v * guadagno) for v in somma])
+
+    # ------------------------------------------------------------ ciclo
+
+    def _butta_vecchie(self):
+        """Le voci che hanno aspettato troppo mentre la scheda era occupata."""
+        limite = time.monotonic() - ETA_MASSIMA
+        with self._lucchetto:
+            tenute = [v for v in self._voci if v[2] >= limite]
+            self._conti["scaduti"] += len(self._voci) - len(tenute)
+            self._voci = tenute
+
+    def _riapri(self, motivo):
+        """Il riproduttore e' morto: si riprova finche' la scheda non torna.
+
+        E' la riga di codice che questa versione esiste per scrivere. La
+        scheda del DMD e' una sola: se quando parte la partita sta finendo un
+        avviso di un servizio, `aplay` non riesce ad aprirla e muore. Prima
+        questo spegneva il mixer per tutta la partita, in silenzio. Adesso si
+        aspetta che l'avviso finisca e si riprende.
+        """
+        self._conti["morti"] += 1
+        if motivo:
+            self.errore = motivo
+        self._chiudi_processo()
+        self._butta_vecchie()
+        scadenza = time.monotonic() + RIAVVIO_LIMITE
+        tentativo = 0
+        while not self._stop.is_set() and time.monotonic() < scadenza:
+            attesa = RIAVVIO_ATTESA if tentativo < 10 else RIAVVIO_LENTO
+            if self._stop.wait(attesa):
+                return False
+            tentativo += 1
+            ok, _motivo = self._apri()
+            if ok:
+                # Il riproduttore c'e'; se la scheda e' ancora occupata muore
+                # di nuovo e si torna qui. Le voci ferme da troppo si buttano
+                # adesso, non quando riprenderanno a suonare in ritardo.
+                self._conti["riavvii"] += 1
+                self._butta_vecchie()
+                return True
+        with self._lucchetto:
+            self._arreso = True
+        if not self.errore:
+            self.errore = "la scheda audio non si e' liberata"
+        print("[suoni] mixer arreso: %s" % self.errore)
+        return False
+
+    def _ciclo(self):
+        """Scrive un blocco per volta, tenendosi CUSCINO davanti al presente.
+
+        Il ritmo lo detta il nostro orologio, non la scrittura sul tubo: se ci
+        limitassimo a bloccarci quando il tubo e' pieno, il cuscino sarebbe
+        quello che il tubo si trova ad avere, cioe' nessuno all'inizio. Qui si
+        scrive finche' non si e' CUSCINO avanti, poi si aspetta. La scrittura
+        bloccante resta come secondo freno per la deriva fra il nostro
+        orologio e il quarzo della scheda.
+        """
         avvio = time.monotonic()
         scritti = 0
         while not self._stop.is_set():
             avanti = (avvio + scritti / float(FREQ_EFFETTI)) - time.monotonic()
-            if avanti > 0.05:
-                time.sleep(avanti - 0.02)
+            if avanti > CUSCINO:
+                time.sleep(avanti - CUSCINO)
             with self._lucchetto:
                 processo = self._processo
-                if processo is None or processo.poll() is not None:
+            morto = processo is None or processo.poll() is not None
+            blocco = None if morto else self._prossimo_blocco()
+            if not morto:
+                try:
+                    processo.stdin.write(blocco)
+                    processo.stdin.flush()
+                except Exception as exc:
+                    morto = True
+                    self.errore = str(exc)
+            if morto:
+                if self._stop.is_set():
                     break
-                vive = []
-                somma = [0] * BLOCCO
-                for voce in self._voci:
-                    campioni, posizione = voce
-                    resto = len(campioni) - posizione
-                    quanti = BLOCCO if resto > BLOCCO else resto
-                    for i in range(quanti):
-                        somma[i] += campioni[posizione + i]
-                    voce[1] = posizione + quanti
-                    if voce[1] < len(campioni):
-                        vive.append(voce)
-                self._voci = vive
-                niente = not vive and not any(somma)
-            if niente:
-                blocco = silenzio
-            else:
-                pezzi = []
-                for v in somma:
-                    v = int(v * guadagno)
-                    # Somma di piu' voci: si taglia agli estremi invece di
-                    # far girare il numero, che produrrebbe uno schiocco.
-                    if v > 32767:
-                        v = 32767
-                    elif v < -32768:
-                        v = -32768
-                    pezzi.append(v)
-                blocco = struct.pack("<%dh" % BLOCCO, *pezzi)
-            try:
-                processo.stdin.write(blocco)
-                processo.stdin.flush()
-            except Exception:
-                break
+                if not self._riapri(self.errore):
+                    break
+                avvio = time.monotonic()
+                scritti = 0
+                continue
             scritti += BLOCCO
+
+    # ------------------------------------------------------------ stato
+
+    def stato(self):
+        """I numeri che mancavano. Li mostra la pagina Giochi."""
+        with self._lucchetto:
+            voci = len(self._voci)
+            voluto, arreso, device = self._voluto, self._arreso, self._device
+        dati = dict(self._conti)
+        dati.update({"acceso": self.acceso(), "voluto": voluto,
+                     "arreso": arreso, "device": device, "voci": voci,
+                     "cuscino": CUSCINO, "errore": self.errore,
+                     "righe": list(self._righe)[-5:]})
+        # Quanti dei suoni chiesti sono davvero usciti. E' il numero che la
+        # domanda "ne salta troppi" chiedeva da sempre.
+        chiesti = dati["chiesti"]
+        dati["resa"] = round(100.0 * dati["resi"] / chiesti, 1) if chiesti else 100.0
+        return dati
+
+    def azzera(self):
+        for chiave in self._conti:
+            self._conti[chiave] = 0
+        self._righe.clear()
 
 
 _mixer = Mixer()
@@ -747,11 +1031,15 @@ def effetti_avvia(cfg):
     device = uscita_giochi(cfg)
     if not device:
         return False
+    _mixer.azzera()
     ok, _motivo = _mixer.avvia(device, volume_giochi(cfg))
     return ok
 
 
-def effetti_ferma():
+def effetti_ferma(svuota=True):
+    """Chiude il mixer. Per difetto aspetta che gli ultimi suoni siano usciti."""
+    if svuota:
+        _mixer.svuota()
     _mixer.ferma()
 
 
@@ -759,17 +1047,27 @@ def effetti_accesi():
     return _mixer.acceso()
 
 
+def effetti_stato():
+    return _mixer.stato()
+
+
 def suona_effetto(cfg, nome):
     """Un effetto dei giochi. Silenzioso se gli effetti sono spenti.
 
-    Durante una partita passa dal mixer, che li somma invece di scartarli.
+    Durante una partita passa **sempre** dal mixer, anche nei momenti in cui
+    il riproduttore e' morto e si sta riaprendo: la voce si mette in coda e
+    parte appena la scheda torna, o scade se ha aspettato troppo. La vecchia
+    versione qui ripiegava sulla strada del processo per volta appena il
+    mixer non risultava acceso, ed e' li' che i suoni sparivano a grappoli:
+    quella strada ne suona uno e scarta tutti quelli che si sovrappongono.
+
     Fuori da una partita — il suono del primato quando la sessione si sta
-    gia' chiudendo — resta la strada del processo per volta, che li' va
-    benissimo: e' un suono solo e nessuno lo sta accavallando.
+    gia' chiudendo — la strada del processo per volta va benissimo: e' un
+    suono solo e nessuno lo sta accavallando.
     """
     if not _conf(cfg).get("giochi", True):
         return False
-    if _mixer.acceso():
+    if _mixer.in_servizio():
         return _mixer.suona(nome)
     percorso = effetto(nome)
     if not percorso:

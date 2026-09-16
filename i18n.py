@@ -2416,6 +2416,36 @@ STRINGS = {
         "servono per provare senza alzarsi.",
         "Play from the cabinet keyboard or the pad; these buttons are for "
         "trying it out without getting up."),
+    "settings.update.cache": (
+        "La risposta di GitHub puo' essere vecchia fino a cinque minuti: "
+        "subito dopo una pubblicazione, \u00absei aggiornato\u00bb non vuol "
+        "ancora dire niente.",
+        "GitHub\u2019s answer can be up to five minutes stale: right after a "
+        "release, \u201cyou are up to date\u201d does not mean anything yet."),
+    "giochi.audio": ("Audio della partita", "Game audio"),
+    "giochi.audio.hint": (
+        "Quanti effetti ha chiesto il gioco e quanti ne sono usciti davvero "
+        "dalla scheda. Se qui i due numeri coincidono e a orecchio manca "
+        "qualcosa, il problema non e' piu' nel DMD.",
+        "How many effects the game asked for and how many actually left the "
+        "sound card. If these two match and something still sounds missing, "
+        "the problem is no longer in the DMD."),
+    "giochi.audio.chiesti": ("Chiesti dal gioco", "Asked by the game"),
+    "giochi.audio.resi": ("Usciti davvero", "Actually played"),
+    "giochi.audio.resa": ("Resa", "Delivered"),
+    "giochi.audio.scaduti": ("Scaduti in attesa", "Expired waiting"),
+    "giochi.audio.scartati": ("Buttati per pieno", "Dropped, queue full"),
+    "giochi.audio.morti": ("Cadute del riproduttore", "Player crashes"),
+    "giochi.audio.riavvii": ("Riaperture della scheda", "Card reopenings"),
+    "giochi.audio.vuoti": ("Buchi della scheda (underrun)",
+                           "Card gaps (underrun)"),
+    "giochi.audio.cuscino": ("Cuscino", "Cushion"),
+    "giochi.audio.spento": (
+        "Il mixer non e' aperto: la partita e' muta.",
+        "The mixer is not open: this game is silent."),
+    "giochi.audio.arreso": (
+        "La scheda audio non si e' liberata e il mixer ha smesso di provare.",
+        "The sound card never freed up and the mixer stopped trying."),
     "giochi.controlli": ("Tastiera e joystick", "Keyboard and joystick"),
     "giochi.keyboard": ("Accetta comandi dalla tastiera",
                         "Accept commands from the keyboard"),

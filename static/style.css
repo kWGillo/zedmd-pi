@@ -541,3 +541,20 @@ nav.schede a.on {
 /* Verde quando il servizio sta lavorando adesso, spento quando qualcosa lo
    ferma: da lontano si legge prima il colore del testo. */
 .badge.on { background: rgba(40,220,70,.14); border-color: #1f7a30; color: #7fe58f; }
+
+/* I contatori del mixer nella pagina Giochi. Griglia che si adatta invece di
+   colonne fisse: su iPhone le colonne fisse sono esattamente il modo in cui
+   una scheda esce dal margine destro. `minmax(0, 1fr)` e non `1fr` perche'
+   una colonna di griglia, per difetto, non si stringe sotto il contenuto. */
+ul.conti {
+  list-style: none; margin: 12px 0 0; padding: 0;
+  display: grid; gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+}
+ul.conti li {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 10px; min-width: 0;
+  padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px;
+}
+ul.conti li span { color: var(--muted); font-size: 12px; min-width: 0; }
+ul.conti li b { font-variant-numeric: tabular-nums; white-space: nowrap; }

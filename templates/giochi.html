@@ -48,6 +48,24 @@
     </form>
   </p>
 </section>
+
+<section class="card">
+  <h2>{{ t('giochi.audio') }}</h2>
+  <p class="hint">{{ t('giochi.audio.hint') }}</p>
+  <p class="status" id="audio_avviso"></p>
+  <ul class="conti" id="audio_conti">
+    <li><span>{{ t('giochi.audio.chiesti') }}</span><b id="a_chiesti">–</b></li>
+    <li><span>{{ t('giochi.audio.resi') }}</span><b id="a_resi">–</b></li>
+    <li><span>{{ t('giochi.audio.resa') }}</span><b id="a_resa">–</b></li>
+    <li><span>{{ t('giochi.audio.scaduti') }}</span><b id="a_scaduti">–</b></li>
+    <li><span>{{ t('giochi.audio.scartati') }}</span><b id="a_scartati">–</b></li>
+    <li><span>{{ t('giochi.audio.vuoti') }}</span><b id="a_vuoti">–</b></li>
+    <li><span>{{ t('giochi.audio.morti') }}</span><b id="a_morti">–</b></li>
+    <li><span>{{ t('giochi.audio.riavvii') }}</span><b id="a_riavvii">–</b></li>
+    <li><span>{{ t('giochi.audio.cuscino') }}</span><b id="a_cuscino">–</b></li>
+  </ul>
+  <p class="hint" id="audio_errore"></p>
+</section>
 {% endif %}
 
 <section class="card">
@@ -182,6 +200,35 @@
     })(imparanti[k]);
   }
 
+  // I contatori del mixer. Esistono per una ragione precisa: "ne salta
+  // troppi" non si puo' verificare a orecchio, e prima non c'era un solo
+  // numero da guardare.
+  function testo(id, valore) {
+    var nodo = document.getElementById(id);
+    if (nodo) { nodo.textContent = valore; }
+  }
+
+  function mostraAudio(a) {
+    if (!a || typeof a.chiesti === "undefined") { return; }
+    testo("a_chiesti", a.chiesti);
+    testo("a_resi", a.resi);
+    testo("a_resa", a.resa + "%");
+    testo("a_scaduti", a.scaduti);
+    testo("a_scartati", a.scartati);
+    testo("a_vuoti", a.vuoti);
+    testo("a_morti", a.morti);
+    testo("a_riavvii", a.riavvii);
+    testo("a_cuscino", Math.round((a.cuscino || 0) * 1000) + " ms");
+    var avviso = document.getElementById("audio_avviso");
+    if (avviso) {
+      if (a.arreso) { avviso.textContent = {{ t('giochi.audio.arreso') | tojson }}; }
+      else if (!a.acceso) { avviso.textContent = {{ t('giochi.audio.spento') | tojson }}; }
+      else { avviso.textContent = ""; }
+    }
+    var errore = document.getElementById("audio_errore");
+    if (errore) { errore.textContent = a.errore || ""; }
+  }
+
   var stato = document.getElementById("stato");
   if (stato) {
     setInterval(function () {
@@ -190,6 +237,7 @@
         .then(function (s) {
           if (!s.session) { return; }
           stato.textContent = s.testo || stato.textContent;
+          mostraAudio(s.audio || {});
         })
         .catch(function () {});
     }, 2000);

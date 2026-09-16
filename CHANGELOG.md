@@ -2,6 +2,74 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [8.2]
+
+- **I suoni di Breakout, rifatti dalla parte che li faceva sparire.** La
+  richiesta era di ripartire da capo. Il punto di partenza però non poteva
+  essere il gioco: misurando una partita vera, la logica di Breakout chiede i
+  suoi suoni, e li chiede una volta sola. Sparivano **dopo**, lungo la strada
+  fra il gioco e l'altoparlante — e quella strada aveva tre buche.
+
+- **Il riproduttore poteva morire senza che nessuno lo sapesse.** È la buca
+  grossa, ed è anche la risposta alla domanda rimasta aperta per settimane:
+  *perché solo Breakout?* La scheda audio del DMD è una sola. Se quando si
+  preme Start c'è un avviso di un servizio che la sta usando, `aplay` parte,
+  non riesce ad aprirla ed esce subito. Ma `Popen` riesce sempre, quindi
+  `avvia()` rispondeva «tutto bene», e il motivo vero — *Device or resource
+  busy* — finiva in `/dev/null`, perché lo stderr veniva buttato via.
+
+  Da quel momento, e per tutta la partita, ogni effetto ripiegava sulla
+  vecchia strada del processo per volta: ne suona uno e **scarta tutti quelli
+  che si sovrappongono**. Breakout i suoi suoni li fa a grappoli — muro,
+  mattone e racchetta possono capitare dentro lo stesso frame, perché la palla
+  avanza a micro-passi — e ne perdeva a manciate. Invaders, che li fa
+  spaziati, quasi no. È esattamente la differenza che si sentiva.
+
+  Adesso la morte del riproduttore si vede, si conta e **si ripara**: la
+  scheda si riapre finché non torna libera, per un minuto, e i suoni chiesti
+  nel frattempo aspettano in coda invece di prendere la strada che li
+  scartava. Quelli che aspettano più di mezzo secondo si buttano: una
+  racchetta che arriva in ritardo non è un suono recuperato, è un suono
+  sbagliato.
+
+- **Il cuscino era di venti millesimi di secondo.** Fra il mixer e
+  l'altoparlante c'è una coda di audio già scritto, ed è l'unica difesa contro
+  un ritardo del thread: quando la coda finisce, la scheda mette silenzio. In
+  ALSA si chiama underrun; per chi gioca è «il suono è saltato». La misura
+  diceva 20–60 ms. Sul Raspberry il GIL è uno solo, Pillow lo tiene per tutta
+  la durata di ogni operazione e il pannello ridisegna 256×64 trenta volte al
+  secondo: una pausa di cinquanta millesimi non è un caso di scuola.
+
+  Il cuscino adesso è dichiarato e vale **120 ms** — misurati al banco, 133 ms
+  fra il mattone colpito e il suono. Si paga un ritardo che non si distingue
+  da «subito» (una cassa Bluetooth ne aggiunge di più) e si compra un audio
+  che una pausa di ottanta millesimi non buca più.
+
+- **Il tetto di otto voci buttava la più vecchia.** Otto voci insieme vogliono
+  dire otto suoni dentro 55 ms, cioè 145 al secondo: non succede mai. Quel
+  tetto non ha mai protetto niente e poteva solo far sparire un suono. Adesso
+  è 24 ed è un freno di sicurezza, non una regola di funzionamento. Quando più
+  suoni coincidono il blocco si abbassa quel tanto che basta invece di
+  tagliare i picchi: cinque mattoni insieme si sentono come cinque mattoni e
+  non come uno schiocco.
+
+- **E l'ultimo suono della partita esce davvero.** Il primato suona mentre la
+  partita si sta già chiudendo, e la riga dopo spegneva il riproduttore. Con
+  un cuscino davanti, «la riga dopo» vuol dire *sempre prima che si senta*.
+  Adesso si aspetta che la coda sia uscita.
+
+- **I numeri, finalmente.** Durante la partita la pagina Giochi mostra quanti
+  effetti ha chiesto il gioco, quanti ne sono usciti davvero, la resa in
+  percentuale, i buchi della scheda, le cadute e le riaperture del
+  riproduttore, e le sue ultime righe di errore. «Ne salta troppi» adesso è
+  una domanda con una risposta.
+
+- **Due correzioni a cose che avevo scritto e che erano false.** Nella guida
+  alla pubblicazione c'era scritto che l'URL lungo di `raw.githubusercontent`
+  (`refs/heads/main`) salta la cache: misurato, **rispondono entrambi**
+  `cache-control: max-age=300`. E accanto al pulsante *Controlla ora* adesso
+  c'è scritto che la risposta di GitHub può essere vecchia di cinque minuti.
+
 ## [8.1]
 
 - **La pagina Servizi diventa tre schede: Servizi · Timing · Suoni.** Non tre

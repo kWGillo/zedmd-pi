@@ -29,6 +29,7 @@
   <div class="actions">
     <form method="post" action="{{ url_for('api_update_check') }}">
       <button type="submit" class="ghost">{{ t('settings.update.checknow') }}</button>
+      <span class="hint">{{ t('settings.update.cache') }}</span>
     </form>
     {% if update.available %}
     <form method="post" action="{{ url_for('api_update_install') }}">
