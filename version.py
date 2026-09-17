@@ -1960,6 +1960,49 @@ Storico:
        la macchina di chi lo usa: un pannello su una mensola e un controller in
        mano. Adesso dicono il pad, o la tastiera collegata al DMD, o
        semplicemente il tasto che vuoi usare.
+  9.1  **I suoni dei giochi: due difetti, nessuno dei due dentro i giochi.**
+       Per settimane la caccia e' stata fatta dentro la logica dei giochi --
+       Breakout e' stato riscritto da capo -- e non era li'. Lo ha dimostrato
+       una registrazione byte per byte di quello che il DMD manda alla scheda
+       durante una partita vera: **gli effetti c'erano tutti.** Venticinque
+       sbuffi in 129 secondi, i contatori a 26 chiesti e 26 resi, zero
+       underrun, e fra un suono e l'altro zero digitale perfetto.
+       *Primo difetto: il volume.* I giochi usavano il volume generale, che si
+       regola pensando agli avvisi che il pannello da' da solo, magari di
+       sera: sul DMD dove il problema si vedeva era a 0,05. Nella
+       registrazione ogni sbuffo aveva il picco **esattamente** 0,05 volte
+       quello del suo file -- 800 su 32767 dove il file ne ha 16000 -- senza
+       una sola eccezione. Intanto Doom, il Game Boy e la musica AirPlay si
+       sentivano benissimo: scrivono sulla scheda per conto loro, a fondo
+       scala, cioe' 26 dB piu' forte. Ora i giochi hanno la loro manopola in
+       Impostazioni, predefinita a 0,90, e chi aggiorna non eredita il volume
+       degli avvisi. Un effetto dura cinquanta millesimi e l'orecchio integra
+       il volume su due decimi di secondo: un suono cosi' corto ha bisogno di
+       ampiezza per pareggiare uno lungo.
+       *Secondo difetto: il silenzio.* Fra un effetto e l'altro il mixer
+       scriveva zero digitale esatto -- il 98% dei campioni della
+       registrazione. Molti convertitori USB si automutano su zero e riaprono
+       l'uscita con una rampa di qualche decina di millesimi per non fare il
+       "plop": un effetto da settanta millesimi ci sparisce dentro quasi
+       intero. Da qui il sintomo che sembrava impossibile, «quando lo sento, lo
+       sento bene», e la differenza fra Snake -- che suona ogni cinque secondi
+       e ne perdeva nove su dieci -- e Breakout, che suona a raffica e ne
+       salvava la maggior parte. La prova che lo ha inchiodato: lo stesso beep,
+       dieci volte, con in mezzo silenzio digitale oppure un fruscio
+       inudibile; col silenzio non si sentiva, col fruscio si'. Adesso durante
+       una partita il mixer non scrive mai zero, ma rumore bianco a -60 dBFS:
+       sotto il fondo di qualunque stanza, e abbastanza perche' la scheda non
+       vada a dormire. Si spegne con `audio.sottofondo` a zero.
+       *E due numeri che mentivano.* La pagina diceva `buffer_ms: 544` dove il
+       cuscino vero e' 250: si divideva il `buffer_size` della scheda -- in
+       fotogrammi a 48000 -- per 22050. Con `plughw` aplay stampa un blocco
+       per ogni anello della catena, e tenendone solo quaranta righe si
+       perdeva proprio il primo, l'unico che parla del flusso che scriviamo
+       noi. Quel numero sbagliato rassicurava nel momento peggiore, mentre si
+       cercava un difetto di cuscino. E quattro righe di riepilogo finivano
+       nel cestino degli errori: l'ultima diventava la riga rossa della
+       pagina, e un flusso negoziato alla perfezione si presentava come un
+       guasto.
 """
 
-__version__ = "9.0"
+__version__ = "9.1"

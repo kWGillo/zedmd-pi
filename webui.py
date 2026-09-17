@@ -2031,6 +2031,11 @@ def create_app(runtime):
                                           int(request.form.get("volume", 70)) / 100.0))
         except ValueError:
             conf["volume"] = 0.7
+        try:
+            conf["volume_giochi"] = max(0.0, min(
+                1.0, int(request.form.get("volume_giochi", 90)) / 100.0))
+        except ValueError:
+            conf["volume_giochi"] = 0.9
         dmdconf.save()
         # Se l'uscita musicale e' accesa, shairport-sync deve seguire la
         # scheda scelta qui. Senza questa riga la cambiavi in Impostazioni e

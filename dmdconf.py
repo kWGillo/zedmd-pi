@@ -796,6 +796,26 @@ DEFAULTS = {
         # per sceglierne una in particolare.
         "device": "",
         "volume": 0.7,
+        # Il volume di una partita, che e' una cosa diversa dal volume del
+        # DMD e per mesi non lo e' stata. `volume` lo si regola pensando agli
+        # avvisi: il pannello parla da solo, magari di sera, e chi lo tiene
+        # in casa lo mette basso — sul DMD di chi scrive era a 0,05. Ma gli
+        # effetti di un gioco non sono un avviso: sono la risposta a un tasto
+        # che hai appena premuto, durano cinquanta millesimi, e l'orecchio
+        # integra il volume su due decimi di secondo — un suono cosi' corto
+        # si sente parecchio piu' piano di uno lungo con la stessa ampiezza.
+        # A 0,05 sparivano, mentre Doom e il Game Boy — che scrivono sulla
+        # scheda per conto loro, a fondo scala — si sentivano benissimo. Non
+        # era un difetto del mixer: era che i giochi usavano il volume di
+        # qualcun altro.
+        "volume_giochi": 0.9,
+        # L'ampiezza del sottofondo che tiene sveglia la scheda durante una
+        # partita. Vedi `suoni.Mixer._blocco_muto`: molti convertitori USB si
+        # automutano quando ricevono zero digitale esatto, e la rampa di
+        # risveglio si mangia un effetto corto intero. 32 su 32767 sono
+        # −60 dBFS, cioe' sotto il fruscio di qualunque stanza. Zero disattiva
+        # il sottofondo e riporta il comportamento di prima.
+        "sottofondo": 32,
         # Il file di avviso per ogni servizio, come percorso dentro la
         # libreria media. Vuoto = quel servizio resta muto.
         "servizi": {},

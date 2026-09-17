@@ -152,6 +152,20 @@
     </div>
     <p class="hint">{{ t('audio.volume.hint') }}</p>
 
+    {# Manopola a parte per i giochi. Fino alla 9.0 ce n'era una sola, e su un
+       pannello con il volume a 5 — scelto per non farsi svegliare dagli
+       avvisi — gli effetti dei giochi finivano 26 dB sotto Doom, che la
+       scheda se la prende per conto suo e scrive a fondo scala. #}
+    <label for="volume_giochi">{{ t('audio.volume.giochi') }}</label>
+    <div class="color-row">
+      <input type="range" id="volume_giochi" name="volume_giochi"
+             min="0" max="100" step="5"
+             value="{{ (cfg.audio.volume_giochi * 100) | round | int }}"
+             oninput="this.nextElementSibling.value = this.value + '%'">
+      <output>{{ (cfg.audio.volume_giochi * 100) | round | int }}%</output>
+    </div>
+    <p class="hint">{{ t('audio.volume.giochi.hint') }}</p>
+
     {# Il livello hardware della scheda. Esiste per un guasto vero: la
        chiavetta si era presentata a −20 dB, un decimo dell'ampiezza, e quel
        numero penalizzava musica, avvisi e giochi insieme senza che nessuna

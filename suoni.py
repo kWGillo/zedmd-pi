@@ -44,6 +44,7 @@ una voce a parte che si puo' spegnere.
 
 import collections
 import os
+import random
 import re
 import shutil
 import struct
@@ -284,14 +285,41 @@ def volume(cfg):
 
 
 def volume_giochi(cfg):
-    """Il volume di una partita, che la notte non tocca.
+    """Il volume di una partita, che ha una manopola sua.
 
     Una partita e' una cosa che stai facendo con le mani, adesso: non e' il
     DMD che parla da solo. Zittirla sarebbe come spegnere il pannello a chi
     ci sta giocando davanti — ed e' esattamente l'eccezione che lo sleep mode
-    fa gia' per chi tiene il pannello occupato.
+    fa gia' per chi tiene il pannello occupato. Per questo la notte non la
+    tocca.
+
+    **E per questo non e' piu' `volume`.** Fino alla 9.0 questa funzione
+    restituiva il volume generale, e sembrava ovvio: il volume e' il volume.
+    Non lo era. Chi tiene un pannello in casa abbassa il volume pensando agli
+    avvisi — sul DMD di chi scrive era a 0,05, cioe' 26 dB sotto — e quel
+    numero finiva moltiplicato dentro ogni effetto dei giochi. Intanto Doom e
+    il Game Boy, che la scheda se la prendono per conto loro e scrivono a
+    fondo scala, si sentivano benissimo: erano 26 dB piu' forti dei nostri
+    effetti, e nessuno lo aveva mai messo in fila.
     """
-    return volume_impostato(cfg)
+    try:
+        valore = _conf(cfg).get("volume_giochi")
+        if valore is None:
+            # Configurazione vecchia, scritta prima che questa voce esistesse:
+            # meglio il predefinito nuovo che il volume degli avvisi, che e'
+            # proprio il numero da cui ci si sta staccando.
+            return 0.9
+        return max(0.0, min(1.0, float(valore)))
+    except (TypeError, ValueError):
+        return 0.9
+
+
+def sottofondo(cfg):
+    """Quanto vale il sottofondo che tiene sveglia la scheda. 0 = spento."""
+    try:
+        return max(0, min(1000, int(_conf(cfg).get("sottofondo", 32))))
+    except (TypeError, ValueError):
+        return 32
 
 
 # ---------------------------------------------------------------- catalogo
@@ -631,6 +659,13 @@ TUBO_SECONDI = TUBO_EFFETTI / 2.0 / FREQ_EFFETTI
 # peggiore resta poco sopra i duecento millesimi, che e' il prezzo giusto.
 CUSCINO_ANELLO = max(0.08, CUSCINO)
 
+# Quanti blocchi diversi di fruscio si tengono pronti per i momenti in cui non
+# c'e' niente da suonare. Vedi `Mixer._prepara_muto`: uno solo, ripetuto
+# quarantatre volte al secondo, non sarebbe rumore ma una nota a 43 Hz.
+# Trentadue blocchi fanno tre quarti di secondo di rumore che non si ripete,
+# e costano trentadue kilobyte.
+BLOCCHI_MUTI = 32
+
 # Una voce che ha aspettato piu' di questo mentre il riproduttore era giu'
 # non si suona piu': un rumore di racchetta che arriva mezzo secondo dopo il
 # colpo non e' un suono recuperato, e' un suono sbagliato.
@@ -662,7 +697,12 @@ _SETUP = ("plug pcm", "hardware pcm", "its setup is", "stream", "access",
           "buffer_time", "periods", "tick_time", "appl_ptr", "avail_min",
           "start_threshold", "stop_threshold", "silence", "period_step",
           "sleep_min", "boundary", "rate_num", "rate_den", "info :",
-          "playing raw data")
+          "playing raw data",
+          # Aggiunte dopo aver letto un riepilogo vero dal DMD: queste quattro
+          # righe cadevano nel cestino degli errori, e siccome l'ultima riga
+          # non riconosciuta diventa `self.errore`, un flusso negoziato
+          # perfettamente si presentava sulla pagina come un guasto.
+          "slave:", "tstamp_mode", "tstamp_type", "period_event", "hw_ptr")
 
 
 def _indice_scheda(device):
@@ -782,8 +822,16 @@ class Mixer:
         self._voluto = False     # c'e' una partita che vuole il mixer
         self._arreso = False     # la scheda non torna: si e' smesso di provare
         self._silenzio = b"\x00\x00" * BLOCCO
+        self._sottofondo = 0     # ampiezza del fruscio che tiene sveglia
+        self._muti = [self._silenzio]
+        self._muto = 0
         self._righe = collections.deque(maxlen=RIGHE_TENUTE)
-        self._setup = collections.deque(maxlen=40)
+        # Quaranta righe erano poche, e si e' visto solo leggendo un riepilogo
+        # vero: con `plughw` aplay stampa un blocco per ogni anello della
+        # catena -- il nostro a 22050, la conversione, la scheda -- e sessanta
+        # righe in tutto. Tenendone quaranta si perdeva **il primo**, cioe'
+        # l'unico che parla del flusso che scriviamo noi.
+        self._setup = collections.deque(maxlen=160)
         self._registro = None
         self._freq_scheda = None
         self.errore = ""
@@ -912,8 +960,15 @@ class Mixer:
             except Exception:
                 pass
 
-    def avvia(self, device, vol):
-        """Apre il riproduttore per una partita. Restituisce (ok, motivo)."""
+    def avvia(self, device, vol, fondo=0):
+        """Apre il riproduttore per una partita. Restituisce (ok, motivo).
+
+        `fondo` e' l'ampiezza del fruscio da scrivere quando non c'e' niente
+        da suonare: vedi `_prepara_muto`. Zero lo disattiva, ed e' il
+        predefinito perche' chi apre il mixer da una prova non vuole rumore
+        dentro la misura.
+        """
+        self._prepara_muto(fondo)
         with self._lucchetto:
             if self._processo is not None and self._processo.poll() is None:
                 return True, ""
@@ -1049,7 +1104,7 @@ class Mixer:
                     vive.append(voce)
             self._voci = vive
         if not attive:
-            return self._silenzio
+            return self._blocco_muto()
         if len(attive) == 1:
             nome, _campioni, posizione, quanti = attive[0]
             pacco = self._pacchi.get(nome)
@@ -1073,6 +1128,56 @@ class Mixer:
         return struct.pack("<%dh" % BLOCCO, *[int(v * guadagno) for v in somma])
 
     # ------------------------------------------------------------ ciclo
+
+    # ------------------------------------------------- il blocco "muto"
+
+    def _prepara_muto(self, ampiezza):
+        """Costruisce i blocchi da scrivere quando non c'e' niente da suonare.
+
+        Perche' non sono zeri
+        ---------------------
+        Questa e' la riga per cui la 9.1 esiste. Molti convertitori USB — il
+        nostro compreso — si **automutano** quando ricevono zero digitale
+        esatto, e al primo campione diverso da zero riaprono l'uscita con una
+        rampa di qualche decina di millesimi, per non fare il "plop". Un
+        effetto di gioco dura cinquanta o settanta millesimi: arriva mentre la
+        rampa e' ancora a meta' e sparisce quasi tutto. Se invece un altro
+        suono e' appena passato, la scheda e' sveglia e lo stesso effetto si
+        sente benissimo — ed e' esattamente il sintomo che si vedeva sul
+        campo: «quando lo sento, lo sento bene», e Snake, che suona ogni
+        cinque secondi, ne perdeva nove su dieci mentre Breakout, che suona a
+        raffica, ne salvava la maggior parte.
+
+        La prova che lo ha inchiodato: lo stesso identico beep, dieci volte di
+        fila, con in mezzo silenzio digitale oppure un fruscio inudibile. Col
+        silenzio non si sentiva; col fruscio si'. E lo conferma dal lato
+        opposto quello che sul DMD ha sempre funzionato — Doom, il Game Boy,
+        la musica AirPlay: nessuno dei tre scrive mai zero, perche' hanno
+        tutti un flusso continuo.
+
+        Il fruscio e' rumore bianco a ±`ampiezza` su 32767: col predefinito 32
+        sono −60 dBFS, sotto il rumore di fondo di qualunque stanza e sotto
+        quello dei componenti dell'amplificatore. Si tengono in memoria
+        BLOCCHI_MUTI blocchi diversi e si girano in tondo: un blocco solo
+        ripetuto quarantatre volte al secondo non sarebbe piu' rumore, sarebbe
+        una nota a 43 Hz.
+        """
+        self._sottofondo = max(0, int(ampiezza or 0))
+        self._muto = 0
+        if self._sottofondo <= 0:
+            self._muti = [self._silenzio]
+            return
+        casuale = random.Random(20260917)
+        self._muti = [
+            struct.pack("<%dh" % BLOCCO,
+                        *[casuale.randint(-self._sottofondo, self._sottofondo)
+                          for _ in range(BLOCCO)])
+            for _ in range(BLOCCHI_MUTI)]
+
+    def _blocco_muto(self):
+        blocco = self._muti[self._muto]
+        self._muto = (self._muto + 1) % len(self._muti)
+        return blocco
 
     def _butta_vecchie(self):
         """Le voci che hanno aspettato troppo mentre la scheda era occupata."""
@@ -1239,12 +1344,30 @@ class Mixer:
         lo dice a nessuno. Se ci ha dato molto meno, il cuscino su cui
         contiamo non esiste e i suoni saltano senza che nessuno capisca
         perche'. `aplay -v` lo stampa: `buffer_size: 5512`, in campioni.
+
+        **I campioni di chi.** Questa e' la correzione: `buffer_size` e' in
+        fotogrammi del flusso che lo dichiara, e con `plughw` i flussi sono
+        piu' di uno. Il DMD ne ha stampati tre -- il nostro a 22050, la
+        conversione a 48000, la scheda a 48000 stereo -- e dividere per
+        FREQ_EFFETTI il `buffer_size` della scheda dava 544 ms di cuscino
+        dove ce n'erano 250. Un numero sbagliato di piu' del doppio, nel
+        verso che rassicura: la pagina diceva che il cuscino era abbondante
+        proprio mentre si cercava un difetto di cuscino. Adesso si usa la
+        frequenza dichiarata nello stesso blocco, che nel riepilogo viene
+        qualche riga prima.
         """
+        frequenza = None
         for riga in self._setup:
-            if "buffer_size" in riga.lower():
+            basso = riga.lower()
+            if basso.strip().startswith("rate") and ":" in riga:
+                cifre = "".join(c for c in riga.split(":", 1)[1] if c.isdigit())
+                if cifre:
+                    frequenza = int(cifre)
+            elif "buffer_size" in basso:
                 cifre = "".join(c for c in riga if c.isdigit())
                 if cifre:
-                    return int(round(1000.0 * int(cifre) / FREQ_EFFETTI))
+                    return int(round(1000.0 * int(cifre)
+                                     / float(frequenza or FREQ_EFFETTI)))
         return None
 
     def azzera(self):
@@ -1267,7 +1390,7 @@ def effetti_avvia(cfg):
     if not device:
         return False
     _mixer.azzera()
-    ok, _motivo = _mixer.avvia(device, volume_giochi(cfg))
+    ok, _motivo = _mixer.avvia(device, volume_giochi(cfg), sottofondo(cfg))
     # Una levetta che non compare in nessuna pagina, e va bene cosi\': serve a
     # rispondere a "questi suoni sono usciti o no?" quando i contatori dicono
     # di si\' e l\'orecchio dice di no. Si accende a mano in configurazione,

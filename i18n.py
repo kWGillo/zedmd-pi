@@ -1710,6 +1710,21 @@ STRINGS = {
         "qui non tocca gli altri programmi.",
         "It applies to the sound the DMD produces, not to the system mixer: "
         "raising it here does not affect other programs."),
+    "audio.volume.giochi": ("Volume dei giochi (0-100)",
+                            "Games volume (0-100)"),
+    "audio.volume.giochi.hint": (
+        "Separato dal volume qui sopra, e non per capriccio: quello lo si "
+        "abbassa pensando agli avvisi, che il pannello dà da solo magari di "
+        "sera. Un effetto di un gioco invece risponde a un tasto appena "
+        "premuto e dura cinquanta millesimi — e un suono così corto si sente "
+        "molto più piano di uno lungo con la stessa ampiezza. Con un volume "
+        "solo per tutti e due, o gli avvisi urlano o i giochi spariscono.",
+        "Separate from the volume above, and not on a whim: that one gets "
+        "turned down because of the alerts the panel gives on its own, "
+        "possibly at night. A game effect answers a button you just pressed "
+        "and lasts fifty milliseconds — and a sound that short is heard far "
+        "more quietly than a long one of the same amplitude. With a single "
+        "volume for both, either the alerts shout or the games vanish."),
     "audio.livello": (
         "Livello hardware della scheda: %(valore)s%%.",
         "Card hardware level: %(valore)s%%."),

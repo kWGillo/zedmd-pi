@@ -2,6 +2,69 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.1]
+
+I suoni dei giochi che mancavano. Due difetti, e nessuno dei due stava dentro i
+giochi — dove invece la caccia è andata avanti per settimane, al punto che
+Breakout è stato riscritto da capo per colpa loro.
+
+A chiudere la questione è stata una registrazione byte per byte di quello che il
+DMD manda alla scheda durante una partita vera: **gli effetti c'erano tutti.**
+Venticinque sbuffi in 129 secondi, i contatori a 26 chiesti e 26 resi, zero
+underrun, e fra un suono e l'altro zero digitale perfetto. Da lì la domanda non
+è più stata «perché si perdono» ma «perché non si sentono», che è una domanda
+diversa e ha due risposte.
+
+### Il volume: i giochi usavano quello degli avvisi
+
+Il volume generale lo si abbassa pensando al pannello che parla da solo, magari
+di sera. Sul DMD dove il problema si vedeva era a 0,05. Nella registrazione ogni
+sbuffo aveva il picco **esattamente** 0,05 volte quello del suo file — 800 su
+32767 dove il file ne ha 16000 — senza una sola eccezione, e i tre valori fuori
+dal conto erano due suoni sovrapposti.
+
+Intanto Doom, il Game Boy e la musica AirPlay si sono sempre sentiti benissimo,
+ed è l'indizio che mancava: scrivono sulla scheda per conto loro, a fondo scala,
+cioè 26 dB più forte dei nostri effetti.
+
+Ora i giochi hanno la loro manopola in Impostazioni, predefinita a 0,90, e chi
+aggiorna non eredita il volume degli avvisi. Non è una comodità: un effetto dura
+cinquanta millesimi e l'orecchio integra il volume su due decimi di secondo, così
+un suono tanto corto si sente molto più piano di uno lungo con la stessa
+ampiezza. Con una manopola sola, o gli avvisi urlano o i giochi spariscono.
+
+### Il silenzio: la scheda si addormentava
+
+Fra un effetto e l'altro il mixer scriveva zero digitale esatto — il 98% dei
+campioni della registrazione. Molti convertitori USB si automutano su zero e
+riaprono l'uscita con una rampa di qualche decina di millesimi per non fare il
+«plop»: un effetto da settanta millesimi ci sparisce dentro quasi intero.
+
+È da qui che veniva il sintomo che sembrava impossibile — «quando lo sento, lo
+sento bene» — e la differenza fra Snake, che suona ogni cinque secondi e ne
+perdeva nove su dieci, e Breakout, che suona a raffica e ne salvava la maggior
+parte. La prova che lo ha inchiodato è stata la più semplice di tutte: lo stesso
+beep, dieci volte di fila, con in mezzo silenzio digitale oppure un fruscio
+inudibile. Col silenzio non si sentiva; col fruscio sì.
+
+Adesso, durante una partita, il mixer non scrive mai zero: scrive rumore bianco
+a −60 dBFS, sotto il fondo di qualunque stanza e abbastanza perché la scheda non
+vada a dormire. Si spegne con `audio.sottofondo` a zero.
+
+### E due numeri che mentivano
+
+La pagina Giochi diceva `buffer_ms: 544` dove il cuscino vero è 250: si divideva
+il `buffer_size` della scheda — in fotogrammi a 48000 — per 22050. Con `plughw`
+aplay stampa un blocco di riepilogo per ogni anello della catena, e tenendone
+solo quaranta righe si perdeva proprio il primo, l'unico che parla del flusso
+che scriviamo noi. Quel numero sbagliato rassicurava nel momento peggiore,
+mentre si cercava un difetto di cuscino.
+
+E quattro righe di riepilogo (`tstamp_mode`, `tstamp_type`, `period_event`,
+`hw_ptr`) finivano nel cestino degli errori: l'ultima diventava la riga rossa
+della pagina, e un flusso negoziato alla perfezione si presentava come un
+guasto.
+
 ## [9.0]
 
 Quattro cose sostanziali, tutte nate da una segnalazione di chi il DMD ce l'ha
