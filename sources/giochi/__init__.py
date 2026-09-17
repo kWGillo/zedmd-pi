@@ -29,8 +29,13 @@ from ..comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_X, BTN_EAST,
 from .base import ALTEZZA, CAMPO, LARGHEZZA, Gioco, centra, scrivi
 from .invasori import Invasori
 from .mattoni import Mattoni
+from .serpente import Serpente
 
-GIOCHI = (Mattoni, Invasori)
+# L'ordine e' quello del giro del tasto Start, ed e' anche l'ordine della
+# pagina: Breakout per primo perche' e' quello che il pannello 4:1 veste
+# meglio, e Snake in fondo perche' e' l'ultimo arrivato -- chi preme Start per
+# abitudine non deve trovarsi un gioco diverso da quello di ieri.
+GIOCHI = (Mattoni, Invasori, Serpente)
 NOMI = tuple(g.nome for g in GIOCHI)
 
 

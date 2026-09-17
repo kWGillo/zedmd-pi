@@ -201,12 +201,15 @@ STRINGS = {
     "satelliti.settings": ("Impostazioni", "Settings"),
     "satelliti.elev": ("Elevazione minima", "Minimum elevation"),
     "satelliti.elev.hint": (
-        "Quanti gradi sopra l'orizzonte. Dieci vuol dire \u00absopra i tetti\u00bb: "
-        "piu' in basso ci sono case e alberi. Non e' un raggio in chilometri: "
-        "un satellite a 60 gradi e' comunque a 225 km da qui.",
-        "Degrees above the horizon. Ten means \u00abover the rooftops\u00bb: lower "
-        "than that there are houses and trees. It is not a radius in "
-        "kilometres: a satellite at 60 degrees is still 225 km away."),
+        "Quanti gradi sopra l'orizzonte deve arrivare il passaggio per essere "
+        "annunciato. Trenta vuol dire \u00abalza il naso\u00bb: a dieci gradi "
+        "l'oggetto e' a 1390 km da qui ed e' tredici volte piu' fioco, quando "
+        "non e' dietro un tetto. Alzando la soglia gli annunci calano: a 30 "
+        "gradi restano circa la meta', a 60 un sesto.",
+        "How high the pass must get to be announced. Thirty means \u00ablook "
+        "up\u00bb: at ten degrees the object is 1390 km away and thirteen times "
+        "fainter, when it is not behind a roof. A higher threshold means fewer "
+        "announcements: about half at 30 degrees, a sixth at 60."),
     "satelliti.lead": ("Preavviso (min)", "Lead time (min)"),
     "satelliti.lead.hint": (
         "Un passaggio dura fra i due e i sette minuti: annunciarlo mentre "
@@ -658,9 +661,10 @@ STRINGS = {
         "If sound is off globally it will not ring, and the panel blinks "
         "anyway. Whoever turned sound off wants silence."),
     "sveglia.regole.pulsante": (
-        "La ferma il pulsante della Funcam, che sul cabinato c'è già: mentre "
-        "squilla quel pulsante è suo, e premerlo non scatta nessuna foto.",
-        "The Funcam button stops it — the one already on the cabinet. While "
+        "La ferma il pulsante della Funcam, quello che hai già assegnato: "
+        "mentre squilla quel pulsante è suo, e premerlo non scatta nessuna "
+        "foto.",
+        "The Funcam button stops it — the one you already assigned. While "
         "ringing, that button belongs to the alarm and pressing it takes no "
         "picture."),
     "status.sveglia.suona": ("sta suonando (%(ora)s)", "ringing (%(ora)s)"),
@@ -2391,6 +2395,18 @@ STRINGS = {
         "Three rows instead of five: the original descent does not fit in "
         "sixty-four rows, and squashing it would mean two-pixel aliens. One "
         "shot at a time, and the swarm speeds up as it empties."),
+    "giochi.snake.hint": (
+        "Il serpente dei Nokia su una griglia 49x15: molto larga e poco alta, "
+        "il contrario degli undici quadrati per lato del 3310. Si gioca con le "
+        "quattro direzioni — croce del pad, frecce, WASD o i pulsanti qui "
+        "sopra — e il dietrofront si ignora. Il bordo uccide, e il cibo non "
+        "nasce mai nella riga in cui stai già viaggiando: su quindici righe "
+        "sarebbe mezzo regalo.",
+        "The Nokia snake on a 49x15 grid: very wide and short, the opposite of "
+        "the 3310's eleven squares per side. Four directions — the pad's "
+        "d-pad, arrow keys, WASD or the buttons above — and a reversal is "
+        "ignored. The wall kills, and food never appears in the row you are "
+        "already travelling along: on fifteen rows that would be half a gift."),
     "giochi.doom.hint": (
         "Doom gira come processo separato, per una ragione di licenza, e ha "
         "una pagina sua: preparazione, scelta del WAD e taratura della fascia.",
@@ -2412,10 +2428,10 @@ STRINGS = {
     "giochi.doom.no": ("da preparare", "needs setup"),
     "giochi.comandi": ("Comandi", "Controls"),
     "giochi.comandi.hint": (
-        "Si gioca dalla tastiera del cabinato o dal pad; questi pulsanti "
-        "servono per provare senza alzarsi.",
-        "Play from the cabinet keyboard or the pad; these buttons are for "
-        "trying it out without getting up."),
+        "Si gioca con il pad o con una tastiera collegata al DMD; questi "
+        "pulsanti servono per provare senza alzarsi, o dal telefono.",
+        "Play with the pad or a keyboard connected to the DMD; these buttons "
+        "are for trying it out without getting up, or from your phone."),
     "settings.update.cache": (
         "La risposta di GitHub puo' essere vecchia fino a cinque minuti: "
         "subito dopo una pubblicazione, \u00absei aggiornato\u00bb non vuol "
@@ -2483,11 +2499,11 @@ STRINGS = {
         "lists them."),
     "giochi.ciclo.hint": (
         "Il tasto Start del pad scorre i giochi: premuto una volta si gioca, "
-        "premuto ancora si passa al successivo. Select esce. Sulla tastiera "
-        "del cabinato fanno lo stesso i due tasti qui sotto.",
+        "premuto ancora si passa al successivo. Select esce. Su una tastiera "
+        "collegata al DMD fanno lo stesso i due tasti qui sotto.",
         "The Start button on the pad cycles through the games: press once to "
-        "play, press again for the next one. Select quits. On the cabinet "
-        "keyboard the two keys below do the same."),
+        "play, press again for the next one. Select quits. On a keyboard "
+        "connected to the DMD the two keys below do the same."),
     "giochi.tasto.ciclo": ("Tasto che scorre i giochi",
                            "Key that cycles the games"),
     "giochi.tasto.esci": ("Tasto che esce dalla partita",
@@ -2495,13 +2511,13 @@ STRINGS = {
     "giochi.impara": ("Impara", "Learn"),
     "giochi.impara.hint": (
         "I codici predefiniti sono quelli di invio ed escape. Una pulsantiera "
-        "da flipper ne manda altri: premi «Impara» e poi il pulsante sul "
-        "cabinato.",
-        "The defaults are the codes for Enter and Escape. A pinball button "
-        "panel sends different ones: press \u00abLearn\u00bb and then the "
-        "button on the cabinet."),
-    "giochi.impara.premi": ("In ascolto: premi ora il pulsante sul cabinato.",
-                            "Listening: press the button on the cabinet now."),
+        "o una tastiera insolita ne mandano altri: premi «Impara» e poi il "
+        "tasto che vuoi usare.",
+        "The defaults are the codes for Enter and Escape. A button panel or an "
+        "unusual keyboard sends different ones: press \u00abLearn\u00bb and "
+        "then the key you want to use."),
+    "giochi.impara.premi": ("In ascolto: premi ora il tasto che vuoi usare.",
+                            "Listening: press the key you want to use now."),
     "giochi.impara.fatto": ("Riconosciuto, codice", "Recognised, code"),
     "giochi.ciclo_doom": (
         "Comprendi anche Doom nel giro dei giochi (parte in qualche secondo e "

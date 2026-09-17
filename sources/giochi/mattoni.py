@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Breakout, riscritto per 256x64.
+"""Breakout, riscritto per 256x64 -- e rifatto una seconda volta per il suono.
 
 Di tutti e tre e' quello che soffre meno il pannello: il muro e' largo per
 natura, e la racchetta si muove sull'asse in cui lo spazio ce l'abbiamo. Quello
@@ -10,6 +10,29 @@ palla torna addosso in fretta e il gioco diventa di riflessi.
 Per questo la palla parte lenta e accelera a ogni fila sfondata invece di
 partire alla velocita' finale: se comincia gia' veloce, su questo schermo non
 si capisce cosa e' successo.
+
+Perche' questo file e' stato rifatto
+------------------------------------
+Per settimane Breakout e' stato l'unico gioco a cui mancavano dei suoni. Le
+misure dicevano che la logica li chiedeva tutti -- 510 contatti rilevati dalla
+fisica, 510 chiamate a `suona` -- ma quelle misure le avevo scritte io, e a un
+certo punto difendere il proprio codice vale meno che rifare la parte che ha
+qualcosa di unico.
+
+E qualcosa di unico ce l'aveva, ed e' **da dove** usciva il suono. Il passo di
+Breakout si spezza in micro-passi piu' corti di un pixel, altrimenti una palla
+veloce attraverserebbe un mattone senza accorgersene; e i suoni partivano da
+*dentro* quel ciclo. Era l'unico gioco del progetto in cui una sola chiamata a
+`passo()` poteva emetterne tre o quattro, in un ordine deciso dalla fisica
+invece che dal fotogramma. Invaders, che i suoi li emette una volta per
+fotogramma, non ha mai avuto il problema.
+
+Adesso la fisica non suona: **registra**. Un mattone, una sponda, la racchetta
+finiscono in una lista, e a fine `passo()` escono insieme, in un ordine deciso
+qui e senza ripetizioni. Il suono diventa un'uscita del fotogramma, come
+l'immagine -- si guarda la stessa lista che ha disegnato il quadro. Nessuna
+riga della fisica chiama piu' `suona` direttamente, e c'e' una prova che lo
+verifica leggendo il sorgente.
 """
 
 import math
@@ -30,6 +53,7 @@ PUNTI = (50, 40, 30, 20, 10)
 RACCHETTA_Y = 60
 RACCHETTA_H = 2
 RACCHETTA_L = 22
+RACCHETTA_V = 88.0              # pixel al secondo, con il tasto premuto
 PALLA = 2
 
 # Oltre i 60 gradi dalla verticale la palla rimbalza quasi in orizzontale e
@@ -39,9 +63,23 @@ ANGOLO_MAX = math.radians(62)
 # E sotto i 9 gradi succede il contrario, ed e' peggio: colpita esattamente al
 # centro la palla salirebbe e scenderebbe sulla stessa colonna all'infinito,
 # e finita quella colonna la partita non e' piu' vincibile. Non e' un caso di
-# scuola — un giocatore che insegue bene la palla la centra quasi sempre — e
+# scuola -- un giocatore che insegue bene la palla la centra quasi sempre -- e
 # infatti l'ha trovato la prova automatica, non una partita a mano.
 ANGOLO_MIN = math.radians(9)
+
+# L'ordine in cui escono i suoni quando in un fotogramma succede piu' di una
+# cosa. E' una scala di importanza, non l'ordine cronologico: dentro trenta
+# millesimi di secondo l'orecchio non distingue chi e' arrivato prima, ma
+# distingue benissimo se la palla persa e' stata coperta da un rimbalzo.
+ORDINE = ("persa", "livello", "lancio", "mattone1", "mattone2", "mattone3",
+          "mattone4", "mattone5", "racchetta", "muro")
+
+# Quanti suoni al massimo per fotogramma. Due, e non e' una rinuncia: misurando
+# quattro partite intere il gioco non ne ha mai chiesti piu' di uno per
+# fotogramma. Il tetto e' un freno per un caso che nessuno ha mai visto, non
+# una regola che tocca le partite vere -- e sopra i due, dentro trenta
+# millesimi, non si sentirebbero come suoni separati ma come un unico schiocco.
+SUONI_PER_FRAME = 2
 
 
 class Mattoni(Gioco):
@@ -49,16 +87,27 @@ class Mattoni(Gioco):
     etichetta = "Breakout"
     colore_hud = (90, 170, 255)
 
+    # -------------------------------------------------------------- partita
+
     def avvia_partita(self, seme=None):
         self._rnd = random.Random(seme)
         self.punteggio = 0
         self.vite = 3
         self.livello = 1
         self.finita = False
+        # Gli eventi sonori di **questo** fotogramma. Vivono un `passo()` e
+        # poi si svuotano: non e' una coda e non deve diventarlo, perche' un
+        # suono che arriva un fotogramma dopo il suo colpo e' gia' in ritardo.
+        self._eventi = []
+        # L'ultima lista emessa. Serve alle prove e alla diagnosi: e' l'unico
+        # modo di vedere da fuori cosa ha chiesto il gioco senza mettersi in
+        # mezzo a `suona`.
+        self.suoni_del_frame = ()
         self._nuovo_livello()
 
     def _nuovo_livello(self):
-        self.mattoni = {(c, f): True for c in range(COLONNE) for f in range(FILE)}
+        self.mattoni = {(c, f): True for c in range(COLONNE)
+                        for f in range(FILE)}
         self._riparti()
 
     def _riparti(self):
@@ -75,36 +124,77 @@ class Mattoni(Gioco):
         self.vx = math.sin(angolo) * self.velocita
         self.vy = -math.cos(angolo) * self.velocita
         self.attaccata = False
-        self.suona("lancio")
+        self._segna("lancio")
 
     def rimasti(self):
         return sum(1 for v in self.mattoni.values() if v)
 
-    # ------------------------------------------------------------------ passo
+    # ---------------------------------------------------------------- suono
+
+    def _segna(self, nome):
+        """Registra un evento sonoro del fotogramma. Non suona: annota.
+
+        E' l'unica porta. Nessun punto della fisica chiama `suona`
+        direttamente, e cosi' *quando* un suono parte lo decide una riga sola
+        -- `_emetti`, a fine fotogramma -- invece di dipendere da quanti
+        micro-passi ha fatto la palla in quel trentesimo di secondo.
+        """
+        self._eventi.append(nome)
+
+    def _emetti(self):
+        """Manda fuori i suoni del fotogramma: ordinati e senza ripetizioni.
+
+        Le ripetizioni si tolgono perche' due click identici dentro lo stesso
+        trentesimo di secondo non si sentono come due: si sommano in uno solo
+        piu' forte. Emetterli entrambi costerebbe il doppio e renderebbe meno.
+        """
+        eventi, self._eventi = self._eventi, []
+        if not eventi:
+            self.suoni_del_frame = ()
+            return
+        scelti = []
+        for nome in ORDINE:
+            if nome in eventi:
+                scelti.append(nome)
+                if len(scelti) >= SUONI_PER_FRAME:
+                    break
+        self.suoni_del_frame = tuple(scelti)
+        for nome in scelti:
+            self.suona(nome)
+
+    # ---------------------------------------------------------------- passo
 
     def passo(self, dt, tasti):
+        """Un fotogramma: prima la fisica, poi -- una volta sola -- il suono."""
+        self._eventi = []
+        try:
+            self._fisica(dt, tasti)
+        finally:
+            # Anche se la fisica dovesse sollevare, quello che era gia'
+            # successo si sente: l'eccezione chiude la partita, ma il colpo
+            # che l'ha preceduta era vero e merita il suo suono.
+            self._emetti()
+
+    def _fisica(self, dt, tasti):
         if self.finita:
             if "fuoco" in tasti:
                 self.avvia_partita()
             return
 
-        velocita = 88.0
         if "sinistra" in tasti:
-            self.racchetta -= velocita * dt
+            self.racchetta -= RACCHETTA_V * dt
         if "destra" in tasti:
-            self.racchetta += velocita * dt
+            self.racchetta += RACCHETTA_V * dt
         self.racchetta = max(0.0, min(CAMPO - RACCHETTA_L, self.racchetta))
 
         if self.attaccata:
+            # La palla segue la racchetta e non succede niente: nessun evento.
+            # Una versione precedente suonava la racchetta anche qui, trenta
+            # volte al secondo: un ronzio continuo prima del lancio e, per il
+            # resto della partita, un mixer sempre pieno che copriva i
+            # mattoni. Il suono del lancio c'e' gia' e arriva quando premi.
             self.bx = self.racchetta + RACCHETTA_L / 2
             self.by = float(RACCHETTA_Y - PALLA)
-            # Qui NON si suona. La palla non sta rimbalzando: sta ferma,
-            # appoggiata alla racchetta, e questo ramo lo attraversa ogni
-            # fotogramma. Suonarci dentro voleva dire trenta "racchetta" al
-            # secondo — un ronzio continuo prima del lancio, e per il resto
-            # della partita un mixer sempre pieno che copriva i mattoni.
-            # Il suono del lancio c'e' gia', e arriva quando premi: e'
-            # `lancio`, dentro `_lancia()`.
             if "fuoco" in tasti:
                 self._lancia()
             return
@@ -116,42 +206,48 @@ class Mattoni(Gioco):
         passi = max(1, int(distanza) + 1)
         for _ in range(passi):
             if self.finita or self.attaccata:
-                return
+                break
             self._micro_passo(dt / passi)
 
-        if self.rimasti() == 0:
+        # Muro finito. Il controllo sta qui e non dentro il ciclo perche' e'
+        # una conclusione del fotogramma, non di un micro-passo. E si arriva
+        # a leggerlo anche quando la palla e' appena caduta, perche' il ciclo
+        # qui sopra esce con `break` e non con `return`: prima, rompere
+        # l'ultimo mattone e perdere la palla nello stesso fotogramma lasciava
+        # il livello a meta' fino al lancio successivo.
+        if self.rimasti() == 0 and not self.finita:
             self.livello += 1
             self.punteggio += 100
             self._aggiorna_record()
-            # L'effetto c'era dalla 5.2 e non lo suonava nessuno: era Invaders
-            # a chiamarlo, e finire un muro passava in silenzio.
-            self.suona("livello")
+            self._segna("livello")
             self._nuovo_livello()
 
     def _micro_passo(self, dt):
+        """Un tratto lungo meno di un pixel. Registra gli eventi, non suona."""
         self.bx += self.vx * dt
         self.by += self.vy * dt
 
         if self.bx <= 0:
             self.bx = 0.0
             self.vx = abs(self.vx)
-            self.suona("muro")
+            self._segna("muro")
         elif self.bx >= CAMPO - PALLA:
             self.bx = CAMPO - PALLA
             self.vx = -abs(self.vx)
-            self.suona("muro")
+            self._segna("muro")
         if self.by <= 0:
             self.by = 0.0
             self.vy = abs(self.vy)
-            self.suona("muro")
+            self._segna("muro")
 
         self._colpisci_mattone()
 
-        # racchetta
-        if (self.vy > 0 and RACCHETTA_Y - PALLA <= self.by <= RACCHETTA_Y + RACCHETTA_H
-                and self.racchetta - 1 <= self.bx + PALLA / 2 <= self.racchetta + RACCHETTA_L + 1):
+        if (self.vy > 0
+                and RACCHETTA_Y - PALLA <= self.by <= RACCHETTA_Y + RACCHETTA_H
+                and self.racchetta - 1 <= self.bx + PALLA / 2
+                <= self.racchetta + RACCHETTA_L + 1):
             self.by = float(RACCHETTA_Y - PALLA)
-            self.suona("racchetta")
+            self._segna("racchetta")
             # L'angolo dipende da dove si colpisce: e' quello che trasforma la
             # racchetta da muro a strumento di mira.
             centro = self.racchetta + RACCHETTA_L / 2
@@ -160,7 +256,8 @@ class Mattoni(Gioco):
             if abs(angolo) < ANGOLO_MIN:
                 # Verso in cui stava gia' andando, cosi' un colpo al centro
                 # non fa cambiare lato alla palla di punto in bianco.
-                verso = 1 if (self.vx > 0 or (self.vx == 0 and scarto >= 0)) else -1
+                verso = 1 if (self.vx > 0
+                              or (self.vx == 0 and scarto >= 0)) else -1
                 # Con un angolo minimo *fisso* la traiettoria diventa
                 # periodica e certi mattoni non li raggiunge mai: un filo di
                 # caso rompe il ciclo, e a occhio non si vede.
@@ -170,7 +267,7 @@ class Mattoni(Gioco):
 
         if self.by > ALTEZZA:
             self.vite -= 1
-            self.suona("persa")
+            self._segna("persa")
             if self.vite <= 0:
                 self.vite = 0
                 self.finita = True
@@ -191,7 +288,7 @@ class Mattoni(Gioco):
         # Una nota per fila, e sale scavando verso l'alto. E' il suono che il
         # Breakout del 1976 usava per dire, senza scriverlo, a che punto sei
         # arrivato: la fila 0 e' quella in cima, quella che vale di piu'.
-        self.suona("mattone%d" % (fila + 1))
+        self._segna("mattone%d" % (fila + 1))
         self.punteggio += PUNTI[fila]
         self._aggiorna_record()
         self.vy = -self.vy
@@ -205,7 +302,7 @@ class Mattoni(Gioco):
             self.vx *= fattore
             self.vy *= fattore
 
-    # --------------------------------------------------------------- disegno
+    # -------------------------------------------------------------- disegno
 
     def disegna_campo(self, img, px):
         for (colonna, fila), vivo in self.mattoni.items():

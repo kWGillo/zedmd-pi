@@ -1895,6 +1895,71 @@ Storico:
        mezzo secondo a 150 ms, cosi' un errore dello stesso tipo non puo' piu'
        zittire niente. Una prova nuova rifiuta qualunque bersaglio sotto tre
        periodi.
+  9.0  **Un gioco nuovo, uno rifatto, e due servizi ritarati sul campo.**
+       Quattro cose sostanziali, tutte nate da una segnalazione di chi il DMD
+       ce l'ha acceso in casa.
+       *Breakout rifatto da capo, per il suono.* Per settimane e' stato
+       l'unico gioco a cui mancavano degli effetti. Le misure dicevano che la
+       logica li chiedeva tutti -- 510 contatti rilevati dalla fisica, 510
+       chiamate -- ma quelle misure le avevo scritte io, e difendere il proprio
+       codice a un certo punto vale meno che rifare la parte che ha qualcosa
+       di unico. E qualcosa di unico ce l'aveva: **da dove** usciva il suono.
+       Il passo di Breakout si spezza in micro-passi piu' corti di un pixel, e
+       i suoni partivano da dentro quel ciclo: era l'unico gioco in cui una
+       chiamata a `passo()` poteva emetterne tre o quattro, in un ordine
+       deciso dalla fisica invece che dal fotogramma.
+       Adesso la fisica non suona, **registra**: gli eventi finiscono in una
+       lista e a fine fotogramma escono insieme, ordinati per importanza e
+       senza ripetizioni. In tutto il file c'e' una sola riga che chiama
+       `suona`, e una prova lo verifica leggendo il sorgente. E' diventata la
+       regola del progetto, e Snake nasce gia' cosi'.
+       Rifacendolo e' saltato fuori un difetto vecchio: rompere l'ultimo
+       mattone e perdere la palla nello stesso fotogramma lasciava il livello a
+       meta' fino al lancio successivo.
+       *Snake.* Quello dei Nokia, su una griglia di **49x15** -- larghissima e
+       bassa, il contrario degli undici quadrati per lato del 3310. Un serpente
+       che cresce qui riempie prima l'altezza che la larghezza, quindi la
+       partita e' fatta di corridoi orizzontali, e il cibo non compare **mai**
+       nella riga in cui il serpente sta gia' viaggiando: su quindici righe
+       sarebbe mezzo regalo.
+       Si gioca con le quattro direzioni del pad. Il dietrofront si ignora, e
+       si scarta al momento di muoversi e non alla pressione: altrimenti due
+       tasti sfiorati dentro lo stesso trentesimo di secondo farebbero un mezzo
+       giro e il serpente si morderebbe da solo senza aver percorso una
+       casella. La pagina Giochi guadagna i pulsanti su e giu', perche' con due
+       frecce sole dal telefono non era giocabile.
+       Quattro effetti nuovi -- `mangia1/2/3` e `tonfo` -- e la nota del
+       boccone **sale con il livello**: e' il modo in cui il gioco dice "stai
+       andando bene" senza scrivere niente. Hanno una **ricetta** invece di
+       essere wav opachi: `diagnostica/genera_suoni.py` li rifa' da frequenze e
+       inviluppi.
+       *I satelliti: trenta gradi invece di dieci.* Una sera il pannello
+       annuncia un passaggio e il satellite risulta sopra la Spagna. Quella
+       parte non era un difetto -- il preavviso e' di dieci minuti, e in dieci
+       minuti un oggetto in orbita bassa percorre 4600 km: e' da li' che si
+       arriva sopra l'Italia. Ma la soglia era sbagliata lo stesso: dieci gradi
+       e' la regola dei radioamatori, sotto cui l'atmosfera attenua il segnale
+       **radio**, e qui il ricevitore sono gli occhi di chi sta in terrazzo. A
+       dieci gradi un oggetto a 420 km e' a 1390 km di distanza al suolo e
+       **2,8 magnitudini piu' fioco**: tredici volte. A trenta ne perde 1,3, e
+       bisogna alzare il naso invece di guardare fra i comignoli. Costa circa
+       meta' degli annunci; a sessanta ne resterebbe il 16% e il servizio
+       smetterebbe di esistere. La levetta c'era gia': mancava un predefinito
+       pensato per gli occhi.
+       *Il meteo diceva «nuvolo» mentre pioveva.* Il codice del cielo viene da
+       un modello; i millimetri d'acqua caduti nell'ultima ora sono una misura,
+       e non li chiedevamo nemmeno. Adesso si chiedono, e quando i due si
+       contraddicono si crede al millimetro. Al contrario non si corregge: un
+       codice che dice pioggia con zero millimetri puo' essere un rovescio
+       appena finito. E un campo in piu' non deve poter spegnere il meteo,
+       quindi se il servizio lo rifiutasse la richiesta ripiega su quella di
+       prima.
+       *E i testi smettono di parlare di un cabinato.* Le righe che si leggono
+       nelle pagine dicevano «la tastiera del cabinato», «il pulsante sul
+       cabinato», «una pulsantiera da flipper». Era il mio modello mentale, non
+       la macchina di chi lo usa: un pannello su una mensola e un controller in
+       mano. Adesso dicono il pad, o la tastiera collegata al DMD, o
+       semplicemente il tasto che vuoi usare.
 """
 
-__version__ = "8.6"
+__version__ = "9.0"

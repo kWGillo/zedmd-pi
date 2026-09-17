@@ -2,6 +2,107 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.0]
+
+Quattro cose sostanziali, tutte nate da una segnalazione di chi il DMD ce l'ha
+acceso in casa. Le versioni intermedie con cui ci si è arrivati non sono state
+pubblicate: quello che segue è il punto di arrivo, non il percorso.
+
+### Breakout rifatto da capo, per il suono
+
+Per settimane è stato l'unico gioco a cui mancavano degli effetti. Le misure
+dicevano che la logica li chiedeva tutti — 510 contatti rilevati dalla fisica,
+510 chiamate — ma quelle misure le avevo scritte io, e a un certo punto
+difendere il proprio codice vale meno che rifare la parte che ha qualcosa di
+unico.
+
+E qualcosa di unico ce l'aveva: **da dove** usciva il suono. Il passo di
+Breakout si spezza in micro-passi più corti di un pixel — altrimenti una palla
+veloce attraversa un mattone senza accorgersene — e i suoni partivano da
+*dentro* quel ciclo. Era l'unico gioco del progetto in cui una sola chiamata a
+`passo()` poteva emetterne tre o quattro, in un ordine deciso dalla fisica
+invece che dal fotogramma. Invaders, che i suoi li emette una volta per
+fotogramma, non ha mai avuto il problema.
+
+Adesso la fisica non suona: **registra**. Gli eventi finiscono in una lista e a
+fine `passo()` escono insieme, ordinati per importanza e senza ripetizioni, al
+massimo due per fotogramma. In tutto il file c'è **una sola riga** che chiama
+`suona`, e una prova lo verifica leggendo il sorgente. È diventata la regola del
+progetto, e Snake nasce già così.
+
+Rifacendolo è saltato fuori un difetto vecchio: rompere l'ultimo mattone e
+perdere la palla nello stesso fotogramma lasciava il livello a metà fino al
+lancio successivo.
+
+### Snake
+
+Quello dei Nokia, su una griglia di **49x15**: larghissima e bassa, il contrario
+degli undici quadrati per lato del 3310. Un serpente che cresce qui riempie
+prima l'altezza che la larghezza, quindi la partita è fatta di corridoi
+orizzontali — e per questo il cibo non compare **mai** nella riga in cui il
+serpente sta già viaggiando: su quindici righe sarebbe mezzo regalo.
+
+Si gioca con le quattro direzioni del pad, delle frecce o di WASD. Il
+dietrofront si ignora, e si scarta **al momento di muoversi** e non alla
+pressione: altrimenti due tasti sfiorati dentro lo stesso trentesimo di secondo
+farebbero un mezzo giro, e il serpente si morderebbe da solo senza aver percorso
+una casella. La pagina Giochi guadagna i pulsanti su e giù, perché con due
+frecce sole dal telefono non era giocabile.
+
+Quattro effetti nuovi — `mangia1/2/3` e `tonfo` — e la nota del boccone **sale
+con il livello**: è il modo in cui il gioco dice «stai andando bene» senza
+scrivere niente sul pannello. Hanno una **ricetta** invece di essere wav
+opachi: `diagnostica/genera_suoni.py` li rifà da frequenze, durate e inviluppi.
+Non tocca quelli di Breakout e Invaders, che sono stati fatti in un altro modo e
+rigenerarli vorrebbe dire cambiarli.
+
+### I satelliti: trenta gradi invece di dieci
+
+Una sera il pannello annuncia un passaggio e il satellite risulta sopra la
+Spagna. **Quella parte non era un difetto**: il preavviso è di dieci minuti, e in
+dieci minuti un oggetto in orbita bassa percorre 4600 km di traccia al suolo — è
+esattamente da lì che si arriva sopra l'Italia.
+
+Ma la soglia era sbagliata lo stesso. Dieci gradi è la regola dei radioamatori,
+sotto cui l'atmosfera attenua il segnale **radio**; qui il ricevitore sono gli
+occhi di chi sta in terrazzo, e davanti a quegli occhi ci sono i tetti. A dieci
+gradi un oggetto a 420 km sta a 1390 km di distanza al suolo ed è **2,8
+magnitudini più fioco**: tredici volte. A trenta gradi ne perde 1,3, e bisogna
+alzare il naso invece di guardare fra i comignoli.
+
+Costa circa **metà** degli annunci — la frazione di passaggi che sopravvive a
+una soglia è la larghezza della fascia di tracce al suolo che la produce. Più su
+non si poteva andare: a sessanta gradi resterebbe il 16%, e con due soli oggetti
+noti il servizio smetterebbe di esistere. La levetta c'era già, da 0 a 80 gradi:
+mancava un predefinito pensato per gli occhi invece che per un'antenna. Chi ha
+scritto un numero suo se lo tiene.
+
+### Il meteo diceva «nuvolo» mentre pioveva
+
+Il codice del cielo fra i valori correnti viene da un modello, e un modello che
+dice «coperto» mentre cade pioviggine non sbaglia di molto — ma sul pannello
+sbaglia del tutto, perché chi lo guarda sta decidendo se prendere l'ombrello.
+
+I millimetri d'acqua caduti nell'ultima ora il servizio li dà, come numero a
+parte, e non li chiedevamo nemmeno. Adesso si chiedono, e quando i due si
+contraddicono **si crede al millimetro**: l'acqua è una misura, il codice è
+un'interpretazione. Al contrario non si corregge niente — un codice che dice
+pioggia con zero millimetri può essere un rovescio appena finito. Sotto un
+decimo di millimetro non si tocca nulla: è un velo che non bagna.
+
+Chiedere un campo in più però non deve poter spegnere il meteo: se il servizio
+lo rifiutasse, la richiesta ripiega sull'elenco di prima.
+
+### E i testi smettono di parlare di un cabinato
+
+Le righe che si leggono nelle pagine dicevano «la tastiera del cabinato», «il
+pulsante sul cabinato», «una pulsantiera da flipper». Era il mio modello
+mentale, non la macchina di chi lo usa: un pannello su una mensola e un
+controller in mano. Adesso dicono il pad, o la tastiera collegata al DMD, o
+semplicemente *il tasto che vuoi usare*. Nei commenti del codice qualche
+riferimento resta, ed è lì che spiega **perché** certi codici siano
+configurabili — quel ragionamento vale ancora.
+
 ## [8.6]
 
 - **Il video lo dimostra: un mattone rotto, e nessun suono.** Quaranta secondi

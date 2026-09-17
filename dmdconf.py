@@ -558,9 +558,28 @@ DEFAULTS = {
         # I gruppi di CelesTrak da scaricare. Solo le stazioni: i "cento piu'
         # luminosi" sono per due terzi stadi di razzo con sigle illeggibili.
         "gruppi": ["stazioni"],
-        # Sopra quanti gradi dall'orizzonte vale la pena annunciare. Dieci
-        # gradi vuol dire "sopra i tetti": piu' in basso ci sono case e alberi.
-        "elevazione_minima": 10.0,
+        # Sopra quanti gradi dall'orizzonte vale la pena annunciare.
+        #
+        # Erano dieci, ed era la soglia sbagliata presa dal posto sbagliato:
+        # dieci gradi e' la regola dei radioamatori, sotto cui l'atmosfera
+        # attenua il segnale. Ma qui il ricevitore sono gli occhi di qualcuno
+        # in terrazzo, e davanti a quegli occhi ci sono case.
+        #
+        # I conti, per un oggetto a 420 km: a dieci gradi e' a 1390 km di
+        # distanza al suolo, la distanza obliqua passa da 420 a 1500 km, ed e'
+        # **2,8 magnitudini piu' fioco** -- un fattore tredici. La ISS allo
+        # zenit e' come Venere; a dieci gradi e' una stellina, quando non e'
+        # dietro un tetto.
+        #
+        # Trenta gradi e' un terzo del cielo: bisogna alzare il naso, non
+        # guardare fra i comignoli, e si perde solo 1,3 magnitudini. Costa
+        # circa meta' degli annunci -- la frazione di passaggi che sopravvive a
+        # una soglia e' la larghezza della fascia di tracce al suolo che la
+        # produce, e da 10 a 30 gradi quella fascia passa da 1390 a 630 km.
+        # Piu' su non si poteva andare: a sessanta gradi resterebbe il 16%
+        # degli annunci, e con due soli oggetti noti il servizio smetterebbe
+        # di esistere.
+        "elevazione_minima": 30.0,
         # Quanto prima avvisare, e ogni quanto ricordarlo. Un passaggio dura
         # dai due ai sette minuti: annunciarlo mentre succede vuol dire
         # arrivare in terrazzo a cose finite.
@@ -926,6 +945,15 @@ def _migrate(raw):
     # pannello, quel numero vale piu' del nostro e non si tocca.
     if doom.get("gamma") == 0.70:
         doom["gamma"] = 1.15
+
+    # 8.8: l'elevazione minima dei satelliti passa da 10 a 30 gradi.
+    #
+    # Stessa regola del gamma di Doom e del giro del meteo: si corregge
+    # **solo** chi ha ancora il vecchio predefinito esatto. Chi ha scritto un
+    # numero suo conosce il proprio orizzonte meglio di noi.
+    satelliti_conf = raw.setdefault("satelliti", {})
+    if satelliti_conf.get("elevazione_minima") == 10.0:
+        satelliti_conf["elevazione_minima"] = 30.0
 
     # 8.3: il giro del meteo passa da venti a dieci minuti.
     #

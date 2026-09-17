@@ -168,12 +168,25 @@ def notevole(codice):
 # ------------------------------------------------------------------ la rete
 
 
-def _url(lat, lon, fuso, giorni=3):
+# I campi del blocco "adesso". Il primo elenco chiede anche **quanta acqua sta
+# cadendo in questo momento**; il secondo e' quello di prima, senza.
+#
+# Servono due elenchi e non uno per una ragione pratica: se un domani il
+# servizio smettesse di offrire `precipitation` fra i valori correnti,
+# rifiuterebbe l'intera richiesta e il meteo sparirebbe dal pannello. Chiedere
+# il piu' e saper ripiegare sul meno costa dieci righe e toglie un modo di
+# rompersi.
+CORRENTI = ("temperature_2m,relative_humidity_2m,weather_code,"
+            "apparent_temperature,is_day,wind_speed_10m,precipitation")
+CORRENTI_MINIME = ("temperature_2m,relative_humidity_2m,weather_code,"
+                   "apparent_temperature,is_day,wind_speed_10m")
+
+
+def _url(lat, lon, fuso, giorni=3, correnti=None):
     parametri = [
         ("latitude", "%.4f" % float(lat)),
         ("longitude", "%.4f" % float(lon)),
-        ("current", "temperature_2m,relative_humidity_2m,weather_code,"
-                    "apparent_temperature,is_day,wind_speed_10m"),
+        ("current", correnti or CORRENTI),
         ("daily", "weather_code,temperature_2m_max,temperature_2m_min,"
                   "precipitation_probability_max,sunrise,sunset"),
         ("hourly", "relative_humidity_2m"),
@@ -282,14 +295,53 @@ def _umidita_media(dati, indice_giorno):
     return int(round(sum(numeri) / len(numeri)))
 
 
+# Sotto questa soglia la pioggia e' un velo che non bagna: chiamarla pioggia
+# sul pannello sarebbe un allarme falso. Sopra, si sente.
+PIOGGIA_MINIMA = 0.1
+
+
+def _codice_corretto(codice, pioggia):
+    """Il codice del cielo, corretto da quanta acqua sta cadendo adesso.
+
+    Nasce da una segnalazione dal campo: *dice nuvolo e sta piovendo*. Il
+    codice corrente di Open-Meteo viene da un modello, e un modello che dice
+    "coperto" mentre cade pioviggine non e' sbagliato di molto -- ma sul
+    pannello e' sbagliato del tutto, perche' chi guarda decide se prendere
+    l'ombrello.
+
+    Il servizio pero' la pioggia in corso la da\', in millimetri, come numero a
+    parte. Quando i due si contraddicono si crede al millimetro, non al
+    codice: l'acqua e' una misura, il codice e\' un\'interpretazione. Al
+    contrario non si corregge niente -- un codice che dice pioggia con zero
+    millimetri puo\' benissimo essere una rovescio appena finito o che sta per
+    cominciare, e cancellarlo toglierebbe un\'informazione vera.
+    """
+    if pioggia is None or pioggia < PIOGGIA_MINIMA:
+        return codice
+    gia_bagnato = ("pioggia", "pioggia_forte", "rovesci", "temporale", "neve",
+                   "neve_forte")
+    if codice is not None and CODICI.get(codice, SCONOSCIUTO)[0] in gia_bagnato:
+        return codice
+    # Si sceglie l'intensita' dai millimetri dell'ultima ora, con la stessa
+    # scala che usa il servizio per i suoi codici.
+    if pioggia >= 2.5:
+        return 65          # pioggia forte
+    if pioggia >= 0.5:
+        return 63          # pioggia
+    return 61              # pioggia debole
+
+
 def interpreta(dati):
     """La risposta di Open-Meteo in una forma che il pannello sa disegnare."""
     corrente = dati.get("current") or {}
+    pioggia_ora = _numero(corrente.get("precipitation"), 2)
+    codice_ora = _intero(corrente.get("weather_code"))
     adesso = {
+        "pioggia": pioggia_ora,
         "temperatura": _numero(corrente.get("temperature_2m"), 1),
         "percepita": _numero(corrente.get("apparent_temperature"), 1),
         "umidita": _intero(corrente.get("relative_humidity_2m")),
-        "codice": _intero(corrente.get("weather_code")),
+        "codice": _codice_corretto(codice_ora, pioggia_ora),
         "vento": _numero(corrente.get("wind_speed_10m"), 1),
         # `is_day` arriva come 1 o 0. Serve a scegliere fra sole e luna, e a
         # non disegnare un sole alle undici di sera.
@@ -360,11 +412,24 @@ class Meteo(object):
         # riproverebbe subito: con la rete giu' diventerebbe una richiesta
         # continua verso un servizio gratuito, che e' il modo di farsi bloccare.
         self._ultimo_tentativo = adesso
-        try:
-            grezzo = _chiedi(_url(dove[0], dove[1], self.fuso()))
-            letto = interpreta(grezzo)
-        except (urllib.error.URLError, OSError, ValueError, KeyError) as exc:
-            self._errore = str(exc)
+        # Due tentativi, e il secondo non e' una ripetizione: il primo chiede
+        # anche la pioggia in corso, il secondo si accontenta di quello che si
+        # chiedeva prima. Se un domani il servizio smettesse di offrire quel
+        # campo rifiuterebbe l'intera richiesta, e un campo in piu' non deve
+        # poter far sparire il meteo dal pannello.
+        ultimo = None
+        for correnti in (CORRENTI, CORRENTI_MINIME):
+            try:
+                grezzo = _chiedi(_url(dove[0], dove[1], self.fuso(),
+                                      correnti=correnti))
+                letto = interpreta(grezzo)
+                break
+            except (urllib.error.URLError, OSError, ValueError, KeyError) as exc:
+                ultimo = exc
+                if correnti is CORRENTI:
+                    print("[meteo] pioggia in corso non disponibile: %s" % exc)
+        else:
+            self._errore = str(ultimo)
             return False, self._errore
         self._dati = letto
         self._errore = ""

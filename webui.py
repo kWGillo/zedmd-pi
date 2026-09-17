@@ -882,7 +882,12 @@ def create_app(runtime):
 
     # ---------------------------------------------------------------- giochi
 
-    GIOCHI_PULSANTI = (("sinistra", "\u25c0"), ("destra", "\u25b6"),
+    # Quattro direzioni e non due: Snake le usa tutte, e senza su e giu' dal
+    # telefono non si potrebbe giocare. Per Breakout e Invaders le due frecce
+    # in piu' non fanno niente, ed e' meglio di due pulsantiere diverse a
+    # seconda del gioco aperto.
+    GIOCHI_PULSANTI = (("su", "\u25b2"), ("sinistra", "\u25c0"),
+                       ("destra", "\u25b6"), ("giu", "\u25bc"),
                        ("fuoco", "FUOCO"), ("esci", "ESCI"))
 
     def _giochi_stato():
