@@ -16,9 +16,10 @@ schermo in soggiorno e non sa niente; Home Assistant sa tutto e non ha uno
 schermo in soggiorno. Questa funzione mette in comunicazione le due cose nel
 verso che mancava.
 
-Il risultato pratico: apri la porta di casa e sul pannello scorre *Porta
-d'ingresso aperta*. Finisce la lavatrice e te lo dice. Scatta l'allarme e il
-pannello lo grida in rosso, interrompendo qualunque cosa stesse facendo.
+Il risultato pratico: apri la porta di casa e sul pannello compare *Porta
+d'ingresso aperta*, ferma, dentro una cornice arancione. Finisce la lavatrice e
+te lo dice. Scatta l'allarme e il pannello lo grida con la cornice rossa che
+lampeggia, interrompendo qualunque cosa stesse facendo — e con il suo suono.
 
 > **Il contratto è piccolo di proposito.** Un topic, un JSON con tre campi,
 > tre livelli. La politica — quando parlare, quando tacere, con che parole —
@@ -70,15 +71,38 @@ Serve per provare al volo, senza costruire nessun JSON.
 
 | Campo | Obbligatorio | Valore |
 |---|---|---|
-| `testo` | sì | Quello che scorre sul pannello |
+| `testo` | sì | Quello che compare sul pannello |
 | `livello` | no | `info`, `avviso`, `allarme`. Predefinito `info` |
 | `secondi` | no | Da 2 a 120. Predefinito 8 |
 | `colore` | no | Esadecimale, scavalca il colore del livello |
 | `lampeggio` | no | `true` o `false`, scavalca quello del livello |
 
-Se il testo è più largo del pannello scorre da destra a sinistra come il
-banner, e se avanza tempo ripassa: meglio due giri di una frase che si legge
-che uno solo perso mentre guardavi altrove.
+**Il messaggio sta fermo.** Fino alla 9.4 un testo che non ci stava in una riga
+scorreva da destra a sinistra come il banner, e il colore del livello era quello
+delle lettere. Era il caso peggiore proprio dove contava di più: un allarme
+lungo era scritto in rosso scuro *e* in movimento *e* lampeggiante, cioè da
+leggere aspettando che ripassasse l'inizio.
+
+Adesso il testo sta fermo sempre, spezzato su quante righe servono, con il
+carattere più grande in cui ci sta. Il livello lo porta una cornice di due
+pixel, così le lettere restano bianche e leggibili qualunque sia la gravità.
+
+| Righe | Carattere | Caratteri circa |
+|---|---|---|
+| 1 | 32 px | 15 |
+| 2 | 29 px | 45 |
+| 3 | 18 px | 70 |
+| 4 | 13 px | 128 |
+
+Si parte dal più grande e si scende: un messaggio corto resta grande invece di
+rimpicciolirsi per uniformità. *«Allagamento rilevato in cantina, valvola
+chiusa»* sono 47 caratteri e stanno su tre righe da 18 px, che da tre metri si
+leggono bene.
+
+Quello che non ci sta **nemmeno a quattro righe viene tagliato**, con i puntini
+a dirlo. Il testo intero resta nella pagina web. Un messaggio che non entra in
+256×64 non diventa leggibile scorrendo: diventa lento, e obbliga chi guarda ad
+aspettare l'inizio del giro.
 
 > **Un messaggio che comincia con `{` deve essere JSON valido.** Se non lo è,
 > viene scartato e contato, non mostrato com'è. È una scelta che nasce da una
@@ -96,7 +120,11 @@ partita**.
 |---|---|---|---|
 | `info` | azzurro | no | no |
 | `avviso` | arancione | no | no |
-| `allarme` | rosso | sì | **sì, qualunque cosa** |
+| `allarme` | rosso | sì, **solo la cornice** | **sì, qualunque cosa** |
+
+> **Lampeggia la cornice, non il messaggio.** Prima lampeggiava tutto, testo
+> compreso: metà del tempo un allarme non si poteva leggere. Adesso l'urgenza
+> si vede da lontano e le parole restano ferme.
 
 `info` e `avviso` aspettano il loro turno come ogni altra sorgente: se stai
 guardando l'orologio compaiono subito, se stai giocando a Doom aspettano che
@@ -202,7 +230,7 @@ Dentro ci sono tre cose che vale la pena conoscere:
 *Strumenti per sviluppatori* → *Azioni* → `script.dmd_notifica`, campo
 **testo**: `Ciao dal soggiorno` → *Esegui azione*.
 
-Se non compare niente, vedi il [capitolo 9](#9-quando-non-funziona).
+Se non compare niente, vedi il [capitolo 10](#10-quando-non-funziona).
 
 ## 6.5 Il pulsante di prova sul DMD
 
@@ -268,13 +296,40 @@ condition:
 
 L'ultima automazione del file spegne l'helper alle 23:30 e lo riaccende alle
 7:00. Di notte il pannello è già quasi spento dalle fasce orarie, ma un
-`avviso` arancione che scorre alle tre di notte sveglia lo stesso chi passa in
-corridoio.
+`avviso` arancione alle tre di notte sveglia lo stesso chi passa in corridoio —
+e adesso che ha anche un campanello, lo sente pure chi in corridoio non passa.
 
 Gli allarmi passano comunque: è scritto nella condizione dello script, non
 nell'automazione, così vale sempre e non dipende da chi chiama.
 
-# 9. Quando non funziona
+# 9. I tre suoni
+
+Una notifica è l'unica cosa del pannello che succede **mentre non lo stai
+guardando**: il compleanno lo scopri passando in soggiorno, l'allagamento in
+cantina no. Fino alla 9.4 era anche l'unico servizio a cui un suono non si
+poteva dare — l'impianto c'era tutto, mancava la voce nell'elenco.
+
+Adesso ci sono **tre campanelli, uno per livello**, e si scelgono nella pagina
+Servizi → Suoni come quelli di tutti gli altri servizi: *Notifica · info*,
+*Notifica · avviso*, *Notifica · allarme*. Un campanello unico direbbe «è
+successo qualcosa» e ti obbligherebbe ad andare a vedere; tre dicono se vale la
+pena alzarsi, e lo dicono dall'altra stanza senza girare la testa.
+
+I file si caricano nella libreria media, come gli altri avvisi, e valgono wav e
+mp3.
+
+> **Tienili sopra i trecento millesimi.** Gli avvisi dei servizi non passano dal
+> mixer degli effetti: ognuno apre la scheda per conto suo, e il fruscio che
+> tiene sveglio il convertitore USB vale solo durante le partite. Una notifica
+> che arriva dopo ore di silenzio trova la scheda addormentata, e la rampa di
+> risveglio si mangia l'attacco. Con un campanello di mezzo secondo non te ne
+> accorgi; con un «blip» da ottanta millesimi rischi di non sentirlo mai.
+
+Il volume è quello degli avvisi, e **rispetta il volume notturno**: una notifica
+alle tre di notte può parlare piano. È la differenza voluta con la sveglia, che
+il volume notturno lo ignora apposta.
+
+# 10. Quando non funziona
 
 La riga di stato nella pagina *Servizi* dice quasi sempre dove si è rotto:
 
@@ -307,7 +362,7 @@ mosquitto_pub -h INDIRIZZO -u utente -P password -t dmd/notifica -m "prova"
 Se questo si vede e le automazioni no, il guasto è in Home Assistant. Se non
 si vede nemmeno questo, è sul DMD o sul broker.
 
-# 10. Quello che non fa, e perché
+# 11. Quello che non fa, e perché
 
 **Niente immagini né icone.** Il pannello è 256×64 con pixel grossi come
 lenticchie: un'icona leggibile mangerebbe un quarto della larghezza per dire
@@ -326,13 +381,16 @@ stata vista. Non saprebbe come: non c'è nessuno che prema un tasto.
 disturbare» configurabile di qua. Sta tutto nello script, di là, per la
 ragione del capitolo 1.
 
-# 11. Riassunto
+# 12. Riassunto
 
 | | |
 |---|---|
 | Topic | `dmd/notifica` |
 | Payload | JSON con `testo`, `livello`, `secondi` — oppure testo semplice |
 | Livelli | `info`, `avviso`, `allarme` |
+| Sul pannello | testo fermo, fino a 4 righe, cornice di 2 px del colore del livello |
+| Troppo lungo | tagliato con i puntini, intero nella pagina web |
+| Suono | uno per livello, *Servizi* → *Suoni* |
 | Interrompe una partita | solo `allarme` |
 | Servizio | *Servizi* → *Notifiche*, nasce spento |
 | File pronto | [`ha/dmd_notifica.yaml`](ha/dmd_notifica.yaml) |

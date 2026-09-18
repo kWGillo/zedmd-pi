@@ -2093,6 +2093,41 @@ Storico:
        tiene sveglia la scheda, la sveglia che si prende il pulsante, la barra
        del timer, i trenta gradi dei satelliti, la pioggia del meteo e le
        tabelle delle sigle. I PDF sono rigenerati.
+  9.5  **Le notifiche stanno ferme, dentro una cornice, e hanno una voce.**
+       *Il sistema di visualizzazione non mi fa impazzire.* Il giudizio era
+       giusto e i difetti erano due, tutti e due nel posto peggiore. Un
+       messaggio che non stava in una riga **scorreva** da destra a sinistra
+       come il banner; e il colore del livello era quello delle **lettere**.
+       Messi insieme: un allarme lungo era scritto in rosso scuro, in
+       movimento e per giunta lampeggiante, cioe' da leggere aspettando che
+       ripassasse l'inizio. Proprio l'allarme, cioe' l'unico messaggio per cui
+       la fretta conta.
+       Adesso il testo **sta fermo**, spezzato su quante righe servono e nel
+       carattere piu' grande in cui ci sta: una riga a 32 px, due a 29, tre a
+       18, quattro a 13. Si parte dal grande e si scende, cosi' un messaggio
+       corto resta corto e grande invece di rimpicciolirsi per uniformita'.
+       Le parole non si spezzano mai a meta'.
+       Il livello lo porta una **cornice di due pixel** e non piu' il testo,
+       che resta bianco: la gravita' si vede da lontano e le lettere si
+       leggono da vicino, che sono due lavori diversi e prima li faceva un
+       colore solo. Dell'allarme lampeggia **solo la cornice** — prima
+       lampeggiava tutto, e meta' del tempo il messaggio non c'era.
+       Quello che non ci sta nemmeno a quattro righe **si taglia, con i
+       puntini a dirlo**, e per intero resta nella pagina web. Un testo che
+       non entra in 256x64 non diventa leggibile scorrendo: diventa lento.
+       *E ogni livello ha il suo campanello.* Era l'assenza piu' strana del
+       progetto: le notifiche erano l'unico servizio a cui un suono non si
+       poteva dare, e sono l'unica cosa del pannello che succede mentre non lo
+       stai guardando. L'impianto c'era tutto, mancava la voce nell'elenco.
+       Adesso in *Servizi -> Suoni* ci sono tre righe -- info, avviso,
+       allarme -- e si scelgono come quelle di tutti gli altri servizi. Tre e
+       non uno perche' un campanello solo direbbe «e' successo qualcosa» e
+       obbligherebbe ad alzarsi per sapere che cosa.
+       In elenco entrano i tre livelli, non «notifiche»: se ci fosse anche la
+       voce generica, il gancio del runtime suonerebbe una seconda volta a
+       ogni messaggio. Un suono che non parte -- scheda occupata, file
+       sparito -- non si porta via la notifica: il pannello la mostra lo
+       stesso.
 """
 
-__version__ = "9.4"
+__version__ = "9.5"

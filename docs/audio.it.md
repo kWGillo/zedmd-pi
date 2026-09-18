@@ -76,10 +76,17 @@ Per ogni servizio, nella pagina **Servizi**, c'è un menu con i file `wav` e
 `mp3` presenti nella libreria media, e un pulsante **Ascolta** per sentirlo
 prima di sceglierlo. «Nessun suono» toglie l'assegnazione.
 
-I servizi che possono avere un avviso sono otto:
+I servizi che possono avere un avviso sono undici:
 
 `zedmd` · `nowplaying` · `birthdays` · `air_radar` · `clock` · `scadenze` ·
-`calendario` · `webcam`
+`calendario` · `webcam` · `notifiche · info` · `notifiche · avviso` ·
+`notifiche · allarme`
+
+**Le notifiche da Home Assistant ne hanno tre, uno per livello.** È l'unico
+servizio con più di un campanello, e il motivo è che una notifica arriva mentre
+non stai guardando il pannello: un suono solo direbbe «è successo qualcosa» e ti
+obbligherebbe ad andare a vedere, tre dicono dall'altra stanza se vale la pena
+alzarsi.
 
 **Tre non ce l'hanno, e non è una dimenticanza.** Media Player e Rolling
 Banner non annunciano niente: compaiono a intervalli per decorazione, e un

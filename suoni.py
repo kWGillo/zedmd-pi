@@ -59,7 +59,24 @@ import wave
 # compaiono qui perche' non sono un servizio: li disegna l'orologio, dentro
 # la sua colonna.
 SERVIZI_CON_SUONO = ("zedmd", "nowplaying", "birthdays", "air_radar",
-                     "clock", "scadenze", "calendario", "webcam")
+                     "clock", "scadenze", "calendario", "webcam",
+                     # Le notifiche hanno **tre** suoni, uno per livello, e
+                     # non uno solo. Una notifica e' l'unica cosa che per
+                     # definizione arriva quando non stai guardando il
+                     # pannello: un campanello unico dice «e' successo
+                     # qualcosa», tre dicono se vale la pena alzarsi, e lo
+                     # dicono dall'altra stanza senza girare la testa.
+                     #
+                     # Fino alla 9.4 le notifiche erano l'unico servizio che
+                     # un suono non poteva averlo: l'impianto c'era tutto,
+                     # mancava la voce in questo elenco.
+                     "notifiche_info", "notifiche_avviso", "notifiche_allarme")
+
+
+def chiave_notifica(livello):
+    """Il servizio sonoro di un livello di notifica."""
+    chiave = "notifiche_%s" % (livello or "").lower()
+    return chiave if chiave in SERVIZI_CON_SUONO else ""
 
 # Estensioni accettate per gli avvisi. Le legge ffmpeg, quindi l'elenco e'
 # corto per scelta: piu' formati vorrebbero dire piu' modi di scoprire, a

@@ -51,6 +51,27 @@ LIVELLO_PREDEFINITO = "info"
 SECONDI_MINIMI = 2
 SECONDI_MASSIMI = 120
 
+# Il bordo che porta il livello, in pixel. Due e' il minimo che si vede da
+# tre metri senza rubare spazio al testo: su 64 righe sono il 6% dell'altezza.
+BORDO = 2
+
+# Su quante righe si puo' spezzare un messaggio, e quanto spazio fra una e
+# l'altra. Oltre le quattro il carattere scende sotto i tredici pixel e da
+# lontano non si legge piu': a quel punto e' meglio tagliare che fingere.
+RIGHE_MASSIME = 4
+INTERLINEA = 2
+
+# Il testo non porta piu' il colore del livello: lo porta il bordo. Bianco
+# pieno perche' e' un "colore sicuro" -- componenti a 0 o 255 -- e su questo
+# pannello le intensita' intermedie sono la causa dello sfarfallio.
+COLORE_TESTO = (255, 255, 255)
+
+# Cosa si scrive in fondo a un messaggio che non ci sta nemmeno a quattro
+# righe. Il testo intero resta nella pagina web: sul pannello si taglia,
+# perche' un messaggio che non entra in 256x64 non diventa leggibile
+# scorrendo -- diventa lento, e ti obbliga ad aspettare l'inizio del giro.
+PUNTINI = "…"
+
 
 class NotificheSource(Source):
     name = "notifiche"
@@ -78,6 +99,10 @@ class NotificheSource(Source):
         # Lo mette il Runtime, come per Doom e il Game Boy: serve solo al
         # livello `allarme`, l'unico che ha diritto di interrompere.
         self.arbiter = None
+        # Chi sa suonare il campanello di un livello. Lo attacca il runtime,
+        # come per la sveglia: qui non si sa com'e' fatto l'audio, si sa solo
+        # che a una notifica corrisponde un suono.
+        self.suona = None
 
     # ------------------------------------------------------------- ciclo vita
 
@@ -235,10 +260,30 @@ class NotificheSource(Source):
                 self._ultima = ""
 
     def _mostra(self, voce):
-        striscia = self._striscia(voce)
+        """La notifica sta ferma sul pannello per il tempo previsto.
+
+        Fino alla 9.4 un messaggio che non ci stava in una riga **scorreva**,
+        come il banner. Era il caso peggiore proprio dove contava di piu': un
+        allarme lungo era rosso scuro *e* in movimento, cioe' da leggere
+        aspettando che ripassasse l'inizio. Adesso il testo sta fermo sempre,
+        spezzato su quante righe servono, e se non ci sta nemmeno cosi' si
+        taglia.
+        """
+        righe, font = self._impagina(voce["testo"])
         self._ultima = voce["testo"]
         self._showing = True
         self._mostrate += 1
+
+        # Il suono parte **qui**, insieme al primo fotogramma: e' il momento in
+        # cui la notifica esiste. Il gancio lo attacca il runtime, come per la
+        # sveglia -- una sorgente non deve sapere com'e' fatto l'audio, deve
+        # saper chiedere. Un livello, un suono: chi sente dall'altra stanza
+        # deve poter decidere se alzarsi senza girare la testa.
+        if self.suona is not None:
+            try:
+                self.suona(voce["livello"])
+            except Exception as exc:      # noqa: BLE001
+                print("[notifiche] suono non riprodotto: %s" % exc)
 
         preso = False
         if voce["interrompe"] and self.arbiter is not None:
@@ -248,54 +293,20 @@ class NotificheSource(Source):
             self.arbiter.hold_on(self.name)
             preso = True
         try:
-            if striscia.width <= self.width:
-                self._ferma(striscia, voce)
-            else:
-                self._scorri(striscia, voce)
+            scadenza = self._fine(voce)
+            acceso_prima = None
+            while self._running and time.time() < scadenza:
+                acceso = self._acceso(voce)
+                if acceso != acceso_prima:
+                    self._pubblica(self._tela(voce, righe, font, acceso))
+                    acceso_prima = acceso
+                time.sleep(0.05)
         finally:
             if preso:
                 self.arbiter.hold_off(self.name)
 
     def _fine(self, voce):
         return time.time() + voce["secondi"]
-
-    def _ferma(self, striscia, voce):
-        """Il testo ci sta: sta fermo al centro per il tempo previsto."""
-        x = (self.width - striscia.width) // 2
-        scadenza = self._fine(voce)
-        acceso_prima = None
-        while self._running and time.time() < scadenza:
-            acceso = self._acceso(voce)
-            if acceso != acceso_prima:
-                tela = Image.new("RGB", (self.width, self.height), (0, 0, 0))
-                if acceso:
-                    tela.paste(striscia, (x, 0))
-                self._pubblica(tela)
-                acceso_prima = acceso
-            time.sleep(0.05)
-
-    def _scorri(self, striscia, voce):
-        """Non ci sta: attraversa da destra a sinistra, come il banner.
-
-        Se il messaggio e' corto e la durata lunga, ripassa: meglio due giri
-        di una frase che si legge che uno solo perso mentre guardavi altrove.
-        """
-        velocita = max(10, int(self._conf().get("velocita", 60)))
-        fps = max(10, min(60, int(self._conf().get("fps", 30))))
-        passo = velocita / float(fps)
-        scadenza = self._fine(voce)
-        while self._running and time.time() < scadenza:
-            posizione = float(self.width)
-            fine = -float(striscia.width)
-            while self._running and posizione > fine:
-                tela = Image.new("RGB", (self.width, self.height), (0, 0, 0))
-                if self._acceso(voce):
-                    tela.paste(striscia, (int(round(posizione)), 0))
-                self._pubblica(tela)
-                posizione -= passo
-                time.sleep(1.0 / fps)
-            if not voce.get("ripeti", True):
-                return
 
     def _acceso(self, voce):
         if not voce["lampeggio"]:
@@ -309,18 +320,95 @@ class NotificheSource(Source):
 
     # ------------------------------------------------------------------ resa
 
-    def _striscia(self, voce):
-        """Immagine del solo testo, larga quanto serve."""
+    def _impagina(self, testo):
+        """Righe e carattere: il piu' grande in cui il messaggio ci sta.
+
+        Si provano una, due, tre, quattro righe e si tiene la prima
+        impaginazione che entra: e' lo stesso criterio con cui l'orologio
+        sceglie il carattere della colonna dei rifiuti, e ha il pregio che un
+        messaggio corto resta grande invece di rimpicciolirsi per uniformita'.
+
+        Se non entra nemmeno a quattro righe si taglia l'ultima e si mettono
+        i puntini. Il testo intero resta nella pagina web.
+        """
         from PIL import ImageDraw
-        altezza_font = max(8, int(self.height * float(
-            self._conf().get("altezza", 0.5))))
-        font = _load_font(altezza_font)
-        colore = parse_color(voce["colore"], (0xFF, 0xFF, 0xFF))
         misura = ImageDraw.Draw(Image.new("RGB", (1, 1)))
-        riquadro = misura.textbbox((0, 0), voce["testo"], font=font)
-        larghezza = max(1, riquadro[2] - riquadro[0])
-        striscia = Image.new("RGB", (larghezza + 8, self.height), (0, 0, 0))
-        disegna = ImageDraw.Draw(striscia)
-        y = (self.height - (riquadro[3] - riquadro[1])) // 2 - riquadro[1]
-        disegna.text((4, y), voce["testo"], font=font, fill=colore)
-        return striscia
+        larghezza = self.width - 2 * BORDO - 4
+        altezza_utile = self.height - 2 * BORDO - 2
+        # Il carattere non supera mai quello configurato: su una riga sola,
+        # senza tetto, un "OK" riempirebbe il pannello da bordo a bordo.
+        tetto = max(8, int(self.height * float(self._conf().get("altezza", 0.5))))
+
+        ultimo = None
+        for quante in range(1, RIGHE_MASSIME + 1):
+            alta = (altezza_utile - (quante - 1) * INTERLINEA) // quante
+            font = _load_font(max(6, min(tetto, alta)))
+            righe = _spezza(testo, font, larghezza, misura)
+            ultimo = (righe, font, larghezza, misura)
+            if len(righe) <= quante:
+                return righe, font
+        # Non ci sta: si tengono le prime righe e si taglia l'ultima.
+        righe, font, larghezza, misura = ultimo
+        tenute = righe[:RIGHE_MASSIME]
+        tenute[-1] = _accorcia(tenute[-1], font, larghezza, misura)
+        return tenute, font
+
+    def _tela(self, voce, righe, font, bordo_acceso=True):
+        """Il fotogramma: il bordo del livello e il testo fermo al centro.
+
+        Lampeggia **solo il bordo**. Prima lampeggiava tutto, testo compreso,
+        quindi meta' del tempo un allarme non si poteva leggere: l'urgenza si
+        vede da lontano e le parole restano ferme.
+        """
+        from PIL import ImageDraw
+        tela = Image.new("RGB", (self.width, self.height), (0, 0, 0))
+        disegna = ImageDraw.Draw(tela)
+        if bordo_acceso:
+            disegna.rectangle((0, 0, self.width - 1, self.height - 1),
+                              outline=parse_color(voce["colore"],
+                                                  (0xFF, 0xFF, 0xFF)),
+                              width=BORDO)
+        alte = []
+        for riga in righe:
+            riquadro = disegna.textbbox((0, 0), riga or " ", font=font)
+            alte.append((riquadro[1], riquadro[3] - riquadro[1],
+                         riquadro[2] - riquadro[0]))
+        totale = sum(h for _t, h, _w in alte) + INTERLINEA * (len(righe) - 1)
+        y = max(BORDO, (self.height - totale) // 2)
+        for riga, (cima, alta, larga) in zip(righe, alte):
+            x = max(BORDO, (self.width - larga) // 2)
+            disegna.text((x, y - cima), riga, font=font, fill=COLORE_TESTO)
+            y += alta + INTERLINEA
+        return tela
+
+
+def _spezza(testo, font, larghezza, misura):
+    """Il testo a capo sulle parole, dentro `larghezza` pixel.
+
+    Una parola piu' larga della riga -- un indirizzo, un nome di file -- non
+    si spezza a meta': si lascia sbordare e ci pensera' il taglio. Spezzare
+    una parola a caso rende illeggibili tutte e due le meta'.
+    """
+    righe = []
+    corrente = ""
+    for parola in (testo or "").split():
+        prova = (corrente + " " + parola).strip()
+        if corrente and misura.textlength(prova, font=font) > larghezza:
+            righe.append(corrente)
+            corrente = parola
+        else:
+            corrente = prova
+    if corrente:
+        righe.append(corrente)
+    return righe or [""]
+
+
+def _accorcia(riga, font, larghezza, misura):
+    """La riga con i puntini in fondo, tagliata quanto basta perche' ci stia."""
+    if misura.textlength(riga + PUNTINI, font=font) <= larghezza:
+        return riga + PUNTINI
+    tagliata = riga
+    while tagliata and misura.textlength(tagliata + PUNTINI,
+                                         font=font) > larghezza:
+        tagliata = tagliata[:-1]
+    return tagliata.rstrip() + PUNTINI

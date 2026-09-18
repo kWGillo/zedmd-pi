@@ -251,7 +251,9 @@
   {% endif %}
 </section>
 
-{% for service in services %}{% if service.suono %}
+{# Non `services`: dalla 9.4 i selettori sonori non coincidono piu' con i
+   servizi, perche' le notifiche ne hanno tre, uno per livello. #}
+{% for service in suoni_servizi %}
 <section class="card service">
   <div class="service-head">
     <h2>{{ service.label }}</h2>
@@ -272,7 +274,7 @@
     <button type="submit" name="prova" value="1">{{ t('audio.play') }}</button>
   </form>
 </section>
-{% endif %}{% endfor %}
+{% endfor %}
 
 <section class="card">
   <h2>{{ t('suoni.sveglia.title') }}</h2>

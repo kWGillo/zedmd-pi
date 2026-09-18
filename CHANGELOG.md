@@ -2,6 +2,53 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.5]
+
+### Le notifiche stanno ferme
+
+Un messaggio che non stava in una riga scorreva da destra a sinistra come il
+banner, e il colore del livello era quello delle lettere. I due difetti si
+sommavano dove contava di più: un allarme lungo era scritto in rosso scuro, in
+movimento e lampeggiante, cioè da leggere aspettando che ripassasse l'inizio.
+
+Adesso il testo sta fermo, spezzato su quante righe servono e nel carattere più
+grande in cui ci sta — una riga a 32 px, due a 29, tre a 18, quattro a 13. Si
+parte dal grande e si scende, così un messaggio corto resta grande invece di
+rimpicciolirsi per uniformità, e le parole non si spezzano mai a metà.
+
+Quello che non ci sta nemmeno a quattro righe viene **tagliato con i puntini**,
+e per intero resta nella pagina web.
+
+### Il livello è la cornice, non le lettere
+
+La gravità la porta una cornice di due pixel; il testo resta bianco. Sono due
+lavori diversi — farsi vedere da lontano e farsi leggere da vicino — e prima li
+faceva un colore solo, male tutti e due.
+
+Dell'allarme lampeggia solo la cornice. Prima lampeggiava tutto, e metà del
+tempo il messaggio non c'era.
+
+### Tre campanelli, uno per livello
+
+Le notifiche erano l'unico servizio a cui non si poteva assegnare un suono, ed
+è l'unica cosa del pannello che succede mentre non lo stai guardando: il
+compleanno lo scopri passando in soggiorno, l'allagamento in cantina no.
+
+In *Servizi → Suoni* ci sono adesso tre righe — *Notifica · info*, *Notifica ·
+avviso*, *Notifica · allarme* — che si scelgono dalla libreria media come
+quelle di tutti gli altri servizi. Tre e non uno: un campanello solo direbbe
+«è successo qualcosa» e obbligherebbe ad alzarsi per sapere che cosa.
+
+In elenco entrano i tre livelli e non la voce generica «notifiche»: se ci fosse
+anche quella, il gancio del runtime suonerebbe una seconda volta a ogni
+messaggio. E un suono che non parte — scheda occupata, file sparito — non si
+porta via la notifica: il pannello la mostra lo stesso.
+
+> I campanelli delle notifiche conviene sceglierli sopra il mezzo secondo. Gli
+> avvisi dei servizi non passano dal mixer degli effetti, e il fruscio che
+> tiene sveglio il convertitore USB vale solo durante le partite: una notifica
+> che arriva dopo ore di silenzio trova la scheda addormentata.
+
 ## [9.4]
 
 ### Le pagine dicono meno

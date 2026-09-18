@@ -253,6 +253,7 @@ class Runtime:
         self.notifiche = NotificheSource(self.cfg, self.display.width,
                                          self.display.height)
         self.notifiche.arbiter = self.arbiter
+        self.notifiche.suona = self._suona_notifica
         # Il meteo. Priorita' 54, sotto il Rolling Banner: fra due cose non
         # urgenti ha la precedenza quella che una persona ha scritto apposta.
         self.meteo = MeteoSource(self.cfg, self.display.width,
@@ -502,6 +503,29 @@ class Runtime:
                 # Una partita che non si lascia congelare non deve impedire
                 # alla sveglia di suonare: al massimo si perde quella partita.
                 print("[sveglia] %s non congelato: %s" % (nome, exc))
+
+    def _suona_notifica(self, livello):
+        """Il campanello di una notifica, scelto dal suo livello.
+
+        Tre file distinti e non uno solo, e la ragione sta nel momento in cui
+        una notifica arriva: e' l'unica cosa del pannello che succede **mentre
+        non lo stai guardando**. Un campanello unico dice «e' successo
+        qualcosa» e ti obbliga ad andare a vedere; tre dicono se vale la pena
+        alzarsi, e lo dicono dall'altra stanza.
+
+        Passa dalla strada normale degli avvisi, quindi rispetta l'interruttore
+        generale dell'audio e il volume notturno. E' la differenza voluta con
+        la sveglia, che il volume notturno lo ignora: una notifica alle tre di
+        notte puo' parlare piano, una sveglia no.
+        """
+        chiave = suoni.chiave_notifica(livello)
+        if not chiave:
+            return False
+        try:
+            return suoni.suona_servizio(self.cfg, chiave)
+        except Exception as exc:          # pragma: no cover
+            print("[notifiche] avviso non riprodotto: %s" % exc)
+            return False
 
     def _suona_sveglia(self, scelto):
         """Il suono della sveglia. (partito, motivo).

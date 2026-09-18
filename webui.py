@@ -1384,6 +1384,18 @@ def create_app(runtime):
         ]
         for voce in services:
             voce["suono"] = voce["key"] in suoni.SERVIZI_CON_SUONO
+        # L'elenco dei selettori sonori non coincide con quello dei servizi, e
+        # dalla 9.4 nemmeno per numero: le notifiche ne hanno **tre**, uno per
+        # livello. Tenerli in una lista a parte evita l'alternativa brutta,
+        # cioe' inventare tre finti servizi che comparirebbero anche fra gli
+        # interruttori con tre levette che non accendono niente.
+        suoni_servizi = [{"key": v["key"], "label": v["label"]}
+                         for v in services if v["suono"]]
+        for livello in ("info", "avviso", "allarme"):
+            suoni_servizi.append({
+                "key": "notifiche_%s" % livello,
+                "label": i18n.translate("suoni.notifica.%s" % livello,
+                                        current_language())})
         # Alle venti regioni note si aggiungono quelle che il feed sta davvero
         # nominando adesso: se MeteoAlarm scrive un nome diverso da quello che
         # ci aspettiamo, si vede nella tendina invece di doverlo indovinare.
@@ -1399,6 +1411,7 @@ def create_app(runtime):
             vista = "servizi"
         return render_template(
             "services.html", cfg=cfg, services=services, regioni=regioni,
+            suoni_servizi=suoni_servizi,
             audio=suoni.stato(cfg), suoni_file=suoni.file_disponibili(cfg),
             current=current.label if current else "—",
             mqtt=runtime.mqtt.status(),
