@@ -213,3 +213,14 @@ A109,AW109,AgustaWestland AW109
 A351,A350-1000,Airbus A350-1000
 HA4T,HondaJet,HondaJet HA-420
 SF50,Vision Jet,Cirrus SF50 Vision Jet
+
+# Aggiunti nella 9.4 dai passaggi registrati sul campo.
+PRM1,Premier I,Raytheon Premier I
+BE40,Beechjet 400,Beechcraft 400 Beechjet
+M700,M700 Fury,Piper M700 Fury
+P180,Avanti,Piaggio P.180 Avanti
+RV8,RV-8,Van's RV-8
+C295,C295,Airbus C295
+C25M,Citation M2,Cessna 525 Citation M2
+C525,CitationJet,Cessna 525 CitationJet
+GA8C,GA8 Airvan,GippsAero GA8 Airvan

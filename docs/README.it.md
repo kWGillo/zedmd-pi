@@ -30,7 +30,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`now-playing.it.md`](now-playing.it.md) · [PDF](DMD_now_playing.pdf) | Il brano in ascolto sul pannello: AirPlay 2, Spotify, MQTT, Home Assistant |
 | [`audio.it.md`](audio.it.md) · [PDF](DMD_audio.pdf) | La scheda audio USB, gli avvisi dei servizi, gli effetti dei giochi, l'audio di Doom e del Game Boy, il DMD come cassa AirPlay |
 | [`calendario.it.md`](calendario.it.md) · [PDF](DMD_calendario.pdf) | Google Calendar: collegamento, permessi, cosa finisce sul pannello |
-| [`telecamera.it.md`](telecamera.it.md) · [PDF](DMD_telecamera.pdf) | Funcam: la webcam sul pannello con pochi colori, e il pulsante fisico sulla Bonnet |
+| [`telecamera.it.md`](telecamera.it.md) · [PDF](DMD_telecamera.pdf) | FunCAM: la webcam sul pannello con pochi colori, e il pulsante fisico sulla Bonnet |
 | [`satelliti.it.md`](satelliti.it.md) · [PDF](DMD_satelliti.pdf) | I passaggi della Stazione Spaziale: preavviso, l'arco del cielo, lo spegnimento in ombra, il registro |
 | [`notifiche.it.md`](notifiche.it.md) · [PDF](DMD_notifiche.pdf) | Le notifiche da Home Assistant: il topic, i tre livelli, lo script e le automazioni pronte |
 | [`meteo.it.md`](meteo.it.md) · [PDF](DMD_meteo.pdf) | Il bollettino del mattino e l'aggiornamento ogni poche ore, le icone disegnate, e perché l'allerta della Protezione Civile non c'è ancora |
@@ -41,7 +41,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 |---|---|
 | [`doom.it.md`](doom.it.md) · [PDF](DMD_doom.pdf) | Doom sul pannello: compilazione, WAD, comandi, audio |
 | [`gameboy.it.md`](gameboy.it.md) · [PDF](DMD_gameboy.pdf) | Game Boy con PyBoy: ROM, overscan, tavolozze, audio |
-| [`joypad.it.md`](joypad.it.md) · [PDF](DMD_joypad.pdf) | Mappatura dei comandi: pad, tastiera del cabinato, chi può far cominciare una partita |
+| [`joypad.it.md`](joypad.it.md) · [PDF](DMD_joypad.pdf) | Mappatura dei comandi: pad, tastiera collegata al DMD, chi può far cominciare una partita |
 
 ## Per chi lavora al progetto
 

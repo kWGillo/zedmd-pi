@@ -5,9 +5,7 @@
 
 <section class="card">
   <h2>{{ t('nowplaying.title') }}</h2>
-  <p class="hint">{{ t('nowplaying.intro') }}</p>
   <p class="status">{{ status }}</p>
-  <p class="hint">{{ t('nowplaying.priority.hint') }}</p>
 </section>
 
 {% if result %}
@@ -66,8 +64,6 @@
     <label class="check">
       <input type="checkbox" name="cassa" {{ 'checked' if cassa.attiva }}>
       {{ t('cassa.enabled') }}</label>
-    <p class="hint">{{ t('cassa.hint') }}</p>
-    <p class="hint">{{ t('cassa.busy') }}</p>
     <button type="submit">{{ t('form.save') }}</button>
   </form>
   {% endif %}
@@ -79,16 +75,15 @@
      musica», non «che stringa c'è scritta in shairport-sync.conf». Mostrare
      `hw:CARD=Dummy` era vero e inutile: sembrava che il DMD avesse scelto la
      scheda finta, mentre era solo l'interruttore spento. #}
-  {% if cassa.nome %}
-  <p class="hint">
-    {% if cassa.attiva %}
-      {{ t('cassa.esce.da', scheda=cassa.nome) }}
-      {% if cassa.convertitore %}{{ t('cassa.convertitore') }}{% endif %}
-    {% else %}
-      {{ t('cassa.nessuna.uscita', scheda=cassa.nome) }}
-    {% endif %}
-  </p>
-  {% elif cassa.uscita %}
+  {# Ad uscita accesa non si scrive piu' da quale scheda esce: lo dice gia' il
+     titolo della scheda, e ripeterlo era una riga in piu' che nessuno legge.
+     Resta il caso che va detto — l'uscita spenta — e la nota del convertitore,
+     che spiega un compromesso vero. #}
+  {% if cassa.nome and not cassa.attiva %}
+  <p class="hint">{{ t('cassa.nessuna.uscita', scheda=cassa.nome) }}</p>
+  {% elif cassa.nome and cassa.convertitore %}
+  <p class="hint">{{ t('cassa.convertitore') }}</p>
+  {% elif cassa.uscita and not cassa.nome %}
   <p class="hint">{{ t('cassa.senza.scheda') }}</p>
   {% endif %}
 
@@ -135,7 +130,6 @@
 <form method="post" action="{{ url_for('api_mqtt_musica') }}">
   <section class="card">
     <h2>{{ t('nowplaying.topics') }}</h2>
-    <p class="hint">{{ t('nowplaying.topics.hint') }}</p>
 
     <p class="status">
       {% if not mqtt.available %}{{ t('nowplaying.mqtt.missing', package=mqtt.package) }}

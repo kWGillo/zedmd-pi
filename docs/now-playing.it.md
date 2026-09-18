@@ -417,7 +417,7 @@ partire musica. Sparisce da solo dopo un minuto.
 Mentre suona qualcosa il player resta a schermo al posto di foto e banner —
 è musica continua, non un evento. Lascia passare Air Radar, che dura una
 decina di secondi. E si toglie di mezzo appena arrivano frame da Batocera:
-durante una partita comanda il flipper.
+durante una partita comanda chi sta giocando.
 
 Un brano in pausa resta a schermo per il tempo impostato in *Permanenza in
 pausa* (90 secondi di serie), poi restituisce il display.
@@ -564,7 +564,7 @@ lo sfarfallio. Tenerne una in permanenza sullo schermo significava tenerci il
 caso peggiore.
 
 Quel ragionamento non è stato cancellato: è stato **aggirato con uno strumento
-già in casa**. La Funcam mostra una telecamera su questo stesso vetro
+già in casa**. La FunCAM mostra una telecamera su questo stesso vetro
 riducendo i livelli di colore per canale, e funziona. La copertina passa dalla
 stessa riduzione.
 
@@ -578,7 +578,7 @@ stessa riduzione.
 
 Il disordine (Floyd-Steinberg) non è un abbellimento: senza, una faccia in
 otto colori diventa una macchia di campiture piatte; con, l'occhio rimette
-insieme le sfumature da solo. È lo stesso motivo per cui la Funcam è
+insieme le sfumature da solo. È lo stesso motivo per cui la FunCAM è
 guardabile.
 
 Sopra sei livelli non si sale, e il limite non è estetico: PIL tiene al

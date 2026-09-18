@@ -7,7 +7,6 @@
 
 <section class="card">
   <h2>{{ t('webcam.title') }}</h2>
-  <p class="hint">{{ t('webcam.intro') }}</p>
 
   {% if not ffmpeg %}
   <p class="status">{{ t('media.noffmpeg') }}</p>
@@ -29,7 +28,6 @@
 
 <section class="card">
   <h2>{{ t('webcam.button.now') }}</h2>
-  <p class="hint">{{ t('webcam.button.now.hint') }}</p>
   <form method="post" action="{{ url_for('api_telecamera_accendi') }}" class="inline">
     <input type="hidden" name="valore" value="{{ '0' if dal_vivo else '1' }}">
     <button type="submit" class="toggle {{ 'on' if dal_vivo }}">
@@ -40,7 +38,6 @@
 
 <section class="card">
   <h2>{{ t('webcam.button') }}</h2>
-  <p class="hint">{{ t('webcam.button.what') }}</p>
 
   <dl class="grid">
     <dt>{{ t('webcam.button.click') }}</dt><dd>{{ t('webcam.button.click.what') }}</dd>
@@ -54,7 +51,6 @@
   {% elif gpiozero.in_corso %}
   <p class="status">{{ t('webcam.gpiozero.running') }}</p>
   {% else %}
-  <p class="hint">{{ t('webcam.gpiozero.hint', package=gpiozero.pacchetto) }}</p>
   <form method="post" action="{{ url_for('api_telecamera_gpiozero') }}" class="inline">
     <button type="submit">{{ t('webcam.gpiozero.install',
                                package=gpiozero.pacchetto) }}</button>
@@ -62,7 +58,8 @@
   {% endif %}
   {% if gpiozero.log %}<pre class="mono">{{ gpiozero.log }}</pre>{% endif %}
 
-  <h3>{{ t('webcam.button.wiring') }}</h3>
+  {# Di tutto quello che c'era scritto qui resta la sola cosa che serve avere
+     sotto gli occhi mentre si salda: dove va il filo. #}
   <p class="hint">{{ t('webcam.button.wiring.hint',
                        gpio=cfg.webcam.pulsante.gpio) }}</p>
 
@@ -80,7 +77,6 @@
         GPIO {{ pin }}{% if pin == 25 %} — {{ t('webcam.button.suggested') }}{% endif %}</option>
       {% endfor %}
     </select>
-    <p class="hint">{{ t('webcam.button.hint') }}</p>
     <button type="submit">{{ t('common.apply') }}</button>
   </form>
 
@@ -92,7 +88,6 @@
   <form method="post" action="{{ url_for('api_telecamera_riarma') }}" class="inline">
     <button type="submit">{{ t('webcam.button.rearm') }}</button>
   </form>
-  <p class="hint">{{ t('webcam.button.rearm.hint') }}</p>
   {% endif %}
   {% endif %}
 </section>
@@ -104,7 +99,6 @@
 {% if dispositivi %}
 <section class="card">
   <h2>{{ t('webcam.shoot') }}</h2>
-  <p class="hint">{{ t('webcam.shoot.hint') }}</p>
   <div class="actions">
     <form method="post" action="{{ url_for('api_telecamera_scatta') }}">
       <button type="submit">{{ t('webcam.shoot.photo') }}</button>
@@ -130,7 +124,6 @@
         {{ voce.nome }} ({{ voce.path }})</option>
       {% endfor %}
     </select>
-    <p class="hint">{{ t('webcam.device.hint') }}</p>
 
     <label for="stile">{{ t('webcam.style') }}</label>
     <select id="stile" name="stile">
@@ -139,7 +132,6 @@
         {{ t('webcam.style.' ~ chiave) }}</option>
       {% endfor %}
     </select>
-    <p class="hint">{{ t('webcam.style.hint') }}</p>
 
     <label for="livelli_colore">{{ t('webcam.depth') }}</label>
     <input type="number" id="livelli_colore" name="livelli_colore"
@@ -150,12 +142,10 @@
     <label for="livelli_grigio">{{ t('webcam.levels') }}</label>
     <input type="number" id="livelli_grigio" name="livelli_grigio" min="2" max="16"
            value="{{ cfg.webcam.livelli_grigio }}">
-    <p class="hint">{{ t('webcam.levels.hint') }}</p>
 
     <label for="fps">{{ t('webcam.fps') }}</label>
     <input type="number" id="fps" name="fps" min="1" max="30"
            value="{{ cfg.webcam.fps }}">
-    <p class="hint">{{ t('webcam.fps.hint') }}</p>
 
     <div class="row">
       <div><label for="capture_width">{{ t('webcam.width') }}</label>
@@ -165,7 +155,6 @@
         <input type="number" id="capture_height" name="capture_height"
                min="120" max="1080" value="{{ cfg.webcam.capture_height }}"></div>
     </div>
-    <p class="hint">{{ t('webcam.size.hint') }}</p>
 
     <label for="gif_secondi">{{ t('webcam.gifsec') }}</label>
     <input type="number" id="gif_secondi" name="gif_secondi" min="1" max="15"
@@ -186,7 +175,6 @@
 {% if scatti %}
 <section class="card">
   <h2>{{ t('webcam.gallery') }}</h2>
-  <p class="hint">{{ t('webcam.gallery.hint') }}</p>
   <ul class="mono">
     {% for voce in scatti %}
     <li>{{ voce.nome }}</li>
@@ -197,7 +185,6 @@
 
 <section class="card">
   <h2>{{ t('webcam.privacy') }}</h2>
-  <p class="hint">{{ t('webcam.privacy.hint') }}</p>
 </section>
 
 {% endblock %}

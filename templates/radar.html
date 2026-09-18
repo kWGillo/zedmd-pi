@@ -78,8 +78,6 @@
       </label>
       {% endfor %}
     </div>
-    <p class="hint">{{ t('radar.fields.hint') }}</p>
-    <p class="hint">{{ t('radar.route.hint') }}</p>
 
     <div class="row3">
       <div><label for="overflow">{{ t('radar.overflow') }}</label>
@@ -97,7 +95,6 @@
         <input type="number" id="scroll_speed" name="scroll_speed" min="10" max="200"
                value="{{ cfg.air_radar.scroll_speed }}"></div>
     </div>
-    <p class="hint">{{ t('radar.overflow.hint') }}</p>
 
     <label>{{ t('radar.units') }}</label>
     <div class="row3">
@@ -184,7 +181,6 @@
 <section class="card">
   <h2>{{ t('radar.notes') }}</h2>
   <p class="hint">{{ t('radar.notes.coverage') }}</p>
-  <p class="hint">{{ t('radar.notes.radius') }}</p>
 </section>
 
 <section class="card">

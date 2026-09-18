@@ -14,7 +14,7 @@ sono nemmeno permessi da sistemare su `/dev/input`.
 
 | Via | Tempo | Quando conviene |
 |---|---|---|
-| **USB** | trenta secondi | prova rapida, oppure pad lasciato collegato nel cabinato |
+| **USB** | trenta secondi | prova rapida, oppure pad lasciato collegato al DMD |
 | **Bluetooth** | due minuti, una volta sola | uso normale: dopo il primo accoppiamento basta premere **PS** |
 
 ---
@@ -29,7 +29,7 @@ sono nemmeno permessi da sistemare su `/dev/input`.
 | **Per Bluetooth** | il Bluetooth del Pi acceso; niente adattatori né pacchetti aggiuntivi |
 
 Il pad serve a due cose distinte: i **giochi** scritti per il pannello
-(Breakout, Invaders) e **Doom**. Sono pagine diverse con impostazioni proprie,
+(Breakout, Invaders, Snake) e **Doom**. Sono pagine diverse con impostazioni proprie,
 ma il pad è lo stesso e si riconosce una volta sola.
 
 ---
@@ -150,7 +150,7 @@ levette e croce direzionale. Se `evtest` non è installato:
 
 ## 5. I comandi
 
-### 5.1 Nei giochi (Breakout, Invaders)
+### 5.1 Nei giochi (Breakout, Invaders, Snake)
 
 | Comando | Sul pad |
 |---|---|
@@ -164,6 +164,20 @@ levette e croce direzionale. Se `evtest` non è installato:
 > tasto frontale chiudeva la partita: stanno tutti e quattro sotto le stesse
 > dita mentre si gioca, e uno di loro non può portare via il pannello. Per
 > uscire restano Share/Select e PS, che si premono apposta.
+
+**Snake sterza in assoluto.** Le quattro direzioni puntano dove dicono: su va
+su, sinistra va a sinistra. La prima stesura sterzava in relativo — sinistra
+gira a sinistra rispetto a dove stai andando — perché davo per scontato un
+cabinato con i due pulsanti del flipper. Quel cabinato non esiste: questo è un
+pannello su una mensola e chi gioca ha un controller in mano, e un controller
+ha la croce direzionale. Con quattro direzioni vere lo sterzo relativo non è
+una soluzione ma un indovinello: premendo sinistra mentre si va in giù il
+serpente girava a destra, che è l'opposto di quello che dice il pollice.
+
+Il dietrofront si ignora, e si scarta **al momento di muoversi** e non alla
+pressione: a trenta fotogrammi al secondo due tasti sfiorati dentro lo stesso
+trentesimo di secondo farebbero un mezzo giro, e il serpente si morderebbe da
+solo senza aver percorso una casella.
 
 ### 5.2 In Doom
 
@@ -206,12 +220,12 @@ nessuno, e salva chi ha un pad che si dichiara diversamente.
 ## 6. Chi può far cominciare una partita
 
 Questa è una distinzione voluta e vale la pena capirla, perché è la differenza
-fra un cabinato usabile e uno che si porta via il pannello da solo.
+fra un pannello che si comanda e uno che si porta via il display da solo.
 
 | Origine | Può cominciare una partita? | Perché |
 |---|---|---|
 | **Options / PS sul pad** | **sì**, di serie | un pulsante preciso su un pad che si tiene in mano non si preme per sbaglio |
-| **tastiera del cabinato** | **no**, di serie | il DMD sta in mezzo a un flipper: un tasto sfiorato per caso non deve rubare il pannello a metà partita |
+| **tastiera collegata al DMD** | **no**, di serie | una tastiera lasciata sul mobile si sfiora: un tasto premuto per caso non deve rubare il pannello a metà partita |
 | pulsante **Gioca** della web UI | sì, sempre | è un gesto esplicito |
 | interruttore in **Home Assistant** | sì, sempre | idem |
 
@@ -302,6 +316,7 @@ di Doom. Compaiono da soli con MQTT Discovery, se `mqtt.discovery` è acceso:
 |---|---|
 | `switch.dmd_gioco_breakout` | accende e spegne una partita a Breakout |
 | `switch.dmd_gioco_invaders` | idem per Invaders |
+| `switch.dmd_gioco_snake` | idem per Snake |
 | `switch.dmd_doom` | idem per Doom |
 
 Sono **mutuamente esclusivi**: la presa del pannello è una sola, quindi

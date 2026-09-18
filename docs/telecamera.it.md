@@ -1,5 +1,5 @@
 ---
-title: "Funcam"
+title: "FunCAM"
 subtitle: "Passi davanti alla webcam e ti vedi sul pannello, con pochi colori"
 ---
 
@@ -22,7 +22,7 @@ tavolozza dei primi computer a colori.
 Il vincolo hardware e l'estetica voluta sono la stessa cosa. Capita di rado, e
 qui si sfrutta invece di combatterlo.
 
-Nella pagina **Funcam** si sceglie fra tre aspetti:
+Nella pagina **FunCAM** si sceglie fra tre aspetti:
 
 | Aspetto | Cosa fa |
 |---|---|
@@ -159,7 +159,7 @@ peggio del nero, perché sembra che funzioni.
 
 # 4. Dove sta, e chi ha la precedenza
 
-Funcam ha **priorità 51**: sopra il Media Player (50), sotto il Rolling
+FunCAM ha **priorità 51**: sopra il Media Player (50), sotto il Rolling
 Banner (55).
 
 Acceso il servizio, la ripresa dal vivo *è* quello che si vuole vedere, quindi
@@ -215,7 +215,15 @@ di sapere di aver tenuto abbastanza senza contare a mente. E una pressione
 lunga vale *un* gesto: senza quel controllo, alzando il dito partirebbe anche
 un clic, che riaccenderebbe subito quello che si era appena spento.
 
-A servizio spento il pulsante non esiste — non si apre nemmeno il piedino.
+A servizio spento la FunCAM non apre il piedino — e fino alla 9.1 questo voleva
+dire che il pulsante non lo leggeva **nessuno**, perché il piedino era suo. Chi
+la webcam non la usa aveva quindi un pulsante saldato e muto: la sveglia
+squillava, la pagina diceva di premerlo, e premerlo non faceva niente.
+
+Il pulsante adesso è del DMD, non della FunCAM. Mentre la sveglia squilla è suo:
+se nessuno lo tiene se lo apre da sola, e se ce l'ha la FunCAM glielo lascia,
+perché il clic le arriva e lei lo gira comunque alla sveglia. Fuori da quel
+momento vale tutto quello che c'è scritto qui sopra.
 
 ## Il servizio arma, non accende
 
@@ -223,7 +231,7 @@ Una regola sola, e vale sempre — con o senza pulsante saldato.
 
 L'interruttore nella pagina Servizi **non accende la telecamera**: dice che la
 si *può* accendere. La ripresa parte solo quando qualcuno la chiama: il
-pulsante fisico, oppure i due comandi in cima alla pagina Funcam. A servizio
+pulsante fisico, oppure i due comandi in cima alla pagina FunCAM. A servizio
 spento non succede niente, né dal pulsante né dalla pagina, e il piedino non è
 nemmeno aperto.
 
@@ -292,7 +300,7 @@ Bonnet lascia le code dei piedini accessibili.
 ### Cosa serve dal lato software
 
 `python3-gpiozero`, che su Raspberry Pi OS c'è già. Se manca, **si installa da
-un pulsante nella pagina Funcam** — non c'è nessun comando da copiare in un
+un pulsante nella pagina FunCAM** — non c'è nessun comando da copiare in un
 terminale, per lo stesso motivo per cui esiste il pulsante fisico: chi ha
 appena saldato qualcosa sotto il pannello non ha un terminale aperto.
 

@@ -221,8 +221,29 @@ class AirRadarSource(Source):
             return
         self._running = True
         self._wake.clear()
+        self._ricostruisci_ignoti()
         self._thread = threading.Thread(target=self._loop, name="airradar", daemon=True)
         self._thread.start()
+
+    def _ricostruisci_ignoti(self):
+        """Rimette in piedi l'elenco delle sigle sconosciute leggendo il registro.
+
+        L'elenco vive in memoria, quindi a ogni riavvio del servizio tornava
+        vuoto: la pagina diceva «niente da aggiungere» mentre nel registro
+        c'erano centinaia di passaggi mai tradotti. Era la lista della spesa,
+        e si cancellava da sola a ogni riavvio.
+
+        Se il registro non c'e' o non si legge non succede niente: questa e'
+        una comodita', non un requisito per far volare il radar.
+        """
+        try:
+            quanti = lookup.ricostruisci(self.log_path())
+        except Exception as exc:                     # pragma: no cover
+            print("[airradar] sigle ignote non ricostruite: %s" % exc)
+            return
+        if quanti:
+            print("[airradar] registro riletto: %d voli, %d sigle da tradurre"
+                  % (quanti, len(lookup.unknown() or [])))
 
     def stop(self):
         self._running = False

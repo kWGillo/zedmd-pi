@@ -83,7 +83,7 @@ caso.
 La **Pi Zero 2 W ha solo Wi-Fi a 2,4 GHz**. Se il router separa le due bande con
 SSID diversi, va indicata quella a 2,4. Pi 3B+ e Pi 4 supportano anche i 5 GHz.
 
-Il DMD sta dentro un cabinato di legno, spesso con lamiere e trasformatori
+Il DMD può stare dentro un mobile, magari con lamiere e trasformatori
 vicini: se il segnale è debole i frame arrivano a scatti. Verifica la qualità:
 
 ```bash
@@ -206,7 +206,7 @@ Due trappole viste sul campo:
   avvia niente.
 - **Cambiando il Raspberry cambia l'indirizzo IP.** `WiFiAddr` punta ancora al
   vecchio, e il sintomo è identico a "il servizio non parte". Il modo più
-  rapido per distinguerli è provare l'handshake dal cabinato:
+  rapido per distinguerli è provare l'handshake da un'altra macchina:
 
   ```bash
   curl -s http://192.168.0.XXX/handshake; echo

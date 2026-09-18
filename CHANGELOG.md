@@ -2,6 +2,72 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.4]
+
+### Le pagine dicono meno
+
+Venti spiegazioni tolte da Musica, Radar, FunCAM e Impostazioni, dove il titolo
+diceva già quello che diceva il paragrafo. Qualche etichetta riscritta con le
+parole di chi la usa invece che con quelle di chi l'ha scritta: «Uscita musicale
+(solo AirPlay)», «Usa cassa integrata», «Altoparlante attivo», «Volume effetti
+sonori servizi».
+
+La Funcam si chiama **FunCAM**, ovunque. Della sua pagina resta una riga sola
+sul cablaggio, che è l'unica che serve avere sotto gli occhi mentre si salda:
+il pulsante va fra GPIO 25 e massa.
+
+### Il radar dimenticava la propria lista della spesa
+
+L'elenco delle sigle mai tradotte — quello che dice quali aeroporti, modelli e
+compagnie conviene aggiungere in tabella per primi — viveva solo in memoria. A
+ogni riavvio del servizio la pagina tornava vuota, mentre nel registro dei voli
+c'erano centinaia di passaggi senza nome.
+
+Adesso all'avvio il registro si rilegge e l'elenco si ricostruisce, con i
+conteggi veri e l'ora vera dell'ultimo avvistamento invece di quella del
+riavvio. La ricostruzione non introduce una seconda verità: ripassa il registro
+**dalle stesse funzioni** che traducono un aereo mentre passa, così la regola
+che distingue una compagnia da un'immatricolazione, e quella che spacca
+`LOWW → LIMC` nei due aeroporti, restano scritte in un posto solo.
+
+### Le tabelle imparano da quello che è passato davvero
+
+Da 846 passaggi registrati sul campo sono usciti 22 aeroporti, 9 modelli di
+aereo e 12 compagnie che il pannello mostrava come sigle.
+
+Gli aeroporti sono stati verificati uno per uno sull'elenco ICAO invece che a
+memoria. Dei modelli e delle compagnie sono stati aggiunti solo quelli
+confermati da una fonte: gli altri restano nell'elenco delle sigle da tradurre,
+che è più onesto di un nome inventato — cinque modelli e trentatré compagnie,
+tutti visti una o due volte.
+
+Dopo l'aggiunta, degli aeroporti presenti nel registro non ne resta ignoto
+nessuno.
+
+Le impronte delle tabelle precedenti entrano in `lookup.DISTRIBUITI`: è la riga
+senza la quale chi aggiorna si terrebbe le tabelle vecchie e non vedrebbe
+niente di tutto questo.
+
+### I manuali dicono di nuovo la verità
+
+Dieci manuali su diciassette erano rimasti indietro, e in un paio di punti
+mentivano. Adesso raccontano Snake e il suo sterzo a quattro direzioni, il
+volume separato dei giochi e il fruscio che tiene sveglia la scheda, la sveglia
+che si prende il pulsante quando la FunCAM è spenta, la barra del timer in
+fondo all'orologio, i trenta gradi dei satelliti, la correzione della pioggia
+sul meteo, e le tabelle delle sigle del radar.
+
+Due errori veri: la tabella delle priorità nel manuale completo ne elencava
+undici su quindici — mancavano sveglia, notifiche, satelliti e meteo, cioè
+proprio quelle aggiunte dopo che la tabella era stata scritta — e la riga sul
+pulsante della sveglia mandava a cercare una casella della FunCAM che non
+c'entra più niente.
+
+Di «cabinato» e «flipper» resta una sola occorrenza in tutti i manuali, ed è
+voluta: racconta perché Snake ha smesso di sterzare in relativo.
+
+I PDF sono stati rigenerati.
+
 ## [9.3]
 
 ### Le spiegazioni nelle pagine diventano una riga

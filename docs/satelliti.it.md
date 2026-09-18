@@ -198,9 +198,22 @@ Si spegne dalla casella *«Mostra anche i passaggi che non si vedono»*.
 
 ### Elevazione minima
 
-Quanti gradi sopra l'orizzonte perché valga la pena annunciarlo. **Dieci
-gradi** vuol dire «sopra i tetti»: più in basso ci sono case, alberi e
-foschia.
+Quanti gradi sopra l'orizzonte perché valga la pena annunciarlo. Il
+predefinito è **trenta gradi**, e vuol dire «alza il naso».
+
+Fino alla 9.0 erano dieci, presi dalla regola dei radioamatori: sotto i dieci
+gradi l'atmosfera attenua il segnale **radio**. Ma qui il ricevitore sono gli
+occhi di chi sta in terrazzo, e davanti a quegli occhi ci sono i tetti. A dieci
+gradi un oggetto a 420 km è a 1390 km di distanza al suolo e **2,8 magnitudini
+più fioco**: tredici volte, quando non è dietro un comignolo. A trenta ne perde
+1,3.
+
+Costa circa metà degli annunci, e si vede nella tabella qui sotto: la frazione
+di passaggi che supera una soglia è la larghezza della fascia di tracce al
+suolo che la produce. A sessanta gradi ne resterebbe il 16% e il servizio
+smetterebbe di esistere. Chi conosce il proprio orizzonte può rimetterla dove
+vuole: chi aveva scelto un valore suo se lo tiene, e solo chi aveva ancora il
+vecchio predefinito esatto viene portato a trenta.
 
 **Non è un raggio in chilometri**, e non lo si può ragionare come quello del
 radar. Per gli aerei, che volano a dieci chilometri, «entro 30 km» vuol dire

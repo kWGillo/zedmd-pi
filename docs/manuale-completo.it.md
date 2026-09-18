@@ -569,7 +569,29 @@ dei nomi dei giorni (italiano, francese, inglese), lampeggio dei due punti.
 immediata, durate e intervalli, adattamento al pannello, modalità pixel art.
 
 **Radar** — coordinate e raggio, provider ADS-B, scelta dei parametri di volo,
-registro CSV dei passaggi con scaricamento, prova diagnostica di una rotta.
+registro CSV dei passaggi con scaricamento, prova diagnostica di una rotta, e le
+due tabelle che trasformano le sigle in nomi.
+
+> **Le sigle e i nomi.** Il radar riceve codici: il modello come designatore
+> ICAO (`B738`), gli aeroporti della rotta come IATA (`MXP`) o ICAO (`LIMC`), la
+> compagnia come prefisso del nominativo (`AFR1732` → `AFR`). Tre tabelle in
+> `/var/lib/dmd` — `aerei.csv`, `aeroporti.csv`, `compagnie.csv` — li
+> trasformano in nomi leggibili. Un codice che non c'è viene mostrato com'è: non
+> è un errore, è un codice che non conosciamo ancora.
+>
+> La pagina tiene l'elenco di quei codici, **ordinato per quante volte sono
+> passati davvero**: è la lista della spesa, e dice cosa conviene aggiungere per
+> primo invece di doverlo indovinare. Fino alla 9.3 quell'elenco viveva solo in
+> memoria e a ogni riavvio del servizio tornava vuoto, mentre nel registro dei
+> voli c'erano centinaia di passaggi senza nome. Adesso all'avvio il registro si
+> rilegge e l'elenco si ricostruisce, con i conteggi veri e l'ora vera
+> dell'ultimo avvistamento.
+>
+> Le tabelle distribuite col pacchetto sono un punto di partenza, non un
+> archivio: contengono quello che è passato sopra un pannello vero. Le tue
+> aggiunte non vengono mai sovrascritte da un aggiornamento — un file toccato da
+> te resta tuo, e solo un file ancora identico a un nostro modello viene
+> sostituito con quello nuovo.
 
 **Calendario** — collegamento dell'account Google e nient'altro: gli
 appuntamenti si scrivono su Google, il pannello li mostra e basta. Guida
@@ -600,12 +622,12 @@ ciascuna, e le due tabelle delle eccezioni.
 attuale, gli indirizzi a cui il DMD risponde. Le password le custodisce
 NetworkManager, non il `config.json`. Guida completa in `docs/rete.it.md`.
 
-**Funcam** — la webcam sul pannello: scelta della telecamera, risoluzione,
+**FunCAM** — la webcam sul pannello: scelta della telecamera, risoluzione,
 aspetto, i comandi per accendere e spegnere la ripresa, il pulsante fisico
 sulla Bonnet. Guida completa in `docs/telecamera.it.md`.
 
-**Giochi** — Breakout e Invaders, i comandi di tastiera e pad, e la scheda
-degli emulatori esterni che porta a Doom e al Game Boy. Guide in
+**Giochi** — Breakout, Invaders e Snake, i comandi di tastiera e pad, e la
+scheda degli emulatori esterni che porta a Doom e al Game Boy. Guide in
 `docs/doom.it.md`, `docs/gameboy.it.md` e `docs/joypad.it.md`.
 
 **Aggiornamenti** — controllo e installazione della nuova versione da GitHub,
@@ -619,7 +641,7 @@ scelta viene salvata. Riportando la voce *Lingua dell'interfaccia* su
 **predefinito** si torna a seguire il browser.
 
 I nomi dei giorni che appaiono **sul pannello** hanno un'impostazione a parte,
-nella pagina Orologio, e comprendono anche il francese: chi guarda il cabinato
+nella pagina Orologio, e comprendono anche il francese: chi guarda il pannello
 non è necessariamente chi configura il sistema.
 
 ### 10.4 Come viene deciso cosa appare sul display
@@ -629,15 +651,19 @@ stesso servizio e un arbitro sceglie chi vince:
 
 | Priorità | Sorgente |
 |---|---|
+| 120 | Sveglia |
 | 100 | ZeDMD |
 | 90 | Anteprima (gestione media) |
+| 70 | Notifiche |
+| 61 | Satelliti |
 | 60 | Air Radar |
 | 59 | Google Calendar |
 | 58 | Now Playing |
 | 57 | Scadenze |
 | 56 | Compleanni |
 | 55 | Rolling Banner |
-| 51 | Funcam |
+| 54 | Meteo |
+| 51 | FunCAM |
 | 50 | Media Player |
 | 10 | Orologio |
 
@@ -645,9 +671,10 @@ stesso servizio e un arbitro sceglie chi vince:
 registrato per primo, quindi la seconda non andrebbe mai a schermo. Una prova
 rifiuta i pareggi.
 
-Le **partite** — Doom, Game Boy, Breakout e Invaders — non partecipano a questa
-gara: prendono il pannello e lo tengono finché non si esce, sopra chiunque
-altro, ZeDMD compreso.
+Le **partite** — Doom, Game Boy, Breakout, Invaders e Snake — non partecipano a
+questa gara: prendono il pannello e lo tengono finché non si esce, sopra
+chiunque altro, ZeDMD compreso. L'unica che passa sopra anche a loro è la
+sveglia, che è a 120 apposta.
 
 ZeDMD prende il controllo **immediatamente** appena un client si connette o
 arriva un frame, e lo mantiene per `grace_seconds` dopo l'ultimo segnale. Il
@@ -721,7 +748,7 @@ verifica che `zedmd.http_port` sia 80 e `web.port` sia 8080.
 Se non vedi **nemmeno** la riga dell'handshake, il client non ha mai parlato
 con il Raspberry: o `dmdserver` non è in esecuzione, o `WiFiAddr` punta a un
 indirizzo sbagliato — succede tipicamente dopo aver cambiato scheda SD o
-Raspberry. Lo si distingue in un secondo provando dal cabinato:
+Raspberry. Lo si distingue in un secondo provando da un altro apparecchio:
 
 ```bash
 curl -s http://192.168.0.XXX/handshake; echo

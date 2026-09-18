@@ -38,8 +38,21 @@ preme, non si digita — e un campo per scriverne una qualsiasi. Si può dare un
 nome («Pasta», «Forno»), che compare sul pannello quando squilla: serve a
 sapere *perché* sta suonando, non solo che sta suonando.
 
-Il timer è **uno solo** e sostituisce quello in corso. Due che scadono insieme
-darebbero un unico squillo con due motivi, cioè un'informazione persa.
+Il timer è **uno solo**. Due che scadono insieme darebbero un unico squillo con
+due motivi, cioè un'informazione persa. Finché ne sta andando uno i comandi per
+avviarne un altro non compaiono: restano il conto alla rovescia e «Annulla il
+timer», e per cambiarlo si annulla e si rifà. Prima i comandi restavano lì, e
+premerli con il campo vuoto rispondeva «durata non valida» mentre il timer
+stava andando benissimo — un errore inventato su un'azione che non andava
+nemmeno offerta.
+
+**Sul pannello si vede.** Mentre il timer scorre, l'orologio ha in fondo una
+barra rossa spessa due pixel che **si accorcia** man mano che il conto scende:
+a metà timer è larga mezzo pannello. Il timer si mette da una pagina web, ma la
+pasta si guarda in cucina, e in cucina l'unica cosa che si guarda è il
+pannello. Una riga fissa direbbe soltanto che un timer c'è; una che si accorcia
+costa gli stessi due pixel e dice anche quanto manca, senza scrivere numeri
+sopra un orologio che di numeri ne ha già.
 
 # Che cosa succede quando scatta
 
@@ -47,8 +60,8 @@ Il pannello diventa un orologio che **lampeggia**, in rosso, con l'etichetta
 sotto se l'hai scritta. La scheda audio suona, e continua a bussare ogni
 secondo e mezzo finché non la fermi.
 
-La si ferma in tre modi: il **pulsante della Funcam** sul cabinato, il pulsante
-nella pagina, oppure Home Assistant. Se non la ferma nessuno si spegne da sola
+La si ferma in tre modi: il **pulsante fisico**, il pulsante nella pagina,
+oppure Home Assistant. Se non la ferma nessuno si spegne da sola
 dopo i secondi che hai indicato — una sveglia che suona per sempre in una casa
 vuota è un dispetto ai vicini, non una funzione.
 
@@ -80,14 +93,24 @@ il suono non vuole sentire niente.
 
 # Il pulsante
 
-Non ne aggiunge uno nuovo: usa quello della **Funcam**, che sul cabinato c'è
-già. Mentre la sveglia squilla quel pulsante appartiene a lei — un clic la
-ferma e **non scatta nessuna foto**.
+Non ne aggiunge uno nuovo: usa il pulsante fisico del DMD, quello che sta sul
+GPIO 25. Mentre la sveglia squilla quel pulsante **è suo** — un clic la ferma e
+non scatta nessuna foto.
 
-La decisione sta in un punto solo. La telecamera non sa che esista una sveglia:
-ha un gancio che il runtime le attacca, e prima di agire chiede se qualcun
-altro abbia diritto a quel clic. È la stessa forma con cui `suoni` sa che sta
-suonando musica senza conoscere Now Playing.
+Fino alla 9.1 quel pulsante non era del DMD ma della FunCAM: lo apriva `start()`
+della telecamera, quindi esisteva solo mentre il servizio FunCAM era acceso. Con
+la FunCAM spenta — il caso normale di chi la webcam non la usa — la sveglia
+squillava, la pagina diceva di premere il pulsante, e premerlo non faceva
+niente. Da fuori sembrava una saldatura sbagliata.
+
+Adesso il pulsante è del DMD. Mentre la sveglia suona se lo prende lei: se
+nessuno lo tiene lo apre da sola, e se ce l'ha già la FunCAM glielo lascia,
+perché il clic le arriva e lei lo gira comunque alla sveglia. Lo rilascia il
+ciclo principale e non `zittisci`, che viene chiamata dal callback del pulsante
+stesso: chiudere un oggetto `gpiozero` da dentro il suo gestore di eventi è il
+modo più rapido di piantare un thread.
+
+Chi non lo vuole mette `sveglia.pulsante` a falso in configurazione.
 
 # E i giochi?
 
@@ -142,4 +165,4 @@ cancellare la sveglia di domani.
 | Lampeggia ma è muta | l'audio generale è spento in Impostazioni |
 | Suona pianissimo | il livello hardware della scheda: vedi il manuale dell'audio |
 | Si ferma troppo presto | «Suona per» è basso |
-| Non si ferma col pulsante | la Funcam non ha un pulsante configurato |
+| Non si ferma col pulsante | `sveglia.pulsante` è a falso, oppure il pulsante non è saldato: si prova con `gpiozero` a servizio fermo |

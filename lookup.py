@@ -97,14 +97,17 @@ def template(kind):
 DISTRIBUITI = {
     "airline": {
         "485c739df2710e5f1e03b4ec71276031",   # 1.12 - 1.12.5
+        "d2931b107de1ea74a1fd1cf6a35a222a",   # 1.13 - 9.3
     },
     "aircraft": {
         "0d763ff25342351827c349175789dcc4",   # 1.11 - 1.11.2
         "7a3e43b60e5e98ec2f8698fc02b4d959",   # 1.11.3 - 1.12.5
+        "011ddce0813df36532e15c1fd86a98ac",   # 1.13 - 9.3
     },
     "airport": {
         "96678004b56af040372199f37aa1c08b",   # 1.11 - 1.11.2, solo codici IATA
         "8407e93552b46e74af88f19e1312626c",   # 1.11.3 - 1.12.5
+        "4884b249008a42c68fbd2c1b934c0a68",   # 1.13 - 9.3
     },
 }
 
@@ -325,22 +328,39 @@ def route(text, index=0):
 
     Si conservano i separatori originali: cambia solo cio' che sta in mezzo.
     """
-    text = (text or "").strip()
-    if not text:
-        return ""
-    out = []
+    return "".join(_lookup("airport", pezzo, index) if sigla else pezzo
+                   for sigla, pezzo in _pezzi_rotta(text))
+
+
+def _pezzi_rotta(testo):
+    """Spezza una rotta in (e' una sigla, testo), tenendo i separatori.
+
+    Sta a parte perche' la regola di che cosa sia una sigla dentro `MXP→FCO`
+    serve in due posti: qui per tradurre, e in `ricostruisci` per sapere quali
+    sigle sono passate. Scriverla due volte vorrebbe dire due verita' che un
+    giorno divergono.
+    """
+    testo = (testo or "").strip()
+    if not testo:
+        return []
+    fuori = []
     token = ""
-    for ch in text:
+    for ch in testo:
         if ch.isalnum():
             token += ch
-        else:
-            if token:
-                out.append(_lookup("airport", token, index))
-                token = ""
-            out.append(ch)
+            continue
+        if token:
+            fuori.append((True, token))
+            token = ""
+        fuori.append((False, ch))
     if token:
-        out.append(_lookup("airport", token, index))
-    return "".join(out)
+        fuori.append((True, token))
+    return fuori
+
+
+def sigle_rotta(testo):
+    """Le sole sigle dentro una rotta composta: `MXP→FCO` da' [MXP, FCO]."""
+    return [pezzo for sigla, pezzo in _pezzi_rotta(testo) if sigla]
 
 
 def callsign_prefix(callsign):
@@ -372,14 +392,75 @@ def airline(callsign, index=0):
 
 # --------------------------------------------------------- codici mancanti
 
-def note_unknown(kind, code):
+def note_unknown(kind, code, quando=None):
+    quando = time.time() if quando is None else quando
     with _lock:
         bucket = _unknown.setdefault(kind, {})
         if code in bucket:
             bucket[code][0] += 1
-            bucket[code][1] = time.time()
+            bucket[code][1] = max(bucket[code][1], quando)
         elif len(bucket) < MAX_UNKNOWN:
-            bucket[code] = [1, time.time()]
+            bucket[code] = [1, quando]
+
+
+def ricostruisci(percorso, massimo=20000):
+    """Rilegge il registro dei voli e rimette in piedi l'elenco dei codici ignoti.
+
+    Il difetto che ripara e' di quelli che si vedono solo usando la macchina
+    per giorni. L'elenco delle sigle sconosciute vive in memoria, quindi a
+    ogni riavvio del servizio tornava vuoto: la pagina diceva «niente da
+    aggiungere» mentre nel registro c'erano centinaia di passaggi non
+    tradotti. Era la lista della spesa, e si cancellava da sola ogni notte.
+
+    Il modo in cui si ricostruisce e' l'unico che non introduce una seconda
+    verita': si **ripassa il registro dalla stessa porta** da cui passa un
+    aereo vero. Non si riscrive qui la regola che distingue una compagnia da
+    un'immatricolazione, ne' quella che spacca una rotta nei due aeroporti:
+    si chiamano le stesse funzioni, e loro chiamano `note_unknown` da se'. Il
+    giorno in cui una di quelle regole cambiera', questa funzione cambiera'
+    con lei senza che nessuno se ne debba ricordare.
+
+    Si leggono le ultime `massimo` righe e non tutte: un registro di un anno
+    sono decine di migliaia di voli, e riprocessarli all'avvio del servizio
+    vorrebbe dire un pannello fermo per qualche secondo. Le piu' recenti
+    sono anche quelle che contano, perche' la domanda e' «cosa mi passa sopra
+    casa adesso».
+    """
+    try:
+        with open(percorso, newline="", encoding="utf8") as handle:
+            righe = list(csv.DictReader(handle))
+    except (OSError, UnicodeDecodeError, csv.Error):
+        return 0
+    if not righe:
+        return 0
+    for riga in righe[-massimo:]:
+        quando = _istante(riga.get("timestamp"))
+        tipo = (riga.get("type") or "").strip()
+        if tipo:
+            _ignoto_se_serve("aircraft", tipo, quando)
+        for codice in sigle_rotta(riga.get("route") or ""):
+            _ignoto_se_serve("airport", codice, quando)
+        prefisso = callsign_prefix(riga.get("callsign") or "")
+        if prefisso:
+            _ignoto_se_serve("airline", prefisso, quando)
+    return len(righe[-massimo:])
+
+
+def _ignoto_se_serve(kind, codice, quando):
+    """Segna il codice come ignoto se la tabella non lo conosce."""
+    codice = (codice or "").strip().upper()
+    if not codice or load(kind).get(codice) is not None:
+        return
+    note_unknown(kind, codice, quando)
+
+
+def _istante(testo):
+    """Il timestamp del registro in secondi. Adesso, se non si capisce."""
+    try:
+        return time.mktime(time.strptime((testo or "").strip(),
+                                         "%Y-%m-%dT%H:%M:%S"))
+    except (ValueError, TypeError, OverflowError):
+        return time.time()
 
 
 def unknown(kind=None):

@@ -124,6 +124,7 @@ GIOCO_PREFISSO = "gioco_"
 ICONE_GIOCHI = {
     "breakout": "mdi:view-grid",
     "invaders": "mdi:space-invaders",
+    "snake": "mdi:snake",
 }
 
 try:

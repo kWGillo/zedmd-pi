@@ -32,7 +32,7 @@ parlano poco.
 E non prende mai il pannello a forza. Il meteo non è urgente: nessuno deve
 sapere la temperatura *adesso* al punto da interrompere una partita o il
 passaggio della Stazione Spaziale. Priorità **54** — sopra il Media Player e
-la Funcam, sotto il Rolling Banner, molto sotto il radar. Fra due cose non
+la FunCAM, sotto il Rolling Banner, molto sotto il radar. Fra due cose non
 urgenti ha la precedenza quella che una persona ha scritto apposta.
 
 ## Da dove arrivano i numeri
@@ -93,7 +93,18 @@ si legge *insieme* a quella: ventisei gradi con il settanta per cento sono
 un'altra giornata rispetto a ventisei asciutti.
 
 La probabilità di pioggia compare **solo se c'è**. Uno zero per cento non è
-un'informazione, è rumore. Lo stesso vale per la temperatura percepita: si
+un'informazione, è rumore.
+
+**E quando il modello e il pluviometro non vanno d'accordo, vince il
+pluviometro.** Il codice del cielo — «nuvolo», «sereno», «pioggia» — viene da un
+modello; i millimetri d'acqua caduti nell'ultima ora sono una misura, e fino
+alla 9.0 non li chiedevamo nemmeno. Da lì la segnalazione dal campo: *mi dice
+che oggi sarà nuvolo e sta piovendo*. Adesso si chiedono, e se ne sono caduti
+almeno 0,1 mm il codice viene corretto in pioggia — debole, moderata o forte a
+seconda di quanti. Al contrario non si corregge mai: un codice che dice pioggia
+con zero millimetri può essere un rovescio appena finito, e smentirlo sarebbe
+peggio. Se il servizio rifiutasse il campo in più, la richiesta ripiega su
+quella di prima: un dato aggiuntivo non deve poter spegnere il meteo. Lo stesso vale per la temperatura percepita: si
 scrive solo quando si discosta di almeno un grado e mezzo da quella vera —
 «18 gradi, percepiti 18» è una riga sprecata, mentre con vento o afa quella
 differenza è il motivo per cui uno si mette la giacca.

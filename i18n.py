@@ -523,10 +523,9 @@ STRINGS = {
         "Fa squillare adesso per quindici secondi, con il suono della prima sveglia attiva.",
         "Rings now for fifteen seconds, with the sound of the first active alarm."),
     "sveglia.prova.button": ("Fai squillare adesso", "Ring now"),
-    "sveglia.prova.ok": ("Sta squillando: premi il pulsante della Funcam, "
-                         "oppure aspetta quindici secondi.",
-                         "Ringing: press the Funcam button, or wait fifteen "
-                         "seconds."),
+    "sveglia.prova.ok": (
+        "Sta squillando: premi il pulsante della FunCAM, o aspetta quindici secondi.",
+        "Ringing: press the FunCAM button, or wait fifteen seconds."),
     "sveglia.prova.no": ("Non è partita: %(error)s", "It did not start: %(error)s"),
     "sveglia.regole.title": ("Che cosa la ferma e che cosa no",
                              "What stops it and what does not"),
@@ -856,9 +855,6 @@ STRINGS = {
 
     # --------------------------------------------------------------- now playing
     "nowplaying.title": ("Now Playing", "Now Playing"),
-    "nowplaying.intro": (
-        "Mostra titolo, artista e avanzamento del brano. Non riproduce audio: legge i metadati.",
-        "Shows title, artist and progress. It plays no audio: it only reads the metadata."),
     "nowplaying.coverage.title": ("Che cosa viene rilevato", "What gets picked up"),
     "nowplaying.coverage.airplay": (
         "Tutto ciò che parte da iPhone, iPad o Mac via AirPlay, con il DMD scelto fra le casse.",
@@ -874,11 +870,8 @@ STRINGS = {
         "Anything else, through a JSON message published to MQTT by a Home "
         "Assistant automation."),
     "nowplaying.coverage.gap": (
-        "Resta fuori la musica che non passa di qui, tipo un HomePod: serve Home Assistant.",
-        "Music that never passes through here, like a HomePod, needs Home Assistant."),
-    "nowplaying.priority.hint": (
-        "Il player sta a schermo al posto di foto e banner, ma lascia passare radar e Batocera.",
-        "The player replaces photos and banners, but lets radar and Batocera through."),
+        "Musica proveniente da HomePod non intercettabile",
+        "Music coming from a HomePod cannot be picked up"),
     "nowplaying.current": ("In riproduzione adesso", "Playing now"),
     "nowplaying.nothing": ("Niente in riproduzione.", "Nothing playing."),
     "nowplaying.source": ("Sorgente", "Source"),
@@ -908,9 +901,6 @@ STRINGS = {
         "Broker, credenziali e Home Assistant si impostano in",
         "Broker, credentials and Home Assistant are set in"),
     "nowplaying.topics": ("Topic della musica", "Music topics"),
-    "nowplaying.topics.hint": (
-        "Da dove arriva il brano in ascolto. La connessione al broker sta altrove.",
-        "Where the playing track comes from. The broker connection lives elsewhere."),
     "nowplaying.mqtt.enabled": ("Collega il DMD al broker",
                                 "Connect the DMD to the broker"),
     "nowplaying.mqtt.host": ("Indirizzo", "Address"),
@@ -1156,9 +1146,6 @@ STRINGS = {
     # Corta di proposito: e' la prima di tre caselle affiancate, e
     # un'etichetta che va a capo sfalsa la riga.
     "radar.overflow": ("Disposizione informazioni", "Details layout"),
-    "radar.overflow.hint": (
-        "La riga in basso è larga 256 pixel: oltre i quattro o cinque campi qualcosa deve cedere.",
-        "The bottom line is 256 pixels wide: past four or five fields something has to give."),
     "radar.overflow.crop": ("Accorcia la riga (comportamento storico)",
                             "Shorten the line (historical behaviour)"),
     "radar.overflow.pages": ("A pagine, a turno", "Pages, in turn"),
@@ -1166,12 +1153,6 @@ STRINGS = {
     "radar.page_seconds": ("Secondi per pagina", "Seconds per page"),
     "radar.scroll_speed": ("Velocità (px/s)", "Speed (px/s)"),
     "radar.scroll_fps": ("Fotogrammi al secondo", "Frames per second"),
-    "radar.fields.hint": (
-        "Formano la riga di dettaglio sotto il codice volo. Se non ci stanno, i centrali si tolgono.",
-        "They form the detail line under the flight code. If they do not fit, middle ones drop."),
-    "radar.route.hint": (
-        "La rotta c'è per i voli di linea, molto meno per cargo e aviazione generale.",
-        "Routes exist for scheduled flights, much less for cargo and general aviation."),
     "radar.log.enable": ("Registra ogni passaggio nel file CSV",
                          "Log every pass to the CSV file"),
     "radar.log.route": (
@@ -1192,9 +1173,6 @@ STRINGS = {
     "radar.notes.coverage": (
         "I dati vengono dalle reti ADS-B comunitarie: la copertura dipende dai riceventi in zona.",
         "Data comes from community ADS-B networks: coverage depends on nearby receivers."),
-    "radar.notes.radius": (
-        "Con pochi chilometri di raggio le apparizioni sono rare: allargalo per provare.",
-        "With a few kilometres of radius sightings are rare: widen it to test."),
 
     "radar.field.route": ("Rotta (origine → destinazione)", "Route (origin → destination)"),
     "radar.field.airline": ("Compagnia aerea", "Airline"),
@@ -1241,28 +1219,23 @@ STRINGS = {
     "services.desc.status_player": ("Notifiche sui giochi avviati dagli amici su Batocera.",
                                     "Notifications about games your friends launch on Batocera."),
     "audio.title": ("Audio", "Audio"),
-    "audio.intro": (
-        "Avvisi dei servizi, effetti dei giochi e audio di Doom. Serve una scheda audio USB.",
-        "Service chimes, game effects and Doom's audio. A USB sound card is required."),
     "audio.nocard": (
         "Nessuna scheda audio collegata. Infilane una USB: compare qui senza "
         "bisogno di riavviare.",
         "No sound card connected. Plug in a USB one: it appears here without "
         "a restart."),
     "audio.error": ("Ultimo errore: %(error)s", "Last error: %(error)s"),
-    "audio.enabled": ("Suono acceso", "Sound on"),
+    "audio.enabled": (
+        "Altoparlante attivo",
+        "Speaker on"),
     "audio.off": (
         "Il suono è spento: avvisi ed effetti non suonano. Il pulsante di prova funziona lo stesso.",
         "Sound is off: chimes and game effects stay silent. The test button still works."),
     "audio.device": ("Uscita audio", "Audio output"),
     "audio.device.auto": ("L'ultima collegata", "The last one connected"),
-    "audio.device.hint": (
-        "Si suona con `plughw`, che converte frequenza e formato al volo.",
-        "Playback goes through `plughw`, which converts rate and format on the fly."),
-    "audio.volume": ("Volume (0-100)", "Volume (0-100)"),
-    "audio.volume.hint": (
-        "Agisce sul suono del DMD, non sul mixer di sistema: non tocca gli altri programmi.",
-        "It affects the DMD's own sound, not the system mixer: other programs are untouched."),
+    "audio.volume": (
+        "Volume effetti sonori servizi",
+        "Service sound effects volume"),
     "audio.volume.giochi": ("Volume dei giochi (0-100)",
                             "Games volume (0-100)"),
     "audio.volume.giochi.hint": (
@@ -1280,9 +1253,6 @@ STRINGS = {
     "audio.giochi": ("Effetti dei giochi (Breakout, Invaders)",
                      "Game effects (Breakout, Invaders)"),
     "audio.doom": ("Audio di Doom", "Doom audio"),
-    "audio.doom.hint": (
-        "L'audio di Doom è l'unico suono continuo, quindi l'unico che pesa sul bus.",
-        "Doom's audio is the only continuous sound, so the only one that loads the bus."),
     "audio.test": ("Prova il suono", "Test the sound"),
     "audio.tested": ("Suono inviato alla scheda.", "Sound sent to the card."),
     "audio.tested.off": (
@@ -1297,24 +1267,20 @@ STRINGS = {
     "audio.device.finta": ("scheda fittizia, non suona",
                            "dummy card, makes no sound"),
 
-    "cassa.title": ("Uscita musicale", "Music output"),
+    "cassa.title": (
+
+        "Uscita musicale (solo AirPlay)",
+
+        "Music output (AirPlay only)"),
     "cassa.intro": (
         "Con questo acceso la musica AirPlay esce dalla scheda audio del DMD.",
         "With this on, AirPlay music comes out of the DMD's sound card."),
-    "cassa.enabled": ("La musica esce dalla scheda audio",
-                      "Music plays through the sound card"),
-    "cassa.hint": (
-        "Riguarda solo AirPlay: da Spotify arriva il racconto del brano, non l'audio.",
-        "AirPlay only: from Spotify comes the track info, not the audio."),
-    "cassa.busy": (
-        "Mentre suona la musica gli avvisi tacciono. Le notifiche sul pannello si vedono.",
-        "While music plays the chimes stay silent. Panel notifications still appear."),
+    "cassa.enabled": (
+        "Usa cassa integrata",
+        "Use the built-in speaker"),
     # Non è una scelta da fare qui: la scheda si sceglie in Impostazioni, e
     # questa riga dice soltanto dove sta andando la musica adesso. Scritta
     # com'era — solo `hw:3,0` — sembrava un campo da compilare.
-    "cassa.esce.da": (
-        "La musica esce da «%(scheda)s», la scheda scelta in Impostazioni.",
-        "Music plays through “%(scheda)s”, the card chosen in Settings."),
     "cassa.nessuna.uscita": (
         "Ora la musica non si sente. Accendendo l'interruttore uscirà da «%(scheda)s».",
         "The music is not audible. Turn the switch on to play it through “%(scheda)s”."),
@@ -1377,11 +1343,12 @@ STRINGS = {
                   "only the metadata remains."),
     "cassa.failed": ("Non è stato cambiato niente: %(error)s",
                      "Nothing was changed: %(error)s"),
-    "nav.telecamera": ("Funcam", "Funcam"),
-    "webcam.title": ("Funcam", "Funcam"),
-    "webcam.intro": (
-        "La webcam sul pannello, coi colori di quarant'anni fa. Si accende dalla pagina Servizi.",
-        "The webcam on the panel, with the colours of forty years ago. Turn it on under Services."),
+    "nav.telecamera": (
+        "FunCAM",
+        "FunCAM"),
+    "webcam.title": (
+        "FunCAM",
+        "FunCAM"),
     "webcam.nocam": (
         "Nessuna telecamera collegata. Attaccane una alla porta USB: compare "
         "qui senza bisogno di riavviare.",
@@ -1404,9 +1371,6 @@ STRINGS = {
         "non funziona: %(error)s — riprovo fra %(seconds)d secondi",
         "not working: %(error)s — retrying in %(seconds)d seconds"),
     "webcam.shoot": ("Scatta", "Capture"),
-    "webcam.shoot.hint": (
-        "Foto e GIF finiscono nella libreria media, e il Media Player te le rimette sul pannello.",
-        "Photos and GIFs go to the media library, and the Media Player shows them again later."),
     "webcam.shoot.photo": ("Foto", "Photo"),
     "webcam.shoot.gif": ("GIF di %(seconds)s secondi", "%(seconds)s second GIF"),
     "webcam.shot": ("Salvata %(name)s.", "Saved %(name)s."),
@@ -1417,63 +1381,28 @@ STRINGS = {
     "webcam.settings": ("Impostazioni", "Settings"),
     "webcam.device": ("Telecamera", "Camera"),
     "webcam.device.auto": ("La prima collegata", "The first one connected"),
-    "webcam.device.hint": (
-        "Compare solo il /dev/video che cattura davvero. Se non va, lo stato qui sopra lo dice.",
-        "Only the /dev/video that really captures is listed. If it fails, the status above says so."),
     "webcam.style": ("Aspetto", "Look"),
     "webcam.style.colori": ("Colori, con dithering", "Colours, dithered"),
     "webcam.style.gameboy": ("Verde Game Boy", "Game Boy green"),
     "webcam.style.grigi": ("Grigi, poche sfumature", "Greys, few shades"),
-    "webcam.style.hint": (
-        "Quanti colori lo decide il campo qui sotto; le sfumature mancanti le rimette il dithering.",
-        "The field below decides how many colours; dithering puts the missing shades back."),
     "webcam.depth": ("Livelli per canale", "Levels per channel"),
     "webcam.depth.hint": (
         "Adesso %(colori)d colori: i livelli valgono per ogni canale, quindi 2 danno 8 e 4 danno 64.",
         "Now %(colori)d colours: levels apply per channel, so 2 give 8 and 4 give 64."),
     "webcam.levels": ("Sfumature (verde e grigi)", "Shades (green and greys)"),
-    "webcam.levels.hint": (
-        "Quante sfumature per gli stili Game Boy e grigi. Quattro è il "
-        "numero del Game Boy vero.",
-        "How many shades for the Game Boy and grey looks. Four is the real "
-        "Game Boy's number."),
     "webcam.fps": ("Fotogrammi al secondo", "Frames per second"),
-    "webcam.fps.hint": (
-        "È quello che si chiede alla telecamera. Dieci bastano; sotto cinque va a scatti.",
-        "It is what the camera is asked to produce. Ten is enough; below five it gets jerky."),
     "webcam.width": ("Larghezza di cattura", "Capture width"),
     "webcam.height": ("Altezza di cattura", "Capture height"),
-    "webcam.size.hint": (
-        "Fra le risoluzioni vere della telecamera. Più grande non serve: si finisce in 256×64.",
-        "From the resolutions the camera really offers. Bigger does not help: it ends up 256×64."),
     "webcam.button": ("Pulsante fisico", "Hardware button"),
-    "webcam.button.what": (
-        "Un pulsante saldato sotto il pannello, per accendere la telecamera. Non è obbligatorio.",
-        "A button soldered under the panel to start the camera. It is optional."),
     "webcam.button.enable": ("Accendilo", "Turn it on"),
     "webcam.button.enable.label": (
         "Usa il pulsante fisico (il servizio arma, non accende)",
         "Use the hardware button (the service arms, it does not turn on)"),
     "webcam.button.gpio": ("Piedino del pulsante", "Button GPIO"),
     "webcam.button.suggested": ("consigliato", "recommended"),
-    "webcam.button.hint": (
-        "Con il pulsante il servizio non accende la telecamera: la arma. La ripresa parte al clic.",
-        "With the button the service does not start the camera: it arms it. A click starts it."),
-    "webcam.button.wiring": ("Come si collega", "How to wire it"),
     "webcam.button.wiring.hint": (
-        "Un pulsante normalmente aperto fra GPIO %(gpio)s e massa, e "
-        "nient'altro: niente resistenze, perché si usa quella di richiamo "
-        "interna al Raspberry. Sul connettore a 40 piedini GPIO 25 è il "
-        "piedino 22 e una massa è il 20 — sono accanto, sulla stessa fila. "
-        "Si salda sui due fori del connettore della Bonnet, che sono esposti "
-        "sopra perché lo zoccolo sta sotto: è il metodo che Adafruit "
-        "documenta per questa stessa scheda.",
-        "A normally-open button between GPIO %(gpio)s and ground, and "
-        "nothing else: no resistors, because the Raspberry's internal pull-up "
-        "does the job. On the 40-pin header GPIO 25 is pin 22 and a ground is "
-        "pin 20 — adjacent, same row. Solder to the two header holes on the "
-        "Bonnet, exposed on top because the socket is underneath: it is the "
-        "method Adafruit documents for this very board."),
+        "Il pulsante va fra GPIO %(gpio)s e massa, senza resistenze.",
+        "The button goes between GPIO %(gpio)s and ground, with no resistors."),
     "webcam.button.click": ("Un clic, telecamera spenta",
                             "One click, camera off"),
     "webcam.button.click.what": ("si accende", "it turns on"),
@@ -1489,17 +1418,11 @@ STRINGS = {
         "si spegne, mentre tieni ancora il dito sopra",
         "it turns off, while your finger is still down"),
     "webcam.button.now": ("Adesso", "Right now"),
-    "webcam.button.now.hint": (
-        "Accendere il servizio non accende la telecamera: si parte da qui o dal pulsante.",
-        "Turning the service on does not start the camera: start it here or with the button."),
     "webcam.button.on": ("Accendi la telecamera", "Turn the camera on"),
     "webcam.button.off": ("Spegni la telecamera", "Turn the camera off"),
     "webcam.gpiozero": ("Libreria del pulsante", "Button library"),
     "webcam.gpiozero.ok": ("%(package)s è installata.",
                            "%(package)s is installed."),
-    "webcam.gpiozero.hint": (
-        "Per leggere il pulsante serve %(package)s. Se manca, si installa da qui.",
-        "Reading the button needs %(package)s. If it is missing, install it from here."),
     "webcam.gpiozero.install": ("Installa %(package)s", "Install %(package)s"),
     "webcam.gpiozero.started": (
         "Installazione avviata. Ci vuole un minuto: la pagina si aggiorna da "
@@ -1509,9 +1432,6 @@ STRINGS = {
     "webcam.gpiozero.running": ("Installazione in corso…",
                                 "Installation in progress…"),
     "webcam.button.rearm": ("Apri il pulsante", "Open the button"),
-    "webcam.button.rearm.hint": (
-        "Il piedino non è aperto. Si riapre da qui, senza riavviare il servizio.",
-        "The pin is not open. Reopen it here, without restarting the service."),
     "webcam.button.ready": ("Pulsante aperto.", "Button open."),
     "webcam.button.nolib": (
         "Manca gpiozero: il pulsante non si può leggere. «sudo apt install python3-gpiozero».",
@@ -1520,8 +1440,8 @@ STRINGS = {
         "spenta, in attesa del pulsante su GPIO %(gpio)s",
         "off, waiting for the button on GPIO %(gpio)s"),
     "webcam.status.armed.page": (
-        "spenta: si accende dalla pagina Funcam",
-        "off: turn it on from the Funcam page"),
+        "spenta: si accende dalla pagina FunCAM",
+        "off: turn it on from the FunCAM page"),
     "webcam.status.countdown": ("scatto fra %(seconds)d…",
                                 "shooting in %(seconds)d…"),
     "webcam.status.button.error": ("pulsante non disponibile: %(error)s",
@@ -1531,13 +1451,7 @@ STRINGS = {
     "webcam.autocontrast": ("Allarga il contrasto da solo",
                             "Stretch the contrast automatically"),
     "webcam.gallery": ("Ultimi scatti", "Latest captures"),
-    "webcam.gallery.hint": (
-        "Stanno nella libreria media: da lì si guardano, si scaricano e si cancellano.",
-        "They live in the media library: watch, download and delete them from there."),
     "webcam.privacy": ("Dove finiscono le immagini", "Where the images go"),
-    "webcam.privacy.hint": (
-        "Le immagini non escono dal Raspberry: niente rete, niente MQTT, niente servizi esterni.",
-        "The images never leave the Raspberry: no network, no MQTT, no external services."),
     "services.desc.webcam": (
         "La webcam sul pannello, dal vivo e con pochi colori.",
         "The webcam on the panel, live and in few colours."),

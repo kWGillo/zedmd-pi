@@ -201,10 +201,10 @@ scritto nella pagina Doom.
 | Cambia arma | da 1 a 7 |
 
 La tastiera **comanda** il gioco ma non lo fa *cominciare*: la partita si apre
-da «Gioca». Se preferisci poterla cominciare premendo un tasto sul cabinato,
-c'è la spunta *«Un tasto sulla tastiera può far cominciare una partita»* — è
-spenta di proposito, perché il DMD sta in mezzo a un flipper e un tasto
-sfiorato per caso non deve portarsi via il pannello a metà partita.
+da «Gioca». Se preferisci poterla cominciare premendo un tasto, c'è la spunta
+*«Un tasto sulla tastiera può far cominciare una partita»* — è spenta di
+proposito: una tastiera lasciata sul mobile accanto al pannello si sfiora, e un
+tasto premuto per caso non deve portarsi via il display a metà partita.
 
 Se non vuoi che il DMD legga affatto la tastiera, togli la spunta a *«Leggi la
 tastiera collegata al Raspberry»*.
@@ -301,8 +301,9 @@ entità del DMD compare un interruttore **Doom**: acceso apre la partita,
 spento la chiude. Lo stato segue la partita vera, quindi se finisce da sola
 per inattività l'interruttore torna a OFF da solo.
 
-**Il suono è spento di proposito.** Sul cabinato l'audio è di Batocera, e un
-secondo canale sonoro sarebbe soltanto rumore sopra al gioco vero.
+**Il suono è spento di proposito** quando il pannello fa da display a
+Batocera: l'audio è già suo, e un secondo canale sarebbe rumore sopra al gioco
+vero. Si accende dalla pagina Audio.
 
 I salvataggi e la configurazione di Doom finiscono in
 `/var/lib/dmd/doom/stato`, fuori da `/opt/dmd`, che deve restare identico alle

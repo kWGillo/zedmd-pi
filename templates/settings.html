@@ -105,7 +105,6 @@
 
 <section class="card">
   <h2>{{ t('audio.title') }}</h2>
-  <p class="hint">{{ t('audio.intro') }}</p>
 
   {% if not audio.dispositivi %}
   <p class="status">{{ t('audio.nocard') }}</p>
@@ -138,7 +137,6 @@
         {{ scheda.nome }} ({{ scheda.alsa }}){% if scheda.finta %} — {{ t('audio.device.finta') }}{% endif %}</option>
       {% endfor %}
     </select>
-    <p class="hint">{{ t('audio.device.hint') }}</p>
 
     <label for="volume">{{ t('audio.volume') }}</label>
     {# Slider e non casella: un volume si cerca a orecchio, e il numero esatto
@@ -150,7 +148,6 @@
              oninput="this.nextElementSibling.value = this.value + '%'">
       <output>{{ (cfg.audio.volume * 100) | round | int }}%</output>
     </div>
-    <p class="hint">{{ t('audio.volume.hint') }}</p>
 
     {# Manopola a parte per i giochi. Fino alla 9.0 ce n'era una sola, e su un
        pannello con il volume a 5 — scelto per non farsi svegliare dagli
@@ -183,7 +180,6 @@
     <label class="check">
       <input type="checkbox" name="doom" {{ 'checked' if cfg.audio.doom }}>
       {{ t('audio.doom') }}</label>
-    <p class="hint">{{ t('audio.doom.hint') }}</p>
 
     <button type="submit">{{ t('common.apply') }}</button>
   </form>

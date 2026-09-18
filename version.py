@@ -2056,6 +2056,43 @@ Storico:
        delle eccezioni scritto una per una: allungare un testo si potra'
        ancora, ma diventa una decisione dichiarata invece di un'abitudine che
        torna da sola.
+  9.4  **Le pagine dicono meno, il radar ricorda di piu'.**
+       *Musica, Radar, FunCAM e Audio dimagriscono ancora.* Venti spiegazioni
+       tolte dove il titolo diceva gia' tutto, e qualche etichetta riscritta
+       con le parole di chi la usa: «Uscita musicale (solo AirPlay)», «Usa
+       cassa integrata», «Altoparlante attivo», «Volume effetti sonori
+       servizi». La Funcam si chiama **FunCAM**, e della sua pagina resta una
+       riga sola sul cablaggio: il pulsante va fra GPIO 25 e massa.
+       *Il radar non dimenticava piu' niente, e invece dimenticava tutto.*
+       L'elenco delle sigle mai tradotte — la lista della spesa di che cosa
+       conviene aggiungere in tabella — viveva solo in memoria: a ogni riavvio
+       del servizio la pagina tornava vuota mentre nel registro c'erano
+       centinaia di passaggi senza nome. Adesso all'avvio il registro si
+       rilegge e l'elenco si ricostruisce, con i conteggi veri e l'ora vera
+       dell'ultimo avvistamento. Non ripassando da una regola nuova, ma dalle
+       stesse funzioni che traducono un aereo mentre passa: la regola che
+       distingue una compagnia da un'immatricolazione resta in un posto solo.
+       *E le tabelle imparano da quello che e' passato davvero.* Da 846
+       passaggi registrati sul campo sono usciti 22 aeroporti, 9 modelli e 12
+       compagnie che il pannello mostrava come sigle. Gli aeroporti sono stati
+       verificati uno per uno sull'elenco ICAO invece che a memoria; dei
+       modelli e delle compagnie sono stati aggiunti solo quelli confermati da
+       una fonte, e gli altri restano in elenco come sigle da tradurre, che e'
+       piu' onesto di un nome inventato. Dopo l'aggiunta, degli aeroporti del
+       registro non ne resta ignoto **nessuno**.
+       Le impronte delle tabelle precedenti entrano in `lookup.DISTRIBUITI`,
+       che e' la riga senza la quale l'aggiornamento arriverebbe con le
+       tabelle vecchie e tutto questo non si vedrebbe.
+       *E i manuali dicono di nuovo la verita'.* Dieci su diciassette erano
+       rimasti indietro e in un paio di punti mentivano: la tabella delle
+       priorita' nel manuale completo ne elencava undici su quindici -- senza
+       sveglia, notifiche, satelliti e meteo, cioe' proprio quelle aggiunte
+       dopo che la tabella era stata scritta -- e la riga sul pulsante della
+       sveglia mandava a cercare una casella della FunCAM che non c'entra piu'.
+       Adesso raccontano Snake, il volume separato dei giochi, il fruscio che
+       tiene sveglia la scheda, la sveglia che si prende il pulsante, la barra
+       del timer, i trenta gradi dei satelliti, la pioggia del meteo e le
+       tabelle delle sigle. I PDF sono rigenerati.
 """
 
-__version__ = "9.3"
+__version__ = "9.4"

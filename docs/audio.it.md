@@ -341,10 +341,10 @@ esattamente come prima: semplicemente non li suona.
 
 # 5. La pagina Impostazioni
 
-Il riquadro **Audio** ha quattro comandi.
+Il riquadro **Audio** ha cinque comandi.
 
-**Suono acceso** — l'interruttore generale. Spento, non suona niente: né
-avvisi, né giochi, né Doom.
+**Altoparlante attivo** — l'interruttore generale. Spento, non suona niente:
+né avvisi, né giochi, né Doom.
 
 **Uscita audio** — le schede viste dal kernel, lette da `/proc/asound/cards`.
 Lasciando *«L'ultima collegata»* il DMD sceglie da sé, e la regola ha **due
@@ -379,9 +379,20 @@ un'altra**: resta muto e lo dice in pagina. Suonare dall'altoparlante
 sbagliato senza avvisare è peggio che non suonare, perché non si capisce cosa
 stia succedendo.
 
-**Volume (0-100)** — non tocca il mixer di sistema: è un filtro `volume=`
-applicato da ffmpeg al momento della riproduzione, quindi non cambia niente
-per gli altri programmi e non ha bisogno di `alsamixer`.
+**Volume effetti sonori servizi** — quanto forte parla il DMD di sua
+iniziativa: un aereo, un compleanno, una notifica. Non tocca il mixer di
+sistema: è un filtro `volume=` applicato da ffmpeg al momento della
+riproduzione, quindi non cambia niente per gli altri programmi e non ha bisogno
+di `alsamixer`.
+
+**Volume dei giochi** — separato dal precedente, e non per capriccio. Il volume
+degli avvisi lo si abbassa pensando al pannello che parla da solo, magari di
+sera: su un DMD vero era a 0,05. Un effetto di un gioco invece risponde a un
+tasto appena premuto e dura cinquanta millesimi — e l'orecchio integra il
+volume su due decimi di secondo, quindi un suono così corto si sente molto più
+piano di uno lungo con la stessa ampiezza. Con una manopola sola, o gli avvisi
+urlano o i giochi spariscono. Il predefinito è 0,90, e chi aggiorna non eredita
+il volume degli avvisi.
 
 **Prova il suono** — suona un effetto sulla scheda scelta. Funziona **anche a
 suono spento**, apposta: serve proprio a capire se l'audio funziona *prima* di
@@ -389,8 +400,33 @@ accenderlo. E usa sempre il volume di giorno: un pulsante di prova che di
 notte suona il silenzio non prova niente, anzi fa credere che la scheda sia
 rotta.
 
-Accanto ci sono le due levette **Effetti dei giochi (Breakout, Invaders)** e
-**Audio di Doom**, che sono i § 3.2 e § 3.3.
+Accanto ci sono le due levette **Effetti dei giochi** e **Audio di Doom**, che
+sono i § 3.2 e § 3.3.
+
+## Il fruscio che tiene sveglia la scheda
+
+C'è una voce che non compare in nessuna pagina, `audio.sottofondo`, e vale la
+pena sapere perché esiste.
+
+Molti convertitori USB — compreso quello con cui questo progetto è stato
+messo a punto — si **automutano** quando ricevono zero digitale esatto, e al
+primo campione diverso da zero riaprono l'uscita con una rampa di qualche
+decina di millesimi, per non fare il «plop». Un effetto di gioco dura cinquanta
+o settanta millesimi: arriva mentre la rampa è a metà e sparisce quasi tutto.
+Se invece un altro suono è appena passato, la scheda è sveglia e lo stesso
+effetto si sente benissimo — ed è esattamente il sintomo che si vedeva sul
+campo: *quando lo sento, lo sento bene*, con Snake che ne perdeva nove su dieci
+e Breakout che ne salvava la maggior parte.
+
+La prova che lo ha inchiodato è stata la più semplice: lo stesso beep, dieci
+volte di fila, con in mezzo silenzio digitale oppure un fruscio inudibile. Col
+silenzio non si sentiva; col fruscio sì. E lo conferma dal lato opposto quello
+che sul DMD ha sempre funzionato — Doom, il Game Boy, la musica AirPlay:
+nessuno dei tre scrive mai zero, perché hanno tutti un flusso continuo.
+
+Quindi durante una partita il mixer non scrive mai zero, ma rumore bianco a
+−60 dBFS: 32 su 32767, sotto il rumore di fondo di qualunque stanza. Si spegne
+mettendo `audio.sottofondo` a zero.
 
 ## Se la scheda non sa fare 44100 Hz
 
