@@ -2,6 +2,17 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.5.1]
+
+### I suoni delle notifiche dicono da dove vengono
+
+I tre selettori si chiamano adesso *Notifica · info — MQTT / Home Assistant*,
+e così avviso e allarme.
+
+Nell'elenco dei suoni tutte le altre righe sono servizi del pannello, e si sa
+già che cosa fanno. Queste tre sono le uniche che arrivano da fuori: senza
+dirlo, chi apre la pagina fa presto a chiedersi che cosa siano.
+
 ## [9.5]
 
 ### Le notifiche stanno ferme

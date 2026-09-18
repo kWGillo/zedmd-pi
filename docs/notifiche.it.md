@@ -310,8 +310,12 @@ cantina no. Fino alla 9.4 era anche l'unico servizio a cui un suono non si
 poteva dare — l'impianto c'era tutto, mancava la voce nell'elenco.
 
 Adesso ci sono **tre campanelli, uno per livello**, e si scelgono nella pagina
-Servizi → Suoni come quelli di tutti gli altri servizi: *Notifica · info*,
-*Notifica · avviso*, *Notifica · allarme*. Un campanello unico direbbe «è
+Servizi → Suoni come quelli di tutti gli altri servizi: *Notifica · info —
+MQTT / Home Assistant*, *Notifica · avviso — …*, *Notifica · allarme — …*. La
+coda del titolo dice da dove arriva il messaggio: in un elenco dove tutte le
+altre righe sono servizi del pannello, queste tre sono le uniche che vengono da
+fuori, e senza dirlo si fa presto a chiedersi che cosa siano. Un campanello
+unico direbbe «è
 successo qualcosa» e ti obbligherebbe ad andare a vedere; tre dicono se vale la
 pena alzarsi, e lo dicono dall'altra stanza senza girare la testa.
 

@@ -2128,6 +2128,12 @@ Storico:
        ogni messaggio. Un suono che non parte -- scheda occupata, file
        sparito -- non si porta via la notifica: il pannello la mostra lo
        stesso.
+  9.5.1 I tre selettori sonori delle notifiche dicono anche da dove arriva il
+       messaggio: «Notifica · info — MQTT / Home Assistant», e cosi' avviso e
+       allarme. Nell'elenco dei suoni tutte le altre righe sono servizi del
+       pannello, che si sa gia' che cosa fanno; queste tre sono le uniche che
+       vengono da fuori, e senza dirlo si fa presto a chiedersi che cosa
+       siano.
 """
 
-__version__ = "9.5"
+__version__ = "9.5.1"

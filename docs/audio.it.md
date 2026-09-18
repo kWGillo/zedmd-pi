@@ -86,7 +86,8 @@ I servizi che possono avere un avviso sono undici:
 servizio con più di un campanello, e il motivo è che una notifica arriva mentre
 non stai guardando il pannello: un suono solo direbbe «è successo qualcosa» e ti
 obbligherebbe ad andare a vedere, tre dicono dall'altra stanza se vale la pena
-alzarsi.
+alzarsi. Nella pagina portano in coda *MQTT / Home Assistant*, perché in un
+elenco di servizi del pannello sono le uniche tre righe che arrivano da fuori.
 
 **Tre non ce l'hanno, e non è una dimenticanza.** Media Player e Rolling
 Banner non annunciano niente: compaiono a intervalli per decorazione, e un

@@ -455,14 +455,14 @@ STRINGS = {
         "Il suono che ogni servizio fa quando prende il pannello: una volta, quando compare.",
         "The sound each service makes when it takes the panel: once, as it appears."),
     "suoni.notifica.info": (
-        "Notifica · info",
-        "Notification · info"),
+        "Notifica · info — MQTT / Home Assistant",
+        "Notification · info — MQTT / Home Assistant"),
     "suoni.notifica.avviso": (
-        "Notifica · avviso",
-        "Notification · warning"),
+        "Notifica · avviso — MQTT / Home Assistant",
+        "Notification · warning — MQTT / Home Assistant"),
     "suoni.notifica.allarme": (
-        "Notifica · allarme",
-        "Notification · alarm"),
+        "Notifica · allarme — MQTT / Home Assistant",
+        "Notification · alarm — MQTT / Home Assistant"),
     "suoni.vuoto": (
         "Non c'è nessun file nella libreria media: copiane qualcuno nella "
         "condivisione di rete e ricompariranno qui.",
