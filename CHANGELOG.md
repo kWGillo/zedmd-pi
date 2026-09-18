@@ -2,6 +2,31 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.3]
+
+### Le spiegazioni nelle pagine diventano una riga
+
+Un giudizio dal campo: *l'interfaccia è ottima, ma la quantità di testo
+descrittivo potrebbe non essere gradevole.* Era vero, e si misurava: due terzi
+di tutto il testo dell'interfaccia — 41.000 caratteri su 65.000 — erano
+spiegazioni, con una media di 203 caratteri l'una. Chi apre una pagina per
+spuntare una casella non legge un paragrafo: lo salta, e saltandolo perde anche
+la riga che gli serviva.
+
+Riscritti **183 testi**: media da 203 a 80 caratteri, il 61% in meno su quelli
+descrittivi e il 34% su tutto il testo dell'interfaccia. Ognuno dice adesso che
+cosa fa il comando, in una riga. Il perché non è sparito: è nei commenti del
+codice, dove serve a chi lo cambia e non pesa a chi lo usa.
+
+Restano lunghe poche cose, ed è una scelta dichiarata: la taratura del pannello,
+la libreria della matrice, il cablaggio del pulsante e la preparazione di Doom e
+PyBoy. Sono le cose che si fanno una volta sola, con il saldatore o il terminale
+in mano, e lì una parola in meno costa un pomeriggio.
+
+Una prova nuova tiene il tetto a novantacinque caratteri e l'elenco delle
+eccezioni scritto una per una, con il motivo accanto: allungare un testo si
+potrà ancora, ma diventa una decisione presa e non un'abitudine che torna.
+
 ## [9.2]
 
 Cinque cose della sveglia e del timer, tutte trovate montando la macchina e

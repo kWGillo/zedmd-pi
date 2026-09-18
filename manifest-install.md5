@@ -22,7 +22,7 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 b697bd1ed14d88357914d8c98f79298f  hass.py
-ec6578a00950272c9696974552784815  i18n.py
+a73852e5ba8952bd35dbfc7e2ba912b1  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 3ee90e4e9e711ab3e660ecb81aa3fe35  lookup.py
@@ -112,7 +112,7 @@ ff12ca205348970f6edbcf5670e94f10  templates/settings.html
 48e92b36bcdbdf54ff56b0714d26e67e  templates/sveglia.html
 0823432fc4a73241082966d4f4c9e760  templates/telecamera.html
 0bbe7fbc76fd30b03e559158b71225d0  templates/updates.html
-9308bd44640f14bb85f01ab5fd8048ac  version.py
+fab9c78fe3255fef9ada4ab1f8ab8f1f  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 6a728264a08ceee4a92cc5281445ec35  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

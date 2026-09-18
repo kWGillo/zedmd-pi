@@ -37,18 +37,8 @@ STRINGS = {
     # La pulizia delle briciole dei Mac, nella pagina Media.
     "pulizia.title": ("Briciole dei Mac", "Mac leftovers"),
     "pulizia.hint": (
-        "Ogni volta che un Mac copia qualcosa sulle condivisioni si porta "
-        "dietro dei file che non gli ha chiesto nessuno: «.DS_Store» e, per "
-        "ogni singolo file copiato, un gemello invisibile che comincia con "
-        "«._». Su una libreria di migliaia di foto raddoppiano le voci da "
-        "elencare. Il DMD toglie quelli, e soltanto quelli: un file nascosto "
-        "che non sia una briciola conosciuta resta dov'è.",
-        "Every time a Mac copies something to the shares it brings along "
-        "files nobody asked for: «.DS_Store» and, for each copied file, an "
-        "invisible twin starting with «._». On a library of thousands of "
-        "photos they double the entries to list. The DMD removes those, and "
-        "only those: a hidden file that is not a known leftover stays where "
-        "it is."),
+        "Toglie i file che i Mac lasciano sulle condivisioni: «.DS_Store» e i gemelli «._».",
+        "Removes the files Macs leave on shares: “.DS_Store” and the “._” twins."),
     "pulizia.enabled": ("Pulisci da solo, ogni tanto",
                         "Clean up by itself, every so often"),
     "pulizia.hours": ("Ogni quante ore", "Every how many hours"),
@@ -71,15 +61,8 @@ STRINGS = {
     "nav.birthdays": ("Compleanni", "Birthdays"),
     "birthdays.title": ("Compleanni e anniversari", "Birthdays and anniversaries"),
     "birthdays.intro": (
-        "Un elenco di date e nomi, compleanni o anniversari. Quando la "
-        "ricorrenza si avvicina, il "
-        "pannello lo ricorda con un messaggio che scorre, come i banner. La "
-        "data si scrive giorno/mese/anno; l'anno si può omettere, ma senza "
-        "non si può mostrare l'età.",
-        "A list of dates and names. When a birthday approaches, the panel "
-        "reminds you with a scrolling message, like the banners. Dates are "
-        "day/month/year; the year is optional, but without it the age cannot "
-        "be shown."),
+        "Date e nomi: quando la ricorrenza si avvicina il pannello lo ricorda con un testo.",
+        "Dates and names: as the day approaches the panel reminds you with a scrolling text."),
     "birthdays.upcoming": ("In arrivo", "Coming up"),
     "birthdays.upcoming.hint": (
         "Chi compie gli anni entro le prossime %(hours)s ore.",
@@ -101,32 +84,19 @@ STRINGS = {
     "birthdays.add.button": ("Aggiungi", "Add"),
     "birthdays.import": ("Importa un CSV", "Import a CSV"),
     "birthdays.import.hint": (
-        "Due colonne, data e nome. Le righe vengono aggiunte in coda a quelle "
-        "già presenti, non le sostituiscono: per ripartire da zero svuota "
-        "prima la casella qui sotto.",
-        "Two columns, date and name. Rows are appended to the existing ones "
-        "rather than replacing them: to start over, empty the box below "
-        "first."),
+        "Due colonne, data e nome. Le righe si aggiungono in coda, non sostituiscono.",
+        "Two columns, date and name. Rows are appended, they do not replace."),
     "birthdays.import.button": ("Importa", "Import"),
     "birthdays.file": ("Elenco completo", "Full list"),
     "birthdays.file.hint": (
-        "Si modifica anche a mano, da qui o via SSH. Le righe che iniziano "
-        "con # sono commenti, e una riga sbagliata si perde da sola senza "
-        "compromettere le altre.",
-        "It can also be edited by hand, here or over SSH. Rows starting with "
-        "# are comments, and a broken row is dropped on its own without "
-        "affecting the others."),
+        "Si modifica anche a mano. Le righe che iniziano con # sono commenti.",
+        "It can be edited by hand. Lines starting with # are comments."),
     "birthdays.count": ("%(count)d persone", "%(count)d people"),
     "birthdays.settings": ("Impostazioni", "Settings"),
     "birthdays.lead": ("Anticipo (ore)", "Lead time (hours)"),
     "birthdays.lead.hint": (
-        "L'anticipo dice quanto prima comincia il promemoria: 48 ore vuol "
-        "dire da due giorni prima. L'intervallo è ogni quanto ricompare; "
-        "se ci sono più compleanni insieme si alternano nello stesso giro.",
-        "The lead time says how early the reminder starts: 48 hours means "
-        "two days ahead. The interval is how often it comes back; when "
-        "several birthdays fall together they alternate within the same "
-        "round."),
+        "L'anticipo dice quanto prima comincia il promemoria; l'intervallo ogni quanto torna.",
+        "The lead says how early the reminder starts; the interval how often it returns."),
     "birthdays.interval": ("Intervallo (minuti)", "Interval (minutes)"),
     "birthdays.seconds": ("Durata (s)", "Duration (s)"),
     "birthdays.size": ("Dimensione", "Size"),
@@ -167,23 +137,15 @@ STRINGS = {
     "nav.satelliti": ("Satelliti", "Satellites"),
     "satelliti.title": ("Satelliti", "Satellites"),
     "satelliti.intro": (
-        "Il pannello avvisa dieci minuti prima che la Stazione Spaziale passi "
-        "sopra casa, lo ricorda a cinque, e durante il passaggio mostra dove "
-        "guardare. Parla poco per scelta: solo per quello che si vede davvero "
-        "a occhio nudo.",
-        "The panel warns ten minutes before the Space Station flies over, "
-        "repeats at five, and during the pass shows where to look. It speaks "
-        "rarely on purpose: only for what is actually visible to the naked "
-        "eye."),
+        "Avvisa dieci minuti prima di un passaggio della Stazione Spaziale, e dice dove guardare.",
+        "It warns ten minutes before a Space Station pass, and shows where to look."),
     "satelliti.nocoords": (
         "Mancano le coordinate: le prende da quelle dell'Air Radar.",
         "Coordinates are missing: they come from the Air Radar ones."),
     "satelliti.next": ("Prossimi passaggi", "Upcoming passes"),
     "satelliti.next.hint": (
-        "Ci sono anche quelli che non si vedono, con il motivo accanto: e' li' "
-        "che si legge perche' una sera il pannello resta muto.",
-        "Invisible passes are listed too, with the reason: that is where you "
-        "read why the panel stays quiet on a given evening."),
+        "Ci sono anche quelli che non si vedono, con il motivo accanto.",
+        "The ones you cannot see are listed too, with the reason next to them."),
     "satelliti.col.sat": ("Satellite", "Satellite"),
     "satelliti.col.rise": ("Sorge", "Rises"),
     "satelliti.col.len": ("Durata", "Length"),
@@ -201,84 +163,49 @@ STRINGS = {
     "satelliti.settings": ("Impostazioni", "Settings"),
     "satelliti.elev": ("Elevazione minima", "Minimum elevation"),
     "satelliti.elev.hint": (
-        "Quanti gradi sopra l'orizzonte deve arrivare il passaggio per essere "
-        "annunciato. Trenta vuol dire \u00abalza il naso\u00bb: a dieci gradi "
-        "l'oggetto e' a 1390 km da qui ed e' tredici volte piu' fioco, quando "
-        "non e' dietro un tetto. Alzando la soglia gli annunci calano: a 30 "
-        "gradi restano circa la meta', a 60 un sesto.",
-        "How high the pass must get to be announced. Thirty means \u00ablook "
-        "up\u00bb: at ten degrees the object is 1390 km away and thirteen times "
-        "fainter, when it is not behind a roof. A higher threshold means fewer "
-        "announcements: about half at 30 degrees, a sixth at 60."),
+        "Quanti gradi sopra l'orizzonte deve arrivare il passaggio. A 30 resta metà degli annunci.",
+        "How high above the horizon the pass must reach. At 30 about half the announcements stay."),
     "satelliti.lead": ("Preavviso (min)", "Lead time (min)"),
     "satelliti.lead.hint": (
-        "Un passaggio dura fra i due e i sette minuti: annunciarlo mentre "
-        "succede vuol dire arrivare in terrazzo a cose finite.",
-        "A pass lasts between two and seven minutes: announcing it while it "
-        "happens means reaching the balcony when it is over."),
+        "Un passaggio dura fra i due e i sette minuti: annunciarlo mentre succede è tardi.",
+        "A pass lasts two to seven minutes: announcing it as it happens is too late."),
     "satelliti.step": ("Promemoria ogni (min)", "Reminder every (min)"),
     "satelliti.step.hint": (
         "Con preavviso 10 e cadenza 5 compaiono due avvisi: a T-10 e a T-5.",
         "With lead 10 and step 5 there are two reminders: at T-10 and T-5."),
     "satelliti.groups": ("Famiglie", "Families"),
     "satelliti.groups.hint": (
-        "Le famiglie le pubblica CelesTrak. Piu' se ne scelgono, piu' il "
-        "calcolo e' lungo; e comunque parlano solo gli oggetti di luminosita' "
-        "nota.",
-        "Families are published by CelesTrak. The more you pick, the longer "
-        "the computation; only objects of known brightness get to speak "
-        "anyway."),
+        "Le famiglie le pubblica CelesTrak. Più se ne scelgono, più il calcolo è lungo.",
+        "The families come from CelesTrak. The more you pick, the longer the computation."),
     "satelliti.showdim": (
         "Mostra anche i passaggi che non si vedono",
         "Show passes that are not visible too"),
     "satelliti.showdim.hint": (
-        "Sono quattro al giorno contro uno. Arrivano in grigio-azzurro, senza "
-        "preavviso e senza lampeggio: il colore dice da solo che non e' un "
-        "invito a uscire, e intanto si vede l'arco.",
-        "Four a day against one. They come in dim blue-grey, with no warning "
-        "and no blinking: the colour alone says it is not an invitation to go "
-        "outside, and meanwhile you still get the sky arc."),
+        "Sono quattro al giorno contro uno. Arrivano in grigio-azzurro, senza preavviso.",
+        "Four a day against one. They arrive in grey-blue, with no advance warning."),
     "satelliti.allobjects": (
         "Anche gli oggetti di luminosita' sconosciuta",
         "Objects of unknown brightness too"),
     "satelliti.allobjects.hint": (
-        "Sconsigliato: il gruppo delle stazioni contiene anche i CubeSat "
-        "rilasciati dalla ISS, invisibili a occhio nudo. Il pannello "
-        "manderebbe qualcuno a cercare una scatoletta da dieci centimetri.",
-        "Not recommended: the stations group also holds CubeSats released "
-        "from the ISS, invisible to the naked eye. The panel would send "
-        "someone looking for a ten-centimetre box."),
+        "Sconsigliato: il gruppo contiene anche i CubeSat, invisibili a occhio nudo.",
+        "Not recommended: the group also holds CubeSats, invisible to the naked eye."),
     "satelliti.sunmax": ("Sole al massimo a (gradi)",
                          "Sun at most at (degrees)"),
     "satelliti.sunmax.hint": (
-        "Sopra questa altezza del Sole il pannello non mostra i satelliti: di "
-        "giorno non c'è niente da vedere e la finestra ruberebbe spazio agli "
-        "altri servizi. A 3 si apre un quarto d'ora prima del tramonto, a 0 "
-        "esattamente al tramonto, a 90 non si chiude mai. Il calcolo dei "
-        "passaggi, il registro e i sensori MQTT continuano comunque: il "
-        "cancello decide cosa **mostrare**, non cosa sapere.",
-        "Above this sun elevation the panel does not show satellites: there is "
-        "nothing to see in daylight and the window would take space from the "
-        "other services. At 3 it opens a quarter of an hour before sunset, at "
-        "0 exactly at sunset, at 90 it never closes. Pass computation, the log "
-        "and the MQTT sensors keep running regardless: the gate decides what "
-        "to **show**, not what to know."),
+        "Sopra questa altezza del Sole non si mostrano: a 0 la finestra si apre al tramonto.",
+        "Above this sun elevation nothing is shown: at 0 the window opens at sunset."),
     "satelliti.attesa.buio": (
         "in attesa del tramonto (Sole a %(sole)d°, soglia %(soglia)d°)",
         "waiting for sunset (sun at %(sole)d°, threshold %(soglia)d°)"),
     "satelliti.tle": ("Elementi orbitali", "Orbital elements"),
     "satelliti.tle.hint": (
-        "Si scaricano da CelesTrak una volta ogni sei ore e invecchiano in "
-        "giorni, non in minuti: il pannello funziona anche con la rete giu'.",
-        "Downloaded from CelesTrak every six hours; they age over days, not "
-        "minutes, so the panel works with the network down."),
+        "Si scaricano da CelesTrak ogni sei ore e invecchiano in giorni, non in minuti.",
+        "Downloaded from CelesTrak every six hours, they age in days, not minutes."),
     "satelliti.tle.never": ("mai", "never"),
     "satelliti.log": ("Registro dei passaggi", "Pass log"),
     "satelliti.log.hint": (
-        "Un CSV con tutti i passaggi a cose fatte, visibili e non, con "
-        "l'altezza del Sole che spiega perche'.",
-        "A CSV with every pass once it is over, visible or not, with the Sun "
-        "elevation explaining why."),
+        "Un CSV con tutti i passaggi a cose fatte, visibili e non.",
+        "A CSV with every pass after the fact, visible or not."),
     "satelliti.log.rows": ("%(rows)d passaggi, %(size)s kB",
                            "%(rows)d passes, %(size)s kB"),
     "satelliti.log.enabled": ("Registra i passaggi", "Log the passes"),
@@ -348,12 +275,8 @@ STRINGS = {
     # ------------------------------------------------------- unita' del radar
     "radar.units": ("Unità di misura", "Units"),
     "radar.units.hint": (
-        "I dati arrivano sempre in piedi e nodi: la conversione riguarda "
-        "solo come vengono scritti sul pannello. Il registro CSV resta nelle "
-        "unità originali, così i passaggi vecchi e nuovi restano confrontabili.",
-        "The data always arrives in feet and knots: the conversion only "
-        "affects how it is written on the panel. The CSV log stays in the "
-        "original units, so old and new passes remain comparable."),
+        "I dati arrivano in piedi e nodi: la conversione riguarda solo il pannello, non il CSV.",
+        "Data arrives in feet and knots: the conversion is for the panel only, not the CSV."),
     "radar.unit.ft": ("piedi (ft)", "feet (ft)"),
     "radar.unit.m": ("metri (m)", "metres (m)"),
     "radar.unit.kt": ("nodi (kt)", "knots (kt)"),
@@ -365,14 +288,8 @@ STRINGS = {
     "nav.radar": ("Radar", "Radar"),
     "radar.vicini": ("Passati appena fuori", "Passed just outside"),
     "radar.vicini.hint": (
-        "Aerei visti oltre i %(raggio)s km ma entro il margine di cortesia: "
-        "non vanno sul pannello né nel registro. Servono a rispondere alla "
-        "domanda «è passato vicino e non l\'ha visto: quanto era lontano "
-        "davvero?» con un numero invece che a occhio.",
-        "Aircraft seen beyond %(raggio)s km but within the courtesy margin: "
-        "they do not reach the panel or the log. They are here to answer "
-        "«it flew close and the panel said nothing — how far was it really?» "
-        "with a number instead of a guess."),
+        "Aerei visti oltre i %(raggio)s km ma poco fuori: non vanno sul pannello né nel registro.",
+        "Aircraft seen just beyond %(raggio)s km: they reach neither the panel nor the log."),
     "radar.col.flight": ("Volo", "Flight"),
     "radar.col.dist": ("Distanza", "Distance"),
     "radar.col.when": ("Quando", "When"),
@@ -468,31 +385,19 @@ STRINGS = {
     # -------------------------------------------------------------- impostazioni
     "settings.brightness": ("Luminosità", "Brightness"),
     "settings.brightness.hint": (
-        "Valore diurno di riferimento. La modifica è immediata sul pannello e "
-        "viene salvata automaticamente.",
-        "Daytime reference value. Changes apply to the panel immediately and "
-        "are saved automatically."),
+        "Valore diurno. La modifica è immediata sul pannello e viene salvata da sola.",
+        "Daytime value. The change is immediate on the panel and saved automatically."),
 
     "settings.brightness.night": (
-        "Night mode è attivo: il pannello sta usando la luminosità notturna "
-        "({valore}%), quindi questo cursore non avrebbe effetto ed è "
-        "disattivato. La luminosità notturna si cambia qui sotto.",
-        "Night mode is on: the panel is using the night brightness "
-        "({valore}%), so this slider would do nothing and is disabled. "
-        "The night brightness is set below."),
+
+        "Night mode è attivo: vale la luminosità notturna ({valore}%), che si cambia qui sotto.",
+
+        "Night mode is on: the night brightness ({valore}%) applies, and it is set below."),
 
     "settings.position": ("Posizione del DMD", "Where the DMD is"),
     "settings.position.hint": (
-        "Una posizione sola per tre servizi: il radar la usa per sapere quali "
-        "aerei sono vicini, i satelliti per calcolare i passaggi, il meteo per "
-        "le previsioni. Lasciarla a zero li tiene tutti e tre in silenzio. "
-        "Fino alla 6.9 stava nella pagina Radar, dove sembrava una preferenza "
-        "del radar.",
-        "One position for three services: the radar uses it to know which "
-        "aircraft are nearby, the satellites to compute passes, the weather "
-        "for the forecast. Leaving it at zero keeps all three silent. Until "
-        "6.9 it lived on the Radar page, where it looked like a radar "
-        "setting."),
+        "Una posizione sola per radar, satelliti e meteo. A zero restano tutti e tre in silenzio.",
+        "One position for radar, satellites and weather. At zero all three stay silent."),
     "radar.coords.moved": (
         "Le coordinate sono passate in Impostazioni, perché le usano anche i "
         "satelliti e il meteo. Adesso sono %(lat)s, %(lon)s.",
@@ -505,14 +410,8 @@ STRINGS = {
     "settings.power.turn_off": ("Spegni il pannello", "Turn the panel off"),
     "settings.power.turn_on": ("Accendi il pannello", "Turn the panel on"),
     "settings.power.hint": (
-        "Spegne solo il vetro: il Raspberry resta acceso e continua a fare "
-        "tutto, il radar registra, le notifiche arrivano e questa pagina "
-        "risponde. Lo spegnimento dura finché non si riaccende — anche dopo "
-        "un riavvio — e si comanda anche da Home Assistant.",
-        "This turns off the glass only: the Raspberry stays on and keeps "
-        "working, the radar keeps logging, notifications still arrive and "
-        "this page still answers. It stays off until turned back on — across "
-        "restarts too — and it can also be switched from Home Assistant."),
+        "Spegne solo il vetro: il Raspberry resta acceso e continua a fare tutto.",
+        "Turns off the glass only: the Raspberry stays on and keeps doing everything."),
 
     "settings.modes": ("Night mode e Sleep mode", "Night mode and Sleep mode"),
     "settings.night": ("Night mode — abbassa la luminosità in una fascia oraria",
@@ -553,10 +452,8 @@ STRINGS = {
         "Wake the display if someone opens a game during Sleep"),
     "suoni.title": ("Suoni", "Sounds"),
     "suoni.intro": (
-        "Il suono che ogni servizio fa quando prende il pannello. Il momento è "
-        "quello: una volta, quando compare — non mentre ci resta.",
-        "The sound each service makes when it takes the panel. That is the "
-        "moment: once, when it appears — not while it stays."),
+        "Il suono che ogni servizio fa quando prende il pannello: una volta, quando compare.",
+        "The sound each service makes when it takes the panel: once, as it appears."),
     "suoni.vuoto": (
         "Non c'è nessun file nella libreria media: copiane qualcuno nella "
         "condivisione di rete e ricompariranno qui.",
@@ -571,12 +468,8 @@ STRINGS = {
     "nav.sveglia": ("Sveglia", "Alarm"),
     "timer.title": ("Timer", "Timer"),
     "timer.intro": (
-        "Un conto alla rovescia, per le cose che non scadono a un'ora ma "
-        "«fra quanto»: la pasta non scade alle 20:47. Quando finisce squilla "
-        "come una sveglia, e si ferma allo stesso modo.",
-        "A countdown, for things that are not due at a time but «in how "
-        "long»: pasta is not due at 8:47 p.m. When it ends it rings like an "
-        "alarm, and stops the same way."),
+        "Un conto alla rovescia per le cose che scadono «fra quanto», non a un'ora.",
+        "A countdown for things that are due “in so long”, not at a given time."),
     "timer.nome": ("Per cosa (facoltativo)", "What for (optional)"),
     "timer.nome.esempio": ("Pasta", "Pasta"),
     "timer.minuti": ("%(n)s min", "%(n)s min"),
@@ -598,11 +491,8 @@ STRINGS = {
                              "timer: %(minuti)s left"),
     "sveglia.title": ("Sveglia", "Alarm clock"),
     "sveglia.intro": (
-        "Fino a quattro orari. Quando uno scatta il pannello diventa un "
-        "orologio che lampeggia e la scheda audio suona, finché non premi il "
-        "pulsante della Funcam.",
-        "Up to four times. When one goes off the panel becomes a blinking "
-        "clock and the sound card rings, until you press the Funcam button."),
+        "Fino a quattro orari. Quando uno scatta il pannello lampeggia e la scheda audio suona.",
+        "Up to four times. When one goes off the panel blinks and the sound card rings."),
     "sveglia.servizio.spento": (
         "Il servizio Sveglia è spento nella pagina Servizi: gli orari qui "
         "sotto restano salvati ma non suonerà niente.",
@@ -630,12 +520,8 @@ STRINGS = {
     "sveglia.nessuna": ("Nessuna sveglia attiva.", "No alarm is on."),
     "sveglia.prova.title": ("Prova", "Test"),
     "sveglia.prova.hint": (
-        "Fa squillare adesso per quindici secondi, con il suono della prima "
-        "sveglia attiva. Senza, l'unico modo di sapere se funziona sarebbe "
-        "metterla e andare a dormire.",
-        "Rings now for fifteen seconds, using the sound of the first enabled "
-        "alarm. Without this, the only way to know it works would be to set "
-        "it and go to bed."),
+        "Fa squillare adesso per quindici secondi, con il suono della prima sveglia attiva.",
+        "Rings now for fifteen seconds, with the sound of the first active alarm."),
     "sveglia.prova.button": ("Fai squillare adesso", "Ring now"),
     "sveglia.prova.ok": ("Sta squillando: premi il pulsante della Funcam, "
                          "oppure aspetta quindici secondi.",
@@ -645,57 +531,32 @@ STRINGS = {
     "sveglia.regole.title": ("Che cosa la ferma e che cosa no",
                              "What stops it and what does not"),
     "sveglia.regole.sleep": (
-        "Passa sopra allo Sleep mode e al display spento a mano. Spegnere il "
-        "pannello è una decisione sul presente; mettere una sveglia è una "
-        "promessa fatta prima per dopo, e fra le due vince la promessa.",
-        "It overrides Sleep mode and a manually switched-off display. "
-        "Switching the panel off is a decision about now; setting an alarm is "
-        "a promise made earlier for later, and the promise wins."),
+        "Passa sopra allo Sleep mode e al display spento a mano.",
+        "It overrides Sleep mode and a manually switched-off display."),
     "sveglia.regole.volume": (
-        "Il volume notturno non la tocca: suona al volume di giorno. Il Night "
-        "mode abbassa la voce perché un aereo alle tre non merita di "
-        "svegliarti — una sveglia si mette apposta per farlo.",
-        "The night volume does not apply: it rings at the daytime volume. "
-        "Night mode lowers the voice because a plane at 3 a.m. does not "
-        "deserve to wake you — an alarm is set precisely to do that."),
+        "Il volume notturno non la tocca: suona al volume di giorno.",
+        "The night volume does not apply: it rings at the daytime volume."),
     "sveglia.regole.audio": (
-        "Se l'audio generale è spento non suona, e il pannello lampeggia lo "
-        "stesso. Chi ha spento il suono non vuole sentire niente.",
-        "If sound is off globally it will not ring, and the panel blinks "
-        "anyway. Whoever turned sound off wants silence."),
+        "Se l'audio generale è spento non suona, e il pannello lampeggia lo stesso.",
+        "If the master sound is off it stays silent, and the panel blinks anyway."),
     "sveglia.regole.pulsante": (
-        "La ferma il pulsante della Funcam, quello che hai già assegnato: "
-        "mentre squilla quel pulsante è suo, e premerlo non scatta nessuna "
-        "foto.",
-        "The Funcam button stops it — the one you already assigned. While "
-        "ringing, that button belongs to the alarm and pressing it takes no "
-        "picture."),
+        "La ferma il pulsante fisico: mentre squilla è suo, e non scatta nessuna foto.",
+        "The physical button stops it: while ringing it is the alarm's, and takes no photo."),
     "status.sveglia.suona": ("sta suonando (%(ora)s)", "ringing (%(ora)s)"),
     "status.sveglia.prossima": ("prossima: %(ora)s di %(giorno)s",
                                 "next: %(ora)s on %(giorno)s"),
     "status.sveglia.nessuna": ("nessuna sveglia attiva", "no alarm set"),
     "settings.night.volume": ("Volume %", "Volume %"),
     "settings.night.volume.hint": (
-        "Il volume che il DMD usa per i propri avvisi durante il Night mode: "
-        "0 vuol dire muto, ed è il valore predefinito. Vale per quello che il "
-        "pannello dice di sua iniziativa — un aereo, un compleanno, una "
-        "notifica — non per una partita, che stai facendo tu. Sleep mode e "
-        "display spento sono già silenziosi di loro: lì non succede niente da "
-        "annunciare.",
-        "The volume the DMD uses for its own alerts during Night mode: 0 means "
-        "muted, and that is the default. It applies to what the panel says on "
-        "its own — a plane, a birthday, a notification — not to a game, which "
-        "is you. Sleep mode and a switched-off display are already silent: "
-        "nothing happens there to announce."),
+        "Il volume degli avvisi durante il Night mode. Zero vuol dire muto, ed è il predefinito.",
+        "Volume of the DMD's own chimes during Night mode. Zero means muted, and is the default."),
     "settings.sleep": ("Sleep mode — spegne il display in una fascia oraria",
                        "Sleep mode — turns the display off during a time range"),
     "settings.wake": ("Risveglia il display se arrivano frame da Batocera durante lo Sleep",
                       "Wake the display if frames arrive from Batocera during Sleep"),
     "settings.modes.hint": (
-        "Sleep ha la precedenza su Night. Le fasce possono attraversare la "
-        "mezzanotte, ad esempio dalle 23:00 alle 07:00.",
-        "Sleep takes precedence over Night. Ranges may cross midnight, for "
-        "example from 23:00 to 07:00."),
+        "Sleep ha la precedenza su Night. Le fasce possono attraversare la mezzanotte.",
+        "Sleep takes precedence over Night. Bands may cross midnight."),
 
     "settings.time": ("Ora e sincronizzazione", "Time and synchronisation"),
     "settings.ntp": ("Server NTP", "NTP server"),
@@ -809,17 +670,8 @@ STRINGS = {
     "settings.update.auto": ("Controlla automaticamente la disponibilità di aggiornamenti",
                              "Check for updates automatically"),
     "settings.update.hint": (
-        "L'installazione scarica l'archivio dal ramo indicato, verifica che "
-        "contenga i file attesi e che tutto il codice compili, salva una copia "
-        "della versione in uso e solo allora sostituisce i file. Se dopo il "
-        "riavvio il servizio non risponde, la versione precedente viene "
-        "ripristinata da sola. La configurazione in %(path)s non viene mai toccata.",
-        "The installer downloads the archive from the chosen branch, checks "
-        "that it contains the expected files and that all the code compiles, "
-        "backs up the running version, and only then replaces the files. If "
-        "the service does not answer after the restart, the previous version "
-        "is restored automatically. The configuration in %(path)s is never "
-        "touched."),
+        "Scarica, verifica, salva una copia e sostituisce. Se non riparte, torna indietro da sola.",
+        "Downloads, verifies, keeps a copy and replaces. If it fails to restart, it rolls back."),
     "settings.update.log": ("Diario degli aggiornamenti", "Update log"),
 
     "settings.lib": ("Libreria del pannello", "Panel library"),
@@ -858,36 +710,20 @@ STRINGS = {
 
     "settings.config": ("Configurazione", "Configuration"),
     "settings.config.hint": (
-        "Tutta la taratura del pannello, i colori, le fasce orarie e le "
-        "impostazioni dei servizi stanno in un unico file. Esportalo dopo ogni "
-        "modifica importante: se la scheda SD si guasta, rimettere in piedi il "
-        "sistema diventa questione di minuti invece che di tentativi.",
-        "The whole panel tuning, the colours, the time ranges and the service "
-        "settings live in a single file. Export it after every significant "
-        "change: if the SD card fails, rebuilding the system becomes a matter "
-        "of minutes rather than guesswork."),
+        "Taratura, colori, fasce e servizi in un file solo. Esportalo dopo ogni modifica.",
+        "Tuning, colours, time bands and services in one file. Export it after every big change."),
     "settings.config.export": ("Esporta la configurazione", "Export the configuration"),
     "settings.config.position": (
         "Includi le coordinate del radar",
         "Include the radar coordinates"),
     "settings.config.position.hint": (
-        "Togli la spunta se il file va condiviso con qualcuno o allegato a una "
-        "segnalazione: senza, le coordinate vengono esportate a zero.",
-        "Clear this if the file is going to be shared or attached to a bug "
-        "report: without it, the coordinates are exported as zero."),
+        "Togli la spunta se il file va condiviso: senza, le coordinate escono a zero.",
+        "Untick it if you are sharing the file: otherwise the coordinates are exported as zero."),
     "settings.config.import": ("Importa una configurazione", "Import a configuration"),
     "settings.config.import.button": ("Importa e riavvia", "Import and restart"),
     "settings.config.import.hint": (
-        "Il file viene adeguato alla versione in uso, quindi va bene anche se "
-        "salvato da una versione precedente. Le chiavi sconosciute vengono "
-        "ignorate. La configurazione attuale viene copiata in %(path)s prima "
-        "di essere sostituita, e il servizio si riavvia: le impostazioni del "
-        "pannello si applicano solo alla creazione della matrice.",
-        "The file is adapted to the running version, so one saved by an older "
-        "version works too. Unknown keys are ignored. The current "
-        "configuration is copied to %(path)s before being replaced, and the "
-        "service restarts: panel settings only apply when the matrix is "
-        "created."),
+        "Il file viene adeguato alla versione in uso. Quella attuale finisce in %(path)s.",
+        "The file is adapted to this version. The current configuration is saved to %(path)s."),
     "settings.config.nofile": ("Nessun file selezionato.", "No file selected."),
     "settings.config.badjson": (
         "Il file non è un JSON leggibile: potrebbe essersi rovinato nel trasferimento.",
@@ -903,10 +739,8 @@ STRINGS = {
 
     "settings.language": ("Lingua dell'interfaccia", "Interface language"),
     "settings.language.hint": (
-        "Vale solo per queste pagine. I nomi dei giorni che appaiono sul "
-        "pannello si scelgono nella pagina Orologio, separatamente.",
-        "Applies to these pages only. The weekday names shown on the panel "
-        "are chosen separately, on the Clock page."),
+        "Vale solo per queste pagine. I giorni sul pannello si scelgono nella pagina Orologio.",
+        "For these pages only. The day names on the panel are chosen on the Clock page."),
 
     # ------------------------------------------------------------------ orologio
     "clock.title": ("Orologio", "Clock"),
@@ -934,55 +768,35 @@ STRINGS = {
     "media.upload": ("Carica immagini o video", "Upload images or videos"),
     "media.upload.button": ("Carica", "Upload"),
     "media.rescan.hint": (
-        "L'elenco dei file viene tenuto in memoria per qualche minuto: con "
-        "librerie molto grandi rileggere il disco a ogni richiesta rallenta "
-        "il sistema e produce righe bianche sul pannello. Dopo aver copiato "
-        "file dalla condivisione di rete, usa il pulsante qui sotto.",
-        "The file list is kept in memory for a few minutes: with very large "
-        "libraries, re-reading the disk on every request slows the system "
-        "down and produces white lines on the panel. After copying files over "
-        "the network share, use the button below."),
+        "L'elenco dei file resta in memoria qualche minuto: dopo aver copiato file, premi qui.",
+        "The file list is cached for a few minutes: after copying files, press this."),
     "media.rescan.button": ("Rileggi la libreria", "Re-read the library"),
     "media.timer": ("Fascia oraria", "Time window"),
     "media.timer.hint": (
-        "Le ore in cui il Media Player pu\u00f2 lavorare. Fuori dalla fascia il "
-        "servizio si ferma davvero \u2014 niente decodifica, niente letture "
-        "dalla scheda SD \u2014 e riparte da solo quando la fascia si riapre.",
-        "The hours during which the Media Player may work. Outside the window "
-        "the service really stops \u2014 no decoding, no reads from the SD "
-        "card \u2014 and starts again by itself when the window reopens."),
+        "Le ore in cui il Media Player lavora. Fuori dalla fascia si ferma davvero.",
+        "The hours when the Media Player works. Outside the band it really stops."),
     "media.timer.enabled": (
         "Rispetta la fascia oraria (spento: il Media Player lavora sempre)",
         "Respect the time window (off: the Media Player always works)"),
     "media.timer.sleep": (
-        "Lo Sleep mode ha comunque la precedenza: dentro la fascia di Sleep il "
-        "pannello resta spento anche se il Media Player \u00e8 nella sua. La "
-        "fascia pu\u00f2 scavalcare la mezzanotte.",
-        "Sleep mode still takes precedence: during the Sleep window the panel "
-        "stays off even if the Media Player is inside its own. The window may "
-        "cross midnight."),
+        "Lo Sleep mode ha comunque la precedenza. La fascia può scavalcare la mezzanotte.",
+        "Sleep mode still takes precedence. The band may cross midnight."),
     "media.preview": ("Anteprima", "Preview"),
     "media.preview.hint": (
-        "Interrompe l'attesa e manda subito sul pannello un contenuto scelto "
-        "a caso dalla libreria.",
-        "Skips the wait and immediately sends a randomly chosen item from the "
-        "library to the panel."),
+        "Manda subito sul pannello un contenuto scelto a caso dalla libreria.",
+        "Sends a random item from the library to the panel right away."),
     "media.preview.button": ("Mostra subito un contenuto", "Show something now"),
     "media.playback": ("Riproduzione", "Playback"),
     "media.minint": ("Intervallo minimo (s)", "Minimum interval (s)"),
     "media.maxint": ("Intervallo massimo (s)", "Maximum interval (s)"),
     "media.interval.hint": (
-        "Tra un contenuto e il successivo il sistema attende un tempo casuale "
-        "compreso in questo intervallo.",
-        "Between one item and the next the system waits a random time within "
-        "this range."),
+        "Fra un contenuto e il successivo si attende un tempo casuale in questo intervallo.",
+        "Between one item and the next a random time in this range is waited."),
     "media.imgdur": ("Durata delle foto (s)", "Photo duration (s)"),
     "media.viddur": ("Durata dei video (s)", "Video duration (s)"),
     "media.duration.hint": (
-        "Le animazioni brevi, come le GIF di Pixelcade, vengono ripetute fino "
-        "a coprire la durata indicata.",
-        "Short animations, such as Pixelcade GIFs, are looped to fill the "
-        "given duration."),
+        "Le animazioni brevi vengono ripetute fino a coprire la durata indicata.",
+        "Short animations are repeated until they cover the chosen duration."),
     "media.fps": ("Fotogrammi al secondo", "Frames per second"),
     "media.scale": ("Adattamento al pannello", "Fit to panel"),
     "media.scale.fit": ("Adatta (bande nere)", "Fit (letterbox)"),
@@ -1001,12 +815,8 @@ STRINGS = {
     # -------------------------------------------------------------------- banner
     "banner.title": ("Rolling Banner", "Rolling Banner"),
     "banner.intro": (
-        "Fino a dieci testi scorrevoli. Compaiono a intervalli casuali come i "
-        "contenuti del Media Player: il testo entra da destra, attraversa il "
-        "pannello ed esce a sinistra, poi il display torna a chi lo aveva.",
-        "Up to ten scrolling texts. They appear at random intervals like Media "
-        "Player items: the text enters from the right, crosses the panel and "
-        "exits to the left, then the display goes back to whoever had it."),
+        "Fino a dieci testi scorrevoli, a intervalli casuali come i contenuti del Media Player.",
+        "Up to ten scrolling texts, at random intervals like the Media Player's content."),
     "banner.texts": ("Testi", "Texts"),
     "banner.slot": ("Testo %(n)d", "Text %(n)d"),
     "banner.text": ("Testo", "Text"),
@@ -1027,48 +837,32 @@ STRINGS = {
     "banner.minint": ("Intervallo minimo (s)", "Minimum interval (s)"),
     "banner.maxint": ("Intervallo massimo (s)", "Maximum interval (s)"),
     "banner.interval.hint": (
-        "Tra un banner e il successivo il sistema attende un tempo casuale "
-        "compreso in questo intervallo.",
-        "Between one banner and the next the system waits a random time within "
-        "this range."),
+        "Fra un banner e il successivo si attende un tempo casuale in questo intervallo.",
+        "Between one banner and the next a random time in this range is waited."),
     "banner.fps": ("Fotogrammi al secondo", "Frames per second"),
     "banner.shuffle": ("Ordine casuale invece che in sequenza",
                        "Random order instead of sequential"),
     "banner.speed.hint": (
-        "La velocità è per singolo testo: a 60 px/s un testo attraversa il "
-        "pannello in poco più di quattro secondi. Valori bassi si leggono "
-        "meglio, valori alti si notano di più.",
-        "Speed is per text: at 60 px/s a text crosses the panel in a little "
-        "over four seconds. Lower values read better, higher ones draw more "
-        "attention."),
+        "A 60 px/s un testo attraversa il pannello in poco più di quattro secondi.",
+        "At 60 px/s a text crosses the panel in a little over four seconds."),
     "banner.preview": ("Anteprima", "Preview"),
     "banner.preview.hint": (
         "Interrompe l'attesa e manda subito in scorrimento il testo successivo.",
         "Skips the wait and immediately scrolls the next text."),
     "banner.preview.button": ("Mostra subito un banner", "Show a banner now"),
     "banner.priority.hint": (
-        "Il banner sta sopra al Media Player ma sotto ad Air Radar e a ZeDMD: "
-        "durante una partita su Batocera non compare mai.",
-        "The banner outranks the Media Player but stays below Air Radar and "
-        "ZeDMD: it never appears during a game on Batocera."),
+        "Sta sopra al Media Player ma sotto ad Air Radar e a ZeDMD.",
+        "It sits above the Media Player but below Air Radar and ZeDMD."),
 
     # --------------------------------------------------------------- now playing
     "nowplaying.title": ("Now Playing", "Now Playing"),
     "nowplaying.intro": (
-        "Il DMD mostra che cosa stai ascoltando: titolo, artista, album, stato "
-        "e avanzamento del brano. Non riproduce audio e non si mette in mezzo "
-        "fra la musica e le casse: si limita ad ascoltare i metadati.",
-        "The DMD shows what you are listening to: title, artist, album, state "
-        "and progress. It plays no audio and never sits between the music and "
-        "your speakers: it only listens for the metadata."),
+        "Mostra titolo, artista e avanzamento del brano. Non riproduce audio: legge i metadati.",
+        "Shows title, artist and progress. It plays no audio: it only reads the metadata."),
     "nowplaying.coverage.title": ("Che cosa viene rilevato", "What gets picked up"),
     "nowplaying.coverage.airplay": (
-        "Tutto quello che parte da un iPhone, un iPad o un Mac via AirPlay, "
-        "purché il DMD sia selezionato fra le casse. Non conta l'applicazione: "
-        "Apple Music, Spotify, Amazon Music, YouTube funzionano allo stesso modo.",
-        "Anything sent from an iPhone, iPad or Mac over AirPlay, as long as the "
-        "DMD is selected among the speakers. The app does not matter: Apple "
-        "Music, Spotify, Amazon Music and YouTube all work the same way."),
+        "Tutto ciò che parte da iPhone, iPad o Mac via AirPlay, con il DMD scelto fra le casse.",
+        "Anything sent from an iPhone, iPad or Mac over AirPlay, with the DMD chosen as speaker."),
     "nowplaying.coverage.spotify": (
         "Spotify anche quando non passa da AirPlay: casse Connect, computer, "
         "Echo. Lo stato arriva direttamente da Spotify.",
@@ -1080,31 +874,19 @@ STRINGS = {
         "Anything else, through a JSON message published to MQTT by a Home "
         "Assistant automation."),
     "nowplaying.coverage.gap": (
-        "Resta fuori la musica che nasce e muore su un altro apparecchio senza "
-        "passare di qui: un HomePod a cui chiedi un brano a voce, o Amazon "
-        "Music su un Echo. Per quelli serve Home Assistant, che li legge e "
-        "ripubblica sul topic esterno qui sotto.",
-        "What stays out is music that starts and ends on another device "
-        "without passing through here: a HomePod asked by voice, or Amazon "
-        "Music on an Echo. Those need Home Assistant, which can read them and "
-        "republish to the external topic below."),
+        "Resta fuori la musica che non passa di qui, tipo un HomePod: serve Home Assistant.",
+        "Music that never passes through here, like a HomePod, needs Home Assistant."),
     "nowplaying.priority.hint": (
-        "Mentre suona qualcosa il player resta a schermo al posto di foto e "
-        "banner, ma lascia passare Air Radar e si toglie di mezzo appena "
-        "arrivano frame da Batocera.",
-        "While something is playing the player stays on screen instead of "
-        "photos and banners, but it lets Air Radar through and steps aside as "
-        "soon as frames arrive from Batocera."),
+        "Il player sta a schermo al posto di foto e banner, ma lascia passare radar e Batocera.",
+        "The player replaces photos and banners, but lets radar and Batocera through."),
     "nowplaying.current": ("In riproduzione adesso", "Playing now"),
     "nowplaying.nothing": ("Niente in riproduzione.", "Nothing playing."),
     "nowplaying.source": ("Sorgente", "Source"),
     "nowplaying.device": ("Dispositivo", "Device"),
     "nowplaying.test": ("Prova senza musica", "Try it without music"),
     "nowplaying.test.hint": (
-        "Mette un brano finto nello stato del player, per vedere subito come "
-        "viene sul pannello senza dover far partire nulla. Sparisce da solo.",
-        "Puts a fake track into the player state, so you can see how it looks "
-        "on the panel without starting anything. It clears itself."),
+        "Mette un brano finto nel player per vedere come viene sul pannello. Sparisce da solo.",
+        "Puts a fake track in the player to see how it looks. It clears itself."),
     "nowplaying.test.button": ("Mostra un brano di prova", "Show a test track"),
 
     # Le chiavi qui sotto tengono il prefisso `nowplaying.` per ragioni di
@@ -1115,18 +897,8 @@ STRINGS = {
     # chiavi sono identificatori, e questo commento e' piu' economico.
     "nowplaying.broker": ("Broker MQTT", "MQTT broker"),
     "nowplaying.broker.hint": (
-        "Dal broker passa quasi tutto quello che il DMD dice e sente: il "
-        "brano in ascolto, gli interruttori dei servizi in Home Assistant, "
-        "le scadenze, i rifiuti e le notifiche che arrivano al pannello. Il "
-        "valore predefinito è un Mosquitto installato sul Raspberry stesso, "
-        "così la cosa lavora da sola; se hai già un broker sotto Home "
-        "Assistant, scrivi quel suo indirizzo e ottieni le due cose insieme.",
-        "Almost everything the DMD says and hears goes through the broker: "
-        "the track playing, the service switches in Home Assistant, the "
-        "deadlines, the waste calendar and the notifications that reach the "
-        "panel. The default is a Mosquitto running on the Raspberry Pi "
-        "itself, so it works on its own; if you already run a broker under "
-        "Home Assistant, put its address here and get both at once."),
+        "Il broker MQTT da cui passano brano, interruttori, scadenze e notifiche.",
+        "The MQTT broker carrying the track, switches, deadlines and notifications."),
     # I due rimandi fra la pagina Rete e la pagina Musica. Finiscono davanti a
     # un collegamento, quindi la frase si chiude con il nome della pagina.
     "rete.mqtt.elsewhere": (
@@ -1137,51 +909,34 @@ STRINGS = {
         "Broker, credentials and Home Assistant are set in"),
     "nowplaying.topics": ("Topic della musica", "Music topics"),
     "nowplaying.topics.hint": (
-        "Da dove arriva il brano in ascolto. La connessione al broker è "
-        "un'altra cosa e sta altrove: qui ci sono solo i due topic.",
-        "Where the playing track comes from. Connecting to the broker is a "
-        "different matter and lives elsewhere: these are just the two "
-        "topics."),
+        "Da dove arriva il brano in ascolto. La connessione al broker sta altrove.",
+        "Where the playing track comes from. The broker connection lives elsewhere."),
     "nowplaying.mqtt.enabled": ("Collega il DMD al broker",
                                 "Connect the DMD to the broker"),
     "nowplaying.mqtt.host": ("Indirizzo", "Address"),
     "nowplaying.mqtt.username": ("Utente", "Username"),
     "nowplaying.mqtt.password": ("Password", "Password"),
     "nowplaying.mqtt.password.hint": (
-        "La password non finisce mai in un file di configurazione esportato: "
-        "viene tolta all'esportazione e va riscritta dopo un'importazione.",
-        "The password never ends up in an exported configuration file: it is "
-        "stripped on export and must be typed again after an import."),
+        "La password non finisce nella configurazione esportata: va riscritta dopo l'importazione.",
+        "The password never leaves in an exported configuration: type it again after an import."),
     "nowplaying.mqtt.client_id": ("Nome del client", "Client name"),
     "nowplaying.mqtt.base_topic": ("Topic di base del DMD", "DMD base topic"),
     "nowplaying.mqtt.shairport": ("Topic di shairport-sync", "shairport-sync topic"),
     "nowplaying.mqtt.shairport.hint": (
-        "Lo stesso valore scritto in `mqtt.topic` dentro "
-        "/etc/shairport-sync.conf. Il DMD si iscrive a tutto quello che ci sta "
-        "sotto.",
-        "The same value set as `mqtt.topic` in /etc/shairport-sync.conf. The "
-        "DMD subscribes to everything below it."),
+        "Lo stesso valore di `mqtt.topic` in /etc/shairport-sync.conf.",
+        "The same value as `mqtt.topic` in /etc/shairport-sync.conf."),
     "nowplaying.mqtt.external": ("Topic esterno", "External topic"),
     "nowplaying.mqtt.external.hint": (
-        "Topic facoltativo su cui qualsiasi cosa può pubblicare un JSON con "
-        "title, artist, album, duration, position e playing. Serve a coprire "
-        "gli apparecchi che il DMD non vede da solo. Lascialo vuoto per non "
-        "ascoltare nulla.",
-        "Optional topic where anything can publish a JSON with title, artist, "
-        "album, duration, position and playing. It covers devices the DMD "
-        "cannot see by itself. Leave it empty to listen to nothing."),
+        "Topic facoltativo dove pubblicare un JSON con il brano. Vuoto: non si ascolta nulla.",
+        "Optional topic where a JSON with the track can be published. Empty: nothing is heard."),
     "nowplaying.mqtt.missing": (
         "La libreria MQTT non è installata. Sul Raspberry: "
         "sudo apt install %(package)s",
         "The MQTT library is not installed. On the Raspberry Pi: "
         "sudo apt install %(package)s"),
     "nowplaying.setup.hint": (
-        "Se non hai ancora preparato il sistema, non compilare queste caselle "
-        "a mano: c'è uno script che installa e configura tutto, e le riempie "
-        "lui. Da SSH sul Raspberry: %(command)s",
-        "If you have not set the system up yet, do not fill these fields in by "
-        "hand: a script installs and configures everything and fills them in "
-        "for you. Over SSH on the Raspberry Pi: %(command)s"),
+        "Non compilare a mano: c'è uno script che configura tutto. Da SSH: %(command)s",
+        "Do not fill these in by hand: a script sets it all up. Over SSH: %(command)s"),
     "nowplaying.mqtt.state": ("Stato", "State"),
     "nowplaying.mqtt.connected": ("connesso a %(host)s:%(port)s",
                                   "connected to %(host)s:%(port)s"),
@@ -1195,26 +950,11 @@ STRINGS = {
     "nowplaying.hass.enabled": ("Crea le entità automaticamente",
                                 "Create the entities automatically"),
     "nowplaying.hass.hint": (
-        "Il DMD si presenta da solo a Home Assistant tramite MQTT Discovery. "
-        "Compare un dispositivo con il brano in riproduzione, un interruttore "
-        "per ogni servizio e la luminosità, tutti comandabili. Se Home "
-        "Assistant non c'è, questi messaggi non li legge nessuno e non "
-        "cambia niente.",
-        "The DMD announces itself to Home Assistant through MQTT Discovery. A "
-        "device appears with the current track, a switch for every service and "
-        "the brightness, all controllable. If Home Assistant is not there, "
-        "nobody reads those messages and nothing changes."),
+        "Il DMD si presenta a Home Assistant via MQTT: brano, interruttori e luminosità.",
+        "The DMD announces itself to Home Assistant: track, switches and brightness."),
     "nowplaying.hass.birth": (
-        "Non serve sorvegliare Home Assistant: quando riparte lo annuncia da "
-        "solo sul topic %(topic)s, e il DMD si ridichiara. In più le "
-        "dichiarazioni restano depositate sul broker, che le riconsegna a chi "
-        "si collega dopo. I due pulsanti qui sotto servono solo come "
-        "scorciatoia manuale.",
-        "There is no need to watch Home Assistant: when it restarts it "
-        "announces itself on %(topic)s and the DMD re-declares. On top of "
-        "that the declarations stay on the broker, which hands them to "
-        "whoever subscribes later. The two buttons below are just a manual "
-        "shortcut."),
+        "Se Home Assistant riparte il DMD si ridichiara da solo: i pulsanti sono una scorciatoia.",
+        "If Home Assistant restarts the DMD re-declares itself: these buttons are a shortcut."),
     "nowplaying.hass.announce": ("Ridichiara le entità", "Re-declare the entities"),
     "nowplaying.hass.announced": ("Entità ridichiarate.", "Entities re-declared."),
     "nowplaying.hass.disabled": (
@@ -1226,34 +966,22 @@ STRINGS = {
     "nowplaying.hass.removed": (
         "Entità rimosse da Home Assistant.", "Entities removed from Home Assistant."),
     "nowplaying.hass.remove.hint": (
-        "Cancella il dispositivo da Home Assistant. Da usare se cambi "
-        "identificativo o se smetti di usare l'integrazione: senza, le "
-        "vecchie entità resterebbero depositate sul broker come fantasmi.",
-        "Deletes the device from Home Assistant. Use it if you change the "
-        "device id or stop using the integration: without it the old entities "
-        "would stay on the broker as ghosts."),
+        "Cancella il dispositivo da Home Assistant, così non restano entità fantasma.",
+        "Removes the device from Home Assistant, so no ghost entities are left behind."),
     "nowplaying.hass.prefix": ("Prefisso discovery", "Discovery prefix"),
     "nowplaying.hass.node": ("Identificativo del dispositivo", "Device id"),
     "nowplaying.hass.device": ("Nome mostrato", "Displayed name"),
 
     "nowplaying.spotify": ("Spotify", "Spotify"),
     "nowplaying.spotify.hint": (
-        "Serve solo per la musica che non passa da AirPlay. Se ascolti "
-        "Spotify dall'iPhone mandandolo al DMD come cassa, questa sezione "
-        "puoi lasciarla spenta.",
-        "This is only for music that does not go through AirPlay. If you play "
-        "Spotify from your iPhone and send it to the DMD as a speaker, you can "
-        "leave this section off."),
+        "Serve solo per la musica che non passa da AirPlay. Altrimenti lascia spento.",
+        "Only for music that does not go through AirPlay. Otherwise leave it off."),
     "nowplaying.spotify.enabled": ("Interroga Spotify", "Poll Spotify"),
     "nowplaying.spotify.client_id": ("Client ID", "Client ID"),
     "nowplaying.spotify.redirect": ("Indirizzo di ritorno", "Redirect URI"),
     "nowplaying.spotify.redirect.hint": (
-        "Va registrato identico nella tua applicazione su Spotify. Deve "
-        "restare un indirizzo di loopback: Spotify non accetta più http su un "
-        "indirizzo di rete.",
-        "It must be registered exactly like this in your Spotify application. "
-        "Keep it a loopback address: Spotify no longer accepts plain http on a "
-        "network address."),
+        "Va registrato identico nell'app Spotify, e deve restare un indirizzo di loopback.",
+        "Register it identically in your Spotify app, and keep it a loopback address."),
     "nowplaying.spotify.poll": ("Ogni quanti secondi", "Poll every (s)"),
     "nowplaying.spotify.steps": ("Come si collega", "How to link it"),
     "nowplaying.spotify.step1": (
@@ -1272,10 +1000,8 @@ STRINGS = {
         "Save, then press the button below and open the address in the browser "
         "of any computer."),
     "nowplaying.spotify.step4": (
-        "Dopo aver autorizzato, la pagina non si aprirà: è previsto. Copia "
-        "l'intero indirizzo dalla barra del browser e incollalo qui.",
-        "After authorising, the page will not load: that is expected. Copy the "
-        "whole address from the browser bar and paste it here."),
+        "La pagina non si aprirà: è previsto. Copia l'indirizzo dalla barra e incollalo qui.",
+        "The page will not load: that is expected. Copy the address and paste it here."),
     "nowplaying.spotify.authorize": ("Genera l'indirizzo di autorizzazione",
                                      "Generate the authorisation address"),
     "nowplaying.spotify.open": ("Apri questo indirizzo nel browser",
@@ -1290,10 +1016,8 @@ STRINGS = {
                                         "account not linked"),
     "nowplaying.spotify.disconnect": ("Scollega l'account", "Unlink the account"),
     "nowplaying.spotify.tokens.hint": (
-        "I token restano in /var/lib/dmd/spotify.json, leggibile solo da root, "
-        "e non finiscono mai nel file di configurazione esportato.",
-        "The tokens live in /var/lib/dmd/spotify.json, readable only by root, "
-        "and never end up in an exported configuration file."),
+        "I token restano in /var/lib/dmd/spotify.json, leggibile solo da root.",
+        "The tokens live in /var/lib/dmd/spotify.json, readable only by root."),
     "nowplaying.spotify.ok": ("Account collegato.", "Account linked."),
     "nowplaying.spotify.failed": ("Collegamento non riuscito: %(error)s",
                                   "Linking failed: %(error)s"),
@@ -1306,60 +1030,25 @@ STRINGS = {
     "nowplaying.color.bar": ("Barra di avanzamento", "Progress bar"),
     "nowplaying.safe_colors": ("Solo colori pieni", "Fully saturated colours only"),
     "nowplaying.safe_colors.hint": (
-        "Porta ogni componente a 0 o 255, lasciando otto colori in tutto. Sono "
-        "gli stessi otto di una PNG a palette, gli unici che su questo "
-        "pannello non tremolano: le intensità intermedie sono la causa dello "
-        "sfarfallio, non il numero di colori. La differenza fra le righe si "
-        "ottiene cambiando tinta invece che luminosità.",
-        "Rounds every channel to 0 or 255, leaving eight colours in total. "
-        "They are the same eight as a palette PNG, the only ones that do not "
-        "flicker on this panel: intermediate intensities cause the flicker, "
-        "not the number of colours. The hierarchy between lines comes from "
-        "changing hue rather than brightness."),
+        "Porta ogni componente a 0 o 255: otto colori, gli unici che non tremolano.",
+        "Rounds every channel to 0 or 255: eight colours, the only ones that never flicker."),
     "nowplaying.hold": ("Permanenza in pausa (s)", "Hold when paused (s)"),
     "nowplaying.hold.hint": (
-        "Quanto resta a schermo un brano messo in pausa prima di restituire il "
-        "display. Un brano in riproduzione non scade mai da solo.",
-        "How long a paused track stays on screen before handing the display "
-        "back. A playing track never expires on its own."),
+        "Quanto resta a schermo un brano in pausa. Un brano che suona non scade mai.",
+        "How long a paused track stays on screen. A playing track never expires."),
     "nowplaying.nocover": (
-        "Fino alla 7.2 la copertina non veniva mostrata, e il motivo era buono: "
-        "è fatta quasi solo di mezzi toni, cioè il contenuto peggiore possibile "
-        "per questo pannello — lo stesso motivo per cui esistono i colori "
-        "sicuri. Adesso si mostra, ma passando dalla stessa riduzione di "
-        "livelli che rende guardabile la Funcam. Se vedi righe chiare o "
-        "sfarfallio quando compare una copertina, abbassa i livelli.",
-        "Until 7.2 the artwork was not shown, and the reason was a good one: "
-        "it is made almost entirely of mid-tones, the worst possible content "
-        "for this panel — the same reason safe colours exist. It is shown now, "
-        "but through the same level reduction that makes the Funcam watchable. "
-        "If you see light rows or flicker when artwork appears, lower the "
-        "levels."),
+        "Le copertine sono fatte di mezzi toni: se vedi righe o sfarfallio, abbassa i livelli.",
+        "Artwork is made of mid-tones: if you see rows or flicker, lower the levels."),
     "nowplaying.artwork": ("Mostra la copertina", "Show the artwork"),
     "nowplaying.artwork.base": ("Indirizzo di Home Assistant",
                                 "Home Assistant address"),
     "nowplaying.artwork.base.hint": (
-        "Serve solo se la sorgente manda un indirizzo relativo, come fa "
-        "`entity_picture` di Home Assistant. Non è una credenziale: quel "
-        "collegamento porta dentro di sé un token firmato, quindi sul "
-        "Raspberry non resta nessun segreto da custodire. Vuoto: niente "
-        "copertine dagli indirizzi relativi.",
-        "Only needed if the source sends a relative address, as Home "
-        "Assistant's `entity_picture` does. It is not a credential: that link "
-        "carries a signed token inside itself, so no secret is kept on the "
-        "Raspberry. Empty: no artwork from relative addresses."),
+        "Serve solo se la sorgente manda indirizzi relativi. Vuoto: niente copertine.",
+        "Only needed if the source sends relative addresses. Empty: no artwork."),
     "nowplaying.artwork.levels": ("Livelli di colore", "Colour levels"),
     "nowplaying.artwork.levels.hint": (
-        "Da 2 a 6 livelli per canale, oppure 0 per lasciare l'immagine "
-        "com'è. Due danno gli otto colori pieni, gli unici che non "
-        "sfarfallano mai; quattro tengono la copertina riconoscibile "
-        "togliendo la maggior parte dei mezzi toni. Sopra sei la tavolozza "
-        "non ci sta: PIL ne tiene 256 e sette livelli ne vorrebbero 343.",
-        "From 2 to 6 levels per channel, or 0 to leave the image as it is. "
-        "Two give the eight full colours, the only ones that never flicker; "
-        "four keep the artwork recognisable while removing most mid-tones. "
-        "Above six the palette does not fit: PIL holds 256 colours and seven "
-        "levels would need 343."),
+        "Da 2 a 6 livelli per canale, 0 per non toccare l'immagine. Meno livelli, meno sfarfallio.",
+        "2 to 6 levels per channel, 0 to leave the image alone. Fewer levels, less flicker."),
     "nowplaying.mode": ("Quando si vede", "When it shows"),
     "nowplaying.mode.always": ("Sempre, finché suona",
                                "Always, while something plays"),
@@ -1368,66 +1057,27 @@ STRINGS = {
     "nowplaying.mode.every": ("Una volta ogni (media)", "Once every (media)"),
     "nowplaying.mode.duration": ("Per (secondi)", "For (seconds)"),
     "nowplaying.mode.hint": (
-        "In rotazione il brano prende il pannello una volta ogni tot foto, "
-        "invece di tenerlo per tutto il tempo in cui suona. Il conto è sui "
-        "media mostrati, non sui minuti: «uno ogni cinque foto» è una frase "
-        "sulle foto. Se il Media Player è spento non c'è niente con cui "
-        "alternarsi e si torna a «sempre».",
-        "In rotation the track takes the panel once every so many photos, "
-        "instead of holding it for as long as music plays. The count is on "
-        "media shown, not minutes: \"one every five photos\" is a sentence "
-        "about photos. If the Media Player is off there is nothing to take "
-        "turns with, and it falls back to \"always\"."),
+        "In rotazione il brano prende il pannello una volta ogni tot foto, invece di tenerlo.",
+        "In rotation the track takes the panel once every so many photos, instead of holding it."),
     "nowplaying.panel.playing": ("in riproduzione", "playing"),
     "nowplaying.panel.paused": ("in pausa", "paused"),
 
     "radar.route_color": ("Colore della rotta", "Route colour"),
     "radar.route_color.hint": (
-        "La rotta ha una riga sua, al centro, fra il numero di volo e i "
-        "dettagli: quello spazio prima restava vuoto, e su una riga sola i "
-        "nomi lunghi facevano scartare modello e quota. Lascia il colore "
-        "vuoto per usare lo stesso dei dettagli.",
-        "The route has its own line, in the middle, between the flight number "
-        "and the details: that space used to be empty, and on a single line "
-        "long names pushed the model and altitude out. Leave the colour empty "
-        "to use the same as the details."),
+        "La rotta ha una riga sua, al centro. Vuoto: lo stesso colore dei dettagli.",
+        "The route gets a line of its own, in the middle. Empty: the same colour as details."),
 
     # ------------------------------------------------------ conversioni codici
     "lookup.title": ("Conversioni dei codici", "Code translations"),
     "lookup.intro": (
-        "Il radar riceve sigle: il modello arriva come designatore ICAO "
-        "(B738), gli aeroporti delle rotte come codice IATA (MXP) oppure "
-        "ICAO (LIMC), a seconda di che cosa risponde il servizio delle "
-        "rotte. Queste due tabelle li trasformano in nomi leggibili. Un "
-        "codice che non è in tabella viene mostrato com'è: non è un errore.",
-        "The radar receives codes: the aircraft model as an ICAO designator "
-        "(B738), route airports as either an IATA code (MXP) or an ICAO one "
-        "(LIMC), depending on what the route service answers. These two "
-        "tables turn them into readable names. A code that is not in the "
-        "table is shown as it is: that is not an error."),
+        "Il radar riceve sigle: queste due tabelle le trasformano in nomi leggibili.",
+        "The radar receives codes: these two tables turn them into readable names."),
     "lookup.iata.warning": (
-        "Gli aeroporti si possono scrivere con entrambi i codici sulla "
-        "stessa riga, separati da una barra: MXP/LIMC. Il servizio delle "
-        "rotte a volte risponde con il codice IATA di tre lettere e a volte "
-        "con quello ICAO di quattro: basta che uno dei due corrisponda. La "
-        "tabella di partenza li porta già tutti e due.",
-        "Airports can carry both codes on the same row, separated by a "
-        "slash: MXP/LIMC. The route service sometimes answers with the "
-        "three-letter IATA code and sometimes with the four-letter ICAO one: "
-        "either match is enough. The bundled table already carries both."),
+        "Gli aeroporti si scrivono con entrambi i codici sulla stessa riga: MXP/LIMC.",
+        "Airports can carry both codes on one row, separated by a slash: MXP/LIMC."),
     "lookup.format": (
-        "Una riga per voce: codice, forma breve, nome completo. Nella prima "
-        "colonna si possono mettere più codici separati da una barra, e la "
-        "riga risponde a tutti. La forma "
-        "breve va sul pannello, dove lo spazio è poco; il nome completo nella "
-        "web UI e nel registro. Le righe che iniziano con # sono commenti, e "
-        "una riga sbagliata si perde da sola senza compromettere le altre.",
-        "One row per entry: code, short form, full name. The first column can "
-        "hold several codes separated by a slash, and the row answers to all "
-        "of them. The short form goes "
-        "on the panel, where space is tight; the full name in the web "
-        "interface and the log. Rows starting with # are comments, and a "
-        "broken row is dropped on its own without affecting the others."),
+        "Una riga per voce: codice, forma breve, nome completo. Con # sono commenti.",
+        "One row per entry: code, short form, full name. Lines with # are comments."),
     "lookup.persist": (
         "I file vivono in %(dir)s e non vengono mai sovrascritti dagli "
         "aggiornamenti: le tue aggiunte restano.",
@@ -1437,16 +1087,8 @@ STRINGS = {
     "lookup.airport": ("Aeroporti", "Airports"),
     "lookup.airline": ("Compagnie aeree", "Airlines"),
     "lookup.airline.hint": (
-        "Il codice è il prefisso di tre lettere del nominativo di volo: in "
-        "AFR1732 la compagnia è AFR, cioè Air France. È il designatore ICAO, "
-        "non la sigla IATA di due lettere che compare sul biglietto. I voli "
-        "senza compagnia — aviazione generale, che usa l'immatricolazione — "
-        "non mostrano nulla in quel campo, invece di inventarsi una sigla.",
-        "The code is the three-letter prefix of the callsign: in AFR1732 the "
-        "airline is AFR, that is Air France. It is the ICAO designator, not "
-        "the two-letter IATA code printed on the ticket. Flights with no "
-        "airline — general aviation, which uses the registration — show "
-        "nothing in that field instead of inventing a code."),
+        "Il prefisso di tre lettere del nominativo: in AFR1732 è AFR, cioè il codice ICAO.",
+        "The three-letter callsign prefix: in AFR1732 it is AFR, the ICAO designator."),
     "lookup.count": ("%(count)d voci in tabella", "%(count)d entries in the table"),
     "lookup.saved": ("Salvato: %(count)d voci valide.",
                      "Saved: %(count)d valid entries."),
@@ -1457,29 +1099,21 @@ STRINGS = {
     "lookup.error.row": ("riga %(row)d: %(reason)s", "row %(row)d: %(reason)s"),
     "lookup.reload": ("Rileggi i file dal disco", "Re-read the files from disk"),
     "lookup.reload.hint": (
-        "Serve solo se hai modificato i file da fuori e vuoi vedere subito "
-        "l'effetto: normalmente il sistema si accorge da sé che sono cambiati.",
-        "Only needed if you edited the files elsewhere and want to see the "
-        "effect immediately: normally the system notices the change by itself."),
+        "Serve solo se hai modificato i file da fuori: di solito se ne accorge da sé.",
+        "Only needed if you edited the files elsewhere: normally it notices by itself."),
     "lookup.reloaded": ("File riletti.", "Files re-read."),
     "lookup.unknown": ("Codici incontrati e non tradotti",
                        "Codes seen and not translated"),
     "lookup.unknown.hint": (
-        "Ordinati per quante volte sono passati davvero: è la lista di cosa "
-        "conviene aggiungere per primo, invece di doverlo indovinare.",
-        "Sorted by how often they actually appeared: this is the list of what "
-        "is worth adding first, instead of having to guess."),
+        "Ordinati per quante volte sono passati: è la lista di cosa aggiungere per primo.",
+        "Sorted by how often they really passed: the list of what to add first."),
     "lookup.unknown.none": ("Nessuno: tutto quello che è passato era in tabella.",
                             "None: everything seen so far was in the table."),
     "lookup.unknown.times": ("%(count)d volte", "%(count)d times"),
     "lookup.add": ("Aggiungi in coda al file", "Append them to the file"),
     "lookup.add.hint": (
-        "Aggiunge i codici come righe da completare, con le due colonne del "
-        "nome vuote. Finché restano vuote non traducono nulla, ma il codice è "
-        "lì e non devi più andarlo a cercare.",
-        "Adds the codes as rows to fill in, with the two name columns empty. "
-        "While empty they translate nothing, but the code is there and you no "
-        "longer have to hunt for it."),
+        "Aggiunge i codici come righe da completare, con le colonne del nome vuote.",
+        "Adds the codes as rows to fill in, with the name columns left empty."),
     "lookup.added": ("Aggiunti %(count)d codici da completare.",
                      "Added %(count)d codes to fill in."),
     "lookup.added.none": ("Nessun codice nuovo da aggiungere.",
@@ -1498,61 +1132,33 @@ STRINGS = {
     "radar.probe": ("Prova la ricerca di una rotta", "Test a route lookup"),
     "radar.probe.button": ("Prova", "Test"),
     "radar.priority.hint": (
-        "Air Radar ha priorità sul Media Player e sull'orologio, ma resta "
-        "sempre sotto ZeDMD: durante una partita su Batocera non compare mai.",
-        "Air Radar outranks the Media Player and the clock, but always stays "
-        "below ZeDMD: it never appears during a game on Batocera."),
+        "Ha priorità sul Media Player e sull'orologio, ma resta sempre sotto ZeDMD.",
+        "It outranks the Media Player and the clock, but always stays under ZeDMD."),
     "radar.position": ("Posizione e raggio", "Position and radius"),
     "radar.lat": ("Latitudine", "Latitude"),
     "radar.lon": ("Longitudine", "Longitude"),
     "radar.coords.hint": (
-        "Coordinate decimali, con il punto come separatore. Su una mappa "
-        "online si ottengono con un clic destro sul punto desiderato. Restano "
-        "solo in %(path)s su questo Raspberry: non fanno parte del software e "
-        "non finiscono in nessun pacchetto o repository.",
-        "Decimal coordinates, using a dot as the separator. On an online map "
-        "you get them by right-clicking the point you want. They stay only in "
-        "%(path)s on this Raspberry Pi: they are not part of the software and "
-        "never end up in any package or repository."),
+        "Coordinate decimali col punto. Restano solo in %(path)s: non finiscono in nessun pacchetto.",
+        "Decimal coordinates with a dot. They stay only in %(path)s: never in any package."),
     "radar.radius": ("Raggio (km)", "Radius (km)"),
     "radar.maxalt": ("Quota massima (ft)", "Maximum altitude (ft)"),
     "radar.provider": ("Servizio dati", "Data service"),
     "radar.filter.hint": (
-        "Quota massima 0 = nessun filtro. Impostandola, ad esempio, a 15000 "
-        "ft si ignorano i voli di alta quota mostrando solo chi sta davvero "
-        "passando sopra di te. Se il servizio scelto non risponde, gli altri "
-        "vengono usati automaticamente come riserva.",
-        "Maximum altitude 0 means no filter. Setting it to, say, 15000 ft "
-        "ignores high-altitude traffic and shows only what is really passing "
-        "overhead. If the chosen service does not answer, the others are used "
-        "as a fallback automatically."),
+        "Quota massima 0 = nessun filtro. Se il servizio scelto non risponde, si usano gli altri.",
+        "Maximum altitude 0 = no filter. If the chosen service fails, the others are used."),
     "radar.interval": ("Intervallo interrogazioni (s)", "Query interval (s)"),
     "radar.duration": ("Durata a schermo (s)", "Time on screen (s)"),
     "radar.cooldown": ("Riposo per aereo (s)", "Per-aircraft cooldown (s)"),
     "radar.cooldown.hint": (
-        "Il riposo evita che lo stesso volo venga riproposto in continuazione "
-        "mentre resta nel raggio.",
-        "The cooldown stops the same flight from being shown over and over "
-        "while it stays within range."),
+        "Evita che lo stesso volo venga riproposto di continuo mentre resta nel raggio.",
+        "Stops the same flight being shown over and over while it stays in range."),
     "radar.fields": ("Parametri di volo da mostrare", "Flight details to show"),
     # Corta di proposito: e' la prima di tre caselle affiancate, e
     # un'etichetta che va a capo sfalsa la riga.
     "radar.overflow": ("Disposizione informazioni", "Details layout"),
     "radar.overflow.hint": (
-        "La riga in basso è larga 256 pixel: oltre i quattro o cinque campi "
-        "qualcosa deve cedere. Le pagine non perdono nulla e lasciano il "
-        "pannello fermo; lo scorrimento si legge senza attese ma tiene il "
-        "testo sempre in movimento. Finché i campi ci stanno tutti le tre "
-        "scelte si comportano allo stesso modo. Con lo scorrimento la durata "
-        "a schermo diventa un minimo: una passata iniziata arriva in fondo, "
-        "e si cambia aereo quando il testo è uscito del tutto.",
-        "The bottom line is 256 pixels wide: past four or five fields "
-        "something has to give. Pages lose nothing and keep the panel still; "
-        "scrolling reads without waiting but keeps the text always moving. As "
-        "long as every field fits, the three choices behave identically. With "
-        "scrolling the time on screen becomes a minimum: a pass that has "
-        "started runs to the end, and the aircraft changes once the text has "
-        "left the panel."),
+        "La riga in basso è larga 256 pixel: oltre i quattro o cinque campi qualcosa deve cedere.",
+        "The bottom line is 256 pixels wide: past four or five fields something has to give."),
     "radar.overflow.crop": ("Accorcia la riga (comportamento storico)",
                             "Shorten the line (historical behaviour)"),
     "radar.overflow.pages": ("A pagine, a turno", "Pages, in turn"),
@@ -1561,21 +1167,11 @@ STRINGS = {
     "radar.scroll_speed": ("Velocità (px/s)", "Speed (px/s)"),
     "radar.scroll_fps": ("Fotogrammi al secondo", "Frames per second"),
     "radar.fields.hint": (
-        "Il codice volo compare sempre in grande. Questi campi formano la riga "
-        "di dettaglio sotto: se non ci stanno tutti, quelli centrali vengono "
-        "tolti automaticamente per non sbordare.",
-        "The flight number is always shown large. These fields form the detail "
-        "line below it: if they do not all fit, the middle ones are dropped "
-        "automatically."),
+        "Formano la riga di dettaglio sotto il codice volo. Se non ci stanno, i centrali si tolgono.",
+        "They form the detail line under the flight code. If they do not fit, middle ones drop."),
     "radar.route.hint": (
-        "La rotta viene cercata solo se il campo è selezionato qui. È "
-        "disponibile per i voli di linea, molto meno per cargo, aviazione "
-        "generale e voli di Stato: conviene selezionare anche altri campi, "
-        "altrimenti quando la rotta manca resta solo la distanza.",
-        "The route is looked up only if the field is selected here. It is "
-        "available for scheduled flights, much less so for cargo, general "
-        "aviation and state flights: it is worth selecting other fields too, "
-        "otherwise only the distance remains when the route is missing."),
+        "La rotta c'è per i voli di linea, molto meno per cargo e aviazione generale.",
+        "Routes exist for scheduled flights, much less for cargo and general aviation."),
     "radar.log.enable": ("Registra ogni passaggio nel file CSV",
                          "Log every pass to the CSV file"),
     "radar.log.route": (
@@ -1588,33 +1184,17 @@ STRINGS = {
     "radar.log.rows": ("Voli registrati", "Flights logged"),
     "radar.log.size": ("Dimensione", "Size"),
     "radar.log.hint": (
-        "Una riga per ogni volo a ogni passaggio, con data e ora, codice volo, "
-        "immatricolazione, modello, quota, velocità, direzione, transponder, "
-        "distanza, coordinate e rotta. Lo stesso aereo non viene riscritto "
-        "finché resta nel raggio.",
-        "One row per flight per pass, with date and time, flight number, "
-        "registration, type, altitude, speed, heading, transponder, distance, "
-        "coordinates and route. The same aircraft is not written again while "
-        "it stays within range."),
+        "Una riga per ogni volo a ogni passaggio, senza riscrivere chi è ancora nel raggio.",
+        "One row per flight per pass, without repeating an aircraft still in range."),
     "radar.log.download": ("Scarica il CSV", "Download the CSV"),
     "radar.log.clear": ("Svuota il registro", "Clear the log"),
     "radar.notes": ("Note sui dati", "About the data"),
     "radar.notes.coverage": (
-        "I dati arrivano dalle reti ADS-B comunitarie, gratuite e senza "
-        "registrazione. Non essendoci un'antenna locale, la copertura dipende "
-        "dai riceventi volontari della zona: il traffico commerciale compare "
-        "quasi sempre, aviazione generale e voli militari spesso no.",
-        "The data comes from the community ADS-B networks, free and without "
-        "registration. With no local antenna, coverage depends on volunteer "
-        "receivers in the area: commercial traffic almost always shows up, "
-        "general aviation and military flights often do not."),
+        "I dati vengono dalle reti ADS-B comunitarie: la copertura dipende dai riceventi in zona.",
+        "Data comes from community ADS-B networks: coverage depends on nearby receivers."),
     "radar.notes.radius": (
-        "Con un raggio di pochi chilometri le apparizioni possono essere rare: "
-        "se non sei sotto una rotta o vicino a un aeroporto, conviene "
-        "allargare il raggio per verificare che tutto funzioni.",
-        "With a radius of a few kilometres sightings can be rare: if you are "
-        "not under an airway or near an airport, widen the radius to check "
-        "that everything works."),
+        "Con pochi chilometri di raggio le apparizioni sono rare: allargalo per provare.",
+        "With a few kilometres of radius sightings are rare: widen it to test."),
 
     "radar.field.route": ("Rotta (origine → destinazione)", "Route (origin → destination)"),
     "radar.field.airline": ("Compagnia aerea", "Airline"),
@@ -1635,33 +1215,18 @@ STRINGS = {
     "services.auto": ("Automatica (per priorità)", "Automatic (by priority)"),
     "services.force": ("Forza %(name)s", "Force %(name)s"),
     "services.arbiter.hint": (
-        "In automatico ZeDMD ha la precedenza appena riceve frame e la "
-        "mantiene per %(grace)d secondi dopo l'ultimo segnale. Il Media Player "
-        "si sovrappone all'orologio solo per la durata del contenuto.",
-        "In automatic mode ZeDMD takes over as soon as it receives frames and "
-        "holds the display for %(grace)d seconds after the last signal. The "
-        "Media Player overrides the clock only for the length of the item."),
+        "In automatico ZeDMD ha la precedenza e la tiene per %(grace)d secondi dopo l'ultimo frame.",
+        "In auto, ZeDMD takes precedence and holds it %(grace)d seconds after the last frame."),
     "services.on": ("Attivo", "On"),
     "services.off": ("Spento", "Off"),
     "services.soon": ("In arrivo", "Coming soon"),
     "services.mqtt": ("MQTT e Home Assistant", "MQTT and Home Assistant"),
     "services.mqtt.desc": (
-        "Il collegamento al broker. Da acceso, i servizi qui sotto diventano "
-        "interruttori in Home Assistant e il brano in riproduzione arriva da "
-        "AirPlay.",
-        "The link to the broker. When on, the services below become switches "
-        "in Home Assistant and the current track arrives over AirPlay."),
+        "Il collegamento al broker: interruttori in Home Assistant e brano da AirPlay.",
+        "The broker connection: switches in Home Assistant and the AirPlay track."),
     "services.mqtt.hint": (
-        "Spegnendolo il DMD saluta il broker e in Home Assistant il "
-        "dispositivo passa a «non disponibile», invece di restare fermo "
-        "sull'ultimo valore. Sul pannello non cambia niente: i servizi qui "
-        "sotto continuano per conto loro. Indirizzo, utente e password si "
-        "impostano nella pagina Rete.",
-        "Turning it off makes the DMD say goodbye to the broker, so in Home "
-        "Assistant the device becomes «unavailable» instead of freezing on "
-        "its last value. Nothing changes on the panel: the services below "
-        "carry on by themselves. Address, user and password are set on the "
-        "Network page."),
+        "Spegnendolo, in Home Assistant il dispositivo passa a «non disponibile».",
+        "Turn it off and the device in Home Assistant goes “unavailable”."),
     "services.desc.zedmd": ("Riceve i frame DMD via rete da Batocera, dmdserver o VPX.",
                            "Receives DMD frames over the network from Batocera, dmdserver or VPX."),
     "services.desc.mediaplayer": ("Foto e video a rotazione dalla libreria, a intervalli casuali.",
@@ -1677,15 +1242,8 @@ STRINGS = {
                                     "Notifications about games your friends launch on Batocera."),
     "audio.title": ("Audio", "Audio"),
     "audio.intro": (
-        "Un suono di avviso per ogni servizio, gli effetti dei giochi e "
-        "l'audio di Doom. Serve una scheda audio USB: quella interna del "
-        "Raspberry con questo pannello non si può usare, perché la libreria "
-        "della matrice si prende lo stesso blocco PWM — è il motivo per cui "
-        "l'installazione la disattiva.",
-        "A notification sound for each service, the game effects and Doom's "
-        "audio. A USB sound card is required: the Raspberry's built-in audio "
-        "cannot be used with this panel, because the matrix library takes "
-        "the same PWM block — which is why the installation disables it."),
+        "Avvisi dei servizi, effetti dei giochi e audio di Doom. Serve una scheda audio USB.",
+        "Service chimes, game effects and Doom's audio. A USB sound card is required."),
     "audio.nocard": (
         "Nessuna scheda audio collegata. Infilane una USB: compare qui senza "
         "bisogno di riavviare.",
@@ -1694,79 +1252,46 @@ STRINGS = {
     "audio.error": ("Ultimo errore: %(error)s", "Last error: %(error)s"),
     "audio.enabled": ("Suono acceso", "Sound on"),
     "audio.off": (
-        "Il suono è spento: avvisi dei servizi ed effetti dei giochi non "
-        "suonano. Il pulsante di prova qui sotto funziona lo stesso, apposta.",
-        "Sound is off: service chimes and game effects do not play. The test "
-        "button below still works, on purpose."),
+        "Il suono è spento: avvisi ed effetti non suonano. Il pulsante di prova funziona lo stesso.",
+        "Sound is off: chimes and game effects stay silent. The test button still works."),
     "audio.device": ("Uscita audio", "Audio output"),
     "audio.device.auto": ("L'ultima collegata", "The last one connected"),
     "audio.device.hint": (
-        "Si suona con `plughw`, che converte frequenza e formato al volo: un "
-        "wav a 44100 stereo su una chiavetta che vuole 48000 mono altrimenti "
-        "non partirebbe, e il motivo non si scopre in fretta.",
-        "Playback uses `plughw`, which converts rate and format on the fly: a "
-        "44100 stereo wav on a stick that wants 48000 mono would otherwise "
-        "not play at all, and the reason is not quick to find."),
+        "Si suona con `plughw`, che converte frequenza e formato al volo.",
+        "Playback goes through `plughw`, which converts rate and format on the fly."),
     "audio.volume": ("Volume (0-100)", "Volume (0-100)"),
     "audio.volume.hint": (
-        "Agisce sul suono prodotto dal DMD, non sul mixer di sistema: alzarlo "
-        "qui non tocca gli altri programmi.",
-        "It applies to the sound the DMD produces, not to the system mixer: "
-        "raising it here does not affect other programs."),
+        "Agisce sul suono del DMD, non sul mixer di sistema: non tocca gli altri programmi.",
+        "It affects the DMD's own sound, not the system mixer: other programs are untouched."),
     "audio.volume.giochi": ("Volume dei giochi (0-100)",
                             "Games volume (0-100)"),
     "audio.volume.giochi.hint": (
-        "Separato dal volume qui sopra, e non per capriccio: quello lo si "
-        "abbassa pensando agli avvisi, che il pannello dà da solo magari di "
-        "sera. Un effetto di un gioco invece risponde a un tasto appena "
-        "premuto e dura cinquanta millesimi — e un suono così corto si sente "
-        "molto più piano di uno lungo con la stessa ampiezza. Con un volume "
-        "solo per tutti e due, o gli avvisi urlano o i giochi spariscono.",
-        "Separate from the volume above, and not on a whim: that one gets "
-        "turned down because of the alerts the panel gives on its own, "
-        "possibly at night. A game effect answers a button you just pressed "
-        "and lasts fifty milliseconds — and a sound that short is heard far "
-        "more quietly than a long one of the same amplitude. With a single "
-        "volume for both, either the alerts shout or the games vanish."),
+        "Separato dal volume sopra: un effetto dura cinquanta millesimi e serve più ampiezza.",
+        "Separate from the volume above: an effect lasts fifty milliseconds and needs more level."),
     "audio.livello": (
         "Livello hardware della scheda: %(valore)s%%.",
         "Card hardware level: %(valore)s%%."),
     "audio.livello.basso": (
-        "È basso, e penalizza tutto insieme — musica, avvisi e giochi. "
-        "Si alza con «amixer -c N set PCM 100%» e si fissa con «alsactl store».",
-        "That is low, and it penalises everything at once — music, alerts and "
-        "games. Raise it with “amixer -c N set PCM 100%” and keep it with "
-        "“alsactl store”."),
+        "È basso e penalizza tutto. Si alza con «amixer -c N set PCM 100%» e «alsactl store».",
+        "Low, and it penalises everything. Raise it with “amixer -c N set PCM 100%”."),
     "audio.notte": (
-        "Adesso è attivo il Night mode: gli avvisi del DMD escono al "
-        "%(valore)s%% del volume. Il valore qui sotto resta quello di giorno, "
-        "e non è stato cambiato. Le partite non sono toccate.",
-        "Night mode is active right now: the DMD's own alerts play at "
-        "%(valore)s%% volume. The value below is the daytime one and has not "
-        "been changed. Games are not affected."),
+        "Night mode attivo: gli avvisi escono al %(valore)s%% del volume. Le partite non cambiano.",
+        "Night mode is on: chimes play at %(valore)s%% of the volume. Games are not affected."),
     "audio.giochi": ("Effetti dei giochi (Breakout, Invaders)",
                      "Game effects (Breakout, Invaders)"),
     "audio.doom": ("Audio di Doom", "Doom audio"),
     "audio.doom.hint": (
-        "L'audio di Doom è l'unico suono continuo, quindi l'unico che si "
-        "paghi davvero in traffico sul bus — quello che sul pannello si vede "
-        "come righe chiare. Per questo ha un interruttore suo.",
-        "Doom's audio is the only continuous sound, so the only one that "
-        "really costs bus traffic — what shows on the panel as bright lines. "
-        "That is why it has a switch of its own."),
+        "L'audio di Doom è l'unico suono continuo, quindi l'unico che pesa sul bus.",
+        "Doom's audio is the only continuous sound, so the only one that loads the bus."),
     "audio.test": ("Prova il suono", "Test the sound"),
     "audio.tested": ("Suono inviato alla scheda.", "Sound sent to the card."),
     "audio.tested.off": (
-        "Il tono si è sentito, ma «Suono acceso» è spento: avvisi dei servizi "
-        "ed effetti dei giochi restano muti. Spuntalo e premi Applica.",
-        "The tone played, but «Sound on» is off: service chimes and game "
-        "effects stay silent. Tick it and press Apply."),
+        "Il tono si è sentito, ma «Suono acceso» è spento. Spuntalo e premi Applica.",
+        "The tone played, but “Sound on” is off. Tick it and press Apply."),
     "audio.failed": ("Non ha suonato: %(error)s", "It did not play: %(error)s"),
     "audio.services.hint": (
-        "Il file di avviso di ogni servizio si sceglie nella pagina Servizi. "
-        "Carica i wav o gli mp3 nella libreria media e compaiono lì.",
-        "Each service's notification file is chosen on the Services page. "
-        "Upload wav or mp3 files to the media library and they appear there."),
+        "Il file di avviso di ogni servizio si sceglie nella pagina Servizi.",
+        "Each service's chime file is chosen on the Services page."),
     "audio.none": ("Nessun suono", "No sound"),
     "audio.play": ("Ascolta", "Play"),
     "audio.device.finta": ("scheda fittizia, non suona",
@@ -1774,25 +1299,16 @@ STRINGS = {
 
     "cassa.title": ("Uscita musicale", "Music output"),
     "cassa.intro": (
-        "Con questo acceso la musica AirPlay esce davvero dalla scheda audio: "
-        "il DMD diventa una cassa, non solo un display che racconta il brano.",
-        "With this on, AirPlay music actually comes out of the sound card: "
-        "the DMD becomes a speaker, not just a display that narrates the "
-        "track."),
+        "Con questo acceso la musica AirPlay esce dalla scheda audio del DMD.",
+        "With this on, AirPlay music comes out of the DMD's sound card."),
     "cassa.enabled": ("La musica esce dalla scheda audio",
                       "Music plays through the sound card"),
     "cassa.hint": (
-        "Riguarda solo AirPlay. Spotify dice che cosa sta suonando su un "
-        "altro dispositivo: da un racconto non esce audio.",
-        "AirPlay only. Spotify reports what is playing on another device, "
-        "and a report carries no audio."),
+        "Riguarda solo AirPlay: da Spotify arriva il racconto del brano, non l'audio.",
+        "AirPlay only: from Spotify comes the track info, not the audio."),
     "cassa.busy": (
-        "Mentre suona la musica gli avvisi dei servizi tacciono: la scheda è "
-        "di shairport-sync, e comunque un campanello sopra il brano non lo "
-        "vuole nessuno. Le notifiche sul pannello si vedono lo stesso.",
-        "While music is playing the service chimes stay silent: the card "
-        "belongs to shairport-sync, and a chime over the music is not "
-        "something anyone wants. Panel notifications still appear."),
+        "Mentre suona la musica gli avvisi tacciono. Le notifiche sul pannello si vedono.",
+        "While music plays the chimes stay silent. Panel notifications still appear."),
     # Non è una scelta da fare qui: la scheda si sceglie in Impostazioni, e
     # questa riga dice soltanto dove sta andando la musica adesso. Scritta
     # com'era — solo `hw:3,0` — sembrava un campo da compilare.
@@ -1800,36 +1316,21 @@ STRINGS = {
         "La musica esce da «%(scheda)s», la scheda scelta in Impostazioni.",
         "Music plays through “%(scheda)s”, the card chosen in Settings."),
     "cassa.nessuna.uscita": (
-        "Adesso la musica non si sente: resta solo il brano sul pannello. "
-        "Accendendo l'interruttore uscirà da «%(scheda)s», la scheda scelta "
-        "in Impostazioni.",
-        "Right now the music is not audible: only the track reaches the "
-        "panel. Turning the switch on will play it through “%(scheda)s”, the "
-        "card chosen in Settings."),
+        "Ora la musica non si sente. Accendendo l'interruttore uscirà da «%(scheda)s».",
+        "The music is not audible. Turn the switch on to play it through “%(scheda)s”."),
     "cassa.senza.scheda": (
         "Non c'è nessuna scheda audio utilizzabile: scegline una in "
         "Impostazioni, oppure collegane una.",
         "There is no usable sound card: choose one in Settings, or plug one "
         "in."),
     "cassa.divergenza": (
-        "Attenzione: shairport-sync sta usando %(adesso)s, mentre in "
-        "Impostazioni è scelta %(voluta)s. Salva di nuovo l'uscita musicale "
-        "per riallinearle.",
-        "Warning: shairport-sync is using %(adesso)s while Settings selects "
-        "%(voluta)s. Save the music output again to realign them."),
+        "Attenzione: shairport-sync usa %(adesso)s, qui è scelta %(voluta)s. Salva di nuovo.",
+        "Warning: shairport-sync uses %(adesso)s, Settings selects %(voluta)s. Save again."),
 
     "metadati.title": ("Metadati del brano", "Track metadata"),
     "metadati.intro": (
-        "Da dove il pannello sa che cosa stai ascoltando. shairport-sync e il "
-        "DMD girano sulla stessa macchina, quindi i metadati passano da una "
-        "pipe locale: nessun broker, nessun indirizzo e nessuna password da "
-        "tenere allineati in due file. Il DMD la attiva da solo al primo "
-        "avvio. MQTT continua a funzionare come prima, accanto a questa.",
-        "Where the panel learns what you are listening to. shairport-sync and "
-        "the DMD run on the same machine, so metadata goes through a local "
-        "pipe: no broker, no address and no password to keep in sync across "
-        "two files. The DMD enables it by itself on first start. MQTT keeps "
-        "working alongside it."),
+        "Da dove il pannello sa che cosa stai ascoltando: una pipe locale di shairport-sync.",
+        "How the panel knows what you are listening to: a local shairport-sync pipe."),
     "metadati.pipe": ("Pipe", "Pipe"),
     "metadati.scrive": ("shairport-sync ci scrive", "shairport-sync writes to it"),
     "metadati.legge": ("il DMD la sta leggendo", "the DMD is reading it"),
@@ -1863,15 +1364,8 @@ STRINGS = {
         "Music output on. The tone you heard proves the card handles the "
         "AirPlay format."),
     "cassa.on.convertitore": (
-        "Uscita musicale accesa, con il convertitore di ALSA davanti alla "
-        "scheda. La tua scheda non sa fare i 44100 Hz di AirPlay, quindi la "
-        "frequenza la converte ALSA: si perde un filo di precisione nella "
-        "sincronizzazione fra più casse, che con una cassa sola non esiste. "
-        "Il tono che hai sentito è la prova che adesso suona.",
-        "Music output on, with the ALSA converter in front of the card. Your "
-        "card cannot do AirPlay's 44100 Hz, so ALSA converts the rate: this "
-        "costs a little precision when syncing several speakers, which with a "
-        "single speaker does not exist. The tone you heard proves it plays."),
+        "Uscita accesa, con il convertitore ALSA davanti alla scheda. Il tono conferma.",
+        "Output on, with the ALSA converter in front of the card. The tone confirms it."),
     "cassa.convertitore": (
         "La frequenza passa dal convertitore di ALSA: questa scheda non fa i "
         "44100 Hz di AirPlay.",
@@ -1886,10 +1380,8 @@ STRINGS = {
     "nav.telecamera": ("Funcam", "Funcam"),
     "webcam.title": ("Funcam", "Funcam"),
     "webcam.intro": (
-        "La webcam sul pannello, ridotta a quello che un computer di "
-        "quarant'anni fa sapeva mostrare. Si accende dalla pagina Servizi.",
-        "The webcam on the panel, reduced to what a computer from forty "
-        "years ago could show. Turn it on from the Services page."),
+        "La webcam sul pannello, coi colori di quarant'anni fa. Si accende dalla pagina Servizi.",
+        "The webcam on the panel, with the colours of forty years ago. Turn it on under Services."),
     "webcam.nocam": (
         "Nessuna telecamera collegata. Attaccane una alla porta USB: compare "
         "qui senza bisogno di riavviare.",
@@ -1913,10 +1405,8 @@ STRINGS = {
         "not working: %(error)s — retrying in %(seconds)d seconds"),
     "webcam.shoot": ("Scatta", "Capture"),
     "webcam.shoot.hint": (
-        "Foto e GIF finiscono nella libreria media, quindi il Media Player "
-        "te le rimette sul pannello da solo, più avanti.",
-        "Photos and GIFs go into the media library, so the Media Player "
-        "puts them back on the panel by itself, later on."),
+        "Foto e GIF finiscono nella libreria media, e il Media Player te le rimette sul pannello.",
+        "Photos and GIFs go to the media library, and the Media Player shows them again later."),
     "webcam.shoot.photo": ("Foto", "Photo"),
     "webcam.shoot.gif": ("GIF di %(seconds)s secondi", "%(seconds)s second GIF"),
     "webcam.shot": ("Salvata %(name)s.", "Saved %(name)s."),
@@ -1928,39 +1418,19 @@ STRINGS = {
     "webcam.device": ("Telecamera", "Camera"),
     "webcam.device.auto": ("La prima collegata", "The first one connected"),
     "webcam.device.hint": (
-        "Una webcam USB espone più di un /dev/video: qui compare solo quello "
-        "che cattura davvero. Se la scelta non funziona, lo stato qui sopra "
-        "lo dice.",
-        "A USB webcam exposes more than one /dev/video: only the one that "
-        "actually captures is listed here. If the choice does not work, the "
-        "state above says so."),
+        "Compare solo il /dev/video che cattura davvero. Se non va, lo stato qui sopra lo dice.",
+        "Only the /dev/video that really captures is listed. If it fails, the status above says so."),
     "webcam.style": ("Aspetto", "Look"),
     "webcam.style.colori": ("Colori, con dithering", "Colours, dithered"),
     "webcam.style.gameboy": ("Verde Game Boy", "Game Boy green"),
     "webcam.style.grigi": ("Grigi, poche sfumature", "Greys, few shades"),
     "webcam.style.hint": (
-        "Quanti colori li decide il campo qui sotto. Le sfumature che "
-        "mancano le rimette il dithering.",
-        "How many colours is decided by the field below. Dithering puts back "
-        "the shades that are missing."),
+        "Quanti colori lo decide il campo qui sotto; le sfumature mancanti le rimette il dithering.",
+        "The field below decides how many colours; dithering puts the missing shades back."),
     "webcam.depth": ("Livelli per canale", "Levels per channel"),
     "webcam.depth.hint": (
-        "Adesso: %(colori)d colori. I livelli valgono per rosso, verde e blu "
-        "separatamente, quindi i colori sono il loro cubo — 2 danno 8, 4 ne "
-        "danno 64, 6 ne danno 216, che è in pratica la tavolozza da 256 "
-        "colori dell'epoca. Due è il valore sicuro: sono i colori pieni, gli "
-        "unici che su questo pannello di sicuro non tremano. Salire non "
-        "costa niente in CPU né sul bus — costa solo il rischio che le tinte "
-        "intermedie sfarfallino, e l'unico modo di saperlo è guardare il "
-        "pannello.",
-        "Right now: %(colori)d colours. Levels apply to red, green and blue "
-        "separately, so the colours are their cube — 2 give 8, 4 give 64, 6 "
-        "give 216, which is in practice the 256-colour palette of the era. "
-        "Two is the safe value: those are the full colours, the only ones "
-        "that certainly do not flicker on this panel. Going higher costs "
-        "nothing in CPU or bus traffic — it only risks the intermediate "
-        "tones flickering, and the only way to know is to look at the "
-        "panel."),
+        "Adesso %(colori)d colori: i livelli valgono per ogni canale, quindi 2 danno 8 e 4 danno 64.",
+        "Now %(colori)d colours: levels apply per channel, so 2 give 8 and 4 give 64."),
     "webcam.levels": ("Sfumature (verde e grigi)", "Shades (green and greys)"),
     "webcam.levels.hint": (
         "Quante sfumature per gli stili Game Boy e grigi. Quattro è il "
@@ -1969,34 +1439,17 @@ STRINGS = {
         "Game Boy's number."),
     "webcam.fps": ("Fotogrammi al secondo", "Frames per second"),
     "webcam.fps.hint": (
-        "Non è un filtro dopo la cattura: è quello che si chiede alla "
-        "telecamera di produrre. Un fotogramma mai prodotto non attraversa "
-        "l'USB e non tocca il bus — ed è il bus che, quando è affollato, "
-        "disegna le righe chiare sul pannello. Dieci bastano; sotto i cinque "
-        "l'immagine va a scatti.",
-        "This is not a filter after capture: it is what the camera is asked "
-        "to produce. A frame never produced never crosses the USB and never "
-        "touches the bus — and it is the bus that, when busy, draws the "
-        "bright lines on the panel. Ten is enough; below five it stutters."),
+        "È quello che si chiede alla telecamera. Dieci bastano; sotto cinque va a scatti.",
+        "It is what the camera is asked to produce. Ten is enough; below five it gets jerky."),
     "webcam.width": ("Larghezza di cattura", "Capture width"),
     "webcam.height": ("Altezza di cattura", "Capture height"),
     "webcam.size.hint": (
-        "Va scelta fra le risoluzioni che la telecamera sa dare davvero "
-        "(`v4l2-ctl --list-formats-ext`). Più grande non vuol dire meglio: "
-        "l'immagine finisce comunque in 256×64, e ogni pixel in più è "
-        "traffico pagato per niente.",
-        "Pick one of the resolutions the camera really offers "
-        "(`v4l2-ctl --list-formats-ext`). Bigger is not better: the image "
-        "ends up in 256×64 anyway, and every extra pixel is traffic paid "
-        "for nothing."),
+        "Fra le risoluzioni vere della telecamera. Più grande non serve: si finisce in 256×64.",
+        "From the resolutions the camera really offers. Bigger does not help: it ends up 256×64."),
     "webcam.button": ("Pulsante fisico", "Hardware button"),
     "webcam.button.what": (
-        "Un pulsante saldato sotto il pannello, per accendere la telecamera "
-        "senza tirare fuori il telefono. Non è obbligatorio: senza, si "
-        "accende dai comandi qui sopra.",
-        "A button soldered under the panel, to turn the camera on without "
-        "reaching for your phone. It is optional: without it, use the "
-        "commands above."),
+        "Un pulsante saldato sotto il pannello, per accendere la telecamera. Non è obbligatorio.",
+        "A button soldered under the panel to start the camera. It is optional."),
     "webcam.button.enable": ("Accendilo", "Turn it on"),
     "webcam.button.enable.label": (
         "Usa il pulsante fisico (il servizio arma, non accende)",
@@ -2004,16 +1457,8 @@ STRINGS = {
     "webcam.button.gpio": ("Piedino del pulsante", "Button GPIO"),
     "webcam.button.suggested": ("consigliato", "recommended"),
     "webcam.button.hint": (
-        "Con il pulsante acceso, il servizio non accende più la telecamera: "
-        "la **arma**. La ripresa parte al primo clic, e finché non lo premi "
-        "la webcam resta spenta — che su una telecamera in soggiorno non è "
-        "una comodità, è il punto. I piedini in elenco sono gli unici liberi "
-        "con la Bonnet montata: tutti gli altri li usa la matrice.",
-        "With the button on, the service no longer switches the camera on: "
-        "it **arms** it. The live view starts on the first click, and until "
-        "you press it the webcam stays off — which on a living-room camera "
-        "is not a convenience, it is the point. The listed pins are the only "
-        "free ones with the Bonnet fitted: the matrix uses all the others."),
+        "Con il pulsante il servizio non accende la telecamera: la arma. La ripresa parte al clic.",
+        "With the button the service does not start the camera: it arms it. A click starts it."),
     "webcam.button.wiring": ("Come si collega", "How to wire it"),
     "webcam.button.wiring.hint": (
         "Un pulsante normalmente aperto fra GPIO %(gpio)s e massa, e "
@@ -2045,25 +1490,16 @@ STRINGS = {
         "it turns off, while your finger is still down"),
     "webcam.button.now": ("Adesso", "Right now"),
     "webcam.button.now.hint": (
-        "Accendere il servizio non accende la telecamera: dice che la si può "
-        "accendere. La ripresa parte da qui, o dal pulsante fisico se ne hai "
-        "saldato uno.",
-        "Turning the service on does not turn the camera on: it says the "
-        "camera may be turned on. The live view starts from here, or from "
-        "the hardware button if you have soldered one."),
+        "Accendere il servizio non accende la telecamera: si parte da qui o dal pulsante.",
+        "Turning the service on does not start the camera: start it here or with the button."),
     "webcam.button.on": ("Accendi la telecamera", "Turn the camera on"),
     "webcam.button.off": ("Spegni la telecamera", "Turn the camera off"),
     "webcam.gpiozero": ("Libreria del pulsante", "Button library"),
     "webcam.gpiozero.ok": ("%(package)s è installata.",
                            "%(package)s is installed."),
     "webcam.gpiozero.hint": (
-        "Per leggere il pulsante serve %(package)s. Su Raspberry Pi OS di "
-        "solito c'è già; se manca, si installa da qui — senza aprire un "
-        "terminale, che è esattamente ciò che il pulsante serve a evitare.",
-        "Reading the button needs %(package)s. On Raspberry Pi OS it is "
-        "usually already there; if it is missing, install it from here — "
-        "without opening a terminal, which is exactly what the button is "
-        "there to avoid."),
+        "Per leggere il pulsante serve %(package)s. Se manca, si installa da qui.",
+        "Reading the button needs %(package)s. If it is missing, install it from here."),
     "webcam.gpiozero.install": ("Installa %(package)s", "Install %(package)s"),
     "webcam.gpiozero.started": (
         "Installazione avviata. Ci vuole un minuto: la pagina si aggiorna da "
@@ -2074,20 +1510,12 @@ STRINGS = {
                                 "Installation in progress…"),
     "webcam.button.rearm": ("Apri il pulsante", "Open the button"),
     "webcam.button.rearm.hint": (
-        "Il piedino non è aperto: succede se la libreria è arrivata dopo "
-        "l'avvio del servizio. Si riapre da qui, senza spegnere e "
-        "riaccendere niente.",
-        "The pin is not open: this happens when the library arrived after "
-        "the service started. Open it from here, without switching anything "
-        "off and on again."),
+        "Il piedino non è aperto. Si riapre da qui, senza riavviare il servizio.",
+        "The pin is not open. Reopen it here, without restarting the service."),
     "webcam.button.ready": ("Pulsante aperto.", "Button open."),
     "webcam.button.nolib": (
-        "Manca gpiozero: il pulsante non può essere letto. Si installa con "
-        "«sudo apt install python3-gpiozero». Finché manca, la telecamera "
-        "si comporta come senza pulsante.",
-        "gpiozero is missing: the button cannot be read. Install it with "
-        "«sudo apt install python3-gpiozero». Until then the camera behaves "
-        "as if there were no button."),
+        "Manca gpiozero: il pulsante non si può leggere. «sudo apt install python3-gpiozero».",
+        "gpiozero is missing: the button cannot be read. “sudo apt install python3-gpiozero”."),
     "webcam.status.armed": (
         "spenta, in attesa del pulsante su GPIO %(gpio)s",
         "off, waiting for the button on GPIO %(gpio)s"),
@@ -2104,22 +1532,12 @@ STRINGS = {
                             "Stretch the contrast automatically"),
     "webcam.gallery": ("Ultimi scatti", "Latest captures"),
     "webcam.gallery.hint": (
-        "Stanno nella libreria media, sotto la cartella indicata in "
-        "configurazione: da lì si guardano, si scaricano e si cancellano "
-        "come qualunque altro contenuto.",
-        "They live in the media library, under the folder set in the "
-        "configuration: from there you can view, download and delete them "
-        "like any other content."),
+        "Stanno nella libreria media: da lì si guardano, si scaricano e si cancellano.",
+        "They live in the media library: watch, download and delete them from there."),
     "webcam.privacy": ("Dove finiscono le immagini", "Where the images go"),
     "webcam.privacy.hint": (
-        "Da nessuna parte. Le immagini non escono dal Raspberry: niente "
-        "rete, niente MQTT, niente servizi esterni. Quello che salvi resta "
-        "sulla scheda SD, e il servizio parte spento — una telecamera in "
-        "soggiorno si accende quando lo decidi tu.",
-        "Nowhere. The images never leave the Raspberry: no network, no "
-        "MQTT, no outside services. What you save stays on the SD card, and "
-        "the service starts off — a camera in the living room turns on when "
-        "you decide it does."),
+        "Le immagini non escono dal Raspberry: niente rete, niente MQTT, niente servizi esterni.",
+        "The images never leave the Raspberry: no network, no MQTT, no external services."),
     "services.desc.webcam": (
         "La webcam sul pannello, dal vivo e con pochi colori.",
         "The webcam on the panel, live and in few colours."),
@@ -2139,20 +1557,11 @@ STRINGS = {
     "notifiche.livello.avviso": ("avviso", "warning"),
     "notifiche.livello.allarme": ("allarme", "alarm"),
     "notifiche.prova.broker": (
-        "Notifica pubblicata su %(topic)s e tornata indietro dal broker: "
-        "la catena funziona tutta, tranne il pezzo di Home Assistant che da "
-        "qui non si può provare.",
-        "Notification published on %(topic)s and received back from the "
-        "broker: the whole chain works, except the Home Assistant part, "
-        "which cannot be tested from here."),
+        "Notifica pubblicata su %(topic)s e tornata indietro dal broker: la catena funziona.",
+        "Notification published on %(topic)s and echoed back by the broker: the chain works."),
     "notifiche.prova.diretta": (
-        "Il broker non è raggiungibile: la notifica è stata consegnata "
-        "direttamente alla sorgente. Il pannello la mostra lo stesso, ma "
-        "quello che arriva da Home Assistant no — guarda la sezione MQTT "
-        "nella pagina Rete.",
-        "The broker is unreachable: the notification was handed straight to "
-        "the source. The panel still shows it, but nothing coming from Home "
-        "Assistant will — check the MQTT section on the Network page."),
+        "Broker irraggiungibile: la notifica è andata diretta. Quelle di Home Assistant no.",
+        "Broker unreachable: the notification went direct. Home Assistant's will not arrive."),
     "notifiche.prova.spento": (
         "Il servizio Notifiche è spento: accendilo qui sopra, altrimenti la "
         "prova non ha niente da mostrare.",
@@ -2172,10 +1581,8 @@ STRINGS = {
     # ---------------------------------------------------------------- meteo
     "services.meteo": ("Meteo", "Weather"),
     "services.desc.meteo": (
-        "Al mattino il bollettino della giornata — massima, minima, umidità — "
-        "e poi un aggiornamento ogni poche ore. Usa le coordinate del radar.",
-        "A morning bulletin for the day — high, low, humidity — then an "
-        "update every few hours. It uses the radar coordinates."),
+        "Il bollettino del mattino e un aggiornamento ogni poche ore. Usa la posizione comune.",
+        "The morning forecast and an update every few hours. It uses the shared position."),
     "meteo.status.ok": (
         "%(temperatura)s %(descrizione)s · oggi %(massima)s / %(minima)s · "
         "dato di %(minuti)d minuti fa",
@@ -2201,14 +1608,8 @@ STRINGS = {
     "meteo.test": ("Mostra adesso sul pannello", "Show on the panel now"),
     "meteo.test.bulletin": ("Prova il bollettino", "Try the bulletin"),
     "meteo.source": (
-        "Le previsioni arrivano da Open-Meteo, che non chiede nessuna chiave: "
-        "non c'è nessun segreto da custodire sul Raspberry. La posizione è "
-        "quella di Impostazioni — la stessa che usano il radar e i satelliti — "
-        "e non esce mai dal Pi se non come coordinate nella richiesta.",
-        "Forecasts come from Open-Meteo, which needs no API key: there is no "
-        "secret to keep on the Raspberry. The position is the one in Settings "
-        "— the same one the radar and the satellites use — and it never "
-        "leaves the Pi except as coordinates in the request."),
+        "Le previsioni vengono da Open-Meteo, senza chiavi. La posizione è quella di Impostazioni.",
+        "Forecasts come from Open-Meteo, no key needed. The position is the one in Settings."),
     "meteo.unit": ("Unità della temperatura", "Temperature unit"),
     "meteo.unit.c": ("Celsius (°C)", "Celsius (°C)"),
     "meteo.unit.f": ("Fahrenheit (°F)", "Fahrenheit (°F)"),
@@ -2218,14 +1619,8 @@ STRINGS = {
     "meteo.alerts": ("Mostra le allerte", "Show alerts"),
     "meteo.test.alert": ("Prova l'allerta", "Try the alert"),
     "meteo.alert.source": (
-        "Le allerte arrivano da MeteoAlarm, che per l'Italia raccoglie quelle "
-        "della Protezione Civile. Senza una regione scelta non se ne mostra "
-        "nessuna: il feed copre il paese intero, e l'allerta di un'altra "
-        "regione non è un'approssimazione, è un allarme falso.",
-        "Alerts come from MeteoAlarm, which for Italy collects the Civil "
-        "Protection warnings. With no region selected none are shown: the "
-        "feed covers the whole country, and another region's warning is not "
-        "an approximation, it is a false alarm."),
+        "Le allerte vengono da MeteoAlarm. Senza una regione scelta non se ne mostra nessuna.",
+        "Alerts come from MeteoAlarm. With no region chosen, none are shown."),
     "meteo.status.alert": ("allerta %(livello)s: %(evento)s",
                            "%(livello)s alert: %(evento)s"),
 
@@ -2238,21 +1633,14 @@ STRINGS = {
     "rete.connected.noname": ("collegato", "connected"),
     "rete.disconnected": ("non collegato", "not connected"),
     "rete.nonmcli": (
-        "Su questa macchina non c'è nmcli: la rete è gestita in un altro "
-        "modo (di solito wpa_supplicant, sulle immagini più vecchie) e da "
-        "qui non si può cambiare. La procedura da riga di comando è in fondo "
-        "alla pagina.",
-        "This machine has no nmcli: the network is managed some other way "
-        "(usually wpa_supplicant, on older images) and cannot be changed "
-        "from here. The command line procedure is at the bottom of the page."),
+        "Su questa macchina non c'è nmcli: la rete si cambia da riga di comando, qui sotto.",
+        "There is no nmcli here: the network is changed from the command line, below."),
     "rete.addresses": ("Il DMD risponde a:", "The DMD answers at:"),
     "rete.scan": ("Reti visibili", "Networks in range"),
     "rete.scan.button": ("Cerca le reti", "Scan"),
     "rete.scan.hint": (
-        "La ricerca non parte da sola: dura qualche secondo e disturba il "
-        "pannello, quindi si fa quando serve.",
-        "The scan does not start on its own: it takes a few seconds and "
-        "disturbs the panel, so it runs when you ask for it."),
+        "La ricerca dura qualche secondo e disturba il pannello: si fa quando serve.",
+        "A scan takes a few seconds and disturbs the panel: do it when needed."),
     "rete.none": ("Nessuna rete trovata.", "No networks found."),
     "rete.open": ("aperta", "open"),
     "rete.known": ("già salvata", "saved"),
@@ -2268,19 +1656,13 @@ STRINGS = {
         "in by hand."),
     "rete.saved": ("Reti salvate", "Saved networks"),
     "rete.saved.hint": (
-        "Il DMD si ricollega da solo a queste, in ordine di segnale. La rete "
-        "attraverso cui stai guardando questa pagina non si può dimenticare: "
-        "collegati prima a un'altra.",
-        "The DMD reconnects to these on its own, by signal strength. The "
-        "network you are reading this page through cannot be forgotten: "
-        "connect to another one first."),
+        "Il DMD si ricollega da solo, in ordine di segnale. Quella in uso non si può dimenticare.",
+        "The DMD reconnects on its own, by signal. The one in use cannot be forgotten."),
     "rete.forget": ("Dimentica", "Forget"),
     "rete.forgotten": ("Rete %(name)s dimenticata.", "Network %(name)s forgotten."),
     "rete.trying": (
-        "Sto provando a collegarmi a %(name)s. Se il cambio riesce questa "
-        "pagina non risponde più: riaprila su uno degli indirizzi qui sopra.",
-        "Trying to connect to %(name)s. If the switch succeeds this page "
-        "stops answering: reopen it at one of the addresses above."),
+        "Provo a collegarmi a %(name)s. Se riesce, riapri la pagina su un indirizzo qui sopra.",
+        "Connecting to %(name)s. If it works, reopen this page on one of the addresses above."),
     "rete.failed": ("Non è stato possibile: %(error)s",
                     "It did not work: %(error)s"),
     "rete.attempt.running": ("tentativo su %(name)s in corso…",
@@ -2297,24 +1679,14 @@ STRINGS = {
         "with sudo:"),
     "nav.updates": ("Aggiornamenti", "Updates"),
     "updates.intro": (
-        "Qui si aggiorna il sistema: il programma dal repository e la "
-        "libreria della matrice. Sono le uniche due cose che cambiano il "
-        "software installato invece di regolarlo, ed è la ragione per cui "
-        "stanno fuori dalle Impostazioni.",
-        "This is where the system gets updated: the program from the "
-        "repository and the matrix library. They are the only two things "
-        "that change the installed software rather than tune it, which is "
-        "why they live outside Settings."),
+        "Qui si aggiornano il programma e la libreria della matrice.",
+        "Here you update the program and the matrix library."),
     # ----------------------------------------------------------------- rifiuti
     "nav.scadenze": ("Scadenze", "Deadlines"),
     "scadenze.title": ("Scadenze e appuntamenti", "Deadlines and appointments"),
     "scadenze.intro": (
-        "Un semaforo a destra dell\u2019orologio dice se c\u2019\u00e8 qualcosa "
-        "in arrivo, e ogni tanto il pannello mostra che cosa. Le scadenze si "
-        "scrivono qui, si importano da un CSV, o arrivano da Home Assistant.",
-        "A traffic light to the right of the clock says whether something is "
-        "due, and now and then the panel shows what. Deadlines are written "
-        "here, imported from a CSV, or sent from Home Assistant."),
+        "Un semaforo a destra dell'orologio dice se c'è qualcosa in arrivo.",
+        "A traffic light beside the clock says whether something is due."),
     "scadenze.aperte": ("Scadenze aperte", "Open deadlines"),
     "scadenze.nessuna": ("Nessuna scadenza aperta.", "No open deadlines."),
     "scadenze.nuova": ("Aggiungi una scadenza", "Add a deadline"),
@@ -2340,23 +1712,12 @@ STRINGS = {
     "scadenze.stato.scaduta": ("SCADUTA", "OVERDUE"),
     "scadenze.csv": ("Elenco in formato CSV", "List in CSV format"),
     "scadenze.csv.hint": (
-        "Una riga per scadenza: id;titolo;data;ricorrenza;descrizione;attiva;"
-        "completate. Si pu\u00f2 incollare quello che esce da un foglio di "
-        "calcolo \u2014 il separatore, punto e virgola o virgola, viene "
-        "riconosciuto da solo, e le righe senza una data valida si saltano.",
-        "One row per deadline: id;title;date;recurrence;description;active;"
-        "completed. You can paste what a spreadsheet exports \u2014 the "
-        "separator, semicolon or comma, is detected automatically, and rows "
-        "without a valid date are skipped."),
+        "Una riga per scadenza: id;titolo;data;ricorrenza;descrizione;attiva;completate.",
+        "One row per deadline: id;title;date;recurrence;description;active;done."),
     "scadenze.soglie": ("Semaforo", "Traffic light"),
     "scadenze.soglie.hint": (
-        "Giorni che mancano alla scadenza. Oltre la soglia verde il semaforo "
-        "resta spento: una scadenza fra un mese non \u00e8 una notizia, e un "
-        "pannello che segnala sempre qualcosa non segnala pi\u00f9 niente. "
-        "Superata la data, il rosso lampeggia.",
-        "Days remaining. Beyond the green threshold the light stays off: "
-        "something due in a month is not news, and a panel that always signals "
-        "something signals nothing. Past the date, red blinks."),
+        "Giorni che mancano. Oltre la soglia verde il semaforo è spento; scaduta, lampeggia.",
+        "Days remaining. Past the green threshold the light stays off; overdue, it blinks."),
     "scadenze.soglia_verde": ("Verde entro", "Green within"),
     "scadenze.soglia_giallo": ("Giallo entro", "Yellow within"),
     "scadenze.soglia_rosso": ("Rosso entro", "Red within"),
@@ -2368,12 +1729,8 @@ STRINGS = {
     "scadenze.speed": ("Velocit\u00e0 dello scorrimento", "Scroll speed"),
     "scadenze.registro": ("Registro", "Log"),
     "scadenze.registro.hint": (
-        "Ogni occorrenza con l\u2019ora in cui \u00e8 stata inserita e quella "
-        "in cui \u00e8 stata completata. Non si cancella mai: \u00e8 l\u2019unico "
-        "posto in cui resta traccia di che cosa \u00e8 stato pagato e quando.",
-        "Every occurrence with the time it was created and the time it was "
-        "completed. Never erased: it is the only place where a record of what "
-        "was paid, and when, survives."),
+        "Ogni occorrenza con l'ora in cui è stata inserita e completata. Non si cancella mai.",
+        "Every occurrence with when it was added and when it was done. It is never erased."),
     "scadenze.registro.scarica": ("Scarica il registro CSV", "Download the CSV log"),
     "scadenze.panel.mancano": ("- %(giorni)dgg", "- %(giorni)dd"),
     "scadenze.panel.oggi": ("OGGI", "TODAY"),
@@ -2386,76 +1743,39 @@ STRINGS = {
     "nav.giochi": ("Giochi", "Games"),
     "giochi.title": ("Giochi sul pannello", "Games on the panel"),
     "giochi.intro": (
-        "Scritti per 256x64, non adattati da uno schermo 4:3: il campo di "
-        "gioco prende i 200 pixel di sinistra e i 56 di destra sono il "
-        "tabellone. Non sono un servizio ma una partita \u2014 si preme "
-        "Gioca, tutti i servizi si fermano, si esce e riprendono da dove "
-        "stavano.",
-        "Written for 256x64, not adapted from a 4:3 screen: the playfield "
-        "takes the left 200 pixels and the right 56 are the scoreboard. They "
-        "are not a service but a game \u2014 press Play, every service stops, "
-        "quit and they resume where they were."),
+        "Scritti per 256x64: campo di gioco a sinistra, tabellone a destra. Si preme Gioca.",
+        "Written for 256x64: playfield on the left, scoreboard on the right. Press Play."),
     "giochi.play": ("Gioca", "Play"),
     "giochi.esci": ("Esci dalla partita", "Quit the game"),
     "giochi.record": ("Record:", "High score:"),
     "giochi.breakout.hint": (
-        "Il muro \u00e8 largo per natura, ed \u00e8 il gioco che soffre meno "
-        "il pannello. Fra muro e racchetta ci sono trenta pixel invece di "
-        "duecento: la palla parte lenta e accelera a ogni quattro mattoni.",
-        "The wall is wide by nature, and this is the game the panel suits "
-        "best. There are thirty pixels between wall and paddle instead of two "
-        "hundred: the ball starts slow and speeds up every four bricks."),
+        "Fra muro e racchetta ci sono trenta pixel: la palla accelera ogni quattro mattoni.",
+        "Thirty pixels between wall and paddle: the ball speeds up every four bricks."),
     "giochi.invaders.hint": (
-        "Tre file invece di cinque: su sessantaquattro righe la discesa "
-        "originale non ci sta, e schiacciarla vorrebbe dire alieni alti due "
-        "pixel. Un colpo per volta, e la schiera accelera man mano che si "
-        "svuota.",
-        "Three rows instead of five: the original descent does not fit in "
-        "sixty-four rows, and squashing it would mean two-pixel aliens. One "
-        "shot at a time, and the swarm speeds up as it empties."),
+        "Tre file invece di cinque: su sessantaquattro righe la discesa originale non ci sta.",
+        "Three rows instead of five: the original descent does not fit in sixty-four rows."),
     "giochi.snake.hint": (
-        "Il serpente dei Nokia su una griglia 49x15: molto larga e poco alta, "
-        "il contrario degli undici quadrati per lato del 3310. Si gioca con le "
-        "quattro direzioni — croce del pad, frecce, WASD o i pulsanti qui "
-        "sopra — e il dietrofront si ignora. Il bordo uccide, e il cibo non "
-        "nasce mai nella riga in cui stai già viaggiando: su quindici righe "
-        "sarebbe mezzo regalo.",
-        "The Nokia snake on a 49x15 grid: very wide and short, the opposite of "
-        "the 3310's eleven squares per side. Four directions — the pad's "
-        "d-pad, arrow keys, WASD or the buttons above — and a reversal is "
-        "ignored. The wall kills, and food never appears in the row you are "
-        "already travelling along: on fifteen rows that would be half a gift."),
+        "Il serpente dei Nokia su una griglia 49x15. Quattro direzioni, e il bordo uccide.",
+        "The Nokia snake on a 49x15 grid. Four directions, and the wall kills."),
     "giochi.doom.hint": (
-        "Doom gira come processo separato, per una ragione di licenza, e ha "
-        "una pagina sua: preparazione, scelta del WAD e taratura della fascia.",
-        "Doom runs as a separate process, for licensing reasons, and has its "
-        "own page: setup, WAD choice and band tuning."),
+        "Doom gira come processo separato e ha una pagina sua.",
+        "Doom runs as a separate process and has a page of its own."),
     "giochi.doom.apri": ("Apri la pagina di Doom", "Open the Doom page"),
     "giochi.gb.apri": ("Apri la pagina di PyBoy", "Open the PyBoy page"),
     "giochi.esterni": ("Emulatori esterni", "External emulators"),
     "giochi.esterni.hint": (
-        "Doom e il Game Boy non sono giochi scritti per il pannello: sono "
-        "programmi che girano per conto loro e prendono il pannello per il "
-        "tempo della partita. Ognuno ha la sua pagina, con la preparazione e "
-        "la taratura dell'immagine.",
-        "Doom and the Game Boy are not games written for the panel: they are "
-        "programs that run on their own and take the panel for the length of "
-        "a session. Each has its own page, with setup and picture tuning."),
+        "Doom e il Game Boy girano per conto loro e hanno una pagina ciascuno.",
+        "Doom and the Game Boy run on their own and have a page each."),
     "giochi.doom.stato": ("WAD:", "WAD:"),
     "giochi.doom.si": ("pronto", "ready"),
     "giochi.doom.no": ("da preparare", "needs setup"),
     "giochi.comandi": ("Comandi", "Controls"),
     "giochi.comandi.hint": (
-        "Si gioca con il pad o con una tastiera collegata al DMD; questi "
-        "pulsanti servono per provare senza alzarsi, o dal telefono.",
-        "Play with the pad or a keyboard connected to the DMD; these buttons "
-        "are for trying it out without getting up, or from your phone."),
+        "Si gioca con il pad o con una tastiera; questi pulsanti servono per provare dal telefono.",
+        "Play with the pad or a keyboard; these buttons are for trying it from the phone."),
     "settings.update.cache": (
-        "La risposta di GitHub puo' essere vecchia fino a cinque minuti: "
-        "subito dopo una pubblicazione, \u00absei aggiornato\u00bb non vuol "
-        "ancora dire niente.",
-        "GitHub\u2019s answer can be up to five minutes stale: right after a "
-        "release, \u201cyou are up to date\u201d does not mean anything yet."),
+        "La risposta di GitHub può essere vecchia di cinque minuti.",
+        "GitHub's answer can be up to five minutes old."),
     "meteo.status.vista": (
         "vista %(minuti)d min fa (%(comparse)d volte, %(perse)d turni persi)",
         "seen %(minuti)d min ago (%(comparse)d times, %(perse)d turns lost)"),
@@ -2463,12 +1783,8 @@ STRINGS = {
     "meteo.giorno.domani": ("DOMANI", "TOMORROW"),
     "giochi.audio": ("Audio della partita", "Game audio"),
     "giochi.audio.hint": (
-        "Quanti effetti ha chiesto il gioco e quanti ne sono usciti davvero "
-        "dalla scheda. Se qui i due numeri coincidono e a orecchio manca "
-        "qualcosa, il problema non e' piu' nel DMD.",
-        "How many effects the game asked for and how many actually left the "
-        "sound card. If these two match and something still sounds missing, "
-        "the problem is no longer in the DMD."),
+        "Quanti effetti ha chiesto il gioco e quanti ne sono usciti davvero dalla scheda.",
+        "How many effects the game asked for, and how many really left the card."),
     "giochi.audio.chiesti": ("Chiesti dal gioco", "Asked by the game"),
     "giochi.audio.resi": ("Usciti davvero", "Actually played"),
     "giochi.audio.resa": ("Resa", "Delivered"),
@@ -2507,33 +1823,19 @@ STRINGS = {
     "giochi.device.pad": ("Joystick (percorso)", "Joystick (path)"),
     "giochi.device.auto": ("automatico", "automatic"),
     "giochi.device.hint": (
-        "Vuoto = tutti quelli che il kernel dichiara come tastiera o come "
-        "joystick. Serve indicarne uno solo se il riconoscimento automatico "
-        "sbaglia: il percorso \u00e8 del tipo /dev/input/event3, e si trova "
-        "con «cat /proc/bus/input/devices».",
-        "Empty = every device the kernel reports as a keyboard or a joystick. "
-        "Naming one is only needed if automatic detection gets it wrong: the "
-        "path looks like /dev/input/event3, and «cat /proc/bus/input/devices» "
-        "lists them."),
+        "Vuoto = tutti i dispositivi visti come tastiera o joystick. Es: /dev/input/event3.",
+        "Empty = every device the kernel calls a keyboard or a joystick. E.g. /dev/input/event3."),
     "giochi.ciclo.hint": (
-        "Il tasto Start del pad scorre i giochi: premuto una volta si gioca, "
-        "premuto ancora si passa al successivo. Select esce. Su una tastiera "
-        "collegata al DMD fanno lo stesso i due tasti qui sotto.",
-        "The Start button on the pad cycles through the games: press once to "
-        "play, press again for the next one. Select quits. On a keyboard "
-        "connected to the DMD the two keys below do the same."),
+        "Start scorre i giochi, Select esce. Sulla tastiera fanno lo stesso i tasti qui sotto.",
+        "Start cycles the games, Select exits. On a keyboard the keys below do the same."),
     "giochi.tasto.ciclo": ("Tasto che scorre i giochi",
                            "Key that cycles the games"),
     "giochi.tasto.esci": ("Tasto che esce dalla partita",
                           "Key that quits the game"),
     "giochi.impara": ("Impara", "Learn"),
     "giochi.impara.hint": (
-        "I codici predefiniti sono quelli di invio ed escape. Una pulsantiera "
-        "o una tastiera insolita ne mandano altri: premi «Impara» e poi il "
-        "tasto che vuoi usare.",
-        "The defaults are the codes for Enter and Escape. A button panel or an "
-        "unusual keyboard sends different ones: press \u00abLearn\u00bb and "
-        "then the key you want to use."),
+        "I predefiniti sono invio ed escape. Per un altro tasto: premi «Impara», poi il tasto.",
+        "The defaults are enter and escape. For another key press “Learn”, then the key."),
     "giochi.impara.premi": ("In ascolto: premi ora il tasto che vuoi usare.",
                             "Listening: press the key you want to use now."),
     "giochi.impara.fatto": ("Riconosciuto, codice", "Recognised, code"),
@@ -2545,20 +1847,13 @@ STRINGS = {
     "giochi.ciclo_gameboy": ("Il tasto Start scorre anche il Game Boy",
                              "The Start button also cycles the Game Boy"),
     "giochi.ciclo_gameboy.hint": (
-        "Entra nel giro solo se PyBoy è installato e la cartuccia scelta è "
-        "valida. Mentre il Game Boy gioca, Start e Select appartengono alla "
-        "console — servono a giocare — e per uscire si usa il tasto PS.",
-        "It joins the rotation only if PyBoy is installed and the chosen "
-        "cartridge is valid. While the Game Boy is playing, Start and Select "
-        "belong to the console — they are game buttons — and the PS button "
-        "is the way out."),
+        "Entra nel giro solo con PyBoy installato e una cartuccia valida. Per uscire, il tasto PS.",
+        "Joins the cycle only with PyBoy installed and a valid cartridge. Exit with the PS button."),
     "giochi.timeout": ("Chiudi la partita dopo (secondi senza comandi)",
                        "Close the game after (seconds with no input)"),
     "giochi.timeout.hint": (
-        "Una partita lasciata a met\u00e0 non deve tenersi il pannello per "
-        "sempre. Zero per non chiuderla mai.",
-        "A game left half-played must not keep the panel forever. Zero to "
-        "never close it."),
+        "Una partita lasciata a metà non tiene il pannello per sempre. Zero per non chiuderla mai.",
+        "A game left half-played does not keep the panel forever. Zero never closes it."),
     "status.giochi.ferma": ("nessuna partita in corso", "no game running"),
     "status.giochi.partita": (
         "%(gioco)s: %(punteggio)d punti, %(vite)d vite",
@@ -2567,26 +1862,15 @@ STRINGS = {
     "rifiuti.title": ("Raccolta rifiuti e attività comunali",
                       "Waste collection and municipal activities"),
     "rifiuti.intro": (
-        "La raccolta non è un elenco di date, è una regola: due o tre giorni "
-        "fissi alla settimana per ogni frazione, e qualche eccezione all'anno "
-        "per le feste. Scritta la regola, le date si calcolano da sole — "
-        "senza dipendere da nessun servizio esterno e senza niente che si "
-        "possa rompere. Le voci compaiono a sinistra dell'orologio, ciascuna "
-        "col suo colore.",
-        "Collection is not a list of dates, it is a rule: two or three fixed "
-        "days a week per stream, plus a handful of exceptions a year for "
-        "holidays. Write the rule and the dates follow — with no external "
-        "service to depend on and nothing that can break. The entries appear "
-        "to the left of the clock, each in its own colour."),
+        "La raccolta è una regola, non un elenco di date: giorni fissi più qualche eccezione.",
+        "Collection is a rule, not a list of dates: fixed days plus a few exceptions."),
     "rifiuti.now": ("Da esporre adesso:", "To put out now:"),
     "rifiuti.now.none": ("Adesso non c'è niente da esporre.",
                          "Nothing to put out right now."),
     "rifiuti.voci": ("Frazioni e attività", "Streams and activities"),
     "rifiuti.voci.hint": (
-        "Una voce senza nessun giorno spuntato non compare da nessuna parte: "
-        "è così che si spegne quello che il tuo comune non raccoglie.",
-        "An entry with no day ticked appears nowhere: that is how you switch "
-        "off what your municipality does not collect."),
+        "Una voce senza nessun giorno spuntato non compare da nessuna parte.",
+        "An item with no day ticked does not appear anywhere."),
     "rifiuti.nome": ("Nome", "Name"),
     "rifiuti.colore": ("Colore", "Colour"),
     "rifiuti.tipo": ("Tipo", "Kind"),
@@ -2608,63 +1892,33 @@ STRINGS = {
     "rifiuti.avviso": ("Avvisa dalle ore", "Warn from"),
     "rifiuti.fine": ("Togli l'avviso alle ore", "Clear the warning at"),
     "rifiuti.orari.hint": (
-        "Il promemoria compare alle 18 della sera prima e sparisce alle 8 del "
-        "giorno di raccolta: si espone il bidone la sera, e dopo il passaggio "
-        "ricordarlo ancora sarebbe rumore. Per le attività comunali la fine è "
-        "quella del divieto, che si imposta sulla singola voce.",
-        "The reminder appears at 18:00 the evening before and clears at 08:00 "
-        "on collection day: you put the bin out in the evening, and after the "
-        "truck has been, still showing it would be noise. For municipal "
-        "activities the end is the end of the restriction, set per entry."),
+        "Il promemoria compare alle 18 della sera prima e sparisce alle 8 del giorno di raccolta.",
+        "The reminder appears at 18 the evening before and clears at 8 on collection day."),
     "rifiuti.soppressioni": ("Giorni di mancato servizio", "Days with no service"),
     "rifiuti.soppressioni.hint": (
-        "Una data per riga, «gg/mm/aaaa,voce,nota». La voce è facoltativa: "
-        "lasciata vuota vale per tutte, che è il caso normale — quando la "
-        "raccolta salta per una festività di solito salta tutta.",
-        "One date per line, “dd/mm/yyyy,entry,note”. The entry is optional: "
-        "left empty it applies to all, which is the normal case — when "
-        "collection is skipped for a holiday it is usually skipped for all."),
+        "Una data per riga, «gg/mm/aaaa,voce,nota». La voce vuota vale per tutte.",
+        "One date per row, “dd/mm/yyyy,item,note”. An empty item applies to all."),
     "rifiuti.straordinari": ("Giorni di servizio straordinario",
                              "Days with extra service"),
     "rifiuti.straordinari.hint": (
-        "Stessa forma. Serve ai recuperi dopo una festività: «non si fa lunedì "
-        "25, si recupera mercoledì 27» sono due righe, una per tabella. Uno "
-        "straordinario vale anche in un giorno soppresso — è esattamente il "
-        "caso del recupero, e sarebbe assurdo che si annullassero a vicenda.",
-        "Same shape. It is for catch-ups after a holiday: “skipped on Monday "
-        "the 25th, caught up on Wednesday the 27th” is two lines, one per "
-        "table. An extra service counts even on a suppressed day — that is "
-        "exactly what a catch-up is, and it would be absurd for the two to "
-        "cancel out."),
+        "Stessa forma. Serve ai recuperi dopo una festività, e vale anche in un giorno soppresso.",
+        "Same format. For catch-ups after a holiday, and it works on a suppressed day too."),
 
     # -------------------------------------------------------------------- doom
     "nav.doom": ("Doom", "Doom"),
     "doom.title": ("Doom", "Doom"),
     "doom.intro": (
-        "Doom non è un servizio che gira in sottofondo: è una partita. "
-        "Premendo «Gioca» tutti i servizi si fermano e il pannello diventa "
-        "suo — Batocera compreso — finché non esci o finché non lo lasci "
-        "fermo abbastanza a lungo. Uscendo, tutto riprende da dove stava.",
-        "Doom is not a service running in the background: it is a game. "
-        "Press “Play” and every service stops, the panel becomes its own — "
-        "Batocera included — until you leave or let it sit idle long enough. "
-        "On leaving, everything resumes where it was."),
+        "Non è un servizio ma una partita: prende il pannello, e all'uscita tutto riprende.",
+        "Not a service but a game: it takes the panel, and on exit everything resumes."),
     "doom.play": ("Gioca", "Play"),
     "doom.leave": ("Esci dalla partita", "Leave the game"),
     "doom.pad": ("Comandi", "Controls"),
     "doom.pad.hint": (
-        "I pulsanti si tengono premuti: tenendo il dito su una freccia si "
-        "cammina davvero, invece di fare un passo alla volta.",
-        "The buttons are held down: keeping your finger on an arrow really "
-        "walks, instead of taking one step at a time."),
+        "I pulsanti si tengono premuti: tenendo il dito su una freccia si cammina davvero.",
+        "Buttons are held down: keeping a finger on an arrow really walks."),
     "doom.keyboard.hint": (
-        "Funziona anche la tastiera di questo computer — frecce o WASD, ctrl "
-        "spara, spazio apre, shift corre — e quella collegata al Raspberry, "
-        "che è la via più diretta: non passa dalla rete.",
-        "The keyboard of this computer works too — arrows or WASD, ctrl "
-        "fires, space opens, shift runs — and so does the one plugged into "
-        "the Raspberry Pi, which is the most direct route: it does not go "
-        "through the network."),
+        "Vanno sia la tastiera di questo computer sia quella collegata al Raspberry.",
+        "Both this computer's keyboard and the one attached to the Raspberry work."),
     "doom.key.fire": ("Fuoco", "Fire"),
     "doom.key.use": ("Apri", "Use"),
     "doom.key.run": ("Corri", "Run"),
@@ -2673,31 +1927,17 @@ STRINGS = {
     "doom.key.map": ("Mappa", "Map"),
     "doom.tuning": ("Immagine e partita", "Picture and game"),
     "doom.tuning.hint": (
-        "Salvando si fa ripartire Doom: la fascia e la gamma stanno nella "
-        "riga di comando del programma, non in un file che rilegge.",
-        "Saving restarts Doom: the band and the gamma live on the program's "
-        "command line, not in a file it re-reads."),
+        "Salvando, Doom riparte: fascia e gamma stanno nella riga di comando del programma.",
+        "Saving restarts Doom: band and gamma live on the program's command line."),
     "doom.band.top": ("Prima riga della fascia", "First row of the band"),
     "doom.band.height": ("Altezza della fascia", "Height of the band"),
     "doom.band.hint": (
-        "Doom disegna 320×200, il pannello è 256×64: schiacciando tutto un "
-        "nemico sarebbe alto otto pixel. Si ritaglia una fascia attorno "
-        "all'orizzonte, dove stanno i nemici, e si buttano via pavimento e "
-        "soffitto. Da riga 36 per 96 righe è il punto di partenza; la "
-        "taratura vera si fa guardando il pannello.",
-        "Doom draws 320×200 while the panel is 256×64: squashing it all would "
-        "make an enemy eight pixels tall. A band around the horizon is cropped "
-        "instead — that is where the enemies are — and floor and ceiling are "
-        "thrown away. Row 36 for 96 rows is the starting point; the real "
-        "tuning is done by looking at the panel."),
+        "Si ritaglia una fascia attorno all'orizzonte: riga 36 per 96 righe è il punto di partenza.",
+        "A band around the horizon is cropped: row 36 for 96 rows is the starting point."),
     "doom.gamma": ("Gamma", "Gamma"),
     "doom.gamma.hint": (
-        "Doom è un gioco buio e un LED non ha il nero di un CRT: sotto 1 "
-        "schiarisce. La difficoltà va da 1 a 5, e il livello si scrive "
-        "«episodio mappa», per esempio «1 1».",
-        "Doom is a dark game and an LED has none of a CRT's black: below 1 "
-        "brightens it. Skill goes from 1 to 5, and the level is written "
-        "“episode map”, for example “1 1”."),
+        "Sotto 1 schiarisce. Difficoltà da 1 a 5; il livello si scrive «episodio mappa», es. «1 1».",
+        "Below 1 brightens. Skill 1 to 5; the level is written “episode map”, e.g. “1 1”."),
     "doom.skill": ("Difficoltà", "Skill"),
     "doom.map": ("Livello iniziale", "Starting level"),
     "doom.timeout": ("Fine partita dopo (s)", "End game after (s)"),
@@ -2721,28 +1961,15 @@ STRINGS = {
     "doom.pad.starts": ("Options sul pad può far cominciare una partita",
                         "Options on the pad can start a game"),
     "doom.pad.starts.hint": (
-        "Nessun pulsante del pad fa cominciare Doom: Start e PS scorrono i "
-        "giochi e Select esce, e sono gli stessi ovunque. A Doom ci si arriva "
-        "dal giro dei giochi — se lo si \u00e8 incluso nella pagina Giochi — "
-        "dal pulsante Gioca qui sopra, o da Home Assistant. Sul pad, durante "
-        "la partita, L3 apre il menu di Doom e R3 conferma.",
-        "No pad button starts Doom: Start and PS cycle the games and Select "
-        "quits, and they mean the same everywhere. Doom is reached from the "
-        "game cycle \u2014 if you included it on the Games page \u2014 from "
-        "the Play button above, or from Home Assistant. On the pad, during a "
-        "game, L3 opens Doom's menu and R3 confirms."),
+        "Dal pad Doom non si apre: Start scorre i giochi e Select esce. Si parte da «Gioca».",
+        "The pad does not open Doom: Start cycles games and Select exits. Start it from “Play”."),
     "doom.pad.found": ("Joystick trovati: %(list)s", "Joysticks found: %(list)s"),
     "doom.pad.none": (
         "Nessun joystick collegato al Raspberry in questo momento.",
         "No joystick connected to the Raspberry Pi right now."),
     "doom.pad.hint2": (
-        "Con un pad PS4 o compatibile: levetta sinistra per camminare e per "
-        "il passo laterale, levetta destra per girare, croce direzionale per "
-        "camminare e girare. R2 o croce sparano, cerchio e quadrato aprono, "
-        "L1 corre, triangolo è la mappa, Options il menu.",
-        "With a PS4 or compatible pad: left stick to walk and strafe, right "
-        "stick to turn, D-pad to walk and turn. R2 or cross fire, circle and "
-        "square open, L1 runs, triangle is the map, Options the menu."),
+        "Levette per camminare e girare, R2 o croce sparano, L1 corre, triangolo è la mappa.",
+        "Sticks walk and turn, R2 or cross shoot, L1 runs, triangle is the map."),
     "doom.binary": ("Programma", "Program"),
     "doom.wad": ("WAD", "WAD"),
     "doom.nobinary": (
@@ -2810,14 +2037,8 @@ STRINGS = {
         "Un tasto sulla tastiera può far cominciare una partita",
         "A key on the keyboard can start a game"),
     "doom.keyboard.starts.hint": (
-        "Spento, la partita comincia solo da «Gioca». Il DMD sta in mezzo a "
-        "un flipper: un tasto sfiorato per caso non deve portarsi via il "
-        "pannello a metà partita. A partita aperta la tastiera comanda "
-        "comunque il gioco.",
-        "Off, a game starts only from “Play”. The DMD sits in the middle of a "
-        "pinball cabinet: a key brushed by accident must not take the panel "
-        "away mid-game. Once a game is running the keyboard controls it "
-        "regardless."),
+        "Spento, la partita comincia solo da «Gioca». A partita aperta la tastiera comanda comunque.",
+        "Off, the game starts only from “Play”. Once open, the keyboard still controls it."),
     "doom.wad.free": ("libero", "free"),
     "doom.wad.use": ("Usa questo", "Use this one"),
     "doom.nowad": (
@@ -2842,29 +2063,15 @@ STRINGS = {
         "The panel is reserved for the media manager: every source is on "
         "hold, ZeDMD included."),
     "manager.hint": (
-        "Finché questa pagina resta aperta il pannello è tuo: nessun aereo, "
-        "nessun compleanno e nessuna partita possono prendere il posto del "
-        "file che stai guardando. Chiudendo la scheda il pannello torna al "
-        "suo lavoro entro %(seconds)d secondi.",
-        "While this page stays open the panel is yours: no aircraft, no "
-        "birthday and no game can take the place of the file you are looking "
-        "at. Close the tab and the panel goes back to work within "
-        "%(seconds)d seconds."),
+        "Finché questa pagina è aperta il pannello è tuo. Chiudendola torna al suo lavoro.",
+        "While this page is open the panel is yours. Close it and it goes back to work."),
     "manager.exit": ("Esci dalla gestione", "Leave the manager"),
     "manager.view.hint": (
-        "«Vedi» manda il file sul pannello, non nel browser: quello che conta "
-        "è come viene lì, con quella scala e quei colori. Il file resta a "
-        "schermo finché non ne scegli un altro.",
-        "“View” sends the file to the panel, not to the browser: what matters "
-        "is how it looks there, at that scale and with those colours. It stays "
-        "on screen until you pick another one."),
+        "«Vedi» manda il file sul pannello, non nel browser. Resta finché non ne scegli un altro.",
+        "“View” sends the file to the panel, not the browser. It stays until you pick another."),
     "media.manager.hint": (
-        "L'elenco dei file, il caricamento e le anteprime sul pannello stanno "
-        "nella Gestione media: entrandoci le sorgenti si fermano, così quello "
-        "che guardi non viene scavalcato da un aereo o da una partita.",
-        "The file list, uploads and panel previews live in the Media manager: "
-        "entering it puts every source on hold, so what you are looking at is "
-        "not pushed aside by an aircraft or a game."),
+        "Elenco, caricamento e anteprime stanno nella Gestione media, dove le sorgenti si fermano.",
+        "The list, uploads and previews live in Media manager, where the sources pause."),
     "panel.manager": ("Gestione media", "Media manager"),
     "media.view.now": ("Sul pannello: %(name)s", "On the panel: %(name)s"),
     "media.view.failed": ("File non mostrabile.", "File cannot be shown."),
@@ -2887,14 +2094,8 @@ STRINGS = {
     "nav.gameboy": ("Game Boy", "Game Boy"),
     "gb.title": ("Game Boy", "Game Boy"),
     "gb.intro": (
-        "L'emulatore gira come processo separato e prende il pannello per il "
-        "tempo della partita, come Doom. Lo schermo del Game Boy \u00e8 160\u00d7144: "
-        "portato a 64 righe tenendo le proporzioni sta in 71 pixel al centro "
-        "del pannello, con il resto spento.",
-        "The emulator runs as a separate process and takes the panel for the "
-        "length of the session, like Doom. The Game Boy screen is 160\u00d7144: "
-        "scaled to 64 rows keeping its proportions it occupies 71 pixels in "
-        "the middle of the panel, with the rest dark."),
+        "L'emulatore prende il pannello per il tempo della partita, come Doom.",
+        "The emulator takes the panel for the length of the game, like Doom."),
     "gb.prep": ("Preparazione", "Setup"),
     "gb.prep.hint": (
         "Installa l'emulatore PyBoy e apre la condivisione %(cartella)s dove "
@@ -2924,78 +2125,35 @@ STRINGS = {
     "gb.esci": ("Esci dalla partita", "Leave the game"),
     "gb.video": ("Immagine", "Picture"),
     "gb.video.hint": (
-        "Hanno effetto alla partenza del processo: cambiandoli durante una "
-        "partita, la partita riparte.",
-        "These apply when the process starts: changing them during a session "
-        "restarts it."),
+        "Hanno effetto alla partenza: cambiandoli durante una partita, la partita riparte.",
+        "They take effect at start-up: changing them mid-game restarts the game."),
     "gb.overscan": ("Overscan (%)", "Overscan (%)"),
     "gb.gamma": ("Gamma", "Gamma"),
     "gb.fps": ("Fotogrammi al secondo", "Frames per second"),
     "gb.palette": ("Colori dello schermo", "Screen colours"),
     "gb.palette.livello": ("Livello %(n)d", "Level %(n)d"),
     "gb.palette.hint": (
-        "Il Game Boy non ha colori: ha quattro gradazioni, e ogni schermo le "
-        "rendeva a modo suo. Il verde \u00e8 quello del DMG del 1989; su un "
-        "pannello LED l'ambra e l'arancione si leggono spesso meglio. I "
-        "quattro riquadri valgono solo scegliendo Personalizzata, e vanno dal "
-        "pi\u00f9 chiaro al pi\u00f9 scuro. Le cartucce Game Boy Color portano i colori "
-        "loro e ignorano questa scelta: \u00e8 la cartuccia a decidere, non lo "
-        "schermo.",
-        "The Game Boy has no colours: it has four shades, and every screen "
-        "rendered them its own way. The green is the 1989 DMG one; on an LED "
-        "panel amber and orange are often easier to read. The four swatches "
-        "apply only with Custom selected, and go from lightest to darkest. "
-        "Game Boy Color cartridges carry their own colours and ignore this "
-        "choice: the cartridge decides, not the screen."),
+        "Il Game Boy ha quattro gradazioni. I quattro riquadri valgono solo con Personalizzata.",
+        "The Game Boy has four shades. The four swatches apply only with Custom."),
     "gb.spostamento": ("Spostamento verticale (righe)",
                        "Vertical shift (rows)"),
     "gb.spostamento.hint": (
-        "L'overscan taglia met\u00e0 sopra e met\u00e0 sotto, ma i giochi non sono "
-        "simmetrici: il punteggio sta in alto, la barra della vita in basso. "
-        "Con un numero negativo la finestra sale e si vede la parte alta dello "
-        "schermo, con uno positivo scende e si vede quella bassa. La finestra "
-        "non esce mai dallo schermo del Game Boy: oltre il bordo il valore "
-        "smette semplicemente di avere effetto. Senza overscan non c'\u00e8 niente "
-        "da spostare.",
-        "Overscan cuts half from the top and half from the bottom, but games "
-        "are not symmetric: the score sits at the top, the health bar at the "
-        "bottom. A negative number moves the window up and shows the upper "
-        "part of the screen, a positive one moves it down. The window never "
-        "leaves the Game Boy screen: past the edge the value simply stops "
-        "having an effect. With no overscan there is nothing to shift."),
+        "Con l'overscan, un numero negativo alza la finestra e uno positivo la abbassa.",
+        "With overscan on, a negative number raises the window and a positive one lowers it."),
     "gb.overscan.hint": (
-        "L'overscan toglie righe sopra e sotto allo schermo del Game Boy: si "
-        "perde una fascia di cielo e una di terreno, ma a parit\u00e0 di 64 "
-        "righe l'immagine sul pannello diventa pi\u00f9 larga \u2014 71 pixel a "
-        "zero, 88 al 20%%, 116 al 40%%. Il gamma sotto 1 schiarisce e sopra 1 "
-        "scurisce, come in Doom. Trenta fotogrammi al secondo bastano "
-        "all'occhio e dimezzano il traffico verso il pannello.",
-        "Overscan drops rows from the top and bottom of the Game Boy screen: "
-        "you lose a band of sky and a band of ground, but with the same 64 "
-        "rows the picture gets wider \u2014 71 pixels at zero, 88 at 20%%, 116 "
-        "at 40%%. Gamma below 1 brightens and above 1 darkens, as in Doom. "
-        "Thirty frames per second are enough for the eye and halve the "
-        "traffic towards the panel."),
+        "Toglie righe sopra e sotto: l'immagine diventa più larga. 71 pixel a zero, 116 al 40%%.",
+        "Cuts rows above and below, so the picture gets wider: 71 pixels at zero, 116 at 40%%."),
     "gb.comandi": ("Comandi", "Controls"),
     "gb.cartella": ("Cartella delle ROM", "ROM folder"),
     "gb.keyboard.starts": (
         "Un tasto della tastiera pu\u00f2 far cominciare una partita",
         "A keyboard key may start a session"),
     "gb.pad.hint": (
-        "Sul pad: croce e cerchio sono A e B, la croce direzionale muove. "
-        "Start e Select del Game Boy stanno sulle levette premute (L3 e R3), "
-        "perch\u00e9 i pulsanti fisici con quel nome sono gi\u00e0 impegnati: Start "
-        "e PS scorrono i giochi, Select esce.",
-        "On the pad: cross and circle are A and B, the d-pad moves. The Game "
-        "Boy's Start and Select are on the pressed sticks (L3 and R3), "
-        "because the physical buttons with those names are already taken: "
-        "Start and PS cycle the games, Select leaves."),
+        "Croce e cerchio sono A e B; Start e Select stanno sulle levette premute, L3 e R3.",
+        "Cross and circle are A and B; Start and Select are the pressed sticks, L3 and R3."),
     "gb.pad.tasti": (
-        "Dal pad non si apre mai una partita: un pulsante deve avere un "
-        "significato solo. Si comincia da questa pagina, o dalla tastiera se "
-        "lo si \u00e8 chiesto qui sopra.",
-        "The pad never starts a session: a button must mean one thing only. "
-        "You start from this page, or from the keyboard if enabled above."),
+        "Dal pad non si apre una partita: si comincia da questa pagina o dalla tastiera.",
+        "The pad never opens a game: start it from this page or from the keyboard."),
     "gb.tasto.su": ("Su", "Up"),
     "gb.tasto.giu": ("Gi\u00f9", "Down"),
     "gb.tasto.sinistra": ("Sinistra", "Left"),
@@ -3018,16 +2176,8 @@ STRINGS = {
     "nav.calendario": ("Calendario", "Calendar"),
     "calendario.title": ("Google Calendar", "Google Calendar"),
     "calendario.intro": (
-        "Il pannello mostra gli appuntamenti dei prossimi %(giorni)s giorni, "
-        "a giro, come fa con le scadenze: in alto a destra quando, al centro "
-        "che cosa. Niente semaforo: un appuntamento succede quando succede. "
-        "Qui si collega l’account e basta — gli appuntamenti si "
-        "scrivono su Google, e da qui non si tocca niente.",
-        "The panel shows the appointments of the next %(giorni)s days, in "
-        "turn, the way it does with deadlines: when at the top right, what in "
-        "the middle. No traffic light: an appointment happens when it "
-        "happens. This page only links the account — appointments are "
-        "written in Google, and nothing here changes them."),
+        "Il pannello mostra gli appuntamenti dei prossimi %(giorni)s giorni. Si scrivono su Google.",
+        "The panel shows the next %(giorni)s days of appointments. You write them in Google."),
     "calendario.connected": ("Collegato come %(name)s.", "Connected as %(name)s."),
     "calendario.connected.anon": ("Account collegato.", "Account connected."),
     "calendario.notconnected": ("Nessun account collegato.",
@@ -3038,10 +2188,8 @@ STRINGS = {
                                "already saved, leave empty to keep it"),
     "calendario.redirect": ("Indirizzo di ritorno", "Redirect URI"),
     "calendario.redirect.hint": (
-        "Dev’essere identico, carattere per carattere, a quello scritto "
-        "nel client OAuth su Google Cloud.",
-        "It must match, character for character, the one registered in the "
-        "OAuth client on Google Cloud."),
+        "Dev'essere identico a quello scritto nel client OAuth su Google Cloud.",
+        "It must match the one set in the OAuth client on Google Cloud, character for character."),
     "calendario.steps": ("Come collegare l’account",
                          "How to link the account"),
     "calendario.step1": (
@@ -3050,12 +2198,8 @@ STRINGS = {
         "On console.cloud.google.com create a project and enable the Google "
         "Calendar API."),
     "calendario.step2": (
-        "Nella schermata di consenso aggiungi il permesso calendar.readonly e "
-        "pubblica in produzione: finché resta in test, Google scollega "
-        "tutto dopo sette giorni.",
-        "In the consent screen add the calendar.readonly scope and publish to "
-        "production: while it stays in testing, Google disconnects everything "
-        "after seven days."),
+        "Aggiungi il permesso calendar.readonly e pubblica in produzione, o Google scollega.",
+        "Add the calendar.readonly scope and publish to production, or Google disconnects."),
     "calendario.step3": (
         "Crea credenziali di tipo Applicazione web e incolla qui sopra Client "
         "ID e Client secret.",
@@ -3080,35 +2224,23 @@ STRINGS = {
     "calendario.complete": ("Completa il collegamento", "Complete linking"),
     "calendario.disconnect": ("Scollega l’account", "Disconnect account"),
     "calendario.disconnect.hint": (
-        "Cancella i token da questo DMD e chiede a Google di revocare il "
-        "permesso. Restano il Client ID e il Client secret, che sono "
-        "credenziali della tua applicazione e non dell’account.",
-        "Deletes the tokens from this DMD and asks Google to revoke the "
-        "permission. The Client ID and Client secret stay: they belong to "
-        "your application, not to the account."),
+        "Cancella i token e chiede a Google di revocare il permesso. Client ID e secret restano.",
+        "Deletes the tokens and asks Google to revoke access. Client ID and secret stay."),
     "calendario.tokens.hint": (
-        "I token stanno in /var/lib/dmd/google.json, leggibili solo da root, "
-        "e non finiscono mai nella configurazione esportata.",
-        "Tokens live in /var/lib/dmd/google.json, readable by root only, and "
-        "never end up in the exported configuration."),
+        "I token stanno in /var/lib/dmd/google.json, leggibili solo da root.",
+        "The tokens live in /var/lib/dmd/google.json, readable only by root."),
     "calendario.next": ("Prossimi appuntamenti", "Upcoming appointments"),
     "calendario.next.hint": (
-        "Quello che il pannello vede in questo momento: i prossimi %(giorni)s "
-        "giorni del calendario principale.",
-        "What the panel sees right now: the next %(giorni)s days of the "
-        "primary calendar."),
+        "I prossimi %(giorni)s giorni del calendario principale, come li vede il pannello.",
+        "The next %(giorni)s days of the main calendar, as the panel sees them."),
     "calendario.next.none": ("Nessun appuntamento nella finestra.",
                              "No appointments in the window."),
     "calendario.refresh": ("Rileggi da Google", "Refresh from Google"),
     "calendario.google.ok": ("Account Google collegato.",
                              "Google account linked."),
     "calendario.google.gone": (
-        "Account Google scollegato dal DMD. Google non ha confermato la "
-        "revoca: se vuoi chiudere anche da lì, vai su myaccount.google.com → "
-        "Sicurezza → App di terze parti.",
-        "Google account disconnected from the DMD. Google did not confirm the "
-        "revocation: to close it on their side too, go to "
-        "myaccount.google.com → Security → Third-party apps."),
+        "Account scollegato. Google non ha confermato la revoca: puoi chiuderla anche da lì.",
+        "Account disconnected. Google did not confirm the revocation: you can close it there too."),
     "calendario.google.revoked": (
         "Account Google scollegato e permesso revocato.",
         "Google account disconnected and permission revoked."),
@@ -3134,10 +2266,8 @@ STRINGS = {
     "settings.autotune": ("Avvia taratura", "Start tuning"),
     "settings.autotune.title": ("Taratura automatica", "Automatic tuning"),
     "settings.autotune.hint": (
-        "Misura il pannello a diversi rallentamenti e aggiunge il profilo "
-        "trovato qui sopra. Circa quaranta minuti, con qualche riavvio.",
-        "Measures the panel at different slowdowns and adds the resulting "
-        "profile above. About forty minutes, with a few restarts."),
+        "Misura il pannello a vari rallentamenti e aggiunge il profilo. Circa quaranta minuti.",
+        "Measures the panel at several slowdowns and adds the profile found. About forty minutes."),
     "settings.autotune.running": ("Taratura in corso: %(fatte)s su %(totale)s.",
                                   "Tuning: %(fatte)s of %(totale)s."),
     "settings.autotune.stop": ("Ferma la taratura", "Stop tuning"),

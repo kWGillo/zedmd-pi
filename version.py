@@ -2036,6 +2036,26 @@ Storico:
        cifre faceva un campo largo mezza scheda con il pulsante spaiato di
        fianco. Adesso hanno una riga loro: campo largo quanto serve, i due
        allineati in mezzo.
+  9.3  **Le spiegazioni nelle pagine diventano una riga.**
+       Un giudizio dal campo: *l'interfaccia è ottima, ma la quantità di testo
+       descrittivo potrebbe non essere gradevole.* Era vero, e si misurava: due
+       terzi di tutto il testo dell'interfaccia — 41.000 caratteri su 65.000 —
+       erano spiegazioni, con una media di 203 caratteri l'una. Chi apre una
+       pagina per spuntare una casella non legge un paragrafo: lo salta, e
+       saltandolo perde anche la riga che serviva.
+       Riscritti **183 testi**: media da 203 a 80 caratteri, il 61% in meno su
+       quelli descrittivi e il 34% su tutto il testo dell'interfaccia. Ognuno
+       dice adesso che cosa fa il comando, in una riga. Il perche' non e'
+       sparito, e' nei commenti del codice — dove serve a chi lo cambia e non
+       pesa a chi lo usa.
+       Restano lunghe poche cose, ed e' una scelta: la taratura del pannello,
+       la libreria della matrice, il cablaggio del pulsante e la preparazione
+       di Doom e PyBoy. Sono le cose che si fanno una volta, con il saldatore o
+       il terminale in mano, dove una parola in meno costa un pomeriggio.
+       Una prova nuova tiene il tetto a novantacinque caratteri e l'elenco
+       delle eccezioni scritto una per una: allungare un testo si potra'
+       ancora, ma diventa una decisione dichiarata invece di un'abitudine che
+       torna da sola.
 """
 
-__version__ = "9.2"
+__version__ = "9.3"
