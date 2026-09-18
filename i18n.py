@@ -591,6 +591,9 @@ STRINGS = {
     "timer.annullato": ("Timer annullato.", "Timer cancelled."),
     "timer.nessuno": ("Non c'era nessun timer in corso.",
                       "There was no timer running."),
+    "timer.occupato": (
+        "Ce n'è già uno in corso: per cambiarlo, annullalo e rifallo.",
+        "One is already running: to change it, cancel it and set it again."),
     "status.sveglia.timer": ("timer: mancano %(minuti)s",
                              "timer: %(minuti)s left"),
     "sveglia.title": ("Sveglia", "Alarm clock"),

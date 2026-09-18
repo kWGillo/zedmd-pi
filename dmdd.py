@@ -27,6 +27,7 @@ import mqttbus
 import nowplaying
 import ota
 import pulizia
+import pulsante
 import spotifyapi
 import cassa
 import suoni
@@ -315,9 +316,16 @@ class Runtime:
         # che e' l'unico a conoscerle entrambe.
         self.sveglia.suona = self._suona_sveglia
         self.telecamera.intercetta = self.sveglia.zittisci
+        # E l'orologio mostra in fondo quanto manca al timer: il timer si mette
+        # da una pagina web, ma la pasta si guarda in cucina, e in cucina
+        # l'unica cosa che si guarda e' il pannello.
+        self.clock.timer = self.sveglia.timer_quota
         # Se ci sono partite congelate adesso. Serve ad agire solo sui cambi
         # di stato invece che a ogni giro del ciclo.
         self._partite_congelate = False
+        # Il pulsante che la sveglia si apre da sola quando squilla e la
+        # telecamera non lo sta gia' tenendo. Vedi `_pulsante_di_turno`.
+        self._pulsante_sveglia = None
 
         # Il brano corrente e chi lo disegna sono due cose distinte: lo stato
         # viene aggiornato anche a servizio spento, cosi' Home Assistant lo
@@ -413,6 +421,51 @@ class Runtime:
         self.frame_saltati = 0
 
     # ------------------------------------------------------------------ musica
+
+    def _pulsante_di_turno(self, squilla):
+        """Mentre la sveglia suona il pulsante fisico e' suo, sempre.
+
+        Il difetto che questa funzione ripara e' di quelli che si vedono solo
+        montando la macchina. Il pulsante veniva aperto da `start()` della
+        **telecamera**, quindi esisteva solo mentre il servizio Funcam era
+        acceso. Con la Funcam spenta -- che e' il caso normale di chi la
+        webcam non la usa -- nessuno leggeva quel piedino: la sveglia
+        squillava, il testo della pagina diceva di premere il pulsante, e
+        premerlo non faceva niente. Da fuori sembrava una saldatura sbagliata,
+        e invece era un pulsante che non apparteneva a nessuno.
+
+        Adesso e' del DMD. Se la telecamera lo sta gia' tenendo non glielo si
+        strappa -- il suo `intercetta` manda comunque il clic alla sveglia, ed
+        e' la stessa cosa con un oggetto in meno. Se invece e' libero lo apre
+        la sveglia, e lo richiude quando ha smesso di squillare.
+
+        La chiusura avviene **qui**, dal ciclo principale, e non dentro
+        `zittisci`: `zittisci` la chiama il callback del pulsante stesso, e
+        chiudere un oggetto `gpiozero` da dentro il suo gestore di eventi e' il
+        modo piu' rapido di piantare un thread.
+        """
+        conf = self.cfg.get("sveglia") or {}
+        if squilla and conf.get("pulsante", True):
+            if self._pulsante_sveglia is not None:
+                return
+            gpio = pulsante.piedino(self.cfg)
+            if pulsante.occupato(gpio) is not None:
+                return
+            bottone = pulsante.Pulsante(gpio, su_clic=self.sveglia.zittisci,
+                                        su_tenuta=self.sveglia.zittisci)
+            aperto, motivo = bottone.avvia()
+            if not aperto:
+                # Si dice e si va avanti: la sveglia si ferma comunque da
+                # sola dopo la durata, e dalla pagina.
+                print("[sveglia] pulsante non disponibile: %s" % motivo)
+                return
+            self._pulsante_sveglia = bottone
+            print("[sveglia] pulsante preso (GPIO %d)" % gpio)
+            return
+        if self._pulsante_sveglia is not None:
+            self._pulsante_sveglia.ferma()
+            self._pulsante_sveglia = None
+            print("[sveglia] pulsante rilasciato")
 
     def _congela_partite(self, squilla):
         """Mentre la sveglia suona, le partite aperte stanno ferme.
@@ -851,6 +904,7 @@ class Runtime:
         except Exception as exc:          # pragma: no cover
             print("[sveglia] controllo fallito: %s" % exc)
             squilla = False
+        self._pulsante_di_turno(squilla)
         self._congela_partite(squilla)
         sleeping, spento, night = modi_effettivi(sleeping, spento, night,
                                                  squilla)

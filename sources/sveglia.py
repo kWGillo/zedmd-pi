@@ -139,6 +139,9 @@ class SvegliaSource(Source):
         # scade alle 20:47, scade fra nove minuti -- e nessuno vuole guardare
         # l'orologio e fare la somma mentre ha le mani bagnate.
         self._timer_a = 0.0
+        # Quanto durava in tutto, per sapere a che punto e' arrivato. Serve
+        # alla barra che l'orologio disegna in fondo al pannello.
+        self._timer_totale = 0.0
         self._timer_nome = ""
         # Chi sa suonare un file. Lo attacca il runtime, come per tutti gli
         # altri ganci di questo progetto: una sorgente non deve sapere come
@@ -189,10 +192,20 @@ class SvegliaSource(Source):
     def avvia_timer(self, minuti, nome=""):
         """Un conto alla rovescia. (ok, motivo).
 
-        Sostituisce quello in corso invece di affiancarlo: un timer alla volta
-        e' quello che serve in cucina, e due che scadono insieme darebbero un
-        solo squillo con due motivi -- cioe' un'informazione persa.
+        Un timer alla volta: due che scadono insieme darebbero un solo squillo
+        con due motivi, cioe' un'informazione persa.
+
+        Finche' ne sta andando uno, questa non ne fa partire un altro e non lo
+        sostituisce nemmeno: si rifiuta, dicendo perche'. Prima sostituiva, e
+        il guaio si e' visto usandolo -- la pagina lasciava i comandi di avvio
+        sotto il conto alla rovescia, premerne uno con il campo vuoto arrivava
+        qui con una stringa vuota, e la risposta era «durata non valida»
+        mentre il timer stava andando benissimo. Un errore inventato su
+        un'azione che non andava nemmeno offerta. Per cambiarlo si annulla e
+        si rifa'.
         """
+        if self.timer_resta() > 0:
+            return False, "in corso"
         try:
             minuti = float(minuti)
         except (TypeError, ValueError):
@@ -200,6 +213,7 @@ class SvegliaSource(Source):
         if not 0 < minuti <= 24 * 60:
             return False, "durata non valida"
         self._timer_a = time.time() + minuti * 60
+        self._timer_totale = minuti * 60
         self._timer_nome = str(nome or "").strip()[:24]
         return True, ""
 
@@ -207,6 +221,7 @@ class SvegliaSource(Source):
         """Annulla il conto alla rovescia. True se ce n'era uno."""
         c_era = self._timer_a > 0
         self._timer_a = 0.0
+        self._timer_totale = 0.0
         self._timer_nome = ""
         return c_era
 
@@ -215,6 +230,25 @@ class SvegliaSource(Source):
         if not self._timer_a:
             return 0
         return max(0, int(round(self._timer_a - time.time())))
+
+    def timer_quota(self):
+        """Quanto ne resta, da 1.0 a 0.0. None se non c'e' nessun timer.
+
+        Serve all'orologio per disegnare la barra in fondo al pannello. La
+        richiesta che l'ha fatta nascere e' stata: *quando il timer e' avviato
+        non mi accorgo che c'e'*. Ed e' vero, perche' il timer vive dentro una
+        pagina web mentre la cucina e' un'altra stanza: l'unica cosa che
+        guardi e' il pannello, e il pannello non ne sapeva niente.
+
+        Si restituisce una frazione e non i secondi perche' chi disegna non
+        deve sapere quanto durava: deve sapere quanta riga accendere.
+        """
+        if not self._timer_a or not self._timer_totale:
+            return None
+        resta = self._timer_a - time.time()
+        if resta <= 0:
+            return 0.0
+        return max(0.0, min(1.0, resta / float(self._timer_totale)))
 
     def _timer_scaduto(self):
         return bool(self._timer_a) and time.time() >= self._timer_a

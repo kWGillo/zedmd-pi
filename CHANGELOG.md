@@ -2,6 +2,58 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.2]
+
+Cinque cose della sveglia e del timer, tutte trovate montando la macchina e
+usandola, non leggendo il codice.
+
+### Il pulsante non era di nessuno
+
+Il piedino GPIO lo apriva `start()` della **telecamera**. Esisteva quindi solo
+mentre il servizio Funcam era acceso — e con la Funcam spenta, che è il caso
+normale di chi la webcam non la usa, nessuno leggeva quel piedino. La sveglia
+squillava, il testo della pagina diceva di premere il pulsante, e premerlo non
+faceva niente. Da fuori sembrava una saldatura sbagliata; il pulsante invece
+era perfetto, tredici pressioni su tredici lette da `gpiozero` a servizio
+fermo.
+
+Adesso il pulsante è del DMD, non della telecamera. Mentre la sveglia squilla è
+suo: se nessuno lo tiene se lo apre da sola, e se ce l'ha la telecamera glielo
+lascia, perché il clic le arriva e lei lo gira comunque alla sveglia. Lo
+rilascia il ciclo principale e non `zittisci`, che viene chiamata dal callback
+del pulsante stesso: chiudere un oggetto `gpiozero` da dentro il suo gestore di
+eventi è il modo più rapido di piantare un thread.
+
+Chi non lo vuole mette `sveglia.pulsante` a falso.
+
+### Il timer non si vedeva
+
+Si mette da una pagina web, ma la pasta si guarda in cucina, e in cucina
+l'unica cosa che si guarda è il pannello — che del timer non sapeva niente.
+
+L'orologio adesso ha in fondo una barra rossa spessa due pixel che **si
+accorcia** man mano che il conto scende. Una riga fissa direbbe soltanto che un
+timer c'è; una che si accorcia costa gli stessi due pixel e dice anche quanto
+manca, senza scrivere numeri sopra un orologio che di numeri ne ha già.
+
+### Il timer inventava un errore
+
+Con un conto alla rovescia in corso la pagina lasciava sotto i comandi per
+avviarne un altro. Premerne uno con il campo dei minuti vuoto rispondeva «Timer
+non avviato: durata non valida» mentre il timer stava andando benissimo: un
+errore inventato su un'azione che non andava nemmeno offerta.
+
+Adesso, con un timer in corso, ci sono solo il conto alla rovescia e «Annulla il
+timer». Un timer alla volta era già la regola, ma la si applicava sostituendo
+quello in corso; adesso ci si rifiuta e si spiega perché.
+
+### E due cose storte nella pagina
+
+Il campo dei minuti e il pulsante Avvia stavano in una griglia metà e metà, che
+per un numero di quattro cifre dava un campo largo mezza scheda con il pulsante
+spaiato di fianco. Adesso hanno una riga fatta per loro: campo largo quanto
+serve, e i due allineati in mezzo.
+
 ## [9.1]
 
 I suoni dei giochi che mancavano. Due difetti, e nessuno dei due stava dentro i

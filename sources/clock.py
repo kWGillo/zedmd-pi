@@ -57,6 +57,9 @@ class ClockSource(Source):
         super().__init__(cfg, width, height)
         self._running = False
         self._signature = None
+        # Quanto resta del timer, come frazione da 1 a 0. Lo attacca il
+        # runtime: vedi `_barra_timer`.
+        self.timer = None
         self._font = _load_font(max(12, int(height * 0.60)))
         self._font_small = _load_font(max(8, int(height * 0.20)))
         # Font della colonna dei rifiuti, dal piu' grande al piu' piccolo. Si
@@ -241,11 +244,17 @@ class ClockSource(Source):
         import scadenze as _sc
         sem_acceso = second_even or stato_sem != _sc.SCADUTA
 
+        # La barra del timer, in fondo al pannello. Si calcola prima della
+        # firma e ci entra dentro: e' larga un pixel in meno ogni tanto, e se
+        # restasse fuori dalla firma il pannello continuerebbe a mostrare
+        # quella del momento in cui e' cambiato qualcos'altro.
+        barra = self._barra_timer()
+
         # Ridisegna solo quando cambia qualcosa di visibile.
         signature = (shown, date if clock["show_date"] else "", meridiem,
                      clock["time_color"], clock["date_color"],
                      tuple((v["nome"], v["colore"]) for v in colonna),
-                     stato_sem, sem_acceso)
+                     stato_sem, sem_acceso, barra)
         if signature == self._signature:
             return None
         self._signature = signature
@@ -295,4 +304,42 @@ class ClockSource(Source):
                        max(0, ora_sotto - alto - riquadro[1])),
                       meridiem, font=self._font_small, fill=date_color)
 
+        if barra:
+            draw.rectangle((0, self.height - self.TIMER_SPESSORE,
+                            barra - 1, self.height - 1),
+                           fill=parse_color(
+                               (self.cfg.get("sveglia") or {}).get("colore"),
+                               (255, 59, 48)))
+
         return image
+
+    # ------------------------------------------------------------ il timer
+
+    TIMER_SPESSORE = 2
+
+    def _barra_timer(self):
+        """Quanti pixel di barra accendere in fondo, o 0 se non serve.
+
+        Nasce da una cosa vista usando il DMD: *quando il timer è avviato non
+        mi accorgo che c'è*. Il timer si mette da una pagina web, ma la pasta
+        si guarda in cucina, e in cucina l'unica cosa che si guarda è il
+        pannello -- che del timer non sapeva niente.
+
+        Una riga fissa direbbe soltanto «c'è un timer». Una riga che si
+        accorcia costa gli stessi due pixel e dice anche **quanto manca**,
+        senza scrivere numeri sopra un orologio che di numeri ne ha già.
+
+        Il gancio lo attacca il runtime: l'orologio non sa che esista una
+        sveglia, sa solo che qualcuno ogni tanto gli dice una frazione.
+        """
+        if self.timer is None:
+            return 0
+        try:
+            quota = self.timer()
+        except Exception:                            # pragma: no cover
+            return 0
+        if not quota:
+            # None (nessun timer) o 0.0 (appena scaduto: da li' in poi parla
+            # la sveglia, che si prende il pannello tutto).
+            return 0
+        return max(1, int(round(quota * self.width)))

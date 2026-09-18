@@ -30,14 +30,19 @@
   <h2>{{ t('timer.title') }}</h2>
   <p class="hint">{{ t('timer.intro') }}</p>
 
+  {# Un timer alla volta, e mentre ne va uno i comandi per avviarne un altro
+     non ci sono. Prima c'erano, e premerli con il campo vuoto rispondeva
+     «Timer non avviato: durata non valida» mentre il timer stava andando
+     benissimo: un errore inventato su un'azione che non aveva senso offrire.
+     Per cambiarlo si annulla e si rifà — un gesto in più, ma dichiarato. #}
   {% if sveglia.timer %}
   <p class="status">{{ t('timer.in.corso', resta=sveglia.timer_testo,
                          nome=sveglia.timer_nome) }}</p>
   <form method="post" action="{{ url_for('api_timer_ferma') }}">
     <button type="submit" class="ghost">{{ t('timer.annulla') }}</button>
   </form>
-  {% endif %}
-
+  <p class="hint">{{ t('timer.occupato') }}</p>
+  {% else %}
   <form method="post" action="{{ url_for('api_timer') }}">
     <label for="nome_timer">{{ t('timer.nome') }}</label>
     <input type="text" id="nome_timer" name="nome" maxlength="24"
@@ -50,12 +55,17 @@
       {% endfor %}
     </div>
     <label for="minuti_liberi">{{ t('timer.altro') }}</label>
-    <div class="row2">
+    {# Non `row2`: quella è una griglia metà e metà, e per un numero di quattro
+       cifre faceva un campo largo mezza scheda con il pulsante spaiato
+       accanto. Qui il campo è largo quanto serve e i due stanno sulla stessa
+       riga, allineati in mezzo. #}
+    <div class="riga-avvio">
       <input type="number" id="minuti_liberi" name="minuti" min="1" max="1440"
              step="1" placeholder="20">
       <button type="submit">{{ t('timer.avvia') }}</button>
     </div>
   </form>
+  {% endif %}
 </section>
 
 {# Una scheda per sveglia, non una tabella: su un telefono una tabella con

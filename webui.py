@@ -1537,6 +1537,12 @@ def create_app(runtime):
                        if str(v).strip()), "")
         ok, motivo = runtime.sveglia.avvia_timer(
             scelto, request.form.get("nome", ""))
+        if not ok and motivo == "in corso":
+            # Non e' un errore dell'utente: la pagina che aveva aperto era di
+            # prima che il timer partisse. Si dice com'e' andata senza la
+            # riga rossa di un guasto.
+            return redirect(url_for("page_sveglia", result=i18n.translate(
+                "timer.occupato", current_language())))
         return redirect(url_for("page_sveglia", result=i18n.translate(
             "timer.avviato" if ok else "timer.no", current_language(),
             minuti=scelto, error=motivo)))

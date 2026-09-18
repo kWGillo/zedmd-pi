@@ -636,6 +636,11 @@ DEFAULTS = {
     "timing": {},
     "sveglia": {
         "colore": "#ff3b30",
+        # Mentre squilla, il pulsante fisico e' suo. Vedi
+        # `dmdd.Runtime._pulsante_di_turno`: prima il piedino lo apriva solo
+        # la telecamera, quindi con la Funcam spenta una sveglia non si
+        # poteva zittire col pulsante — e sembrava un guasto di saldatura.
+        "pulsante": True,
         # Per quanto suona un timer scaduto. Piu' corta di una sveglia: chi ha
         # messo un timer e' in casa e a pochi metri, non sta dormendo.
         "durata_timer": 90,

@@ -245,6 +245,14 @@ input[type=color] {
 
 .color-row { display: flex; align-items: center; gap: 12px; }
 
+/* Un campo corto e il suo pulsante, sulla stessa riga. Nasce dal timer: era
+   una `.row2`, cioè una griglia metà e metà, e per un numero di quattro cifre
+   dava un campo largo mezza scheda con il pulsante spaiato di fianco. Qui il
+   campo è largo quanto il suo contenuto e i due si allineano in mezzo. */
+.riga-avvio { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.riga-avvio input[type=number] { width: 7rem; flex: 0 0 auto; }
+.riga-avvio button { flex: 0 0 auto; }
+
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
 /* Quattro colonne: i quattro livelli della palette Game Boy. Su schermo

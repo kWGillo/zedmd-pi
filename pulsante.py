@@ -220,6 +220,43 @@ def valido(gpio):
         return False
 
 
+def piedino(cfg):
+    """Quale piedino ha il pulsante fisico del DMD.
+
+    Sta scritto sotto `webcam.pulsante` per ragioni di storia -- il pulsante
+    e' nato per la Funcam -- ma **il pulsante non e' della telecamera**: e' un
+    pulsante solo, saldato su una macchina sola, e la sveglia lo vuole anche
+    quando la telecamera e' spenta. Questa funzione esiste per dirlo una volta
+    e per essere l'unico posto da cambiare il giorno in cui la voce si
+    sposta.
+    """
+    conf = (cfg.get("webcam") or {}).get("pulsante") or {}
+    try:
+        gpio = int(conf.get("gpio", GPIO_PREDEFINITO))
+    except (TypeError, ValueError):
+        return GPIO_PREDEFINITO
+    return gpio if valido(gpio) else GPIO_PREDEFINITO
+
+
+# Chi tiene aperto quale piedino, adesso. Il piedino e' una risorsa unica:
+# `gpiozero` non concede lo stesso GPIO a due oggetti, e il secondo che ci
+# prova muore con "already in use". Prima nessuno teneva il conto perche' a
+# volerlo era una sorgente sola; da quando lo vuole anche la sveglia, chi
+# arriva deve poter chiedere se e' libero invece di scoprirlo con un errore.
+_APERTI = {}
+_REGISTRO = threading.Lock()
+
+
+def occupato(gpio):
+    """Il `Pulsante` che tiene quel piedino adesso, o None se e' libero."""
+    try:
+        chiave = int(gpio)
+    except (TypeError, ValueError):
+        return None
+    with _REGISTRO:
+        return _APERTI.get(chiave)
+
+
 class Pulsante:
     """Un pulsante fisico che chiama `su_clic` e `su_tenuta`.
 
@@ -269,11 +306,16 @@ class Pulsante:
             bottone.when_released = self._rilasciato
             self._bottone = bottone
             self._errore = ""
-            return True, ""
+        with _REGISTRO:
+            _APERTI[self.gpio] = self
+        return True, ""
 
     def ferma(self):
         with self._lucchetto:
             bottone, self._bottone = self._bottone, None
+        with _REGISTRO:
+            if _APERTI.get(self.gpio) is self:
+                del _APERTI[self.gpio]
         if bottone is not None:
             try:
                 bottone.close()

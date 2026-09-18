@@ -2003,6 +2003,39 @@ Storico:
        nel cestino degli errori: l'ultima diventava la riga rossa della
        pagina, e un flusso negoziato alla perfezione si presentava come un
        guasto.
+  9.2  **La sveglia si prende il pulsante, e il timer si vede sul pannello.**
+       Cinque cose trovate montando la macchina, non leggendo il codice.
+       *Il pulsante non era di nessuno.* Il piedino GPIO lo apriva `start()`
+       della **telecamera**, quindi esisteva solo mentre il servizio Funcam
+       era acceso. Con la Funcam spenta — il caso normale di chi la webcam non
+       la usa — la sveglia squillava, la pagina diceva di premere il pulsante,
+       e premerlo non faceva niente: da fuori sembrava una saldatura sbagliata.
+       Il pulsante invece era perfetto, tredici pressioni su tredici lette a
+       servizio fermo. Adesso il pulsante e' del DMD: mentre la sveglia
+       squilla e' suo, e se lo apre da sola quando nessun altro lo tiene. Se
+       ce l'ha la telecamera non glielo si strappa, perche' il clic le arriva
+       e lei lo gira comunque alla sveglia. Si rilascia dal ciclo principale e
+       non da `zittisci`, che la chiama il callback del pulsante stesso:
+       chiudere un oggetto `gpiozero` da dentro il suo gestore di eventi e' il
+       modo piu' rapido di piantare un thread.
+       *Il timer non si vedeva.* Si mette da una pagina web, ma la pasta si
+       guarda in cucina, e in cucina l'unica cosa che si guarda e' il
+       pannello. Adesso l'orologio ha in fondo una barra rossa spessa due
+       pixel che **si accorcia**: una riga fissa direbbe solo che un timer
+       c'e', una che si accorcia costa gli stessi due pixel e dice anche
+       quanto manca, senza scrivere numeri sopra un orologio.
+       *Il timer inventava un errore.* Con un conto alla rovescia in corso la
+       pagina lasciava sotto i comandi per avviarne un altro: premerne uno con
+       il campo vuoto rispondeva «Timer non avviato: durata non valida» mentre
+       il timer stava andando benissimo. Adesso i comandi di avvio non
+       compaiono proprio: c'e' il conto alla rovescia e «Annulla il timer». Un
+       timer alla volta era gia' la regola, ma la si diceva sostituendo quello
+       in corso; adesso ci si rifiuta, e si spiega.
+       *E due cose storte nella pagina.* Il campo dei minuti e il pulsante
+       Avvia stavano in una griglia meta' e meta', che per un numero di quattro
+       cifre faceva un campo largo mezza scheda con il pulsante spaiato di
+       fianco. Adesso hanno una riga loro: campo largo quanto serve, i due
+       allineati in mezzo.
 """
 
-__version__ = "9.1"
+__version__ = "9.2"
