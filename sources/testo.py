@@ -34,6 +34,11 @@ INTERLINEA = 2
 # vuol dire caratteri da tredici, che a tre metri non si leggono.
 RIGHE_MASSIME = 4
 
+# Sotto questo corpo non si scende. Sei pixel sono gia' illeggibili: se
+# nemmeno a sei il testo ci sta, vuol dire che c'e' da tagliare, non da
+# rimpicciolire ancora.
+MINIMO = 6
+
 
 def _misuratore():
     """Un disegnatore usa e getta, buono solo per misurare i testi."""
@@ -74,34 +79,92 @@ def accorcia(riga, font, larghezza, misura=None):
     return tagliata.rstrip() + PUNTINI
 
 
+def ingombro(righe, font, misura=None, interlinea=INTERLINEA):
+    """(larghezza della riga piu' larga, altezza del blocco), misurate.
+
+    **Misurate**, non calcolate dal corpo del carattere: e' la correzione di
+    due difetti che la versione precedente aveva tutti e due, e che si vedono
+    solo guardando il pannello.
+
+    L'altezza vera di una riga non e' il corpo del carattere. Un DejaVu da 13
+    px disegna un blocco alto quindici o sedici quando ci sono accenti e
+    lettere che scendono sotto la riga, e quattro righe cosi' sforano di un
+    pixel su un pannello alto sessantaquattro: la quarta riga esce dal basso.
+
+    La larghezza vera puo' essere qualunque cosa. `spezza` non taglia mai una
+    parola a meta', quindi una parola sola piu' larga del pannello resta una
+    riga sola -- e una riga sola «entra» in qualunque impaginazione se ci si
+    limita a contare le righe. Contandole, il testo sbordava di lato senza
+    che niente lo rimpicciolisse.
+    """
+    misura = misura or _misuratore()
+    larga, alta = 0, 0
+    for riga in righe:
+        riquadro = misura.textbbox((0, 0), riga or " ", font=font)
+        larga = max(larga, riquadro[2] - riquadro[0])
+        alta += riquadro[3] - riquadro[1]
+    return larga, alta + interlinea * max(0, len(righe) - 1)
+
+
+def _sta(righe, font, larghezza, altezza, interlinea, misura):
+    larga, alta = ingombro(righe, font, misura, interlinea)
+    return larga <= larghezza and alta <= altezza
+
+
+def _tagliate(testo, font, larghezza, righe_massime, misura):
+    """Le prime righe, con i puntini dove si e' tagliato qualcosa."""
+    righe = spezza(testo, font, larghezza, misura)
+    tenute = list(righe[:righe_massime]) or [""]
+    if len(righe) > righe_massime:
+        tenute[-1] = accorcia(tenute[-1], font, larghezza, misura)
+    # Qualunque riga puo' sbordare, non solo l'ultima: basta che contenga una
+    # parola piu' larga del pannello, che `spezza` lascia intera apposta.
+    for indice, riga in enumerate(tenute):
+        if misura.textlength(riga, font=font) > larghezza:
+            tenute[indice] = accorcia(riga, font, larghezza, misura)
+    return tenute
+
+
 def impagina(testo, larghezza, altezza, tetto, righe_massime=RIGHE_MASSIME,
              interlinea=INTERLINEA):
-    """Righe e carattere: il piu' grande in cui il testo ci sta.
+    """Righe e carattere: il piu' grande in cui il testo ci sta **davvero**.
 
     Si provano una, due, tre, quattro righe e si tiene la prima impaginazione
     che entra: e' lo stesso criterio con cui l'orologio sceglie il carattere
-    della colonna dei rifiuti.
+    della colonna dei rifiuti, e ha il pregio che un messaggio corto resta
+    grande invece di rimpicciolirsi per uniformita'.
 
-    `tetto` e' la dimensione massima del carattere. Serve, e si vede togliendola:
-    su una riga sola, senza tetto, un «OK» riempirebbe il pannello da bordo a
-    bordo.
+    «Entra» vuol dire **misurata**, non contata: vedi `ingombro`.
 
-    Se non entra nemmeno all'ultima riga disponibile, l'ultima si taglia e si
-    mettono i puntini.
+    `tetto` e' la dimensione massima del carattere. Serve, e si vede
+    togliendola: su una riga sola, senza tetto, un «OK» riempirebbe il
+    pannello da bordo a bordo.
+
+    Se nessuna impaginazione entra si scende di corpo un pixel per volta,
+    tagliando quello che avanza. La discesa e' l'ultima rete: prende i casi
+    che il conteggio delle righe non vede, come una parola unica piu' larga
+    del pannello, che va accorciata perche' non c'e' nessun altro modo di
+    farla stare.
     """
     misura = _misuratore()
-    ultimo = None
-    for quante in range(1, max(1, righe_massime) + 1):
+    righe_massime = max(1, righe_massime)
+    for quante in range(1, righe_massime + 1):
         alta = (altezza - (quante - 1) * interlinea) // quante
-        font = _load_font(max(6, min(tetto, alta)))
+        font = _load_font(max(MINIMO, min(tetto, alta)))
         righe = spezza(testo, font, larghezza, misura)
-        ultimo = (righe, font)
-        if len(righe) <= quante:
+        if len(righe) <= quante and _sta(righe, font, larghezza, altezza,
+                                         interlinea, misura):
             return righe, font
-    righe, font = ultimo
-    tenute = righe[:righe_massime]
-    tenute[-1] = accorcia(tenute[-1], font, larghezza, misura)
-    return tenute, font
+
+    partenza = max(MINIMO, min(tetto, (altezza - (righe_massime - 1) * interlinea)
+                               // righe_massime))
+    for corpo in range(partenza, MINIMO - 1, -1):
+        font = _load_font(corpo)
+        righe = _tagliate(testo, font, larghezza, righe_massime, misura)
+        if _sta(righe, font, larghezza, altezza, interlinea, misura):
+            return righe, font
+    font = _load_font(MINIMO)
+    return _tagliate(testo, font, larghezza, righe_massime, misura), font
 
 
 def scrivi_centrato(disegna, righe, font, larghezza, altezza, colore,

@@ -1,65 +1,78 @@
 # =========================================================================
-#  DMD Controller 9.8 - ON AIR dal sensore della porta
+#  DMD Controller 9.8.1 - ON AIR dal sensore della porta
 # =========================================================================
 #
-#  Il DMD non sa che esiste una porta. Sa solo se e' in onda o no, e te lo
-#  chiede con un interruttore:
+#  Il DMD non sa che esiste una porta. Sa solo se e' in onda, e te lo chiede
+#  con un interruttore. Questa automazione ci rispecchia sopra il tuo
+#  sensore: la porta la guarda Home Assistant, dove stanno gia' tutte le
+#  altre decisioni di casa.
 #
-#      switch.dmd_in_onda
+#  Guida completa: docs/onair-automazione.it.md
 #
-#  Questa automazione ci rispecchia sopra il tuo sensore. Il sensore lo
-#  scegli qui, in Home Assistant, dove stanno gia' tutte le altre decisioni
-#  di casa; il DMD resta ignorante di proposito. Il giorno che cambi il
-#  sensore, o vuoi che la porta della cabina conti solo di sera, cambi
-#  **questo file** e basta.
+#  ------------------------------------------------------------------------
+#  TRE RIGHE DA CORREGGERE, E VANNO **LETTE**, NON INDOVINATE
+#
+#  Sono marcate  <<< DA CORREGGERE.  Non fidarti dei nomi scritti qui: sono
+#  quelli di un altro impianto.
+#
+#  1. IL TUO SENSORE PORTA — compare in DUE righe, e devono combaciare.
+#     Impostazioni -> Dispositivi e servizi -> Entita', cerca il sensore,
+#     aprilo e leggi l'entity_id nelle impostazioni (icona ingranaggio).
+#
+#  2. L'INTERRUTTORE DEL DMD
+#     Nella stessa pagina cerca  In onda  -- **non** «onair»: quella pagina
+#     cerca nel *nome*, e il nome e' «In onda».
+#     L'entity_id potrebbe essere  switch.dmd_onair_diretta  oppure
+#     switch.dmd_controller_in_onda  o altro ancora: Home Assistant a volte
+#     se lo costruisce unendo il nome del dispositivo a quello dell'entita'
+#     invece di usare quello proposto dal DMD. Non c'e' modo di saperlo dal
+#     DMD: Home Assistant non lo ripubblica, quindi va letto di la'.
+#
+#  ------------------------------------------------------------------------
+#  ATTENZIONE AL VERSO
+#
+#  Un sensore con  device_class: door  sta a
+#      on  = porta APERTA        off = porta CHIUSA
+#  Quindi «in onda» corrisponde a  off, ed e' quello che dice la variabile
+#  `chiusa`. Se il tuo e' cablato al contrario, cambia quella sola riga.
 #
 #  ------------------------------------------------------------------------
 #  COME SI INSTALLA
 #
-#  1. Accendi il servizio OnAir sul DMD
-#     Pagina Servizi -> OnAir. Nasce spento.
-#     Da li' scegli anche il testo (predefinito «ON AIR») e il suono.
-#
-#  2. Controlla come si chiamano le due entita'
-#     Strumenti per sviluppatori -> Stati, cerca «in_onda».
-#     Se il tuo DMD ha un node_id diverso da `dmd`, l'interruttore si
-#     chiamera' diversamente: correggilo nelle due righe segnate sotto.
-#
-#  3. Crea l'automazione
-#     Impostazioni -> Automazioni e scene -> Crea automazione
-#     -> in alto a destra i tre puntini -> Modifica in YAML
+#  1. Accendi il servizio OnAir sul DMD: pagina Servizi -> OnAir. Nasce
+#     spento. Da li' scegli anche il testo e il suono.
+#  2. Impostazioni -> Automazioni e scene -> Crea automazione
+#     -> tre puntini in alto a destra -> Modifica in YAML
 #     -> incolla tutto quello che c'e' sotto la riga AUTOMAZIONE
-#     -> Salva.
-#
-#  4. La prova
-#     Chiudi la porta. Sul pannello deve comparire ON AIR, e da li' in poi
-#     l'orologio porta un trattino rosso in alto. Apri la porta: sparisce.
+#     -> correggi le tre righe marcate -> Salva.
+#  3. Prova: chiudi la porta. Sul pannello deve comparire ON AIR.
 #
 #  ------------------------------------------------------------------------
-#  DA CAMBIARE: due righe, marcate con  <<< IL TUO SENSORE
+#  PERCHE' TRE INNESCHI
 #
-#  Attenzione al verso. Un sensore con device_class `door` sta a:
-#      on  = porta APERTA
-#      off = porta CHIUSA
-#  Quindi «in onda» corrisponde a `off`. Se il tuo sensore e' cablato al
-#  contrario, scambia `off` con `on` nella riga del template.
-#
-#  ------------------------------------------------------------------------
-#  PERCHE' C'E' IL TERZO INNESCO
-#
-#  Se il Pi si riavvia mentre la porta e' chiusa, al ritorno deve sapere che
-#  e' ancora in onda; e se nel frattempo la porta si e' aperta, non deve
-#  credere il contrario. Il DMD annuncia da se' quando torna disponibile,
-#  pubblicando `online` su `dmd/availability`: quello e' l'innesco esatto per
-#  riallineare, e non richiede di sorvegliare niente.
+#  Il primo e' il sensore. Il secondo e' il DMD che torna disponibile: quando
+#  riparte pubblica `online` su `dmd/availability`, e quello e' il momento
+#  esatto per ridirgli com'e' messa la porta -- cosi' un riavvio del Pi a
+#  meta' diretta non lascia il pannello a credere l'anno scorso. Il terzo e'
+#  il riavvio di Home Assistant.
 #
 #  L'azione non guarda **quale** innesco e' scattato: rilegge sempre lo stato
-#  vero del sensore e lo riafferma. Cosi' e' ripetibile senza danni, e un
-#  innesco perso si corregge al successivo.
+#  vero del sensore e lo riafferma. E' ripetibile senza danni, e un innesco
+#  perso si corregge al successivo.
 #
-#  Se il sensore e' `unavailable` -- batteria scarica, gateway giu' -- il
-#  template cade su «non in onda». E' la scelta prudente: un ON AIR acceso
-#  per sempre per colpa di una pila e' peggio di un ON AIR che manca.
+#  ------------------------------------------------------------------------
+#  PERCHE' C'E' UN RAMO CHE SCRIVE NEL REGISTRO
+#
+#  Perche' la prima versione di questo file non ce l'aveva, ed e' costata una
+#  serata. Il nome del sensore compare in **due** punti, e chi ne corregge
+#  uno solo ottiene un'automazione che scatta regolarmente e **spegne
+#  sempre**: `is_state()` su un'entita' che non esiste e' falso, e il falso
+#  porta a `switch.turn_off`. Nessun errore, nessun avviso, solo una cosa che
+#  non funziona.
+#
+#  Adesso, se il sensore non ha un valore leggibile, non si spegne niente e
+#  si scrive una riga nel registro di Home Assistant con il motivo. Un errore
+#  di battitura deve farsi sentire, non fingere.
 #
 # =========================================================================
 #  AUTOMAZIONE
@@ -72,20 +85,26 @@ description: >-
 mode: queued
 max: 5
 
+variables:
+  sensore: binary_sensor.porta_studio            # <<< DA CORREGGERE (1 di 2)
+  interruttore: switch.dmd_onair_diretta         # <<< DA CORREGGERE
+  # Quale stato del sensore vuol dire «porta chiusa».
+  chiusa: "off"
+
 triggers:
-  # Qualunque cambio del sensore, nei due versi.
+  # Questo `entity_id` deve essere **lo stesso** di `sensore` qui sopra. Un
+  # innesco non accetta variabili, quindi il nome va ripetuto: e' l'unica
+  # ripetizione del file, ed e' marcata apposta.
   - trigger: state
-    entity_id: binary_sensor.porta_studio        # <<< IL TUO SENSORE
+    entity_id: binary_sensor.porta_studio        # <<< DA CORREGGERE (2 di 2)
     not_from:
       - unknown
 
-  # Il DMD e' tornato disponibile: gli si ridice com'e' messa la porta.
   - trigger: mqtt
     topic: dmd/availability
     payload: online
     id: riallinea
 
-  # E dopo un riavvio di Home Assistant.
   - trigger: homeassistant
     event: start
     id: riallinea
@@ -93,16 +112,32 @@ triggers:
 conditions: []
 
 actions:
-  # Solo quando si riallinea si aspetta qualche secondo: il DMD ha appena
-  # detto «online» e deve finire di iscriversi ai propri topic. Sul cambio
-  # della porta l'attesa e' zero, che e' l'unico caso in cui si nota.
+  # Solo il riallineamento aspetta: il DMD ha appena detto «online» e deve
+  # finire di iscriversi ai propri topic. Sul cambio della porta l'attesa e'
+  # zero, che e' l'unico caso in cui si noterebbe.
   - delay: >-
       {{ 3 if (trigger.id | default('')) == 'riallinea' else 0 }}
 
-  # Nella riga qui sotto c'e' la seconda occorrenza  <<< IL TUO SENSORE
-  - action: >-
-      {{ 'switch.turn_on'
-         if is_state('binary_sensor.porta_studio', 'off')
-         else 'switch.turn_off' }}
-    target:
-      entity_id: switch.dmd_in_onda
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ has_value(sensore) }}"
+        sequence:
+          - action: >-
+              {{ 'switch.turn_on' if is_state(sensore, chiusa)
+                 else 'switch.turn_off' }}
+            target:
+              entity_id: "{{ interruttore }}"
+    default:
+      # Nessun valore leggibile: non si spegne niente e si dice perche'.
+      # Copre due casi che prima finivano tutti e due nel silenzio: il
+      # sensore scritto male (non esiste) e il sensore con la pila scarica
+      # (esiste ma non risponde).
+      - action: system_log.write
+        data:
+          level: warning
+          logger: dmd.onair
+          message: >-
+            OnAir: il sensore {{ sensore }} non ha un valore leggibile
+            (stato: {{ states(sensore) }}). Controlla che l'entity_id sia
+            giusto e che sia lo stesso scritto nell'innesco.

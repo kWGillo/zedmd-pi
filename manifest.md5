@@ -25,7 +25,7 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 d44f513c6e1d83482576290e21a05013  hass.py
-414b0aeba16d3ed25d5570dcfbcc15b6  i18n.py
+82c4abff175919e910e8c5545cde5ddb  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
@@ -70,7 +70,7 @@ e6c140b184dd15f3c391ec123180f25e  sources/satelliti.py
 2a73be667459d2a58f2ddab91ff91a98  sources/scadenze.py
 89202743248aadc249d2208cc89bee0a  sources/sveglia.py
 de7ee2495ed06fbae5a24e7de31e756f  sources/telecamera.py
-6b0d11f524d30f4a663d471d65d48d13  sources/testo.py
+0ff9708f05c58f81a6050346055d16d2  sources/testo.py
 9c78a0b718974f492c303164ac3d0dbf  sources/zedmd.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 c750104c1eaa178d6958982586e89855  staccato.py
@@ -108,7 +108,7 @@ cb7f0f3c1130dcb8ef42d19a8cbe7d54  templates/giochi.html
 c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
 250656c1e92734818935e7173907f894  templates/media.html
 db6305423ca76d71efb0121fc62d2627  templates/nowplaying.html
-681d6679d3457b17ebd12820b17b2752  templates/onair.html
+a2cd444631b64478b99d25a28ce44a0a  templates/onair.html
 aa9eb65a9f8993da5a5125d1c7fa5cd4  templates/radar.html
 685924490e771f355e0a6cc0eb58c756  templates/rete.html
 f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
@@ -121,7 +121,7 @@ b004db69d09f344f149a26d2b60eb162  templates/services.html
 0bbe7fbc76fd30b03e559158b71225d0  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-0a981fa2dc826d087ee43360b8cf646f  version.py
+2790859c1d85850fc525090fee81c73d  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-e7e1542c8791ec3e25a59408084b19cc  webui.py
+ba18a90a270e8c4c11acce3dd000fc9e  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

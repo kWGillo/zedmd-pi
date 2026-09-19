@@ -33,6 +33,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`telecamera.it.md`](telecamera.it.md) · [PDF](DMD_telecamera.pdf) | FunCAM: la webcam sul pannello con pochi colori, e il pulsante fisico sulla Bonnet |
 | [`satelliti.it.md`](satelliti.it.md) · [PDF](DMD_satelliti.pdf) | I passaggi della Stazione Spaziale: preavviso, l'arco del cielo, lo spegnimento in ombra, il registro |
 | [`notifiche.it.md`](notifiche.it.md) · [PDF](DMD_notifiche.pdf) | Le notifiche da Home Assistant: il topic, i tre livelli, lo script e le automazioni pronte |
+| [`onair-automazione.it.md`](onair-automazione.it.md) · [PDF](DMD_onair_automazione.pdf) | L'automazione di Home Assistant che collega il sensore della porta al pannello: i due nomi da leggere, lo YAML, e i tre errori facili |
 | [`onair.it.md`](onair.it.md) · [PDF](DMD_onair.pdf) | OnAir: il pannello dice che si sta registrando — la scritta, il trattino sull'orologio, l'automazione dalla porta |
 | [`meteo.it.md`](meteo.it.md) · [PDF](DMD_meteo.pdf) | Il bollettino del mattino e l'aggiornamento ogni poche ore, le icone disegnate, e perché l'allerta della Protezione Civile non c'è ancora |
 

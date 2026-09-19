@@ -2594,6 +2594,10 @@ def create_app(runtime):
             conf=sorgente.conf(),
             in_onda=sorgente.in_onda(),
             stato=sorgente.status(current_language()),
+            # Il nodo MQTT: senza, la pagina mostrerebbe «dmd» anche a chi
+            # l'ha chiamato diversamente, cioe' un nome sbagliato scritto
+            # con l'aria di essere giusto.
+            nodo=runtime.hass.node(),
             page="onair")
 
     @app.route("/api/onair", methods=["POST"])

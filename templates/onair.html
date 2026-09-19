@@ -67,10 +67,11 @@
   <p class="hint">{{ t('onair.ha.hint') }}</p>
   <table class="grid">
     <tr><th>{{ t('onair.ha.servizio') }}</th>
-        <td><code>switch.dmd_onair</code></td></tr>
+        <td><code>switch.{{ nodo }}_onair</code></td></tr>
     <tr><th>{{ t('onair.ha.diretta') }}</th>
-        <td><code>switch.dmd_onair_diretta</code></td></tr>
+        <td><code>switch.{{ nodo }}_onair_diretta</code></td></tr>
   </table>
+  <p class="hint err">{{ t('onair.ha.proposti') }}</p>
   <p class="hint">{{ t('onair.ha.file') }}</p>
 </section>
 

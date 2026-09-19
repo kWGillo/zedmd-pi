@@ -40,10 +40,10 @@ subito, prima di aver saldato o comprato qualunque cosa.
 
 ## 3.1 Le due entità
 
-| Entità | Che cosa dice |
+| Entità (nome in HA) | Che cosa dice |
 |---|---|
-| `switch.dmd_onair` | il **servizio** è acceso: il pannello se ne occupa |
-| `switch.dmd_onair_diretta` | siamo **in onda**: è quello che comanda la porta |
+| **OnAir** | il **servizio** è acceso: il pannello se ne occupa |
+| **In onda** | siamo **in onda**: è quello che comanda la porta |
 
 Sono due apposta, come la sveglia e il suo squillo. Spegnere il servizio non
 deve cancellare il fatto che stai registrando, e finire una diretta non deve
@@ -51,8 +51,16 @@ disattivare il servizio per domani.
 
 ## 3.2 L'automazione
 
-Il file pronto è [`ha/dmd_onair.yaml`](ha/dmd_onair.yaml), con le istruzioni
-nei commenti. Da cambiare ci sono due righe: il tuo `binary_sensor`.
+La guida completa, passo per passo, è
+[`onair-automazione.it.md`](onair-automazione.it.md); il file pronto è
+[`ha/dmd_onair.yaml`](ha/dmd_onair.yaml).
+
+> **I due identificativi si leggono, non si indovinano.** Il DMD *propone*
+> `switch.dmd_onair_diretta`, ma Home Assistant può assegnarne un altro —
+> per esempio `switch.dmd_controller_in_onda` — unendo il nome del
+> dispositivo a quello dell'entità. Lo sa solo lui e non lo ripubblica: va
+> letto in *Impostazioni → Dispositivi e servizi → Entità*, cercando
+> **`onda`** e non «onair», perché quella pagina cerca nel nome.
 
 > **Attenzione al verso.** Un sensore con `device_class: door` sta a `on` =
 > porta **aperta**, `off` = **chiusa**. Quindi «in onda» corrisponde a `off`.
@@ -67,16 +75,25 @@ L'azione non guarda **quale** innesco è scattato: rilegge sempre lo stato vero
 del sensore e lo riafferma. È ripetibile senza danni, e un innesco perso si
 corregge al successivo.
 
-> Se il sensore è `unavailable` — pila scarica, gateway giù — si cade su «non
-> in onda». È la scelta prudente: un ON AIR acceso per sempre per colpa di una
-> batteria è peggio di un ON AIR che manca.
+> Se il sensore non ha un valore leggibile — scritto male, oppure pila
+> scarica — l'automazione **non spegne niente** e lascia una riga nel registro
+> di Home Assistant con il motivo. Prima spegneva in silenzio, ed è il modo in
+> cui un errore di battitura è riuscito a sembrare un guasto del pannello.
 
 # 4. La scritta
 
 Testo libero, fino a sessanta caratteri. Va a capo da solo sulle parole e
-sceglie il carattere più grande in cui ci sta: «ON AIR» riempie il pannello,
-una frase lunga scende a tre righe. Quello che non ci sta nemmeno a quattro
-righe si taglia con i puntini.
+sceglie il carattere più grande in cui ci sta **davvero**: «ON AIR» riempie il
+pannello, una frase lunga scende a tre o quattro righe con il corpo che cala
+finché il blocco non entra. Solo quando non c'è più niente da rimpicciolire si
+taglia, con i puntini a dirlo.
+
+«Davvero» è la parola che conta, ed è una correzione della 9.8.1. Prima si
+contavano le righe invece di misurarle, e bastavano due casi per farlo
+sbordare: l'altezza vera di una riga è maggiore del corpo del carattere,
+quindi quattro righe uscivano dal basso di un pixel; e una parola sola più
+larga del pannello resta una riga sola, quindi «entrava» pur uscendo di lato
+per mille pixel.
 
 È la stessa impaginazione delle notifiche MQTT, e non per caso: dalla 9.8 la
 regola vive in un posto solo, `sources/testo.py`. Una regola scritta due volte
@@ -156,8 +173,8 @@ spegnila a mano dalla pagina, poi guarda il registro di Home Assistant.
 |---|---|
 | Servizio | *Servizi* → *OnAir*, nasce spento |
 | Pagina | *OnAir*, nel menu dopo la sveglia |
-| Entità in HA | `switch.dmd_onair`, `switch.dmd_onair_diretta` |
-| File pronto | [`ha/dmd_onair.yaml`](ha/dmd_onair.yaml) |
+| Entità in HA | «OnAir» e «In onda» — l'ID vero si legge in HA |
+| Automazione | [`onair-automazione.it.md`](onair-automazione.it.md) |
 | Priorità | 52 — non interrompe mai una partita |
 | Suono | uno, alla chiusura della porta |
 | Sull'orologio | trattino rosso 32×2 px, centrato in alto |

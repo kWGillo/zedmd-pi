@@ -2255,6 +2255,48 @@ Storico:
        tabelle. Venti compagnie -- quasi tutte operatori d'affari e air taxi --
        due aeroporti e tre modelli, fra cui il Tecnam P2010 e l'Aura Aero
        Integral R.
+  9.8.1 **Il testo che sbordava, e i nomi che non si indovinano.**
+       *«Se il testo e' troppo lungo sborda e non lo ridimensiona.»* Quattro
+       parole, e dentro c'erano due difetti, tutti e due nati dalla stessa
+       scorciatoia: **contare le righe invece di misurarle**.
+       L'altezza vera di una riga non e' il corpo del carattere. Un DejaVu da
+       13 px disegna un blocco alto quindici o sedici quando ci sono accenti e
+       lettere che scendono: quattro righe cosi' fanno 59 pixel su 58, e la
+       quarta esce dal basso. La larghezza e' peggio: `spezza` non taglia mai
+       una parola a meta' -- apposta, perche' una parola spezzata a caso rende
+       illeggibili tutte e due le meta' -- quindi una parola sola piu' larga
+       del pannello resta **una riga sola**, e una riga sola «entra» in
+       qualunque impaginazione se ci si limita a contarle. Usciva di lato per
+       mille pixel e niente la rimpiccioliva.
+       Adesso si misura, e se non entra si scende di corpo un pixel per volta
+       tagliando solo quando non c'e' piu' niente da rimpicciolire. In regalo,
+       frasi che prima venivano troncate a 13 px adesso ci stanno **intere** a
+       12. Vale per OnAir e per le notifiche, che condividono l'impaginatore.
+       *E i nomi delle entita' non si indovinano.* Un'automazione che non
+       funzionava e' costata una serata, per tre errori in fila. Il DMD
+       propone `switch.dmd_onair_diretta`, ma Home Assistant puo' assegnare
+       altro -- `switch.dmd_controller_in_onda` -- unendo il nome del
+       dispositivo a quello dell'entita': la documentazione dava per certo il
+       primo. La pagina Entita' cerca nel **nome**, non nell'identificativo,
+       quindi cercando «onair» l'entita' sembrava mancare mentre c'era: si
+       cerca «onda». E il nome del sensore compariva in **due** punti del file
+       YAML: correggendone uno solo, l'automazione scattava regolarmente e
+       spegneva **sempre**, perche' `is_state()` su un'entita' inesistente e'
+       falso. Nessun errore, nessun avviso, solo una cosa che non va.
+       L'automazione nel pacchetto adesso tiene i nomi in `variables`, marca
+       tutte e tre le righe da correggere, e se il sensore non ha un valore
+       leggibile **non spegne niente** e scrive il motivo nel registro di Home
+       Assistant. Un errore di battitura deve farsi sentire.
+       C'e' un manuale nuovo, `docs/onair-automazione.it.md`, che di questa
+       parte racconta tutto: chi legge il sensore, i due nomi da leggere, lo
+       YAML, le tre prove che isolano i tre anelli della catena, e i tre
+       errori raccontati per nome.
+       *E due frasi che mancavano.* Nella pagina Servizi, sotto «OnAir», si
+       leggeva `services.desc.onair` invece della descrizione -- e cercandola
+       e' saltato fuori che mancava anche quella della **sveglia**, da
+       versioni. Una prova nuova controlla adesso le 897 chiavi scritte nei
+       modelli, in italiano e in inglese: e' il tipo di difetto che non si
+       vede provando il codice, perche' il codice funziona.
 """
 
-__version__ = "9.8"
+__version__ = "9.8.1"

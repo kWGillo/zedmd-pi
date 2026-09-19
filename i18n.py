@@ -511,9 +511,14 @@ STRINGS = {
         "whether it is on air."),
     "onair.ha.servizio": ("Servizio acceso", "Service on"),
     "onair.ha.diretta": ("In onda", "On air"),
+    "onair.ha.proposti": (
+        "Nomi proposti: HA può assegnarne altri. Il vero si legge in "
+        "Entità, cercando «onda».",
+        "Suggested names: HA may assign others. Read the real one under "
+        "Entities, searching “onda”."),
     "onair.ha.file": (
-        "L'automazione pronta è in docs/ha/dmd_onair.yaml.",
-        "The ready-made automation is in docs/ha/dmd_onair.yaml."),
+        "Guida e automazione pronta: docs/onair-automazione.it.md.",
+        "Guide and ready-made automation: docs/onair-automazione.it.md."),
     "timer.title": ("Timer", "Timer"),
     "timer.intro": (
         "Un conto alla rovescia per le cose che scadono «fra quanto», non a un'ora.",
@@ -1506,6 +1511,16 @@ STRINGS = {
     "services.desc.webcam": (
         "La webcam sul pannello, dal vivo e con pochi colori.",
         "The webcam on the panel, live and in few colours."),
+    "services.desc.sveglia": (
+        "Quattro orari con i loro giorni, più il timer. Suona anche con lo "
+        "Sleep acceso.",
+        "Four times with their days, plus the timer. It rings even with "
+        "Sleep on."),
+    "services.desc.onair": (
+        "La porta si chiude e il pannello lo dice a chi entra, con un "
+        "trattino rosso sull'orologio.",
+        "The door closes and the panel tells whoever walks in, with a red "
+        "tick on the clock."),
     "services.desc.notifiche": (
         "I messaggi che Home Assistant manda al pannello: la porta che si "
         "apre, l'allarme inserito, la lavatrice finita.",
