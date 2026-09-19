@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ t('onair.title') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('onair.title') }}</h2>
+  <p class="hint">{{ t('onair.intro') }}</p>
+  <p class="status {{ 'ok' if in_onda else '' }}">{{ stato }}</p>
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_onair_diretta') }}">
+      <input type="hidden" name="in_onda" value="{{ '0' if in_onda else '1' }}">
+      <button type="submit">
+        {{ t('onair.spegni') if in_onda else t('onair.accendi') }}</button>
+    </form>
+  </div>
+</section>
+
+<section class="card">
+  <h2>{{ t('onair.scritta') }}</h2>
+  <form method="post" action="{{ url_for('api_onair') }}">
+    <label for="testo">{{ t('onair.testo') }}</label>
+    <input type="text" id="testo" name="testo" maxlength="60"
+           value="{{ conf.testo }}">
+    <p class="hint">{{ t('onair.testo.hint') }}</p>
+
+    <div class="row3">
+      <div>
+        <label for="colore_sfondo">{{ t('onair.sfondo') }}</label>
+        <input type="color" id="colore_sfondo" name="colore_sfondo"
+               value="{{ conf.colore_sfondo }}">
+      </div>
+      <div>
+        <label for="colore_testo">{{ t('onair.inchiostro') }}</label>
+        <input type="color" id="colore_testo" name="colore_testo"
+               value="{{ conf.colore_testo }}">
+      </div>
+      <div>
+        <label for="secondi">{{ t('onair.secondi') }}</label>
+        <input type="number" id="secondi" name="secondi" min="0" max="120"
+               step="1" value="{{ conf.secondi }}">
+        <p class="hint">{{ t('onair.secondi.hint') }}</p>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div>
+        <label for="ogni_n_media">{{ t('onair.ogni') }}</label>
+        <input type="number" id="ogni_n_media" name="ogni_n_media"
+               min="1" max="50" step="1" value="{{ conf.ogni_n_media }}">
+        <p class="hint">{{ t('onair.ogni.hint') }}</p>
+      </div>
+      <div>
+        <label for="al_massimo_dopo">{{ t('onair.tetto') }}</label>
+        <input type="number" id="al_massimo_dopo" name="al_massimo_dopo"
+               min="0" max="3600" step="10" value="{{ conf.al_massimo_dopo }}">
+        <p class="hint">{{ t('onair.tetto.hint') }}</p>
+      </div>
+    </div>
+
+    <div class="actions"><button type="submit">{{ t('common.save') }}</button></div>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('onair.ha') }}</h2>
+  <p class="hint">{{ t('onair.ha.hint') }}</p>
+  <table class="grid">
+    <tr><th>{{ t('onair.ha.servizio') }}</th>
+        <td><code>switch.dmd_onair</code></td></tr>
+    <tr><th>{{ t('onair.ha.diretta') }}</th>
+        <td><code>switch.dmd_onair_diretta</code></td></tr>
+  </table>
+  <p class="hint">{{ t('onair.ha.file') }}</p>
+</section>
+
+{% endblock %}

@@ -460,6 +460,8 @@ STRINGS = {
     "suoni.notifica.avviso": (
         "Notifica · avviso — MQTT / Home Assistant",
         "Notification · warning — MQTT / Home Assistant"),
+    "suoni.onair": ("OnAir — alla chiusura della porta",
+                    "OnAir — when the door closes"),
     "suoni.notifica.allarme": (
         "Notifica · allarme — MQTT / Home Assistant",
         "Notification · alarm — MQTT / Home Assistant"),
@@ -475,6 +477,43 @@ STRINGS = {
         "The alarm sound is chosen per time, together with everything else, on "
         "its own page:"),
     "nav.sveglia": ("Sveglia", "Alarm"),
+    "nav.onair": ("OnAir", "OnAir"),
+    "onair.title": ("OnAir", "OnAir"),
+    "onair.intro": (
+        "Il pannello dice che si sta registrando: scritta fissa e trattino "
+        "rosso sull'orologio.",
+        "The panel says a recording is in progress: a fixed sign and a red "
+        "tick on the clock."),
+    "onair.accendi": ("Vai in onda", "Go on air"),
+    "onair.spegni": ("Chiudi la diretta", "End the broadcast"),
+    "onair.scritta": ("La scritta", "The sign"),
+    "onair.testo": ("Testo", "Text"),
+    "onair.testo.hint": (
+        "Va a capo da solo e si taglia con i puntini se non ci sta.",
+        "It wraps by itself, and is cut with an ellipsis if it does not fit."),
+    "onair.sfondo": ("Colore di fondo", "Background colour"),
+    "onair.inchiostro": ("Colore del testo", "Text colour"),
+    "onair.secondi": ("Secondi a schermo", "Seconds on screen"),
+    "onair.secondi.hint": ("0 = quanto una foto del Media Player.",
+                           "0 = as long as a Media Player photo."),
+    "onair.ogni": ("Ricompare ogni", "Reappears every"),
+    "onair.ogni.hint": ("Contenuti del Media Player fra una comparsa e l'altra.",
+                        "Media Player items between one appearance and the next."),
+    "onair.tetto": ("Al massimo dopo (s)", "At the latest after (s)"),
+    "onair.tetto.hint": (
+        "Compare comunque, anche se i media non passano. 0 = nessun tetto.",
+        "It appears anyway, even if no media plays. 0 = no ceiling."),
+    "onair.ha": ("Home Assistant", "Home Assistant"),
+    "onair.ha.hint": (
+        "Il sensore della porta lo scegli in Home Assistant: il DMD sa solo "
+        "se è in onda.",
+        "You pick the door sensor in Home Assistant: the DMD only knows "
+        "whether it is on air."),
+    "onair.ha.servizio": ("Servizio acceso", "Service on"),
+    "onair.ha.diretta": ("In onda", "On air"),
+    "onair.ha.file": (
+        "L'automazione pronta è in docs/ha/dmd_onair.yaml.",
+        "The ready-made automation is in docs/ha/dmd_onair.yaml."),
     "timer.title": ("Timer", "Timer"),
     "timer.intro": (
         "Un conto alla rovescia per le cose che scadono «fra quanto», non a un'ora.",
@@ -1497,6 +1536,11 @@ STRINGS = {
         "in ascolto su %(topic)s — %(shown)d mostrate, %(dropped)d scartate",
         "listening on %(topic)s — %(shown)d shown, %(dropped)d dropped"),
     "status.notifiche.showing": ("a schermo: %(text)s", "on screen: %(text)s"),
+    "status.onair.riposo": ("non in onda", "not on air"),
+    "status.onair.attivo": (
+        "in onda da %(minuti)d min — %(shown)d comparse",
+        "on air for %(minuti)d min — shown %(shown)d times"),
+    "status.onair.schermo": ("a schermo: %(text)s", "on screen: %(text)s"),
     "status.notifiche.error": ("ultimo messaggio scartato: %(error)s",
                                "last message dropped: %(error)s"),
     "services.desc.satelliti": (

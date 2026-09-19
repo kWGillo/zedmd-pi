@@ -36,7 +36,8 @@ from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      CalendarioSource, ClockSource, DoomSource, GameBoySource,
                      GiochiSource, MediaPlayerSource, MeteoSource,
                      NowPlayingSource,
-                     NotificheSource, PreviewSource, SatellitiSource,
+                     NotificheSource, OnAirSource, PreviewSource,
+                     SatellitiSource,
                      ScadenzeSource, SvegliaSource,
                      TelecameraSource,
                      ZeDMDSource, controlla_rom, controlla_wad)
@@ -254,6 +255,13 @@ class Runtime:
                                          self.display.height)
         self.notifiche.arbiter = self.arbiter
         self.notifiche.suona = self._suona_notifica
+        # OnAir. Priorita' 52, appena sopra il Media Player: quando tocca a
+        # lui vince la sua fetta di rotazione, ma un aereo o un compleanno
+        # gli passano davanti e una partita non la interrompe mai. Chi ha
+        # chiuso la porta lo sa gia'.
+        self.onair = OnAirSource(self.cfg, self.display.width,
+                                 self.display.height)
+        self.onair.suona = self._suona_onair
         # Il meteo. Priorita' 54, sotto il Rolling Banner: fra due cose non
         # urgenti ha la precedenza quella che una persona ha scritto apposta.
         self.meteo = MeteoSource(self.cfg, self.display.width,
@@ -339,6 +347,12 @@ class Runtime:
         # sorgente, come per l'arbitro delle notifiche: una sorgente non deve
         # sapere come si costruisce un'altra, solo chiederle un numero.
         self.player.media = self.media
+        # Stessa strada per OnAir: gli serve solo sapere quante foto sono
+        # passate, per ricomparire ogni due.
+        self.onair.media = self.media
+        # E l'orologio deve sapere se siamo in diretta, per il trattino
+        # rosso in cima. Come per il timer: un si' o un no, niente di piu'.
+        self.clock.onair = self._onair_in_onda
         self.mqtt = mqttbus.MqttBus(self.cfg)
         # Nasce qui e non in `_start_metadati` perche' `shutdown` la nomina:
         # un arresto che arriva mentre l'avvio e' ancora a meta' non deve
@@ -367,7 +381,7 @@ class Runtime:
                        self.meteo,
                        self.player,
                        self.birthdays, self.scadenze, self.calendario,
-                       self.banner, self.telecamera, self.media,
+                       self.banner, self.onair, self.telecamera, self.media,
                        self.doom, self.giochi, self.gameboy,
                        self.clock):
             self.arbiter.register(source)
@@ -525,6 +539,24 @@ class Runtime:
             return suoni.suona_servizio(self.cfg, chiave)
         except Exception as exc:          # pragma: no cover
             print("[notifiche] avviso non riprodotto: %s" % exc)
+            return False
+
+    def _onair_in_onda(self):
+        """Se siamo in diretta. Lo chiede l'orologio per il suo trattino."""
+        return bool(self.onair.enabled and self.onair.in_onda())
+
+    def _suona_onair(self):
+        """Il campanello della diretta: **una volta sola**, alla chiusura.
+
+        Non a ogni ricomparsa della scritta. Con la cadenza dei media una
+        diretta di un'ora vorrebbe dire trenta din-don, e a quel punto il
+        suono non annuncia piu' niente: e' rumore. Una spia annuncia il
+        **cambio** di stato, non lo stato.
+        """
+        try:
+            return suoni.suona_servizio(self.cfg, "onair")
+        except Exception as exc:          # pragma: no cover
+            print("[onair] avviso non riprodotto: %s" % exc)
             return False
 
     def _suona_sveglia(self, scelto):
@@ -1023,7 +1055,11 @@ class Runtime:
                 # del servizio suonerebbe quando lo si accende — che non e'
                 # una notizia — e agganciarlo al disegno del fotogramma
                 # suonerebbe trenta volte al secondo.
-                if winner is not None:
+                # Chi si suona da solo non passa di qui: OnAir ricompare ogni
+                # due foto per tutta la diretta, e il suo campanello deve
+                # suonare una volta sola, quando la porta si chiude. Senza
+                # questa riga suonerebbe a ogni ricomparsa.
+                if winner is not None and winner.name not in suoni.SUONO_PROPRIO:
                     try:
                         suoni.suona_servizio(self.cfg, winner.name)
                     except Exception as exc:      # pragma: no cover

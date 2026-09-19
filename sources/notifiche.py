@@ -33,9 +33,10 @@ from collections import deque
 
 from PIL import Image
 
+from . import testo as impaginazione
 from .banner import BLINK_PERIOD
 from .base import Source
-from .clock import _load_font, parse_color
+from .clock import parse_color
 
 # I tre livelli, con il colore di riserva e il carattere che li distingue.
 # Chi pubblica puo' scavalcare il colore, ma non deve essere obbligato a
@@ -58,8 +59,12 @@ BORDO = 2
 # Su quante righe si puo' spezzare un messaggio, e quanto spazio fra una e
 # l'altra. Oltre le quattro il carattere scende sotto i tredici pixel e da
 # lontano non si legge piu': a quel punto e' meglio tagliare che fingere.
-RIGHE_MASSIME = 4
-INTERLINEA = 2
+#
+# I numeri vivono in `sources.testo`, insieme alla regola che li usa: da
+# quando c'e' OnAir sono due i servizi che impaginano cosi', e una regola
+# scritta due volte prima o poi diverge.
+RIGHE_MASSIME = impaginazione.RIGHE_MASSIME
+INTERLINEA = impaginazione.INTERLINEA
 
 # Il testo non porta piu' il colore del livello: lo porta il bordo. Bianco
 # pieno perche' e' un "colore sicuro" -- componenti a 0 o 255 -- e su questo
@@ -70,7 +75,7 @@ COLORE_TESTO = (255, 255, 255)
 # righe. Il testo intero resta nella pagina web: sul pannello si taglia,
 # perche' un messaggio che non entra in 256x64 non diventa leggibile
 # scorrendo -- diventa lento, e ti obbliga ad aspettare l'inizio del giro.
-PUNTINI = "…"
+PUNTINI = impaginazione.PUNTINI
 
 
 class NotificheSource(Source):
@@ -331,27 +336,14 @@ class NotificheSource(Source):
         Se non entra nemmeno a quattro righe si taglia l'ultima e si mettono
         i puntini. Il testo intero resta nella pagina web.
         """
-        from PIL import ImageDraw
-        misura = ImageDraw.Draw(Image.new("RGB", (1, 1)))
-        larghezza = self.width - 2 * BORDO - 4
-        altezza_utile = self.height - 2 * BORDO - 2
         # Il carattere non supera mai quello configurato: su una riga sola,
         # senza tetto, un "OK" riempirebbe il pannello da bordo a bordo.
         tetto = max(8, int(self.height * float(self._conf().get("altezza", 0.5))))
-
-        ultimo = None
-        for quante in range(1, RIGHE_MASSIME + 1):
-            alta = (altezza_utile - (quante - 1) * INTERLINEA) // quante
-            font = _load_font(max(6, min(tetto, alta)))
-            righe = _spezza(testo, font, larghezza, misura)
-            ultimo = (righe, font, larghezza, misura)
-            if len(righe) <= quante:
-                return righe, font
-        # Non ci sta: si tengono le prime righe e si taglia l'ultima.
-        righe, font, larghezza, misura = ultimo
-        tenute = righe[:RIGHE_MASSIME]
-        tenute[-1] = _accorcia(tenute[-1], font, larghezza, misura)
-        return tenute, font
+        return impaginazione.impagina(
+            testo,
+            larghezza=self.width - 2 * BORDO - 4,
+            altezza=self.height - 2 * BORDO - 2,
+            tetto=tetto)
 
     def _tela(self, voce, righe, font, bordo_acceso=True):
         """Il fotogramma: il bordo del livello e il testo fermo al centro.
@@ -368,47 +360,13 @@ class NotificheSource(Source):
                               outline=parse_color(voce["colore"],
                                                   (0xFF, 0xFF, 0xFF)),
                               width=BORDO)
-        alte = []
-        for riga in righe:
-            riquadro = disegna.textbbox((0, 0), riga or " ", font=font)
-            alte.append((riquadro[1], riquadro[3] - riquadro[1],
-                         riquadro[2] - riquadro[0]))
-        totale = sum(h for _t, h, _w in alte) + INTERLINEA * (len(righe) - 1)
-        y = max(BORDO, (self.height - totale) // 2)
-        for riga, (cima, alta, larga) in zip(righe, alte):
-            x = max(BORDO, (self.width - larga) // 2)
-            disegna.text((x, y - cima), riga, font=font, fill=COLORE_TESTO)
-            y += alta + INTERLINEA
+        impaginazione.scrivi_centrato(disegna, righe, font,
+                                      self.width, self.height, COLORE_TESTO,
+                                      margine=BORDO)
         return tela
 
 
-def _spezza(testo, font, larghezza, misura):
-    """Il testo a capo sulle parole, dentro `larghezza` pixel.
-
-    Una parola piu' larga della riga -- un indirizzo, un nome di file -- non
-    si spezza a meta': si lascia sbordare e ci pensera' il taglio. Spezzare
-    una parola a caso rende illeggibili tutte e due le meta'.
-    """
-    righe = []
-    corrente = ""
-    for parola in (testo or "").split():
-        prova = (corrente + " " + parola).strip()
-        if corrente and misura.textlength(prova, font=font) > larghezza:
-            righe.append(corrente)
-            corrente = parola
-        else:
-            corrente = prova
-    if corrente:
-        righe.append(corrente)
-    return righe or [""]
-
-
-def _accorcia(riga, font, larghezza, misura):
-    """La riga con i puntini in fondo, tagliata quanto basta perche' ci stia."""
-    if misura.textlength(riga + PUNTINI, font=font) <= larghezza:
-        return riga + PUNTINI
-    tagliata = riga
-    while tagliata and misura.textlength(tagliata + PUNTINI,
-                                         font=font) > larghezza:
-        tagliata = tagliata[:-1]
-    return tagliata.rstrip() + PUNTINI
+# Restano come nomi locali perche' ci sono prove che li chiamano cosi', ma
+# la regola vive in `sources.testo`, dove la usa anche OnAir.
+_spezza = impaginazione.spezza
+_accorcia = impaginazione.accorcia

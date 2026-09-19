@@ -1381,6 +1381,8 @@ def create_app(runtime):
              "status": stato("meteo")},
             {"key": "sveglia", "label": "Sveglia", "ready": True,
              "status": stato("sveglia")},
+            {"key": "onair", "label": "OnAir", "ready": True,
+             "status": stato("onair")},
         ]
         for voce in services:
             voce["suono"] = voce["key"] in suoni.SERVIZI_CON_SUONO
@@ -1389,8 +1391,17 @@ def create_app(runtime):
         # livello. Tenerli in una lista a parte evita l'alternativa brutta,
         # cioe' inventare tre finti servizi che comparirebbero anche fra gli
         # interruttori con tre levette che non accendono niente.
-        suoni_servizi = [{"key": v["key"], "label": v["label"]}
-                         for v in services if v["suono"]]
+        # Qualche selettore porta in coda una precisazione che nell'elenco
+        # degli interruttori non servirebbe: da dove arriva il messaggio, o
+        # quando suona. Qui serve, perche' scegliendo un file si sta gia'
+        # decidendo *quando* lo si sentira'.
+        etichette_suono = {"onair": "suoni.onair"}
+        suoni_servizi = [
+            {"key": v["key"],
+             "label": (i18n.translate(etichette_suono[v["key"]],
+                                      current_language())
+                       if v["key"] in etichette_suono else v["label"])}
+            for v in services if v["suono"]]
         for livello in ("info", "avviso", "allarme"):
             suoni_servizi.append({
                 "key": "notifiche_%s" % livello,
@@ -2572,6 +2583,53 @@ def create_app(runtime):
         result = ("rotta di %s: %s" % (callsign, route) if route
                   else "nessuna rotta disponibile per %s" % callsign)
         return redirect(url_for("page_radar", callsign=callsign, result=result))
+
+    # ----------------------------------------------------------------- onair
+
+    @app.route("/onair")
+    def page_onair():
+        sorgente = runtime.onair
+        return render_template(
+            "onair.html",
+            conf=sorgente.conf(),
+            in_onda=sorgente.in_onda(),
+            stato=sorgente.status(current_language()),
+            page="onair")
+
+    @app.route("/api/onair", methods=["POST"])
+    def api_onair():
+        from sources.onair import normalizza as _normalizza_onair
+        conf = cfg.setdefault("onair", {})
+        # Lo stato della diretta non si tocca da qui: questa pagina regola
+        # **come** si vede, non **se** siamo in onda. Mescolare le due cose
+        # vorrebbe dire far finire una registrazione salvando un colore.
+        in_onda = bool(conf.get("in_onda"))
+        conf["testo"] = request.form.get("testo", conf.get("testo", ""))
+        for chiave in ("colore_sfondo", "colore_testo"):
+            conf[chiave] = request.form.get(chiave, conf.get(chiave, ""))
+        for chiave in ("ogni_n_media", "al_massimo_dopo", "secondi"):
+            conf[chiave] = request.form.get(chiave, conf.get(chiave, 0))
+        cfg["onair"] = _normalizza_onair(conf)
+        cfg["onair"]["in_onda"] = in_onda
+        dmdconf.save()
+        return redirect(url_for("page_onair"))
+
+    @app.route("/api/onair/diretta", methods=["POST"])
+    def api_onair_diretta():
+        """Accende o spegne la diretta a mano, senza passare da Home Assistant.
+
+        Serve a due cose: provare il servizio prima di aver cablato qualunque
+        sensore, e fermare una diretta rimasta accesa perche' l'automazione
+        non ha parlato.
+        """
+        runtime.onair.imposta(request.form.get("in_onda") == "1")
+        # Lo stato vero lo dice la sorgente, e Home Assistant deve vederlo
+        # cambiare anche quando il comando arriva dalla pagina.
+        try:
+            runtime.hass.publish_state(force=True)
+        except Exception:      # noqa: BLE001
+            pass
+        return redirect(url_for("page_onair"))
 
     # ------------------------------------------------------------- satelliti
 

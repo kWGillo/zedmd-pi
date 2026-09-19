@@ -70,7 +70,28 @@ SERVIZI_CON_SUONO = ("zedmd", "nowplaying", "birthdays", "air_radar",
                      # Fino alla 9.4 le notifiche erano l'unico servizio che
                      # un suono non poteva averlo: l'impianto c'era tutto,
                      # mancava la voce in questo elenco.
-                     "notifiche_info", "notifiche_avviso", "notifiche_allarme")
+                     "notifiche_info", "notifiche_avviso", "notifiche_allarme",
+                     # OnAir suona una volta sola, quando la porta si chiude,
+                     # e non a ogni ricomparsa della scritta. Non e' il
+                     # campanello di una sorgente che prende il pannello: e'
+                     # il campanello di un **cambio di stato**. Per questo non
+                     # lo fa partire il gancio generico del runtime ma la
+                     # sorgente stessa, nel momento in cui la diretta comincia.
+                     "onair")
+
+# Chi il proprio campanello se lo fa partire da solo. Il runtime suona
+# l'avviso di una sorgente **quando prende il pannello**, che per quasi tutte
+# e' il momento giusto. Per OnAir no: la scritta ricompare ogni due foto per
+# tutta la durata della diretta, e un din-don ogni due minuti non annuncia
+# piu' niente. Il suo momento e' la chiusura della porta, che il runtime non
+# vede, quindi lo chiama la sorgente.
+#
+# Le notifiche risolvono lo stesso problema in un altro modo, tenendo fuori
+# da SERVIZI_CON_SUONO la voce generica e mettendoci i tre livelli. Li'
+# serviva: tre suoni diversi non si possono scegliere con una chiave sola.
+# Qui il suono e' uno, e inventare un secondo nome per lo stesso servizio
+# renderebbe la pagina Suoni piu' difficile da leggere, non piu' facile.
+SUONO_PROPRIO = ("onair",)
 
 
 def chiave_notifica(livello):

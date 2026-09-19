@@ -675,6 +675,7 @@ stesso servizio e un arbitro sceglie chi vince:
 | 56 | Compleanni |
 | 55 | Rolling Banner |
 | 54 | Meteo |
+| 52 | OnAir |
 | 51 | FunCAM |
 | 50 | Media Player |
 | 10 | Orologio |

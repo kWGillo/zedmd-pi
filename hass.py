@@ -63,6 +63,10 @@ SWITCHES = [
     # separate, altrimenti spegnere la sveglia di stamattina cancellerebbe
     # anche quella di domani.
     ("sveglia", "Sveglia"),
+    # Il servizio OnAir: dice se il pannello deve occuparsi della diretta,
+    # non se la diretta e' in corso. Per quello c'e' `onair_diretta`, piu'
+    # sotto -- sono due cose diverse, come la sveglia e il suo squillo.
+    ("onair", "OnAir"),
 ]
 
 # Night mode e Sleep mode non sono servizi: sono modi del display, e stanno in
@@ -111,6 +115,12 @@ AZIONI = [
     # suona, e dopo non c'e' niente da tenere acceso. Il pulsante fisico della
     # Funcam fa la stessa cosa; questo serve dall'altra stanza.
     ("sveglia_stop", "Ferma la sveglia", "mdi:alarm-off"),
+    # La diretta. E' l'entita' che un'automazione di Home Assistant accende
+    # quando il sensore della porta si chiude: il DMD non sa che esista una
+    # porta, sa solo se e' in onda. Sta fra le azioni e non fra i servizi
+    # perche' non e' una voce di configurazione da accendere una volta -- e'
+    # uno stato che va e viene, e che si legge dalla sorgente.
+    ("onair_diretta", "In onda", "mdi:record-circle"),
 ]
 
 # I giochi scritti per il pannello sono azioni come Doom: una partita che
@@ -905,6 +915,9 @@ class HassBridge:
             if key == "gameboy":
                 gameboy = getattr(self.runtime, "gameboy", None)
                 return bool(gameboy and gameboy.in_sessione())
+            if key == "onair_diretta":
+                onair = getattr(self.runtime, "onair", None)
+                return bool(onair and onair.in_onda())
             if key == "sveglia_stop":
                 # Acceso vuol dire "c'e' qualcosa da fermare": cosi' in Home
                 # Assistant l'interruttore si accende da solo quando la
@@ -923,6 +936,15 @@ class HassBridge:
 
     def _azione(self, key, acceso):
         """Esegue un'azione. Restituisce True se e' stata gestita."""
+        if key == "onair_diretta":
+            # Qui l'interruttore vale nei due versi, al contrario di
+            # `sveglia_stop`: non e' un pulsante, e' lo specchio della porta.
+            # Spegnendolo la diretta finisce davvero.
+            onair = getattr(self.runtime, "onair", None)
+            if onair is not None:
+                onair.imposta(acceso)
+            self.publish_state(force=True)
+            return True
         if key == "sveglia_stop":
             # Solo lo spegnimento fa qualcosa: "accendere" una sveglia da qui
             # vorrebbe dire farla squillare adesso, che non e' quello che

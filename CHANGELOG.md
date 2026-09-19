@@ -2,6 +2,60 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.8]
+
+### OnAir
+
+Tutti gli altri servizi parlano a chi **guarda** il pannello: l'ora, gli aerei,
+il brano, il compleanno. Questo parla a chi **entra nella stanza**, e non sta
+neanche guardando. È la ragione per cui la luce rossa fuori dagli studi esiste
+da cent'anni — e un DMD in soggiorno può farla senza aggiungere un oggetto alla
+parete, e può farla meglio, perché sa anche scrivere.
+
+Quando la porta si chiude compare **ON AIR**: fondo rosso, lettere nere, ferma,
+nel carattere più grande in cui ci sta. Suona il campanello. Per tutta la
+diretta l'orologio porta un trattino rosso di 32×2 pixel centrato in cima —
+dalla parte opposta della barra del timer, che è in fondo ed è lunga, così i
+due segnali non si possono confondere. La scritta ricompare ogni due contenuti
+del Media Player, perché chi entra dopo deve scoprirlo lo stesso. Alla
+riapertura sparisce tutto.
+
+**Il DMD non sa che esiste una porta.** Sa solo se è in onda, e lo chiede con un
+interruttore: il sensore lo scegli in Home Assistant, con un'automazione di tre
+righe che trovi pronta in [`docs/ha/dmd_onair.yaml`](docs/ha/dmd_onair.yaml). Il
+giorno che il segnale verrà da un pulsante, da un orario o da un mixer, qui non
+cambia niente. E l'interruttore si comanda anche a mano, dalla pagina e a voce,
+quindi il servizio si prova prima di aver saldato qualunque cosa.
+
+Priorità **52**: sopra il Media Player, sotto il meteo, e mai sopra una partita.
+Chi gioca la porta l'ha chiusa lui.
+
+### Due casi che la richiesta non nominava
+
+**Il campanello suona una volta sola**, alla chiusura. Il rischio era concreto:
+il runtime ha un gancio che suona l'avviso di *qualunque* sorgente prenda il
+pannello, e con la cadenza dei media una diretta di un'ora avrebbe voluto dire
+trenta din-don. Una spia annuncia il cambio di stato, non lo stato.
+
+**«Ogni due media» da solo non bastava.** Se il Media Player è acceso ma non
+passa niente — libreria vuota, fascia oraria, Night mode — il contatore non
+avanza e la scritta non comparirebbe mai, proprio quando serve. C'è anche un
+tetto di tempo, centottanta secondi, che si toglie mettendolo a zero.
+
+### L'impaginazione del testo vive in un posto solo
+
+La regola — prova una riga, poi due, poi tre, tieni la prima che entra, e se non
+entra taglia con i puntini — era stata scritta per le notifiche nella 9.5.
+Copiarla in OnAir sarebbe stato più veloce oggi e più caro ogni volta dopo: ora
+sta in `sources/testo.py`, e i due servizi la chiamano.
+
+### Ventisei sigle nuove
+
+Tutte viste una volta sola: è la coda lunga vera, quella che si è potuta leggere
+solo dopo che la 9.7 aveva sbloccato le tabelle. Venti compagnie — quasi tutte
+operatori d'affari e air taxi — due aeroporti e tre modelli, fra cui il Tecnam
+P2010 e l'Aura Aero Integral R.
+
 ## [9.7]
 
 ### Le tabelle si fondono

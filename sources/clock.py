@@ -60,6 +60,9 @@ class ClockSource(Source):
         # Quanto resta del timer, come frazione da 1 a 0. Lo attacca il
         # runtime: vedi `_barra_timer`.
         self.timer = None
+        # Se il servizio OnAir e' in diretta. Lo attacca il runtime, con la
+        # stessa regola del timer: vedi `_tratto_onair`.
+        self.onair = None
         self._font = _load_font(max(12, int(height * 0.60)))
         self._font_small = _load_font(max(8, int(height * 0.20)))
         # Font della colonna dei rifiuti, dal piu' grande al piu' piccolo. Si
@@ -249,12 +252,13 @@ class ClockSource(Source):
         # restasse fuori dalla firma il pannello continuerebbe a mostrare
         # quella del momento in cui e' cambiato qualcos'altro.
         barra = self._barra_timer()
+        diretta = self._tratto_onair()
 
         # Ridisegna solo quando cambia qualcosa di visibile.
         signature = (shown, date if clock["show_date"] else "", meridiem,
                      clock["time_color"], clock["date_color"],
                      tuple((v["nome"], v["colore"]) for v in colonna),
-                     stato_sem, sem_acceso, barra)
+                     stato_sem, sem_acceso, barra, diretta)
         if signature == self._signature:
             return None
         self._signature = signature
@@ -311,6 +315,17 @@ class ClockSource(Source):
                                (self.cfg.get("sveglia") or {}).get("colore"),
                                (255, 59, 48)))
 
+        if diretta:
+            # In cima e corto, dalla parte opposta della barra del timer, che
+            # sta in fondo ed e' lunga: cosi' i due segnali non si possono
+            # confondere nemmeno con la coda dell'occhio.
+            meta = (self.width - self.ONAIR_LARGO) // 2
+            draw.rectangle((meta, 0, meta + self.ONAIR_LARGO - 1,
+                            self.ONAIR_ALTO - 1),
+                           fill=parse_color(
+                               (self.cfg.get("onair") or {}).get("colore_sfondo"),
+                               (0xC0, 0, 0)))
+
         return image
 
     # ------------------------------------------------------------ il timer
@@ -343,3 +358,29 @@ class ClockSource(Source):
             # la sveglia, che si prende il pannello tutto).
             return 0
         return max(1, int(round(quota * self.width)))
+
+    # ------------------------------------------------------------ la diretta
+
+    # Il trattino di OnAir: corto e in cima. Trentadue pixel su duecentocinquanta
+    # sono un ottavo della larghezza -- abbastanza da vedersi dall'altra stanza,
+    # poco da non sembrare un guasto della prima riga.
+    ONAIR_LARGO = 32
+    ONAIR_ALTO = 2
+
+    def _tratto_onair(self):
+        """Vero se va acceso il trattino della diretta.
+
+        Stessa forma del timer, e per la stessa ragione: l'orologio non sa che
+        esista un servizio OnAir ne' che esista una porta. Sa che qualcuno ogni
+        tanto gli dice si' o no, e che quando e' si' accende due pixel.
+
+        Il segnale serve perche' la scritta ON AIR passa e se ne va: per tutto
+        il resto del tempo il pannello mostra l'orologio, e un orologio identico
+        a quello di sempre non dice che si sta registrando.
+        """
+        if self.onair is None:
+            return False
+        try:
+            return bool(self.onair())
+        except Exception:                            # pragma: no cover
+            return False

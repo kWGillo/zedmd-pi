@@ -2211,6 +2211,50 @@ Storico:
        SportCruiser e il Pitts S-2. Brasov, che l'elenco dava per ignota,
        era invece gia' in tabella dalla 9.4: un'altra vittima del file
        congelato, non una sigla mancante.
+  9.8  **OnAir: il pannello dice che si sta registrando.**
+       Tutti gli altri servizi parlano a chi **guarda** il pannello. Questo
+       parla a chi **entra nella stanza**, e non sta neanche guardando -- che
+       e' la ragione per cui la luce rossa fuori dagli studi esiste da
+       cent'anni. Un DMD in soggiorno puo' fare la stessa cosa senza aggiungere
+       un oggetto alla parete, e puo' farla meglio, perche' sa anche scrivere.
+       Quando la porta si chiude compare **ON AIR** -- fondo rosso, lettere
+       nere, ferma, nel carattere piu' grande in cui ci sta -- e suona il
+       campanello. Per tutta la diretta l'orologio porta un trattino rosso di
+       32x2 pixel centrato in cima: sta dalla parte opposta della barra del
+       timer, che e' in fondo ed e' lunga, cosi' i due segnali non si possono
+       confondere. La scritta ricompare ogni due contenuti del Media Player,
+       perche' chi entra dopo deve scoprirlo lo stesso. Alla riapertura
+       sparisce tutto.
+       *Il DMD non sa che esiste una porta.* Sa solo se e' in onda, e lo chiede
+       con un interruttore: il sensore lo sceglie Home Assistant, con
+       un'automazione di tre righe che trovi pronta in `docs/ha/dmd_onair.yaml`.
+       Il giorno che il segnale verra' da un pulsante, da un orario o da un
+       mixer, qui non cambia niente. E l'interruttore si comanda anche a mano,
+       dalla pagina e a voce, quindi il servizio si prova prima di aver saldato
+       qualunque cosa.
+       *Il campanello suona una volta sola*, alla chiusura. Il rischio era
+       concreto: il runtime ha un gancio che suona l'avviso di **qualunque**
+       sorgente prenda il pannello, e con la cadenza dei media una diretta di
+       un'ora avrebbe voluto dire trenta din-don. Una spia annuncia il cambio
+       di stato, non lo stato. La riga che lo esclude ha un nome che lo dice,
+       `suoni.SUONO_PROPRIO`, e una prova che la difende.
+       *«Ogni due media» da solo non bastava.* Se il Media Player e' acceso ma
+       non passa niente -- libreria vuota, fascia oraria, Night mode -- il
+       contatore non avanza e la scritta non comparirebbe mai, proprio quando
+       serve. C'e' anche un tetto di tempo, centottanta secondi, che si toglie
+       mettendolo a zero.
+       Priorita' **52**: sopra il Media Player, sotto il meteo, e mai sopra una
+       partita. Chi gioca la porta l'ha chiusa lui.
+       *E l'impaginazione del testo adesso vive in un posto solo.* La regola --
+       prova una riga, poi due, poi tre, tieni la prima che entra, e se non
+       entra taglia con i puntini -- era stata scritta per le notifiche nella
+       9.5. Copiarla in OnAir sarebbe stato piu' veloce oggi e piu' caro ogni
+       volta dopo: e' in `sources/testo.py`, e i due servizi la chiamano.
+       *Ventisei sigle nuove*, tutte viste una volta sola: la coda lunga vera,
+       quella che si e' potuta leggere solo dopo che la 9.7 aveva sbloccato le
+       tabelle. Venti compagnie -- quasi tutte operatori d'affari e air taxi --
+       due aeroporti e tre modelli, fra cui il Tecnam P2010 e l'Aura Aero
+       Integral R.
 """
 
-__version__ = "9.7"
+__version__ = "9.8"

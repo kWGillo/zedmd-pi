@@ -548,6 +548,21 @@ DEFAULTS = {
             "allarme": "#ff2a20",
         },
     },
+    # OnAir: il pannello dice che si sta registrando. Lo stato `in_onda` sta
+    # qui e non in memoria perche' deve sopravvivere a un riavvio del
+    # servizio, e perche' l'interruttore di Home Assistant deve ritrovarlo
+    # dov'era. Home Assistant lo riafferma comunque appena il DMD torna
+    # disponibile, cosi' una porta aperta nel frattempo non lascia acceso un
+    # ON AIR falso.
+    "onair": {
+        "testo": "ON AIR",
+        "colore_sfondo": "#c00000",
+        "colore_testo": "#000000",
+        "ogni_n_media": 2,
+        "al_massimo_dopo": 180,
+        "secondi": 0,
+        "in_onda": False,
+    },
 
     # ------------------------------------------------------------- satelliti
     #
@@ -692,6 +707,10 @@ DEFAULTS = {
         # qualcosa, questa sorgente resta muta per sempre. Si accende quando
         # dall'altra parte c'e' qualcuno che parla.
         "notifiche": False,
+        # Spento di suo: finche' non c'e' qualcosa che dica «in onda»
+        # non ha niente da mostrare, e un interruttore acceso su un
+        # servizio muto fa credere che qualcosa non funzioni.
+        "onair": False,
         # Come i satelliti: senza coordinate non ha niente da dire, e le
         # coordinate non le mettiamo noi.
         "meteo": False,

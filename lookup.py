@@ -103,9 +103,7 @@ DISTRIBUITI = {
         "485c739df2710e5f1e03b4ec71276031",   # 1.12 - 1.12.5
         "d2931b107de1ea74a1fd1cf6a35a222a",   # 1.13 - 9.3
         "6a29839f1992a6a7dd41d1ab77b6db39",   # 9.4 - 9.5.1
-        # La tabella delle compagnie non cambia nella 9.7: la sua impronta di
-        # adesso e' ancora quella della 9.6, e dichiararla vecchia vorrebbe
-        # dire sostituirla con se stessa. Ci entrera' quando cambiera'.
+        "f9c332a12de76c39365d6647bb226a8d",   # 9.6 - 9.7
     },
     "aircraft": {
         "0d763ff25342351827c349175789dcc4",   # 1.11 - 1.11.2
@@ -113,6 +111,7 @@ DISTRIBUITI = {
         "011ddce0813df36532e15c1fd86a98ac",   # 1.13 - 9.3
         "aeaca714e926f0f438ee76e65dcba9b4",   # 9.4 - 9.5.1
         "e76fc29500780cfc08ec9ed1b4f8ef0b",   # 9.6
+        "025119b146b9b6749a089438ef67ec6c",   # 9.7
     },
     "airport": {
         "96678004b56af040372199f37aa1c08b",   # 1.11 - 1.11.2, solo codici IATA
@@ -120,6 +119,7 @@ DISTRIBUITI = {
         "4884b249008a42c68fbd2c1b934c0a68",   # 1.13 - 9.3
         "52431f16eb9451bf7a9155bca183293f",   # 9.4 - 9.5.1
         "af9645a5cefb12053581fdc2273e6762",   # 9.6
+        "5b0c71eed0ec4d45202b032e78d78643",   # 9.7
     },
 }
 
