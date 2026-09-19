@@ -1109,6 +1109,9 @@ STRINGS = {
     "lookup.unknown.none": ("Nessuno: tutto quello che è passato era in tabella.",
                             "None: everything seen so far was in the table."),
     "lookup.unknown.times": ("%(count)d volte", "%(count)d times"),
+    "lookup.unknown.tagliati": (
+        "Le prime 40 di %(totale)d: il pulsante qui sotto le aggiunge tutte.",
+        "The first 40 of %(totale)d: the button below adds them all."),
     "lookup.add": ("Aggiungi in coda al file", "Append them to the file"),
     "lookup.add.hint": (
         "Aggiunge i codici come righe da completare, con le colonne del nome vuote.",

@@ -2134,6 +2134,48 @@ Storico:
        pannello, che si sa gia' che cosa fanno; queste tre sono le uniche che
        vengono da fuori, e senza dirlo si fa presto a chiedersi che cosa
        siano.
+  9.6  **Venti sigle nuove, e il motivo per cui le altre venti non si vedevano.**
+       Dalla pagina Radar e' arrivato un elenco di quaranta sigle mai tradotte.
+       Guardandolo e' venuta fuori una cosa piu' interessante della richiesta:
+       **la maggior parte c'erano gia'**. Tutti e sei gli aeroporti -- Paderborn,
+       Marsa Alam, Baku, Hahn, Chengdu Tianfu, Zhengzhou -- cinque modelli su
+       sette e nove compagnie su ventisette stavano nel pacchetto dalla 9.4, e
+       sul pannello continuavano a comparire come codici.
+       Il motivo sta in una riga. `lookup.DISTRIBUITI` tiene le impronte delle
+       tabelle che abbiamo distribuito: una copia dell'utente che corrisponde a
+       una di quelle non e' mai stata toccata e si puo' sostituire; una che non
+       corrisponde a **nessuna** vale come lavoro suo e si lascia stare. Nella
+       9.4 le tabelle sono cambiate ma la loro impronta non e' entrata in
+       elenco, e da quel momento si sono comportate come se le avesse scritte
+       lui: gli aggiornamenti successivi le hanno lasciate dov'erano. Adesso in
+       elenco ci sono anche le tabelle della 9.4-9.5.1, e una prova nuova
+       confronta ogni tabella con quella distribuita prima: se e' cambiata
+       pretende l'impronta vecchia in elenco, se e' rimasta uguale pretende che
+       non ci sia -- perche' dichiarare vecchio il modello attuale vorrebbe
+       dire sostituirlo con se stesso a ogni avvio. E' la dimenticanza che si
+       fa in silenzio: il pacchetto e' giusto, e ad arrivare storto e' solo
+       quello che si vede.
+       *E le sigle che mancavano davvero sono venti.* Diciotto compagnie --
+       Aeroitalia, flynas, Air Cairo, Corsair, BA CityFlyer, Dan Air, Electra,
+       Cargo Air, Norwegian Air Sweden, 2Excel, Arcus Air, e sette operatori
+       d'affari fra Italia, Germania, Francia e Malta -- e due modelli, il
+       Tecnam P92 Echo e l'Alpi Pioneer 300, che sono due ultraleggeri italiani
+       e spiegano da soli perche' passassero di li'.
+       Ognuna verificata su due fonti indipendenti che dicono la stessa cosa,
+       e non sulle liste di Wikipedia, che su questo sono vecchie: danno AEZ a
+       un operatore statunitense chiuso da anni invece che ad Aeroitalia, e CFE
+       al nome che BA CityFlyer aveva prima del 2007.
+       In tutto sono ventitre': un secondo elenco, letto una sera dopo, ne ha
+       portate altre tre -- Executive Jet Management, Air Horizont e
+       l'aeroporto di Long Island MacArthur, entrato da una rotta e non da un
+       aereo di passaggio.
+       *E l'elenco delle sigle da tradurre dice quante ne sta nascondendo.* La
+       pagina ne mostra quaranta e in memoria ne tiene cinquecento: oltre la
+       quarantesima sparivano senza dirlo, e lo si e' visto proprio adesso --
+       fra i due elenchi, tre codici nuovi ne hanno spinti fuori tre vecchi
+       dal fondo. Adesso sotto la tabella c'e' scritto quante sono in tutto.
+       Il pulsante che le aggiunge al file le ha sempre prese tutte, anche
+       quelle non mostrate: era il numero a mentire, non il comando.
 """
 
-__version__ = "9.5.1"
+__version__ = "9.6"

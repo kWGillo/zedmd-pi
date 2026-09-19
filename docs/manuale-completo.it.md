@@ -592,6 +592,15 @@ due tabelle che trasformano le sigle in nomi.
 > aggiunte non vengono mai sovrascritte da un aggiornamento — un file toccato da
 > te resta tuo, e solo un file ancora identico a un nostro modello viene
 > sostituito con quello nuovo.
+>
+> Il riconoscimento è per impronta md5, e ha un lato scomodo che vale la pena
+> sapere: se una nostra versione cambia una tabella senza mettere in elenco
+> l'impronta di quella che sostituisce, da lì in poi la tua copia sembra
+> scritta a mano e gli aggiornamenti la lasciano dov'è. È successo fra la 9.4 e
+> la 9.5.1, ed è il motivo per cui aeroporti aggiunti mesi prima comparivano
+> ancora come sigle. Se la tua pagina Radar elenca codici che il changelog dice
+> già aggiunti, il sospetto è quello: confronta `md5sum /var/lib/dmd/*.csv` con
+> le stesse righe dentro la cartella del programma.
 
 **Calendario** — collegamento dell'account Google e nient'altro: gli
 appuntamenti si scrivono su Google, il pannello li mostra e basta. Guida

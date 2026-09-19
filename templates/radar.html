@@ -212,6 +212,9 @@
     </tr>
     {% endfor %}
   </table>
+  {% if unknown|length > 40 %}
+  <p class="hint">{{ t('lookup.unknown.tagliati', totale=unknown|length) }}</p>
+  {% endif %}
   <p class="hint">{{ t('lookup.add.hint') }}</p>
   <div class="actions">
     <form method="post" action="{{ url_for('api_radar_lookup_add') }}">

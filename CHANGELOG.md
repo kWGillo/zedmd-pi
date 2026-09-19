@@ -2,6 +2,58 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.6]
+
+### Le tabelle nuove non arrivavano
+
+Dalla pagina Radar è arrivato un elenco di quaranta sigle mai tradotte. La
+maggior parte **c'erano già**: tutti e sei gli aeroporti — Paderborn, Marsa
+Alam, Baku, Hahn, Chengdu Tianfu, Zhengzhou — cinque modelli su sette e nove
+compagnie su ventisette stavano nel pacchetto dalla 9.4, e sul pannello
+continuavano a comparire come codici.
+
+Il motivo sta in una riga. `lookup.DISTRIBUITI` tiene le impronte delle tabelle
+che abbiamo distribuito: una copia dell'utente che corrisponde a una di quelle
+non è mai stata aperta e si può sostituire; una che non corrisponde a nessuna
+vale come lavoro suo e si lascia stare. Nella 9.4 le tabelle sono cambiate ma la
+loro impronta non è entrata in elenco, e da quel momento si sono comportate come
+se le avesse scritte lui.
+
+Adesso in elenco ci sono anche le tabelle della 9.4–9.5.1, e una prova nuova
+confronta ogni tabella con quella distribuita prima: se è cambiata pretende
+l'impronta vecchia in elenco, se è rimasta uguale pretende che non ci sia —
+perché dichiarare vecchio il modello attuale vorrebbe dire sostituirlo con sé
+stesso a ogni avvio.
+
+È la dimenticanza che si fa in silenzio: il pacchetto è giusto, e ad arrivare
+storto è solo quello che si vede.
+
+### Ventitré sigle nuove
+
+Venti compagnie — Aeroitalia, flynas, Air Cairo, Corsair, BA CityFlyer, Dan
+Air, Electra Airways, Cargo Air, Norwegian Air Sweden, 2Excel, Arcus Air, Air
+Horizont, più otto operatori d'affari fra Italia, Germania, Francia, Malta e
+Stati Uniti — due modelli, il Tecnam P92 Echo e l'Alpi Pioneer 300, due
+ultraleggeri italiani che spiegano da soli perché passassero di lì, e un
+aeroporto, Long Island MacArthur, entrato da una rotta e non da un aereo di
+passaggio.
+
+Ognuna verificata su due fonti indipendenti che dicono la stessa cosa. Non sulle
+liste di Wikipedia, che su questo sono vecchie: danno `AEZ` a un operatore
+statunitense chiuso da anni invece che ad Aeroitalia, e `CFE` al nome che BA
+CityFlyer aveva prima del 2007.
+
+### L'elenco da tradurre dice quante ne sta nascondendo
+
+La pagina Radar ne mostra quaranta; in memoria ne stanno cinquecento. Oltre la
+quarantesima sparivano senza dirlo — e lo si è visto dal vivo: fra due elenchi
+letti a un giorno di distanza, tre codici nuovi ne hanno spinti fuori tre vecchi
+dal fondo, che sembravano risolti e non lo erano.
+
+Adesso sotto la tabella c'è scritto quante sono in tutto. Il pulsante che le
+aggiunge al file le ha sempre prese tutte, anche quelle non mostrate: era il
+numero a mentire, non il comando.
+
 ## [9.5.1]
 
 ### I suoni delle notifiche dicono da dove vengono

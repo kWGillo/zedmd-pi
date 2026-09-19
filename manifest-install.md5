@@ -1,9 +1,9 @@
-aeaca714e926f0f438ee76e65dcba9b4  aerei.csv
-52431f16eb9451bf7a9155bca183293f  aeroporti.csv
+e76fc29500780cfc08ec9ed1b4f8ef0b  aerei.csv
+af9645a5cefb12053581fdc2273e6762  aeroporti.csv
 ebdccc3875a93eba4f6eb06f6912436c  allerte.py
 13e95841fe78d3774935f35182209ae3  autotune.py
 8f611004ff344bdd285b2a5b25b2888d  cassa.py
-6a29839f1992a6a7dd41d1ab77b6db39  compagnie.csv
+f9c332a12de76c39365d6647bb226a8d  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 dffdb5951d4776068d87865067fb4195  congela.py
 f4da634c02da1d2d9c2bf600287d09c3  copertine.py
@@ -22,10 +22,10 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 ec377855670fb7ff43ef7335cda3124a  hass.py
-ed7ae2351f55adba20cbf10fe995530e  i18n.py
+456868eff429f245bb06dfe0ba2a3651  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
-c3ed7997143f28a8c2bfcd715e67ef46  lookup.py
+01558d273c23b25b19b9ed961382ace4  lookup.py
 501367bdb38413b33dbd3b3c5fe8bb17  metadati.py
 a8fedaeb39dd5f3bf035a9ce4c8bb6af  meteo.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
@@ -102,7 +102,7 @@ cb7f0f3c1130dcb8ef42d19a8cbe7d54  templates/giochi.html
 c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
 250656c1e92734818935e7173907f894  templates/media.html
 db6305423ca76d71efb0121fc62d2627  templates/nowplaying.html
-b0602e1e1accdc7a37a2758ffe720808  templates/radar.html
+aa9eb65a9f8993da5a5125d1c7fa5cd4  templates/radar.html
 685924490e771f355e0a6cc0eb58c756  templates/rete.html
 f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 c80b972bd47827c7383979aafb7fecc8  templates/satelliti.html
@@ -112,7 +112,7 @@ b004db69d09f344f149a26d2b60eb162  templates/services.html
 48e92b36bcdbdf54ff56b0714d26e67e  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 0bbe7fbc76fd30b03e559158b71225d0  templates/updates.html
-cac233afe87f35fa65c66a58f49a2bcc  version.py
+1ab5312ddf9032f63ccd058d66f4163c  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 f8ae05fe26da501f543eac6060b8b992  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py
