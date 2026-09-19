@@ -76,6 +76,10 @@ MAX_UNKNOWN = 500
 _lock = threading.Lock()
 _cache = {}      # kind -> (mtime, dimensione, dizionario)
 _unknown = {}    # kind -> {codice: [conteggio, ultimo avvistamento]}
+# Per quali tabelle il confronto con il modello e' gia' stato fatto in questo
+# avvio. Senza, `ensure` rileggerebbe due file interi a ogni traduzione, e
+# `load` la chiama per ogni aereo che passa.
+_verificati = set()
 
 
 # ------------------------------------------------------------------ percorsi
@@ -99,18 +103,23 @@ DISTRIBUITI = {
         "485c739df2710e5f1e03b4ec71276031",   # 1.12 - 1.12.5
         "d2931b107de1ea74a1fd1cf6a35a222a",   # 1.13 - 9.3
         "6a29839f1992a6a7dd41d1ab77b6db39",   # 9.4 - 9.5.1
+        # La tabella delle compagnie non cambia nella 9.7: la sua impronta di
+        # adesso e' ancora quella della 9.6, e dichiararla vecchia vorrebbe
+        # dire sostituirla con se stessa. Ci entrera' quando cambiera'.
     },
     "aircraft": {
         "0d763ff25342351827c349175789dcc4",   # 1.11 - 1.11.2
         "7a3e43b60e5e98ec2f8698fc02b4d959",   # 1.11.3 - 1.12.5
         "011ddce0813df36532e15c1fd86a98ac",   # 1.13 - 9.3
         "aeaca714e926f0f438ee76e65dcba9b4",   # 9.4 - 9.5.1
+        "e76fc29500780cfc08ec9ed1b4f8ef0b",   # 9.6
     },
     "airport": {
         "96678004b56af040372199f37aa1c08b",   # 1.11 - 1.11.2, solo codici IATA
         "8407e93552b46e74af88f19e1312626c",   # 1.11.3 - 1.12.5
         "4884b249008a42c68fbd2c1b934c0a68",   # 1.13 - 9.3
         "52431f16eb9451bf7a9155bca183293f",   # 9.4 - 9.5.1
+        "af9645a5cefb12053581fdc2273e6762",   # 9.6
     },
 }
 
@@ -142,31 +151,154 @@ def _vuoto(target):
         return False
 
 
+def _righe_modello(kind):
+    """Le righe del modello che traducono qualcosa: (codici, campi)."""
+    try:
+        with open(template(kind), encoding="utf-8", errors="replace") as handle:
+            testo = handle.read()
+    except OSError:
+        return []
+    sep = delimitatore(testo)
+    fuori = []
+    for riga in testo.splitlines():
+        spoglia = riga.strip()
+        if not spoglia or spoglia.startswith("#"):
+            continue
+        campi = next(csv.reader([riga], delimiter=sep), [])
+        if len(campi) < 2 or not campi[0].strip() or not campi[1].strip():
+            continue
+        codici = [c.strip().upper() for c in campi[0].split("/") if c.strip()]
+        if codici:
+            fuori.append((codici, [c.strip() for c in campi]))
+    return fuori
+
+
+def _segnaposto(riga, sep):
+    """I codici di una riga che non traduce niente, o lista vuota."""
+    spoglia = riga.strip()
+    if not spoglia or spoglia.startswith("#"):
+        return []
+    campi = next(csv.reader([riga], delimiter=sep), [])
+    if not campi or not campi[0].strip():
+        return []
+    if len(campi) > 1 and campi[1].strip():
+        return []
+    return [c.strip().upper() for c in campi[0].split("/") if c.strip()]
+
+
+def _fondi(kind, target):
+    """Porta nel file dell'utente le righe del modello che gli mancano.
+
+    E' la correzione di un difetto che si e' visto sul campo e che era grave
+    quanto era invisibile. La regola vecchia aveva due sole uscite: o il file
+    e' identico a un modello nostro e allora lo sostituisco tutto, o e' roba
+    dell'utente e allora non lo tocco **mai piu'**. Bastava una riga in piu'
+    per cadere per sempre nel secondo caso -- e a scriverla era il nostro
+    stesso pulsante «Aggiungi in coda al file», che mette un `CODICE,,` come
+    promemoria. Da quel momento nessun aggiornamento poteva piu' portare una
+    tabella nuova: il pacchetto era giusto, il pannello no, e niente lo
+    diceva.
+
+    La regola nuova non sceglie piu' fra tutto e niente. **Le tue traduzioni
+    vincono sempre**; del modello entra solo quello che nel tuo file non
+    traduce nessuno. E i promemoria vuoti che adesso hanno una risposta se ne
+    vanno, che e' la ragione per cui erano stati scritti.
+
+    Una copia di sicurezza resta accanto, con lo stesso nome piu' `.bak`.
+    """
+    modello = _righe_modello(kind)
+    if not modello:
+        return 0
+    try:
+        with open(target, encoding="utf-8", errors="replace") as handle:
+            testo = handle.read()
+    except OSError:
+        return 0
+
+    tradotti, _ = parse(testo)
+    mancanti, nuovi = [], set()
+    for codici, campi in modello:
+        if any(c in tradotti for c in codici):
+            continue
+        mancanti.append(campi)
+        nuovi.update(codici)
+    if not mancanti:
+        return 0
+
+    # Si scrive con il separatore che usa gia' lui: un file esportato da un
+    # foglio di calcolo italiano ha i punti e virgola, e mescolarli renderebbe
+    # illeggibile una delle due meta'.
+    sep = delimitatore(testo)
+    tenute, tolte = [], 0
+    for riga in testo.splitlines():
+        codici = _segnaposto(riga, sep)
+        if codici and all(c in nuovi for c in codici):
+            tolte += 1
+            continue
+        tenute.append(riga)
+
+    fuori = io.StringIO()
+    scrittore = csv.writer(fuori, delimiter=sep, lineterminator="\n")
+    for campi in mancanti:
+        scrittore.writerow(campi)
+
+    try:
+        import version
+        quale = version.__version__
+    except Exception:                       # pragma: no cover
+        quale = time.strftime("%d/%m/%Y")
+
+    corpo = "\n".join(tenute).rstrip("\n")
+    nuovo = "%s\n\n# Arrivate con l'aggiornamento alla %s: righe che il\n" \
+            "# modello conosce e questo file no. Le tue restano dove sono.\n%s" \
+            % (corpo, quale, fuori.getvalue())
+
+    try:
+        shutil.copy2(target, target + ".bak")
+        appoggio = target + ".nuovo"
+        with open(appoggio, "w", encoding="utf-8") as handle:
+            handle.write(nuovo)
+        os.replace(appoggio, target)
+    except OSError as exc:
+        print("[lookup] impossibile fondere %s: %s" % (target, exc))
+        return 0
+    invalidate(kind)
+    print("[lookup] %s: %d righe arrivate dal modello%s (copia in %s.bak)"
+          % (os.path.basename(target), len(mancanti),
+             ", %d promemoria completati" % tolte if tolte else "",
+             os.path.basename(target)))
+    return len(mancanti)
+
+
 def ensure(kind):
-    """Crea il file dell'utente dal modello, se non c'e' ancora.
+    """Allinea il file dell'utente al modello, senza portargli via niente.
 
-    Un file che porta lavoro dell'utente non viene mai sovrascritto. Ci sono
-    due eccezioni, e in nessuna delle due c'e' qualcosa da perdere:
+    Si guarda una volta sola per avvio: e' un controllo che legge due file
+    interi, e `load` passa di qui a ogni traduzione.
 
+    Quattro casi, in ordine:
+
+    * il file **non c'e'** — si copia il modello;
     * il file non ha **nemmeno una riga valida** — e' il segnaposto scritto
       quando il modello non si trovava, e lasciarlo li' significherebbe non
-      tradurre piu' niente per sempre;
-    * il file e' **ancora identico a un modello che abbiamo distribuito
-      noi**, quindi non e' mai stato aperto. Chi si e' fermato alla tabella
-      della 1.11, che conosceva solo i codici IATA, riceve cosi' quella con
-      entrambe le grafie senza doverla chiedere.
+      tradurre piu' niente per sempre: si sostituisce;
+    * il file e' **ancora identico a un modello distribuito da noi**, quindi
+      non e' mai stato aperto: si sostituisce, e non c'e' niente da salvare;
+    * in tutti gli altri casi si **fonde**: vedi `_fondi`.
     """
     target = path(kind)
+    if kind in _verificati and os.path.exists(target):
+        return target
     if os.path.exists(target):
         motivo = ""
         if _vuoto(target):
             motivo = "era vuoto"
         elif _intatto(kind, target):
             motivo = "era ancora il modello di una versione precedente"
-        if not motivo:
-            return target
         source = template(kind)
-        if os.path.exists(source) and _impronta(source) != _impronta(target):
+        if not motivo:
+            _fondi(kind, target)
+        elif os.path.exists(source) and _impronta(source) != _impronta(target):
             try:
                 shutil.copy2(source, target)
                 invalidate(kind)
@@ -174,6 +306,7 @@ def ensure(kind):
                       % (os.path.basename(target), motivo))
             except OSError as exc:
                 print("[lookup] impossibile aggiornare %s: %s" % (target, exc))
+        _verificati.add(kind)
         return target
     source = template(kind)
     try:
@@ -185,10 +318,38 @@ def ensure(kind):
                 handle.write("# codice,forma breve,nome completo\n")
     except OSError as exc:
         print("[lookup] impossibile creare %s: %s" % (target, exc))
+    _verificati.add(kind)
     return target
 
 
+def ricontrolla(kind=None):
+    """Fa rifare il confronto con il modello al prossimo accesso.
+
+    Serve al pulsante «Rileggi le tabelle» della pagina Radar: senza, il
+    confronto si farebbe solo al riavvio del servizio, e chi ha appena
+    corretto un file a mano dalla condivisione non avrebbe modo di chiedere
+    la fusione adesso.
+    """
+    if kind is None:
+        _verificati.clear()
+    else:
+        _verificati.discard(kind)
+
+
 # ------------------------------------------------------------------ lettura
+
+def delimitatore(text):
+    """Il separatore con cui e' scritto questo CSV.
+
+    I fogli di calcolo italiani esportano con il punto e virgola: si
+    riconosce il separatore invece di pretenderne uno. Chi scrive in un file
+    dell'utente deve usare **il suo**, non il nostro: mescolarli renderebbe
+    illeggibile meta' del file al primo riconoscimento.
+    """
+    campione = "\n".join(riga for riga in (text or "").splitlines()[:40]
+                         if riga.strip() and not riga.lstrip().startswith("#"))
+    return ";" if campione.count(";") > campione.count(",") else ","
+
 
 def parse(text):
     """Legge un CSV e restituisce (voci, errori).
@@ -202,12 +363,7 @@ def parse(text):
     if not text:
         return entries, errors
 
-    # I fogli di calcolo italiani esportano con il punto e virgola: si
-    # riconosce il separatore invece di pretenderne uno.
-    campione = "\n".join(riga for riga in text.splitlines()[:40]
-                         if riga.strip() and not riga.lstrip().startswith("#"))
-    delimiter = ";" if campione.count(";") > campione.count(",") else ","
-
+    delimiter = delimitatore(text)
     reader = csv.reader(io.StringIO(text), delimiter=delimiter)
     for number, row in enumerate(reader, 1):
         if not row or not any(cell.strip() for cell in row):
@@ -541,12 +697,20 @@ def append_missing(kind, codes):
         return 0
     target = ensure(kind)
     try:
+        # Il separatore e' il suo, non il nostro: un file esportato da un
+        # foglio di calcolo italiano ha i punti e virgola, e due righe con il
+        # separatore sbagliato diventano righe rotte al riconoscimento.
+        with open(target, encoding="utf-8", errors="replace") as handle:
+            sep = delimitatore(handle.read())
+    except OSError:
+        sep = ","
+    try:
         with open(target, "a", encoding="utf-8") as handle:
             handle.write("\n# aggiunti automaticamente il %s: completa le due\n"
                          "# colonne mancanti con la forma breve e il nome esteso\n"
                          % time.strftime("%d/%m/%Y"))
             for code in nuovi:
-                handle.write("%s,,\n" % code)
+                handle.write("%s%s%s\n" % (code, sep, sep))
     except OSError as exc:
         print("[lookup] impossibile aggiungere a %s: %s" % (target, exc))
         return 0

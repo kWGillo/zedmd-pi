@@ -588,19 +588,22 @@ due tabelle che trasformano le sigle in nomi.
 > dell'ultimo avvistamento.
 >
 > Le tabelle distribuite col pacchetto sono un punto di partenza, non un
-> archivio: contengono quello che è passato sopra un pannello vero. Le tue
-> aggiunte non vengono mai sovrascritte da un aggiornamento — un file toccato da
-> te resta tuo, e solo un file ancora identico a un nostro modello viene
-> sostituito con quello nuovo.
+> archivio: contengono quello che è passato sopra un pannello vero.
 >
-> Il riconoscimento è per impronta md5, e ha un lato scomodo che vale la pena
-> sapere: se una nostra versione cambia una tabella senza mettere in elenco
-> l'impronta di quella che sostituisce, da lì in poi la tua copia sembra
-> scritta a mano e gli aggiornamenti la lasciano dov'è. È successo fra la 9.4 e
-> la 9.5.1, ed è il motivo per cui aeroporti aggiunti mesi prima comparivano
-> ancora come sigle. Se la tua pagina Radar elenca codici che il changelog dice
-> già aggiunti, il sospetto è quello: confronta `md5sum /var/lib/dmd/*.csv` con
-> le stesse righe dentro la cartella del programma.
+> **A ogni avvio il tuo file e il modello si fondono.** Le tue traduzioni
+> vincono sempre, anche quando contraddicono le nostre; del modello entra solo
+> quello che nel tuo file non traduce nessuno; e i promemoria vuoti lasciati dal
+> pulsante «Aggiungi in coda al file» spariscono quando la risposta arriva.
+> Accanto resta una copia di sicurezza con il suffisso `.bak`, e un file che non
+> ha niente da ricevere non viene riscritto.
+>
+> Fino alla 9.6 non era così, e il difetto merita di essere raccontato perché è
+> il tipo di guasto che non si vede. La regola era secca: o il file era identico
+> a un modello nostro e allora lo sostituivamo tutto, o era diverso da tutti e
+> allora non lo toccavamo mai più. Bastava una riga aggiunta — e a scriverla era
+> il nostro stesso pulsante dei promemoria — per congelare le tabelle per
+> sempre. Il pacchetto arrivava aggiornato e il pannello continuava a mostrare
+> sigle, senza un errore da nessuna parte.
 
 **Calendario** — collegamento dell'account Google e nient'altro: gli
 appuntamenti si scrivono su Google, il pannello li mostra e basta. Guida

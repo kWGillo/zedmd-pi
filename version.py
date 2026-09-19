@@ -2176,6 +2176,41 @@ Storico:
        dal fondo. Adesso sotto la tabella c'e' scritto quante sono in tutto.
        Il pulsante che le aggiunge al file le ha sempre prese tutte, anche
        quelle non mostrate: era il numero a mentire, non il comando.
+  9.7  **Le tabelle si fondono, e il pulsante smette di essere una trappola.**
+       La 9.6 ha rimesso le impronte in elenco, e sul pannello non e' cambiato
+       niente: le stesse sigle di prima, comprese quelle aggiunte mesi fa. Il
+       difetto era piu' a monte, e piu' brutto.
+       La regola vecchia aveva due sole uscite. Se il tuo file era **identico**
+       a un modello nostro lo sostituivo tutto; se era diverso da tutti i
+       modelli valeva come lavoro tuo e non lo toccavo **mai piu'**. Bastava
+       una riga in piu' per cadere per sempre nel secondo caso. E a scriverla
+       non eri tu: era il nostro pulsante «Aggiungi in coda al file», che
+       mette un `CODICE,,` come promemoria. Da quel momento il pacchetto
+       portava tabelle nuove e il pannello continuava a mostrare sigle -- senza
+       un errore, senza una riga di log, senza niente. Il pulsante che aiuta
+       era lo stesso che tagliava fuori.
+       Adesso non si sceglie piu' fra tutto e niente: si **fonde**. Le tue
+       traduzioni vincono sempre, anche quando contraddicono le nostre; del
+       modello entra solo quello che nel tuo file non traduce nessuno; e i
+       promemoria vuoti che finalmente hanno una risposta se ne vanno, che e'
+       la ragione per cui erano stati scritti. Accanto resta una copia di
+       sicurezza col suffisso `.bak`. Un file gia' a posto non viene toccato:
+       niente riscritture inutili sulla scheda SD.
+       Il confronto con il modello si fa **una volta per avvio** e non a ogni
+       aereo: prima `ensure` rileggeva il file intero e ne calcolava l'md5 a
+       ogni singola traduzione, e nessuno se n'era accorto perche' il costo
+       era invisibile finche' non ci si e' guardato dentro. «Rileggi le
+       tabelle» lo fa rifare su richiesta.
+       Il pulsante scrive i promemoria con **il separatore del tuo file**:
+       chi aveva un CSV esportato da un foglio di calcolo italiano, con i
+       punti e virgola, si ritrovava due righe scritte con la virgola e quindi
+       illeggibili. La fusione rispetta la stessa regola.
+       *E cinque sigle nuove:* gli aeroporti di Almaty e -- di nuovo dal
+       registro -- tre modelli che raccontano da soli dove vive questo
+       pannello: il Magni M-24 Orion, autogiro costruito a Besnate, il CSA
+       SportCruiser e il Pitts S-2. Brasov, che l'elenco dava per ignota,
+       era invece gia' in tabella dalla 9.4: un'altra vittima del file
+       congelato, non una sigla mancante.
 """
 
-__version__ = "9.6"
+__version__ = "9.7"

@@ -2525,7 +2525,13 @@ def create_app(runtime):
 
     @app.route("/api/radar/lookup/reload", methods=["POST"])
     def api_radar_lookup_reload():
+        # Oltre a rileggere, si rifa' il confronto con il modello: senza,
+        # chi ha appena corretto un file dalla condivisione dovrebbe
+        # riavviare il servizio per vedersi arrivare le righe che mancano.
+        lookup.ricontrolla()
         lookup.invalidate()
+        for kind in lookup.KINDS:
+            lookup.load(kind, force=True)
         return redirect(url_for("page_radar", lookup_result=i18n.translate(
             "lookup.reloaded", current_language())))
 

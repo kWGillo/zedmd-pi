@@ -1,6 +1,6 @@
 43413a31c32e500c1286ea2b4952c563  .gitignore
-e76fc29500780cfc08ec9ed1b4f8ef0b  aerei.csv
-af9645a5cefb12053581fdc2273e6762  aeroporti.csv
+025119b146b9b6749a089438ef67ec6c  aerei.csv
+5b0c71eed0ec4d45202b032e78d78643  aeroporti.csv
 ebdccc3875a93eba4f6eb06f6912436c  allerte.py
 13e95841fe78d3774935f35182209ae3  autotune.py
 8f611004ff344bdd285b2a5b25b2888d  cassa.py
@@ -29,7 +29,7 @@ ec377855670fb7ff43ef7335cda3124a  hass.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
-01558d273c23b25b19b9ed961382ace4  lookup.py
+6432ca81d0b3f5aeb344417206f50a4b  lookup.py
 501367bdb38413b33dbd3b3c5fe8bb17  metadati.py
 a8fedaeb39dd5f3bf035a9ce4c8bb6af  meteo.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
@@ -118,7 +118,7 @@ b004db69d09f344f149a26d2b60eb162  templates/services.html
 0bbe7fbc76fd30b03e559158b71225d0  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-1ab5312ddf9032f63ccd058d66f4163c  version.py
+75d3623c1f3d2fcc9e688baad3a704c8  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-f8ae05fe26da501f543eac6060b8b992  webui.py
+00bf5fb8de0ee98ac64bf8df9872f97e  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

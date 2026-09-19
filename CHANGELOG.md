@@ -2,6 +2,56 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.7]
+
+### Le tabelle si fondono
+
+La 9.6 ha rimesso le impronte in elenco, e sul pannello non è cambiato niente:
+le stesse sigle di prima, comprese quelle aggiunte mesi fa. Il difetto era più
+a monte, e più brutto.
+
+La regola vecchia aveva due sole uscite:
+
+```
+file identico a un modello nostro  ->  lo sostituisco tutto
+file diverso da tutti i modelli    ->  non lo tocco mai più
+```
+
+Bastava **una riga in più** per cadere per sempre nel secondo caso. E a
+scriverla non eri tu: era il nostro pulsante «Aggiungi in coda al file», che
+mette un `CODICE,,` come promemoria da completare. Da quel momento il pacchetto
+portava tabelle nuove e il pannello continuava a mostrare sigle — senza un
+errore, senza una riga di log. Il pulsante che aiuta era lo stesso che tagliava
+fuori.
+
+Adesso non si sceglie più fra tutto e niente: **si fonde**. Le tue traduzioni
+vincono sempre, anche quando contraddicono le nostre. Del modello entra solo
+quello che nel tuo file non traduce nessuno. I promemoria vuoti che finalmente
+hanno una risposta se ne vanno, che è la ragione per cui erano stati scritti.
+Accanto resta una copia di sicurezza con il suffisso `.bak`, e un file già a
+posto non viene riscritto.
+
+### Due cose viste strada facendo
+
+Il confronto con il modello si fa **una volta per avvio**. Prima `ensure`
+rileggeva il file intero e ne calcolava l'md5 a *ogni singola traduzione* — un
+costo che nessuno aveva notato perché non si vedeva da fuori. Il pulsante
+«Rileggi le tabelle» lo fa rifare su richiesta.
+
+Il pulsante dei promemoria scrive con **il separatore del tuo file**. Chi aveva
+un CSV esportato da un foglio di calcolo italiano, con i punti e virgola, si
+ritrovava due righe scritte con la virgola, quindi illeggibili. La fusione
+rispetta la stessa regola.
+
+### Cinque sigle nuove
+
+L'aeroporto di Almaty, e tre modelli che raccontano da soli dove vive questo
+pannello: il **Magni M-24 Orion**, autogiro costruito a Besnate, il **CSA
+SportCruiser** e il **Pitts S-2**.
+
+Brasov, che l'elenco dava per ignota, era invece già in tabella dalla 9.4:
+un'altra vittima del file congelato, non una sigla mancante.
+
 ## [9.6]
 
 ### Le tabelle nuove non arrivavano
