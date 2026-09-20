@@ -53,8 +53,8 @@ Pagina **Orologio**, sezione *World Time*. Cinque righe, ognuna con:
 | Campo | A cosa serve |
 |---|---|
 | Spunta | se questa località si mostra |
-| **Città** | la tendina: sceglierla riempie il fuso |
-| **Fuso** | l'identificativo IANA, anche scritto a mano |
+| **Città** | una scorciatoia: sceglierla riempie il fuso |
+| **Fuso** | l'identificativo IANA — **è questo che vale** |
 | **Sul pannello** | l'etichetta che si vede, fino a 14 caratteri |
 | **Adesso** | l'ora di laggiù, per controllare al volo |
 
@@ -63,15 +63,71 @@ i nomi in italiano dove l'italiano un nome ce l'ha. Non pretende di essere
 completa: per un posto che non c'è, il campo **Fuso** accetta qualunque nome
 fra i quasi cinquecento che il sistema conosce.
 
+## 3.1 La tendina non mostra cosa hai scelto, e non è una dimenticanza
+
+Scegli una città e la casella **Fuso** si riempie mentre guardi. Dopo il
+salvataggio la tendina torna su *— scegli —* e la casella resta piena.
+
+Sembra un difetto ed è l'unica cosa onesta che può fare. Quello che si salva
+è **il fuso**, e un fuso ha più città: Roma e Milano sono `Europe/Rome`, New
+York e Miami sono `America/New_York`, Seattle e Los Angeles sono
+`America/Los_Angeles`. Mostrare «la città del fuso salvato» vuol dire
+sceglierne una a caso fra quelle — e infatti chi sceglieva Roma tornava sulla
+pagina e trovava scritto **Milano**: stesso fuso, ma non quello che aveva
+chiesto.
+
+Quindi la tendina è un attrezzo per riempire, non una finestra su quello che
+c'è dentro. Quello che vale sta nella casella accanto, che è anche l'unica
+cosa che il pannello legge.
+
+> `America/Seattle` non esiste. Il database dei fusi nomina ogni zona con la
+> sua città più grande, e tutta la costa del Pacifico — Seattle, Portland,
+> San Francisco, Las Vegas, Los Angeles — ha le stesse regole. Seattle, San
+> Francisco e Las Vegas sono in tendina lo stesso: non trovarle fa credere
+> che manchino.
+
 > **L'etichetta è la cosa che conta di più**, e non è un dettaglio estetico:
 > decide **quante** città si vedono insieme. Vedi il capitolo 5.
 
 # 4. Dove sta, sul pannello
 
 La banda occupa le righe da 51 a 61. Sotto c'è la barra del timer, che parte a
-62; sopra, le cifre dell'orologio **salgono di cinque pixel** per fare posto —
-spazio che sopra c'era già, e che sotto è la differenza fra un carattere da
-otto e uno da dieci, cioè fra leggere e non leggere da tre metri.
+62; sopra, le cifre dell'orologio **salgono di tre pixel**.
+
+## 4.1 Perché tre, e non cinque
+
+Nella 9.9 erano cinque, e non servivano a evitare una collisione: senza alzata
+le cifre finiscono alla riga 45 e la banda comincia a 51, lo spazio c'era già.
+Servivano a **ribilanciare** — senza, le cifre hanno 17 righe sopra e 5 sotto,
+e sembrano sedute sulla banda invece che centrate.
+
+Cinque però ne creavano un'altra, e si è vista solo sul pannello vero:
+
+| Alzata | Cifre | Righe in comune con la data |
+|---|---|---|
+| 0 | 17–45 | 0 |
+| **3** | **14–42** | **1** |
+| 5 | 12–40 | 3 |
+
+Le cifre e la data sono separate da **cinque pixel in orizzontale**, sempre —
+l'alzata non li tocca. Ma finché i due blocchi stanno ad altezze diverse
+nessuno li confronta; affiancati, a tre metri, il minuto e il giorno della
+settimana per un istante si leggono come una cosa sola.
+
+A tre la riga in comune è una, e sotto le cifre restano otto righe invece di
+dieci. Uno squilibrio che non si nota, in cambio di una quasi collisione che
+si notava.
+
+## 4.2 E se tre non ti va
+
+Pagina *Orologio*, sezione dell'aspetto: **Posizione verticale dell'ora**, un
+cursore da −12 a +12 pixel. Lo zero è la posizione di serie, il cursore è uno
+scostamento da lì, e vale anche a World Time spento.
+
+Il numero giusto non è lo stesso per tutti: lo decidono l'altezza a cui sta il
+pannello e il punto da cui lo guardi. Oltre il limite fisico — la banda, il
+bordo — il cursore smette di muovere invece di spingere le cifre dove non si
+leggono più.
 
 Due cose si spostano da sole quando la banda è accesa:
 
@@ -157,4 +213,5 @@ che NTP sia sincronizzato.
 | Cosa si salva | il fuso IANA, non uno scarto di ore |
 | Ora legale | automatica, dal database del sistema |
 | Altro giorno | `+` o `−` dopo l'ora |
-| Sul pannello | banda alle righe 51–61; le cifre salgono di 5 px |
+| Sul pannello | banda alle righe 51–61; le cifre salgono di 3 px |
+| Se non ti torna | cursore *Posizione verticale dell'ora*, ±12 px |

@@ -308,7 +308,7 @@ class ClockSource(Source):
                      clock["time_color"], clock["date_color"],
                      tuple((v["nome"], v["colore"]) for v in colonna),
                      stato_sem, sem_acceso, barra, diretta,
-                     tuple(mondo), novita)
+                     tuple(mondo), novita, self._offset())
         if signature == self._signature:
             return None
         self._signature = signature
@@ -322,12 +322,18 @@ class ClockSource(Source):
         box = draw.textbbox((0, 0), shown, font=self._font)
         x = (self.width - (box[2] - box[0])) // 2 - box[0]
         y = (self.height - (box[3] - box[1])) // 2 - box[1]
-        # Con il World Time acceso le cifre salgono di qualche pixel. Sopra
-        # lo spazio c'e' -- fra il bordo e le cifre restano sedici righe -- e
-        # sotto quei pixel diventano la differenza fra un carattere da otto e
-        # uno da dieci, che a tre metri e' la differenza fra leggere e no.
+        # Con il World Time acceso le cifre salgono di qualche pixel, per non
+        # restare appoggiate alla banda degli orari del mondo. Poi si somma
+        # l'offset scelto dall'utente, che vale sempre: vedi `_offset()`.
         if mondo:
             y -= self.MONDO_ALZATA
+        y += self._offset()
+        # Un limite fisico, non un ripensamento sul gusto di chi regola: le
+        # cifre non devono finire dentro la banda degli orari del mondo ne'
+        # sotto il bordo. Oltre quel punto il cursore smette di muovere, e la
+        # pagina lo dice invece di lasciar credere che sia rotto.
+        y = min(y, self._fondo_cifre(mondo) - box[3])
+        y = max(y, -box[1])
         draw.text((x, y), shown, font=self._font, fill=time_color)
         ora_destra = x + box[2]
         ora_sotto = y + box[3]
@@ -429,7 +435,18 @@ class ClockSource(Source):
     # Di quanto salgono le cifre quando la banda c'e'. Cinque: sopra le cifre
     # restano sedici righe libere, quindi si puo' -- e sotto sono i pixel che
     # portano il carattere da otto a dieci.
-    MONDO_ALZATA = 5
+    # Quanto salgono le cifre quando il World Time e' acceso.
+    #
+    # Era 5, ed e' sceso a 3 guardando il pannello vero. A 5 le cifre e la
+    # data condividevano **tre righe**: i due blocchi si ritrovavano
+    # affiancati con cinque pixel in mezzo, e a tre metri il minuto e il
+    # giorno della settimana per un istante si leggono come una cosa sola.
+    # A 3 la riga in comune e' una, e i due blocchi tornano separati.
+    #
+    # Il prezzo sono due righe di respiro in meno sotto le cifre, otto invece
+    # di dieci: uno squilibrio che non si nota, in cambio di una quasi
+    # collisione che si notava. Chi la pensa diversamente ha il cursore.
+    MONDO_ALZATA = 3
 
     # Dove comincia la banda e quanto e' alta. Da 51 a 61: sopra c'e' la
     # lampada piu' bassa del semaforo (finisce a 52, ma le cifre alzate le
@@ -588,6 +605,35 @@ class ClockSource(Source):
             return bool(self.onair())
         except Exception:                            # pragma: no cover
             return False
+
+    # ------------------------------------------------ l'offset verticale
+
+    # Di quanto si puo' spostare l'ora, in pixel, in su o in giu'. Dodici
+    # righe su sessantaquattro sono gia' tanto: oltre, con il World Time
+    # acceso, il limite fisico arriva prima del cursore e il comando
+    # smetterebbe di rispondere per meta' della sua corsa.
+    OFFSET_MASSIMO = 12
+
+    def _offset(self):
+        """Lo spostamento verticale scelto dall'utente. Positivo = piu' giu'.
+
+        Vale **sempre**, non solo con il World Time acceso: un comando che
+        non fa niente nel caso piu' comune e' un comando che fa aprire una
+        pagina di aiuto. Con il World Time si somma all'alzata automatica,
+        cosi' lo zero resta la posizione buona di serie e il cursore e' uno
+        scostamento da quella, non un numero assoluto da indovinare.
+        """
+        try:
+            valore = int((self.cfg.get("clock") or {}).get("offset_v", 0) or 0)
+        except (TypeError, ValueError):
+            return 0
+        return max(-self.OFFSET_MASSIMO, min(self.OFFSET_MASSIMO, valore))
+
+    def _fondo_cifre(self, mondo):
+        """L'ultima riga su cui le cifre possono arrivare."""
+        if mondo:
+            return self.MONDO_CIMA - 1
+        return self.height - 1
 
     # -------------------------------------------------- la versione nuova
 

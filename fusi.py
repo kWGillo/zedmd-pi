@@ -93,6 +93,13 @@ CITTA = (
     ("Chicago", "America/Chicago"),
     ("Denver", "America/Denver"),
     ("Los Angeles", "America/Los_Angeles"),
+    # Tutta la costa del Pacifico condivide le stesse regole, e il database
+    # dei fusi nomina ogni zona con la sua citta' piu' grande: `America/
+    # Seattle` non esiste. Stanno in elenco perche' sono le prime che si
+    # cercano, e non trovarle fa credere che manchino.
+    ("Seattle", "America/Los_Angeles"),
+    ("San Francisco", "America/Los_Angeles"),
+    ("Las Vegas", "America/Los_Angeles"),
     ("Anchorage", "America/Anchorage"),
     ("Honolulu", "Pacific/Honolulu"),
     ("Toronto", "America/Toronto"),

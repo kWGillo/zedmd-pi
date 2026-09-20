@@ -489,10 +489,8 @@ STRINGS = {
     "world.adesso": ("Adesso", "Now"),
     "world.scegli": ("— scegli —", "— pick one —"),
     "world.fuso.hint": (
-        "La città riempie il fuso. Il campo accetta anche un fuso scritto a "
-        "mano.",
-        "The city fills the zone in. The field also takes a zone typed by "
-        "hand."),
+        "La tendina riempie la casella e torna indietro. Vale la casella.",
+        "The menu fills the field in, then resets. The field is what counts."),
     "world.etichetta.hint": (
         "Etichette corte fanno stare più città insieme: «NY» invece di "
         "«New York».",
@@ -851,6 +849,12 @@ STRINGS = {
                        "24-hour format (when off: 12-hour with AM/PM)"),
     "clock.showdate": ("Mostra la data", "Show the date"),
     "clock.blink": ("Due punti lampeggianti", "Blinking colon"),
+    "clock.offset": ("Posizione verticale dell'ora", "Vertical position of the time"),
+    "clock.offset.su": ("più in alto", "higher"),
+    "clock.offset.giu": ("più in basso", "lower"),
+    "clock.offset.hint": (
+        "Scostamento dalla posizione normale. Oltre il bordo non va.",
+        "Offset from the normal position. It will not go past the edge."),
     "clock.preview.date": ("LUN 18/08", "MON 18/08"),
 
     # --------------------------------------------------------------------- media

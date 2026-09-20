@@ -138,6 +138,18 @@ def ntp_status():
     return info
 
 
+def _clock_source():
+    """La classe dell'orologio, importata al momento.
+
+    In cima al file no: `sources` tira dentro PIL e tutte le sorgenti, e la
+    web UI la si importa anche dalle prove che con il pannello non c'entrano.
+    Serve solo per leggere una costante -- la corsa del cursore dell'offset --
+    e quella deve stare accanto al codice che la usa, non copiata qui.
+    """
+    from sources.clock import ClockSource
+    return ClockSource
+
+
 def create_app(runtime):
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = 512 * 1024 * 1024
@@ -579,6 +591,7 @@ def create_app(runtime):
             timezones=all_timezones(), ntp=ntp_status(),
             citta=_fusi.elenco(), fusi_pronti=_fusi.DISPONIBILE,
             anteprima=anteprima,
+            offset_massimo=_clock_source().OFFSET_MASSIMO,
             now=time.strftime("%d/%m/%Y %H:%M:%S"), page="clock")
 
     # Quanti file per pagina nell'elenco della libreria.
@@ -1867,6 +1880,15 @@ def create_app(runtime):
         clock["format_24h"] = request.form.get("format_24h") == "on"
         clock["show_date"] = request.form.get("show_date") == "on"
         clock["blink_colon"] = request.form.get("blink_colon") == "on"
+        # Lo spostamento verticale. Si stringe nella corsa del cursore: il
+        # campo arriva dal browser e non c'e' motivo di fidarsi di un numero
+        # che sposterebbe le cifre fuori dal pannello.
+        tetto = _clock_source().OFFSET_MASSIMO
+        try:
+            clock["offset_v"] = max(-tetto, min(tetto,
+                                                int(request.form.get("offset_v", 0))))
+        except (TypeError, ValueError):
+            clock["offset_v"] = 0
         language = request.form.get("language", "it")
         clock["language"] = language if language in dict(LANGUAGES) else "it"
         dmdconf.save()

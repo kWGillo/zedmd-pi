@@ -2,6 +2,56 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.11]
+
+### L'ora si sposta a gusto
+
+Un cursore nella pagina **Orologio**, da −12 a +12 pixel. Vale sempre, non
+solo con il World Time acceso: lo zero è la posizione buona di serie e il
+cursore è uno scostamento da quella, non un numero assoluto da indovinare.
+
+Esiste perché la posizione giusta non è la stessa per tutti — la decidono
+l'altezza a cui sta il pannello e il punto da cui lo si guarda, due cose che
+da qui non si possono sapere.
+
+Oltre il limite fisico — la banda degli orari del mondo, il bordo — il cursore
+smette di muovere invece di spingere le cifre dove non si leggono.
+
+### Due pixel più in basso
+
+L'alzata del World Time scende da **cinque a tre**, e il motivo si è visto
+solo sul pannello vero: a cinque le cifre e la data condividevano **tre
+righe**.
+
+Lo stacco orizzontale fra il minuto e il giorno della settimana è di cinque
+pixel e non cambia mai. Ma finché i due blocchi stanno ad altezze diverse
+nessuno li confronta; affiancati, a tre metri, per un istante si leggono come
+una cosa sola. A tre righe di alzata la riga in comune è una.
+
+Il prezzo sono due righe di respiro in meno sotto le cifre, otto invece di
+dieci: uno squilibrio che non si nota, in cambio di una quasi collisione che
+si notava.
+
+### La tendina delle città non dice più il falso
+
+È venuto fuori cercando Seattle. Il valore salvato è il **fuso**, e un fuso
+ha più città: Roma e Milano, New York e Miami, Toronto e Montreal. Marcando
+tutte le opzioni che corrispondono si ottiene un menu con due `selected`, e il
+browser tiene l'ultima — chi sceglieva Roma tornava sulla pagina e trovava
+scritto **Milano**.
+
+Adesso la tendina non mostra niente: è una scorciatoia che riempie la casella
+del fuso **mentre guardi**, e la casella è l'unica cosa che il pannello legge.
+
+Questo chiude anche il secondo equivoco: il campo *Fuso* sembrava da compilare
+a mano, e la colonna *Adesso* rispondeva con un trattino finché non si
+salvava. Due cose che insieme sembrano un errore.
+
+In tendina entrano **Seattle**, **San Francisco** e **Las Vegas**.
+`America/Seattle` non esiste — tutta la costa del Pacifico ha le stesse regole
+e il database dei fusi nomina ogni zona con la sua città più grande — ma non
+trovarle fa credere che manchino.
+
 ## [9.10]
 
 ### No all'aggiornamento automatico, sì a farsi sapere

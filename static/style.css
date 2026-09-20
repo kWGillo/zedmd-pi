@@ -287,6 +287,18 @@ input[type=color] {
 }
 .preview #pv_time { font-size: 34px; font-weight: 700; letter-spacing: 2px; }
 .preview #pv_date { font-size: 13px; }
+/* L'anteprima si sposta insieme al cursore dell'offset: senza, per capire
+   dove finiscono le cifre bisognava salvare e andare a guardare il pannello.
+   `transition` no: il cursore si trascina, e un ritardo lo farebbe sembrare
+   in ritardo invece che morbido. */
+.preview #pv_time { will-change: transform; }
+
+/* Il cursore dell'offset verticale, con il numero a destra. Il numero ha
+   una larghezza fissa: senza, passando da -9 a -10 tutta la riga scattava. */
+.cursore { display: flex; align-items: center; gap: 12px; }
+.cursore input[type=range] { flex: 1 1 auto; min-width: 0; accent-color: var(--accent); }
+.cursore .hint { flex: 0 0 auto; white-space: nowrap; }
+.cursore #offset_v_val { flex: 0 0 auto; width: 3.2rem; text-align: right; }
 
 button.ghost {
   background: transparent; color: var(--accent);

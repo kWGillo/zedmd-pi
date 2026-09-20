@@ -29,10 +29,18 @@
         <td><input type="checkbox" name="on_{{ loop.index0 }}"
                    {{ 'checked' if voce.enabled }}></td>
         <td>
+          {# La tendina **non** mostra cosa c'e' salvato: e' una scorciatoia
+             per riempire la casella del fuso, e riparte sempre da capo.
+             Mostrarlo sarebbe una bugia, perche' un fuso ha piu' citta' --
+             Roma e Milano, New York e Miami, Seattle e Los Angeles -- e il
+             valore salvato e' il fuso, non la citta'. Chi sceglieva Roma si
+             ritrovava scritto Milano, che e' lo stesso fuso ma non e' quello
+             che aveva chiesto. Quello che vale si legge nella casella
+             accanto, che e' anche l'unica cosa che il pannello usa. #}
           <select name="citta_{{ loop.index0 }}">
             <option value="">{{ t('world.scegli') }}</option>
             {% for nome, zona in citta %}
-            <option value="{{ zona }}" {{ 'selected' if zona == voce.fuso }}>{{ nome }}</option>
+            <option value="{{ zona }}">{{ nome }}</option>
             {% endfor %}
           </select>
         </td>
@@ -113,6 +121,17 @@
       {{ t('clock.blink') }}
     </label>
 
+    <label for="offset_v">{{ t('clock.offset') }}</label>
+    <div class="cursore">
+      <span class="hint">{{ t('clock.offset.su') }}</span>
+      <input type="range" id="offset_v" name="offset_v"
+             min="-{{ offset_massimo }}" max="{{ offset_massimo }}" step="1"
+             value="{{ cfg.clock.offset_v }}">
+      <span class="hint">{{ t('clock.offset.giu') }}</span>
+      <span class="mono big" id="offset_v_val">{{ cfg.clock.offset_v }}</span>
+    </div>
+    <p class="hint">{{ t('clock.offset.hint') }}</p>
+
     <button type="submit">{{ t('common.save') }}</button>
   </form>
 </section>
@@ -163,5 +182,34 @@ function bind(id, hexId, previewId) {
 }
 bind('time_color', 'time_color_hex', 'pv_time');
 bind('date_color', 'date_color_hex', 'pv_date');
+
+// Il numero accanto al cursore, e l'anteprima che si sposta davvero: un
+// cursore che muove solo se stesso obbliga a salvare per capire dove sei.
+(function () {
+  const cursore = document.getElementById('offset_v');
+  if (!cursore) { return; }
+  const numero = document.getElementById('offset_v_val');
+  const ora = document.getElementById('pv_time');
+  function aggiorna() {
+    const v = parseInt(cursore.value, 10) || 0;
+    numero.textContent = v > 0 ? '+' + v : String(v);
+    if (ora) { ora.style.transform = 'translateY(' + v + 'px)'; }
+  }
+  cursore.addEventListener('input', aggiorna);
+  aggiorna();
+})();
+
+// La tendina delle citta' riempie la casella del fuso mentre guardi. Il
+// server lo farebbe comunque al salvataggio, ma fino a quel momento si
+// vedeva un campo vuoto e un trattino nella colonna «Adesso» -- due cose
+// che insieme sembrano un errore, e infatti sono state segnalate come tale.
+document.querySelectorAll('select[name^="citta_"]').forEach(function (menu) {
+  const indice = menu.name.replace('citta_', '');
+  const casella = document.querySelector('input[name="fuso_' + indice + '"]');
+  if (!casella) { return; }
+  menu.addEventListener('change', function () {
+    if (menu.value) { casella.value = menu.value; }
+  });
+});
 </script>
 {% endblock %}

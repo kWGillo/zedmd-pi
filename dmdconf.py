@@ -100,9 +100,17 @@ DEFAULTS = {
         "show_date": True,
         "language": "it",
         "blink_colon": True,
+        # Di quanti pixel spostare le cifre in verticale: negativo in alto,
+        # positivo in basso, zero dove le mette il programma. Vale sempre, e
+        # con il World Time acceso si somma all'alzata automatica.
+        #
+        # Esiste perche' la posizione buona non e' la stessa per tutti: la
+        # decide l'altezza a cui sta il pannello e da dove lo si guarda, e
+        # sono due cose che da qui non si possono sapere.
+        "offset_v": 0,
         # World Time: che ore sono adesso dall'altra parte del mondo. Fino a
         # cinque localita', tre per volta sul pannello, in una banda sotto le
-        # cifre -- che per farle stare salgono di cinque pixel.
+        # cifre -- che per farle stare salgono di tre pixel.
         #
         # Si salva il **fuso IANA** e non un'ora di scarto: «New York = UTC-5»
         # e' sbagliato per meta' dell'anno, e sbagliato in silenzio. Le regole

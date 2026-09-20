@@ -2366,6 +2366,37 @@ Storico:
        `ota-esito.json`, che sopravvive al riavvio, e da li' in un banner
        della pagina, in un pallino rosso nel menu e in un sensore di Home
        Assistant a cui si puo' attaccare un'automazione.
+  9.11 L'ora si sposta a gusto, e due bugie in meno.
+       L'alzata del World Time scende da cinque pixel a **tre**, e il motivo
+       si e' visto solo sul pannello vero: a cinque le cifre e la data
+       condividevano tre righe. Lo stacco orizzontale fra il minuto e il
+       giorno della settimana e' cinque pixel e non cambia mai, ma finche' i
+       due blocchi stanno ad altezze diverse nessuno li confronta; affiancati,
+       a tre metri, per un istante si leggono come una cosa sola. A tre righe
+       di alzata la riga in comune e' una. Il prezzo sono due righe di respiro
+       in meno sotto le cifre, otto invece di dieci -- uno squilibrio che non
+       si nota, in cambio di una quasi collisione che si notava.
+       *E la posizione giusta non e' la stessa per tutti*, perche' la decide
+       l'altezza a cui sta il pannello e da dove lo si guarda: due cose che da
+       qui non si possono sapere. Quindi c'e' un **cursore** nella pagina
+       Orologio, da -12 a +12 pixel, che vale sempre e non solo con il World
+       Time acceso. Lo zero e' la posizione buona di serie, e il cursore e'
+       uno scostamento da quella. Oltre il limite fisico -- la banda degli
+       orari del mondo, il bordo -- smette di muovere invece di spingere le
+       cifre dove non si leggono.
+       *La tendina delle citta' diceva il falso*, ed e' venuto fuori
+       cercando Seattle. Il valore salvato e' il fuso, e un fuso ha piu'
+       citta': Roma e Milano, New York e Miami, adesso Seattle e Los Angeles.
+       Marcando tutte le opzioni che corrispondono si ottiene un menu con due
+       `selected`, e il browser tiene l'ultima -- chi sceglieva Roma tornava
+       sulla pagina e trovava scritto Milano. Adesso la tendina non mostra
+       niente: e' una scorciatoia che riempie la casella del fuso **mentre
+       guardi**, e la casella e' l'unica cosa che il pannello legge. Questo
+       chiude anche il secondo equivoco, quello per cui il campo sembrava da
+       compilare a mano e la colonna «Adesso» rispondeva con un trattino.
+       In tendina entrano Seattle, San Francisco e Las Vegas: `America/Seattle`
+       non esiste, tutta la costa del Pacifico ha le stesse regole, ma non
+       trovarle fa credere che manchino.
 """
 
-__version__ = "9.10"
+__version__ = "9.11"
