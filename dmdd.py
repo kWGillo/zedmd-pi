@@ -353,6 +353,9 @@ class Runtime:
         # E l'orologio deve sapere se siamo in diretta, per il trattino
         # rosso in cima. Come per il timer: un si' o un no, niente di piu'.
         self.clock.onair = self._onair_in_onda
+        # Stessa forma per il puntino verde della versione nuova: l'orologio
+        # chiede, il runtime risponde, e nessuno dei due sa cosa sia GitHub.
+        self.clock.aggiornamento = self._aggiornamento_disponibile
         self.mqtt = mqttbus.MqttBus(self.cfg)
         # Nasce qui e non in `_start_metadati` perche' `shutdown` la nomina:
         # un arresto che arriva mentre l'avvio e' ancora a meta' non deve
@@ -408,8 +411,8 @@ class Runtime:
         self.zedmd_http.start()
 
         self.running = True
-        self.update_info = {"ok": False, "error": "", "current": __version__,
-                            "latest": "", "available": False, "checked": 0}
+        self.update_info = ota._esito(__version__)
+        self.update_info["checked"] = 0
         # Non si interroga GitHub all'avvio: il controllo della libreria e'
         # su richiesta, dal pulsante nella pagina Impostazioni.
         self.lib_info = {"ok": False, "error": "", "path": "",
@@ -544,6 +547,17 @@ class Runtime:
     def _onair_in_onda(self):
         """Se siamo in diretta. Lo chiede l'orologio per il suo trattino."""
         return bool(self.onair.enabled and self.onair.in_onda())
+
+    def _aggiornamento_disponibile(self):
+        """Se c'e' una versione nuova. Lo chiede l'orologio per il suo puntino.
+
+        Legge l'esito del controllo gia' fatto, non ne fa uno nuovo: questa
+        funzione viene chiamata a ogni fotogramma dell'orologio, e interrogare
+        GitHub venti volte al secondo sarebbe un modo creativo di farsi
+        bloccare dall'API.
+        """
+        info = self.update_info or {}
+        return bool(info.get("ok") and info.get("available"))
 
     def _suona_onair(self):
         """Il campanello della diretta: **una volta sola**, alla chiusura.
@@ -846,9 +860,8 @@ class Runtime:
         try:
             self.update_info = ota.check(self.cfg)
         except Exception as exc:
-            self.update_info = {"ok": False, "error": str(exc),
-                                "current": __version__, "latest": "",
-                                "available": False, "checked": time.time()}
+            self.update_info = ota._esito(__version__)
+            self.update_info["error"] = str(exc)
         return self.update_info
 
     def _ota_loop(self):
@@ -858,8 +871,9 @@ class Runtime:
             if self.cfg["ota"]["auto_check"]:
                 info = self.check_update()
                 if info.get("available"):
-                    print("[ota] disponibile la versione %s (installata %s)"
-                          % (info["latest"], info["current"]))
+                    print("[ota] disponibile la versione %s (installata %s, da %s)"
+                          % (info["latest"], info["current"],
+                             info.get("fonte") or "?"))
             hours = max(1, int(self.cfg["ota"]["check_interval_hours"]))
             for _ in range(hours * 60):
                 if not self.running:

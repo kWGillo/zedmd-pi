@@ -10,12 +10,30 @@
 <section class="card">
   <h2>{{ t('settings.updates') }}</h2>
 
+  {% if esito %}
+  <div class="banner {{ 'warn' if esito.esito != 'riuscito' }}">
+    {% if esito.esito == 'riuscito' %}
+    {{ t('settings.update.esito.ok', version=esito.attiva or esito.atteso) }}
+    {% elif esito.esito == 'ripristinato' %}
+    {{ t('settings.update.esito.back', version=esito.atteso, active=esito.attiva or '?') }}
+    {% else %}
+    {{ t('settings.update.esito.bad', version=esito.atteso) }}
+    {% endif %}
+    <div class="hint">{{ esito.quando | timestamp }}{% if esito.motivo %} — {{ esito.motivo }}{% endif %}</div>
+    <form method="post" action="{{ url_for('api_update_esito') }}">
+      <button type="submit" class="ghost">{{ t('settings.update.esito.ok_letto') }}</button>
+    </form>
+  </div>
+  {% endif %}
+
   <dl class="info">
     <dt>{{ t('settings.update.current') }}</dt><dd class="mono big">{{ update.current }}</dd>
     <dt>{{ t('settings.update.latest') }}</dt>
-    <dd class="mono">{{ update.latest if update.latest else t('settings.update.unchecked') }}</dd>
+    <dd class="mono">{{ update.latest if update.latest else t('settings.update.unchecked') }}{% if update.tag %} <span class="hint">({{ update.tag }})</span>{% endif %}</dd>
     <dt>{{ t('settings.update.checked') }}</dt>
     <dd>{% if update.checked %}{{ update.checked | timestamp }}{% else %}{{ t('common.never') }}{% endif %}</dd>
+    <dt>{{ t('settings.update.fonte') }}</dt>
+    <dd>{% if update.fonte == 'release' %}{{ t('settings.update.fonte.release') }}{% elif update.fonte == 'ramo' %}{{ t('settings.update.fonte.ramo') }}{% else %}—{% endif %}</dd>
   </dl>
 
   {% if update.error %}
@@ -24,6 +42,14 @@
   <div class="banner">{{ t('settings.update.available', version=update.latest) }}</div>
   {% elif update.latest %}
   <p class="hint">{{ t('settings.update.uptodate') }}</p>
+  {% endif %}
+
+  {% if update.available and update.note %}
+  <label>{{ t('settings.update.note') }}</label>
+  <pre class="log">{{ update.note }}</pre>
+  {% endif %}
+  {% if update.url %}
+  <p class="hint"><a href="{{ update.url }}" target="_blank" rel="noopener">{{ t('settings.update.vedi') }}</a></p>
   {% endif %}
 
   <div class="actions">
@@ -52,6 +78,11 @@
       <input type="checkbox" name="auto_check" {{ 'checked' if cfg.ota.auto_check }}>
       {{ t('settings.update.auto') }}
     </label>
+    <label class="check">
+      <input type="checkbox" name="segnale" {{ 'checked' if cfg.ota.segnale }}>
+      {{ t('settings.update.segnale') }}
+    </label>
+    <p class="hint">{{ t('settings.update.segnale.hint') }}</p>
     <button type="submit">{{ t('common.save') }}</button>
   </form>
 

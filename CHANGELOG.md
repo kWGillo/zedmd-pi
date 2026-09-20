@@ -2,6 +2,124 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.10]
+
+### No all'aggiornamento automatico, sì a farsi sapere
+
+La domanda era se aggiungere un aggiornamento quotidiano **automatico**. La
+risposta è no, e il motivo è che il controllo quotidiano esisteva già dalla
+1.5 — ogni ventiquattro ore, acceso di serie — e scriveva una riga in
+`ota.log`, cioè parlava a nessuno.
+
+Il buco non era il controllo: era l'annuncio.
+
+### L'entità update di Home Assistant
+
+Il pannello si dichiara come `update`, il tipo che Home Assistant ha fatto
+apposta: «installata 9.9 → disponibile 9.10», le note di rilascio e il
+pulsante Installa, nella stessa lista in cui HA mette gli aggiornamenti del
+sistema e degli add-on. Un `binary_sensor` chiamato «Aggiornamento
+disponibile» avrebbe detto la stessa cosa in un posto dove nessuno la cerca.
+
+Il pulsante funziona e **non è un aggiornamento automatico**: è una pressione,
+come quella sulla pagina web, fatta dal divano. Rifiuta di partire se il
+controllo non ha trovato niente di nuovo e se un'installazione è già in corso.
+
+### Quattro pixel verdi
+
+Nell'angolo in alto a destra dell'orologio, quando c'è una versione nuova. È
+il punto più vuoto del pannello — la data comincia alla riga 2, il trattino
+della diretta sta al centro, la colonna dei rifiuti sta a sinistra — e per
+questo si nota anche senza guardarlo. Si spegne dalla pagina Aggiornamenti.
+
+Nel menu della pagina web compare un pallino sulla voce *Aggiornamenti*, che
+è l'ultima pagina che qualcuno apre per caso.
+
+### Il controllo guarda la release, non il ramo
+
+`version.py` sul ramo cambia nel momento in cui si fa push, cioè anche a metà
+di un lavoro; la release esiste solo quando qualcuno ha deciso che quella
+versione si può installare. Fra i due c'è la distanza fra «il codice è
+cambiato» e «la versione è pronta».
+
+Se l'API delle release non risponde — ha un limite di chiamate per indirizzo —
+si ricade su `version.py` del ramo, come funzionava fino alla 9.9: un
+controllo meno preciso è meglio di un controllo che smette di funzionare.
+
+E adesso **quello che la pagina promette è quello che si installa**:
+l'archivio si scarica dal tag della release, non dalla punta del ramo.
+
+### Il ripristino non è più muto
+
+Il ripristino automatico funziona dalla 1.5, e proprio per questo era
+diventato invisibile: rimetteva in piedi la versione precedente e l'unica
+traccia era una riga in fondo a un log. Dal pannello, la mattina dopo, un
+aggiornamento fallito e uno mai tentato erano identici — salvo che nel primo
+caso continui a premere Installa e continua a non succedere niente.
+
+L'esito finisce in `/var/lib/dmd/ota-esito.json`, che sopravvive al riavvio
+del servizio, e da lì in un banner nella pagina, in un pallino rosso nel menu
+e in un sensore di Home Assistant a cui si può attaccare un'automazione.
+
+## [9.9]
+
+### World Time
+
+Fino a cinque località con la loro ora vera, in una banda alta dieci pixel
+sotto le cifre dell'orologio. Nome nel colore della data, ora in grigio
+chiaro, e un `+` o un `−` quando laggiù è un altro giorno.
+
+Quest'ultimo è il dettaglio che sembra un vezzo e non lo è: a Roma le 05:54
+sono l'una e cinquantaquattro di New York, ma di **ieri**, ed è esattamente
+quello che uno vuole sapere guardando un orologio del mondo.
+
+### Il fuso, non le coordinate
+
+Si salva l'identificativo IANA — `America/New_York` — e non un'ora di scarto,
+perché «New York = UTC−5» è sbagliato per metà dell'anno **e sbagliato in
+silenzio**. Le regole dell'ora legale stanno già nel database dei fusi del
+Raspberry, si aggiornano con gli aggiornamenti di sistema e non chiedono rete.
+
+Le coordinate GPS sono state scartate per aritmetica, non per principio:
+tradurre latitudine e longitudine in un fuso richiede un archivio di poligoni
+da cinquanta megabyte, su un pacchetto che ne pesa tre. Una tendina con un
+centinaio di città riempie il campo, e chi sta altrove scrive a mano il fuso
+fra i quasi cinquecento che il sistema conosce.
+
+### Le due preoccupazioni sull'ingombro erano infondate
+
+Ed è bastato misurare. Il semaforo delle scadenze occupa **sette pixel** di
+larghezza, da 219 a 225 — non i 68 della fascia che gli è riservata. E da
+`y=53` in giù il pannello era già completamente vuoto, per tutti i 256 pixel.
+Non serviva né confinare la banda nella larghezza dell'orologio né spostare le
+lampade.
+
+Le cifre salgono di cinque pixel, spazio che sopra c'era già, e che sotto è la
+differenza fra un carattere da otto e uno da dieci: cioè fra leggere e no.
+
+### Quello che invece dava fastidio davvero
+
+Con **quattro** raccolte differenziate nello stesso giorno, l'ultima finiva
+alla riga 59, dentro la banda. La segnalazione è arrivata da chi ne ha quattro,
+guardando le anteprime.
+
+Adesso la colonna sa dove deve fermarsi e distribuisce le voci nello spazio che
+le resta. Con una, due o tre non cambia niente — ed è il motivo per cui il
+difetto non si sarebbe visto provando in casa.
+
+### Quante se ne vedono insieme
+
+Quattro con le sigle corte (`NY`, `TYO`), tre con i nomi interi, due con
+«LOS ANGELES». Le altre ruotano a gruppi ogni otto secondi, con un cambio
+netto: niente scorrimento, che obbliga ad aspettare il giro, e niente
+dissolvenza, che su un pannello LED è una scala di grigi.
+
+Il conto delle città per gruppo si fa sulla **più larga** e non sulle prime.
+Altrimenti un giro su due l'ultima usciva dal bordo — e questa l'hanno presa le
+prove, prima del pannello.
+
+Manuale nuovo: [`docs/worldtime.it.md`](docs/worldtime.it.md).
+
 ## [9.8.1]
 
 ### Il testo che sbordava

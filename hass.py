@@ -22,6 +22,7 @@ import random
 import threading
 import time
 
+import ota
 from version import __version__
 
 # Servizi esposti come interruttori. La chiave e' quella in `cfg["services"]`.
@@ -200,6 +201,11 @@ class HassBridge:
         # ricordato: una voce rinominata lascerebbe in Home Assistant
         # un'entita' orfana che non si aggiorna piu'.
         self._rifiuti_noti = []
+        # Un aggiornamento e' gia' stato avviato da qui. Non torna mai a
+        # falso da solo, e va bene cosi': o il servizio riparte -- e allora
+        # questo oggetto e' nuovo -- oppure non riparte, e non c'e' nessuno
+        # che possa premere un pulsante due volte.
+        self._ota_in_corso = False
 
     # ------------------------------------------------------------------ topic
 
@@ -487,6 +493,49 @@ class HassBridge:
             })
             self._config("notify", "notify_%s" % livello, voce)
 
+        # ---------------------------------------------------- aggiornamenti
+        #
+        # Home Assistant ha un tipo di entita' fatto apposta, `update`, e usarlo
+        # invece di un sensore acceso/spento cambia parecchio: il pannello
+        # finisce nella stessa lista in cui HA mette gli aggiornamenti del
+        # sistema e degli add-on, con "installata 9.9 -> disponibile 9.10", le
+        # note di rilascio e il pulsante. Un `binary_sensor` chiamato
+        # "Aggiornamento disponibile" avrebbe fatto sapere la stessa cosa e
+        # sarebbe stato in un posto dove nessuno la cerca.
+        #
+        # Il `command_topic` c'e' e il pulsante funziona. **Non e' un
+        # aggiornamento automatico**: e' una pressione, come quella sulla
+        # pagina web, solo fatta dal divano. Che poi qualcuno possa scriverci
+        # sopra un'automazione e' vero, ed e' una sua scelta da prendere con
+        # gli occhi aperti -- non una che prendiamo noi di nascosto ogni notte.
+        aggiornamento = dict(common)
+        aggiornamento.update({
+            "name": "Aggiornamento",
+            "unique_id": "%s_aggiornamento" % node,
+            "object_id": "%s_aggiornamento" % node,
+            "state_topic": "%s/ota/state" % base,
+            "command_topic": "%s/ota/install" % base,
+            "payload_install": "INSTALL",
+            "device_class": "firmware",
+        })
+        self._config("update", "aggiornamento", aggiornamento)
+
+        # Com'e' finito l'ultimo aggiornamento. Esiste per una ragione sola:
+        # il ripristino automatico funziona, e proprio per questo un
+        # aggiornamento fallito non si vedeva -- il pannello la mattina dopo
+        # era acceso e sulla versione di prima, identico a uno che non era
+        # mai partito. Qui si vede, e ci si puo' attaccare un'automazione.
+        esito = dict(common)
+        esito.update({
+            "name": "Ultimo aggiornamento",
+            "unique_id": "%s_ota_esito" % node,
+            "object_id": "%s_ota_esito" % node,
+            "state_topic": "%s/ota/esito" % base,
+            "json_attributes_topic": "%s/ota/esito_dettaglio" % base,
+            "icon": "mdi:history",
+        })
+        self._config("sensor", "ota_esito", esito)
+
         self.announced = True
         return True
 
@@ -509,7 +558,9 @@ class HassBridge:
         noti = list(self._rifiuti_noti)
         scad = [("sensor", "scad_%s" % k) for k, _, _, _ in self.SCADENZE]
         for component, object_id in ([("sensor", "nowplaying"),
-                                      ("number", "brightness")] +
+                                      ("number", "brightness"),
+                                      ("update", "aggiornamento"),
+                                      ("sensor", "ota_esito")] +
                                      [("notify", "notify_%s" % k)
                                       for k, _, _ in NOTIFY] +
                                      [("sensor", k) for k in
@@ -581,6 +632,37 @@ class HassBridge:
         notte = bool(getattr(self.runtime, "night", False))
         self._send("%s/brightness/available" % base,
                    "offline" if notte else "online", force)
+
+        self._pubblica_ota(base, force)
+
+    def _pubblica_ota(self, base, force):
+        """Versione installata, versione disponibile, esito dell'ultima volta."""
+        info = getattr(self.runtime, "update_info", None) or {}
+        installata = str(info.get("current") or __version__)
+        # Quando il controllo non e' riuscito -- rete assente, API a limite --
+        # si dice che l'ultima disponibile **e' quella installata**, non una
+        # stringa vuota. Un'entita' update senza `latest_version` in Home
+        # Assistant compare come guasta, e un controllo non riuscito non e' un
+        # guasto del pannello: e' semplicemente una notizia che non e'
+        # arrivata, e nel dubbio la cosa onesta e' non annunciare niente.
+        stato = {"installed_version": installata,
+                 "latest_version": str(info.get("latest") or installata)}
+        if info.get("url"):
+            stato["release_url"] = str(info["url"])
+        note = ota.riassunto(info.get("note") or "")
+        if note:
+            stato["release_summary"] = note
+        self._send("%s/ota/state" % base,
+                   json.dumps(stato, ensure_ascii=False), force)
+
+        ultimo = ota.ultimo_esito() or {}
+        self._send("%s/ota/esito" % base, str(ultimo.get("esito") or NIENTE), force)
+        self._send("%s/ota/esito_dettaglio" % base,
+                   json.dumps({"atteso": ultimo.get("atteso", ""),
+                               "attiva": ultimo.get("attiva", ""),
+                               "motivo": ultimo.get("motivo", ""),
+                               "quando": ultimo.get("quando", 0)},
+                              ensure_ascii=False), force)
 
     def _pubblica_cielo(self, base, force):
         """Aerei e satelliti verso Home Assistant.
@@ -673,10 +755,40 @@ class HassBridge:
         # sola parte del progetto in cui i dati viaggiano anche all'indietro.
         self.bus.subscribe("%s/scadenze/aggiungi" % base, self._on_scadenza)
         self.bus.subscribe("%s/scadenze/completa" % base, self._on_scadenza_fatta)
+        self.bus.subscribe("%s/ota/install" % base, self._on_ota_install)
         # Home Assistant annuncia da solo quando riparte: pubblica "online"
         # su <prefisso>/status. E' il segnale esatto per ridichiarare le
         # entita', e non richiede di sapere dove sia ne' di sorvegliarlo.
         self.bus.subscribe("%s/status" % self.prefix(), self._on_hass_status)
+
+    def _on_ota_install(self, _topic, payload):
+        """Il pulsante Installa dell'entita' update.
+
+        Due rifiuti espliciti, ed e' la parte importante. Non si installa se
+        il controllo non ha trovato niente di nuovo -- un topic ritenuto o un
+        pulsante premuto due volte non deve riscrivere `/opt/dmd` per il gusto
+        di farlo. E non si installa se un aggiornamento e' gia' in corso.
+        """
+        raw = payload.decode("utf-8", "replace") if isinstance(payload, bytes) \
+            else str(payload)
+        if raw.strip().upper() not in ("INSTALL", "ON", "PRESS"):
+            return
+        info = getattr(self.runtime, "update_info", None) or {}
+        if not info.get("available"):
+            print("[hass] installazione richiesta, ma non risulta niente di nuovo")
+            return
+        if self._ota_in_corso:
+            print("[hass] installazione gia' in corso, richiesta ignorata")
+            return
+        self._ota_in_corso = True
+        print("[hass] installazione della versione %s richiesta da Home Assistant"
+              % info.get("latest"))
+        try:
+            ota.dimentica_esito()
+            ota.start_update(self.cfg, info.get("tag", ""))
+        except Exception as exc:                # noqa: BLE001
+            self._ota_in_corso = False
+            print("[hass] non riesco ad avviare l'aggiornamento: %s" % exc)
 
     def _on_hass_status(self, _topic, payload):
         raw = payload.decode("utf-8", "replace") if isinstance(payload, bytes) \

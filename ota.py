@@ -1,8 +1,9 @@
 """Aggiornamento via rete dal repository GitHub.
 
-Il controllo legge `version.py` dal ramo indicato e lo confronta con la
-versione installata. L'installazione scarica l'archivio del ramo, lo verifica
-e solo allora sostituisce i file.
+Il controllo chiede a GitHub **l'ultima release pubblicata** e la confronta
+con la versione installata; se l'API non risponde ricade su `version.py` del
+ramo, che e' come ha sempre funzionato fino alla 9.9. L'installazione scarica
+l'archivio di quel tag, lo verifica e solo allora sostituisce i file.
 
 La sicurezza sta tutta nell'ordine delle operazioni:
 
@@ -13,8 +14,14 @@ La sicurezza sta tutta nell'ordine delle operazioni:
   5. interroga la web UI per capire se il servizio e' davvero ripartito
   6. se non risponde, ripristina la copia e riavvia di nuovo
 
+  7. scrive com'e' andata in `ota-esito.json`, che sopravvive al riavvio
+
 Il passo 6 e' il motivo per cui l'installazione gira in un processo separato
 e staccato: deve sopravvivere al riavvio del servizio che la ha avviata.
+
+Il passo 7 e' nato dalla 9.10 e corregge un difetto che il passo 6 aveva
+creato: un ripristino riuscito riportava tutto a posto **in silenzio**, e da
+fuori era indistinguibile da un aggiornamento mai tentato.
 """
 
 import io
@@ -32,6 +39,10 @@ import urllib.request
 INSTALL_DIR = "/opt/dmd"
 BACKUP_DIR = "/var/lib/dmd/backup"
 LOG_PATH = "/var/lib/dmd/ota.log"
+# Com'e' finito l'ultimo aggiornamento. Una riga di JSON accanto al log, che
+# sopravvive al riavvio del servizio -- ed e' tutto il punto: chi scrive qui
+# e' il processo staccato, chi legge e' il servizio che riparte dopo.
+ESITO_PATH = "/var/lib/dmd/ota-esito.json"
 USER_AGENT = "zedmd-pi OTA"
 
 # File e cartelle che compongono l'installazione.
@@ -66,8 +77,11 @@ def tail_log(lines=25):
         return ""
 
 
-def _get(url, timeout=30):
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+def _get(url, timeout=30, accept=None):
+    headers = {"User-Agent": USER_AGENT}
+    if accept:
+        headers["Accept"] = accept
+    request = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(request, timeout=timeout) as response:
         return response.read()
 
@@ -92,29 +106,111 @@ def is_newer(remote, local):
     return version_tuple(remote) > version_tuple(local)
 
 
+# Quanto puo' essere lungo il riassunto delle note di rilascio. Il limite non
+# e' nostro: e' quello che Home Assistant impone a `release_summary` di
+# un'entita' update. Un testo piu' lungo non viene troncato, viene **rifiutato**
+# e l'entita' non nasce. Il numero sta qui, accanto a chi produce il testo,
+# perche' chi lo consuma non debba saperlo.
+RIASSUNTO_MASSIMO = 255
+
+
+def riassunto(note, limite=RIASSUNTO_MASSIMO):
+    """Le prime righe delle note di rilascio, entro il limite."""
+    testo = " ".join(str(note or "").split())
+    if len(testo) <= limite:
+        return testo
+    return testo[:limite - 1].rstrip() + "…"
+
+
+def release(repo):
+    """L'ultima release pubblicata, non l'ultimo commit del ramo.
+
+    La differenza conta piu' di quanto sembri. `version.py` sul ramo cambia
+    nel momento in cui si fa push, cioe' anche a meta' di un lavoro; la
+    release esiste solo quando qualcuno ha deciso che quella versione si
+    puo' installare. Fra i due c'e' la distanza che separa "il codice e'
+    cambiato" da "la versione e' pronta", ed e' esattamente la distanza che
+    un pannello su una mensola deve rispettare.
+
+    In piu' la release porta con se' due cose che il ramo non ha: **quando**
+    e' stata pubblicata e **cosa** contiene.
+    """
+    dati = json.loads(_get("https://api.github.com/repos/%s/releases/latest" % repo,
+                           timeout=20,
+                           accept="application/vnd.github+json").decode("utf-8", "replace"))
+    tag = str(dati.get("tag_name") or "").strip()
+    if not tag:
+        raise RuntimeError("release senza tag")
+    return {
+        "tag": tag,
+        # Il tag e' `v9.10`, la versione e' `9.10`: la `v` e' una convenzione
+        # di Git, non fa parte del numero e non deve arrivare al confronto.
+        "versione": tag.lstrip("vV"),
+        "note": str(dati.get("body") or "").strip(),
+        "url": str(dati.get("html_url") or ""),
+        "pubblicata": str(dati.get("published_at") or ""),
+    }
+
+
+def _esito(current):
+    return {"ok": False, "error": "", "current": current, "latest": "",
+            "available": False, "checked": time.time(),
+            "fonte": "", "tag": "", "note": "", "url": "", "pubblicata": ""}
+
+
 def check(cfg):
-    """Confronta la versione remota con quella installata."""
+    """Confronta la versione remota con quella installata.
+
+    Prima le release, poi -- solo se l'API non risponde -- `version.py` sul
+    ramo, che e' come funzionava fino alla 9.9. La ricaduta non e' pigrizia:
+    l'API di GitHub ha un limite di chiamate per indirizzo e un giorno puo'
+    semplicemente non rispondere, e un controllo che smette di funzionare e'
+    peggio di un controllo meno preciso.
+    """
     from version import __version__ as current
     ota = cfg["ota"]
+    esito = _esito(current)
+
+    try:
+        dati = release(ota["repo"])
+    except Exception as exc:                    # noqa: BLE001
+        dati = None
+        motivo = str(exc)
+
+    if dati is not None:
+        esito.update({"ok": True, "fonte": "release", "latest": dati["versione"],
+                      "tag": dati["tag"], "note": dati["note"], "url": dati["url"],
+                      "pubblicata": dati["pubblicata"],
+                      "available": is_newer(dati["versione"], current)})
+        return esito
+
     url = "https://raw.githubusercontent.com/%s/%s/version.py" % (ota["repo"], ota["branch"])
     try:
         remote = parse_version(_get(url, timeout=15).decode("utf-8", "replace"))
-    except Exception as exc:
-        return {"ok": False, "error": str(exc), "current": current,
-                "latest": "", "available": False, "checked": time.time()}
+    except Exception as exc:                    # noqa: BLE001
+        esito["error"] = "%s; release: %s" % (exc, motivo)
+        return esito
     if not remote:
-        return {"ok": False, "error": "version.py remoto illeggibile", "current": current,
-                "latest": "", "available": False, "checked": time.time()}
-    return {"ok": True, "error": "", "current": current, "latest": remote,
-            "available": is_newer(remote, current), "checked": time.time()}
+        esito["error"] = "version.py remoto illeggibile"
+        return esito
+    esito.update({"ok": True, "fonte": "ramo", "latest": remote,
+                  "available": is_newer(remote, current)})
+    return esito
 
 
-def start_update(cfg):
-    """Avvia l'installazione in un processo staccato, che sopravvive al riavvio."""
+def start_update(cfg, tag=""):
+    """Avvia l'installazione in un processo staccato, che sopravvive al riavvio.
+
+    Se il controllo ha trovato una release, si installa **quel tag** e non la
+    punta del ramo: altrimenti la pagina prometterebbe la 9.10 e potrebbe
+    installare qualunque cosa io abbia spinto su `main` nel frattempo.
+    """
     ota = cfg["ota"]
     args = [sys.executable, os.path.join(INSTALL_DIR, "ota.py"), "--apply",
             "--repo", ota["repo"], "--branch", ota["branch"],
             "--port", str(cfg["web"]["port"])]
+    if tag:
+        args += ["--tag", str(tag)]
     # Fuori dal cgroup del servizio: `start_new_session` non basta, perche'
     # il figlio ci resta dentro e `systemctl restart dmd` — che questo stesso
     # processo fa a meta' lavoro — lo ammazzerebbe con /opt/dmd gia'
@@ -128,9 +224,18 @@ def start_update(cfg):
 # ---------------------------------------------------------------- installazione
 
 
-def download_source(repo, branch, workdir):
-    """Scarica ed estrae l'archivio del ramo. Restituisce la cartella radice."""
-    url = "https://codeload.github.com/%s/tar.gz/refs/heads/%s" % (repo, branch)
+def download_source(repo, branch, workdir, tag=""):
+    """Scarica ed estrae l'archivio. Restituisce la cartella radice.
+
+    Con un tag si scarica quello, altrimenti la punta del ramo. La cartella
+    dentro l'archivio cambia nome fra i due casi -- `zedmd-pi-main` contro
+    `zedmd-pi-9.10` -- e per questo non si indovina: si cerca l'unica
+    cartella che c'e'.
+    """
+    if tag:
+        url = "https://codeload.github.com/%s/tar.gz/refs/tags/%s" % (repo, tag)
+    else:
+        url = "https://codeload.github.com/%s/tar.gz/refs/heads/%s" % (repo, branch)
     log("scarico %s" % url)
     blob = _get(url, timeout=120)
     log("archivio ricevuto: %d kB" % (len(blob) // 1024))
@@ -334,13 +439,17 @@ def check_installed(source, destination=None):
     log("installazione completa: nessun file dichiarato risulta mancante")
 
 
-def apply_update(repo, branch, port):
-    log("=== aggiornamento da %s ramo %s ===" % (repo, branch))
+def apply_update(repo, branch, port, tag=""):
+    log("=== aggiornamento da %s %s ===" % (repo, "tag %s" % tag if tag
+                                            else "ramo %s" % branch))
+    atteso = str(tag).lstrip("vV")
     workdir = tempfile.mkdtemp(prefix="dmd-ota-")
     touched = False   # da qui in poi /opt/dmd non e' piu' quello di partenza
     try:
-        source = download_source(repo, branch, workdir)
+        source = download_source(repo, branch, workdir, tag)
         remote = verify(source)
+        if not atteso:
+            atteso = remote
 
         backup()
         touched = True
@@ -352,15 +461,11 @@ def apply_update(repo, branch, port):
         running = healthy(port)
         if running:
             log("aggiornamento riuscito: in esecuzione la versione %s" % running)
+            scrivi_esito("riuscito", atteso, running, "")
             return 0
 
         log("il servizio non risponde dopo l'aggiornamento: ripristino")
-        if restore():
-            service("restart")
-            back = healthy(port)
-            log("ripristino %s" % ("riuscito, versione %s" % back if back
-                                   else "eseguito ma il servizio non risponde"))
-        return 1
+        return _ripiega(port, atteso, "il servizio non e' ripartito dopo l'aggiornamento")
     except Exception as exc:
         log("aggiornamento fallito: %s" % exc)
         # Se l'installazione era gia' cominciata, /opt/dmd e' un misto di
@@ -368,26 +473,83 @@ def apply_update(repo, branch, port):
         # anche quando a fallire e' stata la copia, non solo l'avvio.
         if touched:
             log("l'installazione era in corso: ripristino la copia di sicurezza")
-            if restore():
-                service("restart")
-                back = healthy(port)
-                log("ripristino %s" % ("riuscito, versione %s" % back if back
-                                       else "eseguito ma il servizio non risponde"))
+            return _ripiega(port, atteso, str(exc))
+        scrivi_esito("fallito", atteso, "", str(exc))
         return 1
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
 
 
+def _ripiega(port, atteso, motivo):
+    """Ripristina la copia e **lascia detto** che e' successo.
+
+    Il ripristino funziona da sempre, e proprio per questo era diventato
+    invisibile: rimetteva in piedi la versione precedente e l'unica traccia
+    era una riga in fondo a `ota.log`. Dal punto di vista di chi guarda il
+    pannello, la mattina dopo, un aggiornamento fallito e uno mai tentato
+    sono la stessa identica cosa -- salvo che nel primo caso continui a
+    premere Installa e continua a non succedere niente.
+    """
+    if not restore():
+        scrivi_esito("ripristino fallito", atteso, "", motivo)
+        return 1
+    service("restart")
+    back = healthy(port)
+    log("ripristino %s" % ("riuscito, versione %s" % back if back
+                           else "eseguito ma il servizio non risponde"))
+    scrivi_esito("ripristinato", atteso, back or "", motivo)
+    return 1
+
+
+def scrivi_esito(esito, atteso, attiva, motivo):
+    """Lascia l'esito dove la web UI e Home Assistant lo possono leggere.
+
+    Sta accanto al log e non dentro la configurazione: la configurazione la
+    riscrive l'utente, questo e' il diario di una macchina. E viene scritto
+    dal processo staccato, cioe' dall'unico che sa davvero com'e' finita --
+    il servizio, in quel momento, o e' morto o e' appena rinato senza memoria.
+    """
+    dati = {"esito": esito, "atteso": atteso, "attiva": attiva,
+            "motivo": str(motivo or "")[:400], "quando": time.time()}
+    try:
+        os.makedirs(os.path.dirname(ESITO_PATH), exist_ok=True)
+        with open(ESITO_PATH, "w") as handle:
+            json.dump(dati, handle)
+    except OSError as exc:
+        log("non riesco a scrivere l'esito: %s" % exc)
+    return dati
+
+
+def ultimo_esito():
+    """L'esito dell'ultimo aggiornamento, o None se non ce n'e' mai stato uno."""
+    try:
+        with open(ESITO_PATH) as handle:
+            dati = json.load(handle)
+    except (OSError, ValueError):
+        return None
+    return dati if isinstance(dati, dict) and dati.get("esito") else None
+
+
+def dimentica_esito():
+    """Cancella l'esito: l'ha letto qualcuno, non serve piu' ricordarlo."""
+    try:
+        os.remove(ESITO_PATH)
+        return True
+    except OSError:
+        return False
+
+
 def main(argv):
     if "--apply" not in argv:
-        print("uso: ota.py --apply --repo utente/progetto [--branch main] [--port 8080]")
+        print("uso: ota.py --apply --repo utente/progetto [--branch main] "
+              "[--tag v9.10] [--port 8080]")
         return 2
 
     def option(name, default):
         return argv[argv.index(name) + 1] if name in argv else default
 
     return apply_update(option("--repo", ""), option("--branch", "main"),
-                        int(option("--port", "8080")))
+                        int(option("--port", "8080")), option("--tag", ""))
 
 
 if __name__ == "__main__":

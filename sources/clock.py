@@ -11,6 +11,14 @@ from PIL import Image, ImageDraw, ImageFont
 
 from .base import Source
 
+# Il World Time e' facoltativo: senza il database dei fusi il modulo si
+# importa lo stesso e la banda non compare. L'orologio non deve mai fermarsi
+# per una cosa che sta sotto le cifre.
+try:
+    import fusi
+except Exception:                                    # pragma: no cover
+    fusi = None
+
 FONT_CANDIDATES = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
@@ -48,6 +56,35 @@ def _load_font(size):
     return ImageFont.load_default()
 
 
+def voce_mondo():
+    return {"enabled": False, "etichetta": "", "fuso": ""}
+
+
+def normalizza_mondo(voci):
+    """Sempre `fusi.QUANTE` voci, comunque siano scritte.
+
+    L'etichetta e' la parola che finisce sul pannello, ed e' **sua**: «NY» sta
+    in meno spazio di «New York», e con tre citta' affiancate lo spazio e'
+    l'unica cosa che conta. Se manca, si ripiega sull'ultimo pezzo del fuso --
+    `America/New_York` diventa «New York» -- che e' meglio di una riga muta.
+    """
+    quante = fusi.QUANTE if fusi is not None else 5
+    grezze = voci if isinstance(voci, (list, tuple)) else []
+    fuori = []
+    for indice in range(quante):
+        voce = grezze[indice] if indice < len(grezze) else None
+        base = voce_mondo()
+        if isinstance(voce, dict):
+            base["enabled"] = bool(voce.get("enabled"))
+            base["fuso"] = str(voce.get("fuso") or "").strip()
+            base["etichetta"] = str(voce.get("etichetta") or "").strip()[:14]
+            if not base["etichetta"] and base["fuso"]:
+                base["etichetta"] = base["fuso"].rsplit("/", 1)[-1] \
+                    .replace("_", " ")
+        fuori.append(base)
+    return fuori
+
+
 class ClockSource(Source):
     name = "clock"
     label = "Clock"
@@ -63,6 +100,9 @@ class ClockSource(Source):
         # Se il servizio OnAir e' in diretta. Lo attacca il runtime, con la
         # stessa regola del timer: vedi `_tratto_onair`.
         self.onair = None
+        # Se c'e' una versione nuova da installare. Stessa regola: il runtime
+        # attacca qui una funzione, l'orologio non sa che esista GitHub.
+        self.aggiornamento = None
         self._font = _load_font(max(12, int(height * 0.60)))
         self._font_small = _load_font(max(8, int(height * 0.20)))
         # Font della colonna dei rifiuti, dal piu' grande al piu' piccolo. Si
@@ -180,7 +220,7 @@ class ClockSource(Source):
                           centro_x + self.SEM_RAGGIO, centro_y + self.SEM_RAGGIO],
                          fill=riempi, outline=colore)
 
-    def _disegna_colonna(self, draw, voci, limite):
+    def _disegna_colonna(self, draw, voci, limite, fondo=None):
         """Disegna le voci impilate a sinistra, dentro `limite` pixel.
 
         Impilate e non affiancate: i nomi hanno lunghezze diverse e in
@@ -205,7 +245,14 @@ class ClockSource(Source):
                 font = candidato
                 break
 
-        passo = max(7, self.height // max(len(testi), 4))
+        # In verticale la colonna arriva fin dove le si lascia arrivare. Di
+        # norma e' tutto il pannello; con il World Time acceso e' la banda in
+        # fondo a fermarla, e le voci si stringono per fare posto. Con quattro
+        # raccolte insieme, senza questo, l'ultima finiva scritta sopra gli
+        # orari del mondo -- un difetto che si vede solo con quattro, e che
+        # infatti e' arrivato da chi ne ha quattro.
+        alto_utile = self.height if fondo is None else max(24, fondo)
+        passo = max(7, alto_utile // max(len(testi), 4))
         box = draw.textbbox((0, 0), "AG", font=font)
         alto = box[3] - box[1]
         for indice, (testo, voce) in enumerate(zip(testi, voci)):
@@ -253,12 +300,15 @@ class ClockSource(Source):
         # quella del momento in cui e' cambiato qualcos'altro.
         barra = self._barra_timer()
         diretta = self._tratto_onair()
+        mondo = self._mondo(now)
+        novita = self._segno_aggiornamento()
 
         # Ridisegna solo quando cambia qualcosa di visibile.
         signature = (shown, date if clock["show_date"] else "", meridiem,
                      clock["time_color"], clock["date_color"],
                      tuple((v["nome"], v["colore"]) for v in colonna),
-                     stato_sem, sem_acceso, barra, diretta)
+                     stato_sem, sem_acceso, barra, diretta,
+                     tuple(mondo), novita)
         if signature == self._signature:
             return None
         self._signature = signature
@@ -272,6 +322,12 @@ class ClockSource(Source):
         box = draw.textbbox((0, 0), shown, font=self._font)
         x = (self.width - (box[2] - box[0])) // 2 - box[0]
         y = (self.height - (box[3] - box[1])) // 2 - box[1]
+        # Con il World Time acceso le cifre salgono di qualche pixel. Sopra
+        # lo spazio c'e' -- fra il bordo e le cifre restano sedici righe -- e
+        # sotto quei pixel diventano la differenza fra un carattere da otto e
+        # uno da dieci, che a tre metri e' la differenza fra leggere e no.
+        if mondo:
+            y -= self.MONDO_ALZATA
         draw.text((x, y), shown, font=self._font, fill=time_color)
         ora_destra = x + box[2]
         ora_sotto = y + box[3]
@@ -280,7 +336,8 @@ class ClockSource(Source):
         # avanza alla sua sinistra e si adatta a quello. Un orologio che si
         # sposta quando arriva un promemoria e torna indietro quando se ne va
         # e' un orologio che si muove per conto suo.
-        self._disegna_colonna(draw, colonna, limite=x - 3)
+        self._disegna_colonna(draw, colonna, limite=x - 3,
+                              fondo=(self.MONDO_CIMA - 1) if mondo else None)
 
         if clock["show_date"]:
             box = draw.textbbox((0, 0), date, font=self._font_small)
@@ -315,6 +372,9 @@ class ClockSource(Source):
                                (self.cfg.get("sveglia") or {}).get("colore"),
                                (255, 59, 48)))
 
+        if mondo:
+            self._disegna_mondo(draw, mondo)
+
         if diretta:
             # In cima e corto, dalla parte opposta della barra del timer, che
             # sta in fondo ed e' lunga: cosi' i due segnali non si possono
@@ -325,6 +385,11 @@ class ClockSource(Source):
                            fill=parse_color(
                                (self.cfg.get("onair") or {}).get("colore_sfondo"),
                                (0xC0, 0, 0)))
+
+        if novita:
+            draw.rectangle((self.width - self.AGGIORNA_LARGO, 0,
+                            self.width - 1, self.AGGIORNA_ALTO - 1),
+                           fill=self.AGGIORNA_COLORE)
 
         return image
 
@@ -359,6 +424,145 @@ class ClockSource(Source):
             return 0
         return max(1, int(round(quota * self.width)))
 
+    # ----------------------------------------------------------- world time
+
+    # Di quanto salgono le cifre quando la banda c'e'. Cinque: sopra le cifre
+    # restano sedici righe libere, quindi si puo' -- e sotto sono i pixel che
+    # portano il carattere da otto a dieci.
+    MONDO_ALZATA = 5
+
+    # Dove comincia la banda e quanto e' alta. Da 51 a 61: sopra c'e' la
+    # lampada piu' bassa del semaforo (finisce a 52, ma le cifre alzate le
+    # lasciano spazio), sotto la barra del timer, che parte a 62.
+    MONDO_CIMA = 51
+    MONDO_CORPO = 10
+
+    # Lo spazio minimo fra una citta' e l'altra. Sotto, due nomi si leggono
+    # come uno solo.
+    MONDO_STACCO = 8
+
+    # Ogni quanti secondi cambia il gruppo, quando le localita' sono piu' di
+    # quante ne stanno. Otto: il tempo di leggerle senza che chi passa debba
+    # aspettare.
+    MONDO_GIRO = 8
+
+    def _conf_mondo(self):
+        return (self.cfg.get("clock") or {}).get("world") or {}
+
+    def _mondo(self, adesso=None):
+        """Le righe del World Time da mostrare adesso. Lista vuota se spento.
+
+        Ogni voce e' (etichetta, ora, segno), dove il segno e' `+` o `-`
+        quando in quella citta' e' un altro giorno. E' l'informazione che
+        l'ora da sola nasconde: a Roma le 05:54 sono l'una e cinquantaquattro
+        di New York, ma di **ieri**, ed e' esattamente quello che uno vuole
+        sapere guardando un orologio del mondo.
+
+        La rotazione conta i secondi dell'ora corrente e non un contatore
+        interno, cosi' due pannelli accesi nella stessa stanza girano insieme
+        invece che sfasati, e un riavvio non fa ripartire il giro da capo.
+        """
+        if fusi is None:
+            return []
+        conf = self._conf_mondo()
+        if not conf.get("enabled"):
+            return []
+        voci = [v for v in normalizza_mondo(conf.get("voci"))
+                if v["enabled"] and v["fuso"]]
+        if not voci:
+            return []
+        ore24 = bool((self.cfg.get("clock") or {}).get("format_24h", True))
+
+        pronte = []
+        for voce in voci:
+            ora, scarto = fusi.orario(voce["fuso"], ore24)
+            if not ora:
+                # Un fuso che non esiste piu' -- o un database dei fusi
+                # rimasto indietro -- non deve far sparire le altre citta'.
+                continue
+            pronte.append((voce["etichetta"], ora,
+                           "+" if scarto > 0 else ("-" if scarto < 0 else "")))
+        if not pronte:
+            return []
+
+        quante = self._quante_ci_stanno(pronte)
+        if quante >= len(pronte):
+            return pronte
+        gruppi = (len(pronte) + quante - 1) // quante
+        secondi = (adesso.tm_hour * 3600 + adesso.tm_min * 60 + adesso.tm_sec
+                   if adesso else int(time.time()))
+        quale = (secondi // self.MONDO_GIRO) % gruppi
+        fetta = pronte[quale * quante:(quale + 1) * quante]
+        # L'ultimo gruppo puo' essere spaiato: si completa dall'inizio invece
+        # di lasciare mezza banda vuota.
+        if len(fetta) < quante:
+            fetta += pronte[:quante - len(fetta)]
+        return fetta
+
+    def _font_mondo(self):
+        if not hasattr(self, "_mondo_font"):
+            self._mondo_font = _load_font(self.MONDO_CORPO)
+        return self._mondo_font
+
+    def _quante_ci_stanno(self, pronte):
+        """Quante voci entrano in una banda larga quanto il pannello.
+
+        Si misurano le **piu' larghe**, non le prime. La differenza si vede
+        solo con la rotazione: «NEW YORK TOKYO LONDRA» stanno in tre, ma
+        «SYDNEY LOS ANGELES NEW YORK» no, e il numero deve valere per tutti i
+        gruppi -- altrimenti un giro su due l'ultima citta' esce dal bordo.
+        Contare le prime tre dava esattamente quel difetto.
+        """
+        misura = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+        font = self._font_mondo()
+        larghe = sorted((misura.textlength("%s %s%s" % (e, o, s), font=font)
+                         for e, o, s in pronte), reverse=True)
+        quante, usati = 0, 0.0
+        for largo in larghe:
+            aggiunta = largo + (self.MONDO_STACCO if quante else 0)
+            if usati + aggiunta > self.width - 2:
+                break
+            usati += aggiunta
+            quante += 1
+        # Almeno una: se una sola etichetta fosse piu' larga del pannello, la
+        # banda resterebbe vuota per sempre invece di mostrare qualcosa.
+        return max(1, quante)
+
+    def _disegna_mondo(self, draw, voci):
+        """La banda in fondo: nome nel colore della data, ora piu' chiara.
+
+        Due colori e non uno: il nome e l'ora sono due informazioni diverse e
+        con tre citta' affiancate, tutte dello stesso colore, la riga si
+        legge come una frase sola.
+        """
+        font = self._font_mondo()
+        conf = self._conf_mondo()
+        colore_nome = parse_color(conf.get("colore_nome"),
+                                  parse_color(self.cfg["clock"]["date_color"],
+                                              (0, 160, 208)))
+        colore_ora = parse_color(conf.get("colore_ora"), (200, 200, 200))
+
+        pezzi = []
+        for etichetta, ora, segno in voci:
+            nome = "%s " % etichetta
+            pezzi.append((nome, "%s%s" % (ora, segno),
+                          draw.textlength(nome, font=font),
+                          draw.textlength("%s%s" % (ora, segno), font=font)))
+        totale = sum(n + o for _e, _o, n, o in pezzi)
+        if len(pezzi) > 1:
+            stacco = max(self.MONDO_STACCO,
+                         (self.width - 2 - totale) / (len(pezzi) - 1))
+        else:
+            stacco = 0
+        # Una voce sola si centra; piu' voci si distribuiscono da bordo a
+        # bordo, che e' l'unico modo perche' non sembrino ammucchiate.
+        x = 1.0 if len(pezzi) > 1 else (self.width - totale) / 2
+        for nome, ora, largo_nome, largo_ora in pezzi:
+            draw.text((x, self.MONDO_CIMA), nome, font=font, fill=colore_nome)
+            draw.text((x + largo_nome, self.MONDO_CIMA), ora, font=font,
+                      fill=colore_ora)
+            x += largo_nome + largo_ora + stacco
+
     # ------------------------------------------------------------ la diretta
 
     # Il trattino di OnAir: corto e in cima. Trentadue pixel su duecentocinquanta
@@ -382,5 +586,35 @@ class ClockSource(Source):
             return False
         try:
             return bool(self.onair())
+        except Exception:                            # pragma: no cover
+            return False
+
+    # -------------------------------------------------- la versione nuova
+
+    # Il segno dell'aggiornamento: quattro pixel per due, nell'angolo in alto
+    # a destra. E' il posto piu' vuoto del pannello -- la data comincia alla
+    # riga 2, il trattino della diretta sta al centro, la colonna dei rifiuti
+    # sta a sinistra -- e soprattutto e' un posto dove non c'e' mai niente,
+    # quindi quando qualcosa compare si nota anche senza guardarlo.
+    #
+    # Otto pixel su sedicimila. Non deve chiamare: deve essere li' la prossima
+    # volta che passi davanti al pannello. Chi vuole sapere l'ora la legge lo
+    # stesso, e chi si chiede cos'e' quel puntino apre la pagina Aggiornamenti.
+    AGGIORNA_LARGO = 4
+    AGGIORNA_ALTO = 2
+    # Verde pieno, non una tinta intermedia: su questo pannello le intensita'
+    # a meta' scala sono la causa dello sfarfallio, e su quattro pixel si
+    # vedrebbe piu' il tremolio del segnale.
+    AGGIORNA_COLORE = (0, 255, 0)
+
+    def _segno_aggiornamento(self):
+        """Vero se va acceso il puntino della versione nuova."""
+        conf = self.cfg.get("ota") or {}
+        if not conf.get("segnale", True):
+            return False
+        if self.aggiornamento is None:
+            return False
+        try:
+            return bool(self.aggiornamento())
         except Exception:                            # pragma: no cover
             return False

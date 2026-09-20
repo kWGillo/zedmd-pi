@@ -4,6 +4,67 @@
 {% block content %}
 
 <section class="card">
+  <h2>{{ t('world.title') }}</h2>
+  <p class="hint">{{ t('world.intro') }}</p>
+  <form method="post" action="{{ url_for('api_world') }}">
+    <label class="check">
+      <input type="checkbox" name="enabled" {{ 'checked' if cfg.clock.world.enabled }}>
+      {{ t('world.enabled') }}
+    </label>
+
+    {% if not fusi_pronti %}
+    <p class="status err">{{ t('world.nodb') }}</p>
+    {% endif %}
+
+    <table class="grid">
+      <tr>
+        <th></th>
+        <th>{{ t('world.citta') }}</th>
+        <th>{{ t('world.fuso') }}</th>
+        <th>{{ t('world.etichetta') }}</th>
+        <th>{{ t('world.adesso') }}</th>
+      </tr>
+      {% for voce in cfg.clock.world.voci %}
+      <tr>
+        <td><input type="checkbox" name="on_{{ loop.index0 }}"
+                   {{ 'checked' if voce.enabled }}></td>
+        <td>
+          <select name="citta_{{ loop.index0 }}">
+            <option value="">{{ t('world.scegli') }}</option>
+            {% for nome, zona in citta %}
+            <option value="{{ zona }}" {{ 'selected' if zona == voce.fuso }}>{{ nome }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td><input type="text" name="fuso_{{ loop.index0 }}" class="mono"
+                   value="{{ voce.fuso }}" placeholder="Europe/Rome"></td>
+        <td><input type="text" name="etichetta_{{ loop.index0 }}" maxlength="14"
+                   value="{{ voce.etichetta }}"></td>
+        <td class="mono">{{ anteprima[loop.index0] }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <p class="hint">{{ t('world.fuso.hint') }}</p>
+    <p class="hint">{{ t('world.etichetta.hint') }}</p>
+
+    <div class="row2">
+      <div>
+        <label for="colore_nome">{{ t('world.colore.nome') }}</label>
+        <input type="color" id="colore_nome" name="colore_nome"
+               value="{{ cfg.clock.world.colore_nome or cfg.clock.date_color }}">
+      </div>
+      <div>
+        <label for="colore_ora">{{ t('world.colore.ora') }}</label>
+        <input type="color" id="colore_ora" name="colore_ora"
+               value="{{ cfg.clock.world.colore_ora or '#c8c8c8' }}">
+      </div>
+    </div>
+
+    <div class="actions"><button type="submit">{{ t('common.save') }}</button></div>
+  </form>
+</section>
+
+<section class="card">
   <h2>{{ t('clock.appearance') }}</h2>
   <form method="post" action="{{ url_for('api_clock') }}">
 

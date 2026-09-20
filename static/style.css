@@ -75,6 +75,21 @@ nav a.on {
   border-color: var(--accent-dim);
 }
 
+/* Il pallino accanto ad "Aggiornamenti": verde quando c'e' una versione
+   nuova, rosso quando l'ultimo aggiornamento e' finito male. Sta dentro il
+   link e non accanto, cosi' non allarga il menu ne' manda le voci a capo. */
+.pallino {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  vertical-align: middle;
+  background: #35c759;
+}
+
+.pallino.guasto { background: #ff3b30; }
+
 main { max-width: 760px; margin: 0 auto; padding: 18px; }
 
 .card {

@@ -514,6 +514,9 @@ Le altre chiavi rilevanti sono già corrette di default:
 | `zedmd.grace_seconds` | `60` | quanto ZeDMD trattiene il display dopo l'ultimo frame |
 | `zedmd.client_timeout` | `10` | silenzio oltre il quale il client è considerato caduto |
 | `ota.repo` | `kWGillo/zedmd-pi` | repository per l'aggiornamento via rete |
+| `ota.auto_check` | `true` | controllo quotidiano della versione |
+| `ota.check_interval_hours` | `24` | ogni quante ore si chiede a GitHub |
+| `ota.segnale` | `true` | i quattro pixel verdi sull'orologio |
 | `air_radar.latitude` / `longitude` | `0.0` | nessuna posizione preimpostata |
 
 Le coordinate del radar restano **soltanto** in questo file: non fanno parte
@@ -842,23 +845,43 @@ normale bastano i due comandi qui sopra.
 
 ## 13. Aggiornamenti
 
+> Il documento dedicato è [`aggiornamenti.it.md`](aggiornamenti.it.md):
+> perché il pannello **non** si aggiorna da solo, i tre posti in cui avvisa
+> che dovrebbe, e cosa resta scritto quando un aggiornamento va storto.
+
 ### 12.1 Il software DMD, dall'interfaccia web
 
-È la via consigliata. Nella pagina **Impostazioni**, sezione *Aggiornamenti*,
-il sistema confronta la versione installata con quella pubblicata su GitHub.
-Quando ce n'è una nuova compare il pulsante di installazione.
+È la via consigliata. Nella pagina **Aggiornamenti** il sistema confronta la
+versione installata con l'ultima **release pubblicata** su GitHub — non con la
+punta del ramo: `version.py` sul ramo cambia a ogni push, anche a metà di un
+lavoro, mentre una release esiste quando quella versione si può installare. Se
+l'API delle release non risponde si ricade sul ramo, e la pagina lo dichiara.
+
+Quando c'è una versione nuova compaiono le note di rilascio e il pulsante di
+installazione. Il pannello lo segnala anche da solo, in tre posti: un pallino
+sulla voce *Aggiornamenti* del menu, quattro pixel verdi nell'angolo in alto a
+destra dell'orologio, e l'entità `update` in Home Assistant.
+
+**Il pannello non installa mai da solo.** Il controllo è automatico e
+quotidiano; l'installazione è sempre una pressione.
 
 L'aggiornamento è costruito per non poter lasciare il sistema rotto:
 
-1. scarica l'archivio del ramo in una cartella temporanea
+1. scarica l'archivio del **tag** della release in una cartella temporanea
 2. verifica che ci siano tutti i file attesi, che tutto il Python compili e che
    le impronte md5 corrispondano
 3. salva una copia dell'installazione corrente in `/var/lib/dmd/backup`
 4. sostituisce i file e riavvia il servizio
 5. interroga la web UI per capire se il servizio è davvero ripartito
 6. se non risponde, ripristina la copia e riavvia di nuovo
+7. scrive com'è andata in `/var/lib/dmd/ota-esito.json`
 
-L'esito si legge nel riquadro del registro, in fondo alla stessa pagina.
+Il passo 7 esiste perché il passo 6 funzionava troppo bene: rimetteva tutto a
+posto **in silenzio**, e dal pannello un aggiornamento fallito era identico a
+uno mai tentato. Adesso al ritorno sulla pagina c'è un banner che dice quale
+versione si voleva e quale è rimasta, e resta finché non lo si dichiara letto.
+
+L'esito si legge anche nel riquadro del registro, in fondo alla stessa pagina.
 
 ### 12.2 Il software DMD, da riga di comando
 
@@ -1205,6 +1228,7 @@ cd ~/dmd && git pull            # scarica l'ultima versione
 /var/lib/dmd/config-*.json copie della configurazione prima di un'importazione
 /var/lib/dmd/flights.csv  registro dei passaggi aerei
 /var/lib/dmd/ota.log      registro degli aggiornamenti
+/var/lib/dmd/ota-esito.json  com'è finito l'ultimo aggiornamento
 /srv/dmd/media/           libreria media, condivisa via SMB
 /etc/systemd/system/dmd.service
 ```

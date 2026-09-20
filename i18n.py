@@ -478,6 +478,30 @@ STRINGS = {
         "its own page:"),
     "nav.sveglia": ("Sveglia", "Alarm"),
     "nav.onair": ("OnAir", "OnAir"),
+    "world.title": ("World Time", "World Time"),
+    "world.intro": (
+        "Che ore sono adesso altrove, in una riga sotto l'orologio.",
+        "What time it is elsewhere, on a line under the clock."),
+    "world.enabled": ("Mostra gli orari del mondo", "Show world times"),
+    "world.citta": ("Città", "City"),
+    "world.fuso": ("Fuso", "Time zone"),
+    "world.etichetta": ("Sul pannello", "On the panel"),
+    "world.adesso": ("Adesso", "Now"),
+    "world.scegli": ("— scegli —", "— pick one —"),
+    "world.fuso.hint": (
+        "La città riempie il fuso. Il campo accetta anche un fuso scritto a "
+        "mano.",
+        "The city fills the zone in. The field also takes a zone typed by "
+        "hand."),
+    "world.etichetta.hint": (
+        "Etichette corte fanno stare più città insieme: «NY» invece di "
+        "«New York».",
+        "Short labels fit more cities at once: “NY” instead of “New York”."),
+    "world.colore.nome": ("Colore del nome", "Name colour"),
+    "world.colore.ora": ("Colore dell'ora", "Time colour"),
+    "world.nodb": (
+        "Il database dei fusi non c'è su questo sistema: installa «tzdata».",
+        "The time-zone database is missing on this system: install “tzdata”."),
     "onair.title": ("OnAir", "OnAir"),
     "onair.intro": (
         "Il pannello dice che si sta registrando: scritta fissa e trattino "
@@ -725,6 +749,26 @@ STRINGS = {
         "Scarica, verifica, salva una copia e sostituisce. Se non riparte, torna indietro da sola.",
         "Downloads, verifies, keeps a copy and replaces. If it fails to restart, it rolls back."),
     "settings.update.log": ("Diario degli aggiornamenti", "Update log"),
+    "settings.update.fonte": ("Il controllo guarda", "The check looks at"),
+    "settings.update.fonte.release": ("l'ultima release pubblicata",
+                                      "the latest published release"),
+    "settings.update.fonte.ramo": ("il ramo (l'API delle release non ha risposto)",
+                                   "the branch (the releases API did not answer)"),
+    "settings.update.note": ("Cosa cambia", "What's new"),
+    "settings.update.vedi": ("Apri la release su GitHub", "Open the release on GitHub"),
+    "settings.update.segnale": ("Segnala la versione nuova sul pannello",
+                                "Show a mark on the panel when a new version is out"),
+    "settings.update.segnale.hint": (
+        "Un puntino verde nell'angolo in alto a destra dell'orologio. Niente altro.",
+        "A green dot in the top right corner of the clock. Nothing else."),
+    "settings.update.esito.ok": ("Aggiornamento riuscito: ora è attiva la %(version)s.",
+                                 "Update succeeded: version %(version)s is now running."),
+    "settings.update.esito.back": (
+        "La %(version)s non è ripartita: ripristinata la %(active)s.",
+        "Version %(version)s did not start: rolled back to %(active)s."),
+    "settings.update.esito.bad": ("Aggiornamento alla %(version)s non riuscito.",
+                                  "Update to version %(version)s failed."),
+    "settings.update.esito.ok_letto": ("Ho letto", "Got it"),
 
     "settings.lib": ("Libreria del pannello", "Panel library"),
     "settings.lib.hint": (
@@ -1663,6 +1707,9 @@ STRINGS = {
         "Over SSH, or with a keyboard attached to the Raspberry, as root or "
         "with sudo:"),
     "nav.updates": ("Aggiornamenti", "Updates"),
+    "nav.updates.badge": ("C'è una versione nuova", "A new version is available"),
+    "nav.updates.esito": ("L'ultimo aggiornamento è finito male",
+                          "The last update ended badly"),
     "updates.intro": (
         "Qui si aggiornano il programma e la libreria della matrice.",
         "Here you update the program and the matrix library."),

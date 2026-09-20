@@ -163,6 +163,14 @@ def create_app(runtime):
             "lang": lang,
             "languages": i18n.LANGUAGES,
             "github_url": i18n.GITHUB_URL,
+            # Il pallino accanto ad "Aggiornamenti" nel menu. Sta fra i
+            # globali perche' deve vedersi da qualunque pagina: la pagina
+            # degli aggiornamenti e' l'ultima che uno apre per caso, ed e'
+            # esattamente il motivo per cui il controllo quotidiano non era
+            # mai servito a niente.
+            "c_e_novita": bool((getattr(runtime, "update_info", None)
+                                or {}).get("available")),
+            "c_e_esito": bool(ota.ultimo_esito()),
             # `t` chiude sulla lingua della richiesta: nei template basta
             # scrivere t('chiave'), senza ripetere ogni volta la lingua.
             "t": lambda key, **values: i18n.translate(key, lang, **values),
@@ -471,6 +479,7 @@ def create_app(runtime):
         return render_template(
             "updates.html", cfg=cfg,
             update=runtime.update_info, ota_log=ota.tail_log(12),
+            esito=ota.ultimo_esito(),
             lib=runtime.lib_info,
             lib_commands=libcheck.update_commands(libcheck.library_dir(cfg)),
             page="updates")
@@ -552,9 +561,24 @@ def create_app(runtime):
     def page_clock():
         # Nome diverso da `languages`, che nel contesto globale sono le lingue
         # dell'interfaccia: queste sono quelle dei giorni sul pannello.
+        import fusi as _fusi
+        # L'anteprima accanto a ogni riga: e' il modo piu' corto per capire
+        # se il fuso scelto e' quello giusto, senza aspettare il pannello.
+        anteprima = []
+        for voce in cfg["clock"]["world"]["voci"]:
+            ora, scarto = _fusi.orario(voce["fuso"],
+                                       cfg["clock"].get("format_24h", True))
+            if not ora:
+                anteprima.append("—")
+                continue
+            segno = "+" if scarto > 0 else ("-" if scarto < 0 else "")
+            differenza = _fusi.scarto_orario(voce["fuso"])
+            anteprima.append("%s%s  (%+g h)" % (ora, segno, differenza or 0))
         return render_template(
             "clock.html", cfg=cfg, clock_languages=LANGUAGES,
             timezones=all_timezones(), ntp=ntp_status(),
+            citta=_fusi.elenco(), fusi_pronti=_fusi.DISPONIBILE,
+            anteprima=anteprima,
             now=time.strftime("%d/%m/%Y %H:%M:%S"), page="clock")
 
     # Quanti file per pagina nell'elenco della libreria.
@@ -1849,6 +1873,35 @@ def create_app(runtime):
         runtime.clock.invalidate()
         return redirect(url_for("page_clock"))
 
+    @app.route("/api/world", methods=["POST"])
+    def api_world():
+        import fusi as _fusi
+        from sources.clock import normalizza_mondo
+        mondo = cfg["clock"].setdefault("world", {})
+        mondo["enabled"] = request.form.get("enabled") == "on"
+        for chiave, predefinito in (("colore_nome", ""),
+                                    ("colore_ora", "#c8c8c8")):
+            mondo[chiave] = request.form.get(chiave, predefinito).strip()
+        voci = []
+        for indice in range(_fusi.QUANTE):
+            # La tendina vince sul campo libero solo quando il campo libero
+            # non e' cambiato: cosi' scegliere una citta' riempie la casella,
+            # ma chi ci ha scritto dentro un fuso a mano non se lo vede
+            # sovrascrivere al primo salvataggio.
+            a_mano = request.form.get("fuso_%d" % indice, "").strip()
+            scelta = request.form.get("citta_%d" % indice, "").strip()
+            fuso = a_mano or scelta
+            if scelta and scelta != a_mano and not _fusi.valido(a_mano):
+                fuso = scelta
+            voci.append({"enabled": request.form.get("on_%d" % indice) == "on",
+                         "fuso": fuso,
+                         "etichetta": request.form.get("etichetta_%d" % indice,
+                                                       "")})
+        mondo["voci"] = normalizza_mondo(voci)
+        dmdconf.save()
+        runtime.clock.invalidate()
+        return redirect(url_for("page_clock"))
+
     @app.route("/api/media", methods=["POST"])
     def api_media():
         media = cfg["mediaplayer"]
@@ -2030,6 +2083,7 @@ def create_app(runtime):
         conf["repo"] = request.form.get("repo", conf["repo"]).strip()
         conf["branch"] = request.form.get("branch", "main").strip() or "main"
         conf["auto_check"] = request.form.get("auto_check") == "on"
+        conf["segnale"] = request.form.get("segnale") == "on"
         try:
             conf["check_interval_hours"] = max(1, min(720,
                 int(request.form.get("check_interval_hours", 24))))
@@ -2041,7 +2095,17 @@ def create_app(runtime):
 
     @app.route("/api/update/install", methods=["POST"])
     def api_update_install():
-        ota.start_update(cfg)
+        # Il tag di quello che la pagina sta promettendo, non la punta del
+        # ramo: e' il senso del controllo sulle release.
+        info = runtime.update_info or {}
+        ota.dimentica_esito()
+        ota.start_update(cfg, info.get("tag", ""))
+        return redirect(url_for("page_updates"))
+
+    @app.route("/api/update/esito", methods=["POST"])
+    def api_update_esito():
+        """L'avviso dell'ultimo aggiornamento l'ha letto qualcuno."""
+        ota.dimentica_esito()
         return redirect(url_for("page_updates"))
 
     @app.route("/api/audio", methods=["POST"])

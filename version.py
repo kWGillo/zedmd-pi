@@ -2297,6 +2297,75 @@ Storico:
        versioni. Una prova nuova controlla adesso le 897 chiavi scritte nei
        modelli, in italiano e in inglese: e' il tipo di difetto che non si
        vede provando il codice, perche' il codice funziona.
+  9.9  **World Time: che ore sono adesso dall'altra parte del mondo.**
+       Fino a cinque localita' in una banda alta dieci pixel sotto le cifre.
+       Nome nel colore della data, ora in grigio chiaro, e un `+` o un `-`
+       quando la' e' un altro giorno -- che e' l'informazione che l'ora da
+       sola nasconde: a Roma le 05:54 sono l'una e cinquantaquattro di New
+       York, ma di **ieri**.
+       *Il fuso, non le coordinate.* Si salva l'identificativo IANA e non
+       un'ora di scarto, perche' «New York = UTC-5» e' sbagliato per meta'
+       dell'anno e sbagliato in silenzio. Le regole dell'ora legale stanno
+       gia' nel database dei fusi del sistema, si aggiornano con gli
+       aggiornamenti di sistema, e non chiedono rete. Il GPS e' stato
+       scartato per aritmetica: tradurre una coordinata in un fuso vuole un
+       archivio di poligoni da cinquanta megabyte, su un pacchetto che ne
+       pesa tre. Una tendina di un centinaio di citta' riempie il campo, e
+       chi sta altrove scrive il fuso a mano fra i quasi cinquecento noti.
+       *Le due preoccupazioni sull'ingombro erano infondate, e si e' visto
+       misurando.* Il semaforo delle scadenze occupa **sette** pixel di
+       larghezza, da 219 a 225, non i 68 della sua fascia; e da y=53 in giu'
+       il pannello era gia' vuoto per tutti i 256. Non serviva ne' confinare
+       la banda nella larghezza dell'orologio ne' spostare le lampade.
+       Le cifre salgono di cinque pixel -- sopra lo spazio c'era -- e sotto
+       quei cinque pixel sono la differenza fra un carattere da otto e uno da
+       dieci, cioe' fra leggere e no.
+       *Quello che invece dava fastidio davvero* e' arrivato da chi ce l'ha:
+       con **quattro** raccolte differenziate nello stesso giorno, l'ultima
+       finiva alla riga 59, dentro la banda. Adesso la colonna sa dove deve
+       fermarsi e si stringe. Con una, due o tre non cambia niente, ed e' il
+       motivo per cui il difetto non si sarebbe visto provando in casa.
+       Quante se ne vedono insieme dipende dalle etichette: quattro con le
+       sigle corte, tre con i nomi interi, due con «LOS ANGELES». Le altre
+       ruotano a gruppi ogni otto secondi, con un cambio netto -- niente
+       scorrimento, che obbliga ad aspettare il giro, e niente dissolvenza,
+       che su un pannello LED e' una scala di grigi. Il conto delle citta'
+       per gruppo si fa sulla **piu' larga** e non sulle prime: altrimenti un
+       giro su due l'ultima usciva dal bordo, e questa l'hanno presa le prove
+       prima del pannello.
+  9.10 L'avviso di aggiornamento. La domanda era se aggiungere un
+       aggiornamento quotidiano **automatico**, e la risposta e' no: il
+       controllo quotidiano c'era gia' dalla 1.5 -- ogni ventiquattro ore,
+       acceso di serie -- e scriveva una riga in `ota.log`, cioe' parlava a
+       nessuno. Il buco non era il controllo, era l'annuncio. Installare da
+       soli, di notte, su un pannello che ha un utente solo e coinvolto,
+       avrebbe risolto un problema che non c'e' e portato in casa quello che
+       c'e': una versione sbagliata che arriva mentre dormi.
+       Adesso l'avviso si vede in tre posti. In Home Assistant il pannello
+       si dichiara come **entita' update nativa** -- "installata 9.9 ->
+       disponibile 9.10", note di rilascio, pulsante -- e finisce nella
+       stessa lista degli aggiornamenti di sistema, invece che in un sensore
+       acceso/spento che nessuno va a cercare. Sull'orologio compaiono
+       **quattro pixel verdi** nell'angolo in alto a destra, che e' il punto
+       dove non c'e' mai niente: la data comincia alla riga 2, il trattino
+       della diretta sta al centro, la colonna dei rifiuti sta a sinistra.
+       Nel menu della pagina web c'e' un pallino.
+       *Il controllo ora guarda la release pubblicata*, non la punta del
+       ramo, e se l'API non risponde ricade sul metodo di prima invece di
+       smettere di funzionare. La differenza non e' formale: `version.py` sul
+       ramo cambia quando si fa push, anche a meta' di un lavoro, mentre la
+       release esiste quando qualcuno ha deciso che quella versione si puo'
+       installare. E quello che la pagina promette e' quello che si installa,
+       perche' l'archivio si scarica dal **tag** e non dal ramo.
+       *Il difetto che il ripristino automatico aveva creato*: funzionava, e
+       proprio per questo era invisibile. Rimetteva in piedi la versione
+       precedente e l'unica traccia era una riga in fondo a un log. Dal
+       pannello, la mattina dopo, un aggiornamento fallito e uno mai tentato
+       erano indistinguibili -- salvo che nel primo caso continui a premere
+       Installa e continua a non succedere niente. Adesso l'esito finisce in
+       `ota-esito.json`, che sopravvive al riavvio, e da li' in un banner
+       della pagina, in un pallino rosso nel menu e in un sensore di Home
+       Assistant a cui si puo' attaccare un'automazione.
 """
 
-__version__ = "9.8.1"
+__version__ = "9.10"

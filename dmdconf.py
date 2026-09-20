@@ -100,6 +100,24 @@ DEFAULTS = {
         "show_date": True,
         "language": "it",
         "blink_colon": True,
+        # World Time: che ore sono adesso dall'altra parte del mondo. Fino a
+        # cinque localita', tre per volta sul pannello, in una banda sotto le
+        # cifre -- che per farle stare salgono di cinque pixel.
+        #
+        # Si salva il **fuso IANA** e non un'ora di scarto: «New York = UTC-5»
+        # e' sbagliato per meta' dell'anno, e sbagliato in silenzio. Le regole
+        # dell'ora legale stanno gia' nel database dei fusi del sistema.
+        "world": {
+            "enabled": False,
+            # Le cinque caselle, riempite al primo caricamento da
+            # sources.clock.normalizza_mondo.
+            "voci": [],
+            # Vuoti = il nome prende il colore della data e l'ora il grigio
+            # chiaro. Sono due colori perche' sono due informazioni, e con tre
+            # citta' affiancate uno solo si legge come una frase.
+            "colore_nome": "",
+            "colore_ora": "#c8c8c8",
+        },
     },
     "mediaplayer": {
         "media_dir": "/srv/dmd/media",
@@ -505,6 +523,12 @@ DEFAULTS = {
         "branch": "main",
         "auto_check": True,
         "check_interval_hours": 24,
+        # Il puntino verde nell'angolo in alto a destra dell'orologio quando
+        # c'e' una versione nuova. Acceso di serie: il controllo quotidiano
+        # esisteva gia' dalla 1.5 e scriveva soltanto una riga di log, cioe'
+        # parlava a nessuno. Chi non lo vuole lo spegne qui, e il pannello
+        # torna identico a com'era.
+        "segnale": True,
     },
     # -------------------------------------------------------------- pulizia
     #
@@ -947,6 +971,11 @@ def _migrate(raw):
     from sources.banner import normalize_list
     banner = raw.setdefault("banner", {})
     banner["items"] = normalize_list(banner.get("items"))
+
+    # 9.9: le cinque caselle del World Time, con la stessa regola dei banner.
+    from sources.clock import normalizza_mondo
+    mondo = raw.setdefault("clock", {}).setdefault("world", {})
+    mondo["voci"] = normalizza_mondo(mondo.get("voci"))
 
     # 1.10: il servizio Now Playing deve comparire fra i toggle anche in una
     # configurazione salvata prima che esistesse, altrimenti la pagina Servizi
