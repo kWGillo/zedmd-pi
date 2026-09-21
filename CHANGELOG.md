@@ -2,6 +2,35 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.3]
+
+### Pongo
+
+Un gioco nuovo nella pagina **Giochi**: due racchette e una pallina. Tu a
+sinistra, il computer a destra, il campo è tutto il pannello e vince chi arriva
+a **11**. Dove colpisci la pallina decide l'angolo, e ogni colpo la accelera.
+Il nome non è PONG perché PONG è un marchio di Atari.
+
+Il computer ha **tre livelli** — facile, normale, difficile — e tre difetti
+umani che li distinguono: reagisce in ritardo, ha una velocità massima, e
+sbaglia a stimare dove arriverà la pallina, di più quando va veloce. I livelli
+sono tarati con una prova, non a occhio: contro un giocatore automatico che
+sbaglia la mira di qualche pixel si vince quasi sempre a facile, circa metà
+delle volte a normale, quasi mai a difficile.
+
+La tua racchetta può anche **avanzare**, fino a metà del tuo campo: chiudi gli
+angoli, e se colpisci mentre avanzi **schiacci** — la pallina riparte il 15%
+più veloce. In cambio hai meno tempo per reagire.
+
+Il record è lo **scambio più lungo**. Tre suoni nuovi: la racchetta, la
+sponda, il punto. In Home Assistant compare l'interruttore **Pongo**.
+
+### Le levette in verticale
+
+Nei giochi le levette del pad contavano solo in orizzontale. Adesso danno
+anche su e giù: serve a Pongo, e lo Snake ne guadagna una seconda strada per
+girare.
+
 ## [10.2]
 
 ### L'aggiornamento non inciampa più nella pipe del pulsante

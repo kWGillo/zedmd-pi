@@ -46,6 +46,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 |---|---|
 | [`doom.it.md`](doom.it.md) · [PDF](DMD_doom.pdf) | Doom sul pannello: compilazione, WAD, comandi, audio |
 | [`gameboy.it.md`](gameboy.it.md) · [PDF](DMD_gameboy.pdf) | Game Boy con PyBoy: ROM, overscan, tavolozze, audio |
+| [`pongo.it.md`](pongo.it.md) · [PDF](DMD_pongo.pdf) | Pongo: tu contro il computer, i tre livelli e come sono stati tarati |
 | [`joypad.it.md`](joypad.it.md) · [PDF](DMD_joypad.pdf) | Mappatura dei comandi: pad, tastiera collegata al DMD, chi può far cominciare una partita |
 
 ## Per chi lavora al progetto

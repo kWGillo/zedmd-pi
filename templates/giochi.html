@@ -13,7 +13,20 @@
     <div class="gioco {{ 'on' if stato.session and stato.gioco == nome }}">
       <h3>{{ etichetta }}</h3>
       <p class="hint">{{ t('giochi.' + nome + '.hint') }}</p>
-      <p class="record">{{ t('giochi.record') }} <b>{{ record.get(nome, 0) }}</b></p>
+      <p class="record">{{ t('giochi.' + nome + '.record') if nome == 'pongo' else t('giochi.record') }} <b>{{ record.get(nome, 0) }}</b></p>
+      {% if nome == 'pongo' %}
+      {# Il livello sta nella scheda del gioco e non nei Controlli: e' una
+         cosa di Pongo, e la si cambia fra una partita e l'altra. #}
+      <form method="post" action="{{ url_for('api_giochi_pongo') }}" class="livello-pongo">
+        <label for="pongo_livello">{{ t('giochi.pongo.livello') }}</label>
+        <select id="pongo_livello" name="pongo_livello" onchange="this.form.submit()">
+          {% for livello in ('facile', 'normale', 'difficile') %}
+          <option value="{{ livello }}" {{ 'selected' if (cfg.giochi.pongo_livello or 'normale') == livello }}>
+            {{ t('giochi.pongo.' + livello) }}</option>
+          {% endfor %}
+        </select>
+      </form>
+      {% endif %}
       <form method="post" action="{{ url_for('api_giochi_play') }}">
         <input type="hidden" name="gioco" value="{{ nome }}">
         <button type="submit">{{ t('giochi.play') }}</button>

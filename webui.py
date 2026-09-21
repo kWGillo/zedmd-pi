@@ -1002,6 +1002,20 @@ def create_app(runtime):
             return jsonify({"attivo": True, "codice": 0})
         return jsonify(runtime.giochi.stato_impara())
 
+    @app.route("/api/giochi/pongo", methods=["POST"])
+    def api_giochi_pongo():
+        """Il livello del computer di Pongo. Vale anche a partita aperta,
+        dalla battuta successiva."""
+        scelto = request.form.get("pongo_livello", "normale")
+        if scelto not in ("facile", "normale", "difficile"):
+            scelto = "normale"
+        conf = cfg.setdefault("giochi", {})
+        conf["pongo_livello"] = scelto
+        dmdconf.save()
+        if hasattr(runtime.giochi, "riconfigura"):
+            runtime.giochi.riconfigura()
+        return redirect(url_for("page_giochi"))
+
     @app.route("/api/giochi/ciclo", methods=["POST"])
     def api_giochi_ciclo():
         """Il tasto Start, ma dalla pagina: passa al gioco successivo."""

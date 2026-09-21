@@ -93,6 +93,13 @@ RICETTE = {
     # Il muro: un tonfo corto e basso, diverso dai suoni dei mattoni di
     # Breakout perche' qui vuol dire "hai sbagliato", non "hai colpito".
     "tonfo": [(0.075, 196, 110)],
+    # Pongo. Le frequenze sono quelle che si attribuiscono al cabinato del
+    # 1972 -- un'ottava fra racchetta e sponda -- e le durate sono corte come
+    # le sue: il "ping" della racchetta e' il suono del gioco, deve essere
+    # secco. Il punto e' la stessa nota, lunga.
+    "ping": [(0.035, 490, 490)],
+    "sponda": [(0.030, 245, 245)],
+    "punto": [(0.050, 490, 490), (0.180, 980, 980)],
 }
 
 

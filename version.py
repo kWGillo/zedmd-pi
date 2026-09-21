@@ -2480,6 +2480,17 @@ Storico:
        lavoro del servizio. `copytree` non sa copiarla. La correzione vale
        dagli aggiornamenti *successivi* a questo, perche' la copia la fa la
        versione installata: per arrivare qui la pipe va tolta a mano.
+  10.3 **Pongo.** Due racchette e una pallina, tu a sinistra e il computer a
+       destra, su tutto il pannello e undici punti per vincere. Il nome non
+       e' PONG perche' PONG e' un marchio di Atari. Il computer ha tre
+       difetti umani -- reagisce in ritardo, ha una velocita' massima, stima
+       male dove arriva la pallina, e peggio quando va veloce -- dosati in
+       tre livelli e tarati con una prova: rimanda circa il 60, 75 e 95%
+       delle palle, e contro un giocatore automatico che sbaglia come una
+       persona si vince quasi sempre, circa meta' delle volte, quasi mai. Il
+       record e' lo scambio piu' lungo. La racchetta puo' avanzare fino a
+       meta' del proprio campo, e colpendo mentre avanza schiaccia: +15%.
+       Le levette ora contano anche in verticale in tutti i giochi.
 """
 
-__version__ = "10.2"
+__version__ = "10.3"

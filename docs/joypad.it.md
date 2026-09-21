@@ -29,7 +29,7 @@ sono nemmeno permessi da sistemare su `/dev/input`.
 | **Per Bluetooth** | il Bluetooth del Pi acceso; niente adattatori né pacchetti aggiuntivi |
 
 Il pad serve a due cose distinte: i **giochi** scritti per il pannello
-(Breakout, Invaders, Snake) e **Doom**. Sono pagine diverse con impostazioni proprie,
+(Breakout, Invaders, Snake, Pongo) e **Doom**. Sono pagine diverse con impostazioni proprie,
 ma il pad è lo stesso e si riconosce una volta sola.
 
 ---
@@ -150,11 +150,11 @@ levette e croce direzionale. Se `evtest` non è installato:
 
 ## 5. I comandi
 
-### 5.1 Nei giochi (Breakout, Invaders, Snake)
+### 5.1 Nei giochi (Breakout, Invaders, Snake, Pongo)
 
 | Comando | Sul pad |
 |---|---|
-| muoversi | levetta sinistra, levetta destra, croce direzionale |
+| muoversi | levetta sinistra, levetta destra, croce direzionale — anche in verticale, dalla 10.3 |
 | sparare / lanciare la palla | **X**, **cerchio**, **quadrato**, **R1**, **R2** |
 | uscire dalla partita | **Share/Select** |
 | scorrere il giro dei giochi | **Options/Start** (fuori dal Game Boy anche **PS**) |
@@ -173,6 +173,12 @@ pannello su una mensola e chi gioca ha un controller in mano, e un controller
 ha la croce direzionale. Con quattro direzioni vere lo sterzo relativo non è
 una soluzione ma un indovinello: premendo sinistra mentre si va in giù il
 serpente girava a destra, che è l'opposto di quello che dice il pollice.
+
+**Pongo si gioca in su e in giù**, e in avanti fino a metà del proprio campo:
+croce direzionale o una delle due levette.
+Fino alla 10.2 le levette nei giochi contavano solo in orizzontale — Breakout
+e Invaders non avevano bisogno d'altro — e con Pongo il pollice sulla levetta
+non avrebbe mosso niente.
 
 Il dietrofront si ignora, e si scarta **al momento di muoversi** e non alla
 pressione: a trenta fotogrammi al secondo due tasti sfiorati dentro lo stesso
@@ -317,6 +323,7 @@ di Doom. Compaiono da soli con MQTT Discovery, se `mqtt.discovery` è acceso:
 | `switch.dmd_gioco_breakout` | accende e spegne una partita a Breakout |
 | `switch.dmd_gioco_invaders` | idem per Invaders |
 | `switch.dmd_gioco_snake` | idem per Snake |
+| `switch.dmd_gioco_pongo` | idem per Pongo |
 | `switch.dmd_doom` | idem per Doom |
 
 Sono **mutuamente esclusivi**: la presa del pannello è una sola, quindi

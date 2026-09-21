@@ -23,19 +23,22 @@ from PIL import Image
 import suoni
 
 from ..base import Source
-from ..comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_X, BTN_EAST,
+from ..comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_RY, ABS_X, ABS_Y,
+                       BTN_EAST,
                        BTN_MODE, BTN_SELECT, BTN_SOUTH, BTN_START, BTN_TR,
                        BTN_TR2, BTN_WEST, Lettore, joystick, tastiere)
 from .base import ALTEZZA, CAMPO, LARGHEZZA, Gioco, centra, scrivi
 from .invasori import Invasori
 from .mattoni import Mattoni
+from .pongo import Pongo
 from .serpente import Serpente
 
 # L'ordine e' quello del giro del tasto Start, ed e' anche l'ordine della
 # pagina: Breakout per primo perche' e' quello che il pannello 4:1 veste
-# meglio, e Snake in fondo perche' e' l'ultimo arrivato -- chi preme Start per
-# abitudine non deve trovarsi un gioco diverso da quello di ieri.
-GIOCHI = (Mattoni, Invasori, Serpente)
+# meglio, e gli ultimi arrivati in fondo -- chi preme Start per abitudine non
+# deve trovarsi un gioco diverso da quello di ieri. Pongo e' arrivato dopo
+# Snake.
+GIOCHI = (Mattoni, Invasori, Serpente, Pongo)
 NOMI = tuple(g.nome for g in GIOCHI)
 
 
@@ -91,6 +94,12 @@ ASSI = {
     ABS_RX: ("sinistra", "destra"),
     ABS_HAT0X: ("sinistra", "destra"),
     ABS_HAT0Y: ("su", "giu"),
+    # Le levette in verticale, dalla 10.3: Pongo si gioca in su e in giu', e
+    # con la sola croce direzionale il pollice sinistro stava sulla levetta
+    # per abitudine e non succedeva niente. Doom e il Game Boy le leggevano
+    # gia'; lo Snake ne guadagna una seconda strada per girare.
+    ABS_Y: ("su", "giu"),
+    ABS_RY: ("su", "giu"),
 }
 
 # Trenta come il ciclo di rendering del pannello: girare piu' veloce vuol dire
@@ -392,6 +401,11 @@ class GiochiSource(Source):
             self._ferma_ciclo()
         record = self._gioco.record() if self._gioco else 0
         self._gioco = per_nome(nome)()
+        # Un gioco con delle impostazioni sue (il livello di Pongo) le legge
+        # dalla configurazione qui: la classe non sa dove stia.
+        configura = getattr(self._gioco, "configura", None)
+        if configura is not None:
+            configura(self.conf())
         # Gli effetti arrivano da qui e non da dentro il gioco: cosi' una
         # partita si puo' ancora far girare dentro una prova, in silenzio e
         # senza scheda audio.
@@ -423,6 +437,13 @@ class GiochiSource(Source):
             # pensano il pulsante Esci o il tempo di inattivita'.
             self.arbiter.hold_on(self.name)
         return True
+
+    def riconfigura(self):
+        """Rilegge le impostazioni del gioco aperto (il livello di Pongo)."""
+        gioco = self._gioco
+        configura = getattr(gioco, "configura", None) if gioco else None
+        if configura is not None:
+            configura(self.conf())
 
     def chiudi_sessione(self):
         aperta = self._sessione

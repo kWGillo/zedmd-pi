@@ -240,6 +240,8 @@ DEFAULTS = {
         "session_timeout": 180,
         "ultimo": "breakout",
         "record": {},
+        # Quanto e' forte il computer di Pongo: facile, normale, difficile.
+        "pongo_livello": "normale",
         # Il tasto Start del cabinato scorre i giochi: premuto una volta si
         # gioca, premuto ancora si passa al successivo. I codici sono quelli
         # di una tastiera normale (invio, escape) ma su una pulsantiera da

@@ -606,3 +606,7 @@ ul.conti li b { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .anteprima-cielo img { display: block; width: 100%; max-width: 768px; height: auto;
   image-rendering: pixelated; border-radius: 4px; background: #000; }
 .anteprima-cielo form { margin: .4rem 0 0; }
+
+/* Il livello di Pongo, dentro la sua scheda. */
+.livello-pongo { margin: 0 0 8px; }
+.livello-pongo label { font-size: 12px; }

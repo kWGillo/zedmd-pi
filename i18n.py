@@ -1867,6 +1867,14 @@ STRINGS = {
     "giochi.invaders.hint": (
         "Tre file invece di cinque: su sessantaquattro righe la discesa originale non ci sta.",
         "Three rows instead of five: the original descent does not fit in sixty-four rows."),
+    "giochi.pongo.hint": (
+        "Tu contro il computer. Su e giù, avanti fino a metà campo; vince chi fa undici.",
+        "You against the computer. Up, down, forward to midfield; first to eleven wins."),
+    "giochi.pongo.record": ("Scambio più lungo:", "Longest rally:"),
+    "giochi.pongo.livello": ("Computer", "Computer"),
+    "giochi.pongo.facile": ("Facile", "Easy"),
+    "giochi.pongo.normale": ("Normale", "Normal"),
+    "giochi.pongo.difficile": ("Difficile", "Hard"),
     "giochi.snake.hint": (
         "Il serpente dei Nokia su una griglia 49x15. Quattro direzioni, e il bordo uccide.",
         "The Nokia snake on a 49x15 grid. Four directions, and the wall kills."),
