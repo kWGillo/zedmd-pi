@@ -33,6 +33,7 @@ from datetime import datetime
 
 from PIL import Image, ImageDraw
 
+import fasce
 import icone
 import meteo
 from .base import Source
@@ -82,6 +83,9 @@ class MeteoSource(Source):
         # questo, alle 7:00 la finestra si riaprirebbe a ogni giro del thread
         # per tutta l'ora.
         self._bollettino_dato = ""
+        # Il giorno per cui si sono gia' chiesti i dati del bollettino: vedi
+        # `_giro`, i tentativi successivi usano quelli in mano.
+        self._scaricato_per = ""
         self._ultimo_aggiornamento = 0.0
         # Quando il meteo e' andato **a schermo** l'ultima volta. E' un
         # orologio diverso da quello qui sopra: uno conta le chiamate alla
@@ -175,6 +179,28 @@ class MeteoSource(Source):
         self._ultimo_mostrato = adesso
         if self._durata:
             self._fino_a = adesso + self._durata
+        # Il bollettino di oggi e' dato quando qualcuno l'ha **visto**, non
+        # quando la finestra si e' aperta: e' la correzione della 9.13.
+        if self._modo == "bollettino":
+            self._bollettino_dato = datetime.now().strftime("%Y-%m-%d")
+
+    # ------------------------------------------------------ la fascia del mattino
+
+    # Per quante ore dopo l'ora del bollettino si continua a provare a
+    # mostrarlo, se nessuno l'ha ancora visto. Tre: un bollettino delle sette
+    # visto alle nove e mezza dice ancora la verita' sulla giornata; alle
+    # undici e' meglio lasciarlo perdere.
+    ORE_BOLLETTINO = 3
+
+    @staticmethod
+    def in_mattino(conf, adesso=None):
+        """Vero se `adesso` cade nella fascia del mattino ed e' accesa."""
+        if not conf.get("mattino", True):
+            return False
+        adesso = adesso or datetime.now()
+        inizio = fasce.parse_hhmm(conf.get("mattino_inizio", "06:30"), 390)
+        fine = fasce.parse_hhmm(conf.get("mattino_fine", "09:00"), 540)
+        return fasce.in_window(adesso.hour * 60 + adesso.minute, inizio, fine)
 
     # ------------------------------------------------------------------ ciclo
 
@@ -214,9 +240,33 @@ class MeteoSource(Source):
         # quella in mano va benissimo, ed e' gia' marcata con la sua eta'.
         ogni_minuti = max(0, int(conf.get("ogni_minuti", 20) or 0))
 
+        # La fascia del mattino. «Al mattino vedo poco le previsioni»: dalle
+        # 6 alle 9, con la configurazione di serie, il meteo stava a schermo
+        # 226 secondi su 10.800 -- il 2%, cioe' dodici secondi ogni dieci
+        # minuti. Chi fa colazione davanti al pannello per un quarto d'ora ne
+        # vedeva uno, se capitava. Nella fascia il giro si stringe e mostra il
+        # **bollettino**, che e' la schermata che risponde alla domanda del
+        # mattino: com'e' la giornata, non quanti gradi fa in questo istante.
+        # Fuori dalla fascia tutto resta com'era: un meteo che c'e' sempre
+        # smette di essere guardato.
+        mattino = self.in_mattino(conf, adesso)
+        if mattino:
+            ogni_minuti = max(1, int(conf.get("mattino_ogni_minuti", 2) or 2))
+        periodico = "bollettino" if mattino else "aggiornamento"
+        durata_periodico = (int(conf.get("durata_bollettino", 22) or 22) if mattino
+                            else int(conf.get("durata_aggiornamento", 12) or 12))
+
         oggi = adesso.strftime("%Y-%m-%d")
-        tocca_bollettino = (adesso.hour == ora_bollettino
-                            and self._bollettino_dato != oggi)
+        # Il bollettino di oggi **finche' non e' stato visto**, dall'ora del
+        # bollettino per le tre ore dopo. Fino alla 9.12 bastava averlo
+        # *aperto*: se alle sette il pannello era del Calendario, di una
+        # notifica o dello Sleep, la finestra da ventidue secondi si chiudeva
+        # senza che nessuno la vedesse, e il bollettino era dato per fatto
+        # fino al giorno dopo. La 8.2 aveva corretto lo stesso difetto per
+        # l'aggiornamento periodico e non per questo.
+        tocca_bollettino = (self._bollettino_dato != oggi
+                            and ora_bollettino <= adesso.hour
+                            < ora_bollettino + self.ORE_BOLLETTINO)
         scaduto = (time.time() - self._ultimo_aggiornamento) >= ogni * 3600
         # `_ultimo_mostrato` adesso vuol dire "l'ultima volta che ci hanno
         # visto". Quindi questa riga, senza cambiare una virgola, fa anche il
@@ -237,35 +287,39 @@ class MeteoSource(Source):
             self._apri("allerta", int(conf.get("durata_allerta", 25) or 25))
             return
 
-        if not tocca_bollettino and not scaduto:
-            # Niente da chiedere alla rete. Ma se e' l'ora del giro periodico
-            # si mostra lo stesso quello che si ha gia': e' il caso normale,
-            # non l'eccezione — fra una chiamata e l'altra passano ore e di
-            # giri ce ne stanno decine.
-            if tocca_giro and self._meteo.dati() is not None:
-                self._apri("aggiornamento",
-                           int(conf.get("durata_aggiornamento", 12) or 12))
-            return
-
-        # I dati si chiedono **prima** di aprire la finestra: una finestra che
-        # si apre e poi resta vuota per dieci secondi mentre la rete risponde
-        # e' peggio di una finestra che si apre dieci secondi dopo.
-        self._meteo.aggiorna()
-        if self._meteo.dati() is None:
-            self._errore = self._meteo.errore() or "nessuna previsione"
+        # La rete si interroga quando i dati sono vecchi, oppure una volta al
+        # giorno per il bollettino. **Non** a ogni tentativo del bollettino:
+        # con il pannello in Sleep fino alle otto, riprovare ogni minuto
+        # vorrebbe dire sessanta chiamate a Open-Meteo per mostrare niente.
+        # I tentativi usano i dati gia' in mano.
+        serve_la_rete = scaduto or (tocca_bollettino
+                                    and self._scaricato_per != oggi)
+        fresco = False
+        if serve_la_rete:
+            # I dati si chiedono **prima** di aprire la finestra: una finestra
+            # che si apre e poi resta vuota per dieci secondi mentre la rete
+            # risponde e' peggio di una finestra che si apre dieci secondi dopo.
+            self._meteo.aggiorna()
             # Si segna comunque il tentativo, altrimenti con la rete giu' il
             # giro riproverebbe ogni minuto per sempre.
             self._ultimo_aggiornamento = time.time()
+            if tocca_bollettino:
+                self._scaricato_per = oggi
+            if self._meteo.dati() is None:
+                self._errore = self._meteo.errore() or "nessuna previsione"
+                return
+            fresco = True
+
+        if self._meteo.dati() is None:
             return
 
-        if tocca_bollettino:
-            self._bollettino_dato = oggi
+        if tocca_bollettino and not self.active():
             self._apri("bollettino",
                        int(conf.get("durata_bollettino", 22) or 22))
-        else:
-            self._apri("aggiornamento",
-                       int(conf.get("durata_aggiornamento", 12) or 12))
-        self._ultimo_aggiornamento = time.time()
+        elif tocca_giro or fresco:
+            # Il giro periodico, oppure dati appena arrivati: si mostra quello
+            # che si ha, nella schermata giusta per quest'ora.
+            self._apri(periodico, durata_periodico)
 
     def _allerta_nuova(self):
         """L'allerta da mostrare adesso, se e' cambiata. Altrimenti None.

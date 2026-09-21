@@ -29,7 +29,11 @@
   <dl class="info">
     <dt>{{ t('settings.update.current') }}</dt><dd class="mono big">{{ update.current }}</dd>
     <dt>{{ t('settings.update.latest') }}</dt>
-    <dd class="mono">{{ update.latest if update.latest else t('settings.update.unchecked') }}{% if update.tag %} <span class="hint">({{ update.tag }})</span>{% endif %}</dd>
+    {# Il tag si mostra solo quando dice qualcosa in piu' del numero. Di
+       solito e' il numero con una `v` davanti -- `v9.12` per la 9.12 -- e
+       ripeterlo fra parentesi era rumore. Se un giorno fosse `v9.12-prova`,
+       invece, e' proprio la cosa da vedere prima di premere Installa. #}
+    <dd class="mono">{{ update.latest if update.latest else t('settings.update.unchecked') }}{% if update.tag and update.tag != 'v' ~ update.latest %} <span class="hint">({{ update.tag }})</span>{% endif %}</dd>
     <dt>{{ t('settings.update.checked') }}</dt>
     <dd>{% if update.checked %}{{ update.checked | timestamp }}{% else %}{{ t('common.never') }}{% endif %}</dd>
     <dt>{{ t('settings.update.fonte') }}</dt>

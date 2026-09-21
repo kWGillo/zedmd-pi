@@ -28,6 +28,7 @@ import io
 import json
 import os
 import py_compile
+import re
 import shutil
 import subprocess
 import sys
@@ -114,9 +115,29 @@ def is_newer(remote, local):
 RIASSUNTO_MASSIMO = 255
 
 
+def testo_semplice(note):
+    """Le note di rilascio senza la punteggiatura del Markdown.
+
+    Le note sono la sezione del CHANGELOG, scritta in Markdown perche' su
+    GitHub la si legge impaginata. Nella pagina del DMD e in Home Assistant
+    arrivavano cosi' com'erano, e la prima riga era `### Un colore diverso a
+    ogni ora`: i cancelletti sono istruzioni per chi impagina, non parole da
+    leggere. Qui si tolgono quelli e gli asterischi del grassetto; i titoli
+    restano righe a se', e le liste restano liste.
+    """
+    righe = []
+    for riga in str(note or "").replace("\r\n", "\n").split("\n"):
+        pulita = re.sub(r"^\s{0,3}#{1,6}\s*", "", riga)
+        pulita = pulita.replace("**", "").replace("`", "")
+        pulita = re.sub(r"^\s*[-*]\s+", "• ", pulita)
+        righe.append(pulita.rstrip())
+    testo = "\n".join(righe)
+    return re.sub(r"\n{3,}", "\n\n", testo).strip()
+
+
 def riassunto(note, limite=RIASSUNTO_MASSIMO):
     """Le prime righe delle note di rilascio, entro il limite."""
-    testo = " ".join(str(note or "").split())
+    testo = " ".join(testo_semplice(note).split())
     if len(testo) <= limite:
         return testo
     return testo[:limite - 1].rstrip() + "…"
@@ -146,7 +167,7 @@ def release(repo):
         # Il tag e' `v9.10`, la versione e' `9.10`: la `v` e' una convenzione
         # di Git, non fa parte del numero e non deve arrivare al confronto.
         "versione": tag.lstrip("vV"),
-        "note": str(dati.get("body") or "").strip(),
+        "note": testo_semplice(dati.get("body")),
         "url": str(dati.get("html_url") or ""),
         "pubblicata": str(dati.get("published_at") or ""),
     }

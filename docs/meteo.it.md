@@ -29,6 +29,50 @@ parlano poco.
 > gira come il Rolling Banner, ogni venti minuti, e l'1% del tempo è la misura
 > giusta fra l'essere sfondo e il non esserci.
 
+## La fascia del mattino
+
+L'equilibrio del resto della giornata al mattino non basta. Simulando dalle 6
+alle 9 con la configurazione di serie, il meteo stava a schermo **226 secondi
+su 10.800, il 2%**: dodici secondi ogni dieci minuti. Chi fa colazione davanti
+al pannello per un quarto d'ora ne vedeva uno, se capitava — e quasi sempre la
+schermata «adesso», con la temperatura del momento, non quella che risponde
+alla domanda del mattino.
+
+Dalla 9.13 c'è una **fascia del mattino**, accesa di serie dalle **6:30 alle
+9:00**. Dentro la fascia:
+
+| | Fuori | Dentro |
+|---|---|---|
+| Ogni quanto | 10 minuti | **2 minuti** |
+| Che schermata | «adesso» | **il bollettino della giornata** |
+| Quanto dura | 12 s | 22 s |
+| Tempo a schermo | 2% | **18%** |
+
+Il bollettino dentro la fascia perché è la schermata di chi si sta vestendo:
+massima, minima, umidità, che tempo farà. Fuori dalla fascia non cambia
+niente — il meteo che c'è sempre resta un meteo che non si guarda.
+
+A competere al mattino, con i media spenti, c'è l'orologio. Ed è proprio per
+questo che una fascia densa non toglie niente a nessuno.
+
+## Il bollettino che si perdeva
+
+Fino alla 9.12 il bollettino delle sette era dato per fatto quando la finestra
+si **apriva**, non quando qualcuno la **vedeva**. Se alle sette il pannello era
+del Calendario, di una notifica, dell'Air Radar o dello Sleep, la finestra da
+ventidue secondi si chiudeva senza che nessuno l'avesse vista, e il bollettino
+non tornava fino al giorno dopo.
+
+La 8.2 aveva corretto lo stesso difetto per l'aggiornamento periodico — *perdere
+il turno costa un minuto, non venti* — e non per il bollettino. Adesso vale
+anche per lui: riprova ogni minuto finché qualcuno non lo vede, per tre ore
+dall'ora del bollettino. Un bollettino delle sette visto alle nove e mezza dice
+ancora la verità sulla giornata; a mezzogiorno non è più la notizia del
+mattino, e si lascia perdere.
+
+E i tentativi usano i dati già in mano: con il pannello in Sleep fino alle
+otto, riprovare non vuol dire sessanta chiamate a Open-Meteo.
+
 E non prende mai il pannello a forza. Il meteo non è urgente: nessuno deve
 sapere la temperatura *adesso* al punto da interrompere una partita o il
 passaggio della Stazione Spaziale. Priorità **54** — sopra il Media Player e
@@ -266,7 +310,11 @@ Sta nella pagina **Servizi**, nella scheda del Meteo, e sono tre numeri:
   dati che ha già. Venti è il valore di partenza; **0 spegne il giro** e lascia
   solo il bollettino, gli aggiornamenti e le allerte, cioè il comportamento di
   prima della 7.5;
-- **dati richiesti ogni (ore)** — ogni quanto si interroga Open-Meteo.
+- **dati richiesti ogni (ore)** — ogni quanto si interroga Open-Meteo;
+- **fascia del mattino** — la spunta, le ore *dalle* e *alle*, e ogni quanti
+  minuti compare il bollettino dentro la fascia. Di serie accesa, 6:30–9:00,
+  ogni 2 minuti. Una fascia a cavallo della mezzanotte funziona come quelle di
+  Night e Sleep.
 
 **Le due righe centrali sono cose diverse, e confonderle era il difetto.** Una
 previsione non cambia ogni venti minuti, quindi rimostrarla non richiede di

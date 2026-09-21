@@ -1651,6 +1651,18 @@ def create_app(runtime):
         # Zero è valido e vuol dire "niente giro periodico": non si può
         # limitare dal basso a 1, o si perderebbe quella scelta.
         conf["ogni_minuti"] = numero("ogni_minuti", 20, 0, 720)
+        # La fascia del mattino. Un orario scritto male non si salva: si
+        # tiene quello di prima, invece di trasformarlo in mezzanotte.
+        conf["mattino"] = request.form.get("mattino") == "on"
+        for chiave, predefinito in (("mattino_inizio", "06:30"),
+                                    ("mattino_fine", "09:00")):
+            scritto = (request.form.get(chiave) or "").strip()
+            if re.match(r"^([01]?\d|2[0-3]):[0-5]\d$", scritto):
+                conf[chiave] = "%02d:%s" % (int(scritto.split(":")[0]),
+                                            scritto.split(":")[1])
+            else:
+                conf.setdefault(chiave, predefinito)
+        conf["mattino_ogni_minuti"] = numero("mattino_ogni_minuti", 2, 1, 60)
         conf["regione"] = (request.form.get("regione") or "").strip()
         conf["allerte"] = request.form.get("allerte") == "on"
         unita = (request.form.get("unita") or "C").strip().upper()

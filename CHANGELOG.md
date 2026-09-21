@@ -2,6 +2,43 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.13]
+
+### Il meteo al mattino
+
+«Al mattino vedo poco le previsioni.» Simulando dalle 6 alle 9 con la
+configurazione di serie, il meteo stava a schermo **226 secondi su 10.800**: il
+2%, cioè dodici secondi ogni dieci minuti, quasi sempre con la temperatura del
+momento e non con le previsioni della giornata.
+
+Adesso c'è una **fascia del mattino**, accesa di serie dalle 6:30 alle 9:00: il
+meteo compare **ogni 2 minuti** e mostra il **bollettino della giornata** —
+massima, minima, umidità, che tempo farà. Nella fascia sta a schermo il 18% del
+tempo; fuori non cambia niente. Si regola dalla scheda del Meteo, nella pagina
+Servizi.
+
+### Il bollettino che si perdeva
+
+Il bollettino delle sette era dato per fatto quando la finestra si **apriva**,
+non quando qualcuno la **vedeva**. Se alle sette il pannello era del
+Calendario, di una notifica, dell'Air Radar o dello Sleep, si perdeva fino al
+giorno dopo. La 8.2 aveva corretto lo stesso difetto per l'aggiornamento
+periodico e non per il bollettino.
+
+Adesso riprova ogni minuto finché non viene visto, per tre ore dall'ora del
+bollettino, usando i dati già in mano: lo Sleep fino alle otto non vuol dire
+sessanta chiamate a Open-Meteo.
+
+### La pagina Aggiornamenti, più pulita
+
+Le note di rilascio arrivavano in Markdown, e la prima riga era
+`### Un colore diverso a ogni ora`: i cancelletti sono istruzioni per chi
+impagina, non parole da leggere. Adesso si tolgono, nella pagina e nel
+riassunto per Home Assistant.
+
+E il tag accanto al numero — `9.12 (v9.12)` — si mostra solo quando dice
+qualcosa in più del numero.
+
 ## [9.12]
 
 ### Un colore diverso a ogni ora

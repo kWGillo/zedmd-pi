@@ -117,6 +117,17 @@
     <label for="ogni_ore">{{ t('meteo.every') }}</label>
     <input type="number" id="ogni_ore" name="ogni_ore" min="1" max="24"
            value="{{ cfg.meteo.ogni_ore }}">
+    <label class="check"><input type="checkbox" name="mattino"
+           {{ 'checked' if cfg.meteo.mattino }}> {{ t('meteo.mattino') }}</label>
+    <label for="mattino_inizio">{{ t('meteo.mattino.dalle') }}</label>
+    <input type="time" id="mattino_inizio" name="mattino_inizio"
+           value="{{ cfg.meteo.mattino_inizio }}">
+    <label for="mattino_fine">{{ t('meteo.mattino.alle') }}</label>
+    <input type="time" id="mattino_fine" name="mattino_fine"
+           value="{{ cfg.meteo.mattino_fine }}">
+    <label for="mattino_ogni_minuti">{{ t('meteo.mattino.ogni') }}</label>
+    <input type="number" id="mattino_ogni_minuti" name="mattino_ogni_minuti"
+           min="1" max="60" value="{{ cfg.meteo.mattino_ogni_minuti }}">
     <label for="regione">{{ t('meteo.region') }}</label>
     <select id="regione" name="regione">
       <option value="" {{ 'selected' if not cfg.meteo.regione }}>{{ t('meteo.region.none') }}</option>

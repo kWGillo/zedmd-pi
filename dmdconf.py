@@ -781,6 +781,15 @@ DEFAULTS = {
         # ogni mezz'ora. Corretto quello, dieci minuti danno circa 139
         # comparse al giorno e il due per cento del tempo del pannello.
         "ogni_minuti": 10,
+        # La fascia del mattino: il meteo compare molto piu' spesso e mostra
+        # il bollettino della giornata invece della temperatura del momento.
+        # Dalle 6 alle 9, con i soli dieci minuti qui sopra, il meteo stava a
+        # schermo il 2% del tempo: chi fa colazione davanti al pannello ne
+        # vedeva uno se capitava. Fuori dalla fascia non cambia niente.
+        "mattino": True,
+        "mattino_inizio": "06:30",
+        "mattino_fine": "09:00",
+        "mattino_ogni_minuti": 2,
         "durata_bollettino": 22,
         "durata_aggiornamento": 12,
         "durata_allerta": 25,

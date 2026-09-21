@@ -2418,6 +2418,22 @@ Storico:
        *Il cursore dell'ora parte da +2* nelle installazioni nuove: il centro
        geometrico non e' il centro che si vede da sotto una mensola. Chi aveva
        gia' mosso il cursore se lo tiene.
+  9.13 Il meteo al mattino, e il bollettino che non si perde piu'.
+       Dalle 6 alle 9, con la configurazione di serie, il meteo stava a
+       schermo 226 secondi su 10.800: il 2%, dodici secondi ogni dieci minuti
+       e quasi sempre la temperatura del momento. Adesso una fascia del
+       mattino, accesa di serie dalle 6:30 alle 9:00, lo fa comparire ogni due
+       minuti con il bollettino della giornata: il 18% del tempo nella fascia,
+       e fuori non cambia niente.
+       *Il difetto:* il bollettino era dato per fatto quando la finestra si
+       apriva, non quando qualcuno la vedeva. Con il Calendario, una notifica
+       o lo Sleep sul pannello alle sette, si perdeva fino al giorno dopo. La
+       8.2 aveva corretto lo stesso difetto per l'aggiornamento e non per il
+       bollettino. Adesso riprova finche' non viene visto, per tre ore, con i
+       dati gia' in mano.
+       Nella pagina Aggiornamenti le note di rilascio perdono i cancelletti
+       del Markdown, e il tag fra parentesi accanto al numero si vede solo
+       quando dice qualcosa in piu' del numero stesso.
 """
 
-__version__ = "9.12"
+__version__ = "9.13"
