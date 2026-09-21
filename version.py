@@ -2434,6 +2434,10 @@ Storico:
        Nella pagina Aggiornamenti le note di rilascio perdono i cancelletti
        del Markdown, e il tag fra parentesi accanto al numero si vede solo
        quando dice qualcosa in piu' del numero stesso.
+  9.13.1 Nella pagina Aggiornamenti le note di rilascio vanno sotto il
+         pulsante Installa, non sopra. Sono lunghe -- la sezione intera del
+         CHANGELOG -- e messe prima spingevano il pulsante in fondo alla
+         pagina.
 """
 
-__version__ = "9.13"
+__version__ = "9.13.1"

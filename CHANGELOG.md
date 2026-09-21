@@ -2,6 +2,15 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.13.1]
+
+### Il pulsante prima delle note
+
+Nella pagina **Aggiornamenti** le note di rilascio adesso stanno sotto il
+pulsante *Installa*, non sopra. Sono la sezione intera del CHANGELOG, e messe
+prima spingevano il pulsante in fondo alla pagina: la cosa da fare sotto la
+cosa da leggere, se si vuole.
+
 ## [9.13]
 
 ### Il meteo al mattino

@@ -48,14 +48,6 @@
   <p class="hint">{{ t('settings.update.uptodate') }}</p>
   {% endif %}
 
-  {% if update.available and update.note %}
-  <label>{{ t('settings.update.note') }}</label>
-  <pre class="log">{{ update.note }}</pre>
-  {% endif %}
-  {% if update.url %}
-  <p class="hint"><a href="{{ update.url }}" target="_blank" rel="noopener">{{ t('settings.update.vedi') }}</a></p>
-  {% endif %}
-
   <div class="actions">
     <form method="post" action="{{ url_for('api_update_check') }}">
       <button type="submit" class="ghost">{{ t('settings.update.checknow') }}</button>
@@ -67,6 +59,17 @@
     </form>
     {% endif %}
   </div>
+
+  {# Le note vengono dopo il pulsante, non prima. Sono lunghe -- la sezione
+     intera del CHANGELOG -- e messe sopra spingevano Installa in fondo alla
+     pagina, cioe' la cosa da fare sotto la cosa da leggere se si vuole. #}
+  {% if update.available and update.note %}
+  <label>{{ t('settings.update.note') }}</label>
+  <pre class="log">{{ update.note }}</pre>
+  {% endif %}
+  {% if update.url %}
+  <p class="hint"><a href="{{ update.url }}" target="_blank" rel="noopener">{{ t('settings.update.vedi') }}</a></p>
+  {% endif %}
 
   <form method="post" action="{{ url_for('api_update_settings') }}">
     <div class="row3">

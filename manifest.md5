@@ -119,10 +119,10 @@ f12e84c37e7f8459cf07567e1d22ac0e  templates/services.html
 30649aa4f0233e9d1f426b937a33fc54  templates/settings.html
 48e92b36bcdbdf54ff56b0714d26e67e  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
-061612d878fffcdb276cc3d848b43ad1  templates/updates.html
+29ec3d40d18b3ff9c31cf907cd8b1236  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-3a03162146334714c7eeb643fd024a65  version.py
+57ef43d2c374154c7801fcfddaf99572  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 f60a1b10acebbf63b073901a76e946c2  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py
