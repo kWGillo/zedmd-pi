@@ -137,7 +137,7 @@ if [ $# -gt 0 ]; then
 else
     for f in "$DOCS"/*.it.md; do
         case "$(basename "$f")" in
-            README.it.md|pubblicazione.it.md) continue ;;
+            README.it.md) continue ;;
         esac
         fai "$f"
     done

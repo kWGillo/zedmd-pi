@@ -49,12 +49,6 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`pongo.it.md`](pongo.it.md) · [PDF](DMD_pongo.pdf) | Pongo: tu contro il computer, i tre livelli e come sono stati tarati |
 | [`joypad.it.md`](joypad.it.md) · [PDF](DMD_joypad.pdf) | Mappatura dei comandi: pad, tastiera collegata al DMD, chi può far cominciare una partita |
 
-## Per chi lavora al progetto
-
-| Documento | Di cosa parla |
-|---|---|
-| [`pubblicazione.it.md`](pubblicazione.it.md) | Come si pubblica una nuova versione su GitHub |
-
 ---
 
 I PDF si rigenerano dai `.md` con [`mkpdf.sh`](mkpdf.sh), che usa `pandoc` e

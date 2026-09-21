@@ -37,7 +37,7 @@ da Raspberry Pi Imager. In tutto il documento l'utente è `gillo` e l'hostname
 16. Risoluzione problemi
 17. Comandi utili e struttura dei file
 18. Appendice A — diagnostica del pannello
-19. Appendice B — pubblicare una nuova versione su GitHub
+19. Riferimenti
 
 ---
 
@@ -1356,87 +1356,7 @@ una sola volta.**
 
 ---
 
-## 19. Appendice B — pubblicare una nuova versione su GitHub
-
-Da eseguire **sul Mac**, non sul Raspberry. Incolla **un comando alla volta**:
-quando un `cd` fallisce in una sequenza incollata tutta insieme, i comandi
-successivi vengono eseguiti nella cartella sbagliata.
-
-La prima volta serve il client GitHub:
-
-```bash
-brew install gh && gh auth login
-```
-
-Scompatta il pacchetto ricevuto:
-
-```bash
-cd ~/Downloads
-```
-
-```bash
-ls ~/Downloads/*.tar.gz
-```
-
-In `zsh` un carattere jolly che non trova nulla fa fallire il comando con
-`no matches found`: leggi il nome vero invece di indovinarlo.
-
-```bash
-tar xzf zedmd-pi.tar.gz
-```
-
-La cartella scompattata **non contiene la cronologia git**, quindi non fare
-`git init` al suo interno: creerebbe una storia senza parentela con quella già
-pubblicata e il push verrebbe rifiutato. Si parte dal repository vero:
-
-```bash
-git clone https://github.com/kWGillo/zedmd-pi.git zedmd-pi-repo
-```
-
-```bash
-cd ~/Downloads/zedmd-pi-repo
-```
-
-```bash
-find . -mindepth 1 -maxdepth 1 -not -name .git -exec rm -rf {} +
-```
-
-```bash
-cp -R ~/Downloads/zedmd-pi/. .
-```
-
-Il punto dopo la barra è indispensabile: significa "il contenuto della
-cartella", non la cartella stessa.
-
-```bash
-pwd && grep __version__ version.py && git remote -v
-```
-
-```bash
-git add -A
-```
-
-```bash
-git commit -m "<versione>: <cosa è cambiato>"
-```
-
-```bash
-git push
-```
-
-```bash
-curl -s https://raw.githubusercontent.com/kWGillo/zedmd-pi/main/version.py | grep __version__
-```
-
-Quest'ultimo è l'indirizzo che interroga l'aggiornamento automatico del
-Raspberry: se qui vedi il numero nuovo, l'OTA lo vedrà.
-
-Le volte successive `zedmd-pi-repo` resta sul Mac con il suo `.git`: bastano
-`git pull`, svuota, ricopia, commit, push.
-
----
-
-## 20. Riferimenti
+## 19. Riferimenti
 
 - Progetto: https://github.com/kWGillo/zedmd-pi
 - Fork con supporto S-PWM: https://github.com/kingdo9/rpi-rgb-led-matrix_pwm_experiment
