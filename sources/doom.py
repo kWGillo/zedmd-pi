@@ -291,6 +291,13 @@ class DoomSource(Source):
         import suoni
         if not suoni.doom_con_suono(self.cfg):
             args += ["-nosound", "-nomusic"]
+        else:
+            # Il volume si passa da qui e non dal `default.cfg` di Doom:
+            # doomgeneric quel file non lo legge (e' dentro `#if ORIGCODE`).
+            # Un binario compilato prima della 10.1 non conosce l'opzione e la
+            # ignora: suona com'era, al volume di serie.
+            args.append("--volume=%d" % suoni.percento(
+                suoni.volume_giochi(self.cfg)))
         if not gioca:
             return args
 
@@ -570,6 +577,29 @@ class DoomSource(Source):
             self.chiudi_sessione()
 
     # ------------------------------------------------------------------ tasti
+
+    def imposta_volume(self, valore):
+        """Cambia il volume di Doom a partita aperta. `valore` fra 0 e 1.
+
+        Viaggia sulla stessa pipe dei tasti, con lo stato 2 al posto di
+        premuto/rilasciato. **Solo** se il binario e' stato compilato dal
+        sorgente installato: un binario piu' vecchio lo leggerebbe come un
+        tasto premuto — un tasto a caso, che resta giu' — ed e' molto peggio
+        di un volume che cambia alla prossima partita.
+        """
+        import doomsetup
+        import suoni
+        if doomsetup.binario_vecchio(self.cfg):
+            return False
+        proc = self._proc
+        if proc is None or proc.stdin is None or proc.poll() is not None:
+            return False
+        try:
+            proc.stdin.write(bytes((2, suoni.percento(valore))))
+            proc.stdin.flush()
+        except (OSError, ValueError):
+            return False
+        return True
 
     def premi(self, azione, giu=True, apri=True):
         """Manda un tasto a Doom.

@@ -352,6 +352,15 @@ def volume_giochi(cfg):
         return 0.9
 
 
+def percento(valore):
+    """Un volume 0-1 come intero 0-100: e' come viaggia verso Doom e Game Boy,
+    un byte sulla pipe dei tasti."""
+    try:
+        return max(0, min(100, int(round(float(valore) * 100))))
+    except (TypeError, ValueError):
+        return 0
+
+
 def sottofondo(cfg):
     """Quanto vale il sottofondo che tiene sveglia la scheda. 0 = spento."""
     try:
@@ -1010,10 +1019,7 @@ class Mixer:
         with self._lucchetto:
             if self._processo is not None and self._processo.poll() is None:
                 return True, ""
-            if abs(float(vol) - self._volume) > 1e-9:
-                # Il volume e' cotto dentro i pacchi: cambiandolo vanno rifatti.
-                self._pacchi.clear()
-            self._volume = max(0.0, min(1.0, float(vol)))
+            self._imposta_volume(vol)
             self._device = device
             self._voluto = True
             self._arreso = False
@@ -1029,6 +1035,33 @@ class Mixer:
                                         daemon=True)
         self._thread.start()
         return True, ""
+
+    def _imposta_volume(self, vol):
+        """Da chiamare con il lucchetto preso.
+
+        Il volume e' cotto dentro i pacchi, quindi cambiandolo vanno rifatti.
+        Fino alla 10.0 si buttavano e basta: `_carica` li prepara solo la
+        prima volta che legge un wav, e da li' in poi ogni suono passava per
+        la strada lenta della somma in Python. Suonava giusto, ma costava.
+        """
+        vol = max(0.0, min(1.0, float(vol)))
+        if abs(vol - self._volume) <= 1e-9:
+            return
+        self._volume = vol
+        self._pacchi.clear()
+        for nome, dati in list(self._campioni.items()):
+            if dati:
+                self._impacchetta(nome, dati)
+
+    def cambia_volume(self, vol):
+        """Il volume a partita aperta: lo chiede la pagina Impostazioni.
+
+        Prima il volume si fissava all'apertura della partita, e una
+        partita resta aperta finche' non la si chiude: abbassare il cursore
+        mentre si giocava non cambiava niente, e sembrava rotto.
+        """
+        with self._lucchetto:
+            self._imposta_volume(vol)
 
     def acceso(self):
         """C'e' un riproduttore vivo in questo momento."""
@@ -1420,6 +1453,11 @@ _mixer = Mixer()
 
 # Dove finisce la registrazione degli effetti, quando la si accende.
 REGISTRO_EFFETTI = "/tmp/dmd-effetti.raw"
+
+
+def cambia_volume_giochi(cfg):
+    """Porta il volume dei giochi dentro una partita integrata gia' aperta."""
+    _mixer.cambia_volume(volume_giochi(cfg))
 
 
 def effetti_avvia(cfg):

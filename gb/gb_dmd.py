@@ -25,7 +25,8 @@ Il protocollo e' quello di Doom, volutamente stupido:
     un fotogramma.
   - **stdin**: coppie di byte [stato, tasto] — stato 1 premuto, 0 rilasciato;
     tasto e' un codice della tabella TASTI qui sotto, che vale solo fra questo
-    programma e `sources/gameboy.py`.
+    programma e `sources/gameboy.py`. Stato 2 non e' un tasto: e' il volume,
+    e il secondo byte e' la percentuale del cursore "Volume dei giochi".
 
 Lo schermo del Game Boy e' 160x144, il pannello 256x64. La proporzione si
 tiene: 64 righe di altezza fanno 71 pixel di larghezza, centrati, con il resto
@@ -196,20 +197,16 @@ class Altoparlante:
         `alsamixer`, che su Raspberry Pi OS c'e' quasi sempre.
         """
         if shutil.which("aplay"):
-            # aplay non regola il volume, quindi lo applichiamo noi ai
-            # campioni. Con ffmpeg invece lo fa il filtro, che costa meno.
+            # Il volume lo applichiamo noi ai campioni, con aplay come con
+            # ffmpeg: cosi' lo si puo' cambiare a partita aperta.
             return ["aplay", "-q", "-t", "raw", "-f", "S16_LE",
                     "-r", str(int(frequenza)), "-c", "2",
                     "--buffer-time=%d" % self.BUFFER_US,
                     "--period-time=%d" % self.PERIODO_US,
                     "-D", device, "-"]
-        self.volume_a_valle = True
-        comando = ["ffmpeg", "-v", "error", "-nostdin",
-                   "-f", "s16le", "-ar", str(int(frequenza)), "-ac", "2",
-                   "-i", "-"]
-        if self.volume < 0.999:
-            comando += ["-filter:a", "volume=%.2f" % self.volume]
-        return comando + ["-f", "alsa", device]
+        return ["ffmpeg", "-v", "error", "-nostdin",
+                "-f", "s16le", "-ar", str(int(frequenza)), "-ac", "2",
+                "-i", "-", "-f", "alsa", device]
 
     def _stringi_tubo(self, byte=16384):
         """Un tubo Linux tiene 64 KB: a 48 kHz stereo sono altri 340 ms di
@@ -232,8 +229,7 @@ class Altoparlante:
             # `<< 8` e non una moltiplicazione: da int8 a int16 il valore
             # cambia di scala, non di significato.
             blocco = campioni.astype("int16") << 8
-            if not getattr(self, "volume_a_valle", False) and self.volume < 0.999:
-                # Con aplay il volume non lo regola nessuno a valle: qui.
+            if self.volume < 0.999:
                 blocco = (blocco * self.volume).astype("int16")
             self.processo.stdin.write(blocco.tobytes())
         except (BrokenPipeError, ValueError, OSError):
@@ -334,6 +330,12 @@ def main():
                 break
             for i in range(0, len(dati) - 1, 2):
                 stato, codice = dati[i], dati[i + 1]
+                if stato == 2:
+                    # Il volume, cambiato dalla pagina Impostazioni mentre
+                    # si gioca. Non e' un tasto e non va a PyBoy.
+                    if altoparlante is not None:
+                        altoparlante.volume = max(0.0, min(1.0, codice / 100.0))
+                    continue
                 nome = TASTI.get(codice)
                 if nome is None:
                     continue

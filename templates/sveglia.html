@@ -66,6 +66,24 @@
     </div>
   </form>
   {% endif %}
+
+  {# Il suono del timer ha la sua tendina. Prima lo si ereditava dalla prima
+     sveglia accesa, e non lo diceva nessuna pagina: per cambiarlo bisognava
+     cambiare una sveglia. #}
+  <form method="post" action="{{ url_for('api_timer_suono') }}">
+    <label for="suono_timer">{{ t('timer.suono') }}</label>
+    <div class="riga-avvio">
+      <select id="suono_timer" name="suono_timer">
+        <option value="" {{ 'selected' if not cfg.sveglia.suono_timer }}>
+          {{ t('timer.suono.come') }}</option>
+        {% for file in suoni_file %}
+        <option value="{{ file.nome }}" {{ 'selected' if cfg.sveglia.suono_timer == file.nome }}>
+          {{ file.nome }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="ghost">{{ t('common.apply') }}</button>
+    </div>
+  </form>
 </section>
 
 {# Una scheda per sveglia, non una tabella: su un telefono una tabella con

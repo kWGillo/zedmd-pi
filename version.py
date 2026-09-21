@@ -2461,6 +2461,18 @@ Storico:
        scarto.
        Niente semina e raccolto secondo le fasi: e' una tradizione, non un
        effetto misurabile, e il pannello non la presenta come un fatto.
+  10.1 *Il volume dei giochi vale per tutti i giochi.* Doom non lo riceveva
+       affatto: doomgeneric non legge il suo `default.cfg` (e' dentro
+       `#if ORIGCODE`), e registrando l'uscita con `sfx_volume 0` gli
+       effetti erano identici. Adesso lo riceve con `--volume=` e, a partita
+       aperta, sulla pipe dei tasti con lo stato 2; va ricompilato una volta.
+       Il Game Boy usava il volume degli avvisi, che di notte e' zero: era
+       muto. I giochi integrati lo fissavano all'apertura della partita.
+       *Moon* ha la sua voce nel menu, con stasera, le anteprime delle
+       schermate e i prossimi appuntamenti.
+       *La sveglia* posava la casella del carattere invece delle cifre: l'ora
+       stava bassa, e con l'etichetta la scritta TIMER usciva dal pannello.
+       *Il suono del timer* si sceglie nella scheda del timer.
 """
 
-__version__ = "10.0"
+__version__ = "10.1"

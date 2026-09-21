@@ -305,6 +305,12 @@ per inattività l'interruttore torna a OFF da solo.
 Batocera: l'audio è già suo, e un secondo canale sarebbe rumore sopra al gioco
 vero. Si accende dalla pagina Audio.
 
+**Il volume** è quello del cursore **Volume dei giochi** nelle Impostazioni, e
+cambia anche a partita aperta. Dopo l'aggiornamento alla 10.1 bisogna
+ricompilare Doom una volta (qui sopra, «Prepara»): fino ad allora Doom resta
+al suo volume di serie. Il file `default.cfg` di Doom non serve: doomgeneric
+non lo legge.
+
 I salvataggi e la configurazione di Doom finiscono in
 `/var/lib/dmd/doom/stato`, fuori da `/opt/dmd`, che deve restare identico alle
 proprie impronte per gli aggiornamenti.

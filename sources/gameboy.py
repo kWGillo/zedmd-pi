@@ -277,7 +277,10 @@ class GameBoySource(Source):
                 # rifarla sarebbe rifare il gioco. La scheda gliela diciamo
                 # noi, perche' `gb_dmd.py` non conosce la configurazione.
                 "--audio", suoni.uscita_giochi(self.cfg),
-                "--volume", "%.2f" % suoni.volume(self.cfg)]
+                # Il volume **dei giochi**, non quello degli avvisi. Fino alla
+                # 10.0 qui c'era `suoni.volume`: di notte quello vale il
+                # volume notturno, cioe' zero, e il Game Boy giocava muto.
+                "--volume", "%.2f" % suoni.volume_giochi(self.cfg)]
 
     def _avvia_processo(self, rom):
         problema = controlla_rom(rom)
@@ -513,6 +516,22 @@ class GameBoySource(Source):
             self.chiudi_sessione()
 
     # ------------------------------------------------------------------ tasti
+
+    def imposta_volume(self, valore):
+        """Cambia il volume a partita aperta. `valore` fra 0 e 1.
+
+        Stessa pipe dei tasti, stato 2. `gb_dmd.py` arriva con
+        l'aggiornamento insieme a questo file, quindi lo capisce sempre."""
+        import suoni
+        proc = getattr(self, "_proc", None)
+        if proc is None or proc.stdin is None or proc.poll() is not None:
+            return False
+        try:
+            proc.stdin.write(bytes((2, suoni.percento(valore))))
+            proc.stdin.flush()
+        except (OSError, ValueError):
+            return False
+        return True
 
     def premi(self, azione, giu=True, apri=False):
         if azione == "esci":

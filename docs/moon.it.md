@@ -152,9 +152,20 @@ Raccolto.
 
 # 6. Dove si imposta
 
-Pagina **Servizi**, riga **Moon**: l'interruttore e il pulsante *Mostra la
-Luna adesso*, che la mette sul pannello anche di giorno — per vederla senza
-aspettare il tramonto.
+Dalla 10.1 Moon ha la **sua voce nel menu**. La pagina ha quattro schede:
+
+- **Moon** — l'interruttore e quanti secondi resta a schermo ogni schermata;
+- **Stasera** — fase, sorgere e tramonto della Luna, la prossima piena, e se
+  è una serata da guardare (e se no, perché);
+- **Le schermate di stasera** — le immagini che andranno sul pannello, disegnate
+  dalle stesse funzioni, nell'ordine in cui girano; ognuna con il suo pulsante
+  per mandarla sul pannello subito, anche di giorno;
+- **I prossimi appuntamenti** — le prossime quattro fasi, la prossima luna con
+  un nome, la prossima stagione, il prossimo sciame con quello che farà la
+  Luna. Sul pannello compaiono dal terzo giorno prima; qui si vedono prima.
+
+Nella pagina **Servizi** resta la riga **Moon**, con l'interruttore e il pulsante
+*Mostra la Luna adesso*.
 
 Senza la posizione del DMD (pagina Impostazioni) la Luna si mostra lo stesso,
 ma senza sorgere e tramonto, e la serata buona non si calcola. Il servizio non
@@ -168,3 +179,4 @@ sa dove sei, e non lo inventa.
 | Quanto dura | 15 secondi |
 | Priorità | 53, fra OnAir e il meteo |
 | Home Assistant | interruttore **Moon** |
+| Pagina | **Moon**, nel menu |

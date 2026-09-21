@@ -217,6 +217,18 @@ class SvegliaSource(Source):
         self._timer_nome = str(nome or "").strip()[:24]
         return True, ""
 
+    def suono_timer(self):
+        """Il suono con cui scade il timer.
+
+        Quello scelto nella pagina, se c'e'. Altrimenti quello della prima
+        sveglia accesa che ne ha uno, come e' sempre stato: e se nemmeno quella
+        ne ha, il suono predefinito (stringa vuota)."""
+        scelto = str(self.conf().get("suono_timer") or "").strip()
+        if scelto:
+            return scelto
+        return next((v["suono"] for v in self.voci()
+                     if v["enabled"] and v["suono"]), "")
+
     def ferma_timer(self):
         """Annulla il conto alla rovescia. True se ce n'era uno."""
         c_era = self._timer_a > 0
@@ -300,8 +312,7 @@ class SvegliaSource(Source):
                 "enabled": True, "ora": time.strftime("%H:%M", adesso),
                 "etichetta": nome or "TIMER",
                 "durata": int(self.conf().get("durata_timer", 120) or 120),
-                "suono": next((v["suono"] for v in self.voci()
-                               if v["enabled"] and v["suono"]), ""),
+                "suono": self.suono_timer(),
             })
             self._prossimo_suono = 0.0
             self._ultimo_disegno = None
@@ -382,31 +393,54 @@ class SvegliaSource(Source):
                              parse_color(COLORE))
         etichetta = (self._voce or {}).get("etichetta") or ""
 
-        # L'ora prende quasi tutta l'altezza quando non c'e' un'etichetta, e
-        # le lascia spazio quando c'e'. Le misure si chiedono al font invece
-        # di fissarle: e' la lezione del player, che con le frazioni fisse
-        # faceva toccare le righe.
-        alta = int(self.height * (0.62 if etichetta else 0.78))
-        font = _load_font(max(10, alta))
-        larghezza, altezza = self._misura(draw, ora, font)
-        # Se il carattere scelto sfora in larghezza si stringe: su un pannello
-        # 256x64 non succede, ma questo codice gira anche su pannelli diversi.
-        while larghezza > self.width - 8 and alta > 10:
-            alta = int(alta * 0.9)
-            font = _load_font(max(10, alta))
-            larghezza, altezza = self._misura(draw, ora, font)
-
-        y = (self.height - altezza) // 2 if not etichetta else 0
-        draw.text(((self.width - larghezza) // 2, y), ora,
-                  font=font, fill=colore)
-
+        # Tutto si misura e si posa sull'**inchiostro**, non sulla casella del
+        # carattere. Fino alla 10.0 si posava la casella: `textbbox` partendo
+        # da (0, 0) dice che il primo pixel acceso sta qualche riga piu' in
+        # basso -- l'interlinea che il font tiene sopra le cifre -- e quello
+        # scarto non veniva tolto. L'etichetta, messa "a una riga dal fondo",
+        # scendeva della sua interlinea e usciva dal pannello (TIMER tagliato
+        # sotto), e l'ora, messa "in alto", restava con venti righe vuote fra
+        # se' e l'etichetta.
+        margine = 1
+        stacco = 3
+        fondo = self.height - margine
         if etichetta:
             font_e = _load_font(max(7, int(self.height * 0.20)))
-            larghezza_e, altezza_e = self._misura(draw, etichetta, font_e)
-            draw.text(((self.width - larghezza_e) // 2,
-                       self.height - altezza_e - 1),
+            riquadro_e = self._riquadro(draw, etichetta, font_e)
+            alta_e = riquadro_e[3] - riquadro_e[1]
+            cima_e = fondo - alta_e
+            draw.text(((self.width - (riquadro_e[2] - riquadro_e[0])) // 2
+                       - riquadro_e[0], cima_e - riquadro_e[1]),
                       etichetta, font=font_e, fill=(255, 255, 255))
+            spazio = cima_e - stacco - margine
+        else:
+            spazio = fondo - margine
+
+        # La grandezza dell'ora resta quella di sempre -- quasi tutta
+        # l'altezza senza etichetta, un po' meno con -- e si stringe solo se
+        # sfora: in larghezza, o nello spazio sopra l'etichetta.
+        misura = max(10, int(self.height * (0.62 if etichetta else 0.78)))
+        while True:
+            font = _load_font(misura)
+            riquadro = self._riquadro(draw, ora, font)
+            larga = riquadro[2] - riquadro[0]
+            alta = riquadro[3] - riquadro[1]
+            if (alta <= spazio and larga <= self.width - 8) or misura <= 10:
+                break
+            misura -= 1
+        # E si centra nello spazio che ha, non contro il bordo in alto.
+        cima = margine + (spazio - alta) // 2
+        draw.text(((self.width - larga) // 2 - riquadro[0], cima - riquadro[1]),
+                  ora, font=font, fill=colore)
         return image
+
+    @staticmethod
+    def _riquadro(draw, testo, font):
+        """Il riquadro dell'inchiostro, come lo dice `textbbox` da (0, 0)."""
+        try:
+            return draw.textbbox((0, 0), testo, font=font)
+        except Exception:                 # pragma: no cover
+            return (0, 0, len(testo) * 6, 10)
 
     @staticmethod
     def _misura(draw, testo, font):

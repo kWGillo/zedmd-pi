@@ -664,6 +664,108 @@ class CieloSource(Source):
         self._fino_a = time.time() + self._durata
         return True
 
+    # ------------------------------------------------------------ la pagina
+
+    def anteprime(self, adesso=None, scala=3):
+        """Le schermate di stasera come PNG, per la pagina Moon.
+
+        Sono le stesse immagini che andranno sul pannello, disegnate dalle
+        stesse funzioni: una pagina che mostrasse un disegno suo potrebbe
+        dire una cosa e il pannello un'altra.
+        """
+        import base64
+        import io
+        adesso = adesso or datetime.now().astimezone()
+        fuori = []
+        for tipo, dati in self.schermate(adesso):
+            try:
+                immagine = self.disegna(tipo, dati, adesso)
+            except Exception as exc:             # pragma: no cover
+                print("[cielo] anteprima non disegnata: %s" % exc)
+                continue
+            grande = immagine.resize((immagine.width * scala,
+                                      immagine.height * scala), Image.NEAREST)
+            buffer = io.BytesIO()
+            grande.save(buffer, "PNG")
+            fuori.append({"chiave": tipo,
+                          "tipo": tipo if tipo != "evento" else dati["tipo"],
+                          "png": base64.b64encode(buffer.getvalue()).decode()})
+        return fuori
+
+    def riepilogo(self, adesso=None):
+        """Quello che la pagina Moon racconta: stasera e i prossimi appuntamenti.
+
+        Tutto quello che il pannello mostra solo quando manca poco -- tre
+        giorni prima -- qui si vede in anticipo.
+        """
+        adesso = adesso or datetime.now().astimezone()
+        fuso = adesso.tzinfo
+        dove = self.posizione()
+        lat, lon = (dove if dove else (None, None))
+        utc = adesso.astimezone(timezone.utc)
+
+        def locale(t):
+            return t.astimezone(fuso) if t is not None else None
+
+        luna = cielo.luna_stasera(adesso, lat, lon)
+        for chiave in ("sorge", "tramonta", "prossima_piena"):
+            luna[chiave] = locale(luna.get(chiave))
+
+        fasi = [(locale(t), tipo)
+                for t, tipo in cielo.fasi(utc, utc + timedelta(days=32))][:4]
+
+        nome = None
+        for anno in (adesso.year, adesso.year + 1):
+            for t, quale in cielo.lune_con_nome(anno):
+                if t > utc:
+                    _l, _b, km = pianeti.luna_eclittica(pianeti.giuliano(t))
+                    nome = {"quando": locale(t), "nome": quale, "km": km}
+                    break
+            if nome:
+                break
+
+        stagione = None
+        for anno in (adesso.year, adesso.year + 1):
+            for t, quale in cielo.stagioni(anno):
+                if t > utc:
+                    stagione = {"quando": locale(t), "nome": quale}
+                    break
+            if stagione:
+                break
+
+        sciame = None
+        oggi = adesso.date()
+        for chiave, testo, mese, giorno, zhr in cielo.SCIAMI:
+            for anno in (oggi.year, oggi.year + 1):
+                picco = datetime(anno, mese, giorno).date()
+                if picco >= oggi:
+                    if sciame is None or picco < sciame["picco"]:
+                        sciame = {"chiave": chiave, "nome": testo.title(),
+                                  "picco": picco, "zhr": zhr}
+                    break
+        if sciame is not None:
+            notte = datetime.combine(sciame["picco"], datetime.min.time(),
+                                     tzinfo=fuso)
+            luce, frazione, giu = cielo.sciame_disturbato(notte, lat, lon)
+            sciame.update({"luna": luce, "frazione": frazione,
+                           "luna_tramonta": locale(giu)})
+
+        serata = None
+        if lat is not None:
+            try:
+                serata = cielo.serata(adesso, lat, lon, self._nuvole())
+            except Exception as exc:             # pragma: no cover
+                print("[cielo] serata non calcolata: %s" % exc)
+            if serata:
+                for chiave in ("dalle", "alle"):
+                    serata[chiave] = locale(serata.get(chiave))
+
+        return {"adesso": adesso, "notte": self.e_notte(adesso),
+                "posizione": dove is not None, "luna": luna, "fasi": fasi,
+                "nome": nome, "stagione": stagione, "sciame": sciame,
+                "serata": serata, "comparse": self._comparse,
+                "perse": self._perse}
+
     def mostra_adesso(self, tipo="luna"):
         """Il pulsante della pagina: la schermata subito, anche di giorno."""
         adesso = datetime.now().astimezone()

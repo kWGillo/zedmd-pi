@@ -1617,6 +1617,18 @@ def create_app(runtime):
             "timer.avviato" if ok else "timer.no", current_language(),
             minuti=scelto, error=motivo)))
 
+    @app.route("/api/timer/suono", methods=["POST"])
+    def api_timer_suono():
+        """Il suono del timer. Solo un file che esiste davvero, o vuoto."""
+        scelto = request.form.get("suono_timer", "").strip()
+        nomi = [f["nome"] for f in suoni.file_disponibili(cfg)]
+        if scelto and scelto not in nomi:
+            scelto = ""
+        cfg.setdefault("sveglia", {})["suono_timer"] = scelto
+        dmdconf.save()
+        return redirect(url_for("page_sveglia", result=i18n.translate(
+            "timer.suono.salvato", current_language())))
+
     @app.route("/api/timer/ferma", methods=["POST"])
     def api_timer_ferma():
         c_era = runtime.sveglia.ferma_timer()
@@ -1678,6 +1690,43 @@ def create_app(runtime):
             pass
         return redirect(url_for("page_services"))
 
+    @app.route("/moon")
+    def page_moon():
+        """La pagina Moon: stasera, i prossimi appuntamenti, le anteprime.
+
+        Fino alla 10.0 Moon aveva solo una riga nella pagina Servizi, e un
+        servizio che parla solo di notte e solo a turno, da una riga, non si
+        vede: non si sapeva cosa avrebbe detto, ne' quando.
+        """
+        sorgente = runtime.cielo
+        try:
+            dati = sorgente.riepilogo()
+            anteprime = sorgente.anteprime()
+            errore = ""
+        except Exception as exc:                  # noqa: BLE001
+            print("[cielo] pagina non calcolata: %s" % exc)
+            dati, anteprime, errore = None, [], str(exc)
+        return render_template(
+            "moon.html", dati=dati, anteprime=anteprime, errore=errore,
+            conf=sorgente.conf(),
+            attivo=bool(cfg["services"].get("moon")),
+            stato=sorgente.status(current_language()),
+            risultato=request.args.get("result", ""),
+            page="moon")
+
+    @app.route("/api/moon", methods=["POST"])
+    def api_moon():
+        cfg["services"]["moon"] = request.form.get("enabled") == "on"
+        conf = cfg.setdefault("moon", {})
+        try:
+            conf["durata"] = max(4, min(60, int(request.form.get("durata", 15))))
+        except ValueError:
+            conf["durata"] = 15
+        dmdconf.save()
+        runtime.arbiter.apply_services()
+        return redirect(url_for("page_moon", result=i18n.translate(
+            "moon.salvato", current_language())))
+
     @app.route("/api/cielo/prova", methods=["POST"])
     def api_cielo_prova():
         """La Luna sul pannello subito, anche di giorno.
@@ -1685,10 +1734,16 @@ def create_app(runtime):
         Come il pulsante del meteo: senza, per sapere se funziona bisognerebbe
         aspettare il tramonto.
         """
+        tipo = request.form.get("tipo", "luna")
+        if tipo not in ("luna", "evento", "serata"):
+            tipo = "luna"
         try:
-            runtime.cielo.mostra_adesso("luna")
+            runtime.cielo.mostra_adesso(tipo)
         except Exception as exc:      # noqa: BLE001
             print("[cielo] prova non riuscita: %s" % exc)
+        # Si torna da dove si e' premuto: la pagina Moon o la pagina Servizi.
+        if request.form.get("da") == "moon":
+            return redirect(url_for("page_moon"))
         return redirect(url_for("page_services"))
 
     @app.route("/api/meteo/prova", methods=["POST"])
@@ -2192,6 +2247,18 @@ def create_app(runtime):
         except ValueError:
             conf["volume_giochi"] = 0.9
         dmdconf.save()
+        # Il volume dei giochi vale anche per la partita **in corso**: si
+        # abbassa il cursore mentre si gioca, e deve abbassarsi subito.
+        # Ognuno per la sua strada: il mixer per i giochi integrati, la pipe
+        # dei tasti per Doom e il Game Boy.
+        suoni.cambia_volume_giochi(cfg)
+        for nome in ("doom", "gameboy"):
+            sorgente = getattr(runtime, nome, None)
+            if sorgente is not None and hasattr(sorgente, "imposta_volume"):
+                try:
+                    sorgente.imposta_volume(suoni.volume_giochi(cfg))
+                except Exception as exc:
+                    print("[%s] volume non aggiornato: %s" % (nome, exc))
         # Se l'uscita musicale e' accesa, shairport-sync deve seguire la
         # scheda scelta qui. Senza questa riga la cambiavi in Impostazioni e
         # la musica continuava a uscire da quella di prima, in silenzio e

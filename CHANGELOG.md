@@ -2,6 +2,40 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.1]
+
+### Il volume dei giochi arriva a tutti i giochi
+
+Il cursore **Volume dei giochi** (Impostazioni) adesso regola **Doom**, il
+**Game Boy** e i giochi integrati, e cambia **anche a partita aperta**.
+
+- **Doom** non lo riceveva affatto. doomgeneric non legge il file di
+  configurazione di Doom — la lettura è compilata fuori, dentro
+  `#if ORIGCODE` — quindi Doom partiva sempre al suo volume di serie.
+  Verificato registrando l'uscita audio: con `sfx_volume 0` nel file gli
+  effetti uscivano identici. Adesso il volume arriva all'avvio e, a partita
+  aperta, sulla stessa pipe dei tasti. Il 100% del cursore è il volume di serie
+  di Doom. **Va ricompilato una volta**: pagina Doom, «Prepara».
+- **Il Game Boy** usava il volume degli *avvisi*. Di notte quel volume è il
+  volume notturno, cioè zero: il Game Boy giocava muto.
+- **I giochi integrati** seguivano il cursore, ma il volume restava quello
+  dell'apertura della partita.
+
+### Moon nel menu
+
+Moon ha la sua pagina: com'è la Luna stasera e se è una serata da guardare, le
+schermate che andranno sul pannello (ognuna con il suo pulsante per mandarla
+subito), e i prossimi appuntamenti: fasi, luna con un nome, stagione, sciame.
+
+### Sveglia e timer
+
+- L'ora della sveglia era **troppo bassa**, e con un'etichetta la scritta
+  **TIMER usciva dal fondo** del pannello. Si posava la casella del carattere
+  invece delle cifre accese. Adesso l'ora sta al centro del suo spazio e
+  l'etichetta a una riga dal bordo.
+- **Il suono del timer** si sceglie nella scheda del timer. Senza scelta resta
+  quello della prima sveglia attiva, come prima.
+
 ## [10.0]
 
 ### Moon

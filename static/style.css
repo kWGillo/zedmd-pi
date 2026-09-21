@@ -599,3 +599,10 @@ ul.conti li {
 }
 ul.conti li span { color: var(--muted); font-size: 12px; min-width: 0; }
 ul.conti li b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Le anteprime della pagina Moon: le immagini del pannello, ingrandite senza
+   sfumare i pixel. */
+.anteprima-cielo { margin: 0 0 1rem; }
+.anteprima-cielo img { display: block; width: 100%; max-width: 768px; height: auto;
+  image-rendering: pixelated; border-radius: 4px; background: #000; }
+.anteprima-cielo form { margin: .4rem 0 0; }

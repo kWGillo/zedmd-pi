@@ -54,10 +54,18 @@ pannello. Una riga fissa direbbe soltanto che un timer c'è; una che si accorcia
 costa gli stessi due pixel e dice anche quanto manca, senza scrivere numeri
 sopra un orologio che di numeri ne ha già.
 
+**Il suono del timer** si sceglie nella stessa scheda, sotto i pulsanti. Se
+non ne scegli uno, suona quello della prima sveglia attiva — che fino alla 10.0
+era l'unico modo di cambiarlo, senza che nessuna pagina lo dicesse.
+
 # Che cosa succede quando scatta
 
 Il pannello diventa un orologio che **lampeggia**, in rosso, con l'etichetta
-sotto se l'hai scritta. La scheda audio suona, e continua a bussare ogni
+sotto se l'hai scritta. L'ora sta al centro dello spazio che ha: tutto il
+pannello, o quello sopra l'etichetta. Fino alla 10.0 si centrava la *casella*
+del carattere invece delle cifre accese, e l'interlinea che il font tiene sopra
+le lettere spingeva tutto in basso: senza etichetta l'ora stava bassa, con
+l'etichetta la scritta TIMER usciva dal fondo del pannello. La scheda audio suona, e continua a bussare ogni
 secondo e mezzo finché non la fermi.
 
 La si ferma in tre modi: il **pulsante fisico**, il pulsante nella pagina,

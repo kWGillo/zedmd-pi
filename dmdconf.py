@@ -700,6 +700,10 @@ DEFAULTS = {
         # Per quanto suona un timer scaduto. Piu' corta di una sveglia: chi ha
         # messo un timer e' in casa e a pochi metri, non sta dormendo.
         "durata_timer": 90,
+        # Il suono del timer. Vuoto: quello della prima sveglia attiva, come
+        # fino alla 10.0 -- che era l'unico modo di sceglierlo, e non si
+        # sapeva.
+        "suono_timer": "",
         # Le durate proposte dalla pagina, in minuti. Un elenco e non un campo
         # libero perche' con le mani bagnate si preme, non si digita -- il
         # campo libero c'e' lo stesso, accanto.

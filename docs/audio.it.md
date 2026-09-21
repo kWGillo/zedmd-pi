@@ -402,6 +402,23 @@ piano di uno lungo con la stessa ampiezza. Con una manopola sola, o gli avvisi
 urlano o i giochi spariscono. Il predefinito è 0,90, e chi aggiorna non eredita
 il volume degli avvisi.
 
+Dalla 10.1 vale **per tutti i giochi**, e anche **a partita aperta**: lo si
+abbassa mentre si gioca e si abbassa subito.
+
+- **Giochi integrati** — il volume entra negli effetti già preparati; cambiandolo
+  si rifanno.
+- **Doom** — lo riceve all'avvio e poi sulla stessa pipe dei tasti. Il 100% è
+  il volume di serie di Doom, che misurato sta alla pari dei nostri effetti a
+  fondo scala. Fino alla 10.0 Doom non lo riceveva **affatto**: scriverlo nel
+  suo `default.cfg` non sarebbe servito, perché doomgeneric quel file non lo
+  legge — la lettura è dentro `#if ORIGCODE`, compilata fuori. Lo si è
+  misurato registrando l'uscita audio: con `sfx_volume 0` nel file, effetti
+  identici. Serve **ricompilare Doom** una volta (pagina Doom, «Prepara»): il
+  binario vecchio non conosce il comando, e finché non lo si ricompila il
+  volume non gli viene mandato — perché lo leggerebbe come un tasto premuto.
+- **Game Boy** — fino alla 10.0 usava per sbaglio il volume **degli avvisi**:
+  di notte quello è il volume notturno, cioè zero, e il Game Boy giocava muto.
+
 **Prova il suono** — suona un effetto sulla scheda scelta. Funziona **anche a
 suono spento**, apposta: serve proprio a capire se l'audio funziona *prima* di
 accenderlo. E usa sempre il volume di giorno: un pulsante di prova che di

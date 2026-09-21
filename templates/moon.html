@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ t('moon.title') }}{% endblock %}
+
+{% macro quando(dt) -%}
+{{ dt.strftime('%d/%m %H:%M') if dt else '--' }}
+{%- endmacro %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('moon.title') }}</h2>
+  <p class="hint">{{ t('moon.intro') }}</p>
+  <p class="status {{ 'ok' if attivo }}">{{ stato }}</p>
+  {% if risultato %}<p class="status ok">{{ risultato }}</p>{% endif %}
+  {% if errore %}<p class="status">{{ t('moon.errore') }}: {{ errore }}</p>{% endif %}
+
+  <form method="post" action="{{ url_for('api_moon') }}">
+    <label class="check">
+      <input type="checkbox" name="enabled" {{ 'checked' if attivo }}>
+      {{ t('moon.attivo') }}</label>
+    <label for="durata">{{ t('moon.durata') }}</label>
+    <input type="number" id="durata" name="durata" min="4" max="60" step="1"
+           value="{{ conf.durata }}">
+    <p class="hint">{{ t('moon.durata.hint') }}</p>
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+</section>
+
+{% if dati %}
+{% set luna = dati.luna %}
+<section class="card">
+  <h2>{{ t('moon.stasera') }}</h2>
+  {% if not dati.posizione %}
+  <p class="hint">{{ t('moon.senza_posizione') }}</p>
+  {% endif %}
+  <table class="files">
+    <tr><td>{{ t('moon.fase') }}</td>
+        <td>{{ t('moon.fase.' ~ luna.fase) }} · {{ (luna.frazione * 100) | round | int }}%
+            {%- if luna.fase in ('nuova', 'primo_quarto', 'piena', 'ultimo_quarto') %}
+            · {{ t('moon.crescente') if luna.crescente else t('moon.calante') }}{% endif %}</td></tr>
+    {% if dati.posizione %}
+    <tr><td>{{ t('moon.sorge') }}</td><td>{{ quando(luna.sorge) }}</td></tr>
+    <tr><td>{{ t('moon.tramonta') }}</td><td>{{ quando(luna.tramonta) }}</td></tr>
+    {% endif %}
+    <tr><td>{{ t('moon.piena') }}</td><td>{{ quando(luna.prossima_piena) }}</td></tr>
+    {% if dati.serata %}
+    {% set s = dati.serata %}
+    <tr><td>{{ t('moon.serata') }}</td>
+        <td>{% if s.buona %}<strong>{{ t('moon.serata.buona') }}</strong>
+            {{ quando(s.dalle) }} – {{ s.alle.strftime('%H:%M') if s.alle }}{% if s.nuvole is not none %}, {{ t('moon.nuvole', valore=s.nuvole) }}{% endif %}
+            {% else %}{{ t('moon.serata.no.' ~ (s.motivo or 'luna')) }}{% endif %}
+            {% if s.pianeta %}<br>{{ s.pianeta.nome | capitalize }} · {{ s.pianeta.direzione | lower }} · {{ s.pianeta.gradi | round | int }}°{% endif %}</td></tr>
+    {% endif %}
+  </table>
+</section>
+
+<section class="card">
+  <h2>{{ t('moon.anteprime') }}</h2>
+  <p class="hint">{{ t('moon.anteprime.hint') }}</p>
+  {% for a in anteprime %}
+  <div class="anteprima-cielo">
+    <img src="data:image/png;base64,{{ a.png }}" alt="{{ t('moon.schermata.' ~ a.tipo) }}">
+    <form method="post" action="{{ url_for('api_cielo_prova') }}">
+      <input type="hidden" name="tipo" value="{{ a.chiave }}">
+      <input type="hidden" name="da" value="moon">
+      <button type="submit" class="ghost">{{ t('moon.mostra') }} · {{ t('moon.schermata.' ~ a.tipo) }}</button>
+    </form>
+  </div>
+  {% endfor %}
+</section>
+
+<section class="card">
+  <h2>{{ t('moon.prossimi') }}</h2>
+  <table class="files">
+    {% for istante, tipo in dati.fasi %}
+    <tr><td>{{ t('moon.fase.' ~ tipo) }}</td><td>{{ quando(istante) }}</td></tr>
+    {% endfor %}
+    {% if dati.nome %}
+    <tr><td>{{ t('moon.nome.' ~ dati.nome.nome) }}</td>
+        <td>{{ quando(dati.nome.quando) }} · {{ '{:,}'.format(dati.nome.km | round | int).replace(',', '.') }} km</td></tr>
+    {% endif %}
+    {% if dati.stagione %}
+    <tr><td>{{ t('moon.stagione.' ~ dati.stagione.nome) }}</td>
+        <td>{{ quando(dati.stagione.quando) }}</td></tr>
+    {% endif %}
+    {% if dati.sciame %}
+    {% set sc = dati.sciame %}
+    <tr><td>{{ sc.nome }} · ZHR {{ sc.zhr }}</td>
+        <td>{{ sc.picco.strftime('%d/%m') }} ·
+            {% if sc.luna == 'tramonta' %}{{ t('moon.sciame.tramonta', valore=(sc.frazione * 100) | round | int, ora=sc.luna_tramonta.strftime('%H:%M') if sc.luna_tramonta else '--') }}
+            {% elif sc.luna == 'copre' %}{{ t('moon.sciame.copre', valore=(sc.frazione * 100) | round | int) }}
+            {% else %}{{ t('moon.sciame.sottile') }}{% endif %}</td></tr>
+    {% endif %}
+  </table>
+  <p class="hint">{{ t('moon.prossimi.hint') }}</p>
+</section>
+{% endif %}
+
+{% endblock %}

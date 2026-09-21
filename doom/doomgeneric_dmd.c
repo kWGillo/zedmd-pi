@@ -38,6 +38,8 @@
  *     l'altro, senza intestazione. La dimensione e' fissa, quindi non serve.
  *   - stdin: eventi di tastiera, due byte ciascuno — [stato, codice], stato 1
  *     premuto e 0 rilasciato, codice nella numerazione di doomkeys.h.
+ *     Stato 2 non e' un tasto: e' il volume, e il codice e' la percentuale
+ *     (0-100) del cursore "Volume dei giochi". Vedi imposta_volume().
  *   - stderr: i messaggi di Doom, che finiscono nel journal.
  *
  * Niente socket: una pipe non si lascia dietro file, non ha permessi da
@@ -55,6 +57,12 @@
 
 #include "doomgeneric.h"
 #include "doomkeys.h"
+#include "s_sound.h"
+
+/* Le manopole del menu di Doom, 0-15. Stanno in s_sound.c e non hanno un
+ * header: le si nomina qui per tenerle allineate con quello che si sente. */
+extern int sfxVolume;
+extern int musicVolume;
 
 #define USCITA_L 256
 #define USCITA_A 64
@@ -109,6 +117,36 @@ void DG_SleepMs(uint32_t ms)
     nanosleep(&ts, NULL);
 }
 
+/* ----------------------------------------------------------------- volume */
+
+/* Il volume arriva dal DMD, non dal file di configurazione di Doom.
+ *
+ * Sembrava ovvio scriverlo in `default.cfg` prima di avviare, ed e' la prima
+ * cosa che si prova. Non funziona: in doomgeneric la lettura di quel file e'
+ * dentro `#if ORIGCODE`, cioe' compilata fuori. Doom partiva sempre al suo
+ * volume di serie, 8 su 15, qualunque cosa dicesse il cursore — misurato
+ * registrando l'uscita audio con `sfx_volume 0` nel file: identica.
+ *
+ * Quindi lo si imposta dopo l'avvio, con le stesse funzioni che usa il menu.
+ * La scala: il 100% del cursore e' il volume di serie di Doom (64 su 127),
+ * che misurato sta alla pari dei nostri effetti a fondo scala. Oltre, Doom
+ * sarebbe piu' forte di tutto il resto del DMD. */
+static int volume_voluto = -1;
+
+static void imposta_volume(int percento)
+{
+    int livello;
+    if (percento < 0) percento = 0;
+    if (percento > 100) percento = 100;
+    livello = (percento * 64 + 50) / 100;
+    S_SetSfxVolume(livello);
+    S_SetMusicVolume(livello);
+    /* Il menu mostra queste: che dicano la verita' anche li'. */
+    sfxVolume = (livello + 4) / 8;
+    musicVolume = (livello + 4) / 8;
+    fprintf(stderr, "[doom-dmd] volume %d%% (%d/127)\n", percento, livello);
+}
+
 /* ------------------------------------------------------------------ tasti */
 
 /* Lo stdin e' non bloccante: se non c'e' niente da leggere, Doom deve andare
@@ -116,7 +154,16 @@ void DG_SleepMs(uint32_t ms)
 int DG_GetKey(int* pressed, unsigned char* key)
 {
     unsigned char coppia[2];
-    ssize_t letti = read(STDIN_FILENO, coppia, 2);
+    ssize_t letti;
+    for (;;) {
+        letti = read(STDIN_FILENO, coppia, 2);
+        if (letti == 2 && coppia[0] == 2) {
+            /* Un comando, non un tasto: si esegue e si legge il prossimo. */
+            imposta_volume(coppia[1]);
+            continue;
+        }
+        break;
+    }
     if (letti == 2) {
         *pressed = coppia[0] ? 1 : 0;
         *key = coppia[1];
@@ -130,6 +177,10 @@ int DG_GetKey(int* pressed, unsigned char* key)
         int tentativi = 0;
         while (read(STDIN_FILENO, &resto, 1) != 1 && tentativi++ < 1000) {
             DG_SleepMs(1);
+        }
+        if (coppia[0] == 2) {
+            imposta_volume(resto);
+            return 0;
         }
         *pressed = coppia[0] ? 1 : 0;
         *key = resto;
@@ -271,6 +322,8 @@ int main(int argc, char** argv)
             fascia_altezza = atoi(argv[i] + 17);
         } else if (!strncmp(argv[i], "--gamma=", 8)) {
             gamma_valore = atof(argv[i] + 8);
+        } else if (!strncmp(argv[i], "--volume=", 9)) {
+            volume_voluto = atoi(argv[i] + 9);
         } else {
             passa[n++] = argv[i];
         }
@@ -290,6 +343,9 @@ int main(int argc, char** argv)
             gamma_valore);
 
     doomgeneric_Create(n, passa);
+    if (volume_voluto >= 0) {
+        imposta_volume(volume_voluto);
+    }
 
     for (;;) {
         doomgeneric_Tick();
