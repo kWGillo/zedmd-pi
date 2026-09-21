@@ -517,7 +517,8 @@ Le altre chiavi rilevanti sono già corrette di default:
 | `ota.auto_check` | `true` | controllo quotidiano della versione |
 | `ota.check_interval_hours` | `24` | ogni quante ore si chiede a GitHub |
 | `ota.segnale` | `true` | i quattro pixel verdi sull'orologio |
-| `clock.offset_v` | `0` | spostamento verticale dell'ora, ±12 px |
+| `clock.offset_v` | `2` | spostamento verticale dell'ora, ±12 px |
+| `clock.colore_casuale` | `false` | un colore diverso per le cifre a ogni ora |
 | `air_radar.latitude` / `longitude` | `0.0` | nessuna posizione preimpostata |
 
 Le coordinate del radar restano **soltanto** in questo file: non fanno parte

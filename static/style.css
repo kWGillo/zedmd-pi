@@ -293,6 +293,12 @@ input[type=color] {
    in ritardo invece che morbido. */
 .preview #pv_time { will-change: transform; }
 
+/* Il quadratino del colore di quest'ora, accanto alla spunta del casuale. */
+.campione {
+  display: inline-block; width: 14px; height: 14px; border-radius: 3px;
+  vertical-align: middle; margin: 0 4px; border: 1px solid var(--line);
+}
+
 /* Il cursore dell'offset verticale, con il numero a destra. Il numero ha
    una larghezza fissa: senza, passando da -9 a -10 tutta la riga scattava. */
 .cursore { display: flex; align-items: center; gap: 12px; }

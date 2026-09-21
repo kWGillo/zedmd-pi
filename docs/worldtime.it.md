@@ -109,10 +109,15 @@ Cinque però ne creavano un'altra, e si è vista solo sul pannello vero:
 | **3** | **14–42** | **1** |
 | 5 | 12–40 | 3 |
 
-Le cifre e la data sono separate da **cinque pixel in orizzontale**, sempre —
-l'alzata non li tocca. Ma finché i due blocchi stanno ad altezze diverse
-nessuno li confronta; affiancati, a tre metri, il minuto e il giorno della
-settimana per un istante si leggono come una cosa sola.
+Con il cursore sul suo `+2` di serie le cifre scendono a 16–44, e le righe in
+comune diventano **zero**.
+
+Le cifre e la data sono separate da **circa cinque pixel in orizzontale**,
+uno in più o uno in meno secondo le cifre del minuto e il giorno della
+settimana. L'alzata non c'entra, è una misura verticale. Ma finché i due
+blocchi stanno ad altezze diverse nessuno li confronta; affiancati, a tre
+metri e con cinque pixel in mezzo, il minuto e il giorno della settimana per
+un istante si leggono come una cosa sola.
 
 A tre la riga in comune è una, e sotto le cifre restano otto righe invece di
 dieci. Uno squilibrio che non si nota, in cambio di una quasi collisione che
@@ -121,13 +126,20 @@ si notava.
 ## 4.2 E se tre non ti va
 
 Pagina *Orologio*, sezione dell'aspetto: **Posizione verticale dell'ora**, un
-cursore da −12 a +12 pixel. Lo zero è la posizione di serie, il cursore è uno
-scostamento da lì, e vale anche a World Time spento.
+cursore da −12 a +12 pixel. Lo zero è la posizione calcolata dal programma, il
+cursore è uno scostamento da lì, e vale anche a World Time spento.
 
-Il numero giusto non è lo stesso per tutti: lo decidono l'altezza a cui sta il
-pannello e il punto da cui lo guardi. Oltre il limite fisico — la banda, il
-bordo — il cursore smette di muovere invece di spingere le cifre dove non si
-leggono più.
+**A installazione appena fatta il cursore è su +2**, non su zero. Il centro
+geometrico non è il centro che si vede: un pannello sta su una mensola e lo si
+guarda dal basso, e da lì le cifre centrate sembrano alte. Due pixel misurati
+sul pannello vero, non calcolati — e chi ha un'altra mensola muove il cursore.
+
+Con il World Time acceso e il cursore di serie le cifre stanno alle righe
+16–44: zero righe in comune con la data, sei righe di margine sopra la banda.
+
+Il numero giusto non è lo stesso per tutti. Oltre il limite fisico — la banda,
+il bordo — il cursore smette di muovere invece di spingere le cifre dove non
+si leggono più.
 
 Due cose si spostano da sole quando la banda è accesa:
 
@@ -143,13 +155,32 @@ lampade occupano **sette pixel** di larghezza, da 219 a 225. La fascia che gli
 
 # 5. Quante se ne vedono insieme
 
-Dipende da quanto sono lunghe le etichette, e il conto è questo:
+Dipende da quanto sono lunghe le etichette. Il carattere è a larghezza fissa,
+sei pixel ogni lettera, e il conto si fa sulla somma:
 
-| Etichette | Insieme |
-|---|---|
-| `NY` `TYO` `LDN` `SYD` | **quattro** |
-| `NEW YORK` `TOKYO` `LONDRA` | **tre** |
-| `LOS ANGELES` e simili | **due** |
+| Città insieme | Etichette, in tutto | Per esempio |
+|---|---|---|
+| **2** | sempre — anche due da 14 | `LOS ANGELES` `BUENOS AIRES` |
+| **3** | fino a **20** caratteri | `SEATTLE` `TOKYO` `NEW YORK` (20) |
+| **4** | fino a 13 caratteri | `NY` `TYO` `LDN` `SYD` (11) |
+| 5 | fino a 5 — in pratica mai | |
+
+Con tre etichette più lunghe di venti caratteri in tutto se ne vedono due alla
+volta. Niente esce mai dal bordo: un'etichetta arriva al massimo a 14
+caratteri, e anche la più lunga sta da sola con molto spazio intorno.
+
+## 5.1 Perché di notte se ne vedevano meno
+
+Fino alla 9.11 il conto si faceva sulle scritte del momento, **segno del giorno
+compreso**. Il segno è un carattere, sei pixel, e compare solo quando la città
+è su un altro giorno: «SEATTLE TOKYO NEW YORK» stava in 245 pixel su 254 di
+giorno, e di notte — con Seattle e New York ancora a ieri, due segni — arrivava
+a 257. La banda passava da tre città insieme a due che si alternano, e al
+mattino tornava a tre.
+
+Dalla 9.12 il posto del segno si tiene sempre, e il nome sta a tre pixel dalla
+sua ora invece che a uno spazio intero. Il conto dà lo stesso numero a
+mezzogiorno e a mezzanotte, e lo stesso terzetto con tre segni occupa 250.
 
 Se le località attive sono più di quante ne stanno, si formano dei gruppi che
 si alternano **ogni otto secondi**, con un cambio netto: niente scorrimento,
@@ -157,10 +188,12 @@ niente dissolvenza. Lo scorrimento obbliga ad aspettare l'inizio del giro, e
 una dissolvenza su un pannello LED è una scala di grigi — e le intensità
 intermedie su questo hardware sono la causa dello sfarfallio.
 
-> **Il conto si fa sull'etichetta più larga di tutte, non sulle prime tre.**
-> Sembra pignoleria e non lo è: «NEW YORK TOKYO LONDRA» stanno in tre, ma
-> «SYDNEY LOS ANGELES NEW YORK» no, e con la rotazione capitano tutti e due i
-> gruppi. Contando le prime, un giro su due l'ultima città usciva dal bordo.
+> **Con più città di quante ne stanno, il conto si fa sulle più larghe.**
+> Sembra pignoleria e non lo è: con la rotazione ogni gruppo deve starci, e
+> non si sa quale capiterà. Contando le prime, un giro su due l'ultima città
+> usciva dal bordo. Per questo quattro città attive — `SEATTLE` `TOKYO`
+> `NEW YORK` `LONDRA` — girano a due a due, anche se tre di loro starebbero
+> insieme.
 
 Il momento del cambio si calcola dai secondi dell'ora corrente e non da un
 contatore interno: due pannelli accesi nella stessa stanza girano insieme, e
@@ -214,4 +247,4 @@ che NTP sia sincronizzato.
 | Ora legale | automatica, dal database del sistema |
 | Altro giorno | `+` o `−` dopo l'ora |
 | Sul pannello | banda alle righe 51–61; le cifre salgono di 3 px |
-| Se non ti torna | cursore *Posizione verticale dell'ora*, ±12 px |
+| Se non ti torna | cursore *Posizione verticale dell'ora*, ±12 px, +2 di serie |

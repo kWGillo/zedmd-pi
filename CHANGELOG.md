@@ -2,13 +2,73 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [9.12]
+
+### Un colore diverso a ogni ora
+
+Nella pagina **Orologio**, accanto al colore dell'ora: *Colore casuale,
+diverso a ogni ora*. Spento di serie. Accanto compare il colore toccato
+all'ora in corso, e l'anteprima lo usa.
+
+Tre scelte, e ognuna viene da un modo in cui la versione ingenua sbaglia:
+
+- **si sceglie la tinta, non i tre canali.** Tre numeri a caso fra 50 e 255
+  rispettano il limite e danno quasi sempre un grigio. Qui la luminosità è
+  sempre piena — un canale a 255, quindi mai scuro — e la saturazione sta fra
+  0,55 e 0,80: il canale più basso vale almeno 51, **sopra 50 per
+  costruzione**. Provato su tutte le 8784 ore di un anno: il più basso uscito
+  è 51, e i grigi sono zero;
+- **il colore dipende dall'ora, non da un dado lanciato allo scoccare.** È lo
+  stesso per tutta l'ora, e un riavvio a metà non lo cambia;
+- **due ore di fila non si assomigliano mai.** Ogni ora la tinta avanza
+  dell'angolo aureo, 137,5 gradi, con una deviazione a caso: fra un'ora e la
+  successiva il salto sta sempre fra 98 e 177 gradi, anche a mezzanotte.
+
+Il colore scelto a mano non si perde: spegnendo il casuale si ritrova.
+
+### Tre fusi insieme, anche di notte
+
+«SEATTLE TOKYO NEW YORK» stava in 245 pixel su 254 **finché le tre città
+erano nello stesso giorno di Roma**. Ogni città su un altro giorno aggiunge il
+suo `+` o `−`, sei pixel, e con due segni si arrivava a 257. Di notte Seattle
+e New York sono ancora a ieri: la banda passava da tre città insieme a due
+che si alternano, e al mattino tornava a tre.
+
+Due correzioni. Il nome e l'ora stanno a **3 pixel** invece di uno spazio
+intero — sono già di due colori diversi — e fra una città e l'altra ne
+restano almeno **6** invece di 8. E il posto del segno si tiene **sempre**,
+anche quando il segno non c'è, così il conto di quante città entrano dà lo
+stesso numero a mezzogiorno e a mezzanotte.
+
+Quante ne stanno insieme, con le etichette:
+
+| Città insieme | Etichette, in tutto |
+|---|---|
+| 2 | sempre (fino a 14 caratteri l'una) |
+| 3 | fino a **20** caratteri |
+| 4 | fino a 13 caratteri |
+
+Oltre, si alternano a gruppi ogni otto secondi. Niente esce mai dal bordo.
+
+### Il cursore dell'ora parte da +2
+
+**A installazione appena fatta** il cursore della posizione verticale è su
++2, non su zero: il centro geometrico non è il centro che si vede. Un pannello
+sta su una mensola e lo si guarda dal basso, e da lì le cifre centrate
+sembrano alte. Con il World Time acceso le cifre stanno alle righe 16–44:
+zero righe in comune con la data.
+
+Chi aveva già mosso il cursore se lo tiene: il valore nuovo vale per le
+installazioni nuove, non riscrive le configurazioni già scritte.
+
 ## [9.11]
 
 ### L'ora si sposta a gusto
 
 Un cursore nella pagina **Orologio**, da −12 a +12 pixel. Vale sempre, non
-solo con il World Time acceso: lo zero è la posizione buona di serie e il
-cursore è uno scostamento da quella, non un numero assoluto da indovinare.
+solo con il World Time acceso: lo zero è la posizione calcolata dal programma
+e il cursore è uno scostamento da quella, non un numero assoluto da
+indovinare.
 
 Esiste perché la posizione giusta non è la stessa per tutti — la decidono
 l'altezza a cui sta il pannello e il punto da cui lo si guarda, due cose che
@@ -23,10 +83,11 @@ L'alzata del World Time scende da **cinque a tre**, e il motivo si è visto
 solo sul pannello vero: a cinque le cifre e la data condividevano **tre
 righe**.
 
-Lo stacco orizzontale fra il minuto e il giorno della settimana è di cinque
-pixel e non cambia mai. Ma finché i due blocchi stanno ad altezze diverse
-nessuno li confronta; affiancati, a tre metri, per un istante si leggono come
-una cosa sola. A tre righe di alzata la riga in comune è una.
+Lo stacco orizzontale fra il minuto e il giorno della settimana è di circa
+cinque pixel, uno in più o uno in meno secondo le cifre e il giorno, e
+l'alzata non lo cambia. Ma finché i due blocchi stanno ad altezze
+diverse nessuno li confronta; affiancati, a tre metri, per un istante si
+leggono come una cosa sola. A tre righe di alzata la riga in comune è una.
 
 Il prezzo sono due righe di respiro in meno sotto le cifre, otto invece di
 dieci: uno squilibrio che non si nota, in cambio di una quasi collisione che

@@ -79,10 +79,20 @@
     <div class="row2">
       <div>
         <label for="time_color">{{ t('clock.timecolor') }}</label>
-        <div class="color-row">
+        <div class="color-row" id="riga_colore_ora">
           <input type="color" id="time_color" name="time_color" value="{{ cfg.clock.time_color }}">
           <span class="mono" id="time_color_hex">{{ cfg.clock.time_color }}</span>
         </div>
+        <label class="check">
+          <input type="checkbox" id="colore_casuale" name="colore_casuale"
+                 {{ 'checked' if cfg.clock.colore_casuale }}>
+          {{ t('clock.casuale') }}
+        </label>
+        <p class="hint" id="casuale_adesso">
+          {{ t('clock.casuale.adesso') }}
+          <span class="campione" style="background: {{ colore_adesso }}"></span>
+          <span class="mono">{{ colore_adesso }}</span>
+        </p>
       </div>
       <div>
         <label for="date_color">{{ t('clock.datecolor') }}</label>
@@ -94,7 +104,7 @@
     </div>
 
     <div class="preview" id="preview">
-      <span id="pv_time" style="color: {{ cfg.clock.time_color }}">12:34</span>
+      <span id="pv_time" style="color: {{ colore_adesso if cfg.clock.colore_casuale else cfg.clock.time_color }}">12:34</span>
       <span id="pv_date" style="color: {{ cfg.clock.date_color }}">{{ t('clock.preview.date') }}</span>
     </div>
 
@@ -182,6 +192,31 @@ function bind(id, hexId, previewId) {
 }
 bind('time_color', 'time_color_hex', 'pv_time');
 bind('date_color', 'date_color_hex', 'pv_date');
+
+// Con il colore casuale il selettore non conta: lo si spegne a vista invece
+// di lasciarlo li' a far credere che scegliere un colore serva a qualcosa.
+// L'anteprima prende il colore di quest'ora, e la riga sotto dice quale.
+(function () {
+  const spunta = document.getElementById('colore_casuale');
+  if (!spunta) { return; }
+  const riga = document.getElementById('riga_colore_ora');
+  const scelto = document.getElementById('time_color');
+  const nota = document.getElementById('casuale_adesso');
+  const ora = document.getElementById('pv_time');
+  const adesso = '{{ colore_adesso }}';
+  function aggiorna() {
+    const casuale = spunta.checked;
+    // Niente `disabled`: un campo disabilitato non viene spedito, e il
+    // salvataggio avrebbe rimesso l'arancione di serie al posto del colore
+    // scelto. Chi spegne il casuale deve ritrovare il suo.
+    riga.style.opacity = casuale ? '0.35' : '';
+    riga.style.pointerEvents = casuale ? 'none' : '';
+    nota.style.display = casuale ? '' : 'none';
+    if (ora) { ora.style.color = casuale ? adesso : scelto.value; }
+  }
+  spunta.addEventListener('change', aggiorna);
+  aggiorna();
+})();
 
 // Il numero accanto al cursore, e l'anteprima che si sposta davvero: un
 // cursore che muove solo se stesso obbliga a salvare per capire dove sei.

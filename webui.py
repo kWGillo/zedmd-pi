@@ -150,6 +150,12 @@ def _clock_source():
     return ClockSource
 
 
+def _colore_di_quest_ora():
+    """Il colore casuale dell'ora in corso, per mostrarlo accanto alla spunta."""
+    from sources.clock import colore_casuale, colore_esadecimale
+    return colore_esadecimale(colore_casuale())
+
+
 def create_app(runtime):
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = 512 * 1024 * 1024
@@ -592,6 +598,7 @@ def create_app(runtime):
             citta=_fusi.elenco(), fusi_pronti=_fusi.DISPONIBILE,
             anteprima=anteprima,
             offset_massimo=_clock_source().OFFSET_MASSIMO,
+            colore_adesso=_colore_di_quest_ora(),
             now=time.strftime("%d/%m/%Y %H:%M:%S"), page="clock")
 
     # Quanti file per pagina nell'elenco della libreria.
@@ -1875,11 +1882,16 @@ def create_app(runtime):
     @app.route("/api/clock", methods=["POST"])
     def api_clock():
         clock = cfg["clock"]
-        clock["time_color"] = request.form.get("time_color", "#ff8c1a")
-        clock["date_color"] = request.form.get("date_color", "#00a0d0")
+        # Un colore che non arriva non si sostituisce con quello di serie: si
+        # tiene quello che c'era. Con il colore casuale acceso il selettore
+        # e' spento a vista, e se un giorno un browser non lo spedisse il
+        # salvataggio cancellerebbe in silenzio il colore scelto.
+        clock["time_color"] = request.form.get("time_color") or clock.get("time_color", "#ff8c1a")
+        clock["date_color"] = request.form.get("date_color") or clock.get("date_color", "#00a0d0")
         clock["format_24h"] = request.form.get("format_24h") == "on"
         clock["show_date"] = request.form.get("show_date") == "on"
         clock["blink_colon"] = request.form.get("blink_colon") == "on"
+        clock["colore_casuale"] = request.form.get("colore_casuale") == "on"
         # Lo spostamento verticale. Si stringe nella corsa del cursore: il
         # campo arriva dal browser e non c'e' motivo di fidarsi di un numero
         # che sposterebbe le cifre fuori dal pannello.

@@ -10,7 +10,7 @@ f4da634c02da1d2d9c2bf600287d09c3  copertine.py
 b71d56f9de514de4c9f2b13311bc199a  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
-d0a6be91bdf1b59775976fa6658ab048  dmdconf.py
+65f76be8e8bf4841a77d8e215a7db408  dmdconf.py
 e09b8a67e4764c788239efbf82b463d9  dmdd.py
 bb3118ed4b5ebb8d9f49cc8bbcd6f341  doom/Makefile
 3a0cf57661c015ff2ddcf8bc92d3ee90  doom/doomgeneric_dmd.c
@@ -23,7 +23,7 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 fa450409dc4a62d7ace2c91a8a1a0f12  hass.py
-aff06c0cf4b28aca808804fdb62f6069  i18n.py
+199d0d5101a1a637dd210c2ae354427d  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 b9d0bda3222f80aa266f96cf9db90b8c  lookup.py
@@ -48,7 +48,7 @@ c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
 d231417597b54592614b20b12ac8b82d  sources/base.py
 ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
-b4467eb5c58b843246eb26ef2885a508  sources/clock.py
+624052d03d0fed81299e7f18cff59f7f  sources/clock.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 3569e65e37f57fd6719613780a016dc8  sources/doom.py
@@ -71,7 +71,7 @@ de7ee2495ed06fbae5a24e7de31e756f  sources/telecamera.py
 9c78a0b718974f492c303164ac3d0dbf  sources/zedmd.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 c750104c1eaa178d6958982586e89855  staccato.py
-6d8dd93b16786820a24062e05a3960a9  static/style.css
+8939000787af40ba41b5f61271a1c3ba  static/style.css
 8fa0d17b589e307e4e757ce776869981  suoni.py
 b2e39a45b2319abd500f8c72019d34c0  suoni/colpito.wav
 9bee0b8537ca225025bed746c4134033  suoni/lancio.wav
@@ -98,7 +98,7 @@ e7cbc43ed729a6fc7f71dc5d266d5a98  templates/banner.html
 a4eadc47f1207a85253d97506d73354b  templates/base.html
 f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
 543d0923aa70d70713ab36b039dd126a  templates/calendario.html
-1056c5c6da6c8f8bcae25e7a838c0819  templates/clock.html
+2151e5dc3cc2a6fe5b2e925c5237328c  templates/clock.html
 e335f8f24edc17c812b333673ee4bdca  templates/doom.html
 856a6ac0a358de34d3026f01599c3a1d  templates/gameboy.html
 cb7f0f3c1130dcb8ef42d19a8cbe7d54  templates/giochi.html
@@ -116,7 +116,7 @@ b004db69d09f344f149a26d2b60eb162  templates/services.html
 48e92b36bcdbdf54ff56b0714d26e67e  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 e9378416b5c3c320c8c19c0400d5abe1  templates/updates.html
-7c622b86ff37e3ec1e72aab3c4e76b78  version.py
+76525d8fcf6396277c835c352e5a7c9d  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-dbc7543a5cb0b8f7b527e2f6523b9a2a  webui.py
+280c84a0e311f84a8789ee836088ba4a  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

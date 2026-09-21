@@ -5,6 +5,9 @@ servizio ha qualcosa da mostrare. Colori di ora e data indipendenti,
 formato 12 o 24 ore, nomi dei giorni in italiano, francese o inglese.
 """
 
+import colorsys
+import datetime
+import random
 import time
 
 from PIL import Image, ImageDraw, ImageFont
@@ -45,6 +48,71 @@ def parse_color(value, fallback=(255, 140, 26)):
         return (int(text[0:2], 16), int(text[2:4], 16), int(text[4:6], 16))
     except (TypeError, ValueError):
         return fallback
+
+
+# ------------------------------------------------------ il colore casuale
+#
+# «Ad ogni cambio d'ora il colore dell'orario deve cambiare in modo casuale.
+# I valori RGB non devono mai essere inferiori a 25~50, per evitare colori
+# prossimi al nero.»
+#
+# Tre scelte, e ognuna viene da un modo in cui la versione ingenua sbaglia.
+#
+# **Si sceglie la tinta, non i tre canali.** Tre numeri a caso fra 50 e 255
+# rispettano il limite e danno quasi sempre un grigio: la media di tre valori
+# indipendenti sta vicino a meta' scala, e (140, 160, 150) e' un colore solo
+# sulla carta. Qui la tinta e' libera, la luminosita' e' sempre piena -- un
+# canale a 255, quindi mai scuro -- e la saturazione sta fra 0.55 e 0.80.
+# Da quel tetto viene il limite chiesto: il canale piu' basso vale
+# 255 * (1 - 0.80) = 51, cioe' **sopra 50 per costruzione**, non per un
+# controllo fatto dopo.
+#
+# **Il colore dipende dall'ora, non da un dado lanciato allo scoccare.** E'
+# lo stesso per tutta l'ora, e un riavvio a meta' non lo cambia: il seme e'
+# il numero dell'ora nel calendario. Un orologio che cambia colore perche' e'
+# ripartito il servizio sembra un orologio guasto.
+#
+# **Due ore di fila non si assomigliano mai.** Un dado vero ogni tanto
+# ripete quasi la stessa tinta, e allora il cambio non si vede: l'ora e'
+# cambiata e l'orologio no. Qui ogni ora avanza la tinta dell'angolo aureo --
+# 137,5 gradi, il passo che distribuisce i punti su un cerchio senza mai
+# farli ricadere vicini -- con una deviazione a caso di venti gradi. Fra due
+# ore consecutive la distanza sta sempre fra 97 e 178 gradi, anche a
+# cavallo della mezzanotte, e l'occhio ci vede lo stesso un'estrazione.
+ANGOLO_AUREO = 137.50776
+DEVIAZIONE = 20.0
+SATURAZIONE = (0.55, 0.80)
+MINIMO_CANALE = 50
+
+
+def indice_ora(momento):
+    """Il numero di quest'ora nel calendario: cresce di uno ogni ora."""
+    giorno = datetime.date(momento.tm_year, momento.tm_mon, momento.tm_mday)
+    return giorno.toordinal() * 24 + momento.tm_hour
+
+
+def tinta_ora(indice):
+    """La tinta di un'ora, in gradi."""
+    dado = random.Random(indice)
+    return (indice * ANGOLO_AUREO + dado.uniform(-DEVIAZIONE, DEVIAZIONE)) % 360.0
+
+
+def colore_casuale(momento=None):
+    """Il colore dell'ora `momento` (struct_time), come tupla RGB."""
+    momento = momento or time.localtime()
+    indice = indice_ora(momento)
+    dado = random.Random(indice * 7919 + 1)
+    saturazione = dado.uniform(*SATURAZIONE)
+    r, g, b = colorsys.hsv_to_rgb(tinta_ora(indice) / 360.0, saturazione, 1.0)
+    # Il tetto della saturazione basta gia' a tenere ogni canale sopra il
+    # minimo. Il controllo resta lo stesso: se un giorno qualcuno allarga
+    # l'intervallo, il limite chiesto non deve dipendere dal ricordarsene.
+    return tuple(max(MINIMO_CANALE + 1, min(255, int(round(c * 255))))
+                 for c in (r, g, b))
+
+
+def colore_esadecimale(rgb):
+    return "#%02x%02x%02x" % tuple(rgb)
 
 
 def _load_font(size):
@@ -302,10 +370,13 @@ class ClockSource(Source):
         diretta = self._tratto_onair()
         mondo = self._mondo(now)
         novita = self._segno_aggiornamento()
+        time_color = self.colore_ora(now)
 
-        # Ridisegna solo quando cambia qualcosa di visibile.
+        # Ridisegna solo quando cambia qualcosa di visibile. Il colore entra
+        # come **valore calcolato**, non come impostazione: con il colore
+        # casuale l'impostazione resta ferma e il colore cambia ogni ora.
         signature = (shown, date if clock["show_date"] else "", meridiem,
-                     clock["time_color"], clock["date_color"],
+                     time_color, clock["date_color"],
                      tuple((v["nome"], v["colore"]) for v in colonna),
                      stato_sem, sem_acceso, barra, diretta,
                      tuple(mondo), novita, self._offset())
@@ -313,7 +384,6 @@ class ClockSource(Source):
             return None
         self._signature = signature
 
-        time_color = parse_color(clock["time_color"])
         date_color = parse_color(clock["date_color"], (0, 160, 208))
 
         image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
@@ -454,9 +524,30 @@ class ClockSource(Source):
     MONDO_CIMA = 51
     MONDO_CORPO = 10
 
-    # Lo spazio minimo fra una citta' e l'altra. Sotto, due nomi si leggono
-    # come uno solo.
-    MONDO_STACCO = 8
+    # Lo spazio minimo fra una citta' e l'altra, e quello fra un nome e la sua
+    # ora.
+    #
+    # Erano 8 e uno spazio intero, 6 pixel, e con tre citta' bastavano **a
+    # volte**. «SEATTLE TOKYO NEW YORK» stava in 245 pixel su 254 finche'
+    # tutte e tre erano nello stesso giorno di Roma; ogni citta' su un altro
+    # giorno aggiunge il suo `+` o `-`, sei pixel, e con due segni si arrivava
+    # a 257. Di notte Seattle e New York sono ancora a ieri: la banda passava
+    # da tre citta' insieme a due che si alternano, e al mattino tornava a
+    # tre. Un orologio che cambia impaginazione a seconda dell'ora non e'
+    # rotto, ma sembra.
+    #
+    # Adesso il nome e l'ora stanno a 3 pixel -- sono gia' di due colori
+    # diversi, lo spazio pieno era una ridondanza -- e fra una citta' e
+    # l'altra ne restano almeno 6, dove il cambio dal grigio dell'ora al blu
+    # del nome fa il resto. Nove pixel guadagnati con i tre accosti, quattro
+    # con i due stacchi: lo stesso terzetto con tre segni occupa 250.
+    MONDO_STACCO = 6
+    MONDO_ACCOSTO = 3
+    # Il posto del segno del giorno si tiene **sempre**, anche quando il segno
+    # non c'e'. Il conto di quante citta' entrano deve dare lo stesso numero
+    # a mezzogiorno e a mezzanotte: e' la meta' della correzione, l'altra
+    # meta' e' lo spazio guadagnato qui sopra.
+    MONDO_SEGNO = "+"
 
     # Ogni quanti secondi cambia il gruppo, quando le localita' sono piu' di
     # quante ne stanno. Otto: il tempo di leggerle senza che chi passa debba
@@ -532,8 +623,10 @@ class ClockSource(Source):
         """
         misura = ImageDraw.Draw(Image.new("RGB", (1, 1)))
         font = self._font_mondo()
-        larghe = sorted((misura.textlength("%s %s%s" % (e, o, s), font=font)
-                         for e, o, s in pronte), reverse=True)
+        # Il segno si conta sempre, che ci sia o no: vedi MONDO_SEGNO.
+        larghe = sorted((misura.textlength(e, font=font) + self.MONDO_ACCOSTO
+                         + misura.textlength(o + self.MONDO_SEGNO, font=font)
+                         for e, o, _s in pronte), reverse=True)
         quante, usati = 0, 0.0
         for largo in larghe:
             aggiunta = largo + (self.MONDO_STACCO if quante else 0)
@@ -561,10 +654,10 @@ class ClockSource(Source):
 
         pezzi = []
         for etichetta, ora, segno in voci:
-            nome = "%s " % etichetta
-            pezzi.append((nome, "%s%s" % (ora, segno),
-                          draw.textlength(nome, font=font),
-                          draw.textlength("%s%s" % (ora, segno), font=font)))
+            testo_ora = "%s%s" % (ora, segno)
+            pezzi.append((etichetta, testo_ora,
+                          draw.textlength(etichetta, font=font) + self.MONDO_ACCOSTO,
+                          draw.textlength(testo_ora, font=font)))
         totale = sum(n + o for _e, _o, n, o in pezzi)
         if len(pezzi) > 1:
             stacco = max(self.MONDO_STACCO,
@@ -605,6 +698,20 @@ class ClockSource(Source):
             return bool(self.onair())
         except Exception:                            # pragma: no cover
             return False
+
+    # ------------------------------------------------- il colore dell'ora
+
+    def colore_ora(self, momento=None):
+        """Il colore delle cifre adesso: quello scelto, o quello di quest'ora.
+
+        Pubblico perche' lo chiede anche la pagina web, per mostrare il colore
+        dell'ora in corso accanto all'interruttore: dire «casuale» senza far
+        vedere quale e' toccato adesso lascerebbe il dubbio che non funzioni.
+        """
+        clock = self.cfg.get("clock") or {}
+        if clock.get("colore_casuale"):
+            return colore_casuale(momento)
+        return parse_color(clock.get("time_color"))
 
     # ------------------------------------------------ l'offset verticale
 

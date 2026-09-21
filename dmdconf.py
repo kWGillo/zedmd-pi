@@ -100,14 +100,23 @@ DEFAULTS = {
         "show_date": True,
         "language": "it",
         "blink_colon": True,
+        # Un colore diverso per le cifre a ogni ora, invece di `time_color`.
+        # Spento di serie: chi ha scelto un colore se lo aspetta fermo.
+        "colore_casuale": False,
         # Di quanti pixel spostare le cifre in verticale: negativo in alto,
-        # positivo in basso, zero dove le mette il programma. Vale sempre, e
-        # con il World Time acceso si somma all'alzata automatica.
+        # positivo in basso. Vale sempre, e con il World Time acceso si somma
+        # all'alzata automatica.
         #
         # Esiste perche' la posizione buona non e' la stessa per tutti: la
         # decide l'altezza a cui sta il pannello e da dove lo si guarda, e
         # sono due cose che da qui non si possono sapere.
-        "offset_v": 0,
+        #
+        # Due e non zero: il centro geometrico non e' il centro che si vede.
+        # Un pannello sta su una mensola e lo si guarda **dal basso**, e da
+        # li' le cifre centrate sembrano alte. Questi due pixel sono misurati
+        # sul pannello vero, non calcolati -- e chi ha un'altra mensola muove
+        # il cursore.
+        "offset_v": 2,
         # World Time: che ore sono adesso dall'altra parte del mondo. Fino a
         # cinque localita', tre per volta sul pannello, in una banda sotto le
         # cifre -- che per farle stare salgono di tre pixel.

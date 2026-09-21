@@ -2380,10 +2380,10 @@ Storico:
        l'altezza a cui sta il pannello e da dove lo si guarda: due cose che da
        qui non si possono sapere. Quindi c'e' un **cursore** nella pagina
        Orologio, da -12 a +12 pixel, che vale sempre e non solo con il World
-       Time acceso. Lo zero e' la posizione buona di serie, e il cursore e'
-       uno scostamento da quella. Oltre il limite fisico -- la banda degli
-       orari del mondo, il bordo -- smette di muovere invece di spingere le
-       cifre dove non si leggono.
+       Time acceso. Lo zero e' la posizione calcolata dal programma, e il
+       cursore e' uno scostamento da quella. Oltre il limite fisico -- la
+       banda degli orari del mondo, il bordo -- smette di muovere invece di
+       spingere le cifre dove non si leggono.
        *La tendina delle citta' diceva il falso*, ed e' venuto fuori
        cercando Seattle. Il valore salvato e' il fuso, e un fuso ha piu'
        citta': Roma e Milano, New York e Miami, adesso Seattle e Los Angeles.
@@ -2397,6 +2397,27 @@ Storico:
        In tendina entrano Seattle, San Francisco e Las Vegas: `America/Seattle`
        non esiste, tutta la costa del Pacifico ha le stesse regole, ma non
        trovarle fa credere che manchino.
+  9.12 Un colore diverso a ogni ora, e tre fusi insieme anche di notte.
+       *Il colore* si accende dalla pagina Orologio ed e' spento di serie.
+       Si sceglie la tinta e non i tre canali -- tre numeri a caso fra 50 e
+       255 danno quasi sempre un grigio -- con la luminosita' sempre piena e
+       la saturazione fra 0,55 e 0,80, cosi' il canale piu' basso vale almeno
+       51 per costruzione. Il colore dipende dall'ora e non da un dado: resta
+       lo stesso per tutta l'ora e un riavvio non lo cambia. E due ore di fila
+       non si assomigliano mai, perche' la tinta avanza ogni ora dell'angolo
+       aureo con una deviazione a caso: il salto sta fra 98 e 177 gradi. Il
+       colore scelto a mano non si perde, e spegnendo il casuale si ritrova.
+       *I fusi.* Tre citta' stavano insieme finche' erano nello stesso giorno
+       di Roma: ogni segno `+` o `-` aggiunge sei pixel, e di notte Seattle e
+       New York sono ancora a ieri. La banda passava da tre citta' a due che
+       si alternano, e al mattino tornava a tre. Nome e ora ora stanno a tre
+       pixel invece di uno spazio intero, fra le citta' ne restano almeno sei
+       invece di otto, e il posto del segno si tiene sempre: il conto e' lo
+       stesso a mezzogiorno e a mezzanotte. Tre citta' stanno insieme se le
+       etichette fanno in tutto al massimo venti caratteri.
+       *Il cursore dell'ora parte da +2* nelle installazioni nuove: il centro
+       geometrico non e' il centro che si vede da sotto una mensola. Chi aveva
+       gia' mosso il cursore se lo tiene.
 """
 
-__version__ = "9.11"
+__version__ = "9.12"

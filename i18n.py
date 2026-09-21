@@ -849,6 +849,8 @@ STRINGS = {
                        "24-hour format (when off: 12-hour with AM/PM)"),
     "clock.showdate": ("Mostra la data", "Show the date"),
     "clock.blink": ("Due punti lampeggianti", "Blinking colon"),
+    "clock.casuale": ("Colore casuale, diverso a ogni ora", "Random colour, a new one every hour"),
+    "clock.casuale.adesso": ("Il colore di quest'ora:", "This hour's colour:"),
     "clock.offset": ("Posizione verticale dell'ora", "Vertical position of the time"),
     "clock.offset.su": ("più in alto", "higher"),
     "clock.offset.giu": ("più in basso", "lower"),
