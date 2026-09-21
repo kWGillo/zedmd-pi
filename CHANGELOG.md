@@ -2,6 +2,52 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.0]
+
+### Moon
+
+Il pannello guarda il cielo. **Di notte, a turno con il meteo**, compare la
+Luna: la fase vera disegnata pixel per pixel, giallo panna con i suoi mari al
+posto giusto, la percentuale illuminata, **CRESCENTE** o **CALANTE**, quando
+sorge e quando tramonta, e il giorno della prossima luna piena.
+
+E quando c'è qualcosa da dire, lo dice — dal terzo giorno prima:
+
+- **la Luna del Raccolto**, la piena più vicina all'equinozio d'autunno, che
+  per diverse sere sorge con il tramonto. Nel 2026 è sabato 26 settembre;
+- **la superluna**, sotto i 360.000 km — nel 2026 la vigilia di Natale — e la
+  **luna blu**, seconda piena dello stesso mese;
+- **equinozi e solstizi**, con quanta luce dà quel giorno;
+- **gli sciami** — Perseidi, Orionidi, Geminidi e gli altri cinque — con quello
+  che la Luna fa alla notte del picco: non disturba, tramonta a una cert'ora e
+  poi il cielo è buio, oppure ne copre molte;
+- **la serata buona**: buio senza Luna, poche nuvole secondo la previsione che
+  il meteo ha già scaricato, e il pianeta più luminoso da cercare, con la
+  direzione e l'altezza.
+
+### Il turno con il meteo
+
+Uno ogni due media compare il meteo o la Luna, e si danno il cambio. Di giorno
+lo spazio è tutto del meteo. Senza media vale il tetto dei minuti del meteo,
+come per OnAir; la fascia del mattino resta del meteo; e il turno si consuma
+quando qualcuno lo vede, non quando la finestra si apre.
+
+### I conti
+
+Tutto si calcola sul Raspberry, senza rete e senza dipendenze nuove, a partire
+da `pianeti.py`. Confrontati con gli orari pubblicati e con un'effemeride
+indipendente: fasi lunari entro 2,5 minuti, sorgere della Luna entro mezzo
+minuto, equinozi e solstizi entro dieci.
+
+Per le stagioni è servita una correzione vera: il Sole di `pianeti.py` sta nel
+riferimento dell'anno 2000, e il primo calcolo dava l'equinozio d'autunno con
+**nove ore** di scarto. Adesso si porta al riferimento della data.
+
+### Niente semina e raccolto
+
+Il calendario lunare agricolo è una tradizione, non un effetto misurabile, e le
+tradizioni si contraddicono. Il pannello non la presenta come un fatto.
+
 ## [9.13.1]
 
 ### Il pulsante prima delle note

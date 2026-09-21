@@ -38,6 +38,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`onair-automazione.it.md`](onair-automazione.it.md) · [PDF](DMD_onair_automazione.pdf) | L'automazione di Home Assistant che collega il sensore della porta al pannello: i due nomi da leggere, lo YAML, e i tre errori facili |
 | [`onair.it.md`](onair.it.md) · [PDF](DMD_onair.pdf) | OnAir: il pannello dice che si sta registrando — la scritta, il trattino sull'orologio, l'automazione dalla porta |
 | [`meteo.it.md`](meteo.it.md) · [PDF](DMD_meteo.pdf) | Il bollettino del mattino e l'aggiornamento ogni poche ore, le icone disegnate, e perché l'allerta della Protezione Civile non c'è ancora |
+| [`moon.it.md`](moon.it.md) · [PDF](DMD_moon.pdf) | Moon: la Luna di stasera, le lune con un nome, equinozi e solstizi, gli sciami e le serate buone da guardare — e il turno con il meteo |
 
 ## I giochi
 

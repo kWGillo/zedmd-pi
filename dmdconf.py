@@ -752,9 +752,17 @@ DEFAULTS = {
         # non ha niente da mostrare, e un interruttore acceso su un
         # servizio muto fa credere che qualcosa non funzioni.
         "onair": False,
+        # Il Cielo: acceso di serie. Parla solo di notte, e solo quando il
+        # turno con il meteo gli da' lo spazio -- non ha niente da configurare
+        # prima di funzionare. Senza posizione mostra comunque la fase.
+        "moon": True,
         # Come i satelliti: senza coordinate non ha niente da dire, e le
         # coordinate non le mettiamo noi.
         "meteo": False,
+    },
+    "moon": {
+        # Quanti secondi sta a schermo una schermata del servizio Moon.
+        "durata": 15,
     },
     "meteo": {
         # L'ora del bollettino del mattino, quello che racconta la giornata.

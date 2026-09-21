@@ -156,6 +156,13 @@
   <p class="hint">{{ t('meteo.source') }}</p>
   <p class="hint">{{ t('meteo.alert.source') }}</p>
   {% endif %}
+  {% if service.key == 'moon' %}
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_cielo_prova') }}" class="actions">
+      <button type="submit">{{ t('cielo.prova') }}</button>
+    </form>
+  </div>
+  {% endif %}
   {% if service.status %}<p class="status">{{ service.status }}</p>{% endif %}
   {% if not service.ready %}
   <p class="badge">{{ t('services.soon') }}</p>

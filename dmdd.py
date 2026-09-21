@@ -33,7 +33,7 @@ import cassa
 import suoni
 from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
-                     CalendarioSource, ClockSource, DoomSource, GameBoySource,
+                     CalendarioSource, CieloSource, ClockSource, DoomSource, GameBoySource,
                      GiochiSource, MediaPlayerSource, MeteoSource,
                      NowPlayingSource,
                      NotificheSource, OnAirSource, PreviewSource,
@@ -41,6 +41,7 @@ from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      ScadenzeSource, SvegliaSource,
                      TelecameraSource,
                      ZeDMDSource, controlla_rom, controlla_wad)
+from sources.turni import Turni
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
 
@@ -266,6 +267,13 @@ class Runtime:
         # urgenti ha la precedenza quella che una persona ha scritto apposta.
         self.meteo = MeteoSource(self.cfg, self.display.width,
                                  self.display.height)
+        # Il Cielo. Priorita' 53, fra OnAir e il meteo. Non decide da solo
+        # quando mostrarsi: lo decide il turno qui sotto, che lo alterna con
+        # il meteo ogni due media. Gli serve il meteo per le nuvole della
+        # serata buona, e lo si attacca qui come per gli altri.
+        self.cielo = CieloSource(self.cfg, self.display.width,
+                                 self.display.height)
+        self.cielo.meteo = self.meteo
         # Doom prende e restituisce il pannello da solo, quindi conosce
         # l'arbitro: e' l'unica sorgente che lo fa. Non e' un servizio e non
         # compare fra gli interruttori — `enabled` resta False per sempre — e
@@ -381,7 +389,7 @@ class Runtime:
         for source in (self.sveglia,
                        self.zedmd, self.preview, self.notifiche,
                        self.satelliti, self.radar,
-                       self.meteo,
+                       self.meteo, self.cielo,
                        self.player,
                        self.birthdays, self.scadenze, self.calendario,
                        self.banner, self.onair, self.telecamera, self.media,
@@ -389,6 +397,11 @@ class Runtime:
                        self.clock):
             self.arbiter.register(source)
         self.arbiter.apply_services()
+        # Il turno fra meteo e cielo: uno ogni due media, a turno. Parte
+        # sempre, anche con il Cielo spento -- allora da' tutto lo spazio al
+        # meteo -- perche' la regola dei due media vale per il meteo comunque.
+        self.turni = Turni(self.cfg, self.meteo, self.cielo, self.media)
+        self.turni.start()
         # Doom non passa da apply_services: non e' un servizio. Qui parte solo
         # la lettura della tastiera, se e' stata chiesta.
         self.doom.start()
@@ -1115,7 +1128,7 @@ class Runtime:
             return
         self.running = False
         for closing in (self.zedmd_http, self.spotify, self.hass, self.mqtt,
-                        self.metadati):
+                        self.metadati, getattr(self, "turni", None)):
             try:
                 if closing is not None:
                     closing.stop()

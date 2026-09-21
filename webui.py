@@ -1427,6 +1427,8 @@ def create_app(runtime):
              "status": stato("sveglia")},
             {"key": "onair", "label": "OnAir", "ready": True,
              "status": stato("onair")},
+            {"key": "moon", "label": "Moon", "ready": True,
+             "status": stato("cielo")},
         ]
         for voce in services:
             voce["suono"] = voce["key"] in suoni.SERVIZI_CON_SUONO
@@ -1674,6 +1676,19 @@ def create_app(runtime):
             runtime.meteo._wake.set()
         except Exception:      # noqa: BLE001
             pass
+        return redirect(url_for("page_services"))
+
+    @app.route("/api/cielo/prova", methods=["POST"])
+    def api_cielo_prova():
+        """La Luna sul pannello subito, anche di giorno.
+
+        Come il pulsante del meteo: senza, per sapere se funziona bisognerebbe
+        aspettare il tramonto.
+        """
+        try:
+            runtime.cielo.mostra_adesso("luna")
+        except Exception as exc:      # noqa: BLE001
+            print("[cielo] prova non riuscita: %s" % exc)
         return redirect(url_for("page_services"))
 
     @app.route("/api/meteo/prova", methods=["POST"])

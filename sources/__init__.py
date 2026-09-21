@@ -31,10 +31,12 @@ from .onair import OnAirSource, normalizza as normalizza_onair
 
 from .meteo import MeteoSource
 
+from .cielo import CieloSource
+
 from .sveglia import SvegliaSource, QUANTE as SVEGLIE_QUANTE, normalizza as normalizza_sveglia
 
 __all__ = [
-    "MeteoSource", "SvegliaSource", "SVEGLIE_QUANTE", "normalizza_sveglia",
+    "MeteoSource", "CieloSource", "SvegliaSource", "SVEGLIE_QUANTE", "normalizza_sveglia",
     "OnAirSource", "normalizza_onair",
     "NotificheSource", "SatellitiSource", "Source", "ClockSource", "MediaPlayerSource", "ZeDMDSource", "AirRadarSource",
     "BirthdaysSource", "PreviewSource", "HOLD_SECONDS",

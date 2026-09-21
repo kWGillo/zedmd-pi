@@ -86,6 +86,8 @@ class MeteoSource(Source):
         # Il giorno per cui si sono gia' chiesti i dati del bollettino: vedi
         # `_giro`, i tentativi successivi usano quelli in mano.
         self._scaricato_per = ""
+        # Vero quando il turno con il Cielo e' in funzione: vedi `_giro`.
+        self.turni_attivi = False
         self._ultimo_aggiornamento = 0.0
         # Quando il meteo e' andato **a schermo** l'ultima volta. E' un
         # orologio diverso da quello qui sopra: uno conta le chiamate alla
@@ -278,6 +280,12 @@ class MeteoSource(Source):
                       and not self.active()
                       and (time.time() - self._ultimo_mostrato)
                       >= ogni_minuti * 60)
+        # Dalla 10.0 il giro di tutto il giorno lo decide il turno con il
+        # Cielo -- uno ogni due media, a turno -- e non piu' questo orologio.
+        # Resta suo solo dentro la fascia del mattino, dove la regola e'
+        # un'altra: il bollettino ogni due minuti.
+        if self.turni_attivi and not mattino:
+            tocca_giro = False
 
         # Le allerte si guardano a ogni giro, non ogni quattro ore: il modulo
         # ha il suo freno di mezz'ora e non chiama piu' del dovuto, ma un
@@ -316,7 +324,7 @@ class MeteoSource(Source):
         if tocca_bollettino and not self.active():
             self._apri("bollettino",
                        int(conf.get("durata_bollettino", 22) or 22))
-        elif tocca_giro or fresco:
+        elif tocca_giro or (fresco and (mattino or not self.turni_attivi)):
             # Il giro periodico, oppure dati appena arrivati: si mostra quello
             # che si ha, nella schermata giusta per quest'ora.
             self._apri(periodico, durata_periodico)
@@ -369,6 +377,22 @@ class MeteoSource(Source):
         self._fino_a = time.time() + self._durata
         # L'orologio del giro periodico **non** si tocca qui: lo tocca
         # `in_onda()`. Aprire una finestra non e' essersi mostrati.
+
+    def apri_turno(self):
+        """Lo spazio che il turno da' al meteo: la schermata di quest'ora.
+
+        Con i dati gia' in mano, senza chiamare la rete: il turno arriva
+        ogni due media, e la previsione non cambia ogni minuto.
+        """
+        if not self._running or self._meteo.dati() is None:
+            return False
+        conf = self.conf()
+        mattino = self.in_mattino(conf, datetime.now())
+        modo = "bollettino" if mattino else "aggiornamento"
+        durata = (int(conf.get("durata_bollettino", 22) or 22) if mattino
+                  else int(conf.get("durata_aggiornamento", 12) or 12))
+        self._apri(modo, durata)
+        return bool(self._modo)
 
     def mostra_adesso(self, modo="aggiornamento", secondi=12):
         """Apre la finestra subito. E' il pulsante di prova della pagina web."""

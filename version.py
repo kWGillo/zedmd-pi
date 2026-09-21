@@ -2438,6 +2438,29 @@ Storico:
          pulsante Installa, non sopra. Sono lunghe -- la sezione intera del
          CHANGELOG -- e messe prima spingevano il pulsante in fondo alla
          pagina.
+  10.0 **Moon.** Il pannello guarda il cielo. Di notte, a turno con il
+       meteo, compare la Luna: la fase vera disegnata pixel per pixel,
+       giallo panna con i suoi mari, la percentuale, CRESCENTE o CALANTE,
+       quando sorge e tramonta. E quando c'e' qualcosa da dire, lo dice:
+       la Luna del Raccolto -- la piena piu' vicina all'equinozio d'autunno,
+       che sorge con il tramonto per diverse sere di fila -- la superluna,
+       la luna blu, equinozi e solstizi con la loro luce, gli sciami di
+       meteore con quello che la Luna fa alla notte del picco, e la serata
+       buona: cielo buio, poche nuvole secondo la previsione, e il pianeta
+       da cercare.
+       *Il turno.* Uno ogni due media compare il meteo o la Luna, e si danno
+       il cambio; di giorno lo spazio e' tutto del meteo. Senza media vale il
+       tetto dei minuti del meteo, come per OnAir. La fascia del mattino
+       resta del meteo. E il turno si consuma quando qualcuno lo vede.
+       *I conti* si fanno sul Raspberry senza rete, a partire da
+       `pianeti.py`, e sono stati confrontati con gli orari pubblicati e con
+       un'effemeride indipendente: fasi entro 2,5 minuti, sorgere della Luna
+       entro mezzo minuto, stagioni entro 10. Per arrivarci il Sole e' stato
+       portato al riferimento della data: nel riferimento dell'anno 2000,
+       quello di `pianeti.py`, l'equinozio d'autunno veniva con nove ore di
+       scarto.
+       Niente semina e raccolto secondo le fasi: e' una tradizione, non un
+       effetto misurabile, e il pannello non la presenta come un fatto.
 """
 
-__version__ = "9.13.1"
+__version__ = "10.0"

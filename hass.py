@@ -68,6 +68,7 @@ SWITCHES = [
     # non se la diretta e' in corso. Per quello c'e' `onair_diretta`, piu'
     # sotto -- sono due cose diverse, come la sveglia e il suo squillo.
     ("onair", "OnAir"),
+    ("moon", "Moon"),
 ]
 
 # Night mode e Sleep mode non sono servizi: sono modi del display, e stanno in

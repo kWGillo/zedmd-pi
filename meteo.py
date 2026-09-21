@@ -53,6 +53,7 @@ e il pannello non scrive niente: meglio tacere che promettere.
 import json
 import os
 import time
+from datetime import datetime, timedelta
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -189,7 +190,11 @@ def _url(lat, lon, fuso, giorni=3, correnti=None):
         ("current", correnti or CORRENTI),
         ("daily", "weather_code,temperature_2m_max,temperature_2m_min,"
                   "precipitation_probability_max,sunrise,sunset"),
-        ("hourly", "relative_humidity_2m"),
+        # La copertura nuvolosa ora per ora serve al Cielo, per dire se
+        # stanotte vale la pena uscire a guardare. Si chiede qui, nella stessa
+        # chiamata: una seconda chiamata a Open-Meteo per una colonna sola
+        # sarebbe traffico raddoppiato per niente.
+        ("hourly", "relative_humidity_2m,cloud_cover"),
         ("timezone", fuso or "auto"),
         ("forecast_days", str(int(giorni))),
     ]
@@ -356,9 +361,44 @@ def interpreta(dati):
         "adesso": adesso,
         "oggi": oggi,
         "domani": domani,
+        "nuvole": _nuvole_orarie(dati),
         "fuso": dati.get("timezone"),
         "preso": time.time(),
     }
+
+
+def _nuvole_orarie(dati):
+    """La copertura nuvolosa, ora per ora: {"2026-10-12T19:00Z": 10, ...}.
+
+    Le ore di Open-Meteo sono **locali** e senza fuso -- "2026-10-12T21:00" --
+    con lo scarto dall'UTC scritto una volta sola in cima alla risposta. Qui
+    si portano in UTC, con la Z in fondo, cosi' chi le legge non deve sapere
+    in che fuso stava il Raspberry quando le ha chieste. Chiavi di testo e non
+    date: la previsione si salva su disco in JSON.
+
+    Un campo che manca vuol dire un dizionario vuoto, non un errore: il Cielo
+    senza nuvole non giudica la serata, e il resto del meteo non se ne
+    accorge nemmeno.
+    """
+    orario = dati.get("hourly") or {}
+    ore = orario.get("time") or []
+    valori = orario.get("cloud_cover") or []
+    try:
+        scarto = int(dati.get("utc_offset_seconds") or 0)
+    except (TypeError, ValueError):
+        scarto = 0
+    fuori = {}
+    for quando, valore in zip(ore, valori):
+        numero = _intero(valore)
+        if numero is None:
+            continue
+        try:
+            locale = datetime.strptime(str(quando)[:16], "%Y-%m-%dT%H:%M")
+        except ValueError:
+            continue
+        utc = locale - timedelta(seconds=scarto)
+        fuori[utc.strftime("%Y-%m-%dT%H:00Z")] = max(0, min(100, numero))
+    return fuori
 
 
 # -------------------------------------------------------------- l'interfaccia

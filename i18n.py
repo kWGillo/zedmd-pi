@@ -1571,6 +1571,11 @@ STRINGS = {
         "trattino rosso sull'orologio.",
         "The door closes and the panel tells whoever walks in, with a red "
         "tick on the clock."),
+    "services.desc.moon": (
+        "Di sera, a turno con il meteo: la Luna, le lune con un nome, "
+        "stagioni, sciami e le serate buone.",
+        "In the evening, taking turns with the weather: the Moon, named "
+        "moons, seasons, showers and good nights."),
     "services.desc.notifiche": (
         "I messaggi che Home Assistant manda al pannello: la porta che si "
         "apre, l'allarme inserito, la lavatrice finita.",
@@ -1601,6 +1606,11 @@ STRINGS = {
         "in ascolto su %(topic)s — %(shown)d mostrate, %(dropped)d scartate",
         "listening on %(topic)s — %(shown)d shown, %(dropped)d dropped"),
     "status.notifiche.showing": ("a schermo: %(text)s", "on screen: %(text)s"),
+    "cielo.status.giorno": ("di giorno tace: parla dal tramonto all'alba",
+                            "quiet by day: it speaks from sunset to sunrise"),
+    "cielo.status.notte": ("stanotte: %(shown)d a schermo, %(lost)d perse",
+                           "tonight: %(shown)d on screen, %(lost)d missed"),
+    "cielo.prova": ("Mostra la Luna adesso", "Show the Moon now"),
     "status.onair.riposo": ("non in onda", "not on air"),
     "status.onair.attivo": (
         "in onda da %(minuti)d min — %(shown)d comparse",
@@ -1633,8 +1643,8 @@ STRINGS = {
     "meteo.title": ("Meteo", "Weather"),
     "meteo.hour": ("Ora del bollettino del mattino",
                    "Morning bulletin hour"),
-    "meteo.rotation": ("Compare ogni (minuti, 0 = mai)",
-                       "Appears every (minutes, 0 = never)"),
+    "meteo.rotation": ("Senza media, compare ogni (minuti, 0 = mai)",
+                       "Without media, appears every (minutes, 0 = never)"),
     "meteo.every": ("Dati richiesti ogni (ore)", "Fetch data every (hours)"),
     "meteo.mattino": ("Fascia del mattino: il bollettino più spesso",
                       "Morning window: the forecast more often"),
