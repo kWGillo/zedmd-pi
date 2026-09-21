@@ -211,6 +211,19 @@ guasto del pannello.
 pagina. Se l'installazione è partita, lì ci sono le righe; se il servizio non
 è ripartito, il banner rosso te lo dice al ritorno della pagina.
 
+**Il banner rosso dice «`/opt/dmd/.lgd-nfy0` is a named pipe».** È successo
+installando la 10.1 da una 10.0 o precedente. Quella è la pipe con cui lgpio,
+la libreria del pulsante fisico, riceve i suoi avvisi: la apre nella cartella
+del servizio, e la copia di sicurezza delle versioni fino alla 10.1 non sapeva
+saltarla. Toglila e premi di nuovo *Installa*:
+
+```
+sudo rm /opt/dmd/.lgd-nfy0
+```
+
+Il pulsante continua a funzionare: la pipe è già aperta, e alla ripartenza la
+libreria ne apre una nuova. Dalla 10.2 la copia di sicurezza la salta da sola.
+
 # 7. Riassunto
 
 | | |

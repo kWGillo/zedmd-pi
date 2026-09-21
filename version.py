@@ -2473,6 +2473,13 @@ Storico:
        *La sveglia* posava la casella del carattere invece delle cifre: l'ora
        stava bassa, e con l'etichetta la scritta TIMER usciva dal pannello.
        *Il suono del timer* si sceglie nella scheda del timer.
+  10.2 La copia di sicurezza dell'aggiornamento salta cio' che non e' un
+       file. L'aggiornamento alla 10.1 falliva con "`/opt/dmd/.lgd-nfy0` is
+       a named pipe": e' la pipe di notifica di lgpio, la libreria sotto
+       gpiozero che legge il pulsante fisico, e la apre nella cartella di
+       lavoro del servizio. `copytree` non sa copiarla. La correzione vale
+       dagli aggiornamenti *successivi* a questo, perche' la copia la fa la
+       versione installata: per arrivare qui la pipe va tolta a mano.
 """
 
-__version__ = "10.1"
+__version__ = "10.2"

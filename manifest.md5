@@ -36,7 +36,7 @@ b9d0bda3222f80aa266f96cf9db90b8c  lookup.py
 38d51b9735b5f000b62c9770ca1d0bd0  meteo.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
 3cd27398cb063179a7699520644a98e0  nowplaying.py
-9c65135c4a3c4d26e8b14cdbcc590c40  ota.py
+e5423d012fbb84dd6b94b6e12287d9b3  ota.py
 d2a13bde255f3b4273f817416922bb01  pianeti.py
 0e34e3813c0ae5174c80d38b1c48fd42  presets.py
 404a573c4711807f583b87db5c21e332  pulizia.py
@@ -126,7 +126,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 29ec3d40d18b3ff9c31cf907cd8b1236  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-a7a2b66c6726b77975c26bb3043a5416  version.py
+70f5b2ef2d5554878076c70bfd812582  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 dd89c2cf260c8935bfebd1b603acc9e4  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

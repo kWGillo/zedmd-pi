@@ -328,11 +328,39 @@ def check_manifest(source):
     log("impronte verificate: nessun file alterato")
 
 
+def _solo_file(cartella, nomi):
+    """Per `copytree`: quello che non e' un file o una cartella.
+
+    Esiste per un aggiornamento fallito davvero, alla 10.1. La libreria che
+    legge il pulsante fisico (lgpio, sotto gpiozero) apre le sue pipe di
+    notifica nella cartella di lavoro del servizio, cioe' /opt/dmd:
+    `.lgd-nfy0` e' una **named pipe**. `copytree` non sa copiarla e alza un
+    errore, la copia di sicurezza falliva, e con lei l'intero aggiornamento
+    -- per un file che non e' nostro e che non va salvato.
+
+    Si salta anche la cache di Python: si rigenera da sola.
+    """
+    import stat
+    salta = set()
+    for nome in nomi:
+        if nome == "__pycache__" or nome.endswith(".pyc"):
+            salta.add(nome)
+            continue
+        try:
+            modo = os.stat(os.path.join(cartella, nome)).st_mode
+        except OSError:
+            salta.add(nome)
+            continue
+        if not (stat.S_ISREG(modo) or stat.S_ISDIR(modo)):
+            salta.add(nome)
+    return salta
+
+
 def backup():
     if os.path.exists(BACKUP_DIR):
         shutil.rmtree(BACKUP_DIR, ignore_errors=True)
     os.makedirs(os.path.dirname(BACKUP_DIR), exist_ok=True)
-    shutil.copytree(INSTALL_DIR, BACKUP_DIR)
+    shutil.copytree(INSTALL_DIR, BACKUP_DIR, ignore=_solo_file)
     log("copia di sicurezza in %s" % BACKUP_DIR)
 
 

@@ -2,6 +2,24 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.2]
+
+### L'aggiornamento non inciampa più nella pipe del pulsante
+
+L'aggiornamento alla 10.1 falliva con
+``/opt/dmd/.lgd-nfy0` is a named pipe``. Quel file è la pipe di notifica di
+**lgpio**, la libreria sotto gpiozero che legge il pulsante fisico: la apre
+nella cartella di lavoro del servizio, cioè `/opt/dmd`. La copia di sicurezza
+copiava tutta la cartella e su una pipe si fermava — e con lei l'aggiornamento.
+Adesso la copia prende solo file e cartelle.
+
+La correzione vale dal prossimo aggiornamento in poi: la copia di sicurezza la
+fa la versione **già installata**. Per installare questa, se l'aggiornamento
+fallisce con lo stesso messaggio, la pipe va tolta a mano una volta:
+`sudo rm /opt/dmd/.lgd-nfy0`.
+
+Contiene tutto quello della 10.1.
+
 ## [10.1]
 
 ### Il volume dei giochi arriva a tutti i giochi
