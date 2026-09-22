@@ -2515,6 +2515,8 @@ Storico:
        notturno, come cursori in percento. Il volume dei giochi cambiato da
        li' arriva subito anche alle partite aperte, per la stessa strada
        della pagina Impostazioni.
+  10.6.1 Squadriglia: il fondo e' nero, LED spenti. Anche il quasi nero
+       mostrava le righe del refresh. Il mare resta nelle onde e nelle isole.
 """
 
-__version__ = "10.6"
+__version__ = "10.6.1"

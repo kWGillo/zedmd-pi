@@ -61,7 +61,7 @@ c7be063837324c79053cba527364e517  sources/doom.py
 8b74478fcea06b5ab9db5c6c5f2c710c  sources/giochi/mattoni.py
 dca8a1a47cb19ecfb01ede94968ebc25  sources/giochi/pongo.py
 b9ed5d6a62f16d27b220b48b3d69c54c  sources/giochi/serpente.py
-11ea344deb7795835abad972bb1cba81  sources/giochi/squadriglia.py
+d5a112d877e8481736a9aae611cb0488  sources/giochi/squadriglia.py
 8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
 9d5c71443d63c261e79811e3d8d42b7d  sources/meteo.py
 1d2251eff5cc8b014100149bd68d0103  sources/notifiche.py
@@ -125,7 +125,7 @@ bfe7e1931764badb484f170fb1386427  templates/services.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 29ec3d40d18b3ff9c31cf907cd8b1236  templates/updates.html
-81e217b48be654556fc7e6d0333d11bf  version.py
+225a1973cf643cc992948f5b92dbc99f  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 2c7fccb8af7e206421b1831c361541ae  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

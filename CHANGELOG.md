@@ -2,6 +2,14 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.6.1]
+
+### Squadriglia su fondo nero
+
+Lo sfondo di Squadriglia è **nero**: anche il blu quasi nero della 10.6
+mostrava le righe orizzontali del refresh. Con i LED spenti non ce n'è
+nessuna. Il mare si vede ancora nelle onde e nelle isole che scorrono.
+
 ## [10.6]
 
 ### I volumi in Home Assistant
