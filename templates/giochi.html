@@ -27,10 +27,22 @@
         </select>
       </form>
       {% endif %}
-      <form method="post" action="{{ url_for('api_giochi_play') }}">
-        <input type="hidden" name="gioco" value="{{ nome }}">
-        <button type="submit">{{ t('giochi.play') }}</button>
-      </form>
+      {# Gioca e Azzera sulla stessa riga. Azzera chiede conferma: un record
+         cancellato non torna, e il pulsante sta a un dito da Gioca. #}
+      <div class="riga-gioco">
+        <form method="post" action="{{ url_for('api_giochi_play') }}">
+          <input type="hidden" name="gioco" value="{{ nome }}">
+          <button type="submit">{{ t('giochi.play') }}</button>
+        </form>
+        <form method="post" action="{{ url_for('api_giochi_azzera') }}"
+              data-conferma="{{ t('giochi.azzera.conferma', gioco=etichetta) }}"
+              onsubmit="return confirm(this.dataset.conferma)">
+          <input type="hidden" name="gioco" value="{{ nome }}">
+          <button type="submit" class="ghost" title="{{ t('giochi.azzera.titolo') }}"
+                  {{ 'disabled' if not record.get(nome, 0) }}>
+            {{ t('giochi.azzera') }}</button>
+        </form>
+      </div>
     </div>
     {% endfor %}
 

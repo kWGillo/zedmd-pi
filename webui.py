@@ -1003,6 +1003,22 @@ def create_app(runtime):
             return jsonify({"attivo": True, "codice": 0})
         return jsonify(runtime.giochi.stato_impara())
 
+    @app.route("/api/giochi/azzera", methods=["POST"])
+    def api_giochi_azzera():
+        """Azzera il record di un gioco. Uno solo: quello indicato."""
+        nome = request.form.get("gioco", "").strip()
+        if nome not in dict(giochi_elenco()):
+            return redirect(url_for("page_giochi"))
+        conf = cfg.setdefault("giochi", {})
+        (conf.setdefault("record", {})).pop(nome, None)
+        dmdconf.save()
+        # Se quel gioco e' aperto adesso, il record in memoria va azzerato
+        # anche li': altrimenti alla chiusura della partita verrebbe
+        # riscritto in configurazione, e l'azzeramento sparirebbe.
+        if hasattr(runtime.giochi, "azzera_record"):
+            runtime.giochi.azzera_record(nome)
+        return redirect(url_for("page_giochi"))
+
     @app.route("/api/giochi/pongo", methods=["POST"])
     def api_giochi_pongo():
         """Il livello del computer di Pongo. Vale anche a partita aperta,

@@ -457,6 +457,15 @@ class GiochiSource(Source):
             self.arbiter.hold_on(self.name)
         return True
 
+    def azzera_record(self, nome):
+        """Il record del gioco aperto, se e' quello azzerato dalla pagina."""
+        gioco = self._gioco
+        if gioco is not None and gioco.nome == nome:
+            # Solo il record vecchio. La partita in corso resta com'e': il
+            # suo punteggio e' un risultato vero, e se e' il migliore da qui
+            # in poi diventa il nuovo record, come deve.
+            gioco._record = 0
+
     def riconfigura(self):
         """Rilegge le impostazioni del gioco aperto (il livello di Pongo)."""
         gioco = self._gioco

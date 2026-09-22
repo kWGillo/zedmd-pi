@@ -610,3 +610,9 @@ ul.conti li b { font-variant-numeric: tabular-nums; white-space: nowrap; }
 /* Il livello di Pongo, dentro la sua scheda. */
 .livello-pongo { margin: 0 0 8px; }
 .livello-pongo label { font-size: 12px; }
+
+/* Gioca e Azzera record, affiancati. */
+.riga-gioco { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
+.riga-gioco form { margin: 0; }
+.riga-gioco button { margin: 0; white-space: nowrap; }
+.riga-gioco button[disabled] { opacity: .4; cursor: default; }

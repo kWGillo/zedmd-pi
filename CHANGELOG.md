@@ -2,6 +2,15 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.5]
+
+### Azzerare un record
+
+Nella pagina **Giochi**, accanto a ogni **Gioca** c'è **Azzera**: cancella il
+record di quel gioco, e solo di quello, dopo una conferma. È spento quando non
+c'è niente da azzerare. Se quel gioco è aperto, la partita in corso non
+perde niente: il suo punteggio, se è il migliore, diventa il nuovo record.
+
 ## [10.4]
 
 ### Squadriglia

@@ -2500,6 +2500,10 @@ Storico:
        il tasto speciale; nei giochi che non ne hanno uno spara come prima.
        Provato con un pilota automatico che arriva al livello 6-7, e con
        tasti a caso che non passano il primo.
+  10.5 Accanto a ogni Gioca c'e' Azzera: cancella il record di quel gioco,
+       dopo una conferma. Spento quando non c'e' niente da azzerare. A
+       partita aperta si toglie il record vecchio e la partita in corso
+       resta com'e': se fa meglio, diventa il nuovo record.
 """
 
-__version__ = "10.4"
+__version__ = "10.5"
