@@ -421,6 +421,25 @@ abbassa mentre si gioca e si abbassa subito.
 - **Game Boy** — fino alla 10.0 usava per sbaglio il volume **degli avvisi**:
   di notte quello è il volume notturno, cioè zero, e il Game Boy giocava muto.
 
+**La musica dei giochi**, dalla 10.9. Ogni gioco integrato ha un suo motivo
+di sottofondo, scritto apposta per questo progetto:
+
+| Gioco | Il motivo |
+|---|---|
+| Breakout | veloce, minore, con il rullante: spinge |
+| Invaders | una base cupa e lenta, **senza ritmo suo**: il ritmo è la marcia degli alieni, e la musica ci sta sotto |
+| Snake | calmo, ad arpeggi: è un gioco di concentrazione |
+| Pongo | quasi niente, qualche nota rada: il *ping* resta la voce |
+| Squadriglia | una marcia da fanfara |
+| Gnam Gnam | allegro, in stile chip |
+
+Stanno tutti **sotto gli effetti** — da un sesto a un terzo del loro volume —
+tacciono a partita finita e, dove c'è una schermata iniziale, finché non si
+preme fuoco. Seguono il cursore **Volume dei giochi** e la levetta **Effetti
+dei giochi**; in più c'è la casella **Musica di sottofondo nei giochi**
+nella pagina Giochi, per chi vuole gli effetti ma non la musica. Le ricette
+stanno in `diagnostica/genera_suoni.py`.
+
 **In Home Assistant**, dalla 10.6, i tre volumi — avvisi, giochi e notturno —
 sono tre cursori fra le entità del DMD (`number.dmd_volume_avvisi`,
 `number.dmd_volume_giochi`, `number.dmd_volume_notte`). Servono alle

@@ -2534,6 +2534,12 @@ Storico:
        effetti. Il mixer dei giochi ha una voce di sottofondo che ricomincia
        senza buchi quando finisce; il gioco la accende mentre si gioca e la
        spegne quando ti prendono, a fine livello e a partita finita.
+  10.9 La musica in tutti i giochi integrati, un motivo originale per
+       ciascuno: Breakout veloce, Invaders una base senza ritmo sotto la
+       marcia, Snake ad arpeggi, Pongo quasi niente, Squadriglia una
+       fanfara. Il generatore compone da una ricetta (tempo, melodia,
+       accordi, timbro, basso, percussioni). La casella "Musica di
+       sottofondo nei giochi" la spegne lasciando gli effetti.
 """
 
-__version__ = "10.8"
+__version__ = "10.9"

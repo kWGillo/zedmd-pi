@@ -85,6 +85,7 @@ SUONI_PER_FRAME = 2
 class Mattoni(Gioco):
     nome = "breakout"
     etichetta = "Breakout"
+    MUSICA = "breakout_musica"
     colore_hud = (90, 170, 255)
 
     # -------------------------------------------------------------- partita

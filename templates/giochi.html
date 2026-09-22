@@ -154,6 +154,10 @@
     <p class="hint" id="impara_stato">{{ t('giochi.impara.hint') }}</p>
 
     <label class="check">
+      <input type="checkbox" name="musica" {{ 'checked' if cfg.giochi.musica is not defined or cfg.giochi.musica }}>
+      {{ t('giochi.musica') }}
+    </label>
+    <label class="check">
       <input type="checkbox" name="ciclo_doom" {{ 'checked' if cfg.giochi.ciclo_doom }}>
       {{ t('giochi.ciclo_doom') }}
     </label>

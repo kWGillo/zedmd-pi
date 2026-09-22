@@ -117,6 +117,7 @@ class Gioco:
         # La musica di sottofondo, per chi ce l'ha: nome per farla partire,
         # None per fermarla. Come `suona`, la sostituisce chi apre la partita.
         self.musica = lambda nome: None
+        self._musica_voluta = None
         self.punteggio = 0
         self.vite = 3
         self.livello = 1
@@ -135,6 +136,26 @@ class Gioco:
 
     def disegna_campo(self, img, px):
         raise NotImplementedError
+
+    # --------------------------------------------------------------- musica
+
+    # Il brano di sottofondo del gioco, un file in `suoni/` senza estensione.
+    # None: il gioco non ne ha.
+    MUSICA = None
+
+    def musica_di_adesso(self):
+        """La musica che ci vuole in questo istante. Di serie: il brano del
+        gioco finche' si gioca, silenzio a partita finita. I giochi con una
+        schermata iniziale o dei momenti muti la ridefiniscono."""
+        return self.MUSICA if (self.MUSICA and not self.finita) else None
+
+    def accompagna(self):
+        """Chiede la musica giusta, ma solo quando cambia: non a ogni
+        fotogramma, e senza farla ricominciare."""
+        voluta = self.musica_di_adesso()
+        if voluta != self._musica_voluta:
+            self._musica_voluta = voluta
+            self.musica(voluta)
 
     # --------------------------------------------------------------- comune
 

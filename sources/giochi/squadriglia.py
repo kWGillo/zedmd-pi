@@ -194,6 +194,10 @@ class Caccia(object):
 class Squadriglia(Gioco):
     nome = "squadriglia"
     etichetta = "Squadriglia"
+    MUSICA = "squadriglia_musica"
+
+    def musica_di_adesso(self):
+        return self.MUSICA if (self.iniziata and not self.finita) else None
     colore_hud = COLORE_TU
 
     COMANDI = ("su", "giu", "sinistra", "destra", "fuoco", "speciale",

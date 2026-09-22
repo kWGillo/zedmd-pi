@@ -132,6 +132,10 @@ def larghezza_grande(testo, scala=2):
 class Pongo(Gioco):
     nome = "pongo"
     etichetta = "Pongo"
+    MUSICA = "pongo_musica"
+
+    def musica_di_adesso(self):
+        return self.MUSICA if (self.iniziata and not self.finita) else None
     colore_hud = COLORE_TU
 
     COMANDI = ("su", "giu", "sinistra", "destra", "fuoco", "avvia", "esci")

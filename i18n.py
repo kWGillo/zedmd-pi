@@ -1870,6 +1870,8 @@ STRINGS = {
     "giochi.pongo.hint": (
         "Tu contro il computer. Su e giù, avanti fino a metà campo; vince chi fa undici.",
         "You against the computer. Up, down, forward to midfield; first to eleven wins."),
+    "giochi.musica": ("Musica di sottofondo nei giochi (separata dagli effetti)",
+                      "Background music in games (separate from sound effects)"),
     "giochi.gnam.hint": (
         "Il labirinto, le palline e quattro fantasmi, ognuno col suo modo di inseguire.",
         "The maze, the dots and four ghosts, each chasing in its own way."),

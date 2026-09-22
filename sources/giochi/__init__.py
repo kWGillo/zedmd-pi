@@ -506,6 +506,14 @@ class GiochiSource(Source):
             # in poi diventa il nuovo record, come deve.
             gioco._record = 0
 
+    def riapplica_musica(self):
+        """La casella Musica e' cambiata: si ferma, e il gioco aperto la
+        richiede al prossimo passo se la vuole ancora."""
+        self._musica(None)
+        gioco = self._gioco
+        if gioco is not None:
+            gioco._musica_voluta = None
+
     def riconfigura(self):
         """Rilegge le impostazioni del gioco aperto (il livello di Pongo)."""
         gioco = self._gioco
@@ -685,6 +693,7 @@ class GiochiSource(Source):
                 continue
             try:
                 gioco.passo(dt, tasti_per(gioco, self._premuti))
+                gioco.accompagna()
                 immagine = gioco.disegna()
             except Exception as exc:
                 print("[giochi] errore nel gioco: %s" % exc)

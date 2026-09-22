@@ -53,6 +53,9 @@ BUNKER_ALTO = 5
 class Invasori(Gioco):
     nome = "invaders"
     etichetta = "Invaders"
+    # Una base cupa e lenta, sotto la marcia degli alieni: la marcia resta la
+    # voce, e la musica non ha ritmo suo per non litigarci.
+    MUSICA = "invaders_musica"
     colore_hud = (120, 255, 120)
 
     def avvia_partita(self, seme=None):

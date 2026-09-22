@@ -2,6 +2,24 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.9]
+
+### La musica in tutti i giochi
+
+Dopo Gnam Gnam, ogni gioco integrato ha il suo motivo di sottofondo, scritto
+apposta e con il carattere del gioco:
+
+- **Breakout** — veloce, in minore, con il rullante;
+- **Invaders** — una base cupa e lenta, senza ritmo suo: il ritmo resta la
+  marcia degli alieni;
+- **Snake** — calmo, ad arpeggi;
+- **Pongo** — quasi niente, qualche nota rada sotto il *ping*;
+- **Squadriglia** — una marcia da fanfara.
+
+Stanno sotto gli effetti, tacciono a partita finita e finché non si preme
+fuoco. Nella pagina Giochi c'è la casella **Musica di sottofondo nei giochi**
+per chi vuole gli effetti senza la musica.
+
 ## [10.8]
 
 ### La musica di Gnam Gnam

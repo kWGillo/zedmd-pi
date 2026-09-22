@@ -1045,7 +1045,7 @@ def create_app(runtime):
     def api_giochi():
         conf = cfg.setdefault("giochi", {})
         for chiave in ("keyboard", "keyboard_starts",
-                       "joystick", "joystick_starts", "ciclo_doom"):
+                       "joystick", "joystick_starts", "ciclo_doom", "musica"):
             conf[chiave] = request.form.get(chiave) == "on"
         # Da adesso la casella "Doom nel giro" e' una scelta dell'utente: la
         # migrazione non deve piu' rimetterci le mani.
@@ -1070,6 +1070,9 @@ def create_app(runtime):
         # scelti: senza rileggerli, cambiare il tasto Start non avrebbe
         # effetto fino al riavvio del servizio.
         runtime.giochi.ricarica_comandi()
+        # La musica segue subito la casella, anche a partita aperta.
+        if hasattr(runtime.giochi, "riapplica_musica"):
+            runtime.giochi.riapplica_musica()
         return redirect(url_for("page_giochi"))
 
     # -------------------------------------------------------------- game boy

@@ -240,6 +240,9 @@ DEFAULTS = {
         "session_timeout": 180,
         "ultimo": "breakout",
         "record": {},
+        # La musica di sottofondo dei giochi. Separata dagli effetti: chi
+        # gioca la sera tardi vuole spesso gli uni e non l'altra.
+        "musica": True,
         # Quanto e' forte il computer di Pongo: facile, normale, difficile.
         "pongo_livello": "normale",
         # Il tasto Start del cabinato scorre i giochi: premuto una volta si

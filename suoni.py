@@ -1550,6 +1550,10 @@ def effetti_musica(cfg, nome):
     """
     if nome and not _conf(cfg).get("giochi", True):
         return False
+    # E l'interruttore suo, nella pagina Giochi: chi gioca la sera vuole
+    # spesso gli effetti ma non la musica. Spento, la musica in corso si ferma.
+    if nome and not ((cfg or {}).get("giochi") or {}).get("musica", True):
+        nome = None
     return _mixer.musica(nome)
 
 

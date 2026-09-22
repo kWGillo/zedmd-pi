@@ -137,14 +137,27 @@ def _hz(nome):
     return 440.0 * 2 ** ((semitoni - 69) / 12.0)
 
 
-def musica():
-    croma = 60.0 / BPM / 2
+def musica(bpm=None, melodia=None, accordi=None, forma="quadra25",
+           ampiezza_melodia=1.0, basso="umpa", ampiezza_basso=0.9,
+           charleston=0.25, rullante=0.0, seme=7):
+    """Compone un brano dalla sua ricetta. Senza argomenti, quello di Gnam Gnam.
+
+    `forma`: il timbro della melodia -- quadra25 (il chip, stretto), quadra50
+    (piu' pieno, da fanfara), triangolo (morbido). `basso`: umpa (fondamentale
+    e ottava a crome alterne), quarti (la fondamentale sui quarti), lento (una
+    nota tenuta per mezza battuta). `charleston` e `rullante`: l'ampiezza del
+    fruscio sui controtempi e sul secondo e quarto quarto; zero li toglie.
+    """
+    bpm = bpm or BPM
+    melodia = melodia or MELODIA
+    accordi = accordi or ACCORDI
+    croma = 60.0 / bpm / 2
     per_croma = int(round(FREQUENZA * croma))
-    totale = per_croma * 8 * len(MELODIA)
+    totale = per_croma * 8 * len(melodia)
     fuori = [0.0] * totale
 
-    def suona(inizio, durata, hz, forma, ampiezza):
-        quanti = int(durata * per_croma)
+    def suona(inizio, durata, hz, timbro, ampiezza):
+        quanti = min(int(durata * per_croma), totale - inizio)
         fase = 0.0
         for i in range(quanti):
             t = i / float(quanti)
@@ -152,14 +165,16 @@ def musica():
             # l'una dall'altra invece di fondersi in un fischio.
             inv = min(1.0, i / 60.0) * (1.0 - 0.55 * t) * min(1.0, (quanti - i) / 80.0)
             fase = (fase + hz / FREQUENZA) % 1.0
-            if forma == "quadra":
+            if timbro == "quadra25":
                 v = 1.0 if fase < 0.25 else -1.0      # duty 25%: il timbro chip
+            elif timbro == "quadra50":
+                v = 1.0 if fase < 0.5 else -1.0
             else:
-                v = 4.0 * abs(fase - 0.5) - 1.0        # triangolo, per il basso
+                v = 4.0 * abs(fase - 0.5) - 1.0        # triangolo
             fuori[inizio + i] += v * inv * ampiezza
 
     # la melodia
-    for b, riga in enumerate(MELODIA):
+    for b, riga in enumerate(melodia):
         celle = riga.split()
         j = 0
         while j < 8:
@@ -168,24 +183,109 @@ def musica():
             while j + durata < 8 and celle[j + durata] == "-":
                 durata += 1
             if nota not in (".", "-"):
-                suona((b * 8 + j) * per_croma, durata, _hz(nota), "quadra", 1.0)
+                suona((b * 8 + j) * per_croma, durata, _hz(nota), forma,
+                      ampiezza_melodia)
             j += durata
     # il basso
-    for b, riga in enumerate(ACCORDI):
+    for b, riga in enumerate(accordi):
         for meta, radice in enumerate(riga.split()):
-            for k in range(4):
-                ottava = 3 if k % 2 == 0 else 4
-                suona((b * 8 + meta * 4 + k) * per_croma, 1,
-                      _hz(radice + str(ottava)), "triangolo", 0.9)
-    # un charleston leggero sui controtempi: da' la spinta senza coprire
+            inizio = (b * 8 + meta * 4) * per_croma
+            if basso == "umpa":
+                for k in range(4):
+                    ottava = 3 if k % 2 == 0 else 4
+                    suona(inizio + k * per_croma, 1, _hz(radice + str(ottava)),
+                          "triangolo", ampiezza_basso)
+            elif basso == "quarti":
+                for k in range(2):
+                    suona(inizio + 2 * k * per_croma, 2, _hz(radice + "3"),
+                          "triangolo", ampiezza_basso)
+            else:
+                suona(inizio, 4, _hz(radice + "3"), "triangolo", ampiezza_basso)
+    # le percussioni, fatte di fruscio
     import random
-    casuale = random.Random(7)
-    for c in range(8 * len(MELODIA)):
-        if c % 2 == 1:
+    casuale = random.Random(seme)
+    for c in range(8 * len(melodia)):
+        colpi = []
+        if charleston and c % 2 == 1:
+            colpi.append((charleston, 0.012))
+        if rullante and c % 4 == 2:
+            colpi.append((rullante, 0.06))
+        for forza, durata in colpi:
             base = c * per_croma
-            for i in range(int(FREQUENZA * 0.012)):
-                fuori[base + i] += casuale.uniform(-1, 1) * 0.25 * (1 - i / (FREQUENZA * 0.012))
+            quanti = int(FREQUENZA * durata)
+            for i in range(min(quanti, totale - base)):
+                fuori[base + i] += casuale.uniform(-1, 1) * forza * (1 - i / float(quanti))
     return fuori
+
+
+# Gli altri giochi, ognuno con il suo carattere. Tutti scritti per questo
+# progetto; nessuno riprende una musica esistente. Giri di 16-20 secondi.
+MUSICHE = {
+    # Breakout: spinge. La minore pentatonica, veloce, con il rullante.
+    "breakout_musica": dict(
+        bpm=150, forma="quadra25", rullante=0.3, picco=5000,
+        melodia=(
+            "A4 C5 E5 A5 G5 E5 D5 E5", "C5 -  A4 -  G4 A4 C5 . ",
+            "D5 F5 A5 D6 C6 A5 G5 A5", "F5 -  E5 D5 E5 -  .  . ",
+            "A4 C5 E5 A5 G5 E5 D5 E5", "G5 -  E5 G5 A5 -  C6 - ",
+            "B5 G5 E5 G5 B5 -  D6 - ", "C6 B5 A5 G5 E5 -  .  . ",
+            "E5 E5 G5 E5 A5 G5 E5 D5", "C5 D5 E5 G5 E5 D5 C5 A4",
+            "D5 D5 F5 D5 G5 F5 D5 C5", "E5 -  B4 -  E5 .  E4 . ",
+        ),
+        accordi=("A A", "F G", "D D", "F E", "A A", "C G", "E E", "F E",
+                 "C C", "A A", "D G", "E E")),
+    # Invaders: sotto la marcia, non sopra. Niente ritmo -- il ritmo e' dei
+    # passi degli alieni -- solo un basso lento e qualche nota lunga, cupa.
+    "invaders_musica": dict(
+        bpm=108, forma="triangolo", ampiezza_melodia=0.5, basso="lento",
+        ampiezza_basso=0.8, charleston=0.0, picco=3000,
+        melodia=(
+            "E5 -  -  -  -  -  -  - ", ".  .  .  .  D5 -  -  - ",
+            "C5 -  -  -  -  -  B4 - ", ".  .  .  .  .  .  .  . ",
+            "E5 -  -  -  -  -  -  - ", ".  .  .  .  G5 -  -  - ",
+            "F5 -  -  -  E5 -  -  - ", "B4 -  -  -  .  .  .  . ",
+        ),
+        accordi=("E E", "C D", "A A", "B B", "E E", "C D", "A C", "B B")),
+    # Snake: calmo, a arpeggi. Un gioco di concentrazione non vuole una
+    # musica che corre.
+    "snake_musica": dict(
+        bpm=96, forma="triangolo", ampiezza_melodia=0.9, basso="lento",
+        ampiezza_basso=0.7, charleston=0.12, picco=4500,
+        melodia=(
+            "D4 F4 A4 D5 A4 F4 D4 F4", "C4 E4 G4 C5 G4 E4 C4 E4",
+            "B3 D4 G4 B4 G4 D4 B3 D4", "A3 C4 E4 A4 E4 C4 E4 G4",
+            "D4 F4 A4 D5 E5 D5 A4 F4", "G4 B4 D5 G5 D5 B4 G4 B4",
+            "F4 A4 C5 F5 C5 A4 F4 A4", "E4 G4 A4 C5 A4 G4 E4 D4",
+        ),
+        accordi=("D D", "C C", "G G", "A A", "D D", "G G", "F F", "A A")),
+    # Pongo: quasi niente. Il fascino di Pong e' il ping nel silenzio: qui
+    # qualche nota rada e un basso piano, perche' il ping resti la voce.
+    "pongo_musica": dict(
+        bpm=120, forma="quadra25", ampiezza_melodia=0.6, basso="quarti",
+        ampiezza_basso=0.6, charleston=0.1, picco=3000,
+        melodia=(
+            "C5 .  .  .  G4 .  .  . ", ".  .  E5 .  .  .  D5 . ",
+            "C5 .  .  .  G4 .  .  . ", ".  .  A4 .  G4 .  .  . ",
+            "F4 .  .  .  C5 .  .  . ", ".  .  A4 .  .  .  G4 . ",
+            "E5 .  .  .  C5 .  .  . ", "D5 .  .  .  G4 .  .  . ",
+        ),
+        accordi=("C C", "C C", "A A", "F G", "F F", "F F", "C C", "G G")),
+    # Squadriglia: una marcia da fanfara. Quadra piena, basso sui quarti,
+    # rullante sul due e sul quattro.
+    "squadriglia_musica": dict(
+        bpm=140, forma="quadra50", ampiezza_melodia=0.8, basso="quarti",
+        ampiezza_basso=1.0, charleston=0.15, rullante=0.35, picco=5000,
+        melodia=(
+            "G4 -  C5 -  E5 -  G5 - ", "G5 -  E5 C5 D5 -  .  . ",
+            "A4 -  D5 -  F5 -  A5 - ", "A5 -  G5 F5 E5 -  .  . ",
+            "C5 C5 C5 D5 E5 -  C5 - ", "D5 D5 D5 E5 F5 -  D5 - ",
+            "E5 G5 F5 E5 D5 C5 B4 D5", "C5 -  G4 -  C5 -  .  . ",
+            "E5 -  E5 F5 G5 -  E5 - ", "F5 -  F5 E5 D5 -  B4 - ",
+            "C5 E5 G5 C6 B5 G5 D5 F5", "E5 -  C5 -  G4 .  G4 . ",
+        ),
+        accordi=("C C", "C G", "D D", "F G", "C C", "D G", "C G", "C C",
+                 "C C", "D G", "C G", "C G")),
+}
 
 
 def genera(cartella):
@@ -194,6 +294,12 @@ def genera(cartella):
     quanti = scrivi(os.path.join(cartella, "gnam_musica.wav"), campioni,
                     picco=PICCO_MUSICA)
     fatti.append(("gnam_musica", quanti, 1000.0 * quanti / FREQUENZA))
+    for nome, ricetta in sorted(MUSICHE.items()):
+        ricetta = dict(ricetta)
+        picco = ricetta.pop("picco")
+        quanti = scrivi(os.path.join(cartella, nome + ".wav"),
+                        musica(**ricetta), picco=picco)
+        fatti.append((nome, quanti, 1000.0 * quanti / FREQUENZA))
     for nome, pezzi in sorted(RICETTE.items()):
         campioni = []
         for durata, da_hz, a_hz in pezzi:

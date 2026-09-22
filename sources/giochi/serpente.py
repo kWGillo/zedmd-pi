@@ -88,6 +88,13 @@ SUONI_PER_FRAME = 2
 class Serpente(Gioco):
     nome = "snake"
     etichetta = "Snake"
+    MUSICA = "snake_musica"
+
+    def musica_di_adesso(self):
+        # Parte con il primo fuoco, come il serpente.
+        if self.finita or self._ferma:
+            return None
+        return self.MUSICA
     colore_hud = (90, 220, 110)
 
     # -------------------------------------------------------------- partita
