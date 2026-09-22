@@ -2523,6 +2523,12 @@ Storico:
        attimo dopo lo sostituiva quello del giro. Adesso le partite si aprono
        una alla volta, una scelta esplicita ferma il giro per tre secondi, e
        il giro riparte dal gioco scelto.
+  10.7 **Gnam Gnam.** Un labirinto disegnato per il pannello, 50 caselle
+       per 16, simmetrico, con il tunnel e senza vicoli ciechi; 400 palline
+       e quattro pillole. Quattro fantasmi con il loro modo di inseguire --
+       il cacciatore, l'agguato, l'imprevedibile, il timido -- a fasi di
+       caccia e di tregua. Il nome non e' Pac-Man perche' Pac-Man e' di
+       Bandai Namco.
 """
 
-__version__ = "10.6.2"
+__version__ = "10.7"

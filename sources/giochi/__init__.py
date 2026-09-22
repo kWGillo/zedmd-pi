@@ -28,6 +28,7 @@ from ..comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_RY, ABS_X, ABS_Y,
                        BTN_MODE, BTN_SELECT, BTN_SOUTH, BTN_START, BTN_TR,
                        BTN_TR2, BTN_WEST, Lettore, joystick, tastiere)
 from .base import ALTEZZA, CAMPO, LARGHEZZA, Gioco, centra, scrivi
+from .gnam import Gnam
 from .invasori import Invasori
 from .mattoni import Mattoni
 from .pongo import Pongo
@@ -38,8 +39,8 @@ from .squadriglia import Squadriglia
 # pagina: Breakout per primo perche' e' quello che il pannello 4:1 veste
 # meglio, e gli ultimi arrivati in fondo -- chi preme Start per abitudine non
 # deve trovarsi un gioco diverso da quello di ieri. Pongo e' arrivato dopo
-# Snake, Squadriglia dopo Pongo.
-GIOCHI = (Mattoni, Invasori, Serpente, Pongo, Squadriglia)
+# Snake, Squadriglia dopo Pongo, Gnam Gnam dopo Squadriglia.
+GIOCHI = (Mattoni, Invasori, Serpente, Pongo, Squadriglia, Gnam)
 NOMI = tuple(g.nome for g in GIOCHI)
 
 

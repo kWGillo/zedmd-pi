@@ -152,6 +152,7 @@ ICONE_GIOCHI = {
     "snake": "mdi:snake",
     "pongo": "mdi:table-tennis",
     "squadriglia": "mdi:airplane",
+    "gnam": "mdi:pac-man",
 }
 
 try:

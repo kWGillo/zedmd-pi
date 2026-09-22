@@ -2,6 +2,24 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.7]
+
+### Gnam Gnam
+
+L'ultimo gioco nella pagina **Giochi**: il labirinto, le palline e quattro
+fantasmi. Il nome non è Pac-Man perché Pac-Man è di Bandai Namco.
+
+- **Un labirinto disegnato per il pannello**, 50 caselle per 16, con il
+  tunnel a metà altezza, la casa dei fantasmi al centro, 400 palline e quattro
+  pillole. Nessun vicolo cieco.
+- **Quattro fantasmi, quattro caratteri**: il rosso ti punta, il rosa ti
+  aspetta dove stai andando, l'azzurro ti chiude insieme al rosso, l'arancio
+  da vicino si spaventa. A fasi si ritirano ognuno nel suo angolo.
+- **Le pillole** li fanno diventare blu: 200, 400, 800 e 1600 punti, e i loro
+  occhi tornano a casa.
+
+In Home Assistant compare l'interruttore **Gnam Gnam**.
+
 ## [10.6.2]
 
 ### Gioca vince sul giro

@@ -48,6 +48,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`gameboy.it.md`](gameboy.it.md) · [PDF](DMD_gameboy.pdf) | Game Boy con PyBoy: ROM, overscan, tavolozze, audio |
 | [`pongo.it.md`](pongo.it.md) · [PDF](DMD_pongo.pdf) | Pongo: tu contro il computer, i tre livelli e come sono stati tarati |
 | [`squadriglia.it.md`](squadriglia.it.md) · [PDF](DMD_squadriglia.pdf) | Squadriglia: lo sparatutto in stile 1942, il looping, il POW, il bombardiere |
+| [`gnam.it.md`](gnam.it.md) · [PDF](DMD_gnam.pdf) | Gnam Gnam: il labirinto, le pillole, e come insegue ognuno dei quattro fantasmi |
 | [`joypad.it.md`](joypad.it.md) · [PDF](DMD_joypad.pdf) | Mappatura dei comandi: pad, tastiera collegata al DMD, chi può far cominciare una partita |
 
 ---

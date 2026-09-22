@@ -29,7 +29,7 @@ sono nemmeno permessi da sistemare su `/dev/input`.
 | **Per Bluetooth** | il Bluetooth del Pi acceso; niente adattatori né pacchetti aggiuntivi |
 
 Il pad serve a due cose distinte: i **giochi** scritti per il pannello
-(Breakout, Invaders, Snake, Pongo, Squadriglia) e **Doom**. Sono pagine diverse con impostazioni proprie,
+(Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam) e **Doom**. Sono pagine diverse con impostazioni proprie,
 ma il pad è lo stesso e si riconosce una volta sola.
 
 ---
@@ -150,7 +150,7 @@ levette e croce direzionale. Se `evtest` non è installato:
 
 ## 5. I comandi
 
-### 5.1 Nei giochi (Breakout, Invaders, Snake, Pongo, Squadriglia)
+### 5.1 Nei giochi (Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam)
 
 | Comando | Sul pad |
 |---|---|
@@ -336,6 +336,7 @@ di Doom. Compaiono da soli con MQTT Discovery, se `mqtt.discovery` è acceso:
 | `switch.dmd_gioco_snake` | idem per Snake |
 | `switch.dmd_gioco_pongo` | idem per Pongo |
 | `switch.dmd_gioco_squadriglia` | idem per Squadriglia |
+| `switch.dmd_gioco_gnam` | idem per Gnam Gnam |
 | `switch.dmd_doom` | idem per Doom |
 
 Sono **mutuamente esclusivi**: la presa del pannello è una sola, quindi

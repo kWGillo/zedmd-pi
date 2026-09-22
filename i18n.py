@@ -1870,6 +1870,9 @@ STRINGS = {
     "giochi.pongo.hint": (
         "Tu contro il computer. Su e giù, avanti fino a metà campo; vince chi fa undici.",
         "You against the computer. Up, down, forward to midfield; first to eleven wins."),
+    "giochi.gnam.hint": (
+        "Il labirinto, le palline e quattro fantasmi, ognuno col suo modo di inseguire.",
+        "The maze, the dots and four ghosts, each chasing in its own way."),
     "giochi.squadriglia.hint": (
         "Un caccia contro le squadriglie, in stile 1942. Cerchio per il looping.",
         "A fighter against enemy squadrons, 1942 style. Circle for the loop."),
