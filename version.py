@@ -2504,6 +2504,17 @@ Storico:
        dopo una conferma. Spento quando non c'e' niente da azzerare. A
        partita aperta si toglie il record vecchio e la partita in corso
        resta com'e': se fa meglio, diventa il nuovo record.
+  10.5.1 *Doom partiva forte.* Il volume arrivava dopo `doomgeneric_Create`,
+       che fa gia' partire musica e suoni: per un secondo e mezzo Doom
+       suonava al volume di serie. Adesso e' impostato anche prima (serve
+       ricompilare Doom). *Pongo*: la racchetta sta ferma finche' c'e' la
+       scritta centrale, il riquadro della scritta e' stretto quanto il
+       testo, e la racchetta e' rossa. *Squadriglia*: il mare e' quasi nero,
+       perche' il blu mostrava le righe del refresh.
+  10.6 La 10.5.1, piu' i tre volumi in Home Assistant: avvisi, giochi e
+       notturno, come cursori in percento. Il volume dei giochi cambiato da
+       li' arriva subito anche alle partite aperte, per la stessa strada
+       della pagina Impostazioni.
 """
 
-__version__ = "10.5"
+__version__ = "10.6"

@@ -342,6 +342,21 @@ int main(int argc, char** argv)
             fascia_alto, fascia_alto + fascia_altezza, DOOMGENERIC_RESY,
             gamma_valore);
 
+    /* Il volume va messo **prima** di Create, non solo dopo. Create fa
+     * partire il titolo o il livello, e la musica e i primi suoni uscivano
+     * al volume di serie per il secondo e mezzo che Create impiega a
+     * tornare: misurato col driver disk di SDL, a volume 10% il primo secondo
+     * e mezzo era forte quanto al 100%. S_Init legge queste due variabili,
+     * che il file di configurazione non tocca (doomgeneric non lo legge):
+     * impostate qui, Doom parte gia' basso. La scala di Doom e' a passi di 8
+     * su 127, quindi si arrotonda per difetto -- mai piu' forte del voluto --
+     * e dopo Create si mette il valore esatto. */
+    if (volume_voluto >= 0) {
+        int p = volume_voluto < 0 ? 0 : (volume_voluto > 100 ? 100 : volume_voluto);
+        int livello = (p * 64 + 50) / 100;
+        sfxVolume = livello / 8;
+        musicVolume = livello / 8;
+    }
     doomgeneric_Create(n, passa);
     if (volume_voluto >= 0) {
         imposta_volume(volume_voluto);

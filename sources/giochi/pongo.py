@@ -78,7 +78,9 @@ ANGOLO_MAX = math.radians(50)
 PUNTI_PER_VINCERE = 11        # come il cabinato del 1972: undici, senza vantaggi
 PAUSA_SERVIZIO = 1.2          # secondi fra un punto e la battuta successiva
 
-COLORE_TU = (255, 140, 26)
+# Rosso e non arancione: sul pannello vero l'arancione su due pixel di
+# larghezza, in movimento, si leggeva poco -- diventava un giallo sbiadito.
+COLORE_TU = (255, 40, 40)
 COLORE_CPU = (90, 170, 255)
 COLORE_PALLA = (255, 255, 255)
 COLORE_RETE = (60, 60, 70)
@@ -247,15 +249,20 @@ class Pongo(Gioco):
                 self.iniziata = True
             return
 
-        # La tua racchetta si muove sempre, anche fra un punto e l'altro:
-        # e' li' che ci si rimette in posizione.
-        self.y_tu = self._muovi(self.y_tu, tasti)
-        self.x_tu = self._avanti(self.x_tu, tasti)
-
+        # Prima di cominciare la racchetta sta ferma. Fino alla 10.5 si
+        # muoveva anche li', sotto la scritta centrale: il riquadro nero della
+        # scritta la copriva, e sul pannello sembravano zone oscurate che
+        # mangiavano il cursore. La scritta e' un invito a premere fuoco, non
+        # un campo di gioco.
         if not self.iniziata:
             if "fuoco" in tasti:
                 self.iniziata = True
             return
+
+        # Da qui si muove sempre, anche fra un punto e l'altro: e' li' che
+        # ci si rimette in posizione.
+        self.y_tu = self._muovi(self.y_tu, tasti)
+        self.x_tu = self._avanti(self.x_tu, tasti)
 
         self._mossa_destra(dt)
 
@@ -462,8 +469,12 @@ class Pongo(Gioco):
                    larghezza=LARGHEZZA)
 
     def _riquadro(self, px, alto, basso):
+        """Il fondo nero delle scritte, largo quanto la scritta piu' lunga
+        (19 caratteri, 75 pixel) e non di piu': dalla colonna 86 alla 170.
+        Tu arrivi al massimo alla 64, il computer sta alla 250, quindi il
+        riquadro non copre mai una racchetta."""
         for y in range(alto, basso):
-            for x in range(40, LARGHEZZA - 40):
+            for x in range(86, 171):
                 px[x, y] = (0, 0, 0)
 
     def _disegna_fine(self, px):

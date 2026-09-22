@@ -416,8 +416,15 @@ abbassa mentre si gioca e si abbassa subito.
   identici. Serve **ricompilare Doom** una volta (pagina Doom, «Prepara»): il
   binario vecchio non conosce il comando, e finché non lo si ricompila il
   volume non gli viene mandato — perché lo leggerebbe come un tasto premuto.
+- **Doom parte già al volume giusto** dalla 10.5.1: prima, per il secondo e
+  mezzo dell'avvio, suonava al volume di serie.
 - **Game Boy** — fino alla 10.0 usava per sbaglio il volume **degli avvisi**:
   di notte quello è il volume notturno, cioè zero, e il Game Boy giocava muto.
+
+**In Home Assistant**, dalla 10.6, i tre volumi — avvisi, giochi e notturno —
+sono tre cursori fra le entità del DMD (`number.dmd_volume_avvisi`,
+`number.dmd_volume_giochi`, `number.dmd_volume_notte`). Servono alle
+automazioni: abbassare gli avvisi la sera, alzare i giochi quando si gioca.
 
 **Prova il suono** — suona un effetto sulla scheda scelta. Funziona **anche a
 suono spento**, apposta: serve proprio a capire se l'audio funziona *prima* di

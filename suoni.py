@@ -1460,6 +1460,24 @@ def cambia_volume_giochi(cfg):
     _mixer.cambia_volume(volume_giochi(cfg))
 
 
+def diffondi_volume_giochi(cfg, runtime):
+    """Il volume dei giochi appena cambiato, portato a tutte le partite aperte.
+
+    Ognuno per la sua strada: il mixer per i giochi integrati, la pipe dei
+    tasti per Doom e il Game Boy. Una funzione sola perche' i posti da cui lo
+    si cambia sono due -- la pagina Impostazioni e Home Assistant -- e due
+    copie di questa lista prima o poi direbbero cose diverse.
+    """
+    cambia_volume_giochi(cfg)
+    for nome in ("doom", "gameboy"):
+        sorgente = getattr(runtime, nome, None)
+        if sorgente is not None and hasattr(sorgente, "imposta_volume"):
+            try:
+                sorgente.imposta_volume(volume_giochi(cfg))
+            except Exception as exc:
+                print("[%s] volume non aggiornato: %s" % (nome, exc))
+
+
 def effetti_avvia(cfg):
     """Apre il mixer per una partita. Silenzioso se non si deve suonare."""
     device = uscita_giochi(cfg)

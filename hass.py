@@ -125,6 +125,19 @@ AZIONI = [
     ("onair_diretta", "In onda", "mdi:record-circle"),
 ]
 
+# I volumi come cursori: (chiave, nome in Home Assistant, icona) e dove stanno
+# in configurazione. Tutti fra 0 e 1 in configurazione, in percento fuori.
+VOLUMI = [
+    ("avvisi", "Volume avvisi", "mdi:volume-medium"),
+    ("giochi", "Volume giochi", "mdi:gamepad-variant"),
+    ("notte", "Volume notturno", "mdi:volume-low"),
+]
+VOLUMI_DOVE = {
+    "avvisi": ("audio", "volume", 0.7),
+    "giochi": ("audio", "volume_giochi", 0.9),
+    "notte": ("display", "night_volume", 0.0),
+}
+
 # I giochi scritti per il pannello sono azioni come Doom: una partita che
 # comincia e finisce, non un servizio da accendere. Un interruttore per gioco,
 # costruito dall'elenco dei giochi invece che scritto a mano — aggiungerne uno
@@ -351,6 +364,24 @@ class HassBridge:
         })
         self._config("number", "brightness", brightness)
 
+        # I tre volumi, come cursori. Sono quelli della pagina Impostazioni e
+        # della scheda Timing, con la stessa scala in percento: un'automazione
+        # che abbassa gli avvisi la sera o alza i giochi quando si gioca non
+        # deve passare dalla pagina web.
+        for chiave, nome, icona in VOLUMI:
+            entity = dict(common)
+            entity.update({
+                "name": nome,
+                "unique_id": "%s_volume_%s" % (node, chiave),
+                "object_id": "%s_volume_%s" % (node, chiave),
+                "state_topic": "%s/volume/%s/state" % (base, chiave),
+                "command_topic": "%s/volume/%s/set" % (base, chiave),
+                "min": 0, "max": 100, "step": 5,
+                "unit_of_measurement": "%",
+                "icon": icona,
+            })
+            self._config("number", "volume_%s" % chiave, entity)
+
         # ------------------------------------------------- aerei e satelliti
         #
         # I numeri che il DMD gia' conosce e teneva per se'. Il radar scrive
@@ -562,6 +593,9 @@ class HassBridge:
         scad = [("sensor", "scad_%s" % k) for k, _, _, _ in self.SCADENZE]
         for component, object_id in ([("sensor", "nowplaying"),
                                       ("number", "brightness"),
+                                      ("number", "volume_avvisi"),
+                                      ("number", "volume_giochi"),
+                                      ("number", "volume_notte"),
                                       ("update", "aggiornamento"),
                                       ("sensor", "ota_esito")] +
                                      [("notify", "notify_%s" % k)
@@ -636,7 +670,20 @@ class HassBridge:
         self._send("%s/brightness/available" % base,
                    "offline" if notte else "online", force)
 
+        for chiave, _nome, _icona in VOLUMI:
+            self._send("%s/volume/%s/state" % (base, chiave),
+                       str(self._volume(chiave)), force)
+
         self._pubblica_ota(base, force)
+
+    def _volume(self, chiave):
+        """Un volume in percento, intero, come lo mostra la pagina."""
+        sezione, campo, predefinito = VOLUMI_DOVE[chiave]
+        try:
+            valore = float((self.cfg.get(sezione) or {}).get(campo, predefinito))
+        except (TypeError, ValueError):
+            valore = predefinito
+        return int(round(max(0.0, min(1.0, valore)) * 100))
 
     def _pubblica_ota(self, base, force):
         """Versione installata, versione disponibile, esito dell'ultima volta."""
@@ -754,6 +801,7 @@ class HassBridge:
         base = self.base()
         self.bus.subscribe("%s/service/+/set" % base, self._on_service)
         self.bus.subscribe("%s/brightness/set" % base, self._on_brightness)
+        self.bus.subscribe("%s/volume/+/set" % base, self._on_volume)
         # Le scadenze si possono anche **inserire** da Home Assistant: e' la
         # sola parte del progetto in cui i dati viaggiano anche all'indietro.
         self.bus.subscribe("%s/scadenze/aggiungi" % base, self._on_scadenza)
@@ -1145,6 +1193,33 @@ class HassBridge:
             self.runtime.set_brightness(int(float(raw.strip())))
         except (TypeError, ValueError):
             return
+        self.publish_state(force=True)
+
+    def _on_volume(self, topic, payload):
+        """Un volume da Home Assistant: si salva e vale subito.
+
+        Il volume dei giochi arriva anche alle partite aperte, per la stessa
+        strada della pagina Impostazioni.
+        """
+        chiave = topic.rsplit("/", 2)[-2] if "/" in topic else ""
+        if chiave not in VOLUMI_DOVE:
+            return
+        raw = payload.decode("utf-8", "replace") if isinstance(payload, bytes) \
+            else str(payload)
+        try:
+            percento = max(0.0, min(100.0, float(raw.strip())))
+        except (TypeError, ValueError):
+            return
+        sezione, campo, _predefinito = VOLUMI_DOVE[chiave]
+        try:
+            self.cfg.setdefault(sezione, {})[campo] = round(percento / 100.0, 2)
+            import dmdconf
+            dmdconf.save()
+            if chiave == "giochi":
+                import suoni
+                suoni.diffondi_volume_giochi(self.cfg, self.runtime)
+        except Exception as exc:
+            print("[hass] volume %s non applicato: %s" % (chiave, exc))
         self.publish_state(force=True)
 
     # ------------------------------------------------------------------ ciclo

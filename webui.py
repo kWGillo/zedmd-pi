@@ -2282,14 +2282,7 @@ def create_app(runtime):
         # abbassa il cursore mentre si gioca, e deve abbassarsi subito.
         # Ognuno per la sua strada: il mixer per i giochi integrati, la pipe
         # dei tasti per Doom e il Game Boy.
-        suoni.cambia_volume_giochi(cfg)
-        for nome in ("doom", "gameboy"):
-            sorgente = getattr(runtime, nome, None)
-            if sorgente is not None and hasattr(sorgente, "imposta_volume"):
-                try:
-                    sorgente.imposta_volume(suoni.volume_giochi(cfg))
-                except Exception as exc:
-                    print("[%s] volume non aggiornato: %s" % (nome, exc))
+        suoni.diffondi_volume_giochi(cfg, runtime)
         # Se l'uscita musicale e' accesa, shairport-sync deve seguire la
         # scheda scelta qui. Senza questa riga la cambiavi in Impostazioni e
         # la musica continuava a uscire da quella di prima, in silenzio e

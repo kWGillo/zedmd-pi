@@ -11,7 +11,7 @@ di nessuno e si rifà liberamente; il nome invece è loro. Questo è **Pongo**.
 
 # 2. Come si gioca
 
-Tu a sinistra, in arancione. Il computer a destra, in azzurro. **Su e giù**
+Tu a sinistra, in rosso. Il computer a destra, in azzurro. **Su e giù**
 con la croce direzionale o con una delle due levette, **avanti e indietro**
 con sinistra e destra; **fuoco** per cominciare. Il punteggio sta in alto, uno per parte della rete, e vince chi
 arriva a **11** — come il cabinato, senza vantaggi.

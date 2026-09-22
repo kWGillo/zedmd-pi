@@ -2,6 +2,40 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.6]
+
+### I volumi in Home Assistant
+
+Tre cursori nuovi fra le entità del DMD: **Volume avvisi**, **Volume giochi** e
+**Volume notturno**, in percento come nella pagina Impostazioni. Cambiati da
+Home Assistant si salvano e valgono subito; il volume dei giochi arriva anche
+a una partita già aperta — Doom, Game Boy o un gioco integrato. Se l'integrazione
+non li mostra, *Ridichiara le entità* nella pagina Impostazioni.
+
+Contiene anche le correzioni qui sotto, che non erano ancora state pubblicate.
+
+
+### Doom non parte più forte
+
+Doom partiva al volume di serie e dopo un paio di secondi scendeva a quello
+delle Impostazioni. Il volume arrivava dopo l'avvio, e l'avvio fa già partire
+musica e suoni: misurato registrando l'uscita, a volume 10% il primo secondo
+e mezzo era forte come al 100%. Adesso il volume è già impostato quando Doom
+comincia a suonare. **Serve ricompilare Doom una volta** (pagina Doom,
+«Prepara»).
+
+### Pongo
+
+- Prima di premere fuoco la racchetta sta ferma: si muoveva sotto la scritta
+  centrale, e il riquadro nero della scritta la copriva.
+- Il riquadro delle scritte è largo quanto il testo, e non copre più la rete
+  né le racchette.
+- La tua racchetta è **rossa**: l'arancione su due pixel si vedeva poco.
+
+### Squadriglia
+
+Il mare è quasi nero: il blu mostrava molto le righe orizzontali del refresh.
+
 ## [10.5]
 
 ### Azzerare un record

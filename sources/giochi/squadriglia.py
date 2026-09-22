@@ -89,8 +89,12 @@ COLORE_COLPITO = (255, 255, 255)
 COLORE_COLPO = (255, 240, 120)
 COLORE_NEMICO = (255, 90, 200)       # i proiettili nemici: rosa, non si
                                      # confondono ne' col mare ne' coi tuoi
-COLORE_MARE = (0, 14, 40)
-COLORE_ONDA = (20, 50, 90)
+# Il mare e' quasi nero, e non per gusto. Il blu della 10.4 (0,14,40) sul
+# pannello vero mostrava le righe orizzontali del refresh: su un'area grande
+# e uniforme, un colore basso ma non nullo e' esattamente dove quelle righe si
+# vedono. Piu' scuro, se ne vedono meno, e gli aerei spiccano di piu'.
+COLORE_MARE = (0, 4, 14)
+COLORE_ONDA = (10, 28, 56)
 COLORE_ISOLA = (30, 90, 40)
 COLORE_SABBIA = (120, 110, 60)
 COLORE_POW = (255, 230, 60)
