@@ -34,7 +34,7 @@ import suoni
 from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      CalendarioSource, CieloSource, ClockSource, DoomSource, GameBoySource,
-                     GiochiSource, MediaPlayerSource, MeteoSource,
+                     GiochiSource, InutiliSource, MediaPlayerSource, MeteoSource,
                      NowPlayingSource,
                      NotificheSource, OnAirSource, PreviewSource,
                      SatellitiSource,
@@ -274,6 +274,11 @@ class Runtime:
         self.cielo = CieloSource(self.cfg, self.display.width,
                                  self.display.height)
         self.cielo.meteo = self.meteo
+        # Info inutili. Priorita' 49: non se la gioca con nessuno, perche'
+        # il pannello glielo da' il turno qui sotto, attaccato alla coda del
+        # meteo -- «subito dopo il meteo stesso», come e' stato chiesto.
+        self.inutili = InutiliSource(self.cfg, self.display.width,
+                                     self.display.height)
         # Doom prende e restituisce il pannello da solo, quindi conosce
         # l'arbitro: e' l'unica sorgente che lo fa. Non e' un servizio e non
         # compare fra gli interruttori — `enabled` resta False per sempre — e
@@ -392,7 +397,7 @@ class Runtime:
         for source in (self.sveglia,
                        self.zedmd, self.preview, self.notifiche,
                        self.satelliti, self.radar,
-                       self.meteo, self.cielo,
+                       self.meteo, self.cielo, self.inutili,
                        self.player,
                        self.birthdays, self.scadenze, self.calendario,
                        self.banner, self.onair, self.telecamera, self.media,
@@ -403,7 +408,8 @@ class Runtime:
         # Il turno fra meteo e cielo: uno ogni due media, a turno. Parte
         # sempre, anche con il Cielo spento -- allora da' tutto lo spazio al
         # meteo -- perche' la regola dei due media vale per il meteo comunque.
-        self.turni = Turni(self.cfg, self.meteo, self.cielo, self.media)
+        self.turni = Turni(self.cfg, self.meteo, self.cielo, self.media,
+                           self.inutili)
         self.turni.start()
         # Doom non passa da apply_services: non e' un servizio. Qui parte solo
         # la lettura della tastiera, se e' stata chiesta.

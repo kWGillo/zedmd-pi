@@ -2,6 +2,31 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [11.4]
+
+### Info inutili
+
+Un servizio nuovo, e il nome è quello che si merita: non serve a niente, ed è
+probabilmente quello che sul pannello della cucina verrà letto di più. Compare
+**subito dopo il meteo**, con due schermate.
+
+La prima è tutta calendario e sta dentro il programma — **santo del giorno**,
+i **nomi che festeggiano**, la **giornata mondiale** — quindi funziona anche
+con il wifi staccato: 366 giorni in `santi.csv` e 209 giornate in
+`giornate.csv`. La seconda, **accadde oggi**, sono un nato e un morto famosi
+presi da Wikipedia una volta al giorno: è l'unica parte che vuole la rete, ed
+è anche l'unica che può sparire senza fare danno. Senza rete il servizio si
+accorcia, non si rompe.
+
+In fondo alla prima schermata, quando capita, c'è **l'onomastico dei tuoi**:
+i nomi del giorno confrontati con la lista dei compleanni. È l'unica riga di
+tutto il servizio che fa prendere il telefono, e il confronto è locale.
+
+Tre caselle nella pagina Servizi (calendario, personaggi, morti), la durata
+delle schermate, due pulsanti di prova, e in Home Assistant l'interruttore
+più tre sensori: santo, onomastici — **i tuoi**, se oggi ne festeggia uno — e
+giornata mondiale.
+
 ## [11.3]
 
 ### Musiche da sala giochi

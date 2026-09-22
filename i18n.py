@@ -1631,6 +1631,34 @@ STRINGS = {
         "trattino rosso sull'orologio.",
         "The door closes and the panel tells whoever walks in, with a red "
         "tick on the clock."),
+    "services.desc.inutili": (
+        "Subito dopo il meteo: il santo, chi festeggia l'onomastico, la "
+        "giornata mondiale e chi e' nato o morto oggi.",
+        "Right after the weather: the saint, today's name days, the world "
+        "day, and who was born or died today."),
+    "inutili.calendario": ("Santo, onomastici e giornata mondiale",
+                           "Saint, name days and world day"),
+    "inutili.personaggi": ("Personaggi famosi nati e morti oggi (richiede internet)",
+                           "Famous people born and died today (needs the internet)"),
+    "inutili.morti": ("Mostra anche i morti", "Show the deaths too"),
+    "inutili.durata": ("Secondi per schermata", "Seconds per screen"),
+    "inutili.prova.festa": ("Prova: oggi si festeggia", "Test: today we celebrate"),
+    "inutili.prova.storia": ("Prova: accadde oggi", "Test: on this day"),
+    "inutili.fonte": (
+        "Il calendario sta nel programma e non chiede niente a nessuno. I "
+        "personaggi famosi vengono da Wikipedia, una volta al giorno: senza "
+        "rete il servizio si accorcia, non si ferma.",
+        "The calendar lives inside the program and asks nobody. Famous "
+        "people come from Wikipedia, once a day: with no network the service "
+        "gets shorter, it does not stop."),
+    "inutili.provato": ("Mostrato sul pannello.", "Shown on the panel."),
+    "inutili.non.provato": ("Non c'e' niente da mostrare: %(motivo)s",
+                            "Nothing to show: %(motivo)s"),
+    "inutili.status.ok": ("Oggi: %(santo)s", "Today: %(santo)s"),
+    "inutili.status.solo": ("Oggi: %(santo)s - solo calendario",
+                            "Today: %(santo)s - calendar only"),
+    "inutili.status.attesa": ("Oggi: %(santo)s - personaggi non ancora scaricati",
+                              "Today: %(santo)s - famous people not downloaded yet"),
     "services.desc.moon": (
         "Di sera, a turno con il meteo: la Luna, le lune con un nome, "
         "stagioni, sciami e le serate buone.",

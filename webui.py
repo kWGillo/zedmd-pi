@@ -1457,6 +1457,8 @@ def create_app(runtime):
              "status": stato("notifiche")},
             {"key": "meteo", "label": "Meteo", "ready": True,
              "status": stato("meteo")},
+            {"key": "inutili", "label": "Info inutili", "ready": True,
+             "status": stato("inutili")},
             {"key": "sveglia", "label": "Sveglia", "ready": True,
              "status": stato("sveglia")},
             {"key": "onair", "label": "OnAir", "ready": True,
@@ -1779,6 +1781,40 @@ def create_app(runtime):
         if request.form.get("da") == "moon":
             return redirect(url_for("page_moon"))
         return redirect(url_for("page_services"))
+
+    @app.route("/api/inutili", methods=["POST"])
+    def api_inutili():
+        """Le caselle di Info inutili. Tre spunte e una durata."""
+        conf = cfg.setdefault("inutili", {})
+        conf["calendario"] = request.form.get("calendario") == "on"
+        conf["personaggi"] = request.form.get("personaggi") == "on"
+        conf["morti"] = request.form.get("morti") == "on"
+        try:
+            durata = int(request.form.get("durata_slide", conf.get("durata_slide", 6)))
+        except (TypeError, ValueError):
+            durata = 6
+        conf["durata_slide"] = max(3, min(30, durata))
+        dmdconf.save()
+        sorgente = getattr(runtime, "inutili", None)
+        if sorgente is not None and conf["personaggi"]:
+            # Se i personaggi sono stati appena accesi, si prova subito a
+            # prenderli invece di aspettare mezz'ora.
+            sorgente._wake.set()
+        return redirect(url_for("page_services"))
+
+    @app.route("/api/inutili/prova", methods=["POST"])
+    def api_inutili_prova():
+        sorgente = getattr(runtime, "inutili", None)
+        if sorgente is None:
+            return redirect(url_for("page_services"))
+        slide = request.form.get("slide", "festa")
+        if slide not in ("festa", "storia"):
+            slide = "festa"
+        fatto, motivo = sorgente.mostra_adesso(slide, 10)
+        chiave = "inutili.provato" if fatto else "inutili.non.provato"
+        return redirect(url_for("page_services",
+                                result=i18n.translate(chiave, current_language(),
+                                                      motivo=motivo or "")))
 
     @app.route("/api/meteo/prova", methods=["POST"])
     def api_meteo_prova():

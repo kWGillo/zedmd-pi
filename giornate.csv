@@ -1,0 +1,221 @@
+# Le giornate mondiali, internazionali e nazionali a data fissa.
+# Formato: MM-GG;titolo. Un giorno puo' averne piu' di una: il pannello
+# mostra la piu' corta, che di solito e' anche la piu' nota.
+#
+# Fonti: calendario delle Giornate internazionali delle Nazioni Unite
+# (unric.org) e le ricorrenze civili italiane. Le giornate a data mobile
+# ("la terza domenica di...") non ci sono: qui si guarda il calendario.
+#
+# Chi vuole aggiungerne di sue mette un giornate.csv nella cartella dati:
+# viene letto dopo questo, con lo stesso formato.
+#
+# giorno;titolo
+01-04;Giornata mondiale del Braille
+01-07;Giornata nazionale della bandiera
+01-24;Giornata internazionale dell'educazione
+01-26;Giornata internazionale dell'energia pulita
+01-27;Giorno della Memoria
+01-28;Giornata internazionale della convivenza pacifica
+02-02;Giornata mondiale delle zone umide
+02-04;Giornata mondiale contro il cancro
+02-04;Giornata mondiale della fratellanza umana
+02-06;Giornata contro le mutilazioni genitali femminili
+02-09;Giornata nazionale degli stati vegetativi
+02-10;Giorno del Ricordo
+02-10;Giornata internazionale dei legumi
+02-11;Giornata delle donne e delle ragazze nella scienza
+02-12;Darwin Day
+02-13;Giornata mondiale della radio
+02-20;Giornata mondiale della giustizia sociale
+02-21;Giornata internazionale della lingua materna
+03-01;Giornata contro la discriminazione
+03-03;Giornata mondiale della natura
+03-05;Giornata per il disarmo e la non proliferazione
+03-08;Giornata internazionale della donna
+03-10;Giornata internazionale delle donne giudici
+03-11;Giornata in ricordo delle vittime del terrorismo
+03-17;Giornata dell'Unità nazionale
+03-20;Giornata internazionale della felicità
+03-20;Giornata della lingua francese
+03-21;Giornata mondiale dei ghiacciai
+03-21;Giornata contro la discriminazione razziale
+03-21;Giornata internazionale delle foreste
+03-21;Giornata mondiale della poesia
+03-21;Giornata mondiale della sindrome di Down
+03-22;Giornata mondiale dell'acqua
+03-23;Giornata mondiale della meteorologia
+03-24;Giornata mondiale contro la tubercolosi
+03-24;Giornata nazionale della lettura
+03-25;Giornata in memoria delle vittime della schiavitù
+03-27;Giornata nazionale del teatro
+04-02;Giornata mondiale per l'autismo
+04-04;Giornata contro le mine antiuomo
+04-05;Giornata internazionale della coscienza
+04-06;Giornata dello sport per lo sviluppo e la pace
+04-07;Giornata mondiale della salute
+04-12;Giornata dei viaggi dell'uomo nello spazio
+04-14;Giornata mondiale della malattia di Chagas
+04-20;Giornata della lingua cinese
+04-21;Giornata mondiale della creativita'
+04-22;Giornata mondiale della Terra
+04-23;Giornata mondiale del libro
+04-23;Giornata della lingua inglese
+04-23;Giornata della lingua spagnola
+04-24;Giornata del multilateralismo e della diplomazia
+04-25;Anniversario della Liberazione
+04-25;Giornata mondiale contro la malaria
+04-26;Giornata mondiale della proprietà intellettuale
+04-26;Giornata in ricordo del disastro di Chernobyl
+04-28;Giornata per la sicurezza sul lavoro
+04-30;Giornata internazionale del jazz
+05-01;Festa del lavoro
+05-02;Giornata mondiale del tonno
+05-03;Giornata mondiale della libertà di stampa
+05-05;Giornata nazionale contro la pedofilia
+05-08;Giornata mondiale degli uccelli migratori
+05-09;Giornata dell'Europa
+05-10;Giornata mondiale dell'argan
+05-15;Giornata internazionale della famiglia
+05-16;Giornata mondiale del vivere insieme in pace
+05-16;Giornata internazionale della luce
+05-17;Giornata mondiale delle telecomunicazioni
+05-19;Giornata mondiale del fair play
+05-20;Giornata mondiale delle api
+05-21;Giornata per la diversità culturale
+05-21;Giornata internazionale del tè
+05-22;Giornata internazionale della biodiversità
+05-29;Giornata dei caschi blu delle Nazioni Unite
+05-30;Giornata internazionale della patata
+05-31;Giornata mondiale senza tabacco
+06-01;Giornata mondiale dei genitori
+06-02;Festa della Repubblica
+06-03;Giornata mondiale della bicicletta
+06-04;Giornata dei bambini vittime di aggressioni
+06-05;Giornata mondiale dell'ambiente
+06-05;Giornata contro la pesca illegale
+06-06;Giornata della lingua russa
+06-07;Giornata mondiale della sicurezza alimentare
+06-08;Giornata mondiale degli oceani
+06-12;Giornata contro il lavoro minorile
+06-13;Giornata mondiale dell'albinismo
+06-14;Giornata mondiale dei donatori di sangue
+06-15;Giornata contro l'abuso sugli anziani
+06-16;Giornata per le rimesse familiari
+06-17;Giornata contro la desertificazione
+06-18;Giornata della gastronomia sostenibile
+06-18;Giornata contro i discorsi d'odio
+06-19;Giornata contro la violenza sessuale nei conflitti
+06-20;Giornata mondiale del rifugiato
+06-21;Giornata internazionale dello yoga
+06-21;Giornata del solstizio
+06-23;Giornata delle Nazioni Unite per il servizio pubblico
+06-23;Giornata internazionale delle vedove
+06-24;Giornata delle donne in diplomazia
+06-25;Giornata della gente di mare
+06-26;Giornata contro l'abuso di droghe
+06-26;Giornata a sostegno delle vittime di tortura
+06-27;Giornata delle piccole e medie imprese
+06-29;Giornata internazionale dei tropici
+06-30;Giornata internazionale degli asteroidi
+06-30;Giornata internazionale del parlamentarismo
+07-06;Giornata internazionale delle cooperative
+07-06;Giornata dello sviluppo rurale
+07-07;Giornata mondiale della lingua kiswahili
+07-11;Giornata mondiale della popolazione
+07-12;Giornata internazionale della speranza
+07-15;Giornata delle capacità dei giovani
+07-18;Giornata mondiale per Nelson Mandela
+07-20;Giornata mondiale degli scacchi
+07-25;Giornata per il benessere giudiziario
+07-28;Giornata mondiale contro l'epatite
+07-30;Giornata contro la tratta di esseri umani
+07-30;Giornata internazionale dell'amicizia
+08-08;Giornata del lavoro italiano nel mondo
+08-09;Giornata dei popoli indigeni
+08-12;Giornata internazionale della gioventù
+08-19;Giornata mondiale dell'aiuto umanitario
+08-21;Giornata in ricordo delle vittime del terrorismo
+08-22;Giornata per le vittime di violenza religiosa
+08-23;Giornata in ricordo della tratta degli schiavi
+08-27;Giornata mondiale dei laghi
+08-29;Giornata contro i test nucleari
+08-30;Giornata delle vittime di sparizioni forzate
+08-31;Giornata per le persone di discendenza africana
+09-05;Giornata internazionale della carità
+09-07;Giornata dell'aria pulita
+09-08;Giornata internazionale dell'alfabetizzazione
+09-09;Giornata per la tutela dell'educazione
+09-10;Giornata per la prevenzione del suicidio
+09-12;Giornata per la cooperazione Sud-Sud
+09-15;Giornata internazionale della democrazia
+09-16;Giornata per la protezione dello strato d'ozono
+09-17;Giornata per la sicurezza del paziente
+09-18;Giornata per la parita' di retribuzione
+09-20;Giornata mondiale della pulizia
+09-21;Giornata internazionale della pace
+09-23;Giornata delle lingue dei segni
+09-26;Giornata per l'eliminazione delle armi nucleari
+09-26;Giornata marittima mondiale
+09-27;Giornata mondiale del turismo
+09-28;Giornata per l'accesso all'informazione
+09-28;Giornata mondiale contro la rabbia
+09-29;Giornata contro lo spreco alimentare
+09-30;Giornata internazionale della traduzione
+10-01;Giornata internazionale delle persone anziane
+10-02;Festa dei nonni
+10-02;Giornata internazionale della non violenza
+10-03;Giornata mondiale dell'habitat
+10-04;Festa dei patroni d'Italia
+10-05;Giornata mondiale degli insegnanti
+10-07;Giornata mondiale del cotone
+10-09;Giornata mondiale della posta
+10-10;Giornata mondiale della salute mentale
+10-11;Giornata internazionale delle bambine
+10-12;Giornata di Cristoforo Colombo
+10-13;Giornata per la riduzione dei disastri
+10-15;Giornata internazionale delle donne rurali
+10-16;Giornata mondiale dell'alimentazione
+10-17;Giornata per l'eliminazione della povertà
+10-20;Giornata mondiale della statistica
+10-23;Giornata del leopardo delle nevi
+10-24;Giornata delle Nazioni Unite
+10-27;Giornata del patrimonio audiovisivo
+10-31;Giornata mondiale delle città
+11-02;Giornata per i crimini contro i giornalisti
+11-04;Giorno dell'Unità nazionale
+11-05;Giornata per la sensibilizzazione sugli tsunami
+11-06;Giornata contro lo sfruttamento dell'ambiente in guerra
+11-09;Giornata della libertà
+11-10;Giornata della scienza per la pace
+11-12;Giornata dei caduti nelle missioni di pace
+11-13;Giornata mondiale della gentilezza
+11-14;Giornata mondiale del diabete
+11-16;Giornata internazionale della tolleranza
+11-18;Giornata mondiale della filosofia
+11-19;Giornata mondiale dei servizi igienici
+11-20;Giornata mondiale dell'infanzia
+11-20;Giornata per l'industrializzazione dell'Africa
+11-21;Giornata mondiale della televisione
+11-24;Evolution Day
+11-25;Giornata contro la violenza sulle donne
+11-26;Giornata mondiale dell'olivo
+11-29;Giornata di solidarietà con il popolo palestinese
+11-30;Giornata in memoria delle vittime della guerra chimica
+12-01;Giornata mondiale contro l'AIDS
+12-02;Giornata per l'abolizione della schiavitù
+12-03;Giornata delle persone con disabilità
+12-04;Giornata internazionale delle banche
+12-05;Giornata mondiale del suolo
+12-05;Giornata internazionale dei volontari
+12-07;Giornata dell'aviazione civile
+12-09;Giornata internazionale contro la corruzione
+12-09;Giornata per le vittime di genocidio
+12-10;Giornata dei diritti umani
+12-11;Giornata internazionale della montagna
+12-12;Giornata internazionale della neutralità
+12-12;Giornata della copertura sanitaria universale
+12-18;Giornata internazionale dei migranti
+12-18;Giornata della lingua araba
+12-20;Giornata della solidarietà umana
+12-21;Giornata internazionale della pallacanestro
+12-27;Giornata per la preparazione alle epidemie

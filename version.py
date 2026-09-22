@@ -2574,6 +2574,15 @@ Storico:
        di arpeggi a sedicesimi, capisce gli accordi minori e le alterazioni;
        tutti e nove i brani sono riscritti piu' veloci, piu' staccati e piu'
        presenti. Pongo resta il piu' discreto, Invaders senza rullante.
+  11.4 **Info inutili**, il servizio che non serve a niente: subito dopo il
+       meteo, due schermate. La prima e' calendario e sta nel programma --
+       santo del giorno, nomi che festeggiano, giornata mondiale, 366 giorni
+       in santi.csv e 209 giornate in giornate.csv -- e non chiede niente a
+       nessuno. La seconda sono un nato e un morto famosi da Wikipedia, una
+       volta al giorno: senza rete non si fa, e il servizio si accorcia
+       invece di rompersi. In fondo alla prima, quando capita, l'onomastico
+       di qualcuno della lista compleanni. Interruttore e tre sensori in
+       Home Assistant.
 """
 
-__version__ = "11.3"
+__version__ = "11.4"

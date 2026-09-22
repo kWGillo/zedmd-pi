@@ -1,0 +1,375 @@
+# Santo del giorno e nomi che festeggiano l'onomastico, per tutti i 366
+# giorni. Formato: MM-GG;santo;nomi separati da virgola.
+#
+# Compilato dalle pagine giorno per giorno di Cathopedia (it.cathopedia.org,
+# CC BY-SA) per il santo, e dagli elenchi degli onomastici per i nomi. E' un
+# calendario, non cambia: sta qui dentro perche' il servizio funzioni anche
+# senza rete.
+#
+# giorno;santo;nomi
+01-01;Maria Santissima Madre di Dio;Maria,Telemaco,Concordio,Fulgenzio
+01-02;San Basilio Magno e San Gregorio di Nazianzo;Basilio,Gregorio,Adelardo,Odilone,Macario
+01-03;Santissimo Nome di Gesù;Genoveffa
+01-04;Sant'Angela da Foligno;Angela,Benedetta,Elsa
+01-05;San Giovanni Nepomuceno Neumann;Giovanni,Astolfo,Emiliana,Amelio
+01-06;Epifania del Signore;Gaspare,Melchiorre,Baldassarre,Raffaella
+01-07;San Raimondo di Peñafort;Raimondo,Crispino,Luciano,Mariateresa
+01-08;San Lorenzo Giustiniani;Lorenzo,Erardo
+01-09;San Marcellino di Ancona;Marcellino,Alessia,Giuliano
+01-10;Papa Milziade;Milziade,Aldo,Domitilla,Domiziano
+01-11;Papa Igino;Igino,Onorata,Ortensio
+01-12;Sant'Antonio Maria Pucci;Antonio,Arcadio,Modesto,Tatiana,Cesarina,Cesira
+01-13;Sant'Ilario di Poitiers;Ilario,Liana,Eliano,Veronica
+01-14;San Felice di Nola;Felice,Bianca,Dacia,Felicita,Dacio
+01-15;San Mauro;Mauro,Abaco,Efisio,Ida
+01-16;Papa Marcello I;Marcello,Accursio,Liberata,Berardo
+01-17;Sant'Antonio abate;Antonio,Alba,Antero,Diodoro,Nadia,Iole
+01-18;San Volusiano di Tours;Volusiano,Beatrice,Fazio,Prisca,Priscilla,Bice
+01-19;San Macario Magno;Macario,Mario,Pia,Mariapia
+01-20;San Fabiano e San Sebastiano;Fabiano,Sebastiano
+01-21;Sant'Agnese di Roma;Agnese,Giuseppa,Ines,Patroclo
+01-22;San Vincenzo di Saragozza;Vincenzo,Domenico,Linda,Teodolinda,Gaudenzio
+01-23;Sant'Ildefonso da Toledo;Ildefonso,Durante,Messalina,Armando
+01-24;San Francesco di Sales;Francesco,Babila,Feliciano,Metello,Vera,Artemio
+01-25;Conversione di San Paolo Apostolo;Paolo,Agape,Artemia
+01-26;Santa Paola Romana;Paola,Alberico,Timoteo,Tito,Alberica,Annapaola
+01-27;Sant'Angela Merici;Angela,Devota,Elvira,Palladio,Mariangela
+01-28;San Tommaso d'Aquino;Tommaso,Amedeo,Manfredo
+01-29;San Costanzo di Perugia;Costanzo,Gildo,Sabrina,Gilda
+01-30;Santa Giacinta Marescotti;Giacinta,Batilda,Martina
+01-31;San Giovanni Bosco;Giovanni,Ciro,Ludovica,Saverio,Marcella
+02-01;Santa Brigida d'Irlanda;Brigida,Severo,Verdiana,Orso,Brigitta
+02-02;Presentazione del Signore;Sabatino
+02-03;San Biagio;Biagio,Ofelia,Oscar,Adelino
+02-04;Santa Giovanna di Valois;Giovanna,Gilberto
+02-05;Sant'Agata;Agata,Alice,Heidi
+02-06;San Paolo Miki e compagni;Paolo,Amanda,Dorotea,Fedora,Gastone,Guerrino
+02-07;Sant'Egidio Maria di San Giuseppe;Egidio,Giuliana
+02-08;San Girolamo Emiliani;Girolamo,Giacoma
+02-09;Sant'Apollonia;Apollonia,Rinaldo
+02-10;Santa Scolastica;Scolastica,Guglielmo,Indro
+02-11;Beata Vergine Maria di Lourdes;Maria,Dante
+02-12;San Benedetto d'Aniane;Benedetto,Costante,Eulalia
+02-13;San Fulcranno di Lodève;Fulcranno,Fosca,Maura
+02-14;San Valentino;Valentino,Cirillo,Fiorentino,Apollonio
+02-15;San Claudio de la Colombière;Claudio,Giorgia,Sigfrido
+02-16;Santa Giuliana di Nicomedia;Giuliana,Samuele,Onesto
+02-17;San Teodoro di Amasea;Teodoro,Flaviano
+02-18;Sant'Angilberto di Centula;Angilberto,Artemisia,Cinzia,Claudio
+02-19;San Barbato di Benevento;Barbato,Alvaro,Corrado,Gabino,Publio,Tullio
+02-20;Sant'Eleuterio di Tournai;Eleuterio
+02-21;San Pier Damiani;Pier Damiani,Eleonora
+02-22;Cattedra di San Pietro Apostolo;Pietro,Ariosto
+02-23;San Policarpo di Smirne;Policarpo,Romina,Romana,Milo,Livio
+02-24;Sant'Etelberto del Kent;Etelberto,Fiorentina,Edilberto
+02-25;San Cesario di Nazianzo;Cesario,Romeo
+02-26;Sant'Alessandro di Alessandria;Alessandro,Cornelio
+02-27;San Gabriele dell'Addolorata;Gabriele,Antigone,Leandro,Onorina,Aleandro
+02-28;San Romano di Condat;Romano,Antonia,Antonella
+02-29;Sant'Ilario papa;Ilario,Augusto
+03-01;San Felice III;Felice,Silvio,Albino
+03-02;Sant'Agnese di Boemia;Agnese,Delinda,Ulrico,Gennara
+03-03;Sant'Anselmo di Nonantola;Anselmo,Camelia,Cunegonda,Innocenzo,Tiziano
+03-04;San Casimiro di Cracovia;Casimiro,Nestore,Lucio
+03-05;San Giovanni Giuseppe della Croce;Giovanni,Adriano
+03-06;Santa Rosa da Viterbo;Rosa,Ezio
+03-07;Sante Perpetua e Felicita;Perpetua,Felicita,Tommaso
+03-08;San Giovanni di Dio;Giovanni,Beata
+03-09;Santa Francesca Romana;Francesca,Domenico Savio,Paciano
+03-10;San Simplicio;Simplicio,Crescente,Gaio
+03-11;San Sofronio di Gerusalemme;Sofronio,Ramiro,Costantino
+03-12;San Luigi Orione;Luigi,Aureliano
+03-13;Sant'Eldrado di Novalesa;Eldrado,Eufrasia,Fedele,Letizia,Rodrigo,Salomone
+03-14;Santa Matilde di Germania;Matilde
+03-15;Santa Luisa de Marillac;Luisa,Lucrezia,Tranquillo,Zaccaria
+03-16;Sant'Eriberto di Colonia;Eriberto,Agapito,Tatiano,Natale
+03-17;San Patrizio;Patrizio
+03-18;San Cirillo di Gerusalemme;Cirillo,Salvatore,Christian
+03-19;San Giuseppe sposo della Beata Vergine Maria;Giuseppe,Quinto,Quintiliano,Sibilla
+03-20;San Giovanni Nepomuceno;Giovanni,Alessandra,Claudia
+03-21;San Nicola di Flüe;Nicola,Serapione
+03-22;San Nicola Owen;Nicola,Lea,Nilde,Pasqua,Benvenuto
+03-23;San Turibio de Mogrovejo;Turibio
+03-24;Sant'Oscar Romero;Oscar,Attilia
+03-25;Annunciazione del Signore;Annunziata,Ave
+03-26;San Ludgero di Münster;Ludgero,Emanuele
+03-27;San Ruperto di Salisburgo;Ruperto,Arcibaldo,Augusta
+03-28;Santo Stefano Harding;Stefano,Doroteo
+03-29;San Ludolfo di Ratzeburg;Ludolfo,Secondo
+03-30;San Giovanni Climaco;Giovanni,Decimo,Regolo,Decio
+03-31;San Guido di Pomposa;Guido,Cornelia,Beniamino
+04-01;Sant'Ugo di Grenoble;Ugo,Dora,Irene,Bartolomea
+04-02;San Francesco di Paola;Francesco,Abbondio,Ginevra,Igina,Irmina,Isacco
+04-03;San Sisto I;Sisto,Riccardo
+04-04;Sant'Isidoro di Siviglia;Isidoro,Platone
+04-05;San Vincenzo Ferrer;Vincenzo,Diogene
+04-06;San Pietro da Verona;Pietro,Celestino,Prudenzio,Celine
+04-07;San Giovanni Battista de La Salle;Giovanni Battista,Cristiano,Ermanno
+04-08;Sant'Agabo;Agabo,Dionigi,Macaria
+04-09;Beato Antonio Pavoni;Antonio,Cleo,Cleofe,Ilda,Tancredi
+04-10;Santa Maddalena di Canossa;Maddalena,Ezechiele
+04-11;Sant'Antipa di Pergamo;Antipa,Angelo,Stanislao
+04-12;San Giulio I;Giulio,Alfiero,Zeno,Zenone
+04-13;Sant'Ermenegildo;Ermenegildo,Marzio
+04-14;Sant'Alfonso da Siviglia;Alfonso,Ermenegildo
+04-15;San Damiano de Veuster;Damiano,Anastasia,Annibale,Prisco
+04-16;Santa Bernadette Soubirous;Bernadette,Grazia,Lamberto,Gioacchino
+04-17;Sant'Acacio di Militene;Acacio,Aniceto,Arcangelo,Vanda,Isidora
+04-18;San Calogero di Brescia;Calogero,Galdino
+04-19;San Leone IX;Leone,Emma
+04-20;Sant'Agnese da Montepulciano;Agnese,Adalgisa,Odetta,Sara,Ildegonda
+04-21;Sant'Anselmo d'Aosta;Anselmo,Caio
+04-22;Sant'Agapito I;Agapito,Leonida,Muzio,Virginio
+04-23;San Giorgio;Giorgio,Adalberto,Norina
+04-24;San Fedele da Sigmaringen;Fedele,Melissa,Tiberio,Onorio
+04-25;San Marco evangelista;Marco,Franca,Erminio
+04-26;San Marcellino;Marcellino,Alida,Anacleto
+04-27;Santa Zita;Zita,Antimo
+04-28;San Pietro Chanel;Pietro,Valeria,Pierluigi
+04-29;Santa Caterina da Siena;Caterina,Rina
+04-30;San Giuseppe Benedetto Cottolengo;Giuseppe,Rosamunda,Lodovico,Pio
+05-01;San Giuseppe lavoratore;Giuseppe,Pasquale,Achille,Alfio,Amatore,Vivaldo
+05-02;Sant'Antonino Pierozzi;Antonino,Celeste,Flaminio
+05-03;San Filippo apostolo;Filippo,Viola,Violetta
+05-04;San Floriano di Lorch;Floriano,Fulvio,Porfirio
+05-05;Sant'Angelo da Gerusalemme;Angelo,Gottardo,Leo,Nunzio,Penelope,Tosca
+05-06;San Pietro Nolasco;Pietro,Prudenzia,Violante,Annarosa
+05-07;Sant'Antonio Pecerskij;Antonio,Augusto,Virginia,Flavia
+05-08;San Benedetto II;Benedetto,Bonifacio,Diletta,Generoso,Norma,Dionisio
+05-09;Sant'Isaia;Isaia,Luminosa,Carla,Carolina
+05-10;San Giovanni d'Avila;Giovanni,Cataldo,Giobbe
+05-11;San Francesco De Geronimo;Francesco,Stella,Fabio,Gandolfo,Velio
+05-12;San Pancrazio;Pancrazio,Imelda,Nereo,Brancaleone,Dania
+05-13;Beata Vergine Maria di Fatima;Maria,Fatima,Gherardo
+05-14;San Mattia apostolo;Mattia,Ampelio,Cora,Gemma
+05-15;Sant'Isidoro l'agricoltore;Isidoro,Torquato,Dionisia,Cassio
+05-16;Sant'Ubaldo di Gubbio;Ubaldo,Margherita,Adamo,Teobaldo,Onorato
+05-17;San Pasquale Baylon;Pasquale,Basilia,Basilea
+05-18;San Felice da Cantalice;Felice,Venanzio,Erica,Luciana,Vincenza
+05-19;San Celestino V;Celestino,Gisella,Ivone,Giselda
+05-20;San Bernardino da Siena;Bernardino,Anastasio
+05-21;San Carlo Eugenio de Mazenod;Carlo,Vittorio,Adalrico
+05-22;Santa Rita da Cascia;Rita,Giulia,Annarita
+05-23;San Desiderio di Langres;Desiderio,Giovanni
+05-24;Beata Vergine Maria ausiliatrice;Maria,Albano
+05-25;San Beda il Venerabile;Beda,Gregorio,Maria Maddalena,Adelmo,Orietta,Zenobio
+05-26;San Filippo Neri;Filippo
+05-27;Sant'Agostino di Canterbury;Agostino,Oliviero
+05-28;Beato Lanfranco di Canterbury;Lanfranco,Emilio,Priamo
+05-29;San Paolo VI;Paolo,Massimino
+05-30;Santa Giovanna d'Arco;Giovanna,Ferdinando
+05-31;Visitazione della Beata Vergine Maria;Battista,Petronilla
+06-01;San Giustino;Giustino,Ermenegilda,Lia,Panfilo,Graziano
+06-02;Sant'Erasmo di Formia;Erasmo,Alcibiade,Emilia,Foscolo,Consuelo,Elmo
+06-03;San Carlo Lwanga e compagni;Carlo,Clotilde,Olivia,Ovidio
+06-04;San Filippo Smaldone;Filippo,Isabella,Quirino,Rutilo
+06-05;San Bonifacio di Magonza;Bonifacio,Fernando,Gualtiero
+06-06;San Norberto di Magdeburgo;Norberto
+06-07;Sant'Antonio Maria Gianelli;Antonio,Landolfo
+06-08;San Medardo;Medardo,Dolcelino
+06-09;San Colombano di Iona;Colombano,Efrem,Primo
+06-10;San Massimo d'Aveia;Massimo,Diana,Ghita,Onofrio
+06-11;San Barnaba apostolo;Barnaba,Fermo
+06-12;Sant'Onofrio;Onofrio,Guido
+06-13;Sant'Antonio di Padova;Antonio,Antonella,Anthony
+06-14;Sant'Eliseo;Eliseo,Rosmunda,Valerio
+06-15;Sant'Amos;Amos,Germana,Tristano,Vito,Enrica
+06-16;Santa Giulitta e San Quirico;Giulitta,Quirico,Ferruccio,Giuditta
+06-17;San Ranieri di Pisa;Ranieri,Adolfo,Geremia,Manuele
+06-18;San Gregorio Barbarigo;Gregorio,Calogero,Marina,Osanna
+06-19;San Romualdo;Romualdo,Gervasio,Protasio,Colmazio
+06-20;San Giovanni da Matera;Giovanni,Consolata,Ettore,Benigna
+06-21;San Luigi Gonzaga;Luigi,Marzia,Demetria,Demetra,Gigi,Gino
+06-22;Sant'Albano d'Inghilterra;Albano,Eberardo,Flavio
+06-23;San Giuseppe Cafasso;Giuseppe,Agrippina,Lanfranco,Zena
+06-24;San Giovanni Battista;Giovanni Battista,Giovanni,Giambattista,Eros,Giampiero
+06-25;San Guglielmo di Montevergine;Guglielmo,Eraldo,Massimo,Prospero,Massimiliano
+06-26;San Cirillo d'Alessandria;Cirillo,Deodato,Lisa
+06-27;Sant'Arialdo di Milano;Arialdo,Ladislao,Tosco,Lelio
+06-28;Sant'Ireneo di Lione;Ireneo,Eraclide,Attilio
+06-29;Santi Apostoli Pietro e Paolo;Pietro,Paolo
+06-30;Santi Protomartiri Romani;Ottone
+07-01;Beato Antonio Rosmini;Antonio,Arsenio,Divo,Ester,Preziosa
+07-02;San Bernardino Realino;Bernardino,Santo,Sante
+07-03;San Tommaso apostolo;Tommaso
+07-04;Sant'Elisabetta del Portogallo;Elisabetta,Betta,Berta,Ulderico,Piergiorgio
+07-05;Sant'Antonio Maria Zaccaria;Antonio,Filomena
+07-06;Santa Maria Goretti;Maria,Isaia,Romolo,Domenica
+07-07;Beato Benedetto XI;Benedetto,Villibaldo
+07-08;Sant'Adriano III;Adriano,Edgardo,Illuminato,Palmiro
+07-09;Santa Veronica Giuliani;Veronica,Anatolia,Abbondanza,Carmine,Floriana
+07-10;San Canuto IV di Danimarca;Canuto,Michelangelo,Rufino
+07-11;San Benedetto da Norcia;Benedetto,Amabile,Olga,Savino
+07-12;San Giovanni Gualberto;Giovanni,Ermagora,Fortunato
+07-13;Sant'Enrico II;Enrico,Gioele
+07-14;San Camillo de Lellis;Camillo
+07-15;San Bonaventura da Bagnoregio;Bonaventura,Amerigo,Atanasio,Rolando,Rossana
+07-16;Beata Vergine Maria del Monte Carmelo;Maria,Carmelo,Carmen
+07-17;Sant'Alessio di Roma;Alessio,Generosa,Teodata
+07-18;San Bruno di Segni;Bruno,Federico
+07-19;San Simmaco;Simmaco,Giusta,Mila
+07-20;Sant'Apollinare di Ravenna;Apollinare,Elia,Geronimo
+07-21;San Lorenzo da Brindisi;Lorenzo,Daniele,Danilo
+07-22;Santa Maria Maddalena;Maddalena,Maria,Amore
+07-23;Santa Brigida di Svezia;Brigida,Apollinare,Vanna,Romola
+07-24;Santa Cristina di Bolsena;Cristina,Cecilio
+07-25;San Giacomo il Maggiore;Giacomo,Cristoforo,Iacopo,Tea,Valentina
+07-26;Santi Gioacchino e Anna;Gioacchino,Anna,Camilla,Annalisa
+07-27;San Celestino I;Celestino,Arnaldo,Natalia,Pantaleone,Venere
+07-28;San Vittore I;Vittore,Nazario
+07-29;Santa Marta di Betania;Marta,Lupo
+07-30;San Leopoldo da Castelnuovo;Leopoldo,Abdone
+07-31;Sant'Ignazio di Loyola;Ignazio,Daniela,Calimero,Germano,Danila
+08-01;Sant'Alfonso Maria de' Liguori;Alfonso,Esmeralda,Ruben,Maristella
+08-02;Sant'Eusebio di Vercelli;Eusebio,Alfreda
+08-03;Sant'Aspreno di Napoli;Aspreno,Dalmazio,Lidia,Mara,Nicodemo
+08-04;San Giovanni Maria Vianney;Giovanni,Agabio,Cherubino
+08-05;Dedicazione di Santa Maria Maggiore;Abele,Nives,Osvaldo,Paride,Emidio
+08-06;Trasfigurazione del Signore;Donato,Gaetano,Mafalda,Afro
+08-07;San Gaetano di Thiene;Gaetano,Benedetto
+08-08;San Domenico di Guzman;Domenico,Ciriaco
+08-09;Santa Teresa Benedetta della Croce;Teresa,Romano
+08-10;San Lorenzo martire;Lorenzo
+08-11;Santa Chiara d'Assisi;Chiara,Degna,Lelia,Rufina,Susanna,Clara
+08-12;Santa Giovanna Francesca de Chantal;Giovanna,Ercole,Colombo
+08-13;Sant'Ippolito di Roma;Ippolito,Concordia
+08-14;San Massimiliano Maria Kolbe;Massimiliano,Atanasia,Alfredo
+08-15;Assunzione della Beata Vergine Maria;Maria,Assunta,Arduino,Napoleone
+08-16;San Rocco;Rocco,Serena,Petra
+08-17;Santa Chiara da Montefalco;Chiara,Giacinto,Settimo,Liberato
+08-18;Sant'Elena imperatrice;Elena,Aimone
+08-19;San Ludovico d'Angiò;Ludovico,Italo,Mariano,Bertolfo
+08-20;San Bernardo di Chiaravalle;Bernardo,Filiberto
+08-21;San Pio X;Pio,Baldovino,Malvina
+08-22;Beata Vergine Maria Regina;Maria,Fabrizio,Ildebrando,Incoronata
+08-23;Santa Rosa da Lima;Rosa,Benito,Novella,Rosanna
+08-24;San Bartolomeo apostolo;Bartolomeo,Anita,Tolomeo,Michela,Orio
+08-25;San Luigi IX di Francia;Luigi,Clodoveo,Ebe,Erminia,Genesio,Patrizia
+08-26;San Melchisedech;Melchisedech,Oronzo,Sandro,Alessandro
+08-27;Santa Monica;Monica
+08-28;Sant'Agostino d'Ippona;Agostino,Ermes,Viviano,Adelina,Ermete
+08-29;Martirio di San Giovanni Battista;Giovanni,Adelfo,Sabino
+08-30;San Pammachio;Pammachio,Gaudenzia
+08-31;San Giuseppe d'Arimatea;Giuseppe,Aida,Aidano,Aristide,Raimondo
+09-01;Sant'Egidio;Egidio,Giosuè
+09-02;Sant'Alberto di Pontida;Alberto,Ottaviano,Gianfranco
+09-03;San Gregorio Magno;Gregorio,Clelia,Marino
+09-04;Santa Rosalia;Rosalia,Dina,Mosè,Prospera,Scipione
+09-05;Santa Teresa di Calcutta;Teresa,Berto,Giordano
+09-06;San Zaccaria profeta;Zaccaria,Eva,Umberto
+09-07;San Clodoaldo;Clodoaldo,Guido,Regina
+09-08;Natività della Beata Vergine Maria;Maria,Addolorata,Bellina
+09-09;San Pietro Claver;Pietro,Omero,Sergio,Beltramo
+09-10;San Nicola da Tolentino;Nicola,Candida,Salvo
+09-11;San Giovanni Gabriele Perboyre;Giovanni,Almiro
+09-12;Santissimo Nome di Maria;Maria,Marilena,Franco,Mariasole
+09-13;San Giovanni Crisostomo;Giovanni,Amato,Maurilio
+09-14;Esaltazione della Santa Croce;Croce,Crescenzio,Santa
+09-15;Beata Vergine Maria Addolorata;Maria,Dolores,Melita,Orlando,Baldo
+09-16;San Cornelio e San Cipriano;Cornelio,Cipriano,Editta,Eufemia,Ludmilla
+09-17;Stigmate di San Francesco d'Assisi;Francesco,Colomba,Roberto
+09-18;San Giuseppe da Copertino;Giuseppe,Arianna,Eustorgio,Riccarda
+09-19;San Gennaro;Gennaro,Elio,Costanza
+09-20;Sant'Eustachio Placido;Eustachio,Filippa,Fausta,Giancarlo
+09-21;San Matteo apostolo;Matteo,Bernarda,Giona
+09-22;San Maurizio;Maurizio,Silvano,Tazio
+09-23;San Pio da Pietrelcina;Pio,Lino,Rebecca,Tecla,Libero
+09-24;Beata Vergine Maria della Mercede;Maria,Mercedes,Pacifico,Amata
+09-25;San Firmino di Amiens;Firmino,Aurelia
+09-26;Santi Cosma e Damiano;Cosma,Damiano,Cosimo,Eusebio
+09-27;San Vincenzo de' Paoli;Vincenzo,Fidenzio
+09-28;San Venceslao;Venceslao,Amalio
+09-29;Santi Arcangeli Michele, Gabriele e Raffaele;Michele,Gabriele,Raffaele,Alarico
+09-30;San Girolamo;Girolamo,Dino,Rachele,Sonia,Sofia
+10-01;Santa Teresa di Gesù Bambino;Teresa,Remigio
+10-02;Santi Angeli Custodi;Angelo,Berengario
+10-03;Santa Candida di Roma;Candida,Candido
+10-04;San Francesco d'Assisi;Francesco,Berenice,Petronio
+10-05;Santa Faustina Kowalska;Faustina,Attila,Felicia,Tullia,Flaviana
+10-06;San Bruno di Colonia;Bruno,Alberta
+10-07;Beata Vergine Maria del Rosario;Rosario,Adelchi,Bacco,Adalgiso
+10-08;Santa Taide;Taide,Ivano,Onesta,Porzia,Lorenza
+10-09;San Dionigi;Dionigi,Abramo,Giovanni
+10-10;Sant'Alderico di Sens;Alderico,Dana,Daniele
+10-11;San Giovanni XXIII;Giovanni,Emanuela,Folco,Placido
+10-12;Sant'Amico;Amico,Amone,Serafino
+10-13;Sant'Edoardo il Confessore;Edoardo
+10-14;San Callisto I;Callisto,Fortunata,Guendalina
+10-15;Santa Teresa d'Avila;Teresa,Edda,Ruggero
+10-16;Sant'Edvige;Edvige,Margherita
+10-17;Sant'Ignazio di Antiochia;Ignazio,Eloisa,Marisa,Rodolfo,Gina
+10-18;San Luca evangelista;Luca
+10-19;San Paolo della Croce;Paolo,Cleopatra,Laura,Loretta
+10-20;Sant'Irene del Portogallo;Irene,Aurora
+10-21;Sant'Orsola;Orsola,Bertoldo,Dasio,Zaira,Celina
+10-22;San Giovanni Paolo II;Giovanni Paolo,Apollo
+10-23;San Giovanni da Capestrano;Giovanni,Manlio
+10-24;Sant'Antonio Maria Claret;Antonio,Raffaele
+10-25;Santa Tabita di Ioppe;Tabita,Gavino,Daria,Crisanto
+10-26;Sant'Evaristo;Evaristo
+10-27;San Fiorenzo;Fiorenzo
+10-28;Santi Simone e Giuda Taddeo;Simone,Giuda,Taddeo,Simona,Simeone
+10-29;Sant'Ermelinda;Ermelinda,Cordelia,Narciso,Eusebia
+10-30;Beata Benvenuta Boiani;Benvenuta,Gerardo
+10-31;Santa Lucilla di Roma;Lucilla,Volfango
+11-01;Tutti i Santi;Ognissanti
+11-02;Commemorazione dei fedeli defunti;Tobia
+11-03;San Martino de Porres;Martino,Dalila,Silvia,Uberto,Giusto
+11-04;San Carlo Borromeo;Carlo,Amauri,Arrigo,Vitale,Chiaro
+11-05;Sant'Elisa;Elisa,Galeazzo
+11-06;San Leonardo di Noblac;Leonardo
+11-07;Sant'Ernesto di Zwiefalten;Ernesto,Carina,Urania,Ercolano
+11-08;San Goffredo di Amiens;Goffredo,Quarto,Diodato
+11-09;Dedicazione della Basilica Lateranense;Teodoro
+11-10;San Leone Magno;Leone,Fiorenza,Ninfa
+11-11;San Martino di Tours;Martino
+11-12;San Giosafat Kuncewycz;Giosafat,Aurelio,Diego,Renato
+11-13;Sant'Agostina Pietrantoni;Agostina,Omobono
+11-14;Santa Veneranda;Veneranda,Venerando,Filomeno
+11-15;Sant'Alberto Magno;Alberto,Arturo,Enea,Leopoldo
+11-16;Santa Gertrude di Helfta;Geltrude,Margherita,Elpidio
+11-17;Santa Elisabetta d'Ungheria;Elisabetta,Eugenio
+11-18;Dedicazione delle Basiliche di Pietro e Paolo;Noè,Alda,Frediano
+11-19;San Fausto di Alessandria;Fausto
+11-20;San Benigno di Milano;Benigno,Edmondo,Ottavio
+11-21;Presentazione della Beata Vergine Maria;Celso
+11-22;Santa Cecilia;Cecilia,Ernesta
+11-23;San Clemente I;Clemente,Adelinda,Colombano
+11-24;Sant'Andrea Dung-Lac;Andrea,Flora
+11-25;Santa Caterina d'Alessandria;Caterina
+11-26;Beata Delfina di Signe;Delfina,Delfino,Bellino
+11-27;San Gustavo;Gustavo,Zefiro,Virgilio
+11-28;Santa Teodora di Rossano;Teodora,Giacomo
+11-29;San Saturnino di Tolosa;Saturnino,Fedro
+11-30;Sant'Andrea apostolo;Andrea
+12-01;Sant'Eligio di Noyon;Eligio
+12-02;Santa Bibiana;Bibiana,Viviana,Evelina
+12-03;San Francesco Saverio;Francesco,Cassiano
+12-04;Santa Barbara;Barbara,Giovanni,Ada,Isa
+12-05;Santa Crispina;Crispina,Saba
+12-06;San Nicola di Bari;Nicola,Angelica,Terzo,Fortunato,Emiliano
+12-07;Sant'Ambrogio;Ambrogio
+12-08;Immacolata Concezione;Concetta,Immacolata,Conchita
+12-09;San Juan Diego;Diego,Amleto,Cesare,Siro,Sirio
+12-10;Beata Vergine Maria di Loreto;Loredana,Amanzio,Boris,Nazzareno
+12-11;San Damaso I;Damaso
+12-12;Beata Vergine Maria di Guadalupe;Lena,Rosalinda
+12-13;Santa Lucia;Lucia,Antioco,Oreste
+12-14;San Giovanni della Croce;Giovanni,Pompeo
+12-15;Santa Cristiana;Cristiana,Noemi,Naomi
+12-16;Sant'Adelaide;Adelaide,Adone,Albina
+12-17;Sant'Olimpia;Olimpia,Lazzaro
+12-18;San Graziano di Tours;Graziano
+12-19;San Dario;Dario
+12-20;San Liberato;Liberato,Domenico
+12-21;San Pietro Canisio;Pietro,Temistocle
+12-22;San Demetrio di Ostia;Demetrio,Remo,Spartaco,Dimitri
+12-23;San Giovanni da Kety;Giovanni,Dagoberto,Vittoria
+12-24;Sant'Adele di Pfalzel;Adele,Irma,Adelia,Adelio
+12-25;Natale del Signore;Natale,Nerea,Eugenia
+12-26;Santo Stefano protomartire;Stefano
+12-27;San Giovanni apostolo ed evangelista;Giovanni,Delfina,Fabiola
+12-28;Santi Innocenti;Innocente,Iolanda
+12-29;San Tommaso Becket;Tommaso,Davide
+12-30;San Raniero;Raniero,Eugenio
+12-31;San Silvestro I;Silvestro,Fiore,Ilaria,Melania,Sesto,Donata

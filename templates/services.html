@@ -156,6 +156,29 @@
   <p class="hint">{{ t('meteo.source') }}</p>
   <p class="hint">{{ t('meteo.alert.source') }}</p>
   {% endif %}
+  {# Info inutili: tre spunte e una durata. La seconda schermata dipende da
+     Wikipedia, ed e' l'unica cosa di questo servizio che possa mancare. #}
+  {% if service.key == 'inutili' %}
+  <form method="post" action="{{ url_for('api_inutili') }}" class="inline">
+    <label class="check"><input type="checkbox" name="calendario"
+           {{ 'checked' if cfg.inutili.calendario }}> {{ t('inutili.calendario') }}</label>
+    <label class="check"><input type="checkbox" name="personaggi"
+           {{ 'checked' if cfg.inutili.personaggi }}> {{ t('inutili.personaggi') }}</label>
+    <label class="check"><input type="checkbox" name="morti"
+           {{ 'checked' if cfg.inutili.morti }}> {{ t('inutili.morti') }}</label>
+    <label for="durata_slide">{{ t('inutili.durata') }}</label>
+    <input type="number" id="durata_slide" name="durata_slide" min="3" max="30"
+           value="{{ cfg.inutili.durata_slide }}">
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_inutili_prova') }}" class="actions">
+      <button type="submit" name="slide" value="festa">{{ t('inutili.prova.festa') }}</button>
+      <button type="submit" name="slide" value="storia" class="ghost">{{ t('inutili.prova.storia') }}</button>
+    </form>
+  </div>
+  <p class="hint">{{ t('inutili.fonte') }}</p>
+  {% endif %}
   {% if service.key == 'moon' %}
   <div class="actions">
     <form method="post" action="{{ url_for('api_cielo_prova') }}" class="actions">

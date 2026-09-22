@@ -49,6 +49,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`pongo.it.md`](pongo.it.md) · [PDF](DMD_pongo.pdf) | Pongo: tu contro il computer, i tre livelli e come sono stati tarati |
 | [`squadriglia.it.md`](squadriglia.it.md) · [PDF](DMD_squadriglia.pdf) | Squadriglia: lo sparatutto in stile 1942, il looping, il POW, il bombardiere |
 | [`gnam.it.md`](gnam.it.md) · [PDF](DMD_gnam.pdf) | Gnam Gnam: il labirinto, le pillole, e come insegue ognuno dei quattro fantasmi |
+| [`inutili.it.md`](inutili.it.md) · [PDF](DMD_inutili.pdf) | Info inutili: il santo, gli onomastici, la giornata mondiale, i nati e i morti di oggi |
 | [`mine.it.md`](mine.it.md) · [PDF](DMD_mine.pdf) | Mine vaganti: il gioco vettoriale, la posamine, le quattro specie di mine, il salto |
 | [`trex.it.md`](trex.it.md) · [PDF](DMD_trex.pdf) | T-Rex: la corsa del dinosauro, il salto tenuto, gli pterodattili, giorno e notte |
 | [`bongo.it.md`](bongo.it.md) · [PDF](DMD_bongo.pdf) | Kingo Bongo: i gorilla sui tetti, angolo, velocità e vento, come mira il computer |

@@ -765,9 +765,20 @@ DEFAULTS = {
         # turno con il meteo gli da' lo spazio -- non ha niente da configurare
         # prima di funzionare. Senza posizione mostra comunque la fase.
         "moon": True,
+        "inutili": True,
         # Come i satelliti: senza coordinate non ha niente da dire, e le
         # coordinate non le mettiamo noi.
         "meteo": False,
+    },
+    # Info inutili. Il calendario (santo, nomi, giornata mondiale) e' nei CSV
+    # del programma e non chiede niente a nessuno; i personaggi famosi
+    # arrivano da Wikipedia e sono l'unica parte che vuole la rete: spenta
+    # quella casella, il servizio resta intero, solo piu' corto.
+    "inutili": {
+        "calendario": True,
+        "personaggi": True,
+        "morti": True,
+        "durata_slide": 6,
     },
     "moon": {
         # Quanti secondi sta a schermo una schermata del servizio Moon.

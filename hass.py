@@ -69,6 +69,7 @@ SWITCHES = [
     # sotto -- sono due cose diverse, come la sveglia e il suo squillo.
     ("onair", "OnAir"),
     ("moon", "Moon"),
+    ("inutili", "Info inutili"),
 ]
 
 # Night mode e Sleep mode non sono servizi: sono modi del display, e stanno in
@@ -404,6 +405,29 @@ class HassBridge:
         })
         self._config("select", "pongo_livello", pongo)
 
+        # Info inutili. Tre sensori e nessun numero: il santo e la giornata
+        # mondiale servono a chi vuole farci un annuncio vocale la mattina,
+        # e l'onomastico dei suoi e' l'unico che faccia scattare qualcosa --
+        # un promemoria per telefonare.
+        for chiave, etichetta, topic, icona in (
+                ("inutili_santo", "Santo del giorno", "santo", "mdi:candle"),
+                ("inutili_onomastici", "Onomastici di oggi", "onomastici",
+                 "mdi:card-account-details-outline"),
+                ("inutili_giornata", "Giornata mondiale", "giornata",
+                 "mdi:earth"),
+        ):
+            entity = dict(common)
+            entity.update({
+                "name": etichetta,
+                "unique_id": "%s_%s" % (node, chiave),
+                "object_id": "%s_%s" % (node, chiave),
+                "state_topic": "%s/inutili/%s" % (base, topic),
+                "icon": icona,
+            })
+            if chiave == "inutili_santo":
+                entity["json_attributes_topic"] = "%s/inutili/dettaglio" % base
+            self._config("sensor", chiave, entity)
+
         # ------------------------------------------------- aerei e satelliti
         #
         # I numeri che il DMD gia' conosce e teneva per se'. Il radar scrive
@@ -628,7 +652,9 @@ class HassBridge:
                                        "iss_prossimo", "iss_quanti",
                                        "meteo_temperatura", "meteo_umidita",
                                        "meteo_massima", "meteo_minima",
-                                       "meteo_condizione", "meteo_allerta")] +
+                                       "meteo_condizione", "meteo_allerta",
+                                       "inutili_santo", "inutili_onomastici",
+                                       "inutili_giornata")] +
                                      [("switch", key) for key, _ in SWITCHES] +
                                      [("switch", key) for key, _, _, _ in MODES] +
                                      [("switch", key) for key, _, _ in AZIONI] +
@@ -794,6 +820,24 @@ class HassBridge:
                        (avviso or {}).get("livello") or NIENTE, force)
             self._send("%s/meteo/allerta_dettaglio" % base,
                        json.dumps(avviso or {}, ensure_ascii=False), force)
+
+        try:
+            oggi = self.runtime.inutili.riepilogo()
+        except Exception:                       # noqa: BLE001
+            oggi = None
+        if oggi is not None:
+            self._send("%s/inutili/santo" % base, oggi.get("santo") or NIENTE, force)
+            # Gli onomastici che contano sono **i tuoi**: se oggi festeggia
+            # qualcuno della rubrica, il sensore dice il suo nome. Altrimenti
+            # i nomi del giorno, che sono una curiosita'.
+            tuoi = oggi.get("tuoi") or []
+            nomi = tuoi or (oggi.get("nomi") or [])
+            self._send("%s/inutili/onomastici" % base,
+                       ", ".join(nomi) if nomi else NIENTE, force)
+            self._send("%s/inutili/giornata" % base,
+                       oggi.get("giornata") or NIENTE, force)
+            self._send("%s/inutili/dettaglio" % base,
+                       json.dumps(oggi, ensure_ascii=False), force)
 
         try:
             passaggi = self.runtime.satelliti.riepilogo()
