@@ -2,6 +2,32 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.4]
+
+### Squadriglia
+
+Un gioco nuovo nella pagina **Giochi**: uno sparatutto aereo in stile **1942**,
+girato in orizzontale — su 64 righe un nemico che arriva dall'alto sarebbe
+addosso nello stesso istante, mentre da destra ci sono tre secondi per
+vederlo. Il nome non è 1942 perché 1942 è di Capcom.
+
+- **Le squadriglie** arrivano in formazione: in fila, a onda, in picchiata
+  verso di te, o con un giro della morte.
+- **Il looping** — cerchio sul pad, Alt sulla tastiera — ti rende intoccabile
+  per un secondo. Tre per livello.
+- **Il POW**: abbatti per intero una squadriglia rossa e lascia una P.
+  Prima il doppio colpo, poi due aerei di scorta che sparano con te e ti fanno
+  da scudo.
+- **Il bombardiere** a fine livello: largo mezzo pannello, spara a ventaglio,
+  e va colpito una trentina di volte.
+
+Un pilota automatico che schiva e mira arriva al livello 6-7; premendo tasti a
+caso non si passa il primo.
+
+### Cerchio è il tasto speciale
+
+Serve al looping. Negli altri giochi cerchio spara come prima.
+
 ## [10.3]
 
 ### Pongo

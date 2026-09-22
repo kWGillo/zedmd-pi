@@ -23,8 +23,8 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 075e6985999ab1d4bbcca75759c692b7  gb/setup_gb.sh
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
-3217d439a5345a8fe33b4576c845a982  hass.py
-4691497faf7a17ad7ebc38ff8320d134  i18n.py
+0dab0203d50268b02fc032c013de2031  hass.py
+c5fa19e11251a0099fa0b0e223fcccf5  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 b9d0bda3222f80aa266f96cf9db90b8c  lookup.py
@@ -55,12 +55,13 @@ fff9a6751fd27a17747c95d907945d19  sources/cielo.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 c7be063837324c79053cba527364e517  sources/doom.py
 78c1cccbfc36c6e8c70c0dcce5235786  sources/gameboy.py
-ae36f4b5866496e9329bd32043a9d584  sources/giochi/__init__.py
+f7705d5943e22eb5c05f6e5e23444367  sources/giochi/__init__.py
 1ae61a11b831aaff6c3f30b82572247d  sources/giochi/base.py
 018e911289febd4efb970fba0d9e5626  sources/giochi/invasori.py
 8b74478fcea06b5ab9db5c6c5f2c710c  sources/giochi/mattoni.py
 54da52c0c87612ae4d0f7d23f61ab958  sources/giochi/pongo.py
 b9ed5d6a62f16d27b220b48b3d69c54c  sources/giochi/serpente.py
+f5b6b5eba3d5a049168e8d06b78d3dbd  sources/giochi/squadriglia.py
 8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
 9d5c71443d63c261e79811e3d8d42b7d  sources/meteo.py
 1d2251eff5cc8b014100149bd68d0103  sources/notifiche.py
@@ -124,7 +125,7 @@ bfe7e1931764badb484f170fb1386427  templates/services.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 29ec3d40d18b3ff9c31cf907cd8b1236  templates/updates.html
-5ea2a92ec0e07f98e5ab5e5faafe3e90  version.py
+bbe2792ce43450d0286d9907854a9e07  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-2efbe6d13e54f19b7f57e802a632998e  webui.py
+795c155b469d992b9c37ea501bf22a3b  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

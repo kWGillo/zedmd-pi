@@ -1870,6 +1870,9 @@ STRINGS = {
     "giochi.pongo.hint": (
         "Tu contro il computer. Su e giù, avanti fino a metà campo; vince chi fa undici.",
         "You against the computer. Up, down, forward to midfield; first to eleven wins."),
+    "giochi.squadriglia.hint": (
+        "Un caccia contro le squadriglie, in stile 1942. Cerchio per il looping.",
+        "A fighter against enemy squadrons, 1942 style. Circle for the loop."),
     "giochi.pongo.record": ("Scambio più lungo:", "Longest rally:"),
     "giochi.pongo.livello": ("Computer", "Computer"),
     "giochi.pongo.facile": ("Facile", "Easy"),

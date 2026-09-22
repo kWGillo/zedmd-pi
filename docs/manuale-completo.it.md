@@ -643,7 +643,7 @@ NetworkManager, non il `config.json`. Guida completa in `docs/rete.it.md`.
 aspetto, i comandi per accendere e spegnere la ripresa, il pulsante fisico
 sulla Bonnet. Guida completa in `docs/telecamera.it.md`.
 
-**Giochi** — Breakout, Invaders, Snake e Pongo, i comandi di tastiera e pad, e la
+**Giochi** — Breakout, Invaders, Snake, Pongo e Squadriglia, i comandi di tastiera e pad, e la
 scheda degli emulatori esterni che porta a Doom e al Game Boy. Guide in
 `docs/doom.it.md`, `docs/gameboy.it.md` e `docs/joypad.it.md`.
 
@@ -689,7 +689,7 @@ stesso servizio e un arbitro sceglie chi vince:
 registrato per primo, quindi la seconda non andrebbe mai a schermo. Una prova
 rifiuta i pareggi.
 
-Le **partite** — Doom, Game Boy, Breakout, Invaders, Snake e Pongo — non partecipano a
+Le **partite** — Doom, Game Boy, Breakout, Invaders, Snake, Pongo e Squadriglia — non partecipano a
 questa gara: prendono il pannello e lo tengono finché non si esce, sopra
 chiunque altro, ZeDMD compreso. L'unica che passa sopra anche a loro è la
 sveglia, che è a 120 apposta.

@@ -32,13 +32,14 @@ from .invasori import Invasori
 from .mattoni import Mattoni
 from .pongo import Pongo
 from .serpente import Serpente
+from .squadriglia import Squadriglia
 
 # L'ordine e' quello del giro del tasto Start, ed e' anche l'ordine della
 # pagina: Breakout per primo perche' e' quello che il pannello 4:1 veste
 # meglio, e gli ultimi arrivati in fondo -- chi preme Start per abitudine non
 # deve trovarsi un gioco diverso da quello di ieri. Pongo e' arrivato dopo
-# Snake.
-GIOCHI = (Mattoni, Invasori, Serpente, Pongo)
+# Snake, Squadriglia dopo Pongo.
+GIOCHI = (Mattoni, Invasori, Serpente, Pongo, Squadriglia)
 NOMI = tuple(g.nome for g in GIOCHI)
 
 
@@ -60,7 +61,10 @@ def elenco():
 TASTI = {
     105: "sinistra", 106: "destra", 103: "su", 108: "giu",
     30: "sinistra", 32: "destra", 17: "su", 31: "giu",     # A D W S
-    57: "fuoco", 29: "fuoco", 56: "fuoco",                 # spazio, ctrl, alt
+    57: "fuoco", 29: "fuoco",                              # spazio, ctrl
+    # Alt e' il tasto speciale (il looping di Squadriglia). Nei giochi che
+    # non ne hanno uno spara, come ha sempre fatto: vedi `tasti_per`.
+    56: "speciale",
 }
 
 # I due tasti "di servizio" della tastiera sono configurabili: su una
@@ -86,8 +90,23 @@ PULSANTI = {
     # Start, Select, croce e cerchio appartengono al gioco: li' PS resta
     # l'unica via d'uscita, ed e' il significato che ha sulla console vera.
     BTN_START: "ciclo", BTN_MODE: "home",
-    BTN_SELECT: "esci", BTN_EAST: "fuoco",
+    BTN_SELECT: "esci",
+    # Dalla 10.4 cerchio e' il tasto **speciale**: il looping di
+    # Squadriglia, l'unico gioco con una seconda azione. Negli altri giochi
+    # continua a sparare -- lo traduce `tasti_per` -- quindi per chi ci
+    # gioca non cambia niente.
+    BTN_EAST: "speciale",
 }
+
+
+def tasti_per(gioco, premuti):
+    """I comandi come li vede un gioco: "speciale" e' "fuoco" per chi non
+    ha una seconda azione."""
+    tasti = set(premuti)
+    if "speciale" in tasti and "speciale" not in getattr(gioco, "COMANDI", ()):
+        tasti.discard("speciale")
+        tasti.add("fuoco")
+    return tasti
 
 ASSI = {
     ABS_X: ("sinistra", "destra"),
@@ -616,7 +635,7 @@ class GiochiSource(Source):
                 precedente = time.time()
                 continue
             try:
-                gioco.passo(dt, set(self._premuti))
+                gioco.passo(dt, tasti_per(gioco, self._premuti))
                 immagine = gioco.disegna()
             except Exception as exc:
                 print("[giochi] errore nel gioco: %s" % exc)

@@ -138,6 +138,7 @@ ICONE_GIOCHI = {
     "invaders": "mdi:space-invaders",
     "snake": "mdi:snake",
     "pongo": "mdi:table-tennis",
+    "squadriglia": "mdi:airplane",
 }
 
 try:

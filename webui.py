@@ -932,7 +932,8 @@ def create_app(runtime):
     # seconda del gioco aperto.
     GIOCHI_PULSANTI = (("su", "\u25b2"), ("sinistra", "\u25c0"),
                        ("destra", "\u25b6"), ("giu", "\u25bc"),
-                       ("fuoco", "FUOCO"), ("esci", "ESCI"))
+                       ("fuoco", "FUOCO"), ("speciale", "LOOP"),
+                       ("esci", "ESCI"))
 
     def _giochi_stato():
         stato = runtime.giochi_state()
@@ -981,7 +982,7 @@ def create_app(runtime):
         """
         azione = request.form.get("azione", "").strip()
         if azione not in ("sinistra", "destra", "su", "giu", "fuoco",
-                          "avvia", "esci"):
+                          "speciale", "avvia", "esci"):
             return jsonify({"ok": False}), 400
         if "giu" in request.form:
             runtime.giochi.premi(azione, request.form.get("giu") == "1")

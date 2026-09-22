@@ -2491,6 +2491,15 @@ Storico:
        record e' lo scambio piu' lungo. La racchetta puo' avanzare fino a
        meta' del proprio campo, e colpendo mentre avanza schiaccia: +15%.
        Le levette ora contano anche in verticale in tutti i giochi.
+  10.4 **Squadriglia.** Uno sparatutto aereo in stile 1942, girato in
+       orizzontale perche' su 64 righe un nemico che arriva dall'alto e' gia'
+       addosso. Squadriglie in formazione con quattro traiettorie, il
+       looping (tre per livello, cerchio o Alt), il POW delle squadriglie
+       rosse abbattute per intero -- doppio colpo, poi due aerei di scorta
+       che fanno da scudo -- e il bombardiere a fine livello. Cerchio diventa
+       il tasto speciale; nei giochi che non ne hanno uno spara come prima.
+       Provato con un pilota automatico che arriva al livello 6-7, e con
+       tasti a caso che non passano il primo.
 """
 
-__version__ = "10.3"
+__version__ = "10.4"
