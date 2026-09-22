@@ -128,28 +128,62 @@ MELODIA = (
 # Il basso: un accordo per mezza battuta, suonato "um-pa" -- la fondamentale
 # e la sua ottava, a crome alterne.
 ACCORDI = (
-    "C C", "C C", "A A", "G G", "C C", "A A", "F G", "C C",
+    "C C", "C C", "Am Am", "G G", "C C", "Am Am", "F G", "C C",
     "F F", "F F", "G G", "G G", "C C", "G G", "F G", "C G",
 )
 NOTE = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
+ALTERAZIONI = {"#": 1, "b": -1}
+
+# Gli accordi si scrivono con la lettera della fondamentale, piu' "m" se sono
+# minori: "A" e' La maggiore, "Am" La minore. Serve all'arpeggio, che deve
+# sapere se la terza e' maggiore o minore; al basso basta la fondamentale.
+GRADI = {"": (0, 4, 7, 12), "m": (0, 3, 7, 12)}
 PICCO_MUSICA = 5500        # un terzo degli effetti: la musica sta sotto
 
 
 def _hz(nome):
-    semitoni = NOTE[nome[0]] + 12 * (int(nome[1:]) + 1)
+    corpo = nome[0]
+    resto = nome[1:]
+    semitoni = NOTE[corpo]
+    while resto and resto[0] in ALTERAZIONI:
+        semitoni += ALTERAZIONI[resto[0]]
+        resto = resto[1:]
+    semitoni += 12 * (int(resto) + 1)
     return 440.0 * 2 ** ((semitoni - 69) / 12.0)
+
+
+def _accordo(sigla):
+    """(fondamentale, modo) da "A" o "Am"."""
+    if sigla.endswith("m"):
+        return sigla[:-1], "m"
+    return sigla, ""
+
+
+def _hz_grado(sigla, ottava, grado):
+    """La nota `grado` dell'accordo (0 fondamentale, 1 terza, 2 quinta,
+    3 ottava), nell'ottava data."""
+    radice, modo = _accordo(sigla)
+    semitoni = GRADI[modo][grado]
+    base = _hz(radice + str(ottava))
+    return base * 2 ** (semitoni / 12.0)
 
 
 def musica(bpm=None, melodia=None, accordi=None, forma="quadra25",
            ampiezza_melodia=1.0, basso="umpa", ampiezza_basso=0.9,
-           charleston=0.25, rullante=0.0, seme=7):
+           charleston=0.25, rullante=0.0, cassa=0.0, arpeggio=0.0,
+           stacco=0.62, seme=7):
     """Compone un brano dalla sua ricetta. Senza argomenti, quello di Gnam Gnam.
 
     `forma`: il timbro della melodia -- quadra25 (il chip, stretto), quadra50
     (piu' pieno, da fanfara), triangolo (morbido). `basso`: umpa (fondamentale
-    e ottava a crome alterne), quarti (la fondamentale sui quarti), lento (una
-    nota tenuta per mezza battuta). `charleston` e `rullante`: l'ampiezza del
-    fruscio sui controtempi e sul secondo e quarto quarto; zero li toglie.
+    e ottava a crome alterne), quarti (la fondamentale sui quarti), ottavi (la
+    fondamentale a ogni croma, alternata alla quinta: quello che spinge), lento
+    (una nota tenuta per mezza battuta). `charleston` e `rullante`: l'ampiezza
+    del fruscio sui controtempi e sul secondo e quarto quarto; `cassa` il colpo
+    grave sull'uno e sul tre. `arpeggio`: la seconda voce, l'accordo sgranato
+    a sedicesimi -- e' quella che da' il movimento alle sale giochi, e da sola
+    vale piu' di dieci battiti in piu' al minuto. `stacco`: quanto le note si
+    spengono dentro la loro cella; basso = staccato, secco.
     """
     bpm = bpm or BPM
     melodia = melodia or MELODIA
@@ -166,7 +200,8 @@ def musica(bpm=None, melodia=None, accordi=None, forma="quadra25",
             t = i / float(quanti)
             # Attacco corto, poi un calo: le note ripetute si staccano
             # l'una dall'altra invece di fondersi in un fischio.
-            inv = min(1.0, i / 60.0) * (1.0 - 0.55 * t) * min(1.0, (quanti - i) / 80.0)
+            inv = (min(1.0, i / 25.0) * (1.0 - stacco * t)
+                   * min(1.0, (quanti - i) / 60.0))
             fase = (fase + hz / FREQUENZA) % 1.0
             if timbro == "quadra25":
                 v = 1.0 if fase < 0.25 else -1.0      # duty 25%: il timbro chip
@@ -202,8 +237,27 @@ def musica(bpm=None, melodia=None, accordi=None, forma="quadra25",
                 for k in range(2):
                     suona(inizio + 2 * k * per_croma, 2, _hz(radice + "3"),
                           "triangolo", ampiezza_basso)
+            elif basso == "ottavi":
+                # Il motore: una nota a ogni croma, fondamentale e quinta
+                # alternate. E' il passo che fa muovere la testa.
+                for k in range(4):
+                    grado = 0 if k % 2 == 0 else 2
+                    suona(inizio + k * per_croma, 1,
+                          _hz_grado(radice, 3, grado) * (1.0 if k % 2 == 0 else 0.5),
+                          "quadra25", ampiezza_basso)
             else:
                 suona(inizio, 4, _hz(radice + "3"), "triangolo", ampiezza_basso)
+    # l'arpeggio: l'accordo sgranato a sedicesimi, sopra il basso
+    if arpeggio:
+        mezza = per_croma // 2
+        for b, riga in enumerate(accordi):
+            for meta, sigla in enumerate(riga.split()):
+                for k in range(8):
+                    inizio = (b * 8 + meta * 4) * per_croma + k * mezza
+                    grado = (0, 1, 2, 3, 2, 1, 0, 2)[k]
+                    suona(inizio, 0.5, _hz_grado(sigla, 4, grado),
+                          "quadra25", arpeggio)
+
     # le percussioni, fatte di fruscio
     import random
     casuale = random.Random(seme)
@@ -218,125 +272,171 @@ def musica(bpm=None, melodia=None, accordi=None, forma="quadra25",
             quanti = int(FREQUENZA * durata)
             for i in range(min(quanti, totale - base)):
                 fuori[base + i] += casuale.uniform(-1, 1) * forza * (1 - i / float(quanti))
+        # La cassa sull'uno e sul tre: non fruscio ma una sinusoide che
+        # scende in fretta, che e' il modo in cui si fa una grancassa con
+        # niente. Sotto, tiene insieme tutto il resto.
+        if cassa and c % 4 == 0:
+            base = c * per_croma
+            quanti = int(FREQUENZA * 0.085)
+            fase = 0.0
+            for i in range(min(quanti, totale - base)):
+                t = i / float(quanti)
+                hz = 115.0 * (1.0 - t) ** 2 + 42.0
+                fase += hz / FREQUENZA
+                fuori[base + i] += math.sin(2 * math.pi * fase) * cassa * (1 - t) ** 1.5
     return fuori
 
 
 # Gli altri giochi, ognuno con il suo carattere. Tutti scritti per questo
 # progetto; nessuno riprende una musica esistente. Giri di 16-20 secondi.
 MUSICHE = {
-    # Breakout: spinge. La minore pentatonica, veloce, con il rullante.
+    # Breakout: il piu' veloce di tutti. La minore, sedicesimi di arpeggio
+    # sotto la melodia, cassa e rullante: e' un gioco di riflessi e la
+    # musica deve spingere, non accompagnare.
     "breakout_musica": dict(
-        bpm=150, forma="quadra25", rullante=0.3, picco=5000,
+        bpm=168, forma="quadra25", ampiezza_melodia=0.9, basso="ottavi",
+        ampiezza_basso=0.85, charleston=0.22, rullante=0.34, cassa=1.0,
+        arpeggio=0.30, stacco=0.7, picco=6000,
         melodia=(
-            "A4 C5 E5 A5 G5 E5 D5 E5", "C5 -  A4 -  G4 A4 C5 . ",
-            "D5 F5 A5 D6 C6 A5 G5 A5", "F5 -  E5 D5 E5 -  .  . ",
-            "A4 C5 E5 A5 G5 E5 D5 E5", "G5 -  E5 G5 A5 -  C6 - ",
-            "B5 G5 E5 G5 B5 -  D6 - ", "C6 B5 A5 G5 E5 -  .  . ",
-            "E5 E5 G5 E5 A5 G5 E5 D5", "C5 D5 E5 G5 E5 D5 C5 A4",
-            "D5 D5 F5 D5 G5 F5 D5 C5", "E5 -  B4 -  E5 .  E4 . ",
+            "A4 C5 E5 A5 E5 C5 E5 G5", "F5 E5 D5 C5 D5 E5 .  . ",
+            "D5 F5 A5 D6 A5 F5 A5 C6", "B5 A5 G5 F5 E5 -  .  . ",
+            "A4 C5 E5 A5 E5 C5 E5 G5", "A5 -  G5 E5 D5 C5 B4 D5",
+            "C5 E5 G5 C6 G5 E5 G5 B5", "A5 -  E5 -  A4 -  .  . ",
+            "E5 E5 G5 E5 A5 G5 E5 D5", "C5 D5 E5 G5 A5 -  G5 E5",
+            "D5 F5 A5 D6 C6 A5 G5 F5", "E5 -  -  -  A4 -  .  . ",
         ),
-        accordi=("A A", "F G", "D D", "F E", "A A", "C G", "E E", "F E",
-                 "C C", "A A", "D G", "E E")),
-    # Invaders: sotto la marcia, non sopra. Niente ritmo -- il ritmo e' dei
-    # passi degli alieni -- solo un basso lento e qualche nota lunga, cupa.
+        accordi=("Am Am", "F G", "Dm Dm", "E E", "Am Am", "Am G",
+                 "C C", "Am E", "Am Am", "F G", "Dm Dm", "E E")),
+    # Invaders: la marcia degli alieni e' il ritmo, e non si tocca. Sotto
+    # pero' c'e' un motore: basso a ottavi e cassa sull'uno e sul tre, che
+    # spinge senza mettersi davanti. Niente rullante, per non litigare.
     "invaders_musica": dict(
-        bpm=108, forma="triangolo", ampiezza_melodia=0.5, basso="lento",
-        ampiezza_basso=0.8, charleston=0.0, picco=3000,
+        bpm=152, forma="quadra25", ampiezza_melodia=0.75, basso="ottavi",
+        ampiezza_basso=0.9, charleston=0.08, cassa=0.95, arpeggio=0.16,
+        stacco=0.75, picco=5200,
         melodia=(
-            "E5 -  -  -  -  -  -  - ", ".  .  .  .  D5 -  -  - ",
-            "C5 -  -  -  -  -  B4 - ", ".  .  .  .  .  .  .  . ",
-            "E5 -  -  -  -  -  -  - ", ".  .  .  .  G5 -  -  - ",
-            "F5 -  -  -  E5 -  -  - ", "B4 -  -  -  .  .  .  . ",
+            "E4 -  E4 -  G4 -  E4 - ", "B4 -  A4 -  G4 -  E4 - ",
+            "E4 -  E4 -  G4 -  B4 - ", "C5 -  B4 -  G4 -  .  . ",
+            "E5 -  D5 -  C5 -  B4 - ", "A4 -  B4 -  C5 -  D5 - ",
+            "E5 -  -  -  D5 -  B4 - ", "E4 -  -  -  .  .  .  . ",
+            "G4 -  B4 -  E5 -  B4 - ", "C5 -  B4 -  A4 -  G4 - ",
+            "F#4 -  A4 -  D5 -  A4 - ", "B4 -  -  -  E4 -  .  . ",
         ),
-        accordi=("E E", "C D", "A A", "B B", "E E", "C D", "A C", "B B")),
-    # Snake: calmo, a arpeggi. Un gioco di concentrazione non vuole una
-    # musica che corre.
+        accordi=("Em Em", "Em Em", "G G", "Am B", "Em Em", "Am Am",
+                 "B B", "Em Em", "G G", "Am Am", "B B", "Em Em")),
+    # Snake: era una musica da meditazione, e il gioco non e' quello. Adesso
+    # e' un chip saltellante in re minore, tutto arpeggi, che corre come il
+    # serpente quando si allunga.
     "snake_musica": dict(
-        bpm=96, forma="triangolo", ampiezza_melodia=0.9, basso="lento",
-        ampiezza_basso=0.7, charleston=0.12, picco=4500,
+        bpm=156, forma="quadra25", ampiezza_melodia=0.85, basso="ottavi",
+        ampiezza_basso=0.8, charleston=0.2, rullante=0.22, cassa=0.95,
+        arpeggio=0.28, stacco=0.7, picco=5600,
         melodia=(
-            "D4 F4 A4 D5 A4 F4 D4 F4", "C4 E4 G4 C5 G4 E4 C4 E4",
-            "B3 D4 G4 B4 G4 D4 B3 D4", "A3 C4 E4 A4 E4 C4 E4 G4",
-            "D4 F4 A4 D5 E5 D5 A4 F4", "G4 B4 D5 G5 D5 B4 G4 B4",
-            "F4 A4 C5 F5 C5 A4 F4 A4", "E4 G4 A4 C5 A4 G4 E4 D4",
+            "D4 A4 D5 A4 F5 D5 A4 D5", "C5 G4 C5 E5 G5 E5 C5 G4",
+            "B4 D5 G5 D5 B4 G4 D5 G5", "A4 C5 E5 A5 E5 C5 A4 E5",
+            "D5 F5 A5 D6 A5 F5 D5 A4", "G4 B4 D5 G5 D5 B4 G4 D5",
+            "F4 A4 C5 F5 C5 A4 F4 C5", "E5 D5 C5 A4 G4 -  .  . ",
+            "D5 -  F5 -  A5 -  G5 F5", "E5 -  G5 -  B5 -  A5 G5",
+            "F5 A5 D6 A5 F5 D5 A4 F4", "D4 -  -  -  A4 -  .  . ",
         ),
-        accordi=("D D", "C C", "G G", "A A", "D D", "G G", "F F", "A A")),
-    # Pongo: quasi niente. Il fascino di Pong e' il ping nel silenzio: qui
-    # qualche nota rada e un basso piano, perche' il ping resti la voce.
+        accordi=("Dm Dm", "C C", "G G", "Am Am", "Dm Dm", "G G",
+                 "F F", "Am Am", "Dm Dm", "Em Em", "Dm Dm", "Dm Dm")),
+    # Pongo: resta la piu' discreta -- il ping deve restare la voce -- ma
+    # non piu' addormentata: il basso pulsa a ottavi e la cassa segna il
+    # tempo, mentre la melodia rimane rada.
     "pongo_musica": dict(
-        bpm=120, forma="quadra25", ampiezza_melodia=0.6, basso="quarti",
-        ampiezza_basso=0.6, charleston=0.1, picco=3000,
+        bpm=152, forma="quadra25", ampiezza_melodia=0.7, basso="ottavi",
+        ampiezza_basso=0.55, charleston=0.14, cassa=0.8, arpeggio=0.12,
+        stacco=0.72, picco=4400,
         melodia=(
-            "C5 .  .  .  G4 .  .  . ", ".  .  E5 .  .  .  D5 . ",
-            "C5 .  .  .  G4 .  .  . ", ".  .  A4 .  G4 .  .  . ",
-            "F4 .  .  .  C5 .  .  . ", ".  .  A4 .  .  .  G4 . ",
-            "E5 .  .  .  C5 .  .  . ", "D5 .  .  .  G4 .  .  . ",
+            "C5 .  .  G5 .  .  E5 . ", ".  .  G5 .  E5 .  C5 . ",
+            "A4 .  .  E5 .  .  C5 . ", ".  .  E5 .  D5 .  .  . ",
+            "F5 .  .  C6 .  .  A5 . ", ".  .  A5 .  G5 .  E5 . ",
+            "G5 .  .  D6 .  .  B5 . ", "C6 .  G5 .  E5 .  C5 . ",
+            "E5 .  .  C5 .  .  G4 . ", "C5 .  .  .  G4 .  .  . ",
         ),
-        accordi=("C C", "C C", "A A", "F G", "F F", "F F", "C C", "G G")),
-    # Squadriglia: una marcia da fanfara. Quadra piena, basso sui quarti,
-    # rullante sul due e sul quattro.
+        accordi=("C C", "C C", "Am Am", "G G", "F F", "F F",
+                 "G G", "C C", "Am F", "C G")),
+    # Squadriglia: la fanfara, ma da cabinato. Piu' svelta, con cassa e
+    # rullante veri sotto, e l'arpeggio che tiene la tensione fra una frase
+    # e l'altra.
     "squadriglia_musica": dict(
-        bpm=140, forma="quadra50", ampiezza_melodia=0.8, basso="quarti",
-        ampiezza_basso=1.0, charleston=0.15, rullante=0.35, picco=5000,
+        bpm=168, forma="quadra50", ampiezza_melodia=0.85, basso="ottavi",
+        ampiezza_basso=0.9, charleston=0.18, rullante=0.38, cassa=1.0,
+        arpeggio=0.22, stacco=0.6, picco=6200,
         melodia=(
-            "G4 -  C5 -  E5 -  G5 - ", "G5 -  E5 C5 D5 -  .  . ",
-            "A4 -  D5 -  F5 -  A5 - ", "A5 -  G5 F5 E5 -  .  . ",
-            "C5 C5 C5 D5 E5 -  C5 - ", "D5 D5 D5 E5 F5 -  D5 - ",
+            "G4 -  C5 -  E5 G5 C6 - ", "G5 E5 C5 D5 E5 -  .  . ",
+            "A4 -  D5 -  F5 A5 D6 - ", "A5 G5 F5 E5 D5 -  .  . ",
+            "C5 C5 E5 G5 C6 -  G5 - ", "D5 D5 F5 A5 D6 -  A5 - ",
             "E5 G5 F5 E5 D5 C5 B4 D5", "C5 -  G4 -  C5 -  .  . ",
-            "E5 -  E5 F5 G5 -  E5 - ", "F5 -  F5 E5 D5 -  B4 - ",
+            "E5 -  E5 F5 G5 -  C6 - ", "F5 -  F5 E5 D5 -  B4 - ",
             "C5 E5 G5 C6 B5 G5 D5 F5", "E5 -  C5 -  G4 .  G4 . ",
         ),
         accordi=("C C", "C G", "D D", "F G", "C C", "D G", "C G", "C C",
                  "C C", "D G", "C G", "C G")),
-    # Mine vaganti: lo spazio. Mi minore, un basso che pulsa sotto e una
-    # melodia rada e sospesa che sale e ricade, come un segnale lontano.
+    # Mine vaganti: lo spazio, ma non contemplativo. Mi minore, arpeggio
+    # fitto e cassa: il campo minato si muove, e la musica anche.
     "mine_musica": dict(
-        bpm=124, forma="triangolo", ampiezza_melodia=0.9, basso="umpa",
-        ampiezza_basso=0.7, charleston=0.08, picco=4500,
+        bpm=158, forma="quadra25", ampiezza_melodia=0.85, basso="ottavi",
+        ampiezza_basso=0.85, charleston=0.16, rullante=0.26, cassa=1.0,
+        arpeggio=0.28, stacco=0.68, picco=5800,
         melodia=(
-            "E5 -  -  B4 -  -  G4 - ", "A4 -  B4 -  .  .  .  . ",
-            "E5 -  -  B4 -  -  D5 - ", "E5 -  -  -  .  .  .  . ",
-            "G5 -  -  E5 -  -  D5 - ", "B4 -  D5 -  E5 -  .  . ",
-            "A5 -  G5 -  E5 -  D5 - ", "B4 -  -  -  .  .  .  . ",
-            "C5 -  -  E5 -  -  G5 - ", "A5 -  G5 -  E5 -  .  . ",
-            "D5 -  -  B4 -  -  G4 - ", "A4 -  -  -  B4 -  -  - ",
+            "E5 -  B4 -  E5 G5 B5 - ", "A5 -  G5 E5 D5 -  B4 - ",
+            "E5 -  B4 -  E5 G5 B5 - ", "C6 -  B5 G5 E5 -  .  . ",
+            "G5 B5 D6 B5 G5 E5 D5 B4", "A4 C5 E5 A5 E5 C5 A4 E5",
+            "B4 D5 F#5 B5 F#5 D5 B4 F#5", "E5 -  -  -  B4 -  .  . ",
+            "C5 E5 G5 C6 G5 E5 C5 G4", "A4 C5 E5 A5 G5 E5 C5 A4",
+            "B4 D5 G5 B5 A5 F#5 D5 B4", "E5 -  -  -  E4 -  .  . ",
         ),
-        accordi=("E E", "A B", "E E", "E E", "G G", "E E", "A A", "B B",
-                 "C C", "A A", "G G", "A B")),
-    # T-Rex: la corsa. Sol maggiore, saltellante, a ottavi ribattuti: il
-    # passo del dinosauro. Leggera, perche' sta sotto tutta la partita.
+        accordi=("Em Em", "Am B", "Em Em", "C C", "G G", "Am Am",
+                 "B B", "Em Em", "C C", "Am Am", "B B", "Em Em")),
+    # T-Rex: la corsa. Sol maggiore a ottavi ribattuti -- il passo -- con la
+    # cassa che fa da zampata e l'arpeggio che accelera la sensazione di
+    # velocita' anche quando il dinosauro va allo stesso ritmo.
     "trex_musica": dict(
-        bpm=144, forma="quadra25", ampiezza_melodia=0.7, basso="umpa",
-        ampiezza_basso=0.7, charleston=0.15, picco=3800,
+        bpm=172, forma="quadra25", ampiezza_melodia=0.85, basso="ottavi",
+        ampiezza_basso=0.8, charleston=0.2, rullante=0.24, cassa=0.95,
+        arpeggio=0.26, stacco=0.72, picco=5600,
         melodia=(
             "G4 B4 D5 B4 G4 B4 D5 G5", "E5 -  D5 B4 D5 -  .  . ",
             "C5 E5 G5 E5 C5 E5 G5 C6", "B5 -  A5 G5 A5 -  .  . ",
             "G4 B4 D5 B4 G4 B4 D5 G5", "A5 G5 E5 D5 E5 -  G5 - ",
             "A5 -  C6 -  D6 -  C6 A5", "G5 -  D5 -  G4 .  .  . ",
+            "D5 G5 B5 G5 D5 G5 B5 D6", "C6 -  B5 G5 A5 -  .  . ",
+            "E5 G5 C6 G5 E5 C5 G4 E5", "D5 -  G4 -  G4 .  .  . ",
         ),
-        accordi=("G G", "C D", "C C", "G D", "G G", "C C", "D D", "G G")),
-    # Kingo Bongo: la giungla in citta'. La minore, un ritmo di tamburi
-    # (basso sui quarti e rullante) e una melodia a botta e risposta, come
-    # due che si lanciano qualcosa.
+        accordi=("G G", "C D", "C C", "G D", "G G", "C C", "D D", "G G",
+                 "G G", "C C", "Am D", "G G")),
+    # Kingo Bongo: la giungla in citta'. La minore, tamburi in evidenza --
+    # cassa e rullante forti -- e una melodia a botta e risposta, come due
+    # che si lanciano qualcosa da un tetto all'altro.
     "bongo_musica": dict(
-        bpm=112, forma="quadra50", ampiezza_melodia=0.6, basso="quarti",
-        ampiezza_basso=1.0, charleston=0.1, rullante=0.3, picco=3800,
+        bpm=150, forma="quadra50", ampiezza_melodia=0.8, basso="ottavi",
+        ampiezza_basso=0.9, charleston=0.2, rullante=0.42, cassa=1.0,
+        arpeggio=0.24, stacco=0.65, picco=5800,
         melodia=(
-            "A4 .  C5 .  E5 -  .  . ", ".  .  D5 C5 A4 -  .  . ",
-            "G4 .  B4 .  D5 -  .  . ", ".  .  C5 B4 G4 -  .  . ",
-            "A4 .  C5 .  E5 -  A5 - ", "G5 -  E5 -  D5 C5 .  . ",
-            "E5 .  D5 .  C5 .  B4 . ", "A4 -  -  -  .  .  .  . ",
+            "A4 .  C5 .  E5 -  A5 - ", "G5 E5 D5 C5 A4 -  .  . ",
+            "G4 .  B4 .  D5 -  G5 - ", "F5 D5 C5 B4 G4 -  .  . ",
+            "A4 C5 E5 A5 E5 C5 E5 G5", "A5 -  G5 E5 D5 C5 .  . ",
+            "E5 -  D5 -  C5 -  B4 - ", "A4 -  E5 -  A4 -  .  . ",
+            "C5 E5 G5 C6 G5 E5 C5 G4", "F5 A5 C6 A5 F5 D5 A4 F4",
+            "E5 G5 B5 E6 B5 G5 E5 B4", "A4 -  -  -  E4 -  .  . ",
         ),
-        accordi=("A A", "A A", "G G", "G G", "A A", "C G", "F E", "A A")),
+        accordi=("Am Am", "Am Am", "G G", "G G", "Am Am", "Am G",
+                 "F E", "Am Am", "C C", "F Dm", "Em E", "Am Am")),
+    # Gnam Gnam: il motivo di sempre -- e' quello che gli sta bene -- ma
+    # suonato come in sala giochi: piu' svelto, con la batteria sotto e
+    # l'accordo sgranato che corre.
+    "gnam_musica": dict(
+        bpm=150, forma="quadra25", ampiezza_melodia=0.9, basso="ottavi",
+        ampiezza_basso=0.8, charleston=0.2, rullante=0.26, cassa=0.95,
+        arpeggio=0.26, stacco=0.68, picco=6000,
+        melodia=MELODIA, accordi=ACCORDI),
 }
 
 
 def genera(cartella):
     fatti = []
-    campioni = musica()
-    quanti = scrivi(os.path.join(cartella, "gnam_musica.wav"), campioni,
-                    picco=PICCO_MUSICA)
-    fatti.append(("gnam_musica", quanti, 1000.0 * quanti / FREQUENZA))
     for nome, ricetta in sorted(MUSICHE.items()):
         ricetta = dict(ricetta)
         picco = ricetta.pop("picco")

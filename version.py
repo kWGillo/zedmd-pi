@@ -2569,6 +2569,11 @@ Storico:
        banana. A ogni ripresa la citta' entra dall'alto e si abbassa fino al
        suo posto: il punto di vista e' fermo, scendono i palazzi coi gorilla
        sopra. Mentre scende non si mira e non si tira.
+  11.3 Le musiche dei giochi erano insipide. Il generatore ha ora la
+       batteria (cassa, rullante, charleston), il basso a ottavi e una voce
+       di arpeggi a sedicesimi, capisce gli accordi minori e le alterazioni;
+       tutti e nove i brani sono riscritti piu' veloci, piu' staccati e piu'
+       presenti. Pongo resta il piu' discreto, Invaders senza rullante.
 """
 
-__version__ = "11.2"
+__version__ = "11.3"

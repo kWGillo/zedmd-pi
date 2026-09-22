@@ -2,6 +2,30 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [11.3]
+
+### Musiche da sala giochi
+
+Le musiche di sottofondo erano troppo educate. Il generatore adesso sa fare
+tre cose in più, ed è da lì che viene la differenza:
+
+- una **batteria** vera sotto: cassa sull'uno e sul tre (una sinusoide che
+  scende, non fruscio), rullante sul due e sul quattro, charleston sui
+  controtempi;
+- il **basso a ottavi**, fondamentale e quinta alternate a ogni croma: è il
+  motore che spinge;
+- l'**arpeggio**, una seconda voce che sgrana l'accordo a sedicesimi — è la
+  cosa che fa suonare un brano "da cabinato" più di qualunque aumento di
+  velocità.
+
+Tutti e nove i brani sono stati riscritti su questa base: più veloci (dai 150
+ai 172 battiti), più staccati, e più presenti nel mix. Pongo resta il più
+discreto, perché lì il *ping* deve restare la voce; Invaders resta senza
+rullante, perché il ritmo è la marcia degli alieni.
+
+Il generatore capisce anche gli **accordi minori** (`Am`) e le alterazioni
+(`F#5`): prima l'arpeggio non avrebbe saputo che terza suonare.
+
 ## [11.2]
 
 ### Kingo Bongo: città più bassa, e la discesa d'apertura

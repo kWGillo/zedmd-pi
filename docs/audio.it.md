@@ -421,19 +421,27 @@ abbassa mentre si gioca e si abbassa subito.
 - **Game Boy** — fino alla 10.0 usava per sbaglio il volume **degli avvisi**:
   di notte quello è il volume notturno, cioè zero, e il Game Boy giocava muto.
 
-**La musica dei giochi**, dalla 10.9. Ogni gioco integrato ha un suo motivo
-di sottofondo, scritto apposta per questo progetto:
+**La musica dei giochi**, dalla 10.9, **riscritta nella 11.3**. Ogni gioco
+integrato ha un suo motivo di sottofondo, scritto apposta per questo progetto.
+Dalla 11.3 sono musiche **da sala giochi**: sotto ognuna ci sono una batteria
+(cassa sull'uno e sul tre, rullante sul due e sul quattro, charleston sui
+controtempi), un basso a **ottavi** — fondamentale e quinta alternate — e un
+**arpeggio a sedicesimi**, la seconda voce che dà il movimento. Dai 150 ai 172
+battiti al minuto.
 
 | Gioco | Il motivo |
 |---|---|
-| Breakout | veloce, minore, con il rullante: spinge |
-| Invaders | una base cupa e lenta, **senza ritmo suo**: il ritmo è la marcia degli alieni, e la musica ci sta sotto |
-| Snake | calmo, ad arpeggi: è un gioco di concentrazione |
-| Pongo | quasi niente, qualche nota rada: il *ping* resta la voce |
-| Squadriglia | una marcia da fanfara |
-| Gnam Gnam | allegro, in stile chip |
+| Breakout | il più veloce, la minore: è un gioco di riflessi |
+| Invaders | pulsa, ma **senza rullante**: il ritmo è la marcia degli alieni |
+| Snake | chip saltellante, tutto arpeggi |
+| Pongo | il più discreto di tutti: il basso pulsa, ma il *ping* resta la voce |
+| Squadriglia | fanfara da cabinato, con cassa e rullante |
+| Gnam Gnam | il solito motivo, suonato come in sala giochi |
+| Mine vaganti | mi minore, arpeggio fitto: il campo minato si muove |
+| T-Rex | ottavi ribattuti, il passo della corsa |
+| Kingo Bongo | tamburi in evidenza, melodia a botta e risposta |
 
-Stanno tutti **sotto gli effetti** — da un sesto a un terzo del loro volume —
+Stanno tutti **sotto gli effetti** — da un quarto a un terzo del loro volume —
 tacciono a partita finita e, dove c'è una schermata iniziale, finché non si
 preme fuoco. Seguono il cursore **Volume dei giochi** e la levetta **Effetti
 dei giochi**; in più c'è la casella **Musica di sottofondo nei giochi**
