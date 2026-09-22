@@ -298,10 +298,13 @@ class Runtime:
         # non deve conoscerlo: le si danno due funzioni e le basta.
         self.giochi.doom_pronto = lambda: not controlla_wad(
             self.cfg["doom"].get("wad", ""))
-        self.giochi.apri_doom = lambda: self.gioca("doom")
+        # Le aperture che vengono dal giro portano `da_giro`: un Gioca scelto
+        # a mano pochi istanti prima ha la precedenza su di loro (vedi gioca).
+        self.giochi.apri_doom = lambda: self.gioca("doom", da_giro=True)
         # Anche aprire un gioco passa di qui: e' l'unico punto che sa che
         # Doom e i giochi si contendono la stessa presa del pannello.
-        self.giochi.apri_partita = self.gioca
+        self.giochi.apri_partita = (
+            lambda cosa, nome="": self.gioca(cosa, nome, da_giro=True))
         # Select esce da qualunque partita, Doom compreso.
         self.giochi.chiudi_partita = self.smetti
         # Il Game Boy entra nel giro come Doom: se PyBoy c'e' ed e' stata
@@ -309,7 +312,7 @@ class Runtime:
         self.giochi.gb_pronto = lambda: (
             self.gameboy.pronto()
             and not controlla_rom(self.cfg["gameboy"].get("rom", "")))
-        self.giochi.apri_gameboy = lambda: self.gioca("gameboy")
+        self.giochi.apri_gameboy = lambda: self.gioca("gameboy", da_giro=True)
         # E mentre il Game Boy gioca, i pulsanti sono suoi: il lettore dei
         # giochi si fa da parte e tiene solo PS per uscire.
         # Lambda e non il metodo diretto: cosi' `self.gameboy` si legge quando
@@ -799,8 +802,22 @@ class Runtime:
 
     # ------------------------------------------------------------------ partite
 
-    def gioca(self, cosa, nome=""):
+    # Una partita alla volta si apre o si chiude. Senza, due richieste nello
+    # stesso momento -- il tasto Start del pad e il pulsante Gioca della
+    # pagina -- si intrecciavano dentro `apri_sessione`: la seconda apriva il
+    # suo gioco, la prima, ancora a meta', gli sostituiva il gioco sotto i
+    # piedi. Sul pannello partiva Squadriglia e un attimo dopo compariva il
+    # gioco del giro. Rientrante perche' il giro apre passando di nuovo di qui.
+    _partite = threading.RLock()
+
+    def gioca(self, cosa, nome="", da_giro=False):
         """Apre una partita, chiudendo quella eventualmente in corso.
+
+        **Una scelta esplicita vince sul giro.** Gioca nella pagina, un
+        interruttore di Home Assistant: chi li preme ha scelto quel gioco. Una
+        pressione di Start arrivata insieme, o in coda subito dopo, non se lo
+        deve portare via: per qualche secondo il giro si ferma, e quando
+        riparte riparte **dal gioco scelto**.
 
         Doom e i giochi si contendono **la stessa presa del pannello**, e
         aprirne una senza chiudere l'altra non da' un errore: da' un processo
@@ -809,6 +826,16 @@ class Runtime:
         Breakout. Il runtime e' l'unico punto che conosce entrambe, quindi la
         regola sta qui e non dentro le due sorgenti.
         """
+        with self._partite:
+            if da_giro and self.giochi.scelta_recente():
+                print("[giochi] giro ignorato: c'e' appena stata una scelta")
+                return None
+            if not da_giro:
+                self.giochi.scelta_esplicita(
+                    cosa if cosa in ("doom", "gameboy") else nome)
+            return self._apri_partita(cosa, nome)
+
+    def _apri_partita(self, cosa, nome=""):
         if cosa == "doom":
             self.giochi.chiudi_sessione()
             self.gameboy.chiudi_sessione()
@@ -823,6 +850,10 @@ class Runtime:
 
     def smetti(self, cosa=""):
         """Chiude la partita in corso. Senza argomenti, qualunque essa sia."""
+        with self._partite:
+            return self._smetti(cosa)
+
+    def _smetti(self, cosa=""):
         chiuse = False
         if cosa in ("", "giochi"):
             chiuse = self.giochi.chiudi_sessione() or chiuse

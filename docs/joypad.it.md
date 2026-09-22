@@ -181,6 +181,11 @@ Fino alla 10.2 le levette nei giochi contavano solo in orizzontale — Breakout
 e Invaders non avevano bisogno d'altro — e con Pongo il pollice sulla levetta
 non avrebbe mosso niente.
 
+**Gioca vince sul giro.** Se scegli un gioco dalla pagina (o da Home
+Assistant) mentre il giro del tasto Start sta cambiando gioco, resta il tuo:
+per tre secondi Start non cambia niente, e poi il giro riprende dal gioco
+che hai scelto.
+
 **Cerchio, dalla 10.4, è il tasto speciale.** Serve al looping di Squadriglia,
 l'unico gioco con una seconda azione. In tutti gli altri giochi cerchio spara
 esattamente come prima: il gioco che non conosce il tasto speciale lo riceve

@@ -2,6 +2,20 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.6.2]
+
+### Gioca vince sul giro
+
+Premendo **Gioca** nella pagina mentre il giro del tasto Start stava già
+cambiando gioco, partiva il gioco scelto e un attimo dopo lo sostituiva quello
+del giro. Cambiare gioco richiede un momento — si aspetta che l'ultimo suono
+esca — e le due richieste si intrecciavano.
+
+Adesso le partite si aprono **una alla volta**, e una scelta esplicita —
+Gioca nella pagina, o l'interruttore di Home Assistant — **ha la precedenza**:
+per tre secondi il tasto Start non cambia gioco, e quando riparte il giro
+continua **dal gioco scelto**.
+
 ## [10.6.1]
 
 ### Squadriglia su fondo nero

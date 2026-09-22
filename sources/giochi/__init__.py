@@ -126,6 +126,11 @@ ASSI = {
 # ricevitore ZeDMD, che se rallenta fa scartare fotogrammi al client.
 FPS = 30
 
+# Per quanti secondi, dopo un Gioca scelto a mano, il tasto Start non cambia
+# gioco. Copre le pressioni gia' in coda e quella fatta "per sicurezza"
+# insieme al clic; passato, il giro riprende dal gioco scelto.
+PRECEDENZA_SCELTA = 3.0
+
 
 class GiochiSource(Source):
     """La sorgente che tiene il pannello mentre si gioca."""
@@ -163,6 +168,9 @@ class GiochiSource(Source):
         # Dove siamo arrivati nel giro del tasto Start. Sopravvive alla
         # chiusura di una sessione, e a una partita di Doom.
         self._giro = ""
+        # Quando e' stata fatta l'ultima scelta esplicita (Gioca, Home
+        # Assistant): per qualche secondo ha la precedenza sul giro.
+        self._scelta_a = -1e9
 
     # ------------------------------------------------------------ ciclo di vita
 
@@ -349,6 +357,16 @@ class GiochiSource(Source):
         except Exception:
             return False
 
+    def scelta_esplicita(self, nome):
+        """Un gioco scelto a mano: il giro si ferma per un momento, e riparte
+        da qui."""
+        self._scelta_a = time.monotonic()
+        if nome:
+            self._giro = nome
+
+    def scelta_recente(self):
+        return time.monotonic() - self._scelta_a < PRECEDENZA_SCELTA
+
     def ciclo(self):
         """Passa al gioco successivo. Da fermo, riprende da dove era rimasto.
 
@@ -356,6 +374,8 @@ class GiochiSource(Source):
         ancora si cambia gioco. Non c'e' un menu da attraversare, perche' su
         un pannello alto 64 pixel un menu costa piu' di quello che risolve.
         """
+        if self.scelta_recente():
+            return False
         giro = self.elenco_ciclo()
         if not giro:
             return False
@@ -389,18 +409,21 @@ class GiochiSource(Source):
         """
         for _ in range(len(giro)):
             if prossimo == "doom":
-                self.chiudi_sessione()
-                fatto = bool(self.apri_doom()) if callable(self.apri_doom) else False
+                fatto = self.apri_doom() if callable(self.apri_doom) else False
             elif prossimo == "gameboy":
-                self.chiudi_sessione()
-                fatto = (bool(self.apri_gameboy())
+                fatto = (self.apri_gameboy()
                          if callable(self.apri_gameboy) else False)
             elif callable(self.apri_partita):
                 # Non `apri_sessione` diretta: aprire un gioco deve poter
                 # **chiudere Doom**, e quella regola sta nel runtime.
-                fatto = bool(self.apri_partita("giochi", prossimo))
+                fatto = self.apri_partita("giochi", prossimo)
             else:
-                fatto = bool(self.apri_sessione(prossimo))
+                fatto = self.apri_sessione(prossimo)
+            if fatto is None:
+                # Il runtime l'ha rifiutata perche' un gioco e' appena stato
+                # scelto a mano: non e' un fallimento, e non si tira dritto
+                # al successivo.
+                return False
             if fatto:
                 return True
             print("[giochi] %s non e' partito: passo al successivo" % prossimo)

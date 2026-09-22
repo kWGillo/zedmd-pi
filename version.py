@@ -2517,6 +2517,12 @@ Storico:
        della pagina Impostazioni.
   10.6.1 Squadriglia: il fondo e' nero, LED spenti. Anche il quasi nero
        mostrava le righe del refresh. Il mare resta nelle onde e nelle isole.
+  10.6.2 Gioca vince sul giro del tasto Start. Cambiare gioco richiede un
+       momento (si aspetta l'ultimo suono), e in quel momento il Gioca della
+       pagina e il giro si intrecciavano: partiva il gioco scelto e un
+       attimo dopo lo sostituiva quello del giro. Adesso le partite si aprono
+       una alla volta, una scelta esplicita ferma il giro per tre secondi, e
+       il giro riparte dal gioco scelto.
 """
 
-__version__ = "10.6.1"
+__version__ = "10.6.2"
