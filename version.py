@@ -2562,6 +2562,13 @@ Storico:
        Corretto il record che passava da un gioco all'altro: aprendo un
        gioco dopo un altro, il record del primo compariva come HI del
        secondo e a fine partita ci restava.
+  11.2 Kingo Bongo: i palazzi occupavano troppo pannello. Le altezze si
+       abbassano tutte insieme finche' il piu' basso non resta di due o tre
+       righe --
+       i dislivelli fra i tetti restano quelli -- e sopra resta cielo per la
+       banana. A ogni ripresa la citta' entra dall'alto e si abbassa fino al
+       suo posto: il punto di vista e' fermo, scendono i palazzi coi gorilla
+       sopra. Mentre scende non si mira e non si tira.
 """
 
-__version__ = "11.1"
+__version__ = "11.2"

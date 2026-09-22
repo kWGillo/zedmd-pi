@@ -27,7 +27,7 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 b831684ce5c6e5f7d910ba3ea647a7a0  hass.py
-c6625a3b44415864934e3f4ad7612634  i18n.py
+621d37f8fc055b7c20d962b44f38693a  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
@@ -61,7 +61,7 @@ c7be063837324c79053cba527364e517  sources/doom.py
 78c1cccbfc36c6e8c70c0dcce5235786  sources/gameboy.py
 c61e1342d4985c66c22addb5cd3f0132  sources/giochi/__init__.py
 a6a0effa4d25098e12d2bcd62b058c9b  sources/giochi/base.py
-6513390788b0cdc8607a0f2100fbc5cc  sources/giochi/bongo.py
+f2aea72967c0e34ef150b26ddf000e8b  sources/giochi/bongo.py
 71f54d44a50464e82cafa5d08b261fc3  sources/giochi/gnam.py
 d8be4b827917e8c222dfe63615a6ff87  sources/giochi/invasori.py
 7463e5026b2ad71786d96d7e48187b62  sources/giochi/mattoni.py
@@ -145,7 +145,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 29ec3d40d18b3ff9c31cf907cd8b1236  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-5ba0ca877a7ac4ceafbb465753338238  version.py
+f6f21f5f3511ef3d495d9ba7888cdcd2  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 3d46ce44bd31fc1f964ad7f903551c29  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

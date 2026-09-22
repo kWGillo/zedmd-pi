@@ -19,6 +19,18 @@ ripresa: palazzi di larghezza e altezza a caso, con le finestre accese qua e
 là e qualche stella sopra. Tu sei il gorilla arancio a sinistra, il computer
 quello grigio a destra.
 
+Le altezze dei palazzi si estraggono a caso e poi **si abbassano tutte
+insieme**, finché il più basso del quadro non resta alto due o tre righe di pixel: quello che
+conta in un tiro a parabola è il dislivello fra un tetto e l'altro, non
+quanto è alta la città, e così sopra resta cielo libero per la banana.
+
+A ogni ripresa la città **entra dall'alto e si abbassa** fino al suo posto,
+in poco più di un secondo. Il punto di vista è fermo — la strada resta
+l'ultima riga e le stelle non si muovono — sono i palazzi a scendere, con i
+gorilla sopra i loro tetti, come se l'inquadratura scoprisse la città
+dall'alto. Mentre scende non si mira e non si tira; il computer, intanto,
+sceglie già il suo tiro.
+
 I palazzi sono **contorni con le finestre**, non blocchi pieni: su un'area
 grande di colore basso il pannello mostra le righe del refresh (la lezione di
 Squadriglia e Gnam Gnam). Quando una banana colpisce un palazzo ci fa un

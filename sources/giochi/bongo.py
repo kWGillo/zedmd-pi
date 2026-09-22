@@ -71,6 +71,21 @@ RIPETI_DOPO = 0.35              # tenendo premuto, il numero corre da qui
 RIPETI_VELOCE = 18.0            # unita' al secondo all'inizio della corsa
 RIPETI_ACCELERA = 50.0          # e quanto accelera, al secondo
 
+# I palazzi. Le altezze si estraggono e poi si **abbassano tutte insieme**
+# finche' il piu' basso non resta di due o tre righe: quello che conta in un tiro a
+# parabola e' il dislivello fra un tetto e l'altro, non quanto e' alta la
+# citta'. Cosi' il cielo sopra resta libero e la banana ha dove passare,
+# mentre il profilo dei tetti e' quello estratto, senza schiacciature.
+ALTO_MIN, ALTO_MAX = 12, 42
+ALTO_PIU_BASSO = 3              # il palazzo piu' basso del quadro: due-tre righe
+
+# La discesa d'apertura: la citta' entra dall'alto e si abbassa fino al suo
+# posto, come se l'inquadratura scendesse. Il punto di vista e' fermo -- la
+# strada resta l'ultima riga -- e sono i palazzi ad abbassarsi, coi gorilla
+# sopra.
+ALZATA = 34                     # di quanto sono piu' alti quando cominciano
+DISCESA = 1.3                   # secondi
+
 BUCO = 4.5                      # raggio del buco di una banana su un palazzo
 BUCO_GORILLA = 8.0              # raggio del botto quando si prende un gorilla
 
@@ -180,13 +195,20 @@ class Citta(object):
         self.proprietario = [0] * LARGHEZZA       # quale palazzo, per colonna
         self.palazzi = []                         # (x, larghezza, cima)
         self.finestre = {}                        # (x, y) -> accesa
+        # Prima le misure, tutte: le altezze servono tutte insieme per sapere
+        # di quanto abbassare il quadro.
+        misure = []
         x = 0
-        indice = 0
         while x < LARGHEZZA:
             largo = rnd.randint(16, 27)
             if LARGHEZZA - (x + largo) < 14:
                 largo = LARGHEZZA - x
-            alto = rnd.randint(12, 42)
+            misure.append([x, largo, rnd.randint(ALTO_MIN, ALTO_MAX)])
+            x += largo
+        abbassa = min(m[2] for m in misure) - ALTO_PIU_BASSO
+        for m in misure:
+            m[2] -= abbassa
+        for indice, (x, largo, alto) in enumerate(misure):
             cima = FONDO - alto + 1
             self.palazzi.append((x, largo, cima))
             colore = indice % len(COLORI_PALAZZI)
@@ -195,17 +217,18 @@ class Citta(object):
                 for yy in range(cima, ALTEZZA):
                     self.pieno[yy][xx] = 1
             # Le finestre: colonne ogni tre pixel, piani ogni quattro, alte due.
+            # Si continuano anche sotto la strada: servono al disegno della
+            # discesa, dove del palazzo si vede un pezzo piu' in basso.
             for fx in range(x + 2, x + largo - 3, 3):
-                for fy in range(cima + 3, FONDO - 1, 4):
+                for fy in range(cima + 3, FONDO - 1 + ALZATA, 4):
                     accesa = rnd.random() < 0.45
                     if accesa:
                         self.finestre[(fx, fy)] = True
                         self.finestre[(fx, fy + 1)] = True
-            x += largo
-            indice += 1
         self.stelle = [(rnd.randint(0, LARGHEZZA - 1), rnd.randint(CIMA + 1, 30))
                        for _ in range(26)]
         self._img = None
+        self._estesa = None
 
     def solido(self, x, y):
         xi, yi = int(math.floor(x)), int(math.floor(y))
@@ -222,6 +245,10 @@ class Citta(object):
                 return y
         return FONDO
 
+    def alto_minimo(self):
+        """L'altezza del palazzo piu' basso, in pixel."""
+        return min(ALTEZZA - cima for _x, _largo, cima in self.palazzi)
+
     def buca(self, cx, cy, raggio):
         r2 = raggio * raggio
         for y in range(int(cy - raggio) - 1, int(cy + raggio) + 2):
@@ -231,20 +258,52 @@ class Citta(object):
                 if 0 <= x < LARGHEZZA and (x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2 <= r2:
                     self.pieno[y][x] = 0
         self._img = None
+        self._estesa = None       # dopo un buco non serve piu': la discesa
+                                  # e' finita da un pezzo
 
     def immagine(self):
-        if self._img is not None:
-            return self._img
-        img = Image.new("RGB", (LARGHEZZA, ALTEZZA), (0, 0, 0))
+        if self._img is None:
+            # Se la citta' prolungata c'e' gia' -- l'ha disegnata la discesa
+            # -- la citta' e' il suo pezzo di sopra: un disegno invece di due.
+            if self._estesa is not None:
+                self._img = self._estesa.crop((0, 0, LARGHEZZA, ALTEZZA))
+                px = self._img.load()
+                for x, y in self.stelle:
+                    if not self.pieno[y][x]:
+                        px[x, y] = COLORE_STELLA
+            else:
+                self._img = self._disegna(ALTEZZA, stelle=True)
+        return self._img
+
+    def estesa(self):
+        """La citta' prolungata di ALZATA righe verso il basso.
+
+        Serve alla discesa: alzare i palazzi di `k` e' la stessa cosa che
+        ritagliare questa immagine a partire dalla riga `k`. Si disegna una
+        volta per ripresa, e poi ogni fotogramma e' un ritaglio.
+        """
+        if self._estesa is None:
+            self._estesa = self._disegna(ALTEZZA + ALZATA, stelle=False)
+        return self._estesa
+
+    def _righe(self, y):
+        """La riga `y` della maschera, prolungata sotto la strada: sotto,
+        ogni palazzo continua com'era all'ultima riga."""
+        if y < 0:
+            return None
+        return self.pieno[min(y, ALTEZZA - 1)]
+
+    def _disegna(self, altezza, stelle):
+        img = Image.new("RGB", (LARGHEZZA, altezza), (0, 0, 0))
         px = img.load()
-        for x, y in self.stelle:
-            if not self.pieno[y][x]:
-                px[x, y] = COLORE_STELLA
-        p = self.pieno
-        for y in range(CIMA, ALTEZZA):
-            riga = p[y]
-            su = p[y - 1]
-            giu = p[y + 1] if y + 1 < ALTEZZA else None
+        if stelle:
+            for x, y in self.stelle:
+                if not self.pieno[y][x]:
+                    px[x, y] = COLORE_STELLA
+        for y in range(CIMA, altezza):
+            riga = self._righe(y)
+            su = self._righe(y - 1)
+            giu = self._righe(y + 1) if y + 1 < altezza else None
             for x in range(LARGHEZZA):
                 if not riga[x]:
                     continue
@@ -256,7 +315,6 @@ class Citta(object):
                     px[x, y] = COLORI_PALAZZI[self.proprietario[x]]
                 elif (x, y) in self.finestre:
                     px[x, y] = COLORE_FINESTRA
-        self._img = img
         return img
 
 
@@ -391,6 +449,7 @@ class Bongo(Gioco):
         self._cpu_angolo = None
         self._tiro_cpu = None
         self._mostra = [float(self.angolo), float(self.velocita)]
+        self._discesa = DISCESA
         self._inizia_turno()
 
     def _metti_gorilla(self, indice, verso, colore):
@@ -405,6 +464,15 @@ class Bongo(Gioco):
             self._pensiero = self._cerca_tiro()
             self._tiro_cpu = None
             self._mostra = [float(self.angolo), float(self.velocita)]
+
+    def alzata(self):
+        """Di quanto sono alzati i palazzi in questo istante: ALZATA a inizio
+        ripresa, zero quando la citta' e' scesa al suo posto. La discesa
+        frena verso la fine, come una carrellata che si ferma."""
+        if not self.iniziata or self._discesa <= 0:
+            return 0
+        quota = self._discesa / DISCESA
+        return int(round(ALZATA * quota * quota))
 
     def musica_di_adesso(self):
         return self.MUSICA if (self.iniziata and not self.finita) else None
@@ -450,6 +518,18 @@ class Bongo(Gioco):
         if self._scritta is not None:
             testo, resta = self._scritta
             self._scritta = (testo, resta - dt) if resta - dt > 0 else None
+
+        if self._discesa > 0:
+            # La citta' sta scendendo: non si mira e non si tira. Il
+            # computer intanto puo' pensare -- i suoi conti guardano la
+            # citta' ferma, che e' gia' quella definitiva.
+            self._discesa -= dt
+            if self.fase == "pensa" and self._tiro_cpu is None:
+                try:
+                    next(self._pensiero)
+                except StopIteration:
+                    pass
+            return
 
         if self.fase == "mira":
             self._mira(dt, tasti, premuti_ora)
@@ -679,14 +759,28 @@ class Bongo(Gioco):
         return GORILLA
 
     def disegna(self):
-        img = self.citta.immagine().copy()
-        px = img.load()
+        k = self.alzata()
+        if k > 0:
+            # Alzare i palazzi di k e' ritagliare la citta' prolungata k
+            # righe piu' in basso: la strada resta l'ultima riga, i tetti
+            # sono piu' in alto, e i gorilla stanno sopra i loro tetti.
+            img = self.citta.estesa().crop((0, k, LARGHEZZA, k + ALTEZZA))
+            px = img.load()
+            # Le stelle stanno ferme: il cielo non scende, scendono i
+            # palazzi. Solo quelle che in questo istante non sono coperte.
+            for x, y in self.citta.stelle:
+                if not self.citta._righe(y + k)[x]:
+                    px[x, y] = COLORE_STELLA
+        else:
+            img = self.citta.immagine().copy()
+            px = img.load()
         for chi in (TU, CPU):
             g = self.gorilla[chi]
             if g is not None:
-                self._sprite(px, _pixel(self._posa(chi)), g.x, g.y, g.colore)
+                self._sprite(px, _pixel(self._posa(chi)), g.x, g.y - k, g.colore)
         # A chi tocca: un triangolino sopra la testa, che lampeggia.
-        if self.iniziata and not self.finita and self.fase in ("mira", "pensa"):
+        if (self.iniziata and not self.finita and self._discesa <= 0
+                and self.fase in ("mira", "pensa")):
             g = self.gorilla[self.turno]
             if g is not None and int(self._rnd_fase() * 3) % 2 == 0:
                 cx = g.x + LARGO_G // 2
@@ -695,7 +789,8 @@ class Bongo(Gioco):
                         yy = g.y - 5 + dy
                         if CIMA <= yy < ALTEZZA:
                             px[cx + dx, yy] = COLORE_HUD
-        if self.fase == "mira" and self.iniziata and not self.finita:
+        if (self.fase == "mira" and self.iniziata and not self.finita
+                and self._discesa <= 0):
             self._disegna_mira(px)
         if self.banana is not None:
             b = self.banana

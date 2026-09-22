@@ -2,6 +2,23 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [11.2]
+
+### Kingo Bongo: città più bassa, e la discesa d'apertura
+
+I palazzi occupavano troppo pannello. Adesso le altezze si estraggono come
+prima e poi **si abbassano tutte insieme**, finché il palazzo più basso del
+quadro non è più alto di due o tre righe di pixel: il profilo dei tetti resta quello — i dislivelli
+fra un tetto e l'altro sono il gioco — ma sopra resta cielo libero, e la
+banana ha dove passare.
+
+E un effetto d'apertura: a ogni ripresa la città **entra dall'alto e si
+abbassa** fino al suo posto, in poco più di un secondo, con i gorilla sopra i
+loro tetti. Il punto di vista non si muove — la strada resta l'ultima riga,
+le stelle stanno ferme — sono i palazzi a scendere, come se l'inquadratura
+scoprisse la città dall'alto. Mentre scende non si mira e non si tira; il
+computer, intanto, sceglie già il suo tiro.
+
 ## [11.1]
 
 ### T-Rex, la corsa del dinosauro
