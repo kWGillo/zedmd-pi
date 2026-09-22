@@ -1881,6 +1881,12 @@ STRINGS = {
     "giochi.mine.hint": (
         "Stile Vectrex: ruoti, spingi e spari fra le mine. Cerchio per il salto.",
         "Vectrex style: rotate, thrust and shoot among the mines. Circle to jump."),
+    "giochi.trex.hint": (
+        "Corri, salta i cactus e abbassati sotto gli pterodattili. Fuoco salta, giù si abbassa.",
+        "Run, jump the cacti and duck under the pterodactyls. Fire jumps, down ducks."),
+    "giochi.bongo.hint": (
+        "Due gorilla sui tetti e una banana. Su e giù l'angolo, destra e sinistra la forza, fuoco lancia.",
+        "Two gorillas on the rooftops and a banana. Up/down angle, right/left power, fire throws."),
     "giochi.pongo.record": ("Scambio più lungo:", "Longest rally:"),
     "giochi.azzera": ("Azzera", "Reset"),
     "giochi.azzera.titolo": ("Azzera il record", "Reset the high score"),

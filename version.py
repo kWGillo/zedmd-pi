@@ -2550,6 +2550,18 @@ Storico:
        Il livello del computer di Pongo e' anche una tendina in Home
        Assistant, che lo mostra e lo cambia. Il colore casuale dell'orologio
        e' un colore pieno (R, G, B, C, M, Y) meta' delle ore, e vivo le altre.
+  11.1 Due giochi nuovi. **T-Rex**: la corsa del dinosauro, disegnato qui,
+       che salta i cactus (piu' alto tenendo premuto) e si abbassa sotto gli
+       pterodattili, a tre quote; velocita' che cresce, urti al pixel, giorno
+       e notte con la luna e le stelle invece dei colori invertiti.
+       **Kingo Bongo**: due gorilla sui tetti che si tirano banane, con
+       angolo, velocita' e vento; i palazzi si bucano. Tu contro il computer,
+       che calcola i tiri con la stessa fisica e sbaglia come una persona:
+       largo al primo tiro, meno ai successivi, meno a ogni livello. Tre
+       riprese per vincere la partita. Tutti e due con la loro musica.
+       Corretto il record che passava da un gioco all'altro: aprendo un
+       gioco dopo un altro, il record del primo compariva come HI del
+       secondo e a fine partita ci restava.
 """
 
-__version__ = "11.0"
+__version__ = "11.1"

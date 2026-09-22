@@ -50,6 +50,8 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`squadriglia.it.md`](squadriglia.it.md) · [PDF](DMD_squadriglia.pdf) | Squadriglia: lo sparatutto in stile 1942, il looping, il POW, il bombardiere |
 | [`gnam.it.md`](gnam.it.md) · [PDF](DMD_gnam.pdf) | Gnam Gnam: il labirinto, le pillole, e come insegue ognuno dei quattro fantasmi |
 | [`mine.it.md`](mine.it.md) · [PDF](DMD_mine.pdf) | Mine vaganti: il gioco vettoriale, la posamine, le quattro specie di mine, il salto |
+| [`trex.it.md`](trex.it.md) · [PDF](DMD_trex.pdf) | T-Rex: la corsa del dinosauro, il salto tenuto, gli pterodattili, giorno e notte |
+| [`bongo.it.md`](bongo.it.md) · [PDF](DMD_bongo.pdf) | Kingo Bongo: i gorilla sui tetti, angolo, velocità e vento, come mira il computer |
 | [`joypad.it.md`](joypad.it.md) · [PDF](DMD_joypad.pdf) | Mappatura dei comandi: pad, tastiera collegata al DMD, chi può far cominciare una partita |
 
 ---

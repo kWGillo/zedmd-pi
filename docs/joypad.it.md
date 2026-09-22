@@ -29,7 +29,7 @@ sono nemmeno permessi da sistemare su `/dev/input`.
 | **Per Bluetooth** | il Bluetooth del Pi acceso; niente adattatori né pacchetti aggiuntivi |
 
 Il pad serve a due cose distinte: i **giochi** scritti per il pannello
-(Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam, Mine vaganti) e **Doom**. Sono pagine diverse con impostazioni proprie,
+(Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam, Mine vaganti, T-Rex, Kingo Bongo) e **Doom**. Sono pagine diverse con impostazioni proprie,
 ma il pad è lo stesso e si riconosce una volta sola.
 
 ---
@@ -150,7 +150,7 @@ levette e croce direzionale. Se `evtest` non è installato:
 
 ## 5. I comandi
 
-### 5.1 Nei giochi (Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam, Mine vaganti)
+### 5.1 Nei giochi (Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam, Mine vaganti, T-Rex, Kingo Bongo)
 
 | Comando | Sul pad |
 |---|---|
@@ -158,6 +158,8 @@ levette e croce direzionale. Se `evtest` non è installato:
 | sparare / lanciare la palla | **X**, **cerchio**, **quadrato**, **R1**, **R2** |
 | looping, in Squadriglia | **cerchio** (tastiera: **Alt**) |
 | salto, in Mine vaganti | **cerchio** (tastiera: **Alt**) |
+| saltare, in T-Rex | **X** o **cerchio**, anche **su** (tenuto: più alto); **giù** si abbassa |
+| angolo e velocità, in Kingo Bongo | **su / giù** l'angolo, **destra / sinistra** la velocità; **X** lancia |
 | uscire dalla partita | **Share/Select** |
 | scorrere il giro dei giochi | **Options/Start** (fuori dal Game Boy anche **PS**) |
 | **far cominciare** una partita | **Options** (o il tasto **PS**) |
@@ -339,6 +341,8 @@ di Doom. Compaiono da soli con MQTT Discovery, se `mqtt.discovery` è acceso:
 | `switch.dmd_gioco_squadriglia` | idem per Squadriglia |
 | `switch.dmd_gioco_gnam` | idem per Gnam Gnam |
 | `switch.dmd_gioco_mine` | idem per Mine vaganti |
+| `switch.dmd_gioco_trex` | idem per T-Rex |
+| `switch.dmd_gioco_bongo` | idem per Kingo Bongo |
 | `switch.dmd_doom` | idem per Doom |
 
 Sono **mutuamente esclusivi**: la presa del pannello è una sola, quindi

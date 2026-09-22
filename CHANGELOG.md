@@ -2,6 +2,36 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [11.1]
+
+### T-Rex, la corsa del dinosauro
+
+Un dinosauro che corre sulla pista, disegnato per il pannello — tozzo, verde,
+con le creste arancio e la pancia chiara — salta i cactus e si abbassa sotto
+gli pterodattili. **Fuoco** (o su, o cerchio) salta, e **tenendo premuto** il
+salto è più alto; **giù** abbassa, e in aria fa ricadere in picchiata. La
+velocità cresce piano, da 300 punti arrivano gli pterodattili a tre quote, e
+da 700 la notte: non con i colori invertiti ma con luna e stelle, perché un
+cielo chiaro sul pannello mostrerebbe le righe del refresh. Gli urti sono al
+pixel. Una vita sola. Con la sua musica.
+
+### Kingo Bongo, i gorilla sui tetti
+
+Due gorilla sui palazzi di una città di notte, che si tirano banane. **Su e
+giù** l'angolo, **destra e sinistra** la velocità (tenendo premuto il numero
+corre), **fuoco** lancia; una linea tratteggiata mostra direzione e forza, e il
+tabellone il vento. Le banane bucano i palazzi, e i buchi restano per la
+ripresa. Il computer calcola i tiri con la stessa fisica della banana vera, ma
+sbaglia come una persona: largo al primo tiro, sempre meno ai successivi, e
+meno a ogni livello. Tre riprese vinte fanno la partita, e la partita dopo è
+più difficile; chi colpisce se stesso regala la ripresa. Con la sua musica.
+
+### Il record non passa più da un gioco all'altro
+
+Aprendo un gioco subito dopo un altro, il record del primo compariva come HI
+del secondo, e alla fine della partita veniva salvato come suo. Il controllo
+si faceva col nome del gioco nuovo invece che con quello appena chiuso.
+
 ## [11.0]
 
 ### Mine vaganti, il primo gioco vettoriale

@@ -100,6 +100,9 @@ RICETTE = {
     "ping": [(0.035, 490, 490)],
     "sponda": [(0.030, 245, 245)],
     "punto": [(0.050, 490, 490), (0.180, 980, 980)],
+    # T-Rex: il salto e' un blip che sale di un'ottava, corto, perche' si
+    # sente a ogni ostacolo e non deve stancare.
+    "salto": [(0.060, 420, 840)],
 }
 
 
@@ -300,6 +303,31 @@ MUSICHE = {
         ),
         accordi=("E E", "A B", "E E", "E E", "G G", "E E", "A A", "B B",
                  "C C", "A A", "G G", "A B")),
+    # T-Rex: la corsa. Sol maggiore, saltellante, a ottavi ribattuti: il
+    # passo del dinosauro. Leggera, perche' sta sotto tutta la partita.
+    "trex_musica": dict(
+        bpm=144, forma="quadra25", ampiezza_melodia=0.7, basso="umpa",
+        ampiezza_basso=0.7, charleston=0.15, picco=3800,
+        melodia=(
+            "G4 B4 D5 B4 G4 B4 D5 G5", "E5 -  D5 B4 D5 -  .  . ",
+            "C5 E5 G5 E5 C5 E5 G5 C6", "B5 -  A5 G5 A5 -  .  . ",
+            "G4 B4 D5 B4 G4 B4 D5 G5", "A5 G5 E5 D5 E5 -  G5 - ",
+            "A5 -  C6 -  D6 -  C6 A5", "G5 -  D5 -  G4 .  .  . ",
+        ),
+        accordi=("G G", "C D", "C C", "G D", "G G", "C C", "D D", "G G")),
+    # Kingo Bongo: la giungla in citta'. La minore, un ritmo di tamburi
+    # (basso sui quarti e rullante) e una melodia a botta e risposta, come
+    # due che si lanciano qualcosa.
+    "bongo_musica": dict(
+        bpm=112, forma="quadra50", ampiezza_melodia=0.6, basso="quarti",
+        ampiezza_basso=1.0, charleston=0.1, rullante=0.3, picco=3800,
+        melodia=(
+            "A4 .  C5 .  E5 -  .  . ", ".  .  D5 C5 A4 -  .  . ",
+            "G4 .  B4 .  D5 -  .  . ", ".  .  C5 B4 G4 -  .  . ",
+            "A4 .  C5 .  E5 -  A5 - ", "G5 -  E5 -  D5 C5 .  . ",
+            "E5 .  D5 .  C5 .  B4 . ", "A4 -  -  -  .  .  .  . ",
+        ),
+        accordi=("A A", "A A", "G G", "G G", "A A", "C G", "F E", "A A")),
 }
 
 

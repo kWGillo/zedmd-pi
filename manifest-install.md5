@@ -8,7 +8,7 @@ d3fa24745643710531082bd552ecc8ec  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 dffdb5951d4776068d87865067fb4195  congela.py
 f4da634c02da1d2d9c2bf600287d09c3  copertine.py
-5f97b8dabf5c93c5758354d6b5f05d11  diagnostica/genera_suoni.py
+7ff46b7f19acb5d513ea619de90c319a  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 28dd449748f8f29471a7781d1acb50de  dmdconf.py
@@ -23,8 +23,8 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 075e6985999ab1d4bbcca75759c692b7  gb/setup_gb.sh
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
-deb12fd1afe7fca2cd9bcedf224231be  hass.py
-a7173865d42c9444a347a4cff6a5b980  i18n.py
+b831684ce5c6e5f7d910ba3ea647a7a0  hass.py
+c6625a3b44415864934e3f4ad7612634  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 b9d0bda3222f80aa266f96cf9db90b8c  lookup.py
@@ -55,8 +55,9 @@ fff9a6751fd27a17747c95d907945d19  sources/cielo.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 c7be063837324c79053cba527364e517  sources/doom.py
 78c1cccbfc36c6e8c70c0dcce5235786  sources/gameboy.py
-718ba4ff04c7a83ed1cd97cbbc48ede9  sources/giochi/__init__.py
+c61e1342d4985c66c22addb5cd3f0132  sources/giochi/__init__.py
 a6a0effa4d25098e12d2bcd62b058c9b  sources/giochi/base.py
+6513390788b0cdc8607a0f2100fbc5cc  sources/giochi/bongo.py
 71f54d44a50464e82cafa5d08b261fc3  sources/giochi/gnam.py
 d8be4b827917e8c222dfe63615a6ff87  sources/giochi/invasori.py
 7463e5026b2ad71786d96d7e48187b62  sources/giochi/mattoni.py
@@ -64,6 +65,7 @@ d8be4b827917e8c222dfe63615a6ff87  sources/giochi/invasori.py
 ce067949314c5c7a779ef14aef2a479e  sources/giochi/pongo.py
 bf801c6443981bcbd2132b69bdf01cf8  sources/giochi/serpente.py
 9f1e1bc5394cdb3b6b7620eaeef5e07a  sources/giochi/squadriglia.py
+e6d3a6d006b2d1ff361934e64a1ae7e9  sources/giochi/trex.py
 8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
 9d5c71443d63c261e79811e3d8d42b7d  sources/meteo.py
 1d2251eff5cc8b014100149bd68d0103  sources/notifiche.py
@@ -80,6 +82,7 @@ cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 c750104c1eaa178d6958982586e89855  staccato.py
 59a5d29dba6d1d0e47a7a02287950719  static/style.css
 02da8bb5b0b0d38d3fb59515931fa198  suoni.py
+55f8d7b32f8a65628cc3129198cc74fa  suoni/bongo_musica.wav
 2d1de4696a37ff5de9e4479a263e3916  suoni/breakout_musica.wav
 b2e39a45b2319abd500f8c72019d34c0  suoni/colpito.wav
 f6641ea73dc8405f622e1e1250d79a9a  suoni/gnam_musica.wav
@@ -106,11 +109,13 @@ f7d73d6cba13217a75763da88086227b  suoni/pongo_musica.wav
 0f40be7bd55e8703dbd980ce7257364f  suoni/punto.wav
 de3e7a362401fab65abc94e71aca49d5  suoni/racchetta.wav
 daa1d9018695b5ba1f51b4540301eb40  suoni/record.wav
+22213c89de13ddde41eeb04f8782e3dd  suoni/salto.wav
 0537aa3e83ea7fc34f079f522e16fff5  suoni/snake_musica.wav
 0068be611d5ba365f3e76645b4921d12  suoni/sparo.wav
 65bba922edf1b5a46db02590d120a933  suoni/sponda.wav
 087f475859a58ac561d99ada12f66a6c  suoni/squadriglia_musica.wav
 20f388c98cf3e8c1565aac8909902ac3  suoni/tonfo.wav
+21e242c6de6f537b489a3b6f2bb8e0d3  suoni/trex_musica.wav
 e7cbc43ed729a6fc7f71dc5d266d5a98  templates/banner.html
 8be6e221d561cbbc3d239eecd5eaa7a9  templates/base.html
 f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
@@ -134,7 +139,7 @@ bfe7e1931764badb484f170fb1386427  templates/services.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 29ec3d40d18b3ff9c31cf907cd8b1236  templates/updates.html
-14aba8cf40f9300d86736013c2566758  version.py
+5ba0ca877a7ac4ceafbb465753338238  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 3d46ce44bd31fc1f964ad7f903551c29  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

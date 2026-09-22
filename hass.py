@@ -158,6 +158,8 @@ ICONE_GIOCHI = {
     "squadriglia": "mdi:airplane",
     "gnam": "mdi:pac-man",
     "mine": "mdi:star-four-points-outline",
+    "trex": "mdi:run-fast",
+    "bongo": "mdi:city-variant-outline",
 }
 
 try:

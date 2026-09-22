@@ -28,6 +28,7 @@ from ..comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_RY, ABS_X, ABS_Y,
                        BTN_MODE, BTN_SELECT, BTN_SOUTH, BTN_START, BTN_TR,
                        BTN_TR2, BTN_WEST, Lettore, joystick, tastiere)
 from .base import ALTEZZA, CAMPO, LARGHEZZA, Gioco, centra, scrivi
+from .bongo import Bongo
 from .gnam import Gnam
 from .invasori import Invasori
 from .mattoni import Mattoni
@@ -35,14 +36,16 @@ from .mine import Mine
 from .pongo import Pongo
 from .serpente import Serpente
 from .squadriglia import Squadriglia
+from .trex import TRex
 
 # L'ordine e' quello del giro del tasto Start, ed e' anche l'ordine della
 # pagina: Breakout per primo perche' e' quello che il pannello 4:1 veste
 # meglio, e gli ultimi arrivati in fondo -- chi preme Start per abitudine non
 # deve trovarsi un gioco diverso da quello di ieri. Pongo e' arrivato dopo
 # Snake, Squadriglia dopo Pongo, Gnam Gnam dopo Squadriglia, Mine vaganti
-# dopo Gnam Gnam.
-GIOCHI = (Mattoni, Invasori, Serpente, Pongo, Squadriglia, Gnam, Mine)
+# dopo Gnam Gnam, T-Rex e Kingo Bongo dopo Mine vaganti.
+GIOCHI = (Mattoni, Invasori, Serpente, Pongo, Squadriglia, Gnam, Mine, TRex,
+          Bongo)
 NOMI = tuple(g.nome for g in GIOCHI)
 
 
@@ -459,7 +462,12 @@ class GiochiSource(Source):
             # Cambiare gioco a partita aperta: si chiude quella e si apre
             # l'altra, senza mollare il pannello in mezzo.
             self._ferma_ciclo()
-        record = self._gioco.record() if self._gioco else 0
+        # Il record della partita appena chiusa vale solo se e' lo stesso
+        # gioco. Fino alla 11.0 il confronto si faceva col gioco *nuovo*, che
+        # ha sempre quel nome: passando da un gioco all'altro il record del
+        # primo compariva come HI del secondo, e a fine partita ci restava.
+        prima = self._gioco
+        record = prima.record() if (prima is not None and prima.nome == nome) else 0
         self._gioco = per_nome(nome)()
         # Un gioco con delle impostazioni sue (il livello di Pongo) le legge
         # dalla configurazione qui: la classe non sa dove stia.
@@ -471,7 +479,7 @@ class GiochiSource(Source):
         # senza scheda audio.
         self._gioco.suona = self._suona_effetto
         self._gioco.musica = self._musica
-        self._gioco._record = max(record if self._gioco.nome == nome else 0,
+        self._gioco._record = max(record,
                                   int(self.conf().get("record", {}).get(nome, 0)))
         self._premuti.clear()
         # Il mixer degli effetti vive quanto la partita: aperto adesso,
