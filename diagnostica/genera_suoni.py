@@ -103,8 +103,97 @@ RICETTE = {
 }
 
 
+# ------------------------------------------------------------ la musica
+
+# Il motivo di Gnam Gnam. Scritto apposta per questo progetto: **non** e' la
+# musica di Pac-Man, che e' protetta. Pentatonica maggiore, allegro, sedici
+# battute -- una A di otto e una B che sale -- e poi ricomincia: con sedici
+# battute il giro dura mezzo minuto, abbastanza da non sembrare un disco rotto.
+#
+# Una riga per battuta, otto crome. `.` pausa, `-` la nota prima continua.
+BPM = 132
+MELODIA = (
+    "E5 G5 A5 G5 E5 D5 C5 D5", "E5 -  G5 E5 D5 .  C5 . ",
+    "A4 C5 D5 C5 A4 G4 A4 C5", "D5 -  E5 -  D5 C5 D5 . ",
+    "E5 G5 A5 C6 A5 G5 E5 G5", "A5 -  G5 E5 D5 E5 G5 . ",
+    "C6 A5 G5 E5 D5 E5 D5 C5", "C5 -  G4 -  C5 .  .  . ",
+    "F5 A5 C6 A5 F5 E5 D5 E5", "F5 -  A5 F5 E5 .  D5 . ",
+    "G5 B5 D6 B5 G5 F5 E5 F5", "G5 -  .  G5 A5 -  B5 - ",
+    "C6 -  G5 E5 C6 -  G5 E5", "D6 C6 B5 A5 G5 -  E5 - ",
+    "F5 E5 D5 E5 F5 G5 A5 B5", "C6 -  .  .  G5 .  .  . ",
+)
+# Il basso: un accordo per mezza battuta, suonato "um-pa" -- la fondamentale
+# e la sua ottava, a crome alterne.
+ACCORDI = (
+    "C C", "C C", "A A", "G G", "C C", "A A", "F G", "C C",
+    "F F", "F F", "G G", "G G", "C C", "G G", "F G", "C G",
+)
+NOTE = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
+PICCO_MUSICA = 5500        # un terzo degli effetti: la musica sta sotto
+
+
+def _hz(nome):
+    semitoni = NOTE[nome[0]] + 12 * (int(nome[1:]) + 1)
+    return 440.0 * 2 ** ((semitoni - 69) / 12.0)
+
+
+def musica():
+    croma = 60.0 / BPM / 2
+    per_croma = int(round(FREQUENZA * croma))
+    totale = per_croma * 8 * len(MELODIA)
+    fuori = [0.0] * totale
+
+    def suona(inizio, durata, hz, forma, ampiezza):
+        quanti = int(durata * per_croma)
+        fase = 0.0
+        for i in range(quanti):
+            t = i / float(quanti)
+            # Attacco corto, poi un calo: le note ripetute si staccano
+            # l'una dall'altra invece di fondersi in un fischio.
+            inv = min(1.0, i / 60.0) * (1.0 - 0.55 * t) * min(1.0, (quanti - i) / 80.0)
+            fase = (fase + hz / FREQUENZA) % 1.0
+            if forma == "quadra":
+                v = 1.0 if fase < 0.25 else -1.0      # duty 25%: il timbro chip
+            else:
+                v = 4.0 * abs(fase - 0.5) - 1.0        # triangolo, per il basso
+            fuori[inizio + i] += v * inv * ampiezza
+
+    # la melodia
+    for b, riga in enumerate(MELODIA):
+        celle = riga.split()
+        j = 0
+        while j < 8:
+            nota = celle[j]
+            durata = 1
+            while j + durata < 8 and celle[j + durata] == "-":
+                durata += 1
+            if nota not in (".", "-"):
+                suona((b * 8 + j) * per_croma, durata, _hz(nota), "quadra", 1.0)
+            j += durata
+    # il basso
+    for b, riga in enumerate(ACCORDI):
+        for meta, radice in enumerate(riga.split()):
+            for k in range(4):
+                ottava = 3 if k % 2 == 0 else 4
+                suona((b * 8 + meta * 4 + k) * per_croma, 1,
+                      _hz(radice + str(ottava)), "triangolo", 0.9)
+    # un charleston leggero sui controtempi: da' la spinta senza coprire
+    import random
+    casuale = random.Random(7)
+    for c in range(8 * len(MELODIA)):
+        if c % 2 == 1:
+            base = c * per_croma
+            for i in range(int(FREQUENZA * 0.012)):
+                fuori[base + i] += casuale.uniform(-1, 1) * 0.25 * (1 - i / (FREQUENZA * 0.012))
+    return fuori
+
+
 def genera(cartella):
     fatti = []
+    campioni = musica()
+    quanti = scrivi(os.path.join(cartella, "gnam_musica.wav"), campioni,
+                    picco=PICCO_MUSICA)
+    fatti.append(("gnam_musica", quanti, 1000.0 * quanti / FREQUENZA))
     for nome, pezzi in sorted(RICETTE.items()):
         campioni = []
         for durata, da_hz, a_hz in pezzi:

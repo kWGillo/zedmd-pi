@@ -8,7 +8,7 @@ d3fa24745643710531082bd552ecc8ec  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 dffdb5951d4776068d87865067fb4195  congela.py
 f4da634c02da1d2d9c2bf600287d09c3  copertine.py
-8393d1bbe2ce11a1a552769b287e0305  diagnostica/genera_suoni.py
+2560b9ded9f5366c31eac16120270db6  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 0153ea6ab0db2593aa8f47b29062fe8d  dmdconf.py
@@ -55,9 +55,9 @@ fff9a6751fd27a17747c95d907945d19  sources/cielo.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 c7be063837324c79053cba527364e517  sources/doom.py
 78c1cccbfc36c6e8c70c0dcce5235786  sources/gameboy.py
-265a38cc8353c32eaa32b0671d14c51a  sources/giochi/__init__.py
-1ae61a11b831aaff6c3f30b82572247d  sources/giochi/base.py
-683f9698fb1c3174e7752b2a520c6095  sources/giochi/gnam.py
+fc16a1b0292e05738e25790bb04338bc  sources/giochi/__init__.py
+0745d6c0eed258974100e8570b3a5d63  sources/giochi/base.py
+f14cea5255b410c85ea845049e2c7d99  sources/giochi/gnam.py
 018e911289febd4efb970fba0d9e5626  sources/giochi/invasori.py
 8b74478fcea06b5ab9db5c6c5f2c710c  sources/giochi/mattoni.py
 dca8a1a47cb19ecfb01ede94968ebc25  sources/giochi/pongo.py
@@ -78,8 +78,9 @@ dc7064496fc67607021db0d619a3b05f  sources/turni.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 c750104c1eaa178d6958982586e89855  staccato.py
 59a5d29dba6d1d0e47a7a02287950719  static/style.css
-0c6d1cba74d6c6d450934134f1825143  suoni.py
+37859256c6398df56979485725d12039  suoni.py
 b2e39a45b2319abd500f8c72019d34c0  suoni/colpito.wav
+c1c0aac669167b5fbe8131d35df146e5  suoni/gnam_musica.wav
 9bee0b8537ca225025bed746c4134033  suoni/lancio.wav
 682aeaffd20379a0664b243e9dfa810c  suoni/livello.wav
 114451385c1ae510d6ab5eb4ca73b15b  suoni/mangia1.wav
@@ -126,7 +127,7 @@ bfe7e1931764badb484f170fb1386427  templates/services.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 29ec3d40d18b3ff9c31cf907cd8b1236  templates/updates.html
-43d94f83ce3b0705ac47b52092e55edb  version.py
+e7260ec6978fbf28c9fdf886a5811a81  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 2c7fccb8af7e206421b1831c361541ae  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

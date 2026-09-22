@@ -2,6 +2,17 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [10.8]
+
+### La musica di Gnam Gnam
+
+Mentre si gioca a Gnam Gnam suona un **motivo scritto apposta** — non la
+musica di Pac-Man, che è protetta: sedici battute allegre in stile chip,
+mezzo minuto a giro, a **un terzo del volume degli effetti** così palline e
+fantasmi restano sopra. Tace quando ti prendono, a fine livello e a partita
+finita, e riparte quando si torna a giocare. Segue il volume dei giochi e la
+levetta degli effetti.
+
 ## [10.7]
 
 ### Gnam Gnam

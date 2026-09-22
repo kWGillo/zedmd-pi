@@ -113,6 +113,13 @@ COLORE_PAURA_FINE = (230, 230, 255)
 COLORE_OCCHI = (255, 255, 255)
 
 ORDINE = ("persa", "livello", "mangia3", "lancio", "mangia1", "mangia2")
+
+# Il motivo di sottofondo, scritto apposta (vedi diagnostica/genera_suoni.py):
+# suona mentre si gioca, tace nella schermata iniziale, quando ti prendono,
+# mentre il labirinto lampeggia a fine livello e a partita finita. I silenzi
+# sono la meta' dell'effetto: la musica che si ferma quando ti prendono dice
+# "fermo" meglio di qualunque scritta.
+MUSICA = "gnam_musica"
 SUONI_PER_FRAME = 2
 
 
@@ -237,6 +244,9 @@ class Gnam(Gioco):
         self.iniziata = False
         self._eventi = []
         self.suoni_del_frame = ()
+        # Quale musica e' stata chiesta per ultima: si richiede solo quando
+        # cambia, non a ogni fotogramma.
+        self._musica_voluta = None
         self._nuovo_livello()
 
     def _nuovo_livello(self):
@@ -294,6 +304,19 @@ class Gnam(Gioco):
             self._fisica(dt, tasti)
         finally:
             self._emetti()
+            self._accompagna()
+
+    def musica_di_adesso(self):
+        """La musica che ci vuole in questo istante: il motivo, o silenzio."""
+        in_gioco = (self.iniziata and not self.finita and self._morte <= 0
+                    and self._fine_livello <= 0)
+        return MUSICA if in_gioco else None
+
+    def _accompagna(self):
+        voluta = self.musica_di_adesso()
+        if voluta != self._musica_voluta:
+            self._musica_voluta = voluta
+            self.musica(voluta)
 
     def _fisica(self, dt, tasti):
         if self.finita:

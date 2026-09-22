@@ -860,6 +860,9 @@ class Mixer:
         self._lucchetto = threading.Lock()
         self._processo = None
         self._voci = []          # [[campioni, posizione, nato, nome], ...]
+        # La musica di sottofondo: una voce sola, che ricomincia da capo
+        # quando finisce. [campioni, posizione, nome], oppure None.
+        self._fondo = None
         self._stop = threading.Event()
         self._thread = None
         self._campioni = {}      # nome -> lista di interi, letta una volta
@@ -1132,8 +1135,34 @@ class Mixer:
         self._chiudi_registro()
         with self._lucchetto:
             self._voci = []
+            self._fondo = None
 
     # ---------------------------------------------------------- suonare
+
+    def musica(self, nome):
+        """La musica di sottofondo: `nome` la fa partire, None la ferma.
+
+        Richiederla mentre gia' suona non la fa ricominciare: il gioco la
+        chiede a ogni stato in cui la vuole, e sentirla ripartire da capo a
+        ogni pallina sarebbe un difetto, non una musica.
+        """
+        if not nome:
+            with self._lucchetto:
+                self._fondo = None
+            return True
+        with self._lucchetto:
+            if self._fondo is not None and self._fondo[2] == nome:
+                return True
+        campioni = self._carica(nome)
+        if not campioni:
+            return False
+        with self._lucchetto:
+            self._fondo = [campioni, 0, nome]
+        return True
+
+    def musica_in_corso(self):
+        with self._lucchetto:
+            return self._fondo[2] if self._fondo is not None else None
 
     def suona(self, nome):
         """Mette una voce in coda. Non scarta, salvo casi da contare."""
@@ -1174,9 +1203,21 @@ class Mixer:
                 if voce[1] < len(campioni):
                     vive.append(voce)
             self._voci = vive
-        if not attive:
+            fondo = None
+            if self._fondo is not None:
+                campioni, posizione, _nome = self._fondo
+                fine = posizione + BLOCCO
+                if fine <= len(campioni):
+                    fondo = campioni[posizione:fine]
+                else:
+                    # In fondo al brano si riattacca l'inizio, senza buchi:
+                    # un giro di musica che si ferma un istante a ogni ripresa
+                    # si sente come un disco che salta.
+                    fondo = campioni[posizione:] + campioni[:fine - len(campioni)]
+                self._fondo[1] = fine % len(campioni)
+        if not attive and fondo is None:
             return self._blocco_muto()
-        if len(attive) == 1:
+        if len(attive) == 1 and fondo is None:
             nome, _campioni, posizione, quanti = attive[0]
             pacco = self._pacchi.get(nome)
             if pacco is not None:
@@ -1184,7 +1225,7 @@ class Mixer:
                 if quanti < BLOCCO:
                     pezzo += b"\x00\x00" * (BLOCCO - quanti)
                 return pezzo
-        somma = [0] * BLOCCO
+        somma = fondo if fondo is not None else [0] * BLOCCO
         for _nome, campioni, posizione, quanti in attive:
             for i in range(quanti):
                 somma[i] += campioni[posizione + i]
@@ -1499,6 +1540,17 @@ def effetti_ferma(svuota=True):
     if svuota:
         _mixer.svuota()
     _mixer.ferma()
+
+
+def effetti_musica(cfg, nome):
+    """La musica di sottofondo di una partita. None la ferma.
+
+    Stessa levetta degli effetti: chi li spegne vuole silenzio, e la musica
+    e' la cosa meno necessaria di tutte.
+    """
+    if nome and not _conf(cfg).get("giochi", True):
+        return False
+    return _mixer.musica(nome)
 
 
 def effetti_accesi():

@@ -68,7 +68,28 @@ occhi, che corrono a casa e rinascono.
 Tre vite. Finite le palline il labirinto lampeggia, si passa al livello dopo,
 e tutto è un po' più veloce.
 
-# 6. Come è stato provato
+# 6. La musica
+
+Mentre si gioca suona un **motivo scritto apposta** per Gnam Gnam — non la
+musica di Pac-Man, che è protetta. Pentatonica maggiore, allegro, 132 battiti
+al minuto: sedici battute, una prima parte e una seconda che sale, poi
+ricomincia. Il giro dura mezzo minuto, abbastanza da non sembrare un disco
+rotto. La melodia è un'onda quadra stretta, il timbro dei chip sonori delle
+console, con un basso a triangolo e un charleston leggero sui controtempi.
+
+- Sta **a un terzo** del volume degli effetti: palline e fantasmi si sentono
+  sopra.
+- **Tace** nella schermata iniziale, quando ti prendono, mentre il labirinto
+  lampeggia a fine livello e a partita finita. Riparte da dov'era quando si
+  torna a giocare.
+- Segue il cursore **Volume dei giochi**, e la levetta **Effetti dei giochi**:
+  spenti gli effetti, niente musica.
+- Se la sveglia interrompe la partita, la musica si ferma con lei.
+
+La ricetta — note, tempo, timbri — sta in `diagnostica/genera_suoni.py`:
+cambiarla e rigenerare il file è un comando.
+
+# 7. Come è stato provato
 
 Una prova controlla il labirinto — simmetrico, chiuso, ogni pallina
 raggiungibile, nessun vicolo cieco — e il carattere di ogni fantasma, casella

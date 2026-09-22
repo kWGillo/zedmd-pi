@@ -114,6 +114,9 @@ class Gioco:
         # non e' pigrizia: un gioco che sapesse di schede audio e di
         # configurazione non si potrebbe piu' far girare dentro una prova.
         self.suona = lambda nome: None
+        # La musica di sottofondo, per chi ce l'ha: nome per farla partire,
+        # None per fermarla. Come `suona`, la sostituisce chi apre la partita.
+        self.musica = lambda nome: None
         self.punteggio = 0
         self.vite = 3
         self.livello = 1

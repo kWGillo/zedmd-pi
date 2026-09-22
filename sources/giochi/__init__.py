@@ -319,8 +319,17 @@ class GiochiSource(Source):
     doom_pronto = None
     apri_doom = None
     def sospendi(self):
-        """Ferma il tempo della partita, senza chiuderla."""
+        """Ferma il tempo della partita, senza chiuderla.
+
+        E la musica: la partita e' ferma, e la sveglia che la ferma vuole il
+        pannello e la scheda audio per se'. Alla ripresa la richiede il gioco
+        stesso, al primo passo.
+        """
         self._congelato.set()
+        self._musica(None)
+        gioco = self._gioco
+        if gioco is not None and hasattr(gioco, "_musica_voluta"):
+            gioco._musica_voluta = None
 
     def riprendi(self):
         """Fa ripartire la partita da dov'era.
@@ -334,6 +343,12 @@ class GiochiSource(Source):
 
     def congelata(self):
         return self._congelato.is_set()
+
+    def _musica(self, nome):
+        try:
+            suoni.effetti_musica(self.cfg, nome)
+        except Exception as exc:                    # pragma: no cover
+            print("[giochi] musica non avviata: %s" % exc)
 
     def _suona_effetto(self, nome):
         try:
@@ -453,6 +468,7 @@ class GiochiSource(Source):
         # partita si puo' ancora far girare dentro una prova, in silenzio e
         # senza scheda audio.
         self._gioco.suona = self._suona_effetto
+        self._gioco.musica = self._musica
         self._gioco._record = max(record if self._gioco.nome == nome else 0,
                                   int(self.conf().get("record", {}).get(nome, 0)))
         self._premuti.clear()

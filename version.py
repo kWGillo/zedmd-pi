@@ -2529,6 +2529,11 @@ Storico:
        il cacciatore, l'agguato, l'imprevedibile, il timido -- a fasi di
        caccia e di tregua. Il nome non e' Pac-Man perche' Pac-Man e' di
        Bandai Namco.
+  10.8 La musica di Gnam Gnam: un motivo originale di sedici battute, onda
+       quadra, basso a triangolo e charleston, a un terzo del volume degli
+       effetti. Il mixer dei giochi ha una voce di sottofondo che ricomincia
+       senza buchi quando finisce; il gioco la accende mentre si gioca e la
+       spegne quando ti prendono, a fine livello e a partita finita.
 """
 
-__version__ = "10.7"
+__version__ = "10.8"
