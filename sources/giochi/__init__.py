@@ -31,6 +31,7 @@ from .base import ALTEZZA, CAMPO, LARGHEZZA, Gioco, centra, scrivi
 from .gnam import Gnam
 from .invasori import Invasori
 from .mattoni import Mattoni
+from .mine import Mine
 from .pongo import Pongo
 from .serpente import Serpente
 from .squadriglia import Squadriglia
@@ -39,8 +40,9 @@ from .squadriglia import Squadriglia
 # pagina: Breakout per primo perche' e' quello che il pannello 4:1 veste
 # meglio, e gli ultimi arrivati in fondo -- chi preme Start per abitudine non
 # deve trovarsi un gioco diverso da quello di ieri. Pongo e' arrivato dopo
-# Snake, Squadriglia dopo Pongo, Gnam Gnam dopo Squadriglia.
-GIOCHI = (Mattoni, Invasori, Serpente, Pongo, Squadriglia, Gnam)
+# Snake, Squadriglia dopo Pongo, Gnam Gnam dopo Squadriglia, Mine vaganti
+# dopo Gnam Gnam.
+GIOCHI = (Mattoni, Invasori, Serpente, Pongo, Squadriglia, Gnam, Mine)
 NOMI = tuple(g.nome for g in GIOCHI)
 
 
@@ -93,7 +95,7 @@ PULSANTI = {
     BTN_START: "ciclo", BTN_MODE: "home",
     BTN_SELECT: "esci",
     # Dalla 10.4 cerchio e' il tasto **speciale**: il looping di
-    # Squadriglia, l'unico gioco con una seconda azione. Negli altri giochi
+    # Squadriglia, e dalla 11.0 il salto di Mine vaganti. Negli altri giochi
     # continua a sparare -- lo traduce `tasti_per` -- quindi per chi ci
     # gioca non cambia niente.
     BTN_EAST: "speciale",

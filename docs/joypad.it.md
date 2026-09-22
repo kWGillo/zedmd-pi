@@ -29,7 +29,7 @@ sono nemmeno permessi da sistemare su `/dev/input`.
 | **Per Bluetooth** | il Bluetooth del Pi acceso; niente adattatori né pacchetti aggiuntivi |
 
 Il pad serve a due cose distinte: i **giochi** scritti per il pannello
-(Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam) e **Doom**. Sono pagine diverse con impostazioni proprie,
+(Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam, Mine vaganti) e **Doom**. Sono pagine diverse con impostazioni proprie,
 ma il pad è lo stesso e si riconosce una volta sola.
 
 ---
@@ -150,13 +150,14 @@ levette e croce direzionale. Se `evtest` non è installato:
 
 ## 5. I comandi
 
-### 5.1 Nei giochi (Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam)
+### 5.1 Nei giochi (Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam, Mine vaganti)
 
 | Comando | Sul pad |
 |---|---|
 | muoversi | levetta sinistra, levetta destra, croce direzionale — anche in verticale, dalla 10.3 |
 | sparare / lanciare la palla | **X**, **cerchio**, **quadrato**, **R1**, **R2** |
 | looping, in Squadriglia | **cerchio** (tastiera: **Alt**) |
+| salto, in Mine vaganti | **cerchio** (tastiera: **Alt**) |
 | uscire dalla partita | **Share/Select** |
 | scorrere il giro dei giochi | **Options/Start** (fuori dal Game Boy anche **PS**) |
 | **far cominciare** una partita | **Options** (o il tasto **PS**) |
@@ -186,8 +187,8 @@ Assistant) mentre il giro del tasto Start sta cambiando gioco, resta il tuo:
 per tre secondi Start non cambia niente, e poi il giro riprende dal gioco
 che hai scelto.
 
-**Cerchio, dalla 10.4, è il tasto speciale.** Serve al looping di Squadriglia,
-l'unico gioco con una seconda azione. In tutti gli altri giochi cerchio spara
+**Cerchio, dalla 10.4, è il tasto speciale.** Serve al looping di Squadriglia
+e, dalla 11.0, al salto di Mine vaganti. In tutti gli altri giochi cerchio spara
 esattamente come prima: il gioco che non conosce il tasto speciale lo riceve
 come fuoco. Sulla tastiera vale lo stesso per **Alt**.
 
@@ -337,6 +338,7 @@ di Doom. Compaiono da soli con MQTT Discovery, se `mqtt.discovery` è acceso:
 | `switch.dmd_gioco_pongo` | idem per Pongo |
 | `switch.dmd_gioco_squadriglia` | idem per Squadriglia |
 | `switch.dmd_gioco_gnam` | idem per Gnam Gnam |
+| `switch.dmd_gioco_mine` | idem per Mine vaganti |
 | `switch.dmd_doom` | idem per Doom |
 
 Sono **mutuamente esclusivi**: la presa del pannello è una sola, quindi
@@ -346,6 +348,11 @@ l'interruttore in Home Assistant torna a OFF senza che nessuno glielo dica.
 
 Da lì, un pulsante fisico o un comando vocale che avvia una partita è
 un'automazione di tre righe.
+
+Dalla **11.0** c'è anche `select.dmd_pongo_livello` (**Pongo: computer**):
+Facile, Normale o Difficile, la stessa tendina della pagina Giochi. Mostra il
+livello in uso e si può cambiare da lì; a partita aperta vale dalla battuta
+successiva.
 
 ---
 

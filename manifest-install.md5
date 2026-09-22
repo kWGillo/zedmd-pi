@@ -8,7 +8,7 @@ d3fa24745643710531082bd552ecc8ec  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 dffdb5951d4776068d87865067fb4195  congela.py
 f4da634c02da1d2d9c2bf600287d09c3  copertine.py
-96f103d88f113da72775634fe583df58  diagnostica/genera_suoni.py
+5f97b8dabf5c93c5758354d6b5f05d11  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 b7799f7832e7313c2e99206e722069d7  display.py
 28dd449748f8f29471a7781d1acb50de  dmdconf.py
@@ -23,8 +23,8 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 075e6985999ab1d4bbcca75759c692b7  gb/setup_gb.sh
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
-f63689b11a761d35dbab23cc7bd2133a  hass.py
-f0119161f271b1222afa8bc8d6e51fc0  i18n.py
+deb12fd1afe7fca2cd9bcedf224231be  hass.py
+a7173865d42c9444a347a4cff6a5b980  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 b9d0bda3222f80aa266f96cf9db90b8c  lookup.py
@@ -50,16 +50,17 @@ c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 d231417597b54592614b20b12ac8b82d  sources/base.py
 ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 fff9a6751fd27a17747c95d907945d19  sources/cielo.py
-624052d03d0fed81299e7f18cff59f7f  sources/clock.py
+08a1c0883a230ddd814aa282d6d745a3  sources/clock.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 c7be063837324c79053cba527364e517  sources/doom.py
 78c1cccbfc36c6e8c70c0dcce5235786  sources/gameboy.py
-21f5c6e59834f005186d96aa610c4cbf  sources/giochi/__init__.py
+718ba4ff04c7a83ed1cd97cbbc48ede9  sources/giochi/__init__.py
 a6a0effa4d25098e12d2bcd62b058c9b  sources/giochi/base.py
 71f54d44a50464e82cafa5d08b261fc3  sources/giochi/gnam.py
 d8be4b827917e8c222dfe63615a6ff87  sources/giochi/invasori.py
 7463e5026b2ad71786d96d7e48187b62  sources/giochi/mattoni.py
+8e8d7180e98ea0aa81205ffd2a821b47  sources/giochi/mine.py
 ce067949314c5c7a779ef14aef2a479e  sources/giochi/pongo.py
 bf801c6443981bcbd2132b69bdf01cf8  sources/giochi/serpente.py
 9f1e1bc5394cdb3b6b7620eaeef5e07a  sources/giochi/squadriglia.py
@@ -93,6 +94,7 @@ a722ccf8164545a5f511d2f9f072b95b  suoni/mattone1.wav
 572209c8e1c0bad6d7e0a897fbcd402a  suoni/mattone3.wav
 5aa0bce13726e30cad54c58cf1e6aca2  suoni/mattone4.wav
 0773d391e3aad591a5600f5baec71aeb  suoni/mattone5.wav
+3b6a8b3973507dbf8487285bcf131e54  suoni/mine_musica.wav
 61c16d3a984b300f891ca2e30775996d  suoni/muro.wav
 586c5179daf8209331e3e40318bd96ff  suoni/passo1.wav
 d31ca7937789eecad57bf4ced860bbb7  suoni/passo2.wav
@@ -132,7 +134,7 @@ bfe7e1931764badb484f170fb1386427  templates/services.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 29ec3d40d18b3ff9c31cf907cd8b1236  templates/updates.html
-dbeb80b56c6d1aad07e87598a9706c1f  version.py
+14aba8cf40f9300d86736013c2566758  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-91e37db8b2e6a92ebe3b8f2858c07e4f  webui.py
+3d46ce44bd31fc1f964ad7f903551c29  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

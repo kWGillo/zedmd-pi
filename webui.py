@@ -932,7 +932,7 @@ def create_app(runtime):
     # seconda del gioco aperto.
     GIOCHI_PULSANTI = (("su", "\u25b2"), ("sinistra", "\u25c0"),
                        ("destra", "\u25b6"), ("giu", "\u25bc"),
-                       ("fuoco", "FUOCO"), ("speciale", "LOOP"),
+                       ("fuoco", "FUOCO"), ("speciale", "SPECIALE"),
                        ("esci", "ESCI"))
 
     def _giochi_stato():

@@ -2540,6 +2540,16 @@ Storico:
        fanfara. Il generatore compone da una ricetta (tempo, melodia,
        accordi, timbro, basso, percussioni). La casella "Musica di
        sottofondo nei giochi" la spegne lasciando gli effetti.
+  11.0 **Mine vaganti**, il primo gioco vettoriale: solo linee luminose su
+       nero, con un bagliore sotto, come il fosforo del Vectrex. Una nave
+       che ruota, spinge e spara; la posamine semina, le mine si schiudono
+       e abbattute ne fanno nascere due piu' piccole. Quattro specie, una in
+       piu' per livello: galleggianti, di fuoco, magnetiche, magnetiche di
+       fuoco. Cerchio e' il salto. I bordi del campo si riattaccano. Con la
+       sua musica. Il pulsante LOOP della pagina ora si chiama SPECIALE.
+       Il livello del computer di Pongo e' anche una tendina in Home
+       Assistant, che lo mostra e lo cambia. Il colore casuale dell'orologio
+       e' un colore pieno (R, G, B, C, M, Y) meta' delle ore, e vivo le altre.
 """
 
-__version__ = "10.9"
+__version__ = "11.0"

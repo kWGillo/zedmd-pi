@@ -2,6 +2,36 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [11.0]
+
+### Mine vaganti, il primo gioco vettoriale
+
+Un gioco in stile Vectrex: **solo linee luminose su nero**, con un bagliore
+tenue sotto ognuna, come il fosforo. Una nave che ruota, spinge e spara in un
+campo che si riattacca ai bordi. Passa la posamine e semina; le mine si
+schiudono e, abbattute, ne fanno nascere due più piccole. Quattro specie, una
+in più per livello: galleggianti, di fuoco, magnetiche, magnetiche di fuoco.
+**Cerchio** (o Alt) è il salto. Con la sua musica.
+
+Il pulsante LOOP della pulsantiera nella pagina Giochi ora si chiama
+**SPECIALE**: è il looping in Squadriglia e il salto in Mine vaganti.
+
+### Colore casuale dell'orologio: colori pieni
+
+I colori casuali erano sempre chiari, mai un rosso o un blu pieno: il minimo
+di 50 per canale, chiesto per evitare i colori scuri, toglieva proprio i
+colori puri. Adesso **metà delle ore è un colore pieno** — rosso, giallo,
+verde, ciano, blu o magenta, esatti — e le altre sono tinte vive, spinte
+verso il pieno più vicino, senza pastelli. Il "mai scuro" resta: un canale è
+sempre al massimo. Il colore non si ripete mai due ore di fila, e la tinta
+salta sempre di almeno 60 gradi.
+
+### Il livello di Pongo in Home Assistant
+
+La tendina **Pongo: computer** (`select.dmd_pongo_livello`) mostra il livello
+in uso e lo cambia: Facile, Normale, Difficile. È la stessa della pagina
+Giochi, e a partita aperta vale dalla battuta successiva.
+
 ## [10.9]
 
 ### La musica in tutti i giochi

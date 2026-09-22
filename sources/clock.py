@@ -54,35 +54,39 @@ def parse_color(value, fallback=(255, 140, 26)):
 #
 # «Ad ogni cambio d'ora il colore dell'orario deve cambiare in modo casuale.
 # I valori RGB non devono mai essere inferiori a 25~50, per evitare colori
-# prossimi al nero.»
+# prossimi al nero.» E poi, dalla 11.0: «i colori casuali sono sempre chiari
+# e non tendono mai a colori pieni R, G, B oppure C, M, Y».
 #
-# Tre scelte, e ognuna viene da un modo in cui la versione ingenua sbaglia.
+# Le due frasi insieme dicono cosa si voleva davvero: **mai scuro**, e colori
+# **vivi**. Il minimo di 50 per canale era il mezzo, e toglieva proprio i
+# colori pieni: il rosso puro e' (255, 0, 0). Il "mai scuro" lo garantisce
+# gia' la luminosita', sempre piena -- un canale e' sempre a 255 -- e allora
+# il minimo per canale non serve piu'.
 #
-# **Si sceglie la tinta, non i tre canali.** Tre numeri a caso fra 50 e 255
-# rispettano il limite e danno quasi sempre un grigio: la media di tre valori
-# indipendenti sta vicino a meta' scala, e (140, 160, 150) e' un colore solo
-# sulla carta. Qui la tinta e' libera, la luminosita' e' sempre piena -- un
-# canale a 255, quindi mai scuro -- e la saturazione sta fra 0.55 e 0.80.
-# Da quel tetto viene il limite chiesto: il canale piu' basso vale
-# 255 * (1 - 0.80) = 51, cioe' **sopra 50 per costruzione**, non per un
-# controllo fatto dopo.
+# **Si sceglie la tinta, non i tre canali.** Tre numeri a caso danno quasi
+# sempre un grigio: la media di tre valori indipendenti sta vicino a meta'
+# scala. Qui la tinta e' libera e la luminosita' piena.
+#
+# **Meta' delle ore e' un colore pieno.** Rosso, giallo, verde, ciano, blu o
+# magenta, esatti: la tinta va al piu' vicino dei sei e la saturazione e' 1.
+# Le altre ore sono tinte intermedie, tirate a meta' strada verso il pieno
+# piu' vicino, con la saturazione fra 0.75 e 1: vive, niente pastelli.
 #
 # **Il colore dipende dall'ora, non da un dado lanciato allo scoccare.** E'
 # lo stesso per tutta l'ora, e un riavvio a meta' non lo cambia: il seme e'
-# il numero dell'ora nel calendario. Un orologio che cambia colore perche' e'
-# ripartito il servizio sembra un orologio guasto.
+# il numero dell'ora nel calendario.
 #
-# **Due ore di fila non si assomigliano mai.** Un dado vero ogni tanto
-# ripete quasi la stessa tinta, e allora il cambio non si vede: l'ora e'
-# cambiata e l'orologio no. Qui ogni ora avanza la tinta dell'angolo aureo --
-# 137,5 gradi, il passo che distribuisce i punti su un cerchio senza mai
-# farli ricadere vicini -- con una deviazione a caso di venti gradi. Fra due
-# ore consecutive la distanza sta sempre fra 97 e 178 gradi, anche a
-# cavallo della mezzanotte, e l'occhio ci vede lo stesso un'estrazione.
+# **Due ore di fila non si assomigliano mai.** Ogni ora la tinta di partenza
+# avanza dell'angolo aureo -- 137,5 gradi, il passo che distribuisce i punti
+# su un cerchio senza farli ricadere vicini -- con una deviazione a caso di
+# venti gradi. Anche dopo la spinta verso i colori pieni, fra due ore
+# consecutive la tinta salta sempre di almeno 60 gradi: rosso e giallo, non
+# rosso e arancio.
 ANGOLO_AUREO = 137.50776
 DEVIAZIONE = 20.0
-SATURAZIONE = (0.55, 0.80)
-MINIMO_CANALE = 50
+PIENI = 0.5                 # quante ore sono un colore pieno
+SPINTA = 0.5                # le altre: quanto si avvicinano al pieno piu' vicino
+SATURAZIONE = (0.75, 1.0)
 
 
 def indice_ora(momento):
@@ -92,7 +96,7 @@ def indice_ora(momento):
 
 
 def tinta_ora(indice):
-    """La tinta di un'ora, in gradi."""
+    """La tinta di partenza di un'ora, in gradi."""
     dado = random.Random(indice)
     return (indice * ANGOLO_AUREO + dado.uniform(-DEVIAZIONE, DEVIAZIONE)) % 360.0
 
@@ -102,13 +106,17 @@ def colore_casuale(momento=None):
     momento = momento or time.localtime()
     indice = indice_ora(momento)
     dado = random.Random(indice * 7919 + 1)
-    saturazione = dado.uniform(*SATURAZIONE)
-    r, g, b = colorsys.hsv_to_rgb(tinta_ora(indice) / 360.0, saturazione, 1.0)
-    # Il tetto della saturazione basta gia' a tenere ogni canale sopra il
-    # minimo. Il controllo resta lo stesso: se un giorno qualcuno allarga
-    # l'intervallo, il limite chiesto non deve dipendere dal ricordarsene.
-    return tuple(max(MINIMO_CANALE + 1, min(255, int(round(c * 255))))
-                 for c in (r, g, b))
+    tinta = tinta_ora(indice)
+    # Il pieno piu' vicino: i sei stanno ogni 60 gradi, rosso a zero.
+    pieno = (round(tinta / 60.0) * 60.0) % 360.0
+    verso = (pieno - tinta + 180.0) % 360.0 - 180.0
+    if dado.random() < PIENI:
+        tinta, saturazione = pieno, 1.0
+    else:
+        tinta = (tinta + verso * SPINTA) % 360.0
+        saturazione = dado.uniform(*SATURAZIONE)
+    r, g, b = colorsys.hsv_to_rgb(tinta / 360.0, saturazione, 1.0)
+    return tuple(max(0, min(255, int(round(c * 255)))) for c in (r, g, b))
 
 
 def colore_esadecimale(rgb):

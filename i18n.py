@@ -1878,6 +1878,9 @@ STRINGS = {
     "giochi.squadriglia.hint": (
         "Un caccia contro le squadriglie, in stile 1942. Cerchio per il looping.",
         "A fighter against enemy squadrons, 1942 style. Circle for the loop."),
+    "giochi.mine.hint": (
+        "Stile Vectrex: ruoti, spingi e spari fra le mine. Cerchio per il salto.",
+        "Vectrex style: rotate, thrust and shoot among the mines. Circle to jump."),
     "giochi.pongo.record": ("Scambio più lungo:", "Longest rally:"),
     "giochi.azzera": ("Azzera", "Reset"),
     "giochi.azzera.titolo": ("Azzera il record", "Reset the high score"),

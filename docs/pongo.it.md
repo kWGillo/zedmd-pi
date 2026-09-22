@@ -59,8 +59,10 @@ automatico che reagisce in due decimi di secondo e sbaglia la mira di qualche
 pixel: vince quasi sempre a facile, circa metà delle volte a normale, quasi
 mai a difficile.
 
-Il livello si sceglie nella scheda di Pongo, pagina **Giochi**. Cambiato a
-partita aperta, vale dalla battuta successiva.
+Il livello si sceglie nella scheda di Pongo, pagina **Giochi**, oppure da
+Home Assistant con la tendina `select.dmd_pongo_livello` (**Pongo: computer**),
+che mostra anche il livello in uso. Cambiato a partita aperta, da una parte o
+dall'altra, vale dalla battuta successiva.
 
 # 4. Il record
 

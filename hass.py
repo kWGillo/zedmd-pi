@@ -138,6 +138,10 @@ VOLUMI_DOVE = {
     "notte": ("display", "night_volume", 0.0),
 }
 
+# Il computer di Pongo, come tendina: le voci sono quelle della pagina Giochi.
+PONGO_LIVELLI = (("facile", "Facile"), ("normale", "Normale"),
+                 ("difficile", "Difficile"))
+
 # I giochi scritti per il pannello sono azioni come Doom: una partita che
 # comincia e finisce, non un servizio da accendere. Un interruttore per gioco,
 # costruito dall'elenco dei giochi invece che scritto a mano — aggiungerne uno
@@ -153,6 +157,7 @@ ICONE_GIOCHI = {
     "pongo": "mdi:table-tennis",
     "squadriglia": "mdi:airplane",
     "gnam": "mdi:pac-man",
+    "mine": "mdi:star-four-points-outline",
 }
 
 try:
@@ -382,6 +387,20 @@ class HassBridge:
                 "icon": icona,
             })
             self._config("number", "volume_%s" % chiave, entity)
+
+        # Il livello del computer di Pongo, come tendina: la stessa della
+        # pagina Giochi, e vale anche a partita aperta dalla battuta dopo.
+        pongo = dict(common)
+        pongo.update({
+            "name": "Pongo: computer",
+            "unique_id": "%s_pongo_livello" % node,
+            "object_id": "%s_pongo_livello" % node,
+            "state_topic": "%s/pongo/livello/state" % base,
+            "command_topic": "%s/pongo/livello/set" % base,
+            "options": [etichetta for _chiave, etichetta in PONGO_LIVELLI],
+            "icon": "mdi:table-tennis",
+        })
+        self._config("select", "pongo_livello", pongo)
 
         # ------------------------------------------------- aerei e satelliti
         #
@@ -674,8 +693,17 @@ class HassBridge:
         for chiave, _nome, _icona in VOLUMI:
             self._send("%s/volume/%s/state" % (base, chiave),
                        str(self._volume(chiave)), force)
+        self._send("%s/pongo/livello/state" % base, self._pongo_livello(), force)
 
         self._pubblica_ota(base, force)
+
+    def _pongo_livello(self):
+        """Il livello del computer di Pongo, con l'etichetta della tendina."""
+        scelto = (self.cfg.get("giochi") or {}).get("pongo_livello", "normale")
+        for chiave, etichetta in PONGO_LIVELLI:
+            if chiave == scelto:
+                return etichetta
+        return "Normale"
 
     def _volume(self, chiave):
         """Un volume in percento, intero, come lo mostra la pagina."""
@@ -803,6 +831,7 @@ class HassBridge:
         self.bus.subscribe("%s/service/+/set" % base, self._on_service)
         self.bus.subscribe("%s/brightness/set" % base, self._on_brightness)
         self.bus.subscribe("%s/volume/+/set" % base, self._on_volume)
+        self.bus.subscribe("%s/pongo/livello/set" % base, self._on_pongo_livello)
         # Le scadenze si possono anche **inserire** da Home Assistant: e' la
         # sola parte del progetto in cui i dati viaggiano anche all'indietro.
         self.bus.subscribe("%s/scadenze/aggiungi" % base, self._on_scadenza)
@@ -1221,6 +1250,25 @@ class HassBridge:
                 suoni.diffondi_volume_giochi(self.cfg, self.runtime)
         except Exception as exc:
             print("[hass] volume %s non applicato: %s" % (chiave, exc))
+        self.publish_state(force=True)
+
+    def _on_pongo_livello(self, _topic, payload):
+        """Il livello di Pongo da Home Assistant: come la tendina della
+        pagina, si salva e vale dalla battuta successiva."""
+        raw = payload.decode("utf-8", "replace") if isinstance(payload, bytes) \
+            else str(payload)
+        voluto = raw.strip().lower()
+        if voluto not in [chiave for chiave, _e in PONGO_LIVELLI]:
+            return
+        try:
+            self.cfg.setdefault("giochi", {})["pongo_livello"] = voluto
+            import dmdconf
+            dmdconf.save()
+            giochi = getattr(self.runtime, "giochi", None)
+            if hasattr(giochi, "riconfigura"):
+                giochi.riconfigura()
+        except Exception as exc:
+            print("[hass] livello di Pongo non applicato: %s" % exc)
         self.publish_state(force=True)
 
     # ------------------------------------------------------------------ ciclo

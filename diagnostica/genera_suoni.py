@@ -285,6 +285,21 @@ MUSICHE = {
         ),
         accordi=("C C", "C G", "D D", "F G", "C C", "D G", "C G", "C C",
                  "C C", "D G", "C G", "C G")),
+    # Mine vaganti: lo spazio. Mi minore, un basso che pulsa sotto e una
+    # melodia rada e sospesa che sale e ricade, come un segnale lontano.
+    "mine_musica": dict(
+        bpm=124, forma="triangolo", ampiezza_melodia=0.9, basso="umpa",
+        ampiezza_basso=0.7, charleston=0.08, picco=4500,
+        melodia=(
+            "E5 -  -  B4 -  -  G4 - ", "A4 -  B4 -  .  .  .  . ",
+            "E5 -  -  B4 -  -  D5 - ", "E5 -  -  -  .  .  .  . ",
+            "G5 -  -  E5 -  -  D5 - ", "B4 -  D5 -  E5 -  .  . ",
+            "A5 -  G5 -  E5 -  D5 - ", "B4 -  -  -  .  .  .  . ",
+            "C5 -  -  E5 -  -  G5 - ", "A5 -  G5 -  E5 -  .  . ",
+            "D5 -  -  B4 -  -  G4 - ", "A4 -  -  -  B4 -  -  - ",
+        ),
+        accordi=("E E", "A B", "E E", "E E", "G G", "E E", "A A", "B B",
+                 "C C", "A A", "G G", "A B")),
 }
 
 
