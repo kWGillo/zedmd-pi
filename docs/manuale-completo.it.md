@@ -378,9 +378,9 @@ tipo di pannello. Dalla 11.5 le voci di fabbrica sono due:
 | Profilo | Libreria | Per cosa |
 |---|---|---|
 | **FM6373 & DP32020B** | il fork con l'S-PWM | i pannelli di questo progetto: catalogo dei registri, `panel_type`, i quattro parametri S-PWM |
-| **Erippolus** | quella **standard** di hzeller | pannelli a indirizzamento diretto, che l'S-PWM non ce l'hanno |
+| **ICND2038S+ICN2012** | quella **standard** di hzeller | pannelli a indirizzamento diretto, che l'S-PWM non ce l'hanno |
 
-*Erippolus* non è una taratura, è un interruttore: svuota tutto quello che
+*ICND2038S+ICN2012* non è una taratura, è un interruttore: svuota tutto quello che
 appartiene al fork — catalogo dei profili di registro, `panel_type`, i quattro
 parametri S-PWM, le variabili d'ambiente — e riporta profondità e tempi ai
 predefiniti della libreria. Questi i suoi valori:
@@ -398,7 +398,7 @@ predefiniti della libreria. Questi i suoi valori:
 
 Il **cablaggio non sta nel profilo**, per scelta: che pannello è e come è
 collegato sono due fatti separati, e un profilo che riscrivesse l'uscita
-rimetterebbe i fili diretti a chi ha la Bonnet montata. Con Erippolus va messo
+rimetterebbe i fili diretti a chi ha la Bonnet montata. Con questo profilo va messo
 a mano su *Adafruit RGB Matrix Bonnet*, nel menu **Collegamento del pannello**
 qui sopra.
 

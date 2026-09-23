@@ -778,10 +778,10 @@ STRINGS = {
                                "Direct addressing panels"),
     "settings.panel.classico.hint": (
         "Servono solo con la libreria standard, cioè con un profilo che non usa "
-        "l'S-PWM (per esempio Erippolus). Lasciati vuoti, valgono i predefiniti "
+        "l'S-PWM (per esempio ICND2038S+ICN2012). Lasciati vuoti, valgono i "
         "della libreria: si riempiono uno alla volta, guardando il pannello.",
         "These only matter with the standard library, that is with a profile "
-        "that does not use S-PWM (Erippolus, for instance). Left empty, the "
+        "that does not use S-PWM (ICND2038S+ICN2012, for instance). Left empty, the "
         "library defaults apply: fill them one at a time, watching the panel."),
     "settings.panel.libreria": ("predefinito", "default"),
     "settings.panel.multiplexing": ("Multiplexing", "Multiplexing"),

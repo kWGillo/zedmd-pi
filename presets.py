@@ -33,7 +33,7 @@ PRESETS = {
             "panel_type": "fm6373",
             # Il catalogo dei profili di registro. Sta nel profilo dalla
             # 11.5, da quando esiste un profilo che lo **svuota**: senza
-            # questa riga, passare a Erippolus e tornare indietro lasciava il
+            # questa riga, passare all'altro profilo e tornare indietro lasciava il
             # fork senza catalogo, cioe' un pannello che non parte piu' e
             # nessun modo di capire perche'.
             "profile_dir": ("/home/gillo/rpi-rgb-led-matrix_pwm_experiment"
@@ -53,7 +53,7 @@ PRESETS = {
             },
         },
     },
-    # Erippolus: pannelli a indirizzamento diretto, che girano con la
+    # ICND2038S+ICN2012: pannelli a indirizzamento diretto, che girano con la
     # **libreria standard** di hzeller invece che con il fork S-PWM. Il
     # profilo non e' una taratura, e' un interruttore: svuota tutto quello
     # che appartiene al fork -- catalogo dei profili di registro, panel_type,
@@ -68,8 +68,8 @@ PRESETS = {
     # da **come e' montato** il pannello, non da che pannello e'. Ci sta
     # perche' e' il montaggio di questo cabinato; chi lo appende dritto lo
     # svuota dalla pagina.
-    "erippolus": {
-        "label": "Erippolus",
+    "icnd2038s_icn2012": {
+        "label": "ICND2038S+ICN2012",
         "values": {
             "rows": 64,
             "cols": 128,
@@ -108,6 +108,18 @@ PRESETS = {
 # io". Serve perche' l'utente possa vedere, dal menu, che la configurazione
 # attuale non corrisponde a nessun profilo noto.
 CUSTOM = "custom"
+
+# Nomi vecchi di profili che esistono ancora sotto un altro nome. Servono a
+# una cosa sola: una configurazione salvata prima del cambio deve continuare a
+# mostrare il suo profilo, non finire su «Personalizzata» perche' la chiave
+# non esiste piu'. Il profilo dei pannelli a indirizzamento diretto si
+# chiamava «Erippolus» nella 11.5, poi e' stato chiamato con i due chip.
+RINOMINATI = {"erippolus": "icnd2038s_icn2012"}
+
+
+def canonico(key):
+    """Il nome buono di un profilo, anche se ne arriva uno vecchio."""
+    return RINOMINATI.get(key, key)
 
 # Il profilo che nasce da una taratura automatica. Non sta in PRESETS perche'
 # non e' un fatto del pannello ma una misura di **questa** macchina: dipende
@@ -168,6 +180,7 @@ def valori_autotune(panel):
 
 def _valori(panel, key):
     """I valori che quella voce del menu scrive nel pannello."""
+    key = canonico(key)
     if key == AUTOTUNE:
         return valori_autotune(panel)
     blocco = PRESETS.get(key)
@@ -186,6 +199,7 @@ def choices(panel=None):
 
 
 def known(key, panel=None):
+    key = canonico(key)
     if key == AUTOTUNE:
         return profilo_autotune(panel) is not None
     return key in PRESETS
@@ -197,6 +211,7 @@ def apply(panel, key):
     `custom` non applica niente di proposito: sceglierlo vuol dire tenere i
     valori attuali e continuare a modificarli a mano.
     """
+    key = canonico(key)
     if key == CUSTOM:
         panel["preset"] = CUSTOM
         return False
@@ -215,6 +230,7 @@ def apply(panel, key):
 
 def matches(panel, key):
     """Vero se il pannello ha esattamente i valori del profilo indicato."""
+    key = canonico(key)
     valori = _valori(panel, key)
     if not valori:
         return False
@@ -257,7 +273,7 @@ def detect(panel):
     si torna a riconoscere dai valori. Per `custom` non c'e' niente da
     verificare: e' la voce che dice «questi numeri li ho scelti io».
     """
-    scelto = (panel or {}).get("preset")
+    scelto = canonico((panel or {}).get("preset"))
     if scelto == CUSTOM:
         return CUSTOM
     if scelto == AUTOTUNE and matches(panel, AUTOTUNE):

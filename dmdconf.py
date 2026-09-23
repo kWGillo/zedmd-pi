@@ -1104,6 +1104,13 @@ def _migrate(raw):
     if meteo_conf.get("ogni_minuti") == 20:
         meteo_conf["ogni_minuti"] = 10
 
+    # Il profilo dei pannelli a indirizzamento diretto si chiamava
+    # «erippolus» nella 11.5 e dalla 11.5.1 porta il nome dei due chip. Chi
+    # l'aveva scelto lo ritrova scelto, senza passare da «Personalizzata».
+    pannello = raw.setdefault("panel", {})
+    if pannello.get("preset") == "erippolus":
+        pannello["preset"] = "icnd2038s_icn2012"
+
     wad = doom.get("wad") or ""
     if wad and not os.path.exists(wad):
         candidato = os.path.join("/srv/dmd/doom", os.path.basename(wad))

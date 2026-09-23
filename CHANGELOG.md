@@ -2,12 +2,19 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [11.5.1]
+
+Il profilo aggiunto nella 11.5 si chiama con i suoi due chip —
+**ICND2038S+ICN2012** — invece che con il nome del venditore. Chi lo aveva già
+scelto se lo ritrova scelto: la configurazione salvata con il nome vecchio
+viene aggiornata all'avvio, e il menu non passa a «Personalizzata».
+
 ## [11.5]
 
-### Il profilo «Erippolus», e la libreria standard
+### Il profilo «ICND2038S+ICN2012», e la libreria standard
 
 Il pannello si può ora pilotare anche con la **libreria standard** di hzeller,
-non solo con il fork S-PWM di questo progetto. Il nuovo profilo **Erippolus**
+non solo con il fork S-PWM di questo progetto. Il nuovo profilo **ICND2038S+ICN2012**
 lo fa in un clic: svuota catalogo dei registri, `panel_type`, i quattro
 parametri S-PWM e le variabili d'ambiente del fork, e riporta profondità e
 tempi ai predefiniti della libreria.
@@ -29,7 +36,7 @@ come per tutti gli altri: con la Bonnet va scelto a mano nel menu
 *Collegamento del pannello*.
 
 Il profilo FM6373 & DP32020B adesso contiene anche il percorso del catalogo
-dei registri: serve per tornare indietro dopo aver provato Erippolus.
+dei registri: serve per tornare indietro dopo aver provato l'altro.
 
 ## [11.4]
 

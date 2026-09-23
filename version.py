@@ -2584,15 +2584,18 @@ Storico:
        di qualcuno della lista compleanni. Interruttore e tre sensori in
        Home Assistant.
   11.5 Il pannello si puo' pilotare anche con la libreria standard di
-       hzeller: profilo **Erippolus**, che svuota tutto quello che appartiene
+       hzeller: profilo **ICND2038S+ICN2012**, che svuota tutto quello che appartiene
        al fork S-PWM. I parametri di quel fork si assegnano solo se la
        libreria li conosce -- assegnarli a vuoto dava pannello nero
        all'avvio -- e la misura del display la dice la matrice invece del
        prodotto colonne per catena. In Impostazioni la sezione dei pannelli a
        indirizzamento diretto: multiplexing, indirizzamento righe, scan mode,
-       ordine dei colori, pixel mapper, pulsing hardware. I valori di
-       Erippolus sono quelli trovati sul campo: slowdown 2, indirizzamento
-       diretto, niente multiplexing, scan progressivo, Rotate:180.
+       ordine dei colori, pixel mapper, pulsing hardware. I valori sono
+       quelli trovati sul campo: slowdown 2, indirizzamento diretto, niente
+       multiplexing, scan progressivo, Rotate:180.
+  11.5.1 Il profilo nuovo si chiama con i suoi due chip -- ICND2038S+ICN2012
+       -- invece che con il nome del venditore. Chi aveva gia' scelto quello
+       vecchio se lo ritrova scelto: il nome cambia, la configurazione no.
 """
 
-__version__ = "11.5"
+__version__ = "11.5.1"
