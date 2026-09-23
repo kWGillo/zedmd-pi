@@ -365,6 +365,12 @@ class InutiliSource(Source):
             return self.t("inutili.status.ok", lang, santo=santo)
         if not self.conf().get("personaggi", True):
             return self.t("inutili.status.solo", lang, santo=santo)
+        motivo = self.storia.errore()
+        if motivo:
+            # Se i personaggi non arrivano, la pagina deve dire **perche'**:
+            # e' l'unica parte del servizio che puo' non funzionare, e una
+            # riga che dice solo "non ancora scaricati" non aiuta nessuno.
+            return self.t("inutili.status.errore", lang, santo=santo, motivo=motivo)
         return self.t("inutili.status.attesa", lang, santo=santo)
 
     def riepilogo(self):

@@ -52,5 +52,46 @@
     <span>256 &times; 64 px &middot; FM6373 &middot; {{ t('footer.version') }} {{ version }}</span>
     <a href="{{ github_url }}" target="_blank" rel="noopener">{{ t('footer.project') }}</a>
   </footer>
+
+  <script>
+  /* Il punto in cui si stava lavorando.
+
+     Ogni Applica e' un POST seguito da un redirect, e un redirect ricarica
+     la pagina dall'alto: su una pagina lunga -- Impostazioni, Servizi -- si
+     perdeva ogni volta il riquadro che si stava toccando, e bisognava
+     ritrovarlo a mano. Qui si segna dove si era prima di inviare e si
+     torna li' al ricaricamento.
+
+     Due cautele. Si ricorda **solo per la pagina da cui si e' partiti**: se
+     il salvataggio porta altrove, si arriva in cima, che e' giusto. E tutto
+     sta dentro try/catch, perche' in una finestra privata sessionStorage
+     puo' sollevare: una comodita' non puo' rompere la pagina. */
+  (function () {
+    var CHIAVE = "dmd:punto";
+    try {
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+      document.addEventListener("submit", function () {
+        try {
+          sessionStorage.setItem(CHIAVE, JSON.stringify({
+            path: location.pathname,
+            y: window.scrollY || window.pageYOffset || 0
+          }));
+        } catch (e) {}
+      }, true);
+      var grezzo = sessionStorage.getItem(CHIAVE);
+      if (grezzo) {
+        sessionStorage.removeItem(CHIAVE);
+        var punto = JSON.parse(grezzo);
+        if (punto && punto.path === location.pathname && punto.y > 0) {
+          window.addEventListener("load", function () {
+            window.scrollTo(0, punto.y);
+          });
+        }
+      }
+    } catch (e) {}
+  })();
+  </script>
 </body>
 </html>

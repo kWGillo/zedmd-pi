@@ -29,6 +29,7 @@ import re
 import time
 import unicodedata
 import urllib.error
+import urllib.parse
 import urllib.request
 
 import compleanni
@@ -40,10 +41,23 @@ SANTI = "santi.csv"
 GIORNATE = "giornate.csv"
 CACHE = "inutili.json"
 
-# L'API di Wikimedia. La lingua e' fissa all'italiano: il servizio e' scritto
-# per un pannello che parla italiano, e la versione inglese darebbe personaggi
-# diversi -- il "famoso" di una lingua non e' quello di un'altra.
-API = "https://it.wikipedia.org/api/rest_v1/feed/onthisday/%s/%02d/%02d"
+# L'API di Wikimedia.
+#
+# **Il feed italiano non ha nati e morti.** Risponde 200 e una lista vuota,
+# sempre, per tutti i giorni dell'anno: quelle due sezioni su it.wikipedia
+# semplicemente non ci sono. E' il motivo per cui la schermata "Accadde oggi"
+# non compariva mai, e non c'era modo di accorgersene guardando il codice --
+# la chiamata riusciva.
+#
+# Quindi si chiede all'inglese, che le ha, e poi si **traducono i nomi**: i
+# titoli inglesi si passano a `langlinks`, che per ciascuno da' il titolo
+# italiano quando la voce esiste anche da noi (Charles the Bald -> Carlo il
+# Calvo). Le descrizioni brevi si prendono in italiano con una seconda
+# chiamata. Tre richieste al giorno in tutto.
+API = "https://%s.wikipedia.org/api/rest_v1/feed/onthisday/%s/%02d/%02d"
+LINGUA = "it"
+LINGUA_FEED = "en"
+API_QUERY = "https://%s.wikipedia.org/w/api.php"
 # Wikimedia chiede di presentarsi. Un programma che non lo fa viene rifiutato,
 # ed e' giusto cosi': si sa chi sta chiedendo e a chi scrivere se esagera.
 AGENTE = "zedmd-pi/1.0 (https://github.com/kWGillo/zedmd-pi) info-inutili"
@@ -210,6 +224,76 @@ def _chiedi(url):
         return json.loads(risposta.read().decode("utf-8", "replace"))
 
 
+def _query(lingua, parametri):
+    """Una chiamata all'API classica di MediaWiki. Torna {} se va storta:
+    e' una rifinitura, non deve poter far fallire il resto."""
+    parametri = dict(parametri)
+    parametri.setdefault("format", "json")
+    parametri.setdefault("formatversion", "2")
+    url = "%s?%s" % (API_QUERY % lingua, urllib.parse.urlencode(parametri))
+    try:
+        return _chiedi(url) or {}
+    except (urllib.error.URLError, OSError, ValueError):
+        return {}
+
+
+def _in_italiano(titoli):
+    """{titolo inglese: titolo italiano} per quelli che da noi esistono."""
+    fuori = {}
+    if not titoli:
+        return fuori
+    dati = _query(LINGUA_FEED, {"action": "query", "prop": "langlinks",
+                                "lllang": LINGUA, "lllimit": "max",
+                                "redirects": "1",
+                                "titles": "|".join(titoli[:50])})
+    pagine = ((dati.get("query") or {}).get("pages")) or []
+    if isinstance(pagine, dict):                  # formatversion 1
+        pagine = list(pagine.values())
+    for pagina in pagine:
+        collegamenti = pagina.get("langlinks") or []
+        for collegamento in collegamenti:
+            titolo = collegamento.get("title") or collegamento.get("*")
+            if titolo:
+                fuori[pagina.get("title", "")] = titolo
+                break
+    return fuori
+
+
+def _descrizioni(titoli):
+    """La descrizione breve italiana di ogni titolo, quando c'e'."""
+    fuori = {}
+    if not titoli:
+        return fuori
+    dati = _query(LINGUA, {"action": "query", "prop": "description",
+                           "redirects": "1", "titles": "|".join(titoli[:50])})
+    pagine = ((dati.get("query") or {}).get("pages")) or []
+    if isinstance(pagine, dict):
+        pagine = list(pagine.values())
+    for pagina in pagine:
+        if pagina.get("description"):
+            fuori[pagina.get("title", "")] = pagina["description"]
+    return fuori
+
+
+def traduci(voci):
+    """Da [(anno, nome inglese, mestiere)] a [(anno, nome italiano, mestiere)].
+
+    Se la traduzione non riesce -- rete che cade a meta', voce che da noi non
+    c'e' -- resta quello che c'era: un nome inglese e' meglio di niente, e
+    quasi sempre e' anche lo stesso nome.
+    """
+    if not voci:
+        return voci
+    nomi = [v[1] for v in voci]
+    italiani = _in_italiano(nomi)
+    descrizioni = _descrizioni(sorted(set(italiani.values()))) if italiani else {}
+    fuori = []
+    for anno, nome, mestiere in voci:
+        tradotto = italiani.get(nome, nome)
+        fuori.append((anno, tradotto, descrizioni.get(tradotto) or mestiere))
+    return fuori
+
+
 def _persona(voce):
     """Da una voce dell'API: (anno, nome, cosa faceva) oppure None.
 
@@ -245,21 +329,42 @@ def scarica(quando=None, tipi=("births", "deaths")):
     """
     quando = quando or time.localtime()
     fuori = {}
+    da_tradurre = {}
     for tipo, etichetta in (("births", "nati"), ("deaths", "morti")):
         if tipo not in tipi:
             continue
-        try:
-            dati = _chiedi(API % (tipo, quando.tm_mon, quando.tm_mday))
-        except (urllib.error.URLError, OSError, ValueError) as exc:
-            return None, str(getattr(exc, "reason", exc))[:120]
         voci = []
-        for voce in (dati.get(etichetta) or dati.get(tipo) or []):
-            persona = _persona(voce)
-            if persona:
-                voci.append(persona)
+        # Prima l'italiano -- se un giorno le due sezioni ci saranno, sono
+        # le sue -- e poi l'inglese, che oggi e' l'unico ad averle.
+        for lingua in (LINGUA, LINGUA_FEED):
+            try:
+                dati = _chiedi(API % (lingua, tipo, quando.tm_mon, quando.tm_mday))
+            except (urllib.error.URLError, OSError, ValueError) as exc:
+                if lingua == LINGUA_FEED:
+                    return None, str(getattr(exc, "reason", exc))[:120]
+                continue
+            voci = []
+            for voce in (dati.get(etichetta) or dati.get(tipo) or []):
+                persona = _persona(voce)
+                if persona:
+                    voci.append(persona)
+            if voci:
+                break
         # Dalle piu' recenti: sono quelle che uno riconosce.
         voci.sort(key=lambda v: -v[0])
         fuori[etichetta] = voci[:QUANTI]
+        da_tradurre[etichetta] = lingua != LINGUA
+    if not any(fuori.values()):
+        return None, "Wikipedia non ha nati ne' morti per oggi"
+    # I nomi si traducono tutti insieme, nati e morti: due chiamate in tutto
+    # invece di due per lista.
+    insieme = [v for etichetta, voci in fuori.items() if da_tradurre.get(etichetta)
+               for v in voci]
+    if insieme:
+        tradotti = dict(zip([v[1] for v in insieme], traduci(insieme)))
+        for etichetta, voci in fuori.items():
+            if da_tradurre.get(etichetta):
+                fuori[etichetta] = [tradotti.get(v[1], v) for v in voci]
     return fuori, ""
 
 

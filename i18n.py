@@ -1676,6 +1676,8 @@ STRINGS = {
     "inutili.status.ok": ("Oggi: %(santo)s", "Today: %(santo)s"),
     "inutili.status.solo": ("Oggi: %(santo)s - solo calendario",
                             "Today: %(santo)s - calendar only"),
+    "inutili.status.errore": ("Oggi: %(santo)s - personaggi non arrivati: %(motivo)s",
+                              "Today: %(santo)s - famous people missing: %(motivo)s"),
     "inutili.status.attesa": ("Oggi: %(santo)s - personaggi non ancora scaricati",
                               "Today: %(santo)s - famous people not downloaded yet"),
     "services.desc.moon": (

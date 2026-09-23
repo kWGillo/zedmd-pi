@@ -2596,6 +2596,13 @@ Storico:
   11.5.1 Il profilo nuovo si chiama con i suoi due chip -- ICND2038S+ICN2012
        -- invece che con il nome del venditore. Chi aveva gia' scelto quello
        vecchio se lo ritrova scelto: il nome cambia, la configurazione no.
+  11.6 *«Accadde oggi» era sempre vuota.* Il feed on-this-day di it.wikipedia
+       non ha nati e morti: risponde con una lista vuota tutti i giorni, e la
+       chiamata riusciva. Adesso si chiede prima all'italiano e poi
+       all'inglese, con i nomi tradotti via langlinks e le descrizioni prese
+       in italiano; se non c'e' niente, la riga di stato dice il motivo. E la
+       pagina web non riparte piu' dall'alto dopo Applica: il punto in cui si
+       stava lavorando viene ricordato.
 """
 
-__version__ = "11.5.1"
+__version__ = "11.6"

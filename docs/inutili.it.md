@@ -82,9 +82,20 @@ quello del programma e si aggiunge, non lo sostituisce.
 
 # 5. I personaggi famosi
 
-Vengono dall'API pubblica *on this day* di Wikipedia in italiano: gratuita,
-senza chiave, come Open-Meteo per il meteo e le ADS-B per gli aerei. Si
-chiede **una volta al giorno** e si tiene in cache, quindi:
+Vengono dall'API pubblica *on this day* di Wikipedia: gratuita, senza chiave,
+come Open-Meteo per il meteo e le ADS-B per gli aerei.
+
+**Il feed italiano non ha nati e morti.** Risponde regolarmente, ma con una
+lista vuota, per tutti i giorni dell'anno: quelle due sezioni su it.wikipedia
+non esistono. È il motivo per cui nella 11.4 la seconda schermata non
+compariva mai — la chiamata riusciva, e non tornava niente. Dalla 11.6 si
+chiede prima all'italiano (se un giorno lo riempiranno, è suo) e poi
+all'inglese, e i nomi si **traducono**: i titoli inglesi passano da
+`langlinks`, che dà il titolo italiano quando la voce c'è anche da noi —
+*Charles the Bald* diventa *Carlo il Calvo* — e le descrizioni brevi si
+prendono in italiano. In tutto sei richieste al giorno.
+
+Si chiede **una volta al giorno** e si tiene in cache, quindi:
 
 - se la rete cade dopo, il pannello continua a mostrare quelli di oggi;
 - se la rete manca del tutto, la seconda schermata non compare e basta;

@@ -28,10 +28,10 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 c6814e92f81b4968d943f3d1cbc6f301  giornate.csv
 0d83c8464fd5bd30a6fcb328e6dd0489  hass.py
-e15022f3d36d9db9991dde8f336a3dc7  i18n.py
+54d560abb1b235bc2e1947af6ca9a067  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
-382d7c4bcbeaa99cc40927abcb5a6786  inutili.py
+806cb122cc061f335abd14cfa8a3b17b  inutili.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 b9d0bda3222f80aa266f96cf9db90b8c  lookup.py
 501367bdb38413b33dbd3b3c5fe8bb17  metadati.py
@@ -73,7 +73,7 @@ ce067949314c5c7a779ef14aef2a479e  sources/giochi/pongo.py
 bf801c6443981bcbd2132b69bdf01cf8  sources/giochi/serpente.py
 9f1e1bc5394cdb3b6b7620eaeef5e07a  sources/giochi/squadriglia.py
 e6d3a6d006b2d1ff361934e64a1ae7e9  sources/giochi/trex.py
-c0a83742de67c0a90d8cd1bd75193221  sources/inutili.py
+929de2f232c032abd6b5a3443e82e5c1  sources/inutili.py
 8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
 9d5c71443d63c261e79811e3d8d42b7d  sources/meteo.py
 1d2251eff5cc8b014100149bd68d0103  sources/notifiche.py
@@ -125,7 +125,7 @@ f989ae9731b72c895aca8e14d94b517a  suoni/squadriglia_musica.wav
 20f388c98cf3e8c1565aac8909902ac3  suoni/tonfo.wav
 c193906bb0ae9364de937623953b62dc  suoni/trex_musica.wav
 e7cbc43ed729a6fc7f71dc5d266d5a98  templates/banner.html
-8be6e221d561cbbc3d239eecd5eaa7a9  templates/base.html
+12a21862aa615c6c7a777e68d9163953  templates/base.html
 f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
 543d0923aa70d70713ab36b039dd126a  templates/calendario.html
 2151e5dc3cc2a6fe5b2e925c5237328c  templates/clock.html
@@ -149,7 +149,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 29ec3d40d18b3ff9c31cf907cd8b1236  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-5405dc72d6f12b5c15c019620bdc4cbe  version.py
+7ee5a85793e40b574b35c9993b7e6021  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 8ce7a4bb5e4c656e0e0d7b2eb0a4677d  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

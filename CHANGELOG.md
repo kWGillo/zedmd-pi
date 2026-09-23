@@ -2,6 +2,30 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [11.6]
+
+### «Accadde oggi» era sempre vuota
+
+Il feed *on this day* di **it.wikipedia non ha nati e morti**: risponde
+regolarmente con una lista vuota, tutti i giorni dell'anno. La chiamata
+riusciva, non arrivava niente, e la seconda schermata di Info inutili non
+compariva mai.
+
+Adesso si chiede prima all'italiano — se un giorno quelle sezioni ci saranno,
+sono le sue — e poi all'inglese, che le ha; i nomi si traducono con
+`langlinks` (*Charles the Bald* → *Carlo il Calvo*) e le descrizioni brevi si
+prendono in italiano. Se non c'è niente da nessuna parte, adesso lo dice: la
+riga di stato della pagina Servizi riporta il motivo invece di un generico
+«non ancora scaricati».
+
+### La pagina non riparte più dall'alto
+
+Ogni **Applica** è un POST seguito da un redirect, e un redirect ricarica la
+pagina dall'alto: su Impostazioni o Servizi si perdeva ogni volta il riquadro
+che si stava toccando. Adesso il punto in cui si stava lavorando viene
+ricordato e ripristinato al ricaricamento. Se il salvataggio porta a un'altra
+pagina, si arriva in cima — che è giusto.
+
 ## [11.5.1]
 
 Il profilo aggiunto nella 11.5 si chiama con i suoi due chip —
