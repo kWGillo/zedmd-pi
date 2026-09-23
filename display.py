@@ -12,8 +12,12 @@ class Display:
     def __init__(self, cfg):
         panel = cfg["panel"]
 
-        # Il catalogo dei profili di registro va indicato prima di creare la matrice.
-        os.environ["SPWM_PROFILE_DIR"] = panel["profile_dir"]
+        # Il catalogo dei profili di registro va indicato prima di creare la
+        # matrice. Vuoto = **libreria standard**, quella di hzeller senza il
+        # fork S-PWM: allora non c'e' nessun catalogo da indicare, e scrivere
+        # la variabile a vuoto farebbe cercare una cartella che non esiste.
+        if (panel.get("profile_dir") or "").strip():
+            os.environ["SPWM_PROFILE_DIR"] = panel["profile_dir"]
 
         # Regolazioni fini del driver S-PWM: la libreria le legge dall'ambiente
         # al momento della creazione della matrice. Un valore vuoto significa
@@ -35,11 +39,38 @@ class Display:
         options.parallel = panel["parallel"]
         options.hardware_mapping = panel["hardware_mapping"]
         options.gpio_slowdown = panel["slowdown"]
-        options.panel_type = panel["panel_type"]
-        options.spwm_row_address_type = panel["spwm_row_address_type"]
-        options.spwm_scan_rows = panel["spwm_scan_rows"]
-        options.spwm_data_layout = panel["spwm_data_layout"]
-        options.spwm_register_config = panel["spwm_register_config"]
+        options.panel_type = panel.get("panel_type") or ""
+        # I quattro parametri S-PWM esistono **solo** nel fork: con la
+        # libreria standard assegnarli farebbe morire il servizio all'avvio,
+        # cioe' pannello nero. Si guarda se la libreria li conosce, e se non
+        # li conosce si tira dritto -- e' la stessa cautela dei registri
+        # forzati, qui applicata a tutto il blocco.
+        spwm = hasattr(options, "spwm_row_address_type")
+        if spwm:
+            options.spwm_row_address_type = panel["spwm_row_address_type"]
+            options.spwm_scan_rows = panel["spwm_scan_rows"]
+            options.spwm_data_layout = panel["spwm_data_layout"]
+            options.spwm_register_config = panel["spwm_register_config"]
+        # I parametri dei pannelli classici, quelli a indirizzamento diretto.
+        # Si applicano solo se in configurazione c'e' scritto qualcosa: vuoto
+        # vuol dire "lascia il predefinito della libreria", che e' quello che
+        # vuole chi non sa ancora che pannello ha in mano.
+        for chiave, attributo, tipo in (
+                ("row_address_type", "row_address_type", int),
+                ("multiplexing", "multiplexing", int),
+                ("scan_mode", "scan_mode", int),
+                ("pixel_mapper", "pixel_mapper_config", str),
+                ("led_rgb_sequence", "led_rgb_sequence", str),
+                ("disable_hardware_pulsing", "disable_hardware_pulsing", bool)):
+            grezzo = panel.get(chiave)
+            if grezzo in (None, ""):
+                continue
+            try:
+                valore = bool(grezzo) if tipo is bool else tipo(grezzo)
+                setattr(options, attributo, valore)
+                print("[display] %s=%s" % (attributo, valore))
+            except (AttributeError, TypeError, ValueError):
+                print("[display] la libreria non accetta %s" % attributo)
         options.limit_refresh_rate_hz = panel["limit_refresh"]
         options.pwm_bits = panel["pwm_bits"]
         # Le due leve che permettono di tenere la profondita' alta senza
@@ -53,7 +84,7 @@ class Display:
         # all'avvio, cioe' pannello nero per una funzione che l'utente non ha
         # nemmeno chiesto. Se non c'e', si tira dritto con il profilo.
         registri = str(panel.get("spwm_force_register") or "").strip()
-        if registri:
+        if registri and spwm:
             try:
                 options.spwm_force_register = registri
                 print("[display] registri RGB forzati: %s" % registri[:60])
@@ -68,8 +99,11 @@ class Display:
 
         self.matrix = RGBMatrix(options=options)
         self.canvas = self.matrix.CreateFrameCanvas()
-        self.width = panel["cols"] * panel["chain"]
-        self.height = panel["rows"]
+        # La misura la dice la matrice, non la configurazione: con un
+        # pixel mapper -- o con una catena disposta in piu' righe -- il
+        # prodotto colonne per catena non e' piu' quello che si vede.
+        self.width = self.matrix.width
+        self.height = self.matrix.height
         self._lock = threading.Lock()
 
     def set_brightness(self, value):

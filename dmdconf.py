@@ -42,6 +42,16 @@ DEFAULTS = {
         # dei casi: serve per provare una parola sola alla volta quando
         # nessun profilo del catalogo va bene del tutto.
         "spwm_force_register": "",
+        # I parametri dei pannelli **classici**, quelli a indirizzamento
+        # diretto che girano con la libreria standard di hzeller. Vuoto =
+        # predefinito della libreria, ed e' cosi' per tutti finche' qualcuno
+        # non ha un pannello che li vuole: i profili S-PWM non li usano.
+        "row_address_type": "",
+        "multiplexing": "",
+        "scan_mode": "",
+        "pixel_mapper": "",
+        "led_rgb_sequence": "",
+        "disable_hardware_pulsing": "",
         "show_refresh": False,
         # Cartella del fork della libreria matrice. Vuoto = dedotta da
         # profile_dir, che ne e' una sottocartella.

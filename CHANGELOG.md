@@ -2,6 +2,35 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [11.5]
+
+### Il profilo «Erippolus», e la libreria standard
+
+Il pannello si può ora pilotare anche con la **libreria standard** di hzeller,
+non solo con il fork S-PWM di questo progetto. Il nuovo profilo **Erippolus**
+lo fa in un clic: svuota catalogo dei registri, `panel_type`, i quattro
+parametri S-PWM e le variabili d'ambiente del fork, e riporta profondità e
+tempi ai predefiniti della libreria.
+
+Il programma guarda se la libreria conosce i parametri S-PWM e, se non li
+conosce, non glieli assegna: assegnarli non darebbe un errore ma un pannello
+nero all'avvio. La misura del display la dice ora la matrice e non più il
+prodotto colonne × catena, così un pixel mapper non la falsa.
+
+In Impostazioni compare la sezione **Pannelli a indirizzamento diretto**:
+multiplexing, tipo di indirizzamento righe, scan mode, ordine dei colori,
+pixel mapper e pulsing hardware. Vuoti valgono i predefiniti della libreria, e
+si riempiono uno alla volta guardando il pannello.
+
+I valori del profilo sono quelli trovati sul campo: 256×64, `slowdown` 2 (Pi
+3B+), indirizzamento diretto A–E, niente multiplexing, scan progressivo e
+`Rotate:180` per il montaggio capovolto. Il cablaggio resta fuori dal profilo
+come per tutti gli altri: con la Bonnet va scelto a mano nel menu
+*Collegamento del pannello*.
+
+Il profilo FM6373 & DP32020B adesso contiene anche il percorso del catalogo
+dei registri: serve per tornare indietro dopo aver provato Erippolus.
+
 ## [11.4]
 
 ### Info inutili

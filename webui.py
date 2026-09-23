@@ -2203,6 +2203,31 @@ def create_app(runtime):
                 panel[key] = default
         panel["show_refresh"] = request.form.get("show_refresh") == "on"
 
+        # I parametri dei pannelli classici. Tre numeri e due parole, e tutti
+        # e cinque possono restare **vuoti**: vuoto vuol dire "quello che dice
+        # la libreria". Un campo svuotato deve tornare vuoto davvero, non
+        # ricadere su uno zero che per la libreria e' una scelta.
+        for chiave, massimo in (("row_address_type", 5), ("multiplexing", 20),
+                                ("scan_mode", 1)):
+            if chiave not in request.form:
+                continue
+            grezzo = request.form.get(chiave, "").strip()
+            if not grezzo:
+                panel[chiave] = ""
+                continue
+            try:
+                panel[chiave] = max(0, min(massimo, int(grezzo)))
+            except ValueError:
+                panel[chiave] = ""
+        for chiave in ("pixel_mapper", "led_rgb_sequence"):
+            if chiave in request.form:
+                panel[chiave] = request.form.get(chiave, "").strip()[:60]
+        if "pannello_classico" in request.form:
+            # La spunta arriva solo dalla pagina del pannello: senza questo
+            # marcatore una chiamata che non la contiene la spegnerebbe.
+            panel["disable_hardware_pulsing"] = (
+                True if request.form.get("disable_hardware_pulsing") == "on" else "")
+
 
         env = panel.setdefault("spwm_env", {})
         for name in list(env.keys()):

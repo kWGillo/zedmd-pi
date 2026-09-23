@@ -270,6 +270,39 @@
               placeholder="{{ t('settings.panel.registri.vuoto') }}">{{ cfg.panel.spwm_force_register }}</textarea>
     <p class="hint">{{ t('settings.panel.registri.hint') }}</p>
 
+    {# I parametri dei pannelli classici, quelli senza S-PWM. Vuoti quasi
+       sempre: servono al profilo Erippolus e a chi ha un pannello a
+       indirizzamento diretto. #}
+    <h3>{{ t('settings.panel.classico') }}</h3>
+    <p class="hint">{{ t('settings.panel.classico.hint') }}</p>
+    <input type="hidden" name="pannello_classico" value="1">
+    <div class="row3">
+      <div><label for="multiplexing">{{ t('settings.panel.multiplexing') }}</label>
+           <input type="number" id="multiplexing" name="multiplexing" min="0" max="20"
+                  placeholder="{{ t('settings.panel.libreria') }}"
+                  value="{{ cfg.panel.multiplexing }}"></div>
+      <div><label for="row_address_type">{{ t('settings.panel.rowaddress') }}</label>
+           <input type="number" id="row_address_type" name="row_address_type" min="0" max="5"
+                  placeholder="{{ t('settings.panel.libreria') }}"
+                  value="{{ cfg.panel.row_address_type }}"></div>
+      <div><label for="scan_mode">{{ t('settings.panel.scanmode') }}</label>
+           <input type="number" id="scan_mode" name="scan_mode" min="0" max="1"
+                  placeholder="{{ t('settings.panel.libreria') }}"
+                  value="{{ cfg.panel.scan_mode }}"></div>
+    </div>
+    <label for="led_rgb_sequence">{{ t('settings.panel.rgb') }}</label>
+    <input type="text" id="led_rgb_sequence" name="led_rgb_sequence" maxlength="3"
+           spellcheck="false" placeholder="RGB" value="{{ cfg.panel.led_rgb_sequence }}">
+    <label for="pixel_mapper">{{ t('settings.panel.mapper') }}</label>
+    <input type="text" id="pixel_mapper" name="pixel_mapper" maxlength="60"
+           spellcheck="false" placeholder="{{ t('settings.panel.libreria') }}"
+           value="{{ cfg.panel.pixel_mapper }}">
+    <label class="check">
+      <input type="checkbox" name="disable_hardware_pulsing"
+             {{ 'checked' if cfg.panel.disable_hardware_pulsing }}>
+      {{ t('settings.panel.nopulsing') }}
+    </label>
+
     <label class="check">
       <input type="checkbox" name="show_refresh" {{ 'checked' if cfg.panel.show_refresh }}>
       {{ t('settings.panel.showrefresh') }}

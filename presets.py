@@ -31,6 +31,13 @@ PRESETS = {
             # vorrebbe dire che riapplicare il profilo del pannello ributta
             # l'uscita sul cablaggio diretto con la Bonnet montata.
             "panel_type": "fm6373",
+            # Il catalogo dei profili di registro. Sta nel profilo dalla
+            # 11.5, da quando esiste un profilo che lo **svuota**: senza
+            # questa riga, passare a Erippolus e tornare indietro lasciava il
+            # fork senza catalogo, cioe' un pannello che non parte piu' e
+            # nessun modo di capire perche'.
+            "profile_dir": ("/home/gillo/rpi-rgb-led-matrix_pwm_experiment"
+                            "/lib/spwm/registertest/data"),
             "spwm_row_address_type": 1,
             "spwm_scan_rows": 64,
             "spwm_data_layout": 0,
@@ -43,6 +50,52 @@ PRESETS = {
             "spwm_env": {
                 "SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES": "1",
                 "SPWM_FRAME_END_SLEEP_US": "300",
+            },
+        },
+    },
+    # Erippolus: pannelli a indirizzamento diretto, che girano con la
+    # **libreria standard** di hzeller invece che con il fork S-PWM. Il
+    # profilo non e' una taratura, e' un interruttore: svuota tutto quello
+    # che appartiene al fork -- catalogo dei profili di registro, panel_type,
+    # i quattro parametri S-PWM, le variabili d'ambiente -- e riporta
+    # profondita' e tempi ai predefiniti della libreria.
+    #
+    # I parametri classici sono quelli trovati sul campo: indirizzamento
+    # diretto A-E (row_address_type 0; 3, 4 e 5 provati e sbagliati), niente
+    # multiplexing, scan progressivo. Lo slowdown 2 e' quello di un Pi 3B+.
+    #
+    # `pixel_mapper` fa eccezione e sta qui a malincuore: Rotate:180 dipende
+    # da **come e' montato** il pannello, non da che pannello e'. Ci sta
+    # perche' e' il montaggio di questo cabinato; chi lo appende dritto lo
+    # svuota dalla pagina.
+    "erippolus": {
+        "label": "Erippolus",
+        "values": {
+            "rows": 64,
+            "cols": 128,
+            "chain": 2,
+            "parallel": 1,
+            "panel_type": "",
+            "profile_dir": "",
+            "spwm_row_address_type": 0,
+            "spwm_scan_rows": 0,
+            "spwm_data_layout": 0,
+            "spwm_register_config": 0,
+            "spwm_force_register": "",
+            "slowdown": 2,
+            "limit_refresh": 0,
+            "pwm_bits": 11,
+            "pwm_lsb_nanoseconds": 130,
+            "pwm_dither_bits": 0,
+            "row_address_type": 0,
+            "multiplexing": 0,
+            "scan_mode": 0,
+            "pixel_mapper": "Rotate:180",
+            "led_rgb_sequence": "",
+            "disable_hardware_pulsing": "",
+            "spwm_env": {
+                "SPWM_END_OF_FRAME_EXTRA_ROW_CYCLES": "",
+                "SPWM_FRAME_END_SLEEP_US": "",
             },
         },
     },

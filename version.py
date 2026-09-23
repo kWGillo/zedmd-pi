@@ -2583,6 +2583,16 @@ Storico:
        invece di rompersi. In fondo alla prima, quando capita, l'onomastico
        di qualcuno della lista compleanni. Interruttore e tre sensori in
        Home Assistant.
+  11.5 Il pannello si puo' pilotare anche con la libreria standard di
+       hzeller: profilo **Erippolus**, che svuota tutto quello che appartiene
+       al fork S-PWM. I parametri di quel fork si assegnano solo se la
+       libreria li conosce -- assegnarli a vuoto dava pannello nero
+       all'avvio -- e la misura del display la dice la matrice invece del
+       prodotto colonne per catena. In Impostazioni la sezione dei pannelli a
+       indirizzamento diretto: multiplexing, indirizzamento righe, scan mode,
+       ordine dei colori, pixel mapper, pulsing hardware. I valori di
+       Erippolus sono quelli trovati sul campo: slowdown 2, indirizzamento
+       diretto, niente multiplexing, scan progressivo, Rotate:180.
 """
 
-__version__ = "11.4"
+__version__ = "11.5"

@@ -774,6 +774,25 @@ STRINGS = {
         "right and you want to try a single word at a time starting from one "
         "that works. Empty = back to the profile, which is always the way "
         "out."),
+    "settings.panel.classico": ("Pannelli a indirizzamento diretto",
+                               "Direct addressing panels"),
+    "settings.panel.classico.hint": (
+        "Servono solo con la libreria standard, cioè con un profilo che non usa "
+        "l'S-PWM (per esempio Erippolus). Lasciati vuoti, valgono i predefiniti "
+        "della libreria: si riempiono uno alla volta, guardando il pannello.",
+        "These only matter with the standard library, that is with a profile "
+        "that does not use S-PWM (Erippolus, for instance). Left empty, the "
+        "library defaults apply: fill them one at a time, watching the panel."),
+    "settings.panel.libreria": ("predefinito", "default"),
+    "settings.panel.multiplexing": ("Multiplexing", "Multiplexing"),
+    "settings.panel.rowaddress": ("Tipo di indirizzamento righe", "Row address type"),
+    "settings.panel.scanmode": ("Scan mode (0 progressivo, 1 interlacciato)",
+                                "Scan mode (0 progressive, 1 interlaced)"),
+    "settings.panel.rgb": ("Ordine dei colori", "Colour order"),
+    "settings.panel.mapper": ("Pixel mapper", "Pixel mapper"),
+    "settings.panel.nopulsing": (
+        "Disattiva il pulsing hardware (serve su alcune schede audio attive)",
+        "Disable hardware pulsing (needed with some active sound cards)"),
     "settings.panel.showrefresh": ("Scrivi il refresh rate nel log — utile durante la taratura",
                                    "Write the refresh rate to the log — useful while tuning"),
     "settings.panel.button": ("Salva e riavvia il servizio", "Save and restart the service"),

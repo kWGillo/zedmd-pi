@@ -370,6 +370,49 @@ La taratura fine va ricontrollata: lo `slowdown` del profilo è stato trovato
 sul cablaggio diretto, e con i level-shifter della Bonnet il valore buono può
 essere più basso.
 
+#### I profili del pannello
+
+Il menu **Profilo** di Impostazioni applica in blocco i venti parametri di un
+tipo di pannello. Dalla 11.5 le voci di fabbrica sono due:
+
+| Profilo | Libreria | Per cosa |
+|---|---|---|
+| **FM6373 & DP32020B** | il fork con l'S-PWM | i pannelli di questo progetto: catalogo dei registri, `panel_type`, i quattro parametri S-PWM |
+| **Erippolus** | quella **standard** di hzeller | pannelli a indirizzamento diretto, che l'S-PWM non ce l'hanno |
+
+*Erippolus* non è una taratura, è un interruttore: svuota tutto quello che
+appartiene al fork — catalogo dei profili di registro, `panel_type`, i quattro
+parametri S-PWM, le variabili d'ambiente — e riporta profondità e tempi ai
+predefiniti della libreria. Questi i suoi valori:
+
+| Parametro | Valore | Perché |
+|---|---|---|
+| righe × colonne × catena | 64 × 128 × 2, parallel 1 | 256×64, come l'altro profilo |
+| `slowdown` | 2 | trovato su un Pi 3B+ |
+| `panel_type` | vuoto | nessun init speciale |
+| `row_address_type` | 0 | indirizzamento diretto A–E; 3, 4 e 5 provati e sbagliati |
+| `multiplexing` | 0 | nessuno |
+| `scan_mode` | 0 | progressivo |
+| `pixel_mapper` | `Rotate:180` | dipende dal **montaggio**, non dal pannello |
+| profondità e tempi | 11 bit, 130 ns, 0 dithering | predefiniti della libreria |
+
+Il **cablaggio non sta nel profilo**, per scelta: che pannello è e come è
+collegato sono due fatti separati, e un profilo che riscrivesse l'uscita
+rimetterebbe i fili diretti a chi ha la Bonnet montata. Con Erippolus va messo
+a mano su *Adafruit RGB Matrix Bonnet*, nel menu **Collegamento del pannello**
+qui sopra.
+
+Gli altri parametri classici — **ordine dei colori** e **pulsing hardware** —
+restano vuoti, e vuoto vuol dire *quello che dice la libreria*. Si riempiono
+dalla sezione «Pannelli a indirizzamento diretto», guardando il pannello: sono
+esattamente i `--led-multiplexing`, `--led-row-addr-type`, `--led-scan-mode`,
+`--led-rgb-sequence` e `--led-pixel-mapper` della libreria.
+
+Il programma non decide da sé quale libreria sta usando: **guarda se la
+libreria conosce i parametri S-PWM** e, se non li conosce, li salta. Assegnare
+un parametro che non esiste non darebbe un errore da leggere con calma:
+darebbe un pannello nero all'avvio.
+
 ---
 
 ## 7. Verifica del pannello
