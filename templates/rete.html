@@ -23,6 +23,19 @@
     <dd class="mono">{{ stato.interfaccia or '—' }}</dd>
   </dl>
   {% if stato.errore %}<p class="status">{{ stato.errore }}</p>{% endif %}
+
+  {# Il risparmio energetico della radio: acceso, prima o poi il Raspberry
+     sparisce dalla rete pur restando acceso. #}
+  <form method="post" action="{{ url_for('api_rete_risparmio') }}" class="inline">
+    <label class="check">
+      <input type="checkbox" name="wifi_sveglio"
+             {{ 'checked' if cfg.rete.wifi_sveglio }}>
+      {{ t('rete.sveglio') }}
+    </label>
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+  <p class="hint">{{ t('rete.sveglio.hint') }}
+    {%- if risparmio is not none %} — {{ t('rete.sveglio.stato.on') if risparmio else t('rete.sveglio.stato.off') }}{% endif %}</p>
   {% endif %}
 
   {% if indirizzi %}

@@ -734,6 +734,12 @@ DEFAULTS = {
              "suono": "", "etichetta": "", "durata": 120},
         ],
     },
+    # La rete. Una levetta sola, e non e' un vezzo: il risparmio energetico
+    # del wifi ha reso il Raspberry irraggiungibile -- pannello acceso, SSH e
+    # pagina web morti -- e si e' ripreso solo staccando la corrente.
+    "rete": {
+        "wifi_sveglio": True,
+    },
     "services": {
         "zedmd": True,
         # Acceso di suo, e non e' una contraddizione con le voci spente: qui
@@ -786,6 +792,11 @@ DEFAULTS = {
     # quella casella, il servizio resta intero, solo piu' corto.
     "inutili": {
         "calendario": True,
+        # I fatti storici del giorno, dalla pagina «24 settembre» di
+        # Wikipedia: due righe da leggere, quindi la loro durata e' piu'
+        # lunga di quella delle altre schermate.
+        "eventi": True,
+        "durata_eventi": 10,
         "personaggi": True,
         "morti": True,
         "durata_slide": 6,

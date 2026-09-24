@@ -158,8 +158,13 @@ riavvio del servizio, e da lì in tre posti:
 | Menu | il pallino diventa **rosso** |
 | Home Assistant | il sensore **Ultimo aggiornamento** |
 
-Il banner resta finché non premi **Ho letto**. Non sparisce da solo, perché
-sparire da solo è esattamente il difetto di prima.
+Il banner si mostra **una volta**: lo vedi quando riapri la pagina dopo
+l'aggiornamento, e alla visita successiva non c'è più, pallino compreso. Fino
+alla 11.6 c'era un pulsante **Ho letto** da premere — un lavoro in più chiesto
+a chi ha appena finito di aggiornare, per un avviso che aveva già letto. Il
+difetto che il banner era nato per togliere era il ripristino *silenzioso*, e
+per quello basta mostrarlo una volta; chi lo vuole rileggere ha il registro in
+fondo alla stessa pagina e il sensore di Home Assistant, che non si cancellano.
 
 ## 4.2 Il sensore di Home Assistant
 

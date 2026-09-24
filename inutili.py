@@ -63,6 +63,9 @@ API_QUERY = "https://%s.wikipedia.org/w/api.php"
 AGENTE = "zedmd-pi/1.0 (https://github.com/kWGillo/zedmd-pi) info-inutili"
 TIMEOUT = 12
 QUANTI = 6                  # nati e morti da tenere in cache, per tipo
+EVENTI = 8                  # fatti storici da tenere in cache
+MESI_IT = ("gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
+           "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre")
 ETA_MASSIMA = 36 * 3600     # oltre, la cache e' vecchia ma si usa lo stesso
 
 
@@ -368,6 +371,110 @@ def scarica(quando=None, tipi=("births", "deaths")):
     return fuori, ""
 
 
+# ------------------------------------------------------- i fatti storici
+
+def _pulisci_wikitesto(testo):
+    """Da wikitesto a una riga leggibile su un pannello.
+
+    Non e' un parser: e' una scrematura. Si tolgono i template, le note, i
+    tag, e ai collegamenti si tiene la parte che si legge -- `[[Luna|la
+    Luna]]` diventa "la Luna". Quello che resta e' testo, ed e' quello che
+    serve: sul pannello non ci sono collegamenti da cliccare.
+    """
+    testo = re.sub(r"<ref[^>]*?/>", "", testo)
+    testo = re.sub(r"<ref.*?</ref>", "", testo, flags=re.S)
+    testo = re.sub(r"<!--.*?-->", "", testo, flags=re.S)
+    testo = re.sub(r"\{\{[^{}]*\}\}", "", testo)
+    testo = re.sub(r"\[\[[^\]|]*\|([^\]]*)\]\]", r"\1", testo)
+    testo = re.sub(r"\[\[([^\]]*)\]\]", r"\1", testo)
+    testo = re.sub(r"'{2,}", "", testo)
+    testo = re.sub(r"<[^>]+>", "", testo)
+    testo = re.sub(r"\s+", " ", testo)
+    return testo.strip(" .;–—-")
+
+
+def _fatto(anno, testo):
+    testo = _pulisci_wikitesto(testo)
+    if not testo or not (0 < anno <= 2100):
+        return None
+    # Una frase sola: sul pannello la seconda non ci starebbe, e tagliata a
+    # meta' fa peggio che non esserci.
+    testo = re.split(r"(?<=[a-z0-9\)])\.\s+[A-Z]", testo)[0].strip(" .")
+    return (anno, testo)
+
+
+def _eventi_dal_feed(quando):
+    """I fatti del giorno dal feed on-this-day. Lista, eventualmente vuota."""
+    voci = []
+    for tipo in ("selected", "events"):
+        try:
+            dati = _chiedi(API % (LINGUA, tipo, quando.tm_mon, quando.tm_mday))
+        except (urllib.error.URLError, OSError, ValueError):
+            continue
+        for voce in (dati.get(tipo) or dati.get("selected") or dati.get("events") or []):
+            anno, testo = voce.get("year"), (voce.get("text") or "").strip()
+            if isinstance(anno, int) and testo:
+                fatto = _fatto(anno, testo)
+                if fatto:
+                    voci.append(fatto)
+        if voci:
+            break
+    return voci
+
+
+def _eventi_dalla_pagina(quando):
+    """I fatti del giorno letti dalla pagina «24 settembre» di it.wikipedia.
+
+    La rete di sicurezza del feed: la pagina del giorno **esiste di sicuro**,
+    e la sezione «Eventi» e' scritta a mano da chi cura quella pagina. Due
+    chiamate: una per sapere dov'e' la sezione, una per prenderla.
+    """
+    pagina = "%d %s" % (quando.tm_mday, MESI_IT[quando.tm_mon - 1])
+    sezioni = _query(LINGUA, {"action": "parse", "page": pagina, "prop": "sections"})
+    indice = ""
+    for sezione in ((sezioni.get("parse") or {}).get("sections") or []):
+        if (sezione.get("line") or "").strip().lower() == "eventi":
+            indice = sezione.get("index") or ""
+            break
+    if not indice:
+        return []
+    testo = _query(LINGUA, {"action": "parse", "page": pagina, "prop": "wikitext",
+                            "section": indice})
+    grezzo = ((testo.get("parse") or {}).get("wikitext") or "")
+    if isinstance(grezzo, dict):                  # formatversion 1
+        grezzo = grezzo.get("*", "")
+    voci = []
+    for riga in grezzo.split("\n"):
+        trovato = re.match(r"^\*+\s*\[?\[?(\d{3,4})\]?\]?\s*[–—:-]\s*(.+)$",
+                           riga.strip())
+        if not trovato:
+            continue
+        fatto = _fatto(int(trovato.group(1)), trovato.group(2))
+        if fatto:
+            voci.append(fatto)
+    return voci
+
+
+def scarica_eventi(quando=None):
+    """I fatti storici del giorno, in italiano. (lista, errore).
+
+    Prima il feed, che e' fatto apposta; se torna vuoto -- come succede a
+    it.wikipedia per nati e morti -- si legge la pagina del giorno, che c'e'
+    sempre. In italiano in tutti e due i casi: un fatto storico non si
+    traduce con `langlinks`, e' una frase.
+    """
+    quando = quando or time.localtime()
+    try:
+        voci = _eventi_dal_feed(quando) or _eventi_dalla_pagina(quando)
+    except Exception as exc:                      # pragma: no cover - difensivo
+        return [], str(exc)[:120]
+    if not voci:
+        return [], "Wikipedia non ha fatti per oggi"
+    # I piu' recenti per primi: sono quelli che uno ha sentito nominare.
+    voci.sort(key=lambda v: -v[0])
+    return voci[:EVENTI], ""
+
+
 # ------------------------------------------------------------- la cache
 
 def percorso_cache(cartella=None):
@@ -432,11 +539,13 @@ class Storia(object):
             return False, "riprovo piu' tardi"
         self._tentativo = adesso
         dati, errore = scarica(quando)
-        if dati is None:
-            self._errore = errore
-            return False, errore
+        eventi, errore_eventi = scarica_eventi(quando)
+        if dati is None and not eventi:
+            self._errore = errore or errore_eventi
+            return False, self._errore
+        dati = dati or {}
         voce = {"preso": adesso, "nati": dati.get("nati", []),
-                "morti": dati.get("morti", [])}
+                "morti": dati.get("morti", []), "eventi": eventi}
         # Si tiene solo il giorno in corso: la cache e' un promemoria, non un
         # archivio, e un file che cresce per sempre su una scheda SD e' un
         # problema che arriva fra due anni.
@@ -452,6 +561,10 @@ class Storia(object):
     def morti(self, quando=None):
         voce = self._valida(quando) or {}
         return [tuple(v) for v in voce.get("morti", [])]
+
+    def eventi(self, quando=None):
+        voce = self._valida(quando) or {}
+        return [tuple(v) for v in voce.get("eventi", [])]
 
     def ha_qualcosa(self, quando=None, con_morti=True):
         return bool(self.nati(quando) or (con_morti and self.morti(quando)))
@@ -473,8 +586,10 @@ def riepilogo(quando=None, storia=None):
         "tuoi": onomastici_tuoi(quando),
         "nati": [],
         "morti": [],
+        "eventi": [],
     }
     if storia is not None:
         dati["nati"] = [list(v) for v in storia.nati(quando)]
         dati["morti"] = [list(v) for v in storia.morti(quando)]
+        dati["eventi"] = [list(v) for v in storia.eventi(quando)]
     return dati

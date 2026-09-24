@@ -84,6 +84,44 @@ farebbe cadere la connessione all'istante, e per rimediare servirebbe di
 nuovo il monitor — cioè esattamente la situazione da cui questa pagina deve
 tirarti fuori. Se la vuoi togliere, collegati prima a un'altra.
 
+## Wi-Fi sempre sveglio
+
+Una casella sola, accesa di serie, e accanto lo stato letto dalla radio in
+quel momento. Esiste per un guasto preciso: il DMD acceso, il pannello che
+disegna, e **la macchina irraggiungibile** — né SSH né pagina web — finché non
+la riavvii togliendo la corrente. Nel registro del kernel c'è una riga sola:
+
+```
+brcmfmac: brcmf_cfg80211_set_power_mgmt: power save enabled
+```
+
+La radio del Raspberry si addormenta per risparmiare qualche milliwatt, e
+l'access point smette di tenerle da parte i pacchetti. Su un computer che usi
+non te ne accorgi, perché sei tu a svegliarlo; su un oggetto che sta in un
+angolo e a cui ti colleghi da fuori è la differenza fra acceso e sparito.
+
+Il rimedio a mano (`iw dev wlan0 set power_save off`) dura fino al riavvio,
+cioè fino al momento esatto in cui non c'è nessuno a rifarlo. Con la casella
+accesa lo fa il programma, in due punti:
+
+| Dove | Con cosa | Quanto dura |
+|---|---|---|
+| Sulla radio, adesso | `iw dev … set power_save off` | fino al riavvio |
+| Nella connessione salvata | `nmcli connection modify … wifi.powersave 2` | per sempre |
+
+Il nome della tua rete non serve saperlo: fra le connessioni attive si
+riconosce quella wireless dal tipo. E si rifà **a ogni avvio del servizio**,
+in un thread a parte che non trattiene l'accensione del pannello, perché una
+reinstallazione o una connessione rifatta si riporterebbe dietro il difetto.
+
+Togliendo la spunta si smette solo di **imporlo**: quello che NetworkManager
+ha già salvato resta. Disfarlo da qui vorrebbe dire rimettere di nascosto il
+guasto che la casella è nata per togliere; se lo vuoi davvero indietro, è una
+riga di `nmcli` scritta da te.
+
+Su una macchina senza `iw`, senza `nmcli` o senza wifi non succede niente e
+non si rompe niente: la casella resta, e lo stato accanto dice che non si sa.
+
 ## Broker MQTT e Home Assistant
 
 In fondo alla pagina, dalla 6.2, c'è il collegamento al **broker MQTT**:

@@ -2603,6 +2603,19 @@ Storico:
        in italiano; se non c'e' niente, la riga di stato dice il motivo. E la
        pagina web non riparte piu' dall'alto dopo Applica: il punto in cui si
        stava lavorando viene ricordato.
+  12.0 **I fatti storici del giorno** in Info inutili: l'anno grande a
+       sinistra e il fatto a destra, dieci secondi. Dal feed on-this-day
+       italiano -- sezione selected/events, che in italiano c'e' davvero --
+       o, se non risponde, dalla pagina del giorno di Wikipedia, sezione
+       Eventi. Il turno resta di due schermate: il calendario e, a turno, i
+       fatti o i personaggi. La schermata dei personaggi si intitola NATI E
+       MORTI. **Il Wi-Fi non si addormenta piu'**: il risparmio energetico
+       della radio -- che lasciava il pannello acceso e irraggiungibile, ne'
+       SSH ne' pagina web, fino al riavvio -- viene spento a ogni avvio,
+       sulla radio e nella connessione di NetworkManager, con la casella
+       «Wi-Fi sempre sveglio» nella pagina Rete. E il cartello
+       dell'aggiornamento non chiede piu' di dichiarare di averlo letto: si
+       mostra una volta e si toglie da solo.
 """
 
-__version__ = "11.6"
+__version__ = "12.0"

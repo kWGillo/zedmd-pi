@@ -162,6 +162,8 @@
   <form method="post" action="{{ url_for('api_inutili') }}" class="inline">
     <label class="check"><input type="checkbox" name="calendario"
            {{ 'checked' if cfg.inutili.calendario }}> {{ t('inutili.calendario') }}</label>
+    <label class="check"><input type="checkbox" name="eventi"
+           {{ 'checked' if cfg.inutili.eventi }}> {{ t('inutili.eventi') }}</label>
     <label class="check"><input type="checkbox" name="personaggi"
            {{ 'checked' if cfg.inutili.personaggi }}> {{ t('inutili.personaggi') }}</label>
     <label class="check"><input type="checkbox" name="morti"
@@ -169,11 +171,15 @@
     <label for="durata_slide">{{ t('inutili.durata') }}</label>
     <input type="number" id="durata_slide" name="durata_slide" min="3" max="30"
            value="{{ cfg.inutili.durata_slide }}">
+    <label for="durata_eventi">{{ t('inutili.durata.eventi') }}</label>
+    <input type="number" id="durata_eventi" name="durata_eventi" min="3" max="30"
+           value="{{ cfg.inutili.durata_eventi }}">
     <button type="submit">{{ t('common.apply') }}</button>
   </form>
   <div class="actions">
     <form method="post" action="{{ url_for('api_inutili_prova') }}" class="actions">
       <button type="submit" name="slide" value="festa">{{ t('inutili.prova.festa') }}</button>
+      <button type="submit" name="slide" value="eventi" class="ghost">{{ t('inutili.prova.eventi') }}</button>
       <button type="submit" name="slide" value="storia" class="ghost">{{ t('inutili.prova.storia') }}</button>
     </form>
   </div>

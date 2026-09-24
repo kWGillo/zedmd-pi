@@ -52,6 +52,7 @@ NOMI = (0xE0, 0xE4, 0xF0)           # i nomi che festeggiano
 TUOI = (0x60, 0xC8, 0xB0)           # l'onomastico di uno dei tuoi: verde, salta all'occhio
 GIORNATA = (0x40, 0xB8, 0xFF)       # la giornata mondiale
 DATA = (0x78, 0x80, 0x90)
+ANNO_EVENTO = (0xFF, 0x8C, 0x1A)    # l'anno del fatto storico: come il santo
 NATO = (0x9A, 0xD8, 0x6A)
 MORTO = (0xB0, 0x90, 0xD0)
 ANNO = (0x78, 0x80, 0x90)
@@ -149,18 +150,52 @@ class InutiliSource(Source):
     # ----------------------------------------------------------------- turno
 
     def slide_disponibili(self, adesso=None):
-        """Quali schermate si possono fare adesso.
+        """Quali schermate si potrebbero fare adesso.
 
         La prima c'e' sempre: e' calendario, e il calendario ce l'abbiamo in
-        casa. La seconda c'e' solo se Wikipedia ha risposto almeno una volta.
+        casa. Le altre due ci sono solo se Wikipedia ha risposto almeno una
+        volta -- e sono quelle che, senza rete, semplicemente non si fanno.
         """
         conf = self.conf()
         pronte = []
         if conf.get("calendario", True):
             pronte.append("festa")
+        if conf.get("eventi", True) and self.storia.eventi(self._quando(adesso)):
+            pronte.append("eventi")
         if conf.get("personaggi", True) and self._ha_personaggi(adesso):
             pronte.append("storia")
         return pronte
+
+    @staticmethod
+    def _quando(adesso=None):
+        return (adesso or datetime.now()).timetuple()
+
+    def coda_del_turno(self, adesso=None):
+        """Le schermate di **questo** turno, in ordine.
+
+        Non tutte insieme: tre schermate di fila sono oltre venti secondi, e
+        un servizio che non serve a niente non puo' tenere il pannello per
+        mezzo minuto. Il calendario c'e' sempre, e dietro di lui si alternano
+        i fatti storici e i personaggi -- un passaggio l'uno, un passaggio
+        l'altro. Cosi' due comparse di fila non dicono mai la stessa cosa.
+        """
+        pronte = self.slide_disponibili(adesso)
+        dietro = [s for s in ("eventi", "storia") if s in pronte]
+        coda = [s for s in pronte if s == "festa"]
+        if dietro:
+            coda.append(dietro[self._comparse % len(dietro)])
+        return coda
+
+    def durata_di(self, slide):
+        """Quanti secondi sta su una schermata.
+
+        I fatti storici hanno la loro durata, piu' lunga: sono due righe di
+        testo da leggere, non tre parole da riconoscere.
+        """
+        conf = self.conf()
+        if slide == "eventi":
+            return max(3, int(conf.get("durata_eventi", 10) or 10))
+        return max(3, int(conf.get("durata_slide", 6) or 6))
 
     def _ha_personaggi(self, adesso=None):
         quando = (adesso or datetime.now()).timetuple()
@@ -178,13 +213,11 @@ class InutiliSource(Source):
         if not self._running:
             return False
         adesso = adesso or datetime.now()
-        pronte = self.slide_disponibili(adesso)
-        if not pronte:
+        coda = self.coda_del_turno(adesso)
+        if not coda:
             return False
-        conf = self.conf()
-        durata = max(3, int(conf.get("durata_slide", 6) or 6))
-        self._coda = pronte[1:]
-        self._apri(pronte[0], durata)
+        self._coda = coda[1:]
+        self._apri(coda[0], self.durata_di(coda[0]))
         return bool(self._slide)
 
     def _apri(self, slide, secondi):
@@ -210,18 +243,22 @@ class InutiliSource(Source):
         if not coda or not self._running:
             return False
         prossima = coda.pop(0)
-        durata = max(3, int(self.conf().get("durata_slide", 6) or 6))
-        self._apri(prossima, durata)
+        self._apri(prossima, self.durata_di(prossima))
         return bool(self._slide)
 
-    def mostra_adesso(self, slide="festa", secondi=8):
+    def mostra_adesso(self, slide="festa", secondi=None):
         """Il pulsante di prova della pagina web."""
-        if slide == "storia" and not self._ha_personaggi():
-            fatto, motivo = self.storia.aggiorna(forza=True)
-            if not self._ha_personaggi():
-                return False, motivo or "nessun personaggio"
+        if slide in ("storia", "eventi"):
+            pronta = (self._ha_personaggi() if slide == "storia"
+                      else bool(self.storia.eventi(self._quando())))
+            if not pronta:
+                _fatto, motivo = self.storia.aggiorna(forza=True)
+                pronta = (self._ha_personaggi() if slide == "storia"
+                          else bool(self.storia.eventi(self._quando())))
+                if not pronta:
+                    return False, motivo or "niente da mostrare"
         self._coda = []
-        self._apri(slide, secondi)
+        self._apri(slide, secondi or self.durata_di(slide))
         return bool(self._slide), ""
 
     # --------------------------------------------------------------- disegno
@@ -234,6 +271,8 @@ class InutiliSource(Source):
         d = ImageDraw.Draw(img)
         if slide == "storia":
             self._storia(d)
+        elif slide == "eventi":
+            self._eventi(d)
         else:
             self._festa(d)
         return img
@@ -285,14 +324,71 @@ class InutiliSource(Source):
     def _data(self, adesso):
         return "%d %s" % (adesso.day, MESI[adesso.month - 1].upper())
 
-    # ---- schermata 2: accadde oggi
+    # ---- schermata 2: accadde oggi (i fatti)
+
+    def _eventi(self, d, adesso=None):
+        """L'anno grande a sinistra, il fatto a destra su due o tre righe.
+
+        L'anno e' la cosa che si guarda per prima -- «1969» dice gia' mezza
+        storia -- quindi sta da solo, grande, e il testo gli scorre accanto
+        invece di andargli sotto.
+        """
+        adesso = adesso or datetime.now()
+        quando = adesso.timetuple()
+        margine = 3
+        d.text((margine, 1), "ACCADDE OGGI", font=self._font_piccolo, fill=TITOLO)
+        fatti = self.storia.eventi(quando)
+        if not fatti:                              # pragma: no cover - difensivo
+            d.text((margine, int(self.height * 0.4)), "niente da raccontare",
+                   font=self._font_medio, fill=DATA)
+            return
+        anno, testo = fatti[self._comparse % len(fatti)]
+        d.text((margine, int(self.height * 0.30)), str(anno),
+               font=self._font_grande, fill=ANNO_EVENTO)
+        sinistra = margine + self._largo(d, "0000", self._font_grande) + 6
+        disponibile = self.width - sinistra - margine
+        righe = self._a_capo(d, testo, self._font_piccolo, disponibile, 3)
+        alto = int(self.height * 0.17) + 1
+        passo = int(self.height * 0.22)
+        for i, riga in enumerate(righe):
+            d.text((sinistra, alto + i * passo), riga,
+                   font=self._font_piccolo, fill=NOMI)
+
+    def _a_capo(self, d, testo, font, disponibile, quante):
+        """Il testo spezzato in righe che ci stanno, al massimo `quante`.
+
+        Sul pannello non c'e' l'andare a capo automatico: se non si spezza a
+        mano, la frase esce dal vetro. L'ultima riga, se il testo non finisce,
+        prende i puntini.
+        """
+        parole = testo.split()
+        righe, riga = [], ""
+        for parola in parole:
+            prova = (riga + " " + parola).strip()
+            if riga and self._largo(d, prova, font) > disponibile:
+                righe.append(riga)
+                riga = parola
+                if len(righe) == quante:
+                    break
+            else:
+                riga = prova
+        if len(righe) < quante and riga:
+            righe.append(riga)
+        if len(righe) == quante and parole:
+            # E' rimasto fuori qualcosa?
+            scritte = " ".join(righe)
+            if len(scritte) < len(testo):
+                righe[-1] = self._taglia(d, righe[-1] + "…", font, disponibile)
+        return righe
+
+    # ---- schermata 3: nati e morti
 
     def _storia(self, d, adesso=None):
         adesso = adesso or datetime.now()
         quando = adesso.timetuple()
         margine = 3
         disponibile = self.width - margine * 2
-        d.text((margine, 1), "ACCADDE OGGI", font=self._font_piccolo, fill=TITOLO)
+        d.text((margine, 1), "NATI E MORTI", font=self._font_piccolo, fill=TITOLO)
 
         conf = self.conf()
         righe = []
@@ -378,5 +474,6 @@ class InutiliSource(Source):
         quando = datetime.now().timetuple()
         riassunto = dati.riepilogo(quando, self.storia)
         riassunto["slide"] = self.slide_disponibili()
+        riassunto["turno"] = self.coda_del_turno()
         riassunto["comparse"] = self._comparse
         return riassunto

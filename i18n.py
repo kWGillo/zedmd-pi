@@ -845,7 +845,6 @@ STRINGS = {
         "Version %(version)s did not start: rolled back to %(active)s."),
     "settings.update.esito.bad": ("Aggiornamento alla %(version)s non riuscito.",
                                   "Update to version %(version)s failed."),
-    "settings.update.esito.ok_letto": ("Ho letto", "Got it"),
 
     "settings.lib": ("Libreria del pannello", "Panel library"),
     "settings.lib.hint": (
@@ -1651,18 +1650,21 @@ STRINGS = {
         "The door closes and the panel tells whoever walks in, with a red "
         "tick on the clock."),
     "services.desc.inutili": (
-        "Subito dopo il meteo: il santo, chi festeggia l'onomastico, la "
-        "giornata mondiale e chi e' nato o morto oggi.",
-        "Right after the weather: the saint, today's name days, the world "
-        "day, and who was born or died today."),
+        "Subito dopo il meteo: il santo, chi festeggia, la giornata "
+        "mondiale, i fatti storici di oggi e chi e' nato o morto.",
+        "Right after the weather: the saint, name days, the world day, "
+        "today in history, and who was born or died."),
     "inutili.calendario": ("Santo, onomastici e giornata mondiale",
                            "Saint, name days and world day"),
     "inutili.personaggi": ("Personaggi famosi nati e morti oggi (richiede internet)",
                            "Famous people born and died today (needs the internet)"),
     "inutili.morti": ("Mostra anche i morti", "Show the deaths too"),
+    "inutili.eventi": ("Fatti storici di oggi", "Today in history"),
     "inutili.durata": ("Secondi per schermata", "Seconds per screen"),
+    "inutili.durata.eventi": ("Secondi per i fatti storici", "Seconds for history"),
+    "inutili.prova.eventi": ("Prova: accadde oggi", "Test: on this day"),
     "inutili.prova.festa": ("Prova: oggi si festeggia", "Test: today we celebrate"),
-    "inutili.prova.storia": ("Prova: accadde oggi", "Test: on this day"),
+    "inutili.prova.storia": ("Prova: nati e morti", "Test: births and deaths"),
     "inutili.fonte": (
         "Il calendario sta nel programma e non chiede niente a nessuno. I "
         "personaggi famosi vengono da Wikipedia, una volta al giorno: senza "
@@ -1784,6 +1786,21 @@ STRINGS = {
                            "%(livello)s alert: %(evento)s"),
 
     "nav.rete": ("Rete", "Network"),
+    "rete.sveglio": ("Wi-Fi sempre sveglio (niente risparmio energetico)",
+                     "Keep Wi-Fi awake (no power saving)"),
+    "rete.sveglio.hint": (
+        "Se la radio si addormenta il DMD resta acceso ma irraggiungibile. "
+        "Si rifà a ogni avvio.",
+        "If the radio falls asleep the panel stays on but unreachable. "
+        "Redone at every boot."),
+    "rete.sveglio.stato.on": ("adesso il risparmio è acceso",
+                              "power saving is on right now"),
+    "rete.sveglio.stato.off": ("adesso il risparmio è spento",
+                               "power saving is off right now"),
+    "rete.risparmio.fatto": ("Risparmio energetico del Wi-Fi spento. %(dettaglio)s",
+                             "Wi-Fi power saving turned off. %(dettaglio)s"),
+    "rete.risparmio.no": ("Non sono riuscito a spegnere il risparmio: %(dettaglio)s",
+                          "Could not turn power saving off: %(dettaglio)s"),
     "rete.title": ("Rete wifi", "Wi-Fi network"),
     "rete.current": ("Collegamento attuale", "Current connection"),
     "rete.state": ("Stato", "State"),

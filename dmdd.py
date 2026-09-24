@@ -408,6 +408,10 @@ class Runtime:
         # Il turno fra meteo e cielo: uno ogni due media, a turno. Parte
         # sempre, anche con il Cielo spento -- allora da' tutto lo spazio al
         # meteo -- perche' la regola dei due media vale per il meteo comunque.
+        # Il wifi sempre sveglio. In un thread: `nmcli` puo' prendersi
+        # qualche secondo, e l'avvio del pannello non aspetta la radio.
+        threading.Thread(target=self._wifi_sveglio, name="wifi",
+                         daemon=True).start()
         self.turni = Turni(self.cfg, self.meteo, self.cielo, self.media,
                            self.inutili)
         self.turni.start()
@@ -1159,6 +1163,26 @@ class Runtime:
             elapsed = time.time() - started
             if elapsed < period:
                 time.sleep(period - elapsed)
+
+    def _wifi_sveglio(self):
+        """Spegne il risparmio energetico della radio, se e' stato chiesto.
+
+        Si fa a **ogni avvio** e non una volta sola: la preferenza salvata in
+        NetworkManager si perde se la connessione viene rifatta, e una
+        reinstallazione ripartirebbe con il risparmio acceso -- cioe' con il
+        difetto che ha reso il pannello irraggiungibile pur restando acceso.
+        """
+        if not (self.cfg.get("rete") or {}).get("wifi_sveglio", True):
+            return
+        try:
+            import rete
+            if rete.risparmio() is False:
+                return                      # gia' sveglio: niente da fare
+            fatto, dettaglio = rete.spegni_risparmio()
+            print("[rete] risparmio wifi: %s (%s)"
+                  % ("spento" if fatto else "non spento", dettaglio))
+        except Exception as exc:                  # pragma: no cover - difensivo
+            print("[rete] risparmio wifi non applicato: %s" % exc)
 
     def shutdown(self, *_args):
         if not self.running:

@@ -20,9 +20,6 @@
     {{ t('settings.update.esito.bad', version=esito.atteso) }}
     {% endif %}
     <div class="hint">{{ esito.quando | timestamp }}{% if esito.motivo %} — {{ esito.motivo }}{% endif %}</div>
-    <form method="post" action="{{ url_for('api_update_esito') }}">
-      <button type="submit" class="ghost">{{ t('settings.update.esito.ok_letto') }}</button>
-    </form>
   </div>
   {% endif %}
 

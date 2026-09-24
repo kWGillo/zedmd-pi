@@ -2,6 +2,66 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [12.0]
+
+### «Accadde oggi»: i fatti storici del giorno
+
+Info inutili ha una terza schermata: **l'anno grande a sinistra e il fatto a
+destra**, su due o tre righe. Viene dalla stessa API dei personaggi, sezione
+*selected* ed *events*, e questa in italiano **c'è** — è la stessa del riquadro
+«Accadde oggi» della pagina principale di it.wikipedia. Se un giorno non
+rispondesse, si legge direttamente la pagina del giorno («24 settembre») e se
+ne prende la sezione *Eventi*: quella c'è sempre.
+
+Dura **dieci secondi**, perché sono due righe da leggere e non tre parole da
+riconoscere, mentre le altre restano a sei.
+
+**Due schermate per volta, non tre.** Il calendario c'è sempre, e dietro di lui
+si alternano i fatti storici e i personaggi: un passaggio l'uno, un passaggio
+l'altro. Tre di fila sarebbero mezzo minuto di pannello per un servizio che non
+serve a niente, e due comparse di fila direbbero la stessa cosa.
+
+La schermata dei personaggi ora si intitola **NATI E MORTI**, così i due titoli
+non si assomigliano più.
+
+### Il Wi-Fi che si addormentava
+
+Il pannello è rimasto acceso e irraggiungibile: niente SSH, niente pagina web,
+DMD che continuava a disegnare come se niente fosse. Nel registro del kernel
+c'era una riga sola, ed era abbastanza:
+
+```
+brcmfmac: brcmf_cfg80211_set_power_mgmt: power save enabled
+```
+
+La radio del Raspberry si addormenta, l'access point smette di tenerle da parte
+i pacchetti, e la macchina continua a esistere solo per sé stessa. Il rimedio a
+mano — `iw dev wlan0 set power_save off` — dura fino al riavvio, che è
+esattamente il momento in cui uno non c'è.
+
+Adesso lo fa il programma, in due punti: **sulla radio subito** e **nella
+connessione di NetworkManager per sempre** (`wifi.powersave 2`). Il nome della
+rete non serve saperlo: si riconosce fra le connessioni attive quella di tipo
+wireless. E si rifà **a ogni avvio**, in un thread a parte che non trattiene
+l'accensione del pannello: una reinstallazione o una connessione rifatta si
+riporterebbe dietro il difetto.
+
+Nella pagina **Rete** c'è la casella **Wi-Fi sempre sveglio**, accesa di serie,
+con accanto lo stato letto dalla radio in quel momento. Togliendo la spunta si
+smette solo di imporlo: quello che NetworkManager ha già salvato resta, perché
+disfarlo da qui vorrebbe dire rimettere di nascosto il difetto.
+
+Chi non ha `iw`, `nmcli` o una radio wifi non se ne accorge: non succede niente
+e non si rompe niente.
+
+### Niente più «Ho letto»
+
+Il cartello che racconta com'è andato l'aggiornamento aveva un pulsante da
+premere per farlo sparire: un lavoro in più chiesto a chi ha appena finito di
+aggiornare, per un avviso che aveva già letto. Adesso si mostra una volta —
+banner e pallino nel menu — e alla riapertura della pagina non c'è più. Il
+registro qui sotto resta, per chi lo vuole rileggere.
+
 ## [11.6]
 
 ### «Accadde oggi» era sempre vuota

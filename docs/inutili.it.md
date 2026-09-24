@@ -13,15 +13,22 @@ una cucina verrà letto di più.
 Compare **subito dopo il meteo**: appena la finestra del meteo si chiude, il
 pannello passa a lui senza intervallo.
 
-# 2. Due schermate, e non è estetica
+# 2. Tre schermate, due per volta
 
 ```
- schermata 1                                schermata 2
+ oggi si festeggia                  accadde oggi
 ┌──────────────────────────────┐   ┌──────────────────────────────┐
-│ 22 SETTEMBRE                 │   │ ACCADDE OGGI                 │
-│ San Maurizio                 │   │ * 1791  Michael Faraday      │
-│ Maurizio · Silvano · Tazio   │   │ + 1989  Irving Berlin        │
-│ onomastico di Anna           │   └──────────────────────────────┘
+│ 24 SETTEMBRE                 │   │ ACCADDE OGGI                 │
+│ San Pacifico                 │   │      La Guinea-Bissau        │
+│ Pacifico · Mercedes · Amata  │   │ 1973 dichiara l'indipendenza │
+│ onomastico di Anna           │   │      dal Portogallo          │
+└──────────────────────────────┘   └──────────────────────────────┘
+
+ nati e morti
+┌──────────────────────────────┐
+│ NATI E MORTI                 │
+│ * 1791  Michael Faraday      │
+│ + 1989  Irving Berlin        │
 └──────────────────────────────┘
 ```
 
@@ -29,13 +36,17 @@ La **prima** è tutta roba da calendario e sta dentro il programma: santo,
 nomi che festeggiano, giornata mondiale. Non chiede niente a nessuno, e
 funziona con il wifi staccato.
 
-La **seconda** arriva da Wikipedia, ed è l'unica parte che dipende dalla rete.
-È anche l'unica che può sparire senza fare danno: se non c'è niente da
-raccontare, la seconda schermata non si fa e il turno dura la metà. **Si
-accorcia, non si rompe** — è il motivo vero della divisione, l'estetica viene
-dopo.
+Le altre due arrivano da Wikipedia, e sono l'unica parte che dipende dalla
+rete. Sono anche le uniche che possono sparire senza fare danno: se non c'è
+niente da raccontare non si fanno, e il turno si accorcia. **Si accorcia, non
+si rompe** — è il motivo vero della divisione, l'estetica viene dopo.
 
-Sei secondi per schermata di serie, regolabili nella pagina Servizi.
+**Due schermate per volta, non tre.** Il calendario c'è sempre, e dietro di
+lui si alternano i fatti storici e i personaggi: un passaggio l'uno, un
+passaggio l'altro. Tre di fila sarebbero oltre venti secondi di pannello per
+un servizio che non serve a niente, e due comparse di fila direbbero sempre la
+stessa cosa. Sei secondi per le schermate brevi e **dieci per i fatti
+storici**, che sono due righe da leggere: si regolano nella pagina Servizi.
 
 # 3. La riga che fa fare una telefonata
 
@@ -61,6 +72,7 @@ pannello vuoto.
 | Nomi che festeggiano | `santi.csv` | no |
 | Giornata mondiale | `giornate.csv`, 209 voci in 179 giorni | no |
 | Onomastico dei tuoi | `compleanni.csv` | no |
+| Fatti storici di oggi | Wikipedia: feed *on this day*, o la pagina del giorno | sì |
 | Nati e morti famosi | Wikipedia, API *on this day* | sì |
 
 I due CSV sono stati compilati dalle pagine giorno per giorno di
@@ -80,7 +92,25 @@ del gatto, l'anniversario di qualcosa — mette un `giornate.csv` nella cartella
 dati (`/var/lib/dmd`), con lo stesso formato `MM-GG;titolo`. Viene letto dopo
 quello del programma e si aggiunge, non lo sostituisce.
 
-# 5. I personaggi famosi
+# 5. I fatti storici
+
+Vengono dalla stessa API, sezione *selected* ed *events*, **in italiano**:
+quella sezione su it.wikipedia esiste — è la stessa del riquadro «Accadde
+oggi» della pagina principale — al contrario di nati e morti, che lì sono
+vuoti.
+
+Se il feed non rispondesse, si legge direttamente la **pagina del giorno** di
+Wikipedia — «24 settembre» — e se ne prende la sezione *Eventi*. Quella pagina
+c'è sempre, quindi i fatti arrivano in un modo o nell'altro. Il testo viene
+ripulito di template, note e collegamenti, e si tiene la prima frase: sul
+pannello la seconda non ci starebbe, e tagliata a metà farebbe peggio che non
+esserci.
+
+Si tengono gli otto fatti più recenti — sono quelli che uno ha sentito
+nominare — e a ogni passaggio ne compare uno, a rotazione. L'anno sta grande a
+sinistra, il fatto a destra su due o tre righe.
+
+# 6. I personaggi famosi
 
 Vengono dall'API pubblica *on this day* di Wikipedia: gratuita, senza chiave,
 come Open-Meteo per il meteo e le ADS-B per gli aerei.
@@ -109,20 +139,22 @@ I **morti** hanno la loro casella, e non è pro forma: su un pannello in cucina
 possono essere lugubri. Spenti, la seconda schermata mostra due nati e resta
 piena.
 
-# 6. Nella pagina Servizi
+# 7. Nella pagina Servizi
 
 Tre caselle e un numero:
 
 | Comando | Cosa fa |
 |---|---|
 | **Santo, onomastici e giornata mondiale** | la prima schermata |
+| **Fatti storici di oggi** | la schermata «Accadde oggi» |
 | **Personaggi famosi nati e morti oggi** | la seconda; è quella che vuole internet |
 | **Mostra anche i morti** | dentro la seconda |
 | **Secondi per schermata** | da 3 a 30, sei di serie |
+| **Secondi per i fatti storici** | da 3 a 30, dieci di serie: sono due righe da leggere |
 
-E due pulsanti di prova, uno per schermata, per vederle subito sul pannello.
+E tre pulsanti di prova, uno per schermata, per vederle subito sul pannello.
 
-# 7. In Home Assistant
+# 8. In Home Assistant
 
 Oltre all'interruttore del servizio (`switch.dmd_inutili`), tre sensori:
 
@@ -135,9 +167,9 @@ Oltre all'interruttore del servizio (`switch.dmd_inutili`), tre sensori:
 Il secondo è l'unico su cui valga la pena scrivere un'automazione che *fa*
 qualcosa: un promemoria per telefonare a chi festeggia.
 
-# 8. Come è stato provato
+# 9. Come è stato provato
 
-`test_inutili.py`, 84 controlli. I tre che contano davvero:
+`test_inutili.py`, 110 controlli. I tre che contano davvero:
 
 - **il calendario è completo**: 366 giorni, 29 febbraio compreso, nessun
   giorno senza nomi, nessun santo troppo lungo per il pannello;

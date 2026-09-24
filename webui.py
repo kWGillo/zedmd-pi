@@ -456,6 +456,7 @@ def create_app(runtime):
             reti=rete.scansiona(forza=True) if cercare else [],
             cercato=cercare,
             conosciute=rete.conosciute(),
+            risparmio=rete.risparmio(),
             indirizzi=rete.indirizzi(),
             tentativo=rete.tentativo(),
             result=request.args.get("result"), page="rete")
@@ -478,6 +479,27 @@ def create_app(runtime):
         return redirect(url_for("page_rete", result=i18n.translate(
             "rete.trying", current_language(), name=ssid)))
 
+    @app.route("/api/rete/risparmio", methods=["POST"])
+    def api_rete_risparmio():
+        """La levetta «Wi-Fi sempre sveglio».
+
+        Spenta la casella, si smette solo di **imporlo** a ogni avvio: quello
+        che NetworkManager ha gia' salvato resta, perche' disfarlo da qui
+        vorrebbe dire rimettere di nascosto il difetto che questa casella e'
+        nata per togliere.
+        """
+        conf = cfg.setdefault("rete", {})
+        voluto = request.form.get("wifi_sveglio") == "on"
+        conf["wifi_sveglio"] = voluto
+        dmdconf.save()
+        messaggio = ""
+        if voluto:
+            fatto, dettaglio = rete.spegni_risparmio()
+            messaggio = i18n.translate(
+                "rete.risparmio.fatto" if fatto else "rete.risparmio.no",
+                current_language(), dettaglio=dettaglio)
+        return redirect(url_for("page_rete", result=messaggio or None))
+
     @app.route("/api/rete/forget", methods=["POST"])
     def api_rete_forget():
         fatto, motivo = rete.dimentica(request.form.get("ssid", ""))
@@ -494,13 +516,25 @@ def create_app(runtime):
         che *cambia il sistema* invece di regolarlo: ci si entra quando si
         vuole aggiornare, non mentre si cerca un colore o un orario.
         """
-        return render_template(
+        # L'esito dell'ultimo aggiornamento si mostra **una volta**, e poi
+        # si dimentica da solo. Prima c'era un pulsante «Ho letto»: un lavoro
+        # in piu' chiesto a chi ha appena finito di aggiornare, per un
+        # cartello che aveva gia' letto. Chi vuole rivederlo ha il registro
+        # qui sotto.
+        esito = ota.ultimo_esito()
+        pagina = render_template(
             "updates.html", cfg=cfg,
             update=runtime.update_info, ota_log=ota.tail_log(12),
-            esito=ota.ultimo_esito(),
+            esito=esito,
             lib=runtime.lib_info,
             lib_commands=libcheck.update_commands(libcheck.library_dir(cfg)),
             page="updates")
+        # Si dimentica **dopo** aver disegnato: cosi' questa pagina mostra
+        # ancora il cartello e il pallino rosso che l'ha fatta aprire, e la
+        # volta dopo non c'e' piu' niente.
+        if esito:
+            ota.dimentica_esito()
+        return pagina
 
     @app.route("/birthdays")
     def page_birthdays():
@@ -1787,13 +1821,15 @@ def create_app(runtime):
         """Le caselle di Info inutili. Tre spunte e una durata."""
         conf = cfg.setdefault("inutili", {})
         conf["calendario"] = request.form.get("calendario") == "on"
+        conf["eventi"] = request.form.get("eventi") == "on"
         conf["personaggi"] = request.form.get("personaggi") == "on"
         conf["morti"] = request.form.get("morti") == "on"
-        try:
-            durata = int(request.form.get("durata_slide", conf.get("durata_slide", 6)))
-        except (TypeError, ValueError):
-            durata = 6
-        conf["durata_slide"] = max(3, min(30, durata))
+        for chiave, predefinito in (("durata_slide", 6), ("durata_eventi", 10)):
+            try:
+                durata = int(request.form.get(chiave, conf.get(chiave, predefinito)))
+            except (TypeError, ValueError):
+                durata = predefinito
+            conf[chiave] = max(3, min(30, durata))
         dmdconf.save()
         sorgente = getattr(runtime, "inutili", None)
         if sorgente is not None and conf["personaggi"]:
@@ -1808,9 +1844,9 @@ def create_app(runtime):
         if sorgente is None:
             return redirect(url_for("page_services"))
         slide = request.form.get("slide", "festa")
-        if slide not in ("festa", "storia"):
+        if slide not in ("festa", "eventi", "storia"):
             slide = "festa"
-        fatto, motivo = sorgente.mostra_adesso(slide, 10)
+        fatto, motivo = sorgente.mostra_adesso(slide)
         chiave = "inutili.provato" if fatto else "inutili.non.provato"
         return redirect(url_for("page_services",
                                 result=i18n.translate(chiave, current_language(),
@@ -2311,12 +2347,6 @@ def create_app(runtime):
         info = runtime.update_info or {}
         ota.dimentica_esito()
         ota.start_update(cfg, info.get("tag", ""))
-        return redirect(url_for("page_updates"))
-
-    @app.route("/api/update/esito", methods=["POST"])
-    def api_update_esito():
-        """L'avviso dell'ultimo aggiornamento l'ha letto qualcuno."""
-        ota.dimentica_esito()
         return redirect(url_for("page_updates"))
 
     @app.route("/api/audio", methods=["POST"])

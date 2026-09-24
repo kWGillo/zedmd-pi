@@ -924,7 +924,8 @@ L'aggiornamento è costruito per non poter lasciare il sistema rotto:
 Il passo 7 esiste perché il passo 6 funzionava troppo bene: rimetteva tutto a
 posto **in silenzio**, e dal pannello un aggiornamento fallito era identico a
 uno mai tentato. Adesso al ritorno sulla pagina c'è un banner che dice quale
-versione si voleva e quale è rimasta, e resta finché non lo si dichiara letto.
+versione si voleva e quale è rimasta. Si mostra una volta e poi si toglie da
+solo: dalla 12.0 non c'è più un pulsante «Ho letto» da premere.
 
 L'esito si legge anche nel riquadro del registro, in fondo alla stessa pagina.
 

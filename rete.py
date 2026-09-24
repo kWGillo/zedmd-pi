@@ -67,6 +67,16 @@ def disponibile():
     return bool(shutil.which("nmcli"))
 
 
+def _esegui(argomenti, timeout=TIMEOUT_LETTURA):
+    """Un comando di sistema: (codice, uscita, errore). Non solleva mai."""
+    try:
+        finito = subprocess.run(argomenti, capture_output=True, text=True,
+                                timeout=timeout)
+    except (OSError, subprocess.SubprocessError) as exc:
+        return 1, "", str(exc)
+    return finito.returncode, finito.stdout or "", (finito.stderr or "").strip()
+
+
 def _nmcli(args, timeout=TIMEOUT_LETTURA):
     """Esegue nmcli. Restituisce (codice, uscita, errore), senza sollevare.
 
@@ -125,6 +135,83 @@ def _interfaccia():
         if len(campi) >= 2 and campi[1] == "wifi":
             return campi[0]
     return ""
+
+
+# ------------------------------------------------- il risparmio della radio
+#
+# Il chip wifi del Raspberry, lasciato ai suoi predefiniti, **dorme fra un
+# pacchetto e l'altro**. Su certi router va bene; su altri, dopo qualche ora,
+# la radio non si risveglia piu' da sola: la macchina continua a funzionare
+# -- il pannello va, i servizi girano -- ma da fuori non risponde piu' ne'
+# alla pagina web ne' a SSH, e l'unico rimedio e' staccare la corrente.
+#
+# E' successo, ed e' il motivo per cui questa parte esiste. Si spegne in due
+# posti, perche' i posti sono due: `iw` agisce sulla radio **adesso**, nmcli
+# scrive la preferenza nella connessione, che NetworkManager riapplica a ogni
+# avvio. Uno solo dei due non basta: `iw` da solo si perde al riavvio, nmcli
+# da solo non tocca la radio gia' accesa.
+
+RISPARMIO_SPENTO = "2"          # wifi.powersave di NetworkManager: mai
+
+
+def _iw(args, timeout=5):
+    if not shutil.which("iw"):
+        return 127, "", "iw non installato"
+    return _esegui(["iw"] + list(args), timeout)
+
+
+def risparmio(interfaccia=None):
+    """Se la radio sta risparmiando corrente: True, False, o None se non si sa."""
+    interfaccia = interfaccia or _interfaccia()
+    if not interfaccia:
+        return None
+    codice, uscita, _errore = _iw(["dev", interfaccia, "get", "power_save"])
+    if codice != 0:
+        return None
+    testo = uscita.lower()
+    if "power save: on" in testo:
+        return True
+    if "power save: off" in testo:
+        return False
+    return None
+
+
+def connessione_wifi_attiva():
+    """Il nome della connessione wifi accesa in questo momento."""
+    codice, uscita, _e = _nmcli(["-t", "-f", "NAME,TYPE", "connection", "show",
+                                 "--active"])
+    if codice != 0:
+        return ""
+    for riga in uscita.splitlines():
+        campi = _campi(riga)
+        if len(campi) >= 2 and campi[1] == "802-11-wireless" and campi[0]:
+            return campi[0]
+    return ""
+
+
+def spegni_risparmio():
+    """Spegne il risparmio energetico del wifi, adesso e per sempre.
+
+    Torna (fatto, dettaglio). "Fatto" vuol dire che almeno la radio adesso e'
+    sveglia: se nmcli non c'e' o la connessione non si trova, si dice, ma non
+    si considera un fallimento -- meglio sveglia fino al riavvio che niente.
+    """
+    interfaccia = _interfaccia()
+    if not interfaccia:
+        return False, "nessuna interfaccia wifi"
+    pezzi = []
+    codice, _u, errore = _iw(["dev", interfaccia, "set", "power_save", "off"])
+    adesso = codice == 0
+    pezzi.append("radio: %s" % ("sveglia" if adesso else (errore or "non riuscito")))
+    nome = connessione_wifi_attiva()
+    if nome:
+        codice, _u, errore = _nmcli(["connection", "modify", nome,
+                                     "wifi.powersave", RISPARMIO_SPENTO])
+        pezzi.append("%s: %s" % (nome, "salvato" if codice == 0
+                                 else (errore or "non riuscito")))
+    else:
+        pezzi.append("nessuna connessione wifi attiva da salvare")
+    return adesso, "; ".join(pezzi)
 
 
 def conosciute():
