@@ -2,6 +2,51 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [12.1]
+
+### I cataloghi: 27.000 voci sotto le tue tabelle
+
+Un registro vero di **2.145 passaggi** in una settimana conteneva 33 compagnie,
+8 modelli e 6 aeroporti che le tabelle non sapevano tradurre: bizjet ceche,
+ambulanze svizzere, cargo uzbeki, un gyrocottero francese. Aggiungerli a mano è
+il lavoro che si rifà ogni settimana, perché la settimana dopo ne passano altri
+trenta diversi.
+
+Da questa versione, sotto `aerei.csv`, `aeroporti.csv` e `compagnie.csv` ci
+sono tre **cataloghi** distribuiti con il programma:
+
+| File | Voci | Fonte |
+|---|---|---|
+| `catalogo-aerei.csv` | 2.767 | designatori di tipo ICAO, Doc 8643 |
+| `catalogo-aeroporti.csv` | 18.361 | OurAirports (pubblico dominio) |
+| `catalogo-compagnie.csv` | 5.904 | Virtual Radar Server standing-data (CC0) |
+
+**Le tue righe vincono sempre.** Il catalogo si guarda solo dopo la tua
+tabella, è di sola lettura e non finisce in `/var/lib/dmd`: le tabelle a mano
+restano corte, leggibili e modificabili dalla pagina Radar, che in una casella
+di testo da ventisettemila righe non si modificherebbero più.
+
+Sullo stesso registro i codici non tradotti passano da **47 a 1** — e quell'uno
+è una sigla che non risulta a nessuna banca dati. Il catalogo si legge solo
+alla prima domanda a cui serve, quindi chi non guarda il radar non paga gli 800
+KB degli aeroporti.
+
+La pagina Radar ora dice, accanto a ogni tabella, quante voci ci metti tu e
+quante ne aggiunge il catalogo. E la «lista della spesa» dei codici da
+aggiungere non nomina più quelli che il catalogo sa già tradurre.
+
+I tre file si rifanno con `python3 diagnostica/genera_catalogo.py`, sul
+computer e non sul Raspberry: un pannello che dipende da tre siti per dire
+«Malpensa» è un pannello che un giorno non lo dice.
+
+### E le sigle viste sul campo
+
+Aggiunte anche alle tabelle a mano, con il nome giusto invece di quello del
+catalogo: otto modelli (Citation VI, Hawker 800, Learjet 75, Cheyenne I,
+Cessna 150, Glasair, Magni M-22, Groppo Trail), sei aeroporti (Vitoria, Luxor,
+Windhoek, La Romana, Cefalonia, Pardubice) e cinque compagnie (Arrow Aviation,
+Jet Stream Charter, Luxaviation UK, Journey Aviation, DRF Luftrettung).
+
 ## [12.0]
 
 ### «Accadde oggi»: i fatti storici del giorno

@@ -2616,6 +2616,15 @@ Storico:
        «Wi-Fi sempre sveglio» nella pagina Rete. E il cartello
        dell'aggiornamento non chiede piu' di dichiarare di averlo letto: si
        mostra una volta e si toglie da solo.
+  12.1 **I cataloghi**: sotto le tre tabelle dei codici ci sono ora tre file
+       distribuiti con il programma -- 2.767 tipi di aeromobile dal Doc 8643
+       dell'ICAO, 18.361 aeroporti da OurAirports, 5.904 operatori dal
+       database CC0 di Virtual Radar Server -- che rispondono quando la
+       tabella scritta a mano non risponde. Le righe dell'utente vincono
+       sempre; il catalogo riempie il resto. Su un registro vero di 2.145
+       passaggi i codici non tradotti passano da 47 a 1. Aggiunte anche alle
+       tabelle a mano le sigle viste sul campo: otto modelli, sei aeroporti e
+       cinque compagnie.
 """
 
-__version__ = "12.0"
+__version__ = "12.1"

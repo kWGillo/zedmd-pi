@@ -944,13 +944,26 @@ routeset di adsb.lol è documentato per rispondere con i codici IATA di tre
 lettere (`MXP`), ma quel campo spesso non c'è e sia routeset sia hexdb.io
 ripiegano sui codici ICAO di quattro (`LIMC`). Le tabelle conoscono entrambe.
 
-Due file CSV modificabili traducono le sigle in nomi leggibili:
+Tre file CSV modificabili traducono le sigle in nomi leggibili:
 
 ```
-/var/lib/dmd/aerei.csv       177 tipi di aeromobile
-/var/lib/dmd/aeroporti.csv   326 aeroporti
-/var/lib/dmd/compagnie.csv   129 compagnie aeree
+/var/lib/dmd/aerei.csv       212 tipi di aeromobile
+/var/lib/dmd/aeroporti.csv   750 aeroporti
+/var/lib/dmd/compagnie.csv   208 compagnie aeree
 ```
+
+Sotto ci sono i **cataloghi**, tre file distribuiti con il programma che
+rispondono quando la tua riga non c'è — 27.000 voci in tutto, di sola lettura:
+
+```
+/opt/dmd/catalogo-aerei.csv       2.767 tipi       ICAO Doc 8643
+/opt/dmd/catalogo-aeroporti.csv  18.361 scali      OurAirports
+/opt/dmd/catalogo-compagnie.csv   5.904 operatori  Virtual Radar Server (CC0)
+```
+
+**Le tue righe vincono sempre**: il catalogo si consulta solo dopo la tua
+tabella. Si rifà con `python3 diagnostica/genera_catalogo.py`, che scarica le
+tre banche dati e riscrive i file; il Raspberry non scarica niente a runtime.
 
 La compagnia non arriva come campo a sé: sta nelle **prime tre lettere del
 nominativo di volo**. In `AFR1732` la compagnia è `AFR`, Air France — il

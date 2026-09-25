@@ -232,7 +232,10 @@
 {% for tabella in tables %}
 <section class="card">
   <h2>{{ t('lookup.' ~ tabella.kind) }}
-    <span class="version">{{ t('lookup.count', count=tabella.count) }}</span></h2>
+    <span class="version">{{ t('lookup.count', count=tabella.count) }}{% if tabella.catalogo %} {{ t('lookup.catalogo', count=tabella.extra) }}{% endif %}</span></h2>
+  {% if tabella.catalogo %}
+  <p class="hint">{{ t('lookup.catalogo.hint', count=tabella.catalogo) }}</p>
+  {% endif %}
   {% if tabella.kind == 'airport' %}
   <p class="hint">{{ t('lookup.iata.warning') }}</p>
   {% elif tabella.kind == 'airline' %}

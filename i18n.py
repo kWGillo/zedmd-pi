@@ -1261,6 +1261,13 @@ STRINGS = {
         "Il prefisso di tre lettere del nominativo: in AFR1732 è AFR, cioè il codice ICAO.",
         "The three-letter callsign prefix: in AFR1732 it is AFR, the ICAO designator."),
     "lookup.count": ("%(count)d voci in tabella", "%(count)d entries in the table"),
+    "lookup.catalogo": ("+ %(count)d dal catalogo",
+                        "+ %(count)d from the catalogue"),
+    "lookup.catalogo.hint": (
+        "Sotto c'è un catalogo di %(count)d voci: risponde dove la tua riga "
+        "manca. Le tue vincono.",
+        "Below sits a catalogue of %(count)d entries: it answers where your row "
+        "is missing. Yours win."),
     "lookup.saved": ("Salvato: %(count)d voci valide.",
                      "Saved: %(count)d valid entries."),
     "lookup.saved.errors": (

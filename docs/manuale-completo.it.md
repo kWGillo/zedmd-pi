@@ -627,6 +627,15 @@ due tabelle che trasformano le sigle in nomi.
 > trasformano in nomi leggibili. Un codice che non c'è viene mostrato com'è: non
 > è un errore, è un codice che non conosciamo ancora.
 >
+> **Sotto le tre tabelle, dalla 12.1, ci sono i cataloghi.** Tre file
+> distribuiti con il programma — `catalogo-aerei.csv`, `catalogo-aeroporti.csv`,
+> `catalogo-compagnie.csv`, 27.000 voci da banche dati pubbliche — che
+> rispondono quando la tua riga non c'è. Sono di sola lettura e le tue
+> traduzioni vincono sempre: il catalogo si guarda solo dopo la tua tabella.
+> Si rifanno con `python3 diagnostica/genera_catalogo.py`, sul computer e non
+> sul Raspberry, perché un pannello che dipende da tre siti per dire
+> «Malpensa» è un pannello che un giorno non lo dice.
+>
 > La pagina tiene l'elenco di quei codici, **ordinato per quante volte sono
 > passati davvero**: è la lista della spesa, e dice cosa conviene aggiungere per
 > primo invece di doverlo indovinare. Fino alla 9.3 quell'elenco viveva solo in

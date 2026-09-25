@@ -2851,6 +2851,7 @@ def create_app(runtime):
         # riavviare il servizio per vedersi arrivare le righe che mancano.
         lookup.ricontrolla()
         lookup.invalidate()
+        lookup.scorda_catalogo()
         for kind in lookup.KINDS:
             lookup.load(kind, force=True)
         return redirect(url_for("page_radar", lookup_result=i18n.translate(

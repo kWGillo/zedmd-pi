@@ -28,7 +28,14 @@ porta gia' rotta, quota, velocita' e distanza: "Boeing 737-800" non ci sta,
 "737-800" si'. Il nome completo va nella web UI e nel registro dei passaggi,
 dove lo spazio non manca.
 
-**Un codice che non e' in tabella viene mostrato com'e'.** Non e' un errore:
+Sotto le tre tabelle ci sono i **cataloghi**, altri tre file distribuiti con
+il programma: ventisettemila voci fra compagnie, aeroporti e tipi di
+aeromobile, prese da banche dati pubbliche. Rispondono quando la tabella
+dell'utente non risponde, e sono di sola lettura: le sue righe vincono
+sempre. Sono la differenza fra «sopra casa passa un LJ75 di ECC» e «passa un
+Learjet 75 di Eclair Aviation» senza che nessuno debba scrivere niente.
+
+**Un codice che non e' in nessuno dei due viene mostrato com'e'.** Non e' un errore:
 e' il comportamento previsto, e il sistema tiene il conto di quelli che
 incontra senza saperli tradurre, cosi' la pagina Radar puo' dirti che cosa
 conviene aggiungere per primo invece di lasciartelo indovinare.
@@ -69,12 +76,31 @@ KINDS = {
     "airline": "compagnie.csv",
 }
 
+# I cataloghi: tre file distribuiti con il programma che rispondono quando la
+# tabella dell'utente non sa rispondere. Stanno in /opt/dmd e non vengono mai
+# copiati nella cartella dati, perche' non sono suoi: li rifa' `diagnostica/
+# genera_catalogo.py` da tre banche dati pubbliche, e un aggiornamento li
+# sostituisce senza chiedere permesso.
+#
+# Il perche' e' una questione di misura. Le tabelle a mano sono poche
+# centinaia di righe, si leggono in un pomeriggio e si correggono; i cataloghi
+# sono ventisettemila voci, che in una casella di testo della pagina web non
+# si modificano e in un file dell'utente sarebbero solo un peso. Cosi' le due
+# cose fanno due mestieri diversi: **le tue righe vincono sempre**, il
+# catalogo riempie tutto il resto.
+CATALOGHI = {
+    "aircraft": "catalogo-aerei.csv",
+    "airport": "catalogo-aeroporti.csv",
+    "airline": "catalogo-compagnie.csv",
+}
+
 # Quanti codici sconosciuti tenere in memoria. Un tetto serve: senza, una
 # sorgente impazzita farebbe crescere il dizionario senza fine.
 MAX_UNKNOWN = 500
 
 _lock = threading.Lock()
 _cache = {}      # kind -> (mtime, dimensione, dizionario)
+_catalogo = {}   # kind -> dizionario, letto una volta sola per avvio
 _unknown = {}    # kind -> {codice: [conteggio, ultimo avvistamento]}
 # Per quali tabelle il confronto con il modello e' gia' stato fatto in questo
 # avvio. Senza, `ensure` rileggerebbe due file interi a ogni traduzione, e
@@ -444,13 +470,70 @@ def invalidate(kind=None):
             _cache.pop(kind, None)
 
 
+# ------------------------------------------------------------------ catalogo
+
+def catalogo_path(kind):
+    return os.path.join(TEMPLATE_DIR, CATALOGHI[kind])
+
+
+def catalogo(kind):
+    """Il catalogo distribuito, letto alla prima domanda a cui serve.
+
+    Si legge **pigramente**: chi non guarda mai il radar non paga gli ottocento
+    kilobyte degli aeroporti, e chi lo guarda li paga una volta per avvio. Il
+    file non cambia mentre il servizio gira -- lo riscrive solo un
+    aggiornamento, che riavvia -- quindi non c'e' niente da ricontrollare a
+    ogni traduzione.
+    """
+    with _lock:
+        if kind in _catalogo:
+            return _catalogo[kind]
+    percorso = catalogo_path(kind)
+    try:
+        with open(percorso, encoding="utf-8", errors="replace") as handle:
+            voci, errori = parse(handle.read())
+    except OSError:
+        # Un pacchetto senza catalogo e' un pacchetto piu' povero, non uno
+        # rotto: si continua con la sola tabella dell'utente, come prima.
+        voci, errori = {}, []
+    if errori:
+        print("[lookup] %s: %d righe scartate" % (CATALOGHI[kind], len(errori)))
+    with _lock:
+        _catalogo[kind] = voci
+    return voci
+
+
+def scorda_catalogo(kind=None):
+    with _lock:
+        if kind is None:
+            _catalogo.clear()
+        else:
+            _catalogo.pop(kind, None)
+
+
+def trova(kind, code):
+    """La voce per questo codice: prima la tua tabella, poi il catalogo.
+
+    Torna `None` se non la sa nessuno dei due. E' l'unico posto in cui e'
+    scritto l'ordine di precedenza, di proposito: quando un giorno arrivera'
+    un terzo livello, cambiera' qui e da nessun'altra parte.
+    """
+    code = (code or "").strip().upper()
+    if not code:
+        return None
+    voce = load(kind).get(code)
+    if voce is not None:
+        return voce
+    return catalogo(kind).get(code)
+
+
 # ------------------------------------------------------------ conversione
 
 def _lookup(kind, code, index):
     code = (code or "").strip().upper()
     if not code:
         return ""
-    entry = load(kind).get(code)
+    entry = trova(kind, code)
     if entry is None:
         note_unknown(kind, code)
         return code
@@ -606,9 +689,9 @@ def ricostruisci(percorso, massimo=20000):
 
 
 def _ignoto_se_serve(kind, codice, quando):
-    """Segna il codice come ignoto se la tabella non lo conosce."""
+    """Segna il codice come ignoto se non lo sa ne' la tabella ne' il catalogo."""
     codice = (codice or "").strip().upper()
-    if not codice or load(kind).get(codice) is not None:
+    if not codice or trova(kind, codice) is not None:
         return
     note_unknown(kind, codice, quando)
 
@@ -691,8 +774,7 @@ def append_missing(kind, codes):
     codes = [c.strip().upper() for c in codes if c and c.strip()]
     if not codes:
         return 0
-    known = load(kind)
-    nuovi = [c for c in dict.fromkeys(codes) if c not in known]
+    nuovi = [c for c in dict.fromkeys(codes) if trova(kind, c) is None]
     if not nuovi:
         return 0
     target = ensure(kind)
@@ -720,9 +802,14 @@ def append_missing(kind, codes):
 
 def stats(kind):
     entries = load(kind)
+    voci = catalogo(kind)
     return {
         "kind": kind,
         "path": path(kind),
         "count": len(entries),
+        "catalogo": len(voci),
+        # Quante risposte arrivano solo dal catalogo: e' il numero che dice a
+        # cosa serve, meglio del totale.
+        "extra": len([c for c in voci if c not in entries]),
         "unknown": len(_unknown.get(kind) or {}),
     }
