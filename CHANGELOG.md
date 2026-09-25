@@ -2,6 +2,32 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [12.2]
+
+### I promemoria che non erano più domande
+
+In un file vero, arrivato dalla 12.0, c'erano **ventotto righe `CODICE,,`** in
+fondo a `compagnie.csv`: le aveva scritte il pulsante «Aggiungi in coda al
+file» quando quei codici non li sapeva tradurre nessuno. Con la 12.1 il
+catalogo li traduce tutti e ventotto — e infatti sul pannello i nomi
+comparivano — ma le righe restavano lì, e il file sembrava pieno di domande
+aperte che invece avevano già risposta.
+
+Non bloccavano niente: una riga senza forma breve non traduce e si lascia
+scavalcare dal catalogo, ed è la prima cosa che questa versione mette per
+iscritto in una prova. Però un elenco che mente su sé stesso è peggio di un
+elenco lungo, e chi lo apre si mette a compilare a mano righe che sono già
+risposte.
+
+Adesso, all'avvio, spariscono anche i promemoria a cui risponde il **catalogo**
+e non solo quelli a cui risponde il modello. Restano solo i codici davvero
+ignoti — che è esattamente la lista della spesa per cui erano stati scritti.
+Accanto resta la solita copia `.bak`.
+
+E la fusione non riscrive più il file quando non c'è niente da portare né da
+togliere: prima, in quel caso, rifaceva file e `.bak` a ogni avvio per non
+cambiare niente.
+
 ## [12.1]
 
 ### I cataloghi: 27.000 voci sotto le tue tabelle

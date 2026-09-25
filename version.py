@@ -2625,6 +2625,13 @@ Storico:
        passaggi i codici non tradotti passano da 47 a 1. Aggiunte anche alle
        tabelle a mano le sigle viste sul campo: otto modelli, sei aeroporti e
        cinque compagnie.
+  12.2 I promemoria vuoti lasciati dal pulsante «Aggiungi in coda al file»
+       spariscono anche quando la risposta arriva dal catalogo e non dal
+       modello: in un file vero erano ventotto codici che sembravano domande
+       aperte ed erano gia' tutti tradotti. Non bloccavano niente -- una riga
+       senza forma breve si lascia scavalcare -- ma un elenco che mente su se
+       stesso e' peggio di un elenco lungo. E la fusione non riscrive piu' il
+       file quando non c'e' niente da portare ne' da togliere.
 """
 
-__version__ = "12.1"
+__version__ = "12.2"

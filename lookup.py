@@ -230,11 +230,14 @@ def _fondi(kind, target):
     traduce nessuno. E i promemoria vuoti che adesso hanno una risposta se ne
     vanno, che e' la ragione per cui erano stati scritti.
 
+    Dalla 12.2 la risposta puo' arrivare anche dal **catalogo**, e allora il
+    promemoria se ne va lo stesso. Senza questa riga il file si riempirebbe di
+    codici che sembrano domande aperte e non lo sono piu': ventotto, in un file
+    vero, tutti gia' tradotti dal catalogo. Un elenco che mente su se stesso e'
+    peggio di un elenco lungo.
+
     Una copia di sicurezza resta accanto, con lo stesso nome piu' `.bak`.
     """
-    modello = _righe_modello(kind)
-    if not modello:
-        return 0
     try:
         with open(target, encoding="utf-8", errors="replace") as handle:
             testo = handle.read()
@@ -243,13 +246,17 @@ def _fondi(kind, target):
 
     tradotti, _ = parse(testo)
     mancanti, nuovi = [], set()
-    for codici, campi in modello:
+    for codici, campi in _righe_modello(kind):
         if any(c in tradotti for c in codici):
             continue
         mancanti.append(campi)
         nuovi.update(codici)
-    if not mancanti:
+    # I promemoria a cui risponde il catalogo: non arrivano righe nuove, ma la
+    # domanda non e' piu' aperta e il promemoria non ha piu' ragione di stare li'.
+    dal_catalogo = set(catalogo(kind))
+    if not mancanti and not dal_catalogo:
         return 0
+    nuovi |= dal_catalogo
 
     # Si scrive con il separatore che usa gia' lui: un file esportato da un
     # foglio di calcolo italiano ha i punti e virgola, e mescolarli renderebbe
@@ -262,22 +269,25 @@ def _fondi(kind, target):
             tolte += 1
             continue
         tenute.append(riga)
+    # Niente da portare e niente da togliere: si lascia il file com'e'. Senza
+    # questo, ogni avvio riscriverebbe il file e il suo `.bak` per niente.
+    if not mancanti and not tolte:
+        return 0
 
-    fuori = io.StringIO()
-    scrittore = csv.writer(fuori, delimiter=sep, lineterminator="\n")
-    for campi in mancanti:
-        scrittore.writerow(campi)
-
-    try:
-        import version
-        quale = version.__version__
-    except Exception:                       # pragma: no cover
-        quale = time.strftime("%d/%m/%Y")
-
-    corpo = "\n".join(tenute).rstrip("\n")
-    nuovo = "%s\n\n# Arrivate con l'aggiornamento alla %s: righe che il\n" \
-            "# modello conosce e questo file no. Le tue restano dove sono.\n%s" \
-            % (corpo, quale, fuori.getvalue())
+    nuovo = "\n".join(tenute).rstrip("\n") + "\n"
+    if mancanti:
+        fuori = io.StringIO()
+        scrittore = csv.writer(fuori, delimiter=sep, lineterminator="\n")
+        for campi in mancanti:
+            scrittore.writerow(campi)
+        try:
+            import version
+            quale = version.__version__
+        except Exception:                   # pragma: no cover
+            quale = time.strftime("%d/%m/%Y")
+        nuovo = "%s\n# Arrivate con l'aggiornamento alla %s: righe che il\n" \
+                "# modello conosce e questo file no. Le tue restano dove sono.\n%s" \
+                % (nuovo, quale, fuori.getvalue())
 
     try:
         shutil.copy2(target, target + ".bak")
@@ -291,9 +301,9 @@ def _fondi(kind, target):
     invalidate(kind)
     print("[lookup] %s: %d righe arrivate dal modello%s (copia in %s.bak)"
           % (os.path.basename(target), len(mancanti),
-             ", %d promemoria completati" % tolte if tolte else "",
+             ", %d promemoria ormai con risposta tolti" % tolte if tolte else "",
              os.path.basename(target)))
-    return len(mancanti)
+    return len(mancanti) + tolte
 
 
 def ensure(kind):
