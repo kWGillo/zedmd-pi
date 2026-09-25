@@ -153,6 +153,13 @@ DEFAULTS = {
         "image_duration": 5,
         "video_duration": 8,
         "video_fps": 20,
+        # Quanta parte dei contenuti deve essere animata, in percentuale.
+        # Senza questa manopola si pescava a caso da tutta la libreria, e una
+        # cartella fatta per nove decimi di PNG mostrava PNG nove volte su
+        # dieci: le animazioni, che sono quelle che si guardano, comparivano
+        # una volta ogni tanto. 60 vuol dire sei contenuti animati su dieci,
+        # qualunque cosa ci sia nella cartella.
+        "quota_animazioni": 60,
         "scale_mode": "fit",
         "pixel_art": True,
         # Fascia oraria del Media Player, con la stessa forma di Night mode.

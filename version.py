@@ -2632,6 +2632,16 @@ Storico:
        senza forma breve si lascia scavalcare -- ma un elenco che mente su se
        stesso e' peggio di un elenco lungo. E la fusione non riscrive piu' il
        file quando non c'e' niente da portare ne' da togliere.
+  12.3 **La riga in fondo a Info inutili non e' piu' quasi sempre vuota**: il
+       calendario dell'ONU copre 179 giorni su 366, e piu' di un giorno su due
+       non aveva niente da dire. Aggiunte 181 giornate minori e goliardiche --
+       il gatto nero, la Nutella, il parlare come un pirata, Festivus -- tutte
+       a data fissa e documentate: i giorni coperti passano a 360. Portano
+       `pop` in terza colonna e valgono solo dove non c'e' niente di
+       ufficiale. E nel Media Player una manopola **quante animazioni**: si
+       sorteggia prima il gruppo e poi il file, cosi' la proporzione fra foto
+       ferme e animazioni la decidi tu invece della composizione della
+       cartella.
 """
 
-__version__ = "12.2"
+__version__ = "12.3"

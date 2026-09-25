@@ -616,6 +616,18 @@ dei nomi dei giorni (italiano, francese, inglese), lampeggio dei due punti.
 **Media** — libreria, caricamento file, rilettura della libreria, anteprima
 immediata, durate e intervalli, adattamento al pannello, modalità pixel art.
 
+> **Quante animazioni.** Dalla 12.3 una casella dice che parte dei contenuti
+> deve muoversi: `60` vuol dire sei animazioni ogni dieci passaggi. Non è una
+> preferenza vaga, è il modo in cui si sorteggia — **prima il gruppo, poi il
+> file dentro al gruppo**. Pescando a caso da tutta la libreria, come si faceva
+> prima, una cartella con 9.000 PNG e 1.000 GIF mostra una GIF ogni dieci
+> contenuti e non c'è impostazione che possa cambiarlo: la proporzione la
+> decideva la cartella. Adesso la decidi tu. Chi ha solo foto, o solo
+> animazioni, non se ne accorge: se il gruppo sorteggiato è vuoto si pesca
+> dall'altro invece di saltare il turno. Il criterio è l'estensione — `.gif`,
+> `.mp4` e gli altri video da una parte, `.png`, `.jpg` e le altre immagini
+> dall'altra.
+
 **Radar** — coordinate e raggio, provider ADS-B, scelta dei parametri di volo,
 registro CSV dei passaggi con scaricamento, prova diagnostica di una rotta, e le
 due tabelle che trasformano le sigle in nomi.

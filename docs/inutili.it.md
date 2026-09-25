@@ -70,7 +70,7 @@ pannello vuoto.
 |---|---|---|
 | Santo del giorno | `santi.csv`, 366 giorni | no |
 | Nomi che festeggiano | `santi.csv` | no |
-| Giornata mondiale | `giornate.csv`, 209 voci in 179 giorni | no |
+| Giornata mondiale | `giornate.csv`, 390 voci in 360 giorni | no |
 | Onomastico dei tuoi | `compleanni.csv` | no |
 | Fatti storici di oggi | Wikipedia: feed *on this day*, o la pagina del giorno | sì |
 | Nati e morti famosi | Wikipedia, API *on this day* | sì |
@@ -87,10 +87,34 @@ pannello mostra la più corta. Nella pratica è quasi sempre anche la più nota:
 *Giornata mondiale della poesia* contro *Giornata internazionale per
 l'eliminazione della discriminazione razziale*.
 
-**Le tue giornate.** Chi ne vuole aggiungere di sue — la giornata mondiale
-del gatto, l'anniversario di qualcosa — mette un `giornate.csv` nella cartella
+## Perché la riga in fondo era quasi sempre vuota
+
+Il calendario delle Nazioni Unite copre **179 giorni su 366**. Vuol dire che
+più di un giorno su due non aveva niente da dire lì in fondo, e a guardare il
+pannello sembrava un guasto: non lo era, era una tabella che finiva.
+
+Dalla 12.3 ci sono anche le giornate **minori e goliardiche** — il gatto nero
+il 17 agosto, la Nutella il 5 febbraio, il parlare come un pirata il 19
+settembre, Festivus il 23 dicembre — e i giorni coperti passano a **360**. Le
+sei date che restano vuote sono quelle in cui il santo dice già tutto: Natale,
+Santo Stefano, San Nicola, Santa Cecilia, San Silvestro; più il 9 luglio e il
+7 agosto, dove davvero non risulta niente a data fissa.
+
+Le goliardiche portano `pop` in terza colonna e valgono **solo dove non c'è
+niente di ufficiale**: il 21 marzo passa la poesia, non il panda. Vale anche
+la regola di prima — a parità, la più corta.
+
+Sono tutte a **data fissa**. Quelle che si spostano — la giornata del sonno,
+il venerdì prima dell'equinozio; la giornata della neve, la terza domenica di
+gennaio — sono state scartate: qui si guarda il calendario, non il giorno
+della settimana.
+
+**Le tue giornate.** Chi ne vuole aggiungere di sue — l'anniversario di
+qualcosa, la giornata di qualcuno — mette un `giornate.csv` nella cartella
 dati (`/var/lib/dmd`), con lo stesso formato `MM-GG;titolo`. Viene letto dopo
-quello del programma e si aggiunge, non lo sostituisce.
+quello del programma e si aggiunge, non lo sostituisce. Scritte in due colonne
+valgono **ufficiali**, quindi vincono sulle nostre goliardiche: è la stessa
+regola delle tabelle del radar, le tue prima.
 
 # 5. I fatti storici
 

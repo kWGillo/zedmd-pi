@@ -130,13 +130,25 @@ def _santi():
 
 
 def _giornate():
+    """Le giornate del giorno: {MM-GG: [(titolo, goliardica), ...]}.
+
+    La terza colonna, quando c'e', dice `pop`: e' una giornata goliardica o
+    minore -- il gatto nero, il pane alle banane, Festivus. Serve a tenerle
+    **sotto** quelle ufficiali senza doverle mettere in un file a parte: il
+    17 marzo passa la giornata del sonno prima di quella del panda, ma il 25
+    settembre, dove di ufficiale non c'e' niente, il farmacista e' meglio del
+    vuoto. Un file dell'utente scritto in due colonne vale ufficiale, ed e'
+    giusto: le sue vincono.
+    """
     def costruisci(righe):
         tavola = {}
         for riga in righe:
             pezzi = riga.split(";")
             if len(pezzi) < 2 or not pezzi[1].strip():
                 continue
-            tavola.setdefault(pezzi[0].strip(), []).append(pezzi[1].strip())
+            goliardica = len(pezzi) > 2 and pezzi[2].strip().lower() == "pop"
+            tavola.setdefault(pezzi[0].strip(), []).append(
+                (pezzi[1].strip(), goliardica))
         return tavola
     return _tavola(GIORNATE, costruisci)
 
@@ -164,17 +176,21 @@ def nomi(quando=None):
 def giornata(quando=None):
     """La giornata mondiale del giorno, o "" se non ce n'e'.
 
-    Quando ce n'e' piu' d'una si prende **la piu' corta**: sul pannello ci
-    sta, e nella pratica e' quasi sempre anche quella che la gente conosce --
-    "Giornata mondiale dell'acqua" contro "Giornata internazionale per la
-    prevenzione dell'estremismo violento".
+    Quando ce n'e' piu' d'una vince **la piu' seria**, e a parita' la piu'
+    corta: sul pannello ci sta, e nella pratica e' quasi sempre anche quella
+    che la gente conosce -- "Giornata mondiale dell'acqua" contro "Giornata
+    internazionale per la prevenzione dell'estremismo violento".
     """
     voci = _giornate().get(chiave(quando)) or []
-    return min(voci, key=len) if voci else ""
+    if not voci:
+        return ""
+    return min(voci, key=lambda v: (v[1], len(v[0])))[0]
 
 
 def giornate_del_giorno(quando=None):
-    return list(_giornate().get(chiave(quando)) or [])
+    """I titoli delle giornate di oggi, dalla piu' seria alla piu' scema."""
+    voci = _giornate().get(chiave(quando)) or []
+    return [t for t, _ in sorted(voci, key=lambda v: (v[1], len(v[0])))]
 
 
 # ------------------------------------------------- l'onomastico dei tuoi

@@ -11,8 +11,9 @@ from .clock import ClockSource, DAY_NAMES, LANGUAGES, parse_color
 from .doom import (DOOM_TASTI, DoomSource, PULSANTI as DOOM_PULSANTI,
                    controlla_wad, direzione_asse, joystick, posizione_asse,
                    tastiere)
-from .media import (MediaPlayerSource, cached_count, invalidate_scan,
-                    scan_media, walk_media, is_supported, have_ffmpeg)
+from .media import (MediaPlayerSource, cached_count, divide, gruppi,
+                    invalidate_scan, scan_media, scegli, walk_media,
+                    is_supported, have_ffmpeg)
 from .nowplaying import (NowPlayingSource, DEFAULT_COLORS, draw_text,
                          snap_color, text_width)
 from .gameboy import (GameBoySource, PALETTE, PULSANTI as GB_PULSANTI,
@@ -55,5 +56,5 @@ __all__ = [
     "OVERFLOW_MODES", "UNIT_KEYS", "UNITS", "convert", "FRECCIA",
     "parse_color", "haversine_km",
     "scan_media", "walk_media", "cached_count", "invalidate_scan",
-    "is_supported", "have_ffmpeg",
+    "divide", "gruppi", "scegli", "is_supported", "have_ffmpeg",
 ]

@@ -18,7 +18,7 @@ e2c2c47345553586ed699be1e9d3c3ce  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 ea2b0d24ff1827bdf031ed8393dc6db8  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
-7b6d6ed8d5928078f3e1f5666ffbd3cb  dmdconf.py
+58f639a84a3f4b426a2f3769881a32a0  dmdconf.py
 a3a7b1fcd62599b256906812438cf147  dmdd.py
 bb3118ed4b5ebb8d9f49cc8bbcd6f341  doom/Makefile
 bbfb28cef53489faeaf3f40271c6f5bd  doom/doomgeneric_dmd.c
@@ -30,12 +30,12 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 075e6985999ab1d4bbcca75759c692b7  gb/setup_gb.sh
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
-c6814e92f81b4968d943f3d1cbc6f301  giornate.csv
+48b68ac87a2559a7efff49d54460ff57  giornate.csv
 0d83c8464fd5bd30a6fcb328e6dd0489  hass.py
-6da956e68d7ba0c265a008cf92308d00  i18n.py
+0df2743f551edb665cf2c504c8bb3d29  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
-2bfe2bef40132e4bee2cbdbb4f28c043  inutili.py
+7fe7fb617ddfdac829b0ee4990572ced  inutili.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 33804e1f60d47bc20ea370bb2e0b6502  lookup.py
 501367bdb38413b33dbd3b3c5fe8bb17  metadati.py
@@ -54,7 +54,7 @@ a1d8f7f59de7ddc70db9ab829de222dc  satelliti.py
 5698878038d0f306ecebc25bde34d88c  scadenze.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 7ee163e5c89f7ac983b26ae09a1a4b92  setup_share.sh
-4f3e04a5d1eb981053fb4dc7582cfffd  sources/__init__.py
+59c2ea2c3905c5898da336bdc95ad205  sources/__init__.py
 09e41ccca7a0f91ade61fbfefe602f47  sources/airradar.py
 4839d9f4d5cbf59bfe83a946f7c272ee  sources/anteprima.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
@@ -78,7 +78,7 @@ bf801c6443981bcbd2132b69bdf01cf8  sources/giochi/serpente.py
 9f1e1bc5394cdb3b6b7620eaeef5e07a  sources/giochi/squadriglia.py
 e6d3a6d006b2d1ff361934e64a1ae7e9  sources/giochi/trex.py
 42c900f9454d44e5bdb85f2390f5f44e  sources/inutili.py
-8ff4cebbe7c6e19bdddd15f2d8d93962  sources/media.py
+28d110bf5109a0bdbb4a66f126a205e4  sources/media.py
 9d5c71443d63c261e79811e3d8d42b7d  sources/meteo.py
 1d2251eff5cc8b014100149bd68d0103  sources/notifiche.py
 48225cc518aa6df9897f3fa93880a8ba  sources/nowplaying.py
@@ -137,7 +137,7 @@ e335f8f24edc17c812b333673ee4bdca  templates/doom.html
 856a6ac0a358de34d3026f01599c3a1d  templates/gameboy.html
 2df6c4de8a42b8bb3a0fa10df303cb59  templates/giochi.html
 c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
-250656c1e92734818935e7173907f894  templates/media.html
+c935aa8a8d4c3bac10e4f73152d643d7  templates/media.html
 c7bb06bb146f24e6a2b049413bf8a18e  templates/moon.html
 db6305423ca76d71efb0121fc62d2627  templates/nowplaying.html
 a2cd444631b64478b99d25a28ce44a0a  templates/onair.html
@@ -153,7 +153,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 2bc1da7de80749f0587cfc1c2c56f8fd  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-7119773c00371627a6ef6cefc0a14732  version.py
+1b13f44d920eed5a2b5db0c0003982d7  version.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-bf81c477ed949551471b725c890d71ab  webui.py
+60318f07042caf6b9a2fa0ea540de75e  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

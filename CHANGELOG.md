@@ -2,6 +2,57 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [12.3]
+
+### La giornata mondiale era quasi sempre vuota
+
+Non era un guasto, era una tabella che finiva: il calendario delle Nazioni
+Unite copre **179 giorni su 366**, quindi più di un giorno su due la riga in
+fondo alla prima schermata di Info inutili non aveva niente da dire. Guardando
+il pannello sembrava rotta.
+
+Aggiunte **181 giornate**, tutte a data fissa e tutte documentate: quelle
+ufficiali che mancavano (UNESCO, OMS, Consiglio d'Europa, ricorrenze civili
+italiane) e quelle minori o goliardiche — il gatto nero il 17 agosto, la
+Nutella il 5 febbraio, il backup il 31 marzo, il parlare come un pirata il 19
+settembre, Festivus il 23 dicembre. I giorni coperti passano da 179 a **360**.
+
+Le goliardiche portano **`pop` in terza colonna** e valgono solo dove non c'è
+niente di ufficiale: il 21 marzo passa la Giornata mondiale della poesia, non
+quella del panda. A parità vince sempre la più corta, come prima. Un
+`giornate.csv` tuo, scritto in due colonne, vale ufficiale e quindi vince sulle
+nostre: le tue prima, come per le tabelle del radar.
+
+Le sei date rimaste vuote sono quelle in cui il santo dice già tutto — Natale,
+Santo Stefano, San Nicola, Santa Cecilia, San Silvestro — più il 9 luglio e il
+7 agosto, dove davvero non risulta niente a data fissa. Le giornate **mobili**
+(la giornata del sonno, il venerdì prima dell'equinozio; la neve, la terza
+domenica di gennaio) restano fuori: qui si guarda il calendario, non il giorno
+della settimana.
+
+### Quante animazioni, e non quante ne capitano
+
+*«Vorrei vedere più animazioni che PNG statiche.»* Non si poteva, e il motivo
+non era un'impostazione mancante: il Media Player pescava **a caso da tutta la
+libreria**, quindi la proporzione la decideva la cartella. Una raccolta
+Pixelcade con 9.000 PNG e 1.000 GIF mostra una GIF ogni dieci contenuti, e non
+c'era numero da cambiare per ottenere il contrario.
+
+Nella pagina Media c'è ora **Quante animazioni %**, di serie 60: sei contenuti
+animati ogni dieci, comunque sia fatta la cartella. La correzione sta tutta in
+quando si sorteggia — **prima il gruppo, poi il file dentro al gruppo** — cioè
+un sorteggio in due tempi invece che in uno.
+
+Chi ha solo foto, o solo animazioni, non se ne accorge: se il gruppo sorteggiato
+è vuoto si pesca dall'altro, invece di saltare il turno e lasciare il pannello
+all'orologio senza motivo. Accanto alla casella la pagina dice quante ne hai di
+un tipo e quante dell'altro, così non si gira il cursore al buio.
+
+Il criterio è l'estensione: `.gif`, `.mp4` e gli altri video da una parte,
+`.png`, `.jpg` e le altre immagini dall'altra. Aprire quarantamila file per
+contarne i fotogrammi terrebbe occupata la scheda SD a ogni scansione, e sul
+pannello si vedrebbe.
+
 ## [12.2]
 
 ### I promemoria che non erano più domande

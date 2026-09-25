@@ -977,6 +977,13 @@ STRINGS = {
     "media.duration.hint": (
         "Le animazioni brevi vengono ripetute fino a coprire la durata indicata.",
         "Short animations are repeated until they cover the chosen duration."),
+    "media.quota": ("Quante animazioni %", "How many animations %"),
+    "media.quota.hint": (
+        "60 vuol dire sei animazioni ogni dieci contenuti, comunque sia fatta "
+        "la cartella.",
+        "60 means six animations out of ten, whatever the folder holds."),
+    "media.quota.conto": ("In libreria: %(animate)d animate, %(ferme)d ferme.",
+                          "In the library: %(animate)d animated, %(ferme)d still."),
     "media.fps": ("Fotogrammi al secondo", "Frames per second"),
     "media.scale": ("Adattamento al pannello", "Fit to panel"),
     "media.scale.fit": ("Adatta (bande nere)", "Fit (letterbox)"),

@@ -219,3 +219,192 @@
 12-20;Giornata della solidarietà umana
 12-21;Giornata internazionale della pallacanestro
 12-27;Giornata per la preparazione alle epidemie
+
+# Aggiunte nella 12.3: le giornate che riempiono i giorni lasciati
+# scoperti dal calendario delle Nazioni Unite -- erano 186 su 366, cioe'
+# un giorno su due con la riga in fondo vuota. Quelle segnate `pop` in
+# terza colonna sono goliardiche o minori: valgono solo quando quel
+# giorno non c'e' niente di ufficiale.
+#
+# giorno;titolo;pop
+01-01;Capodanno
+01-02;Giornata della fantascienza;pop
+01-03;Brindisi per Tolkien;pop
+01-05;Giornata degli uccelli;pop
+01-06;Giornata per gli orfani di guerra
+01-08;Giornata della dattilografia;pop
+01-09;Giornata dei voli in mongolfiera;pop
+01-10;Giornata per salvare le aquile;pop
+01-11;Giornata mondiale del grazie;pop
+01-12;Giornata del marzapane;pop
+01-13;Giornata della paperella di gomma;pop
+01-14;Giornata mondiale della logica
+01-15;Giornata di Wikipedia;pop
+01-16;Giornata del nulla;pop
+01-17;Giornata mondiale della pizza;pop
+01-18;Giornata di Winnie the Pooh;pop
+01-19;Giornata mondiale dei popcorn;pop
+01-20;Giornata del formaggio;pop
+01-21;Giornata mondiale degli abbracci;pop
+01-22;Giornata franco-tedesca
+01-23;Giornata della scrittura a mano;pop
+01-25;Burns Night, la notte di Burns;pop
+01-29;Giornata mondiale dei puzzle;pop
+01-30;Giornata scolastica della nonviolenza
+01-31;Giornata internazionale della zebra;pop
+02-01;Giornata mondiale del velo islamico;pop
+02-03;Il giorno in cui mori' la musica;pop
+02-05;Giornata mondiale della Nutella;pop
+02-07;Giornata contro il bullismo
+02-08;Giornata contro la tratta di persone
+02-14;San Valentino
+02-15;Giornata contro il cancro infantile
+02-16;Giornata mondiale della mandorla;pop
+02-17;Giornata internazionale del gatto;pop
+02-18;Giornata della sindrome di Asperger;pop
+02-19;Giornata mondiale delle balene;pop
+02-22;Giornata europea vittime di reato
+02-23;Giornata del pane alle banane;pop
+02-24;Giornata mondiale del barman;pop
+02-25;Giornata del mangiar sano;pop
+02-26;Giornata mondiale del pistacchio;pop
+02-27;Giornata mondiale dell'orso polare;pop
+02-28;Giornata delle malattie rare
+02-29;Giorno bisestile;pop
+03-02;Giornata del benessere mentale teen;pop
+03-04;Giornata mondiale dell'obesita'
+03-06;Giornata europea dei Giusti
+03-07;Giornata mondiale dei cereali;pop
+03-09;Giornata mondiale di Barbie;pop
+03-12;Giornata contro la censura online
+03-13;Giornata del buon samaritano;pop
+03-14;Giornata della matematica
+03-15;Giornata dei diritti dei consumatori
+03-16;Giornata mondiale del panda;pop
+03-18;Giornata delle vittime del Covid
+03-19;Festa del papa'
+03-26;Purple Day per l'epilessia;pop
+03-28;Giornata del rispetto per i gatti;pop
+03-29;Giornata delle piccole botteghe;pop
+03-30;Giornata mondiale rifiuti zero
+03-31;Giornata mondiale del backup;pop
+04-01;Pesce d'aprile;pop
+04-03;Giornata mondiale della festa;pop
+04-08;Giornata internazionale dei Rom
+04-09;Giornata mondiale dell'unicorno;pop
+04-10;Giornata mondiale dei fratelli;pop
+04-11;Giornata mondiale del Parkinson
+04-13;Giornata internazionale del bacio;pop
+04-15;Giornata mondiale dell'arte
+04-16;Giornata mondiale della voce
+04-17;Giornata mondiale dell'emofilia
+04-18;Giornata dei monumenti e dei siti
+04-19;Giornata mondiale del fegato
+04-27;Giornata mondiale del design
+04-29;Giornata internazionale della danza
+05-04;Star Wars Day;pop
+05-06;Giornata mondiale senza dieta;pop
+05-07;Giornata mondiale dell'atletica;pop
+05-11;Giornata del tramezzino;pop
+05-12;Giornata mondiale dell'infermiere
+05-13;Giornata mondiale del cocktail;pop
+05-14;Giornata di Dylan Thomas;pop
+05-18;Giornata internazionale dei musei
+05-23;Giornata della legalita'
+05-24;Giornata europea dei parchi
+05-25;Giornata dei bambini scomparsi
+05-26;Giornata mondiale di Dracula;pop
+05-27;Giornata della protezione solare;pop
+05-28;Giornata dell'igiene mestruale
+06-09;Giornata degli archivi
+06-10;Giornata mondiale dell'Art Nouveau;pop
+06-11;Giornata internazionale del gioco
+06-22;Giornata della foresta pluviale;pop
+06-28;Giornata dell'orgoglio LGBTQ;pop
+07-01;Giornata mondiale della barzelletta;pop
+07-02;Palio di Siena
+07-03;Giornata senza sacchetti di plastica;pop
+07-04;Indipendenza degli Stati Uniti;pop
+07-05;Giornata mondiale del bikini;pop
+07-08;Giornata del Mar Mediterraneo
+07-10;Giornata di Nikola Tesla;pop
+07-13;Giornata mondiale del rock;pop
+07-14;Presa della Bastiglia;pop
+07-16;Giornata mondiale del serpente;pop
+07-17;Giornata mondiale delle emoji;pop
+07-19;Giornata mondiale del karaoke;pop
+07-21;Festa nazionale del Belgio;pop
+07-22;Giornata del Pi greco approssimato;pop
+07-23;Giornata delle balene e dei delfini;pop
+07-24;Giornata mondiale dell'autocura;pop
+07-26;Giornata mondiale delle mangrovie
+07-27;Giornata del dormiglione;pop
+07-29;Giornata mondiale della tigre
+07-31;Giornata mondiale dei ranger;pop
+08-01;Giornata mondiale del web;pop
+08-02;Ricordo del genocidio di Rom e Sinti
+08-03;Giornata mondiale dell'anguria;pop
+08-04;Giornata del leopardo nebuloso;pop
+08-05;Giornata mondiale del semaforo;pop
+08-06;Anniversario di Hiroshima
+08-10;Giornata mondiale del leone;pop
+08-11;Giornata mondiale dell'hip hop;pop
+08-13;Giornata mondiale dei mancini;pop
+08-14;Giornata mondiale della lucertola;pop
+08-15;Ferragosto
+08-16;Giornata delle montagne russe;pop
+08-17;Giornata del gatto nero;pop
+08-18;Giornata del non mollare mai;pop
+08-20;Giornata mondiale della zanzara;pop
+08-24;Giornata del Vesuvio;pop
+08-25;Giornata della banana split;pop
+08-26;Giornata mondiale del cane;pop
+08-28;Giornata del vino rosso;pop
+09-01;Giornata per la custodia del creato
+09-02;Giornata mondiale del cocco;pop
+09-03;Giornata dei grattacieli;pop
+09-04;Giornata della salute sessuale;pop
+09-06;Giornata contro la procrastinazione;pop
+09-11;Giornata delle nuvole;pop
+09-13;Giornata mondiale del cioccolato;pop
+09-14;Giornata dell'eczema atopico;pop
+09-19;Giornata del parlare come un pirata;pop
+09-22;Giornata mondiale del rinoceronte;pop
+09-24;Giornata mondiale del gorilla;pop
+09-25;Giornata mondiale del farmacista;pop
+10-06;Giornata della paralisi cerebrale;pop
+10-08;Giornata mondiale del polpo;pop
+10-14;Giornata mondiale degli standard
+10-18;Giornata mondiale della menopausa
+10-19;Giornata contro il tumore al seno;pop
+10-21;Giornata della mela;pop
+10-22;Giornata mondiale dell'energia;pop
+10-25;Giornata mondiale della pasta;pop
+10-26;Giornata dell'intersessualita';pop
+10-28;Giornata mondiale dell'animazione
+10-29;Giornata mondiale contro l'ictus;pop
+10-30;Giornata del radiodramma;pop
+11-01;Giornata mondiale vegan;pop
+11-03;Giornata delle riserve della biosfera
+11-07;Giornata della fisica medica;pop
+11-08;Giornata mondiale dell'urbanistica;pop
+11-11;Giorno dell'Armistizio del 1918
+11-15;Giornata degli scrittori in carcere;pop
+11-17;Giornata internazionale degli studenti;pop
+11-23;Giornata di Fibonacci;pop
+11-27;Giornata dell'illustrazione;pop
+11-28;Giornata del pianeta rosso;pop
+12-08;Bodhi Day, il risveglio di Buddha;pop
+12-13;Giornata nazionale del cieco
+12-14;Giornata della scimmia;pop
+12-15;Giornata dell'esperanto;pop
+12-16;Inizio della novena di Natale
+12-17;Giornata dei fratelli Wright;pop
+12-19;Giornata dell'emo;pop
+12-22;Approvazione della Costituzione
+12-23;Festivus;pop
+12-24;Vigilia di Natale
+12-26;Boxing Day;pop
+12-28;Nascita del cinema, 1895;pop
+12-29;Giornata del violoncello;pop
+12-30;Giornata dei buoni propositi;pop

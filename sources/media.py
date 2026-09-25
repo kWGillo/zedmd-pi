@@ -4,6 +4,13 @@ Ogni 20-30 secondi (intervallo casuale) nasconde l'orologio e mostra un
 contenuto scelto a caso da una cartella: una foto per qualche secondo
 oppure un video/animazione. Poi restituisce il display.
 
+**Non si pesca a caso da tutto.** Prima si sorteggia il gruppo -- ferme o
+animate, secondo la manopola `quota_animazioni` -- e poi il file dentro al
+gruppo. La differenza non e' teorica: una libreria con novemila PNG e mille
+GIF, pescando a caso da tutto, mostra una GIF ogni dieci contenuti, e non
+c'e' impostazione che possa cambiarlo. Sorteggiando prima il gruppo, la
+proporzione la decidi tu e non la cartella.
+
 La cartella e' raggiungibile via SMB e via upload dalla web UI. I file
 vengono adattati al pannello con ffmpeg, quindi si possono caricare i
 principali formati senza preparazione manuale. Sono supportate anche le
@@ -41,6 +48,7 @@ SCAN_TTL = 300.0
 
 _scan_lock = threading.Lock()
 _scan_cache = {}          # root -> (istante, elenco)
+_gruppi_cache = {}        # root -> (elenco, (fermi, animati))
 
 
 def is_supported(name):
@@ -87,8 +95,10 @@ def invalidate_scan(root=None):
     with _scan_lock:
         if root is None:
             _scan_cache.clear()
+            _gruppi_cache.clear()
         else:
             _scan_cache.pop(root, None)
+            _gruppi_cache.pop(root, None)
 
 
 def cached_count(root):
@@ -96,6 +106,57 @@ def cached_count(root):
     with _scan_lock:
         entry = _scan_cache.get(root)
     return len(entry[1]) if entry else -1
+
+
+def divide(files):
+    """Spacca l'elenco in (immagini ferme, animazioni e video).
+
+    La regola e' l'estensione e nient'altro: aprire quarantamila file per
+    contare i fotogrammi di ognuno vorrebbe dire tenere occupata la scheda SD
+    per minuti a ogni scansione, e sul pannello quello si vede. Il prezzo e'
+    che una GIF di un fotogramma solo passa per animazione: e' un caso raro e
+    innocuo, e chi ne ha una la rinomina.
+    """
+    fermi, animati = [], []
+    for path in files:
+        (fermi if os.path.splitext(path)[1].lower() in IMAGE_EXT
+         else animati).append(path)
+    return fermi, animati
+
+
+def gruppi(root):
+    """(fermi, animati) per questa cartella, con la stessa cache della scansione."""
+    files = scan_media(root)
+    with _scan_lock:
+        entry = _gruppi_cache.get(root)
+        if entry and entry[0] is files:
+            return entry[1]
+    divisi = divide(files)
+    with _scan_lock:
+        _gruppi_cache[root] = (files, divisi)
+    return divisi
+
+
+def scegli(root, quota, sorteggio=None):
+    """Il prossimo contenuto da mostrare, o None se la cartella e' vuota.
+
+    `quota` e' quanta parte dei contenuti deve essere animata, da 0 a 100.
+    Prima si sorteggia **il gruppo**, poi il file dentro al gruppo: e' questo
+    che rende il risultato indipendente da come e' fatta la libreria. Pescare
+    a caso da tutto, come si faceva prima, vuol dire che una cartella con
+    9.000 PNG e 1.000 GIF mostra una GIF ogni dieci contenuti, e non c'e'
+    manopola che tenga.
+
+    Se il gruppo sorteggiato e' vuoto si pesca dall'altro: meglio una foto in
+    piu' che un turno saltato, e chi ha solo PNG non deve accorgersi che
+    questa manopola esiste.
+    """
+    fermi, animati = gruppi(root)
+    if not fermi and not animati:
+        return None
+    sorteggio = sorteggio or random.random
+    voluto = animati if sorteggio() * 100 < max(0, min(100, quota)) else fermi
+    return random.choice(voluto or fermi or animati)
 
 
 def have_ffmpeg():
@@ -194,12 +255,11 @@ class MediaPlayerSource(Source):
             if not self._running:
                 return
 
-            files = scan_media(cfg["media_dir"])
-            if not files:
+            path = scegli(cfg["media_dir"], cfg.get("quota_animazioni", 60))
+            if path is None:
                 self._error = None
                 continue
 
-            path = random.choice(files)
             self._current = path
             try:
                 if os.path.splitext(path)[1].lower() in IMAGE_EXT:

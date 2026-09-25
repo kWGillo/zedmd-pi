@@ -77,6 +77,18 @@
     </div>
     <p class="hint">{{ t('media.duration.hint') }}</p>
 
+    {# La manopola delle animazioni: prima si sorteggia il gruppo, poi il
+       file. Cosi' la proporzione la decide questa casella e non la
+       composizione della cartella. #}
+    <div class="row2">
+      <div><label for="quota_animazioni">{{ t('media.quota') }}</label>
+        <input type="number" id="quota_animazioni" name="quota_animazioni" min="0" max="100"
+               value="{{ cfg.mediaplayer.quota_animazioni }}"></div>
+      <div></div>
+    </div>
+    <p class="hint">{{ t('media.quota.hint') }}
+      {%- if gruppi %} {{ t('media.quota.conto', ferme=gruppi[0], animate=gruppi[1]) }}{% endif %}</p>
+
     <div class="row2">
       <div><label for="video_fps">{{ t('media.fps') }}</label>
         <input type="number" id="video_fps" name="video_fps" min="5" max="60"

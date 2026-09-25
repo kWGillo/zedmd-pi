@@ -43,8 +43,8 @@ from sources import (DOOM_PULSANTI, DOOM_TASTI, FIELD_LIST, GB_PULSANTI,
                      PROVIDER_LIST, SIZE_KEYS, SLOTS, UNIT_KEYS,
                      controlla_wad, elenco_rom, giochi_elenco,
                      palette_scelte,
-                     invalidate_scan, is_supported, joystick, normalize_list,
-                     scan_media, have_ffmpeg, tastiere, usable)
+                     gruppi, invalidate_scan, is_supported, joystick,
+                     normalize_list, scan_media, have_ffmpeg, tastiere, usable)
 from version import __version__
 
 # Ogni quanto la pagina della gestione media dice che c'e' ancora qualcuno.
@@ -672,8 +672,10 @@ def create_app(runtime):
     @app.route("/media")
     def page_media():
         elenco = _elenco_libreria()
+        fermi, animati = gruppi(cfg["mediaplayer"]["media_dir"])
         return render_template(
             "media.html", cfg=cfg, total=elenco["total"],
+            gruppi=(len(fermi), len(animati)),
             media_dir=elenco["media_dir"], ffmpeg=have_ffmpeg(),
             pulizia={"ultimo": runtime.pulitore.ultimo,
                      "cartelle": pulizia.cartelle(cfg)},
@@ -2131,7 +2133,8 @@ def create_app(runtime):
                                         ("max_interval", 3, 3600, 30),
                                         ("image_duration", 1, 120, 5),
                                         ("video_duration", 1, 300, 8),
-                                        ("video_fps", 5, 60, 20)):
+                                        ("video_fps", 5, 60, 20),
+                                        ("quota_animazioni", 0, 100, 60)):
             try:
                 media[key] = max(low, min(high, int(request.form.get(key, default))))
             except ValueError:
