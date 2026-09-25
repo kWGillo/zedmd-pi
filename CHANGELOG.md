@@ -2,6 +2,73 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [12.5]
+
+### Il Bluetooth, dalla pagina
+
+Per collegare un pad bisognava aprire `bluetoothctl` e battere `scan on`,
+`pair`, `trust`, `connect` a mano, con un indirizzo di dodici cifre copiato da
+una riga che scorre. Per un oggetto che sta in soggiorno serviva un monitor,
+una tastiera e il manuale aperto — la stessa procedura assurda che la pagina
+Rete aveva già tolto di mezzo per il wifi.
+
+Ora in fondo alla pagina **Rete** c'è il riquadro Bluetooth: cerca, collega,
+scollega, dimentica. Sta lì e non in una pagina sua perché è l'altra radio
+della stessa macchina, e chi cerca «come collego il pad» va a cercare dove ha
+collegato il wifi.
+
+**Collega fa tre cose in un pulsante**: accoppia, *fidati*, collega. La riga
+che conta è la seconda — senza `trust` il pad si aggancia adesso e non torna
+più dopo un riavvio, ed è l'errore che fa chiunque segua una guida. Adesso non
+c'è modo di dimenticarla.
+
+La pagina mostra anche la **carica del pad**, che da riga di comando non si
+vede da nessuna parte, e dice se quel pad **ha i motori**. La ricerca parte
+solo a comando, come quella del wifi e per un motivo in più: su un Pi 3B+ le
+due radio condividono l'antenna. L'accoppiamento gira in un thread, perché
+prende dai cinque ai venti secondi e una pagina bianca per venti secondi la
+gente la ricarica a metà.
+
+Gli altoparlanti Bluetooth restano fuori: vogliono PipeWire, un profilo A2DP e
+una scheda che non è quella di ALSA. Qui si accoppiano pad e telecomandi.
+
+### La vibrazione nei giochi
+
+Un pannello da 256×64 è piccolo: quando la palla prende la racchetta cambiano
+due pixel, e in mezzo ai mattoncini non si vedono — il colpo si capisce *dopo*,
+da come riparte la palla. Un DualShock ha due motori dentro, e un tonfo di
+centoventi millesimi lo dice prima che l'occhio se ne accorga.
+
+**Solo i colpi grossi**, cinque in tutto:
+
+| Colpo | Quando | Quanto |
+|---|---|---|
+| vita persa | tutti e nove i giochi | il più forte, 0,28 s |
+| tonfo | la mina che esplode, la banana a segno | forte, 0,16 s |
+| colpito | un invasore distrutto, un asteroide | medio, 0,10 s |
+| racchetta | la palla che torna indietro in Breakout | un buffetto, 0,05 s |
+| ping | la pallina di Pongo | un buffetto, 0,05 s |
+
+Mattoncini, spari, bocconi e punti non vibrano: un pad che trema in
+continuazione smette di dire qualcosa dopo un minuto.
+
+Nella pagina **Giochi** ci sono l'interruttore, la forza e un pulsante di
+prova, che risponde alla sola domanda che conta prima di mettersi a giocare:
+*questo* pad vibra? La pagina elenca anche i pad che dichiarano di avere i
+motori.
+
+Sotto il cofano non c'è niente da installare e nessuna libreria nuova: il pad è
+lo stesso dispositivo di `/dev/input` da cui si leggono i tasti, si carica un
+effetto con una ioctl e lo si suona scrivendogli un evento. La `struct
+ff_effect` cambia misura fra 32 e 64 bit — e su un Raspberry capitano tutte e
+due — quindi la misura si calcola invece di scriverla a mano: 44 byte e 48, con
+le due ioctl `0x402c4580` e `0x40304580`. Sono nelle prove, perché un numero
+sbagliato lì dentro non dà un errore da leggere: dà un pad che non vibra.
+
+I nove giochi non sono stati toccati. Chiamavano già i loro colpi con gli
+stessi nomi — `persa`, `tonfo`, `colpito` — e una tabella sola, nella sorgente
+dei giochi, li copre tutti.
+
 ## [12.4]
 
 ### «Ho abbassato il volume ma sembra non avere effetto»

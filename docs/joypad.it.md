@@ -49,6 +49,22 @@ Vai alla verifica del punto 4.
 
 ## 3. Collegamento via Bluetooth
 
+> **Dalla 12.5 c'è la pagina.** In *Rete*, sotto il wifi, c'è il riquadro
+> **Bluetooth**: metti il pad in accoppiamento (3.1 qui sotto), premi **Cerca
+> dispositivi**, e accanto al nome che compare premi **Collega**. Quel
+> pulsante fa i tre passi nell'ordine giusto — accoppia, *fidati*, collega —
+> e la riga `trust`, quella che tutti dimenticano, non la devi più ricordare
+> tu. La pagina mostra anche la **carica del pad**, che da riga di comando non
+> si vede da nessuna parte, e dice se quel pad ha i motori per la vibrazione.
+>
+> Il collegamento non avviene dentro la richiesta web: prende dai cinque ai
+> venti secondi, quindi la pagina risponde subito e l'esito si legge
+> ricaricandola. La ricerca, come quella del wifi, parte solo quando la
+> chiedi: su un Pi 3B+ Bluetooth e wifi sono davvero la stessa antenna.
+>
+> Il resto di questo capitolo resta per chi preferisce la riga di comando — e
+> perché quando qualcosa non va è lì che si va a guardare.
+
 ### 3.1 Metti il pad in accoppiamento
 
 Con il pad **spento**, tieni premuti insieme **Share** e **PS** per circa
@@ -324,6 +340,42 @@ Per limitarlo a uno, scrivi il suo percorso nel campo. I percorsi
 `/dev/input/eventN` però possono cambiare numero fra un riavvio e l'altro se
 colleghi le periferiche in ordine diverso: se ti capita, lascia il campo vuoto e
 scollega l'altro pad.
+
+---
+
+## 9-bis. La vibrazione
+
+Un DualShock ha due motori: uno grande che fa il tonfo e uno piccolo che fa il
+tremolio. Dalla **12.5** il DMD li usa, e il motivo è che il pannello è
+piccolo: quando la palla prende la racchetta cambiano due pixel, e in mezzo a
+un campo pieno di mattoncini non si vedono. Il colpo si capisce *dopo*, da come
+riparte la palla. Con la vibrazione lo senti prima che l'occhio se ne accorga.
+
+Nella pagina *Giochi*, sotto i controlli, ci sono una casella **Vibrazione del
+pad** (accesa di serie), un cursore per la **forza** e un pulsante di prova.
+La pagina elenca anche i pad che dichiarano di avere i motori: se lì non
+compare niente, il tuo pad non li ha — o non è collegato.
+
+**Solo i colpi grossi**, e sono cinque:
+
+| Colpo | Quando | Quanto |
+|---|---|---|
+| vita persa | in tutti e nove i giochi | il più forte, 0,28 s |
+| tonfo | la mina che esplode, la banana a segno in Kingo Bongo | forte, 0,16 s |
+| colpito | qualcosa è stato distrutto: un invasore, un asteroide | medio, 0,10 s |
+| racchetta | la palla che torna indietro in Breakout | un buffetto, 0,05 s |
+| ping | la pallina di Pongo sulla racchetta | un buffetto, 0,05 s |
+
+Mattoncini, spari, bocconi, punti e salti **non** vibrano, ed è una scelta: un
+pad che trema in continuazione smette di dire qualcosa dopo un minuto. Le
+vibrazioni sono poche apposta, e ognuna vuol dire una cosa sola.
+
+Sotto il cofano non c'è niente da installare, come per i tasti: il pad è lo
+stesso dispositivo di `/dev/input`, si carica un effetto nel pad con una ioctl
+e poi lo si «suona» scrivendogli un evento. Funziona uguale via USB e via
+Bluetooth. Un pad senza motori non è un errore: non compare nell'elenco e la
+partita va avanti, esattamente come va avanti muta quando la scheda audio è
+occupata dalla musica.
 
 ---
 

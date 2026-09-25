@@ -3,6 +3,8 @@
 
 {% block content %}
 
+{% if result %}<div class="banner">{{ result }}</div>{% endif %}
+
 <section class="card">
   <h2>{{ t('giochi.title') }}</h2>
   <p class="hint">{{ t('giochi.intro') }}</p>
@@ -134,6 +136,33 @@
                placeholder="{{ t('giochi.device.auto') }}"></div>
     </div>
     <p class="hint">{{ t('giochi.device.hint') }}</p>
+
+    <hr class="sep">
+    {# I motori del pad. Quali colpi li fanno girare sta scritto in
+       sources/giochi: qui si decide solo se, e quanto forte. #}
+    <label class="check">
+      <input type="checkbox" name="vibrazione" {{ 'checked' if cfg.giochi.vibrazione }}>
+      {{ t('giochi.vibrazione') }}
+    </label>
+    <div class="row2">
+      <div><label for="vibrazione_forza">{{ t('giochi.vibrazione.forza') }}</label>
+        <div class="color-row">
+          <input type="range" id="vibrazione_forza" name="vibrazione_forza"
+                 min="0" max="100" step="5"
+                 value="{{ cfg.giochi.vibrazione_forza }}"
+                 oninput="this.nextElementSibling.value = this.value + '%'">
+          <output>{{ cfg.giochi.vibrazione_forza }}%</output>
+        </div></div>
+      <div></div>
+    </div>
+    <p class="hint">{{ t('giochi.vibrazione.hint') }}
+      {%- if motori %}
+      {{ t('giochi.vibrazione.trovati') }}
+      {% for percorso, nome in motori %}<span class="mono">{{ nome or percorso }}</span>{{ ", " if not loop.last }}{% endfor %}
+      {%- else %} {{ t('giochi.vibrazione.nessuno') }}{% endif %}</p>
+    <form method="post" action="{{ url_for('api_giochi_vibra') }}" class="inline">
+      <button type="submit" class="ghost">{{ t('giochi.vibrazione.prova') }}</button>
+    </form>
 
     <hr class="sep">
     <p class="hint">{{ t('giochi.ciclo.hint') }}</p>

@@ -2650,6 +2650,15 @@ Storico:
        da' una curva quadratica: meta' cursore e' un quarto del segnale.
        Vale per tutte e tre le strade del suono -- ffmpeg per gli avvisi, il
        mixer per i giochi, la pipe dei tasti per Doom e il Game Boy.
+  12.5 **Il pad si collega dalla pagina, e vibra.** Nella pagina Rete, sotto
+       il wifi, c'e' il Bluetooth: cerca, collega, scollega, dimentica, con
+       la carica del pad e un pulsante che fa accoppia+fidati+collega in un
+       colpo -- la riga `trust`, quella che tutti dimenticano e senza la
+       quale il pad non torna dopo un riavvio, non la deve piu' ricordare
+       nessuno. E i motori del pad si sentono nei giochi: solo i colpi
+       grossi, cinque in tutto -- una vita persa, un'esplosione, la palla
+       sulla racchetta -- con interruttore, forza e prova nella pagina
+       Giochi. Un pad senza motori non e' un errore: non compare e basta.
 """
 
-__version__ = "12.4"
+__version__ = "12.5"

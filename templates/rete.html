@@ -213,6 +213,69 @@
   </form>
 </section>
 
+{# Il Bluetooth sta qui e non in una pagina sua: e' l'altra radio della stessa
+   macchina, e chi cerca «come collego il pad» cerca dove ha collegato il
+   wifi. La scansione, come quella del wifi, si fa solo a comando: su un Pi
+   3B+ le due radio sono davvero la stessa antenna. #}
+<section class="card">
+  <h2>{{ t('bt.title') }}
+    {%- if bt.stato.collegati %} <span class="version">{{ bt.stato.collegati | length }} ✓</span>{% endif %}</h2>
+  <p class="hint">{{ t('bt.hint') }}</p>
+
+  {% if not bt.stato.disponibile %}
+  <p class="status">{{ t('bt.missing') }}</p>
+  {% else %}
+
+  {% if bt.esito %}
+  <p class="status">{{ t('bt.esito.ok') if bt.esito.riuscito else t('bt.esito.no') }}
+    <span class="hint">{{ bt.esito.messaggio }}</span></p>
+  {% endif %}
+  {% if bt.stato.in_corso %}
+  <p class="status">{{ t('bt.working', address=bt.stato.in_corso) }}</p>
+  {% endif %}
+
+  <form method="get" action="{{ url_for('page_rete') }}" class="inline">
+    <input type="hidden" name="btscan" value="1">
+    <button type="submit">{{ t('bt.scan') }}</button>
+  </form>
+
+  {% if bt.cercato and not bt.dispositivi %}
+  <p class="status">{{ t('bt.none') }}</p>
+  {% endif %}
+
+  {% for voce in bt.dispositivi %}
+  <div class="service-head">
+    <h3>
+      {{ voce.nome or voce.indirizzo }}
+      {%- if voce.collegato %} ✓{% endif %}
+      <span class="hint">{{ voce.indirizzo }}
+        {%- if voce.batteria is not none %} — {{ t('bt.battery', livello=voce.batteria) }}{% endif %}
+        {%- if voce.accoppiato %} — {{ t('bt.paired') }}{% endif %}
+        {%- if voce.motori %} — {{ t('bt.motors') }}{% endif %}</span>
+    </h3>
+  </div>
+  <form method="post" action="{{ url_for('api_bt_collega') }}" class="inline">
+    <input type="hidden" name="indirizzo" value="{{ voce.indirizzo }}">
+    <button type="submit">{{ t('bt.connect') if not voce.collegato else t('bt.reconnect') }}</button>
+  </form>
+  {% if voce.collegato %}
+  <form method="post" action="{{ url_for('api_bt_scollega') }}" class="inline">
+    <input type="hidden" name="indirizzo" value="{{ voce.indirizzo }}">
+    <button type="submit" class="ghost">{{ t('bt.disconnect') }}</button>
+  </form>
+  {% endif %}
+  {% if voce.accoppiato %}
+  <form method="post" action="{{ url_for('api_bt_dimentica') }}" class="inline">
+    <input type="hidden" name="indirizzo" value="{{ voce.indirizzo }}">
+    <button type="submit" class="ghost">{{ t('bt.forget') }}</button>
+  </form>
+  {% endif %}
+  {% endfor %}
+
+  <p class="hint">{{ t('bt.trust.hint') }}</p>
+  {% endif %}
+</section>
+
 <section class="card">
   <h2>{{ t('rete.console') }}</h2>
   <p class="hint">{{ t('rete.console.hint') }}</p>

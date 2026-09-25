@@ -163,6 +163,38 @@ niente: NetworkManager riattiva da solo il profilo di prima, il DMD torna
 dov'era, e riaprendo la pagina trovi scritto cosa non è andato. Per questo il
 profilo vecchio non si cancella mai prima di aver provato il nuovo.
 
+# 4-bis. Il Bluetooth
+
+In fondo alla stessa pagina, dalla **12.5**, c'è il Bluetooth. Sta qui e non in
+una pagina sua per due ragioni: è l'altra radio della stessa macchina, e chi
+cerca «come collego il pad» va a cercare dove ha collegato il wifi.
+
+Fa una cosa sola, e la fa in un pulsante: **Collega** esegue `pair`, `trust` e
+`connect` nell'ordine giusto. La riga che conta è la seconda — senza `trust` il
+pad si aggancia adesso e non torna più dopo un riavvio, ed è l'errore che fanno
+tutti seguendo le guide. Qui non c'è modo di dimenticarla.
+
+| Cosa vedi | Da dove viene |
+|---|---|
+| nome e indirizzo | `bluetoothctl devices` |
+| accoppiato, collegato | `bluetoothctl info` |
+| **carica del pad** | la stessa, quando il pad la dichiara |
+| **ha i motori** | `/proc/bus/input/devices`, la riga `B: FF=` |
+
+La ricerca **non parte da sola**, come quella del wifi e per un motivo in più:
+su un Raspberry Pi 3B+ Bluetooth e wifi condividono l'antenna, e una scansione
+continua disturberebbe la rete da cui stai guardando la pagina.
+
+L'accoppiamento non avviene dentro la richiesta web — prende dai cinque ai
+venti secondi, e una pagina bianca per venti secondi la gente la ricarica a
+metà. Parte in un thread, la pagina risponde subito, e l'esito compare al
+ricaricamento successivo.
+
+**Gli altoparlanti Bluetooth no.** Sono un altro mestiere: vogliono PipeWire o
+PulseAudio, un profilo A2DP e una scheda che non è quella di ALSA. Qui si
+accoppiano pad e telecomandi. Per la musica c'è AirPlay, che sul DMD funziona
+già.
+
 # 5. Se la pagina non basta
 
 Da SSH, o da tastiera attaccata al Raspberry, con `sudo`:

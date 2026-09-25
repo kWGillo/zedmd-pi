@@ -1820,6 +1820,37 @@ STRINGS = {
                              "Wi-Fi power saving turned off. %(dettaglio)s"),
     "rete.risparmio.no": ("Non sono riuscito a spegnere il risparmio: %(dettaglio)s",
                           "Could not turn power saving off: %(dettaglio)s"),
+    "bt.title": ("Bluetooth", "Bluetooth"),
+    "bt.hint": (
+        "Pad e telecomandi. Gli altoparlanti no: quelli sono un'altra cosa.",
+        "Pads and remotes. Not speakers: those are a different matter."),
+    "bt.missing": ("bluetoothctl non è installato su questa macchina.",
+                   "bluetoothctl is not installed on this machine."),
+    "bt.scan": ("Cerca dispositivi", "Search for devices"),
+    "bt.none": ("Nessun dispositivo trovato. Il pad è in accoppiamento?",
+                "No device found. Is the pad in pairing mode?"),
+    "bt.connect": ("Collega", "Connect"),
+    "bt.reconnect": ("Ricollega", "Reconnect"),
+    "bt.disconnect": ("Scollega", "Disconnect"),
+    "bt.forget": ("Dimentica", "Forget"),
+    "bt.paired": ("accoppiato", "paired"),
+    "bt.motors": ("ha i motori", "has motors"),
+    "bt.battery": ("batteria %(livello)d%%", "battery %(livello)d%%"),
+    "bt.trying": ("Sto collegando %(address)s. Ricarica fra qualche secondo.",
+                  "Connecting %(address)s. Reload in a few seconds."),
+    "bt.working": ("Collegamento a %(address)s in corso.",
+                   "Connecting to %(address)s."),
+    "bt.failed": ("Non ha funzionato: %(error)s", "It did not work: %(error)s"),
+    "bt.disconnected": ("Scollegato.", "Disconnected."),
+    "bt.forgotten": ("Dimenticato: per riusarlo va riaccoppiato.",
+                     "Forgotten: pair it again to use it."),
+    "bt.esito.ok": ("Collegato.", "Connected."),
+    "bt.esito.no": ("Il collegamento non è riuscito.", "The connection failed."),
+    "bt.trust.hint": (
+        "Collega fa accoppia, fidati e collega: senza «fidati» il pad non si "
+        "riaggancia dopo un riavvio.",
+        "Connect does pair, trust and connect: without trust the pad will not "
+        "come back after a reboot."),
     "rete.title": ("Rete wifi", "Wi-Fi network"),
     "rete.current": ("Collegamento attuale", "Current connection"),
     "rete.state": ("Stato", "State"),
@@ -2052,6 +2083,22 @@ STRINGS = {
     "giochi.device.hint": (
         "Vuoto = tutti i dispositivi visti come tastiera o joystick. Es: /dev/input/event3.",
         "Empty = every device the kernel calls a keyboard or a joystick. E.g. /dev/input/event3."),
+    "giochi.vibrazione": ("Vibrazione del pad", "Pad rumble"),
+    "giochi.vibrazione.forza": ("Forza della vibrazione", "Rumble strength"),
+    "giochi.vibrazione.hint": (
+        "Solo i colpi grossi: una vita persa, un'esplosione, la palla sulla "
+        "racchetta.",
+        "Only the big hits: a life lost, an explosion, the ball on the paddle."),
+    "giochi.vibrazione.trovati": ("Pad con i motori:", "Pads with motors:"),
+    "giochi.vibrazione.nessuno": (
+        "Nessun pad collegato dichiara di avere i motori.",
+        "No connected pad reports having motors."),
+    "giochi.vibrazione.prova": ("Prova la vibrazione", "Test the rumble"),
+    "giochi.vibrazione.provata": ("Colpo mandato a %(quanti)d pad.",
+                                  "Pulse sent to %(quanti)d pad(s)."),
+    "giochi.vibrazione.muta": (
+        "Nessun pad ha vibrato: o non ha i motori, o non è collegato.",
+        "No pad vibrated: either it has no motors, or it is not connected."),
     "giochi.ciclo.hint": (
         "Start scorre i giochi, Select esce. Sulla tastiera fanno lo stesso i tasti qui sotto.",
         "Start cycles the games, Select exits. On a keyboard the keys below do the same."),

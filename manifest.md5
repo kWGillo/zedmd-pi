@@ -3,6 +3,7 @@
 08c3469c3a1911510abcd22e0ce19238  aeroporti.csv
 ebdccc3875a93eba4f6eb06f6912436c  allerte.py
 13e95841fe78d3774935f35182209ae3  autotune.py
+4438d578077aeded3675b26d1268faac  bt.py
 8f611004ff344bdd285b2a5b25b2888d  cassa.py
 0043347a44791b32ddac8ee7841b7633  catalogo-aerei.csv
 317b5c25e3823c1d8ab42e17a361118b  catalogo-aeroporti.csv
@@ -18,7 +19,7 @@ e2c2c47345553586ed699be1e9d3c3ce  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 ea2b0d24ff1827bdf031ed8393dc6db8  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
-58f639a84a3f4b426a2f3769881a32a0  dmdconf.py
+19b37c7f1b107b83c2bbd474899067a6  dmdconf.py
 a3a7b1fcd62599b256906812438cf147  dmdd.py
 bb3118ed4b5ebb8d9f49cc8bbcd6f341  doom/Makefile
 bbfb28cef53489faeaf3f40271c6f5bd  doom/doomgeneric_dmd.c
@@ -32,7 +33,7 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 48b68ac87a2559a7efff49d54460ff57  giornate.csv
 0d83c8464fd5bd30a6fcb328e6dd0489  hass.py
-09ef16ff44276be2dc6a7c8e8a616ce8  i18n.py
+f90b85976dd0ba75470e9967b731b4d8  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
 7fe7fb617ddfdac829b0ee4990572ced  inutili.py
@@ -66,7 +67,7 @@ fff9a6751fd27a17747c95d907945d19  sources/cielo.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 121811114e48abfc98e44fafee43e6f1  sources/doom.py
 bc025a8c4685b1cec20e46e3178346cb  sources/gameboy.py
-c61e1342d4985c66c22addb5cd3f0132  sources/giochi/__init__.py
+1f38dc152f8cb4c1dfc6809730307f76  sources/giochi/__init__.py
 a6a0effa4d25098e12d2bcd62b058c9b  sources/giochi/base.py
 f2aea72967c0e34ef150b26ddf000e8b  sources/giochi/bongo.py
 71f54d44a50464e82cafa5d08b261fc3  sources/giochi/gnam.py
@@ -135,14 +136,14 @@ f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
 2151e5dc3cc2a6fe5b2e925c5237328c  templates/clock.html
 e335f8f24edc17c812b333673ee4bdca  templates/doom.html
 856a6ac0a358de34d3026f01599c3a1d  templates/gameboy.html
-2df6c4de8a42b8bb3a0fa10df303cb59  templates/giochi.html
+f5e3570f3a90081b88e11c96030993fd  templates/giochi.html
 c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
 c935aa8a8d4c3bac10e4f73152d643d7  templates/media.html
 c7bb06bb146f24e6a2b049413bf8a18e  templates/moon.html
 db6305423ca76d71efb0121fc62d2627  templates/nowplaying.html
 a2cd444631b64478b99d25a28ce44a0a  templates/onair.html
 c5d532ee5613e04cd594627be62abcde  templates/radar.html
-16ef160d53c6dd0c759d5f45cf9e2c8c  templates/rete.html
+0984e85fca803b7be722fd7965b69205  templates/rete.html
 f6c06fad41095cdaaeff9e513c07ea6f  templates/rifiuti.html
 c80b972bd47827c7383979aafb7fecc8  templates/satelliti.html
 403872d6a716a4b13b8775cfbbdd355a  templates/scadenze.html
@@ -153,7 +154,8 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 2bc1da7de80749f0587cfc1c2c56f8fd  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-714c8250c0f2c2df7b1a3a305dacf0c7  version.py
+fd362b5338dd89928e74c93dc073b22b  version.py
+a28618e709b657f90163d97a23ca108a  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-60318f07042caf6b9a2fa0ea540de75e  webui.py
+f162c72650f5b9db0bab1a17d93d933f  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

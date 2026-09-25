@@ -21,6 +21,7 @@ import time
 from PIL import Image
 
 import suoni
+import vibra
 
 from ..base import Source
 from ..comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_RY, ABS_X, ABS_Y,
@@ -355,11 +356,44 @@ class GiochiSource(Source):
         except Exception as exc:                    # pragma: no cover
             print("[giochi] musica non avviata: %s" % exc)
 
+    # I colpi che si sentono anche con le mani. La tabella sta qui e non
+    # dentro i giochi per la stessa ragione per cui ci stanno gli effetti: un
+    # gioco che sapesse di motori non si potrebbe piu' far girare dentro una
+    # prova. E i nove giochi chiamano gia' i colpi con lo stesso nome --
+    # `persa` quando si perde una vita, `colpito` quando qualcosa esplode --
+    # quindi una tabella sola li copre tutti senza toccarne nessuno.
+    #
+    # Ci sono **solo i colpi grossi**. Un pad che vibra a ogni mattoncino, a
+    # ogni sparo e a ogni boccone smette di dire qualcosa dopo un minuto: le
+    # vibrazioni sono poche apposta, e ognuna vuol dire una cosa sola.
+    COLPI = {
+        "persa": (1.00, 0.28),        # una vita persa: il piu' lungo
+        "tonfo": (0.85, 0.16),        # la mina che esplode, la banana a segno
+        "colpito": (0.60, 0.10),      # qualcosa e' stato distrutto
+        "racchetta": (0.35, 0.05),    # la palla prende la racchetta
+        "ping": (0.35, 0.05),         # e la pallina di Pongo
+    }
+
     def _suona_effetto(self, nome):
         try:
             suoni.suona_effetto(self.cfg, nome)
         except Exception as exc:                    # pragma: no cover
             print("[giochi] effetto non riprodotto: %s" % exc)
+        self._vibra(nome)
+
+    def _vibra(self, nome):
+        """Il colpo sul pad, se quel nome ne merita uno."""
+        colpo = self.COLPI.get(nome)
+        if colpo is None:
+            return
+        conf = self.conf()
+        if not conf.get("vibrazione", True):
+            return
+        forza = max(0, min(100, int(conf.get("vibrazione_forza", 70)))) / 100.0
+        try:
+            vibra.colpo(colpo[0] * forza, colpo[1])
+        except Exception as exc:                    # pragma: no cover
+            print("[giochi] vibrazione non inviata: %s" % exc)
 
     apri_partita = None
     chiudi_partita = None
@@ -485,6 +519,14 @@ class GiochiSource(Source):
         # Il mixer degli effetti vive quanto la partita: aperto adesso,
         # chiuso quando si esce. A pannello fermo non tiene occupata la
         # scheda audio e non consuma niente.
+        # I motori del pad vivono quanto la partita, come il mixer: presi
+        # adesso, lasciati quando si esce. Un pad senza motori non e' un
+        # errore -- non si trova nell'elenco e basta.
+        try:
+            if self.conf().get("vibrazione", True):
+                vibra.apri()
+        except Exception as exc:                    # pragma: no cover
+            print("[giochi] motori del pad non aperti: %s" % exc)
         try:
             if not suoni.effetti_avvia(self.cfg):
                 # Non e' un errore: puo' voler dire audio spento, effetti dei
@@ -556,6 +598,10 @@ class GiochiSource(Source):
             suoni.effetti_ferma()
         except Exception as exc:                    # pragma: no cover
             print("[giochi] mixer non fermato: %s" % exc)
+        try:
+            vibra.chiudi()
+        except Exception as exc:                    # pragma: no cover
+            print("[giochi] motori del pad non lasciati: %s" % exc)
 
     def _salva_record(self):
         """Il record sopravvive alla partita: e' l'unica cosa che ha senso

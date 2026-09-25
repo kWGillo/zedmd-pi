@@ -266,6 +266,11 @@ DEFAULTS = {
         # gioca, premuto ancora si passa al successivo. I codici sono quelli
         # di una tastiera normale (invio, escape) ma su una pulsantiera da
         # flipper sono altri, e si imparano dalla pagina premendo il pulsante.
+        # I motori del pad: si sentono solo i colpi grossi, e la tabella di
+        # quali sta in sources/giochi. La forza e' in percento perche' i pad
+        # non sono tutti uguali: un DualShock scuote piu' di un pad leggero.
+        "vibrazione": True,
+        "vibrazione_forza": 70,
         "tasto_ciclo": 28,
         "tasto_esci": 1,
         # Doom nel giro del tasto Start. **Acceso**: dalla 3.8.2 il pad non

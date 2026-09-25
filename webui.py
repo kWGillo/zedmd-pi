@@ -15,6 +15,7 @@ from flask import (Flask, has_request_context, jsonify, redirect,
                    render_template, request, send_file, url_for)
 from werkzeug.utils import secure_filename
 
+import bt
 import cassa
 import dmdconf
 import fasce
@@ -36,6 +37,7 @@ import pulsante
 import rete
 import satelliti
 import suoni
+import vibra
 import webcam
 import spotifyapi
 from sources import (DOOM_PULSANTI, DOOM_TASTI, FIELD_LIST, GB_PULSANTI,
@@ -447,8 +449,23 @@ def create_app(runtime):
         rifarla a ogni ricaricamento sarebbe un disturbo continuo.
         """
         cercare = request.args.get("scan") == "1"
+        # Il Bluetooth: la scansione costa qualche secondo di radio, quindi si
+        # fa solo a comando, come quella del wifi. Senza la richiesta si
+        # mostra quello che BlueZ gia' conosce, che e' gratis.
+        btscan = request.args.get("btscan") == "1"
+        dispositivi, bterrore = bt.cerca() if btscan else (bt.elenco(), "")
+        motori = {os.path.basename(p): n for p, n in vibra.motori(con_nome=True)}
+        for voce in dispositivi:
+            # Un pad collegato e con i motori: e' l'informazione che serve a
+            # sapere se la vibrazione dei giochi avra' effetto su questo.
+            voce["motori"] = bool(voce.get("collegato")) and any(
+                voce.get("nome") and voce["nome"] in nome
+                for nome in motori.values())
         return render_template(
             "rete.html", cfg=cfg,
+            bt={"stato": bt.stato(), "dispositivi": dispositivi,
+                "cercato": btscan, "errore": bterrore,
+                "esito": bt.ultimo_esito()},
             stato=rete.stato(),
             # Da qui si configura anche il broker: la pagina Musica non lo
             # fa piu'.
@@ -499,6 +516,34 @@ def create_app(runtime):
                 "rete.risparmio.fatto" if fatto else "rete.risparmio.no",
                 current_language(), dettaglio=dettaglio)
         return redirect(url_for("page_rete", result=messaggio or None))
+
+    @app.route("/api/bt/collega", methods=["POST"])
+    def api_bt_collega():
+        """Accoppia, fidati, collega: i tre passi in un pulsante solo.
+
+        Non si aspetta la fine dentro la richiesta: accoppiare un pad prende
+        dai cinque ai venti secondi, e una pagina bianca per venti secondi la
+        gente la ricarica a meta'. L'esito si legge riaprendo la pagina.
+        """
+        indirizzo = request.form.get("indirizzo", "")
+        avviato, motivo = bt.avvia_collegamento(indirizzo)
+        chiave = "bt.trying" if avviato else "bt.failed"
+        return redirect(url_for("page_rete", result=i18n.translate(
+            chiave, current_language(), address=indirizzo, error=motivo)))
+
+    @app.route("/api/bt/scollega", methods=["POST"])
+    def api_bt_scollega():
+        fatto, motivo = bt.scollega(request.form.get("indirizzo", ""))
+        chiave = "bt.disconnected" if fatto else "bt.failed"
+        return redirect(url_for("page_rete", result=i18n.translate(
+            chiave, current_language(), error=motivo)))
+
+    @app.route("/api/bt/dimentica", methods=["POST"])
+    def api_bt_dimentica():
+        fatto, motivo = bt.dimentica(request.form.get("indirizzo", ""))
+        chiave = "bt.forgotten" if fatto else "bt.failed"
+        return redirect(url_for("page_rete", result=i18n.translate(
+            chiave, current_language(), error=motivo)))
 
     @app.route("/api/rete/forget", methods=["POST"])
     def api_rete_forget():
@@ -985,10 +1030,39 @@ def create_app(runtime):
             "giochi.html", cfg=cfg, stato=stato, stato_testo=stato["testo"],
             giochi=giochi_elenco(), record=(conf.get("record") or {}),
             pulsanti=GIOCHI_PULSANTI, pad=joystick(con_nome=True),
+            motori=vibra.motori(con_nome=True),
+            result=request.args.get("result"),
             doom_pronto=i18n.translate(
                 "giochi.doom.no" if errore else "giochi.doom.si",
                 current_language()),
             page="giochi")
+
+    @app.route("/api/giochi/vibra", methods=["POST"])
+    def api_giochi_vibra():
+        """Un colpo di prova sui motori del pad.
+
+        Serve a rispondere alla sola domanda che conta prima di mettersi a
+        giocare: *questo* pad vibra? Un pad senza motori non e' un errore, e
+        la risposta lo dice invece di lasciar dubitare del gioco.
+        """
+        quanti = 0
+        try:
+            forza = max(0, min(100, int(
+                (cfg.get("giochi") or {}).get("vibrazione_forza", 70)))) / 100.0
+            vibra.apri()
+            quanti = vibra.colpo(forza, 0.25)
+        except Exception as exc:                    # pragma: no cover
+            print("[giochi] prova vibrazione non riuscita: %s" % exc)
+        finally:
+            # I motori si lasciano subito: qui non c'e' nessuna partita aperta
+            # che li debba tenere.
+            try:
+                vibra.chiudi()
+            except Exception:
+                pass
+        chiave = "giochi.vibrazione.provata" if quanti else "giochi.vibrazione.muta"
+        return redirect(url_for("page_giochi", result=i18n.translate(
+            chiave, current_language(), quanti=quanti)))
 
     @app.route("/api/giochi/state")
     def api_giochi_state():
@@ -1081,8 +1155,14 @@ def create_app(runtime):
     def api_giochi():
         conf = cfg.setdefault("giochi", {})
         for chiave in ("keyboard", "keyboard_starts",
-                       "joystick", "joystick_starts", "ciclo_doom", "musica"):
+                       "joystick", "joystick_starts", "ciclo_doom", "musica",
+                       "vibrazione"):
             conf[chiave] = request.form.get(chiave) == "on"
+        try:
+            conf["vibrazione_forza"] = max(0, min(100, int(
+                request.form.get("vibrazione_forza", 70))))
+        except (TypeError, ValueError):
+            conf["vibrazione_forza"] = 70
         # Da adesso la casella "Doom nel giro" e' una scelta dell'utente: la
         # migrazione non deve piu' rimetterci le mani.
         conf["ciclo_scelto"] = True
