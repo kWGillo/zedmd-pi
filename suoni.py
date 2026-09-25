@@ -361,6 +361,50 @@ def percento(valore):
         return 0
 
 
+# La curva del cursore. Il numero salvato in configurazione e' **la posizione
+# del cursore**, non il guadagno: qui si passa dall'una all'altro.
+#
+# Serviva perche' il cursore sembrava rotto, ed era una segnalazione giusta:
+# un cursore lineare sull'ampiezza ha la meta' alta della corsa quasi inutile.
+# Da 100 a 70 sono 3 dB, che nessuno sente come "piu' basso"; meta' cursore e'
+# meno 6 dB, e l'orecchio chiama "meta' volume" qualcosa come meno 10. Si
+# spostava il cursore di trenta punti, il numero arrivava a ffmpeg giusto, e
+# non cambiava niente di percepibile.
+#
+# Al quadrato la corsa si distribuisce come la sente un orecchio:
+#
+#     cursore   guadagno    dB
+#        100      1.00       0
+#         70      0.49      -6
+#         50      0.25     -12
+#         30      0.09     -21
+#         10      0.01     -40
+#
+# Vale per tutte e tre le strade del suono -- ffmpeg per gli avvisi, il mixer
+# per i giochi, la pipe dei tasti per Doom e il Game Boy -- perche' un cursore
+# che si comporta in due modi diversi e' peggio di due cursori.
+CURVA = 2.0
+
+
+def guadagno(posizione):
+    """Dal cursore (0-1) al guadagno da applicare davvero all'onda.
+
+    Gli estremi restano dove sono -- 0 e' silenzio, 1 e' fondo scala -- e in
+    configurazione continua a stare la posizione del cursore: la pagina e Home
+    Assistant mostrano lo stesso numero di prima.
+    """
+    try:
+        posizione = max(0.0, min(1.0, float(posizione)))
+    except (TypeError, ValueError):
+        return 0.0
+    return posizione ** CURVA
+
+
+def percento_udibile(valore):
+    """Il cursore come lo aspettano Doom e il Game Boy: passato dalla curva."""
+    return percento(guadagno(valore))
+
+
 def sottofondo(cfg):
     """Quanto vale il sottofondo che tiene sveglia la scheda. 0 = spento."""
     try:
@@ -583,7 +627,10 @@ def riproduci(cfg, percorso, forza=False, vol=None):
             return False, "un suono e' gia' in corso"
         comando = ["ffmpeg", "-v", "error", "-nostdin",
                    "-t", str(DURATA_MASSIMA), "-i", percorso,
-                   "-filter:a", "volume=%.2f" % vol,
+                   # `vol` e' la posizione del cursore: il guadagno vero lo
+                   # da' la curva, ed e' l'unico punto in cui questa strada
+                   # del suono ci passa.
+                   "-filter:a", "volume=%.3f" % guadagno(vol),
                    "-f", "alsa", device]
         try:
             _processo = subprocess.Popen(comando, stdin=subprocess.DEVNULL,
@@ -1047,7 +1094,9 @@ class Mixer:
         prima volta che legge un wav, e da li' in poi ogni suono passava per
         la strada lenta della somma in Python. Suonava giusto, ma costava.
         """
-        vol = max(0.0, min(1.0, float(vol)))
+        # Entra la posizione del cursore, si tiene il guadagno: e' l'unico
+        # punto in cui la strada del mixer passa dalla curva.
+        vol = guadagno(vol)
         if abs(vol - self._volume) <= 1e-9:
             return
         self._volume = vol

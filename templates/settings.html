@@ -148,6 +148,10 @@
              oninput="this.nextElementSibling.value = this.value + '%'">
       <output>{{ (cfg.audio.volume * 100) | round | int }}%</output>
     </div>
+    {# La curva sta in suoni.guadagno(): qui si dice solo che c'e', perche'
+       un cursore che scende al quadrato senza avvisare sembra rotto quanto
+       quello lineare di prima, solo dall'altra parte. #}
+    <p class="hint">{{ t('audio.volume.curva') }}</p>
 
     {# Manopola a parte per i giochi. Fino alla 9.0 ce n'era una sola, e su un
        pannello con il volume a 5 — scelto per non farsi svegliare dagli

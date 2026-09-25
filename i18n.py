@@ -1434,6 +1434,11 @@ STRINGS = {
     "audio.volume": (
         "Volume effetti sonori servizi",
         "Service sound effects volume"),
+    "audio.volume.curva": (
+        "Il cursore segue l'orecchio, non l'ampiezza: metà cursore è un quarto "
+        "del segnale.",
+        "The slider follows the ear, not the amplitude: half way is a quarter "
+        "of the signal."),
     "audio.volume.giochi": ("Volume dei giochi (0-100)",
                             "Games volume (0-100)"),
     "audio.volume.giochi.hint": (

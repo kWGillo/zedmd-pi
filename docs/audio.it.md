@@ -393,6 +393,34 @@ sistema: è un filtro `volume=` applicato da ffmpeg al momento della
 riproduzione, quindi non cambia niente per gli altri programmi e non ha bisogno
 di `alsamixer`.
 
+> **Il cursore segue l'orecchio, non l'ampiezza.** Fino alla 12.3 il numero
+> salvato era il guadagno, e il cursore sembrava rotto: *«ho abbassato il volume
+> ma sembra non avere effetto»*. Il numero arrivava a ffmpeg giusto — misurato,
+> a metà cursore uscivano −6 dB esatti — ma metà cursore non è metà volume:
+> l'orecchio chiama «metà» qualcosa come −10 dB, e la metà alta della corsa non
+> serviva a niente, perché da 100 a 70 sono 3 dB che nessuno sente.
+>
+> Dalla 12.4 in configurazione sta **la posizione del cursore** e il guadagno lo
+> dà una curva quadratica:
+>
+> | cursore | guadagno | dB |
+> |---|---|---|
+> | 100 | 1,00 | 0 |
+> | 70 | 0,49 | −6 |
+> | 50 | 0,25 | −12 |
+> | 30 | 0,09 | −21 |
+> | 10 | 0,01 | −40 |
+>
+> Gli estremi non si muovono: 0 è silenzio, 100 è fondo scala. La curva vale per
+> tutte e tre le strade del suono — ffmpeg per gli avvisi, il mixer per i giochi
+> integrati, la pipe dei tasti per Doom e il Game Boy — perché un cursore che si
+> comporta in due modi è peggio di due cursori. Nella pagina e in Home Assistant
+> si continua a leggere la posizione, non il guadagno: altrimenti il numero
+> scenderebbe da solo a ogni salvataggio.
+>
+> Effetto pratico dell'aggiornamento: a parità di cursore tutto suona un po' più
+> piano di prima. È il prezzo di avere una corsa che serve tutta.
+
 **Volume dei giochi** — separato dal precedente, e non per capriccio. Il volume
 degli avvisi lo si abbassa pensando al pannello che parla da solo, magari di
 sera: su un DMD vero era a 0,05. Un effetto di un gioco invece risponde a un

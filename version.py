@@ -2642,6 +2642,14 @@ Storico:
        sorteggia prima il gruppo e poi il file, cosi' la proporzione fra foto
        ferme e animazioni la decidi tu invece della composizione della
        cartella.
+  12.4 **Il cursore del volume segue l'orecchio.** Il numero arrivava a
+       ffmpeg giusto -- a meta' cursore il segnale usciva a -6 dB esatti, e
+       si e' misurato -- ma un cursore lineare sull'ampiezza ha la meta' alta
+       della corsa quasi inutile: da 100 a 70 sono 3 dB, che nessuno sente.
+       Adesso in configurazione sta la posizione del cursore e il guadagno lo
+       da' una curva quadratica: meta' cursore e' un quarto del segnale.
+       Vale per tutte e tre le strade del suono -- ffmpeg per gli avvisi, il
+       mixer per i giochi, la pipe dei tasti per Doom e il Game Boy.
 """
 
-__version__ = "12.3"
+__version__ = "12.4"

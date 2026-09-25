@@ -296,7 +296,7 @@ class DoomSource(Source):
             # doomgeneric quel file non lo legge (e' dentro `#if ORIGCODE`).
             # Un binario compilato prima della 10.1 non conosce l'opzione e la
             # ignora: suona com'era, al volume di serie.
-            args.append("--volume=%d" % suoni.percento(
+            args.append("--volume=%d" % suoni.percento_udibile(
                 suoni.volume_giochi(self.cfg)))
         if not gioca:
             return args
@@ -595,7 +595,7 @@ class DoomSource(Source):
         if proc is None or proc.stdin is None or proc.poll() is not None:
             return False
         try:
-            proc.stdin.write(bytes((2, suoni.percento(valore))))
+            proc.stdin.write(bytes((2, suoni.percento_udibile(valore))))
             proc.stdin.flush()
         except (OSError, ValueError):
             return False

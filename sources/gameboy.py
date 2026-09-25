@@ -280,7 +280,8 @@ class GameBoySource(Source):
                 # Il volume **dei giochi**, non quello degli avvisi. Fino alla
                 # 10.0 qui c'era `suoni.volume`: di notte quello vale il
                 # volume notturno, cioe' zero, e il Game Boy giocava muto.
-                "--volume", "%.2f" % suoni.volume_giochi(self.cfg)]
+                "--volume", "%.3f" % suoni.guadagno(
+                    suoni.volume_giochi(self.cfg))]
 
     def _avvia_processo(self, rom):
         problema = controlla_rom(rom)
@@ -527,7 +528,7 @@ class GameBoySource(Source):
         if proc is None or proc.stdin is None or proc.poll() is not None:
             return False
         try:
-            proc.stdin.write(bytes((2, suoni.percento(valore))))
+            proc.stdin.write(bytes((2, suoni.percento_udibile(valore))))
             proc.stdin.flush()
         except (OSError, ValueError):
             return False

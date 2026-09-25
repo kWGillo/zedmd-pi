@@ -2,6 +2,43 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [12.4]
+
+### «Ho abbassato il volume ma sembra non avere effetto»
+
+La segnalazione era giusta anche se il codice era corretto. Il numero arrivava
+fino in fondo: misurato sul file vero, con il cursore a metà il segnale usciva
+a **−6,0 dB esatti**. Il difetto era la scala.
+
+Un cursore lineare sull'ampiezza ha la metà alta della corsa quasi inutile: da
+100 a 70 sono 3 dB, che nessuno sente come «più basso», e l'orecchio chiama
+«metà volume» qualcosa come −10 dB. Si spostava il cursore di trenta punti e
+non cambiava niente di percepibile.
+
+Da questa versione in configurazione sta **la posizione del cursore**, e il
+guadagno lo dà una curva quadratica:
+
+| cursore | guadagno | dB |
+|---|---|---|
+| 100 | 1,00 | 0 |
+| 70 | 0,49 | −6 |
+| 50 | 0,25 | −12 |
+| 30 | 0,09 | −21 |
+| 10 | 0,01 | −40 |
+
+Gli estremi non si muovono — 0 è silenzio, 100 è fondo scala — e la curva vale
+per **tutte e tre** le strade del suono: ffmpeg per gli avvisi, il mixer per i
+giochi integrati, la pipe dei tasti per Doom e il Game Boy. Un cursore che si
+comporta in due modi è peggio di due cursori.
+
+Nella pagina e in Home Assistant si continua a leggere la posizione e non il
+guadagno: altrimenti si salverebbe 50, si riaprirebbe la pagina trovando 25, e
+tre giri dopo il volume sarebbe a zero.
+
+A parità di cursore tutto suona un po' più piano di prima: è il prezzo di avere
+una corsa che serve tutta. Chi vuole il volume di prima alza il cursore, e
+questa volta se ne accorge.
+
 ## [12.3]
 
 ### La giornata mondiale era quasi sempre vuota
