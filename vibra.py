@@ -45,6 +45,7 @@ import fcntl
 import os
 import struct
 import threading
+import time
 
 # Dal kernel: include/uapi/linux/input.h e input-event-codes.h
 EV_FF = 0x15
@@ -285,6 +286,31 @@ def aperti():
         return list(_aperti)
 
 
+# Quanto deve passare fra due colpi piccoli. Senza, un gioco che spara a
+# raffica manderebbe trenta impulsi al secondo: il motore non fa in tempo a
+# fermarsi, e quello che si sente non e' piu' un colpo ma un ronzio continuo
+# -- il modo piu' rapido di far spegnere la vibrazione a chi gioca.
+INTERVALLO_MINIMO = 0.045
+
+_ultimo_colpo = [0.0, 0.0]      # istante, forza: per la regola qui sopra
+_generazione = [0]              # per fermare una sequenza quando ne arriva una piu' forte
+
+
+def _passa(forza, adesso=None):
+    """Se questo colpo ha diritto di farsi sentire adesso.
+
+    Un colpo **piu' forte** di quello in corso passa sempre: l'esplosione che
+    arriva mentre stai raccogliendo monetine deve sentirsi, ed e' l'unico
+    caso in cui vale la pena interrompere qualcosa.
+    """
+    adesso = time.time() if adesso is None else adesso
+    quando, precedente = _ultimo_colpo
+    if adesso - quando >= INTERVALLO_MINIMO or forza > precedente + 0.05:
+        _ultimo_colpo[0], _ultimo_colpo[1] = adesso, forza
+        return True
+    return False
+
+
 def colpo(forza=1.0, durata=0.12, tremolio=0.0):
     """Un colpo su tutti i pad aperti.
 
@@ -300,3 +326,48 @@ def colpo(forza=1.0, durata=0.12, tremolio=0.0):
         if motore.colpo(forza * 0xFFFF, tremolio * 0xFFFF, durata_ms):
             fatti += 1
     return fatti
+
+
+def sequenza(passi, scala=1.0):
+    """Un colpo con una forma: piu' impulsi uno dietro l'altro.
+
+    `passi` e' una lista di `(forte, debole, durata)`, tutti da 0 a 1 tranne
+    la durata che e' in secondi. Un passo con tutti e due i motori a zero e'
+    una **pausa**, ed e' cosi' che si scrive un doppio colpo.
+
+    Serve perche' il kernel, su un effetto rumble, sa fare una cosa sola:
+    due motori a una forza fissa per un tempo fisso. Una busta che sale o
+    scende esiste solo per gli effetti periodici, che i pad da gioco non
+    hanno. Quindi la forma la si compone qui, a impulsi.
+
+    Il primo impulso parte **subito**, sul filo della chiamata: e' quello che
+    si deve sentire insieme al colpo sul pannello, e un thread da far partire
+    prima costerebbe dei millesimi proprio dove si notano. Il resto della
+    forma va in un thread, perche' il ciclo del gioco non puo' dormire.
+    """
+    passi = [p for p in (passi or []) if len(p) >= 3]
+    if not passi:
+        return 0
+    forza_massima = max(p[0] for p in passi)
+    if not _passa(forza_massima * scala):
+        return 0
+    # Una sequenza nuova zittisce quella di prima: due forme sovrapposte non
+    # si sentono come due, si sentono come confusione.
+    _generazione[0] += 1
+    mia = _generazione[0]
+    forte, debole, durata = passi[0]
+    fatti = colpo(forte * scala, durata, debole * scala)
+    if len(passi) > 1:
+        threading.Thread(target=_continua, args=(passi[1:], scala, mia, durata),
+                         name="vibra", daemon=True).start()
+    return fatti
+
+
+def _continua(passi, scala, mia, attesa):
+    for forte, debole, durata in passi:
+        time.sleep(max(0.0, attesa))
+        if _generazione[0] != mia or not aperti():
+            return
+        if forte > 0 or debole > 0:
+            colpo(forte * scala, durata, debole * scala)
+        attesa = durata

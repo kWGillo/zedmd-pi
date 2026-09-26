@@ -2085,10 +2085,12 @@ STRINGS = {
         "Empty = every device the kernel calls a keyboard or a joystick. E.g. /dev/input/event3."),
     "giochi.vibrazione": ("Vibrazione del pad", "Pad rumble"),
     "giochi.vibrazione.forza": ("Forza della vibrazione", "Rumble strength"),
+    "giochi.vibrazione.dettagli": (
+        "Anche i dettagli (mattoncini, spari, bocconi)",
+        "Details too (bricks, shots, bites)"),
     "giochi.vibrazione.hint": (
-        "Solo i colpi grossi: una vita persa, un'esplosione, la palla sulla "
-        "racchetta.",
-        "Only the big hits: a life lost, an explosion, the ball on the paddle."),
+        "Ogni colpo ha una forma: l'esplosione si spegne, il record sale.",
+        "Every hit has a shape: explosions fade, records rise."),
     "giochi.vibrazione.trovati": ("Pad con i motori:", "Pads with motors:"),
     "giochi.vibrazione.nessuno": (
         "Nessun pad collegato dichiara di avere i motori.",

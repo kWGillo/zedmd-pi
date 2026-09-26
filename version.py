@@ -2659,6 +2659,15 @@ Storico:
        grossi, cinque in tutto -- una vita persa, un'esplosione, la palla
        sulla racchetta -- con interruttore, forza e prova nella pagina
        Giochi. Un pad senza motori non e' un errore: non compare e basta.
+  12.6 **La vibrazione prende carattere.** Ogni colpo adesso ha una forma
+       invece di un impulso secco: la vita persa e' un botto che si spegne in
+       tre impulsi calanti, il record una salita, il cambio di livello due
+       tocchi con la pausa in mezzo. E con la casella «anche i dettagli»
+       vibrano anche mattoncini, spari, bocconi, salti e punti -- quasi tutti
+       sul motorino piccolo, tre centesimi l'uno: si sentono in punta di dita
+       e non scuotono. Un intervallo minimo di 45 ms tiene il pad vivibile
+       anche quando si spara a raffica, e un colpo piu' forte di quello in
+       corso passa comunque.
 """
 
-__version__ = "12.5"
+__version__ = "12.6"

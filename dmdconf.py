@@ -271,6 +271,10 @@ DEFAULTS = {
         # non sono tutti uguali: un DualShock scuote piu' di un pad leggero.
         "vibrazione": True,
         "vibrazione_forza": 70,
+        # Anche i dettagli -- mattoncini, spari, bocconi -- o solo i colpi
+        # grossi. I dettagli stanno sul motorino piccolo e durano trenta
+        # millesimi: si sentono in punta di dita e non scuotono.
+        "vibrazione_dettagli": True,
         "tasto_ciclo": 28,
         "tasto_esci": 1,
         # Doom nel giro del tasto Start. **Acceso**: dalla 3.8.2 il pad non

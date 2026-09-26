@@ -2,6 +2,53 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [12.6]
+
+### La vibrazione prende carattere
+
+Nella 12.5 ogni colpo era un impulso secco, e cinque colpi diversi si
+sentivano come cinque volte la stessa cosa a volumi diversi. Adesso ogni colpo
+ha una **forma**:
+
+| Colpo | Forma |
+|---|---|
+| vita persa | botto e poi si spegne: tre impulsi calanti |
+| tonfo | colpo forte più una coda |
+| **livello** | due tocchi, con la pausa in mezzo |
+| **record** | una salita: piano, medio, forte e lungo |
+
+Le ultime due sono nuove, e hanno una forma riconoscibile apposta: un colpo
+solo suonerebbe come tutti gli altri, e queste devono dire una cosa diversa
+senza guardare il pannello.
+
+Sotto il cofano la forma si compone a impulsi, perché il kernel su un effetto
+rumble sa fare una cosa sola: due motori a forza fissa per un tempo fisso. Le
+buste che salgono o scendono esistono solo per gli effetti periodici, che i pad
+da gioco non hanno. Il primo impulso parte sul filo della chiamata — è quello
+che deve sentirsi insieme al colpo sul pannello — e il resto va in un thread,
+perché il ciclo del gioco non può dormire.
+
+### E i dettagli, per chi li vuole
+
+Casella **Anche i dettagli** nella pagina Giochi, accesa di serie: vibrano
+anche mattoncini, spari, bocconi, salti, sponde e punti. Stanno quasi tutti sul
+**motorino piccolo** e durano tre o quattro centesimi — un frizzare in punta di
+dita, non un colpo. Se scuotessero come un'esplosione, dopo dieci mattoncini
+non scuoterebbe più niente.
+
+I due motori fanno due mestieri diversi, ed è la ragione per cui i dettagli si
+possono accendere senza rovinare i colpi grossi: il grande è il tonfo nei
+polsi, il piccolo il dettaglio.
+
+Il passo degli invasori resta fuori comunque: è due volte al secondo per tutta
+la partita. E c'è un **intervallo minimo** di 45 millesimi fra un colpo e
+l'altro, perché un gioco che spara a raffica manderebbe trenta impulsi al
+secondo e il motore non farebbe in tempo a fermarsi — quello che si sente non
+sarebbe più un colpo ma un ronzio. Un colpo più forte di quello in corso passa
+sempre: l'esplosione che arriva mentre raccogli monetine deve sentirsi.
+
+I nove giochi, di nuovo, non sono stati toccati.
+
 ## [12.5]
 
 ### Il Bluetooth, dalla pagina

@@ -356,19 +356,50 @@ pad** (accesa di serie), un cursore per la **forza** e un pulsante di prova.
 La pagina elenca anche i pad che dichiarano di avere i motori: se lì non
 compare niente, il tuo pad non li ha — o non è collegato.
 
-**Solo i colpi grossi**, e sono cinque:
+Ogni colpo ha una **forma**, non è un impulso secco: il kernel su un effetto
+rumble sa fare una cosa sola — due motori a forza fissa per un tempo fisso —
+quindi la forma si compone a impulsi. E i due motori fanno due mestieri
+diversi: il grande è il tonfo che senti nei polsi, il piccolo un frizzare in
+punta di dita.
 
-| Colpo | Quando | Quanto |
+**I colpi grossi**, sempre accesi:
+
+| Colpo | Quando | Forma |
 |---|---|---|
-| vita persa | in tutti e nove i giochi | il più forte, 0,28 s |
-| tonfo | la mina che esplode, la banana a segno in Kingo Bongo | forte, 0,16 s |
-| colpito | qualcosa è stato distrutto: un invasore, un asteroide | medio, 0,10 s |
-| racchetta | la palla che torna indietro in Breakout | un buffetto, 0,05 s |
-| ping | la pallina di Pongo sulla racchetta | un buffetto, 0,05 s |
+| vita persa | tutti e nove i giochi | botto e poi si spegne, tre impulsi calanti |
+| tonfo | la mina che esplode, la banana a segno | colpo forte più una coda |
+| colpito | un invasore distrutto, un asteroide | un impulso, medio |
+| racchetta | la palla che torna indietro in Breakout | un buffetto |
+| ping | la pallina di Pongo | un buffetto |
+| livello | si sale di livello | **due tocchi**, con la pausa in mezzo |
+| record | record battuto | una **salita**: piano, medio, forte e lungo |
 
-Mattoncini, spari, bocconi, punti e salti **non** vibrano, ed è una scelta: un
-pad che trema in continuazione smette di dire qualcosa dopo un minuto. Le
-vibrazioni sono poche apposta, e ognuna vuol dire una cosa sola.
+Le ultime due hanno una forma riconoscibile apposta: un colpo solo suonerebbe
+come tutti gli altri, e queste due devono dire una cosa diversa senza che tu
+debba guardare il pannello.
+
+**I dettagli**, con la casella *Anche i dettagli* accesa:
+
+| Colpo | Quando |
+|---|---|
+| mattone | il mattoncino che si rompe |
+| sparo | il colpo che parte |
+| mangia | il boccone di Gnam Gnam e Snake |
+| salto | il T-Rex che stacca da terra |
+| muro, sponda | la palla sulla parete |
+| lancio | la palla che parte |
+| punto | un punto messo a segno |
+
+Stanno quasi tutti **sul motorino piccolo** e durano tre o quattro centesimi:
+si sentono in punta di dita e non scuotono. Se scuotessero, dopo dieci
+mattoncini non scuoterebbe più niente.
+
+Il passo degli invasori resta fuori in tutti e due i casi: è due volte al
+secondo per tutta la partita, e un pad che ronza di continuo smette di dire
+qualcosa dopo un minuto. Per la stessa ragione c'è un **intervallo minimo** di
+quarantacinque millesimi fra un colpo e l'altro: un gioco che spara a raffica
+non trasforma il pad in un ronzio. Un colpo più forte di quello in corso passa
+comunque — l'esplosione che arriva mentre raccogli monetine deve sentirsi.
 
 Sotto il cofano non c'è niente da installare, come per i tasti: il pad è lo
 stesso dispositivo di `/dev/input`, si carica un effetto nel pad con una ioctl

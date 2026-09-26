@@ -363,15 +363,47 @@ class GiochiSource(Source):
     # `persa` quando si perde una vita, `colpito` quando qualcosa esplode --
     # quindi una tabella sola li copre tutti senza toccarne nessuno.
     #
-    # Ci sono **solo i colpi grossi**. Un pad che vibra a ogni mattoncino, a
-    # ogni sparo e a ogni boccone smette di dire qualcosa dopo un minuto: le
-    # vibrazioni sono poche apposta, e ognuna vuol dire una cosa sola.
+    # Ogni colpo e' una **forma**: una lista di `(motore grande, motorino,
+    # durata)`. Uno solo fa un impulso secco; tre fanno un'esplosione che si
+    # spegne, un doppio tocco, una salita. Un passo con tutti e due i motori
+    # a zero e' una pausa, ed e' cosi' che si scrive il doppio colpo del
+    # cambio di livello.
+    #
+    # La divisione fra i due motori non e' un dettaglio: il grande fa il
+    # tonfo che senti nei polsi, il piccolo un frizzare in punta di dita. Le
+    # cose grosse stanno sul grande, i dettagli quasi solo sul piccolo --
+    # altrimenti un mattoncino scuote come un'esplosione, e dopo dieci
+    # mattoncini non scuote piu' niente.
     COLPI = {
-        "persa": (1.00, 0.28),        # una vita persa: il piu' lungo
-        "tonfo": (0.85, 0.16),        # la mina che esplode, la banana a segno
-        "colpito": (0.60, 0.10),      # qualcosa e' stato distrutto
-        "racchetta": (0.35, 0.05),    # la palla prende la racchetta
-        "ping": (0.35, 0.05),         # e la pallina di Pongo
+        # una vita persa: il botto, e poi si spegne
+        "persa": [(1.00, 0.40, 0.16), (0.55, 0.30, 0.10), (0.22, 0.15, 0.08)],
+        # la mina che esplode, la banana a segno in Kingo Bongo
+        "tonfo": [(0.85, 0.35, 0.14), (0.30, 0.20, 0.07)],
+        "colpito": [(0.60, 0.30, 0.10)],   # qualcosa e' stato distrutto
+        "racchetta": [(0.35, 0.25, 0.05)],  # la palla prende la racchetta
+        "ping": [(0.35, 0.25, 0.05)],       # e la pallina di Pongo
+        # due tocchi: il livello sale. Nessun colpo solo suona come tutti gli
+        # altri, e questo deve dire una cosa diversa.
+        "livello": [(0.45, 0.35, 0.07), (0.0, 0.0, 0.07), (0.45, 0.35, 0.07)],
+        # il record battuto: una salita, che e' l'unica forma che si capisce
+        # senza sapere cosa sta succedendo
+        "record": [(0.25, 0.20, 0.09), (0.50, 0.35, 0.09), (0.90, 0.60, 0.22)],
+    }
+
+    # I dettagli: mattoncini, spari, bocconi. Stanno quasi tutti sul motorino
+    # e durano trenta o quaranta millesimi -- un frizzare, non un colpo.
+    # Valgono solo con «anche i dettagli» acceso, e anche allora restano
+    # sotto la regola dell'intervallo minimo di `vibra`: un gioco che spara a
+    # raffica non deve trasformare il pad in un ronzio continuo.
+    DETTAGLI = {
+        "mattone": [(0.0, 0.30, 0.035)],   # il mattoncino che si rompe
+        "sparo": [(0.0, 0.22, 0.030)],     # il colpo che parte
+        "mangia": [(0.0, 0.28, 0.040)],    # il boccone di Gnam Gnam e Snake
+        "salto": [(0.15, 0.25, 0.040)],    # il T-Rex che stacca da terra
+        "muro": [(0.0, 0.25, 0.035)],      # la palla sulla parete
+        "sponda": [(0.0, 0.28, 0.040)],    # la sponda di Pongo
+        "lancio": [(0.25, 0.25, 0.050)],   # la palla che parte
+        "punto": [(0.20, 0.35, 0.060)],    # un punto messo a segno
     }
 
     def _suona_effetto(self, nome):
@@ -381,17 +413,30 @@ class GiochiSource(Source):
             print("[giochi] effetto non riprodotto: %s" % exc)
         self._vibra(nome)
 
+    def forma(self, nome, dettagli=True):
+        """La forma del colpo per questo evento, o None se non ne ha una.
+
+        I nomi arrivano numerati -- `mattone3`, `mangia2`, `passo1` -- perche'
+        i suoni sono piu' d'uno per non sentirsi ripetitivi. Al pad la
+        variante non interessa: si toglie la cifra e si guarda il nome.
+        """
+        nome = (nome or "").rstrip("0123456789")
+        colpo = self.COLPI.get(nome)
+        if colpo is None and dettagli:
+            colpo = self.DETTAGLI.get(nome)
+        return colpo
+
     def _vibra(self, nome):
         """Il colpo sul pad, se quel nome ne merita uno."""
-        colpo = self.COLPI.get(nome)
-        if colpo is None:
-            return
         conf = self.conf()
         if not conf.get("vibrazione", True):
             return
+        colpo = self.forma(nome, conf.get("vibrazione_dettagli", True))
+        if colpo is None:
+            return
         forza = max(0, min(100, int(conf.get("vibrazione_forza", 70)))) / 100.0
         try:
-            vibra.colpo(colpo[0] * forza, colpo[1])
+            vibra.sequenza(colpo, forza)
         except Exception as exc:                    # pragma: no cover
             print("[giochi] vibrazione non inviata: %s" % exc)
 

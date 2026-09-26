@@ -1156,7 +1156,7 @@ def create_app(runtime):
         conf = cfg.setdefault("giochi", {})
         for chiave in ("keyboard", "keyboard_starts",
                        "joystick", "joystick_starts", "ciclo_doom", "musica",
-                       "vibrazione"):
+                       "vibrazione", "vibrazione_dettagli"):
             conf[chiave] = request.form.get(chiave) == "on"
         try:
             conf["vibrazione_forza"] = max(0, min(100, int(
