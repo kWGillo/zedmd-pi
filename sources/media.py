@@ -276,6 +276,14 @@ class MediaPlayerSource(Source):
             finally:
                 self._showing = False
                 self._current = None
+                # E il fotogramma appena mostrato **si butta**. Tenerlo era il
+                # difetto: alla presa del pannello l'arbitro chiede alla
+                # sorgente di ridisegnare, e la sorgente ridisegnava il
+                # contenuto **di prima** -- che restava li' finche' il nuovo
+                # non era pronto. Su una GIF non si vedeva, perche' venti
+                # fotogrammi al secondo lo coprono in cinquanta millesimi; su
+                # un'immagine ferma restava in faccia per un paio di secondi.
+                self._dimentica()
 
     # ------------------------------------------------------------------ riproduzione
 
@@ -283,6 +291,17 @@ class MediaPlayerSource(Source):
         with self._lock:
             self._image = image
             self._dirty = True
+
+    def _dimentica(self):
+        """Lascia andare il fotogramma: non e' piu' roba da mostrare.
+
+        `frame()` torna None finche' non ce n'e' uno nuovo, e un None vuol
+        dire «non ho niente da dire»: il pannello resta a chi ce l'ha --
+        l'orologio, di solito -- invece di ricevere una fotografia scaduta.
+        """
+        with self._lock:
+            self._image = None
+            self._dirty = False
 
     def _show_image(self, path, cfg):
         image = self._load_image(path, cfg)
@@ -359,16 +378,25 @@ class MediaPlayerSource(Source):
              "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
-        self._showing = True
         period = 1.0 / fps
-        deadline = time.time() + duration
+        # Il tempo comincia **dal primo fotogramma**, non da adesso: ffmpeg ci
+        # mette da mezzo secondo a due ad aprire un file grande, e quel tempo
+        # veniva tolto ai secondi di visione invece che all'attesa.
+        deadline = None
         try:
-            while self._running and time.time() < deadline:
+            while self._running and (deadline is None or time.time() < deadline):
                 started = time.time()
                 raw = proc.stdout.read(frame_bytes)
                 if not raw or len(raw) < frame_bytes:
                     break
                 self._publish(Image.frombytes("RGB", (self.width, self.height), raw))
+                if deadline is None:
+                    # Solo adesso il Media Player ha qualcosa da far vedere, e
+                    # solo adesso chiede il pannello. Dichiararsi pronti prima
+                    # vuol dire prenderselo per mostrarci sopra il contenuto
+                    # di prima.
+                    self._showing = True
+                    deadline = time.time() + duration
                 elapsed = time.time() - started
                 if elapsed < period:
                     time.sleep(period - elapsed)

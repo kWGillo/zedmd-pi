@@ -616,6 +616,16 @@ dei nomi dei giorni (italiano, francese, inglese), lampeggio dei due punti.
 **Media** — libreria, caricamento file, rilettura della libreria, anteprima
 immediata, durate e intervalli, adattamento al pannello, modalità pixel art.
 
+> **Un contenuto per volta, e nessuna coda.** Dalla 13.0.1 il fotogramma di un
+> contenuto viene lasciato andare appena quel contenuto finisce, e un video si
+> dichiara pronto solo dopo aver prodotto il primo fotogramma. Prima no, e si
+> vedeva: alla presa del pannello l'arbitro chiede alla sorgente di
+> ridisegnare tutto, e quello che veniva ridisegnato era il contenuto
+> *precedente* — visibile finché il nuovo non era pronto, cioè fino a due
+> secondi per un video, perché tanto ci mette ffmpeg ad aprire un file grande.
+> Sulle GIF non si notava: venti fotogrammi al secondo coprono una fotografia
+> scaduta in cinquanta millesimi.
+
 > **Quante animazioni.** Dalla 12.3 una casella dice che parte dei contenuti
 > deve muoversi: `60` vuol dire sei animazioni ogni dieci passaggi. Non è una
 > preferenza vaga, è il modo in cui si sorteggia — **prima il gruppo, poi il

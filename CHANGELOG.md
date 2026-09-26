@@ -2,6 +2,41 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [13.0.1]
+
+### Il contenuto di prima restava in faccia a quello dopo
+
+Segnalato dal campo, su pannelli con la libreria standard: *«quando parte il
+media successivo si vede per due secondi il media precedente; nelle GIF non
+si nota»*.
+
+Non era il pannello, ed è un difetto vecchio quanto l'arbitro. Il Media Player
+tiene l'ultimo fotogramma che ha pubblicato; quando una sorgente prende il
+pannello, `dmdd` le chiede di **ridisegnare tutto** — perché una sorgente che
+torna in onda deve ripresentarsi per intero invece di aspettare il suo
+prossimo aggiornamento. Giusto in generale, sbagliato lì: il fotogramma che il
+Media Player aveva in mano era quello del **contenuto precedente**.
+
+Le GIF lo nascondevano per una ragione sola: venti fotogrammi al secondo
+coprono una fotografia scaduta in cinquanta millesimi. Un'immagine ferma no —
+resta visibile finché il contenuto nuovo non è pronto, e «pronto», per un
+video che parte, vuol dire aspettare che ffmpeg apra il file: da mezzo secondo
+a due. Da lì i «due secondi».
+
+Corretto in due punti:
+
+- quando un contenuto finisce, il suo fotogramma si **butta**: `frame()` torna
+  `None`, che vuol dire «non ho niente da dire», e il pannello resta a chi ce
+  l'ha invece di ricevere una fotografia scaduta;
+- un video si dichiara pronto **dopo** il primo fotogramma, non prima. Effetto
+  collaterale gradito: i secondi di visione cominciano quando l'immagine c'è
+  davvero, invece di essere mangiati dall'attesa di ffmpeg.
+
+**Nessun ritardo nero fra un contenuto e l'altro.** Era la correzione
+suggerita, e nasconderebbe il sintomo invece di togliere la causa: il
+fotogramma scaduto uscirebbe comunque durante l'apertura del file, e nel
+frattempo il pannello lampeggerebbe a tutti.
+
 ## [13.0]
 
 ### Super Quiz

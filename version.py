@@ -2681,6 +2681,16 @@ Storico:
        francese aveva tradotto un nome proprio. E in **tutti e dieci** i
        giochi, a fine partita: le tre lettere da comporre con la leva se si
        entra fra i migliori, e la classifica dei tre, come nei cabinati.
+  13.0.1 *Il contenuto di prima restava in faccia a quello dopo.* Il Media
+       Player teneva l'ultimo fotogramma pubblicato, e alla presa del
+       pannello l'arbitro chiede di ridisegnare tutto: quello che si
+       ridisegnava era il contenuto **precedente**, finche' il nuovo non era
+       pronto -- e per un video «pronto» vuol dire aspettare che ffmpeg apra
+       il file, da mezzo secondo a due. Sulle GIF non si vedeva perche' venti
+       fotogrammi al secondo lo coprono in cinquanta millesimi. Adesso il
+       fotogramma si butta quando il contenuto finisce, e un video si
+       dichiara pronto **dopo** il primo fotogramma: i suoi secondi di
+       visione cominciano da li' invece di essere mangiati dall'attesa.
 """
 
-__version__ = "13.0"
+__version__ = "13.0.1"
