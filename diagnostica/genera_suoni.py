@@ -225,8 +225,16 @@ def musica(bpm=None, melodia=None, accordi=None, forma="quadra25",
                       ampiezza_melodia)
             j += durata
     # il basso
+    #
+    # `radice` qui e' la **sigla** dell'accordo, «Am» e non «A»: prima di
+    # chiederne la frequenza va tolto il modo. Fino alla 12.6 tre rami su
+    # quattro lo facevano e uno no, e non se ne accorgeva nessuno perche'
+    # nessuna ricetta usava insieme un accordo minore e un basso lungo. La
+    # prima che l'ha fatto -- la musica della risposta sbagliata -- e' morta
+    # con «invalid literal for int(): 'm3'».
     for b, riga in enumerate(accordi):
-        for meta, radice in enumerate(riga.split()):
+        for meta, sigla in enumerate(riga.split()):
+            radice = _accordo(sigla)[0]
             inizio = (b * 8 + meta * 4) * per_croma
             if basso == "umpa":
                 for k in range(4):
@@ -243,7 +251,7 @@ def musica(bpm=None, melodia=None, accordi=None, forma="quadra25",
                 for k in range(4):
                     grado = 0 if k % 2 == 0 else 2
                     suona(inizio + k * per_croma, 1,
-                          _hz_grado(radice, 3, grado) * (1.0 if k % 2 == 0 else 0.5),
+                          _hz_grado(sigla, 3, grado) * (1.0 if k % 2 == 0 else 0.5),
                           "quadra25", ampiezza_basso)
             else:
                 suona(inizio, 4, _hz(radice + "3"), "triangolo", ampiezza_basso)
@@ -290,6 +298,63 @@ def musica(bpm=None, melodia=None, accordi=None, forma="quadra25",
 # Gli altri giochi, ognuno con il suo carattere. Tutti scritti per questo
 # progetto; nessuno riprende una musica esistente. Giri di 16-20 secondi.
 MUSICHE = {
+    # ------------------------------------------------------ Super Quiz
+    #
+    # Quattro brani per quattro momenti, e sono il contrario dei brani dei
+    # giochi d'azione: qui la musica non deve spingere, deve **far venire il
+    # dubbio**. Chi ha visto un quiz in televisione sa gia' come suonano
+    # questi quattro momenti, e il compito era scriverli senza copiarne
+    # nessuno.
+    #
+    # La domanda che appare: due accordi che salgono, larghi, con la melodia
+    # che arriva dopo -- il momento in cui si apre il sipario.
+    "quiz_domanda": dict(
+        bpm=96, forma="triangolo", ampiezza_melodia=0.8, basso="lunghi",
+        ampiezza_basso=0.8, charleston=0.0, cassa=0.55, arpeggio=0.22,
+        stacco=0.35, picco=4200,
+        melodia=(
+            "C4 -  -  -  E4 -  G4 - ", "C5 -  -  -  -  -  .  . ",
+            "A4 -  -  -  C5 -  E5 - ", "D5 -  -  -  -  -  .  . ",
+        ),
+        accordi=("C C", "C G", "Am Am", "F G")),
+    # L'attesa: un pendolo. Due note che si alternano sotto, e sopra quasi
+    # niente -- e' il silenzio che fa paura, non la musica. Sedicesimi no:
+    # il tempo che passa si sente meglio se il passo e' lento e uguale.
+    "quiz_attesa": dict(
+        bpm=104, forma="triangolo", ampiezza_melodia=0.85, basso="ottavi",
+        ampiezza_basso=0.6, charleston=0.10, cassa=0.35, arpeggio=0.0,
+        stacco=0.25, picco=3400,
+        melodia=(
+            "E4 -  .  .  E4 -  .  . ", "D4 -  .  .  D4 -  .  . ",
+            "E4 -  .  .  E4 -  .  . ", "C4 -  .  .  -  -  .  . ",
+            "A3 -  .  .  A3 -  .  . ", "B3 -  .  .  B3 -  .  . ",
+            "E4 -  .  .  D4 -  .  . ", "A3 -  -  -  .  .  .  . ",
+        ),
+        accordi=("Am Am", "Dm Dm", "Am Am", "E E",
+                 "Am Am", "Dm Dm", "E E", "Am Am")),
+    # La risposta giusta: quattro battute e basta, in maggiore, che salgono
+    # e si fermano in alto. Deve finire prima che smetta di piacere.
+    "quiz_giusta": dict(
+        bpm=132, forma="quadra25", ampiezza_melodia=1.0, basso="ottavi",
+        ampiezza_basso=0.85, charleston=0.25, rullante=0.30, cassa=0.95,
+        arpeggio=0.30, stacco=0.8, picco=5600,
+        melodia=(
+            "C5 E5 G5 C6 -  -  G5 - ", "A5 -  G5 E5 C5 -  .  . ",
+            "F5 A5 C6 F6 -  -  C6 - ", "G5 -  -  -  C6 -  .  . ",
+        ),
+        accordi=("C C", "Am F", "F F", "G C")),
+    # La risposta sbagliata: la stessa melodia che scende invece di salire, e
+    # un basso che casca di un semitono. Corta: nessuno vuole restare li'.
+    "quiz_sbagliata": dict(
+        bpm=100, forma="quadra25", ampiezza_melodia=0.85, basso="lunghi",
+        ampiezza_basso=0.9, charleston=0.0, cassa=0.8, arpeggio=0.0,
+        stacco=0.5, picco=4800,
+        melodia=(
+            "C5 -  B4 -  Bb4 -  A4 - ", "Ab4 -  -  -  -  -  .  . ",
+            "F4 -  E4 -  Eb4 -  D4 - ", "C4 -  -  -  -  -  .  . ",
+        ),
+        accordi=("Am Am", "Ab Ab", "Dm Dm", "Am Am")),
+
     # Breakout: il piu' veloce di tutti. La minore, sedicesimi di arpeggio
     # sotto la melodia, cassa e rullante: e' un gioco di riflessi e la
     # musica deve spingere, non accompagnare.

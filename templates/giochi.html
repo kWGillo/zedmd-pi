@@ -16,6 +16,36 @@
       <h3>{{ etichetta }}</h3>
       <p class="hint">{{ t('giochi.' + nome + '.hint') }}</p>
       <p class="record">{{ t('giochi.' + nome + '.record') if nome == 'pongo' else t('giochi.record') }} <b>{{ record.get(nome, 0) }}</b></p>
+      {# I tre migliori, con le iniziali composte a fine partita. Se non c'e'
+         ancora nessuno non si mostra una tabella vuota: si tace. #}
+      {% if classifica.get(nome) %}
+      <ol class="classifica">
+        {% for voce in classifica[nome] %}
+        <li><b>{{ voce.nome or '---' }}</b> <span>{{ voce.punti }}</span></li>
+        {% endfor %}
+      </ol>
+      {% endif %}
+      {% if nome == 'quiz' %}
+      {# Le quattro musiche del quiz stanno nella scheda del gioco, come il
+         livello di Pongo: sono una cosa sua. #}
+      <form method="post" action="{{ url_for('api_giochi_quiz') }}" class="quiz-musica">
+        <p class="hint">{{ t('giochi.quiz.musica.hint') }}</p>
+        {% for momento in ('domanda', 'attesa', 'giusta', 'sbagliata') %}
+        <label for="quiz_{{ momento }}">{{ t('giochi.quiz.momento.' + momento) }}</label>
+        <select id="quiz_{{ momento }}" name="quiz_{{ momento }}">
+          {% for brano in brani %}
+          <option value="{{ brano }}" {{ 'selected' if (cfg.giochi.quiz_musica or {}).get(momento) == brano }}>{{ brano }}</option>
+          {% endfor %}
+        </select>
+        {% endfor %}
+        <label for="quiz_tempo">{{ t('giochi.quiz.tempo') }}</label>
+        <input type="number" id="quiz_tempo" name="quiz_tempo" min="5" max="120"
+               value="{{ cfg.giochi.quiz_tempo or 30 }}">
+        <button type="submit">{{ t('common.apply') }}</button>
+      </form>
+      <p class="hint">{{ t('giochi.quiz.domande', it=domande.it.quante, en=domande.en.quante) }}
+        {{ t('giochi.quiz.fonte', dir=data_dir) }}</p>
+      {% endif %}
       {% if nome == 'pongo' %}
       {# Il livello sta nella scheda del gioco e non nei Controlli: e' una
          cosa di Pongo, e la si cambia fra una partita e l'altra. #}

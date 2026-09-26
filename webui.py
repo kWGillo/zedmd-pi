@@ -18,6 +18,7 @@ from werkzeug.utils import secure_filename
 import bt
 import cassa
 import dmdconf
+import domande
 import fasce
 import i18n
 import libcheck
@@ -1031,11 +1032,34 @@ def create_app(runtime):
             giochi=giochi_elenco(), record=(conf.get("record") or {}),
             pulsanti=GIOCHI_PULSANTI, pad=joystick(con_nome=True),
             motori=vibra.motori(con_nome=True),
+            classifica=(conf.get("classifica") or {}),
+            brani=suoni.musiche_disponibili(),
+            domande=domande.stato(), data_dir=domande.DATA_DIR,
             result=request.args.get("result"),
             doom_pronto=i18n.translate(
                 "giochi.doom.no" if errore else "giochi.doom.si",
                 current_language()),
             page="giochi")
+
+    @app.route("/api/giochi/quiz", methods=["POST"])
+    def api_giochi_quiz():
+        """Le quattro musiche di Super Quiz, e il tempo per rispondere."""
+        conf = cfg.setdefault("giochi", {})
+        musica = conf.setdefault("quiz_musica", {})
+        noti = set(suoni.musiche_disponibili())
+        for momento in ("domanda", "attesa", "giusta", "sbagliata"):
+            scelto = (request.form.get("quiz_%s" % momento) or "").strip()
+            # Un nome inventato non si scrive: finirebbe in un percorso di
+            # file, e il gioco resterebbe muto senza dire perche'.
+            if scelto in noti:
+                musica[momento] = scelto
+        try:
+            conf["quiz_tempo"] = max(5, min(120, int(
+                request.form.get("quiz_tempo", 30))))
+        except (TypeError, ValueError):
+            conf["quiz_tempo"] = 30
+        dmdconf.save()
+        return redirect(url_for("page_giochi"))
 
     @app.route("/api/giochi/vibra", methods=["POST"])
     def api_giochi_vibra():

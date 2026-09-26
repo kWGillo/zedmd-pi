@@ -257,11 +257,29 @@ DEFAULTS = {
         "session_timeout": 180,
         "ultimo": "breakout",
         "record": {},
+        # I tre migliori per gioco, con le tre lettere di chi li ha fatti:
+        # {"breakout": [{"punti": 1200, "nome": "GIL", "livello": 4, ...}]}.
+        # Il `record` qui sopra resta e si aggiorna da solo: lo leggono la
+        # pagina web, Home Assistant e il tabellone dentro la partita.
+        "classifica": {},
         # La musica di sottofondo dei giochi. Separata dagli effetti: chi
         # gioca la sera tardi vuole spesso gli uni e non l'altra.
         "musica": True,
         # Quanto e' forte il computer di Pongo: facile, normale, difficile.
         "pongo_livello": "normale",
+        # Super Quiz. Le quattro musiche sono nomi di file dentro `suoni/`,
+        # senza estensione: cambiandole si cambia il carattere del gioco
+        # senza toccare il codice.
+        "quiz_musica": {
+            "domanda": "quiz_domanda",
+            "attesa": "quiz_attesa",
+            "giusta": "quiz_giusta",
+            "sbagliata": "quiz_sbagliata",
+        },
+        "quiz_tempo": 30,
+        # Gli identificativi delle domande gia' uscite, per non rifarle. Si
+        # riempie da solo e si accorcia da solo.
+        "quiz_viste": [],
         # Il tasto Start del cabinato scorre i giochi: premuto una volta si
         # gioca, premuto ancora si passa al successivo. I codici sono quelli
         # di una tastiera normale (invio, escape) ma su una pulsantiera da
@@ -1137,6 +1155,22 @@ def _migrate(raw):
     pannello = raw.setdefault("panel", {})
     if pannello.get("preset") == "erippolus":
         pannello["preset"] = "icnd2038s_icn2012"
+
+    # 13.0: i record diventano una classifica di tre, con le iniziali. Chi
+    # aggiorna non deve vedere sparire le sue partite: il numero che aveva
+    # diventa il primo posto, firmato con tre trattini -- che nei cabinati
+    # voleva dire «questo non l'ha firmato nessuno».
+    giochi = raw.setdefault("giochi", {})
+    if giochi.get("record") and not giochi.get("classifica"):
+        classifica = giochi.setdefault("classifica", {})
+        for gioco, punti in (giochi.get("record") or {}).items():
+            try:
+                punti = int(punti)
+            except (TypeError, ValueError):
+                continue
+            if punti > 0:
+                classifica[gioco] = [{"punti": punti, "nome": "---",
+                                      "livello": 0, "quando": 0.0}]
 
     wad = doom.get("wad") or ""
     if wad and not os.path.exists(wad):

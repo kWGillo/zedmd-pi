@@ -2,6 +2,106 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [13.0]
+
+### Super Quiz
+
+Il decimo gioco, e l'unico fatto di parole. Quindici domande a scelta
+multipla, quattro risposte, un montepremi che raddoppia da 100 a un milione,
+e due **traguardi** alla quinta e alla decima domanda: sbagliando si torna lì
+invece che a zero.
+
+Si sceglie con la leva, si preme fuoco, e il pannello chiede **«La
+accendiamo?»**. Solo il secondo fuoco risponde. Non è un vezzo preso dalla
+televisione: è l'unica cosa che distingue «ho scelto» da «ho sfiorato il
+tasto», e su un pad tenuto in mano mentre si discute di una risposta la
+differenza capita più spesso di quanto si creda. Il fuoco che apre la
+conferma non la può chiudere — un quarto di secondo di margine — ed **Esci**
+ci ripensa.
+
+Il tempo che scade vale come una risposta sbagliata: in un quiz il tempo è
+parte della domanda. Trenta secondi di serie, regolabili da 5 a 120.
+
+È anche l'unico dei dieci a prendersi tutti i 256 pixel: una domanda su due
+righe da sessanta caratteri non sta in 200, e un gioco di parole non ha
+niente da mettere in una colonna laterale.
+
+### Quattro musiche, una per momento
+
+Non ha **un** brano, ne ha quattro: quando la domanda compare, mentre si
+aspetta, quando si indovina e quando si sbaglia. Sono scritti per questo — il
+sipario che si apre, un pendolo lento, quattro battute in maggiore, e la
+stessa melodia che scende — e si **sostituiscono dalla pagina Giochi** con
+una tendina che legge cosa c'è in `suoni/`: ci si può mettere la musica di
+Pongo, o un file proprio copiato lì dentro.
+
+### Le domande: 1.301 per lingua, e due su cinque buttate
+
+Vengono da **OpenQuizzDB** (CC BY-SA 4.0), l'unico archivio di quiz a scelta
+multipla che esista con l'italiano dentro e una licenza che ne permetta la
+ridistribuzione. È francese, e il lavoro vero non è stato scaricare: è stato
+buttare via. Di 3.323 quesiti italiani ne restano **1.301**, con altrettanti
+in inglese.
+
+| Scartate | Quante | Perché |
+|---|---|---|
+| pacchetti interi | ~1.100 | i dipartimenti della Bretagna, il gossip francese, i modi di dire intraducibili |
+| nome proprio tradotto | 291 | «L'Humanité» diventato «Umanità» non è una risposta imprecisa, è una risposta **sbagliata** |
+| risposta non tradotta | 172 | il francese dice «Pomme», l'inglese «Apple», e l'italiano dice ancora «Apple» |
+| troppo lunga | 76 | non ci sta sul pannello, quindi non si legge |
+| francese rimasto | 49 | una cediglia in mezzo a una frase italiana |
+
+La regola che ha lavorato di più usa **il francese come arbitro**: se una
+risposta francese ha una maiuscola in mezzo — `L'Humanité`, `Mega Mindy`,
+`PlayStation 2` — è un nome proprio, e le altre lingue devono ripeterlo
+uguale. E se almeno due delle quattro sono nomi, lo sono tutte e quattro:
+quando le alternative sono Mega Mindy, Gwen Tennyson e Sif, anche «Blink» è
+un personaggio, e «Lampeggia» è una traduzione che nessuno voleva.
+
+**Le due banche sono la stessa banca**: la stessa domanda porta lo stesso
+identificativo in italiano e in inglese, quindi il conto delle domande già
+uscite vale per tutte e due le lingue e cambiando lingua non si rivede quello
+che si è appena visto. Il gioco segue la lingua dell'interfaccia.
+
+Un `domande.it.csv` tuo nella cartella dati si aggiunge alle nostre e non
+viene mai toccato dagli aggiornamenti: è lì che vanno le domande di famiglia.
+
+Niente rete durante la partita, e per tre ragioni tutte valide: una domanda
+deve arrivare in millesimi; l'archivio ammette una richiesta ogni cinque
+secondi; e un pannello che dipende da un sito per fare una domanda è un
+pannello che un giorno non la fa.
+
+### E in tutti e dieci i giochi: le tre lettere, e i tre migliori
+
+A fine partita, chi entra fra i **tre migliori** compone le sue **tre
+lettere** con la leva — su e giù cambiano la lettera, destra e sinistra
+spostano, il fuoco conferma — e poi compare la classifica. Come nei cabinati,
+e per la stessa ragione: un record senza nome regge un giocatore solo, non la
+seconda persona che si siede davanti.
+
+Venticinque secondi per comporre, poi vale quello che c'è: chi si alza e se
+ne va non lascia il pannello fermo su una schermata di attesa per sempre.
+
+Chi aggiorna non perde niente: il record che aveva diventa il primo posto,
+firmato `---`, che nei cabinati voleva dire «questo non l'ha firmato
+nessuno». Il vecchio numero resta scritto e aggiornato accanto alla
+classifica, perché lo leggono la pagina web, Home Assistant e il tabellone
+dentro la partita.
+
+### Due cose piccole che servivano a tutto il resto
+
+Il font 3×5 dei giochi ha imparato la **punteggiatura** (`?`, `'`, `,`, le
+virgolette, le parentesi) e le **lettere accentate**, che diventano la lettera
+senza accento. Fino a ieri qui si scrivevano punteggi e nomi di livello, e
+«più» scritto con l'accento diventava «pi»: in un gioco che fa domande sarebbe
+stato inaccettabile.
+
+E il generatore delle musiche aveva un difetto latente da sempre: in tre rami
+su quattro toglieva il modo dall'accordo prima di chiederne la frequenza, nel
+quarto no. Nessuna ricetta aveva mai messo insieme un accordo minore e un
+basso lungo — la prima che l'ha fatto, la musica della risposta sbagliata, è
+morta con `invalid literal for int(): 'm3'`.
+
 ## [12.6]
 
 ### La vibrazione prende carattere

@@ -472,6 +472,28 @@ def effetto(nome):
     return intero if os.path.isfile(intero) else ""
 
 
+def musiche_disponibili():
+    """I brani che si possono scegliere: i file `*_musica` e quelli del quiz.
+
+    Serve alla pagina Giochi, dove le quattro musiche di Super Quiz si
+    sostituiscono con una tendina. Si guarda **cosa c'e' sul disco** invece di
+    tenere un elenco scritto: chi aggiunge un suo brano nella cartella lo
+    trova nella tendina senza che nessuno debba aggiornare una lista.
+    """
+    try:
+        nomi = os.listdir(CARTELLA_EFFETTI)
+    except OSError:
+        return []
+    fuori = []
+    for nome in nomi:
+        if not nome.endswith(".wav"):
+            continue
+        corpo = nome[:-4]
+        if corpo.endswith("_musica") or corpo.startswith("quiz_"):
+            fuori.append(corpo)
+    return sorted(fuori)
+
+
 # ------------------------------------------------- uscita PCM a bassa latenza
 
 # Quanto audio sta in volo prima di uscire dall'altoparlante. 80 ms non si

@@ -29,12 +29,14 @@ from ..comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_RY, ABS_X, ABS_Y,
                        BTN_MODE, BTN_SELECT, BTN_SOUTH, BTN_START, BTN_TR,
                        BTN_TR2, BTN_WEST, Lettore, joystick, tastiere)
 from .base import ALTEZZA, CAMPO, LARGHEZZA, Gioco, centra, scrivi
+from .classifica import Classifica, Epilogo
 from .bongo import Bongo
 from .gnam import Gnam
 from .invasori import Invasori
 from .mattoni import Mattoni
 from .mine import Mine
 from .pongo import Pongo
+from .quiz import Quiz
 from .serpente import Serpente
 from .squadriglia import Squadriglia
 from .trex import TRex
@@ -44,9 +46,10 @@ from .trex import TRex
 # meglio, e gli ultimi arrivati in fondo -- chi preme Start per abitudine non
 # deve trovarsi un gioco diverso da quello di ieri. Pongo e' arrivato dopo
 # Snake, Squadriglia dopo Pongo, Gnam Gnam dopo Squadriglia, Mine vaganti
-# dopo Gnam Gnam, T-Rex e Kingo Bongo dopo Mine vaganti.
+# dopo Gnam Gnam, T-Rex e Kingo Bongo dopo Mine vaganti, Super Quiz
+# dopo tutti.
 GIOCHI = (Mattoni, Invasori, Serpente, Pongo, Squadriglia, Gnam, Mine, TRex,
-          Bongo)
+          Bongo, Quiz)
 NOMI = tuple(g.nome for g in GIOCHI)
 
 
@@ -163,6 +166,9 @@ class GiochiSource(Source):
         # resta aperta e il pannello, quando torna, riparte da dov'era.
         self._congelato = threading.Event()
         self._premuti = set()
+        # L'epilogo: le schermate fra il GAME OVER e il ritorno al gioco.
+        self._epilogo = None
+        self._epilogato = False
         self._ultimo_comando = 0.0
 
         self._lettore = Lettore(self._dispositivi, self._da_comando,
@@ -194,6 +200,14 @@ class GiochiSource(Source):
 
     def conf(self):
         return self.cfg.get("giochi") or {}
+
+    def lingua(self):
+        """La lingua dell'interfaccia: Super Quiz fa le domande in quella."""
+        try:
+            import i18n
+            return i18n.resolve((self.cfg.get("web") or {}).get("language"), "")
+        except Exception:                           # pragma: no cover
+            return "it"
 
     def _tasti(self):
         """La tabella della tastiera, con i due tasti di servizio scelti."""
@@ -553,6 +567,12 @@ class GiochiSource(Source):
         configura = getattr(self._gioco, "configura", None)
         if configura is not None:
             configura(self.conf())
+        # Un gioco fatto di parole deve sapere in che lingua parlare, e non
+        # puo' leggerlo da solo: la configurazione della lingua non sta fra
+        # quelle dei giochi.
+        lingua = getattr(self._gioco, "configura_lingua", None)
+        if lingua is not None:
+            lingua(self.lingua())
         # Gli effetti arrivano da qui e non da dentro il gioco: cosi' una
         # partita si puo' ancora far girare dentro una prova, in silenzio e
         # senza scheda audio.
@@ -561,6 +581,8 @@ class GiochiSource(Source):
         self._gioco._record = max(record,
                                   int(self.conf().get("record", {}).get(nome, 0)))
         self._premuti.clear()
+        self._epilogo = None
+        self._epilogato = False
         # Il mixer degli effetti vive quanto la partita: aperto adesso,
         # chiuso quando si esce. A pannello fermo non tiene occupata la
         # scheda audio e non consuma niente.
@@ -648,6 +670,29 @@ class GiochiSource(Source):
         except Exception as exc:                    # pragma: no cover
             print("[giochi] motori del pad non lasciati: %s" % exc)
 
+    def _apri_epilogo(self, gioco):
+        """Apre le schermate di fine partita, una volta per partita."""
+        self._epilogato = True
+        try:
+            classifica = Classifica(self.cfg.setdefault("giochi", {}))
+            self._epilogo = Epilogo(
+                gioco.nome, gioco.punteggio, gioco.livello, classifica,
+                self.lingua(), salva=self._salva_configurazione)
+            self._epilogo.suona = self._suona_effetto
+            # A partita finita la musica del gioco non c'entra piu' niente:
+            # l'epilogo e' un'altra cosa, e va guardato in silenzio.
+            self._musica(None)
+        except Exception as exc:                    # pragma: no cover
+            print("[giochi] epilogo non aperto: %s" % exc)
+            self._epilogo = None
+
+    def _salva_configurazione(self):
+        try:
+            import dmdconf
+            dmdconf.save()
+        except Exception as exc:                    # pragma: no cover
+            print("[giochi] configurazione non salvata: %s" % exc)
+
     def _salva_record(self):
         """Il record sopravvive alla partita: e' l'unica cosa che ha senso
         ricordare, e sta in configurazione come tutto il resto."""
@@ -657,6 +702,15 @@ class GiochiSource(Source):
             conf = self.cfg.setdefault("giochi", {})
             record = conf.setdefault("record", {})
             nome = self._gioco.nome
+            # Le domande gia' uscite: le ricorda il gioco che le ha pescate, e
+            # si salvano qui perche' e' l'unico momento in cui si sa che la
+            # partita e' davvero finita.
+            memoria = getattr(self._gioco, "memoria_domande", None)
+            if memoria is not None:
+                try:
+                    conf["quiz_viste"] = memoria()
+                except Exception:                   # pragma: no cover
+                    pass
             if self._gioco.record() > int(record.get(nome, 0)):
                 record[nome] = int(self._gioco.record())
                 conf["ultimo"] = nome
@@ -793,9 +847,28 @@ class GiochiSource(Source):
                 precedente = time.time()
                 continue
             try:
-                gioco.passo(dt, tasti_per(gioco, self._premuti))
-                gioco.accompagna()
-                immagine = gioco.disegna()
+                # Finita la partita, il pannello e' dell'**epilogo**: il
+                # punteggio, le tre lettere da comporre se si e' entrati in
+                # classifica, e i tre migliori. Non e' roba del gioco -- la
+                # classifica e' del cabinato, e infatti vale per tutti e
+                # dieci -- quindi non sta dentro nessuno dei dieci.
+                if not gioco.finita:
+                    # Ricominciata: il prossimo GAME OVER avra' il suo
+                    # epilogo. Senza questa riga la classifica compariva solo
+                    # dopo la prima partita di ogni sessione, e alla seconda
+                    # non la vedeva piu' nessuno.
+                    self._epilogato = False
+                elif self._epilogo is None and not self._epilogato:
+                    self._apri_epilogo(gioco)
+                if self._epilogo is not None:
+                    self._epilogo.passo(dt, set(self._premuti))
+                    immagine = self._epilogo.disegna()
+                    if self._epilogo.finito():
+                        self._epilogo = None
+                else:
+                    gioco.passo(dt, tasti_per(gioco, self._premuti))
+                    gioco.accompagna()
+                    immagine = gioco.disegna()
             except Exception as exc:
                 print("[giochi] errore nel gioco: %s" % exc)
                 self.chiudi_sessione()

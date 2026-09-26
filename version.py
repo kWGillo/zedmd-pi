@@ -2668,6 +2668,19 @@ Storico:
        e non scuotono. Un intervallo minimo di 45 ms tiene il pad vivibile
        anche quando si spara a raffica, e un colpo piu' forte di quello in
        corso passa comunque.
+  13.0 **Super Quiz**, il decimo gioco, e la classifica dei tre migliori.
+       Quindici domande a scelta multipla con il montepremi che raddoppia,
+       due traguardi, e la conferma «La accendiamo?» prima che una risposta
+       valga -- il primo fuoco chiede, il secondo risponde. Quattro musiche,
+       una per momento (la domanda che compare, l'attesa, la risposta giusta,
+       quella sbagliata), sostituibili dalla pagina senza toccare il codice.
+       Le domande stanno in due file, `domande.it.csv` e `domande.en.csv`:
+       1.301 per lingua, con lo stesso identificativo, ricavate da
+       OpenQuizzDB (CC BY-SA 4.0) e ripulite -- di 3.323 ne sono state buttate
+       due su cinque, la maggior parte perche' la traduzione automatica
+       francese aveva tradotto un nome proprio. E in **tutti e dieci** i
+       giochi, a fine partita: le tre lettere da comporre con la leva se si
+       entra fra i migliori, e la classifica dei tre, come nei cabinati.
 """
 
-__version__ = "12.6"
+__version__ = "13.0"

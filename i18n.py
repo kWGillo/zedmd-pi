@@ -2003,6 +2003,30 @@ STRINGS = {
     "giochi.bongo.hint": (
         "Due gorilla sui tetti, una banana. Su e giù l'angolo, destra e sinistra la forza, fuoco lancia.",
         "Two gorillas on the rooftops and a banana. Up/down angle, right/left power, fire throws."),
+    "giochi.quiz.hint": (
+        "Quindici domande, quattro risposte, due traguardi. Poi il pannello chiede: la accendiamo?",
+        "Fifteen questions, four answers, two safe havens. Then: is that your answer?"),
+    "giochi.quiz.titolo": ("Super Quiz", "Super Quiz"),
+    "giochi.quiz.musica": ("Musica di Super Quiz", "Super Quiz music"),
+    "giochi.quiz.musica.hint": (
+        "Un brano per momento. Sono i file in suoni/: cambiali e cambia il gioco.",
+        "One track per moment. They are the files in suoni/: change them, change the game."),
+    "giochi.quiz.momento.domanda": ("La domanda appare", "The question appears"),
+    "giochi.quiz.momento.attesa": ("Attesa della risposta", "Waiting for the answer"),
+    "giochi.quiz.momento.giusta": ("Risposta giusta", "Right answer"),
+    "giochi.quiz.momento.sbagliata": ("Risposta sbagliata", "Wrong answer"),
+    "giochi.quiz.tempo": ("Secondi per rispondere", "Seconds to answer"),
+    "giochi.quiz.domande": (
+        "%(it)d domande in italiano, %(en)d in inglese.",
+        "%(it)d questions in Italian, %(en)d in English."),
+    "giochi.quiz.fonte": (
+        "Da OpenQuizzDB (CC BY-SA 4.0), ripulite. Le tue: domande.it.csv in %(dir)s.",
+        "From OpenQuizzDB (CC BY-SA 4.0), cleaned up. Yours: domande.en.csv in %(dir)s."),
+    "giochi.classifica": ("I migliori 3", "Best 3"),
+    "giochi.classifica.vuota": ("Ancora nessuno", "Nobody yet"),
+    "giochi.classifica.hint": (
+        "A fine partita, chi entra fra i tre scrive le sue iniziali con la leva.",
+        "At the end, whoever makes the top three enters their initials with the stick."),
     "giochi.pongo.record": ("Scambio più lungo:", "Longest rally:"),
     "giochi.azzera": ("Azzera", "Reset"),
     "giochi.azzera.titolo": ("Azzera il record", "Reset the high score"),

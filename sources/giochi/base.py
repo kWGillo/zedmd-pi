@@ -64,18 +64,57 @@ _F = {
     ".": (0, 0, 0, 0, 0b010),
     ":": (0, 0b010, 0, 0b010, 0),
     "!": (0b010, 0b010, 0b010, 0, 0b010),
+    # Dalla 13.0 anche la punteggiatura che serve a una **frase**, non a un
+    # tabellone: fino a ieri qui si scrivevano punteggi e nomi di livello, e
+    # un punto interrogativo non serviva a nessuno. Super Quiz fa domande, e
+    # una domanda senza il punto interrogativo non e' una domanda.
+    "?": (0b111, 0b001, 0b011, 0, 0b010),
+    "'": (0b010, 0b010, 0, 0, 0),
+    ",": (0, 0, 0, 0b010, 0b100),
+    '"': (0b101, 0b101, 0, 0, 0),
+    "(": (0b001, 0b010, 0b010, 0b010, 0b001),
+    ")": (0b100, 0b010, 0b010, 0b010, 0b100),
+    "/": (0b001, 0b001, 0b010, 0b100, 0b100),
+    "+": (0, 0b010, 0b111, 0b010, 0),
+    "%": (0b101, 0b001, 0b010, 0b100, 0b101),
+    "\u00b0": (0b010, 0b101, 0b010, 0, 0),
+    "\u2026": (0, 0, 0, 0, 0b111),
 }
+
+# Le lettere accentate diventano la lettera senza accento. Un font 3x5 non ha
+# lo spazio per un accento -- sarebbe un pixel sopra una lettera alta cinque
+# -- e in italiano una «e» al posto di una «è» si legge lo stesso, mentre un
+# buco no: fino alla 12.6 «piu'» scritto con l'accento diventava «pi».
+_EQUIVALENTI = {}
+for _senza, _con in (("A", "ÀÁÂÃÄÅ"), ("E", "ÈÉÊË"), ("I", "ÌÍÎÏ"),
+                     ("O", "ÒÓÔÕÖØ"), ("U", "ÙÚÛÜ"), ("C", "Ç"),
+                     ("N", "Ñ"), ("Y", "Ý"), ("S", "Š"), ("Z", "Ž"),
+                     ("AE", "Æ"), ("OE", "Œ"), ("SS", "ß"),
+                     ("'", "\u2019\u02bc"), ('"', "\u201c\u201d\u00ab\u00bb"),
+                     ("-", "\u2013\u2014")):
+    for _lettera in _con:
+        _EQUIVALENTI[_lettera] = _senza
 PASSO = 4       # 3 pixel di glifo piu' uno di spazio
 RIGA = 7        # 5 pixel di altezza piu' due di interlinea
 
 
 def larghezza_testo(testo):
-    return max(0, len(testo) * PASSO - 1)
+    # Sulla stringa **tradotta**: «Æ» diventa «AE» e occupa due posti, e una
+    # riga centrata sul conto sbagliato esce dal pannello.
+    return max(0, len(senza_accenti(testo)) * PASSO - 1)
+
+
+def senza_accenti(testo):
+    """Il testo come lo sa scrivere il font: maiuscolo e senza accenti."""
+    fuori = []
+    for carattere in str(testo).upper():
+        fuori.append(_EQUIVALENTI.get(carattere, carattere))
+    return "".join(fuori)
 
 
 def scrivi(px, testo, x, y, colore):
     """Testo 3x5 pixel per pixel. `px` e' l'accesso ai pixel dell'immagine."""
-    for carattere in str(testo).upper():
+    for carattere in senza_accenti(testo):
         glifo = _F.get(carattere)
         if glifo is not None:
             for riga, bit in enumerate(glifo):
