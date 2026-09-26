@@ -168,7 +168,8 @@ levette e croce direzionale. Se `evtest` non è installato:
 
 ### 5.1 Nei giochi (Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam, Mine vaganti, T-Rex, Kingo Bongo)
 
-> **Super Quiz** ha comandi suoi: la leva sceglie fra le quattro risposte,
+> **Super Quiz** ha comandi suoi: si comincia scegliendo con la leva se
+> giocare con il tempo o senza, poi la leva sceglie fra le quattro risposte,
 > il fuoco chiede «la accendiamo?» e il secondo fuoco risponde; **Esci**
 > annulla la scelta. E a fine partita, in **tutti** i giochi, chi entra
 > fra i tre migliori compone le sue tre lettere: su e giù cambiano la

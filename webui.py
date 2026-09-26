@@ -1033,7 +1033,7 @@ def create_app(runtime):
             pulsanti=GIOCHI_PULSANTI, pad=joystick(con_nome=True),
             motori=vibra.motori(con_nome=True),
             classifica=(conf.get("classifica") or {}),
-            brani=suoni.musiche_disponibili(),
+            brani=suoni.musiche_disponibili(cfg),
             domande=domande.stato(), data_dir=domande.DATA_DIR,
             result=request.args.get("result"),
             doom_pronto=i18n.translate(
@@ -1046,18 +1046,23 @@ def create_app(runtime):
         """Le quattro musiche di Super Quiz, e il tempo per rispondere."""
         conf = cfg.setdefault("giochi", {})
         musica = conf.setdefault("quiz_musica", {})
-        noti = set(suoni.musiche_disponibili())
+        noti = set(suoni.musiche_disponibili(cfg))
         for momento in ("domanda", "attesa", "giusta", "sbagliata"):
             scelto = (request.form.get("quiz_%s" % momento) or "").strip()
             # Un nome inventato non si scrive: finirebbe in un percorso di
             # file, e il gioco resterebbe muto senza dire perche'.
             if scelto in noti:
                 musica[momento] = scelto
+                # Un brano della libreria si converte adesso, mentre si
+                # salva la pagina: cosi' la partita lo trova gia' pronto
+                # invece di far partire ffmpeg nel bel mezzo di una domanda.
+                if scelto.startswith(suoni.PREFISSO_MEDIA):
+                    suoni.prepara(cfg, scelto)
         try:
-            conf["quiz_tempo"] = max(5, min(120, int(
-                request.form.get("quiz_tempo", 30))))
+            conf["quiz_tempo"] = max(5, min(180, int(
+                request.form.get("quiz_tempo", 60))))
         except (TypeError, ValueError):
-            conf["quiz_tempo"] = 30
+            conf["quiz_tempo"] = 60
         dmdconf.save()
         return redirect(url_for("page_giochi"))
 

@@ -717,9 +717,19 @@ NetworkManager, non il `config.json`. Guida completa in `docs/rete.it.md`.
 aspetto, i comandi per accendere e spegnere la ripresa, il pulsante fisico
 sulla Bonnet. Guida completa in `docs/telecamera.it.md`.
 
-**Giochi** — Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam, Mine vaganti, T-Rex e Kingo Bongo, i comandi di tastiera e pad, e la
-scheda degli emulatori esterni che porta a Doom e al Game Boy. Guide in
+**Giochi** — Breakout, Invaders, Snake, Pongo, Squadriglia, Gnam Gnam, Mine
+vaganti, T-Rex, Kingo Bongo e Super Quiz, i comandi di tastiera e pad, le
+quattro musiche del quiz e i secondi per rispondere, e la scheda degli
+emulatori esterni che porta a Doom e al Game Boy. Guide in `docs/quiz.it.md`,
 `docs/doom.it.md`, `docs/gameboy.it.md` e `docs/joypad.it.md`.
+
+> **Il quiz si può giocare senza tempo.** Dalla 13.1 la prima schermata chiede
+> con la leva se giocare con il tempo — sessanta secondi di serie, regolabili
+> da 5 a 180 — oppure senza. Senza, il conto alla rovescia sparisce e il gioco
+> non torna all'orologio per inattività mentre si sta pensando: il limite
+> diventa mezz'ora, e torna a tre minuti appena la partita finisce. A fine
+> partita, in tutti i giochi, chi entra fra i tre migliori compone le sue tre
+> lettere come nei cabinati.
 
 **Aggiornamenti** — controllo e installazione della nuova versione da GitHub,
 con verifica dell'archivio e ripristino automatico se il servizio non riparte.

@@ -33,12 +33,36 @@ sola e nessuno arriverebbe in fondo.
 | Scelta | leva in tutte e quattro le direzioni |
 | Risposta | fuoco, due volte |
 | Ci ripenso | esci |
-| Tempo | 30 secondi, regolabili da 5 a 120 |
+| Tempo | 60 secondi, regolabili da 5 a 180 — oppure nessuno |
 | Scala | 100 → 1.000.000 in quindici gradini |
 | Traguardi | quinta e decima domanda |
 
-Il tempo che scade vale come una risposta sbagliata: in un quiz il tempo è
-parte della domanda.
+## Con il tempo o senza
+
+Prima della prima domanda il gioco chiede come si vuole giocare, e la leva
+sceglie:
+
+```
+                       SUPER QUIZ
+                  COME VUOI GIOCARE?
+        ▶ CON IL TEMPO        SENZA TEMPO
+              FUOCO PER COMINCIARE
+```
+
+Con il tempo, i secondi in fondo allo schermo sono **60** di serie invece dei
+trenta della 13.0: trenta bastavano a leggere una domanda corta, non a
+leggerne una lunga e discuterla in due. Si regolano dalla pagina Giochi, da 5
+a 180. Il tempo che scade vale come una risposta sbagliata: in un quiz il
+tempo è parte della domanda.
+
+Senza tempo, il conto alla rovescia e la barra spariscono e la domanda resta
+lì finché non si risponde. E — questa è la parte che si sarebbe notata solo
+giocando — **il gioco non si chiude da solo**: l'inattività che dopo tre
+minuti riporta il pannello all'orologio, e che negli altri nove giochi è
+giusta, qui darebbe la partita per abbandonata mentre si sta ancora
+pensando. Senza tempo il limite diventa mezz'ora, e torna a tre minuti appena
+la partita finisce. Chi non sceglie entro venti secondi gioca con il tempo:
+è il comportamento di sempre.
 
 # 2. Le quattro musiche
 
@@ -52,10 +76,31 @@ momento, e si cambiano dalla pagina Giochi senza toccare il codice:
 | Risposta giusta | `quiz_giusta` | quattro battute in maggiore, e basta |
 | Risposta sbagliata | `quiz_sbagliata` | la stessa melodia che scende, e un basso che casca |
 
-Nella tendina compaiono tutti i brani che stanno in `suoni/`, quindi ci si
-può mettere la musica di Pongo o quella di Kingo Bongo — o un file tuo, se lo
-copi lì dentro: l'elenco si legge dal disco, non da una lista scritta nel
-programma.
+Nella tendina compaiono tre gruppi: i brani che stanno in `suoni/` — quindi
+anche la musica di Pongo o quella di Kingo Bongo — i wav che metti in
+`/var/lib/dmd/suoni`, che nessun aggiornamento tocca, e **i file audio della
+libreria media**: quelli che carichi dalla pagina Media, wav o mp3,
+sottocartelle comprese. L'elenco si legge dal disco, non da una lista scritta
+nel programma.
+
+Un mp3 non entra nel mixer com'è: gli effetti dei giochi escono tutti da un
+flusso solo, aperto una volta e tenuto aperto, e dentro quel flusso ci entrano
+campioni — mono, 16 bit, 22050 Hz — non file. Il brano si converte quindi una
+volta con ffmpeg, quando lo scegli e quando si apre il gioco, mai durante una
+domanda: il risultato resta in `/var/lib/dmd/musiche` e si rifà solo se
+cambi il file di partenza. Si convertono al massimo **45 secondi**, perché il
+mixer tiene i campioni in memoria e un brano di quattro minuti sarebbero
+duecento megabyte su un Raspberry.
+
+## La risposta dura quanto la sua musica
+
+La musica della risposta non fa da sottofondo: **è il tempo che passa**. La
+domanda dopo arriva quando il brano finisce — sette secondi per la risposta
+giusta e nove e mezzo per quella sbagliata, con i nostri, invece dei tre e
+mezzo e quattro e mezzo della 13.0, che li tagliavano a metà. Chi ha fretta
+preme fuoco e va avanti subito; chi mette un suo brano se lo sente tutto senza
+dover regolare niente. Fra i 2 e i 20 secondi: sotto non si legge la risposta,
+sopra il gioco sembrerebbe fermo. A musica spenta valgono i tempi di prima.
 
 # 3. Da dove vengono le domande
 
@@ -137,7 +182,7 @@ sul Raspberry**.
 
 # 6. Come è stato provato
 
-`test_quiz.py`, 90 controlli. I tre che contano davvero:
+`test_quiz.py`, 120 controlli, e `test_musica_media.py`, altri 24. Quelli che contano davvero:
 
 - **un fuoco solo non risponde mai**: il primo apre la conferma, e lo stesso
   fuoco non la può chiudere — un quarto di secondo di margine, altrimenti su
@@ -146,4 +191,7 @@ sul Raspberry**.
   confrontando i 1.301 identificativi uno per uno;
 - **la risposta giusta non sta sempre nello stesso posto**: nel file è sempre
   la prima, e un quiz in cui la risposta è sempre la A si vince senza
-  leggere.
+  leggere;
+- **senza tempo non scade niente**: né il conto alla rovescia, che non c'è,
+  né l'inattività, verificata chiedendo al gioco il proprio limite — 1.800
+  secondi mentre si gioca, 180 appena finito.

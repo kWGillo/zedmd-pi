@@ -156,6 +156,12 @@ class Gioco:
         # La musica di sottofondo, per chi ce l'ha: nome per farla partire,
         # None per fermarla. Come `suona`, la sostituisce chi apre la partita.
         self.musica = lambda nome: None
+        # Quanto dura un brano, in secondi, o 0.0 se non si sa. Super Quiz lo
+        # chiede perche' da lui la musica non fa da sottofondo: e' il tempo
+        # che passa fra una risposta e la domanda dopo. Sta qui, e non dentro
+        # il gioco, per la stessa ragione delle due righe sopra: un gioco che
+        # aprisse un file wav da solo non si potrebbe piu' provare.
+        self.durata_musica = lambda nome: 0.0
         self._musica_voluta = None
         self.punteggio = 0
         self.vite = 3

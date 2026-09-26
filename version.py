@@ -2691,6 +2691,20 @@ Storico:
        fotogramma si butta quando il contenuto finisce, e un video si
        dichiara pronto **dopo** il primo fotogramma: i suoi secondi di
        visione cominciano da li' invece di essere mangiati dall'attesa.
+  13.1 *Super Quiz: il tempo si sceglie.* Sessanta secondi invece di trenta
+       (regolabili da 5 a 180), e prima della prima domanda una schermata
+       dove la leva sceglie fra CON IL TEMPO e SENZA TEMPO -- chi non sceglie
+       entro venti secondi gioca con il tempo, come prima. Senza tempo il
+       conto alla rovescia e la barra spariscono, e il gioco non si chiude
+       piu' da solo mentre si pensa: ogni gioco puo' dire la sua
+       sull'inattivita', e il quiz senza tempo chiede mezz'ora invece di tre
+       minuti, che tornano tre appena la partita finisce.
+       La domanda dopo aspetta che la musica della risposta finisca invece di
+       tagliarla a meta': comanda il brano, non un numero nel codice. E le
+       quattro musiche si possono prendere dalla **libreria media**, mp3
+       compresi: si convertono una volta con ffmpeg nel formato del mixer,
+       quando si sceglie il brano e all'apertura del gioco, e restano in
+       /var/lib/dmd/musiche.
 """
 
-__version__ = "13.0.1"
+__version__ = "13.1"

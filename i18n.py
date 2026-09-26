@@ -2009,13 +2009,18 @@ STRINGS = {
     "giochi.quiz.titolo": ("Super Quiz", "Super Quiz"),
     "giochi.quiz.musica": ("Musica di Super Quiz", "Super Quiz music"),
     "giochi.quiz.musica.hint": (
-        "Un brano per momento. Sono i file in suoni/: cambiali e cambia il gioco.",
-        "One track per moment. They are the files in suoni/: change them, change the game."),
+        "Un brano per momento: i nostri, o un tuo file audio caricato nella libreria media.",
+        "One track per moment: ours, or an audio file of yours from the media library."),
+    "giochi.quiz.brani.nostri": ("Suoni del programma", "Program sounds"),
+    "giochi.quiz.brani.media": ("Dalla libreria media", "From the media library"),
     "giochi.quiz.momento.domanda": ("La domanda appare", "The question appears"),
     "giochi.quiz.momento.attesa": ("Attesa della risposta", "Waiting for the answer"),
     "giochi.quiz.momento.giusta": ("Risposta giusta", "Right answer"),
     "giochi.quiz.momento.sbagliata": ("Risposta sbagliata", "Wrong answer"),
     "giochi.quiz.tempo": ("Secondi per rispondere", "Seconds to answer"),
+    "giochi.quiz.tempo.hint": (
+        "Valgono se si gioca con il tempo: a inizio partita si sceglie con la leva.",
+        "They count when playing with time: the lever picks it at the start."),
     "giochi.quiz.domande": (
         "%(it)d domande in italiano, %(en)d in inglese.",
         "%(it)d questions in Italian, %(en)d in English."),

@@ -370,6 +370,35 @@ class GiochiSource(Source):
         except Exception as exc:                    # pragma: no cover
             print("[giochi] musica non avviata: %s" % exc)
 
+    def _prepara_musiche(self, nomi=None):
+        """Converte adesso i brani presi dalla libreria media.
+
+        Un mp3 caricato dalla pagina Media non entra nel mixer com'e': va
+        portato a mono, 16 bit, 22050 Hz. La conversione dura una frazione
+        di secondo, ma e' un processo esterno, e farla partire **durante**
+        una partita vorrebbe dire uno scatto sul pannello nel momento in cui
+        arriva la risposta. Si fa qui, all'apertura del gioco, dove un
+        decimo di secondo non lo nota nessuno -- e la volta dopo il file
+        convertito c'e' gia'.
+        """
+        if nomi is None:
+            nomi = list((self.conf().get("quiz_musica") or {}).values())
+        for nome in nomi:
+            if nome and str(nome).startswith(suoni.PREFISSO_MEDIA):
+                try:
+                    suoni.prepara(self.cfg, nome)
+                except Exception as exc:            # pragma: no cover
+                    print("[giochi] brano non convertito: %s" % exc)
+
+    def _durata_musica(self, nome):
+        """Quanto dura un brano. Zero vuol dire "non lo so", e chi chiede
+        si tiene il suo tempo di serie invece di fermarsi per sempre."""
+        try:
+            return suoni.durata_musica(self.cfg, nome)
+        except Exception as exc:                    # pragma: no cover
+            print("[giochi] durata non letta: %s" % exc)
+            return 0.0
+
     # I colpi che si sentono anche con le mani. La tabella sta qui e non
     # dentro i giochi per la stessa ragione per cui ci stanno gli effetti: un
     # gioco che sapesse di motori non si potrebbe piu' far girare dentro una
@@ -578,6 +607,8 @@ class GiochiSource(Source):
         # senza scheda audio.
         self._gioco.suona = self._suona_effetto
         self._gioco.musica = self._musica
+        self._gioco.durata_musica = self._durata_musica
+        self._prepara_musiche()
         self._gioco._record = max(record,
                                   int(self.conf().get("record", {}).get(nome, 0)))
         self._premuti.clear()
@@ -729,8 +760,23 @@ class GiochiSource(Source):
         return time.time() - self._ultimo_comando
 
     def controlla_inattivita(self):
-        """Una partita lasciata a meta' non tiene il pannello per sempre."""
+        """Una partita lasciata a meta' non tiene il pannello per sempre.
+
+        Il limite puo' pero' dipendere dalla partita. Super Quiz giocato
+        **senza tempo** e' l'unico caso: li' si discute una risposta in due
+        per minuti, e chiudere la partita a tre minuti di silenzio vorrebbe
+        dire togliere proprio quello per cui si e' scelto di giocare senza
+        tempo. Il gioco dice quanto gli serve; la sorgente non decide al suo
+        posto e non sa perche'.
+        """
         limite = int(self.conf().get("session_timeout", 180) or 0)
+        gioco = self._gioco
+        chiedi = getattr(gioco, "limite_inattivita", None)
+        if limite and chiedi is not None:
+            try:
+                limite = int(chiedi(limite))
+            except Exception:                       # pragma: no cover
+                pass
         if limite and self._sessione and self.inattivita() > limite:
             print("[giochi] partita chiusa per inattivita'")
             self.chiudi_sessione()

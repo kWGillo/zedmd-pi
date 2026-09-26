@@ -276,7 +276,7 @@ DEFAULTS = {
             "giusta": "quiz_giusta",
             "sbagliata": "quiz_sbagliata",
         },
-        "quiz_tempo": 30,
+        "quiz_tempo": 60,
         # Gli identificativi delle domande gia' uscite, per non rifarle. Si
         # riempie da solo e si accorcia da solo.
         "quiz_viste": [],

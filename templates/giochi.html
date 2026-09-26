@@ -33,14 +33,26 @@
         {% for momento in ('domanda', 'attesa', 'giusta', 'sbagliata') %}
         <label for="quiz_{{ momento }}">{{ t('giochi.quiz.momento.' + momento) }}</label>
         <select id="quiz_{{ momento }}" name="quiz_{{ momento }}">
-          {% for brano in brani %}
+          <optgroup label="{{ t('giochi.quiz.brani.nostri') }}">
+          {% for brano in brani if not brano.startswith('media:') %}
           <option value="{{ brano }}" {{ 'selected' if (cfg.giochi.quiz_musica or {}).get(momento) == brano }}>{{ brano }}</option>
           {% endfor %}
+          </optgroup>
+          {% set quanti_media = [] %}
+          {% for brano in brani if brano.startswith('media:') %}{% set _ = quanti_media.append(brano) %}{% endfor %}
+          {% if quanti_media %}
+          <optgroup label="{{ t('giochi.quiz.brani.media') }}">
+          {% for brano in brani if brano.startswith('media:') %}
+          <option value="{{ brano }}" {{ 'selected' if (cfg.giochi.quiz_musica or {}).get(momento) == brano }}>{{ brano[6:] }}</option>
+          {% endfor %}
+          </optgroup>
+          {% endif %}
         </select>
         {% endfor %}
         <label for="quiz_tempo">{{ t('giochi.quiz.tempo') }}</label>
-        <input type="number" id="quiz_tempo" name="quiz_tempo" min="5" max="120"
-               value="{{ cfg.giochi.quiz_tempo or 30 }}">
+        <input type="number" id="quiz_tempo" name="quiz_tempo" min="5" max="180"
+               value="{{ cfg.giochi.quiz_tempo or 60 }}">
+        <p class="hint">{{ t('giochi.quiz.tempo.hint') }}</p>
         <button type="submit">{{ t('common.apply') }}</button>
       </form>
       <p class="hint">{{ t('giochi.quiz.domande', it=domande.it.quante, en=domande.en.quante) }}

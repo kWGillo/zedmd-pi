@@ -2,6 +2,95 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [13.1]
+
+### Super Quiz: il tempo si sceglie, e senza tempo non scade niente
+
+*«Il timer che hai posto è troppo veloce. Inoltre a inizio gioco devo poter
+decidere se giocare con timer o senza. Occhio che se gioco senza timer non
+voglio che poi il gioco vada in timeout e si chiuda per inutilizzo, come per
+gli altri.»*
+
+Tre cose, e la terza è quella che si sarebbe scoperta solo giocando.
+
+**Sessanta secondi invece di trenta.** Trenta bastano a leggere una domanda
+corta; non bastano a leggerne una lunga e a discuterla in due, che è come si
+gioca davvero. La corsa del campo nella pagina Giochi sale da 5–120 a
+**5–180**.
+
+**La scelta prima della prima domanda.** Una schermata sola, la leva che
+sposta fra CON IL TEMPO e SENZA TEMPO, il fuoco che comincia. Chi non sceglie
+entro venti secondi gioca con il tempo: chi accende il pannello e va via
+trova comunque una partita che si comporta come prima. Senza tempo il conto
+alla rovescia e la barra spariscono — non restano fermi, spariscono: una
+barra che non scende è una barra rotta.
+
+**E il gioco non si chiude più da solo mentre si pensa.** L'inattività che
+dopo tre minuti riporta il pannello all'orologio è giusta negli altri nove
+giochi, dove tre minuti senza toccare niente vogliono dire che non c'è
+nessuno. In un quiz senza tempo vogliono dire che si sta ragionando. Adesso
+ogni gioco può dire la sua sul limite — `limite_inattivita()` — e il quiz
+senza tempo chiede **mezz'ora**, che torna a tre minuti appena la partita
+finisce: la classifica non deve restare accesa fino a sera.
+
+Provato in `test_quiz.py`, salito a 105 controlli: la schermata di scelta,
+l'avvio automatico dopo venti secondi, il conto alla rovescia che senza tempo
+non esiste, e il limite di inattività chiesto nei tre stati (1.800 mentre si
+gioca senza tempo, 180 con il tempo, 180 a partita finita).
+
+### La domanda dopo aspetta che la musica finisca
+
+*«Quando parte un mp3 di risposta giusta, il software deve passare alla
+domanda successiva a mp3 finito.»*
+
+Giusto, e non era un dettaglio di gusto: la musica della risposta non fa da
+sottofondo, **è il tempo che passa**. I due momenti duravano 3,6 e 4,6
+secondi scritti nel codice, e i brani ne durano 7,3 e 9,6: venivano tagliati
+a metà tutte le volte. Adesso comanda il brano — il suo, quindi anche quello
+che uno ci mette al posto del nostro. Il fuoco salta l'attesa come prima, e
+fra i 2 e i 20 secondi c'è un limite: sotto non si legge la risposta, sopra
+il gioco sembra fermo. A musica spenta valgono i tempi di riserva di prima:
+un gioco muto non deve aspettare una musica che non parte.
+
+Il gioco non ha imparato a leggere i file wav — continua a non sapere che
+esistano. Gli si passa da fuori chi sa dire quanto dura un brano
+(`durata_musica`), come già si fa con i suoni e la musica: una partita deve
+potersi ancora far girare dentro una prova, in silenzio.
+
+### E la musica si può prendere dalla libreria media
+
+*«Sto provando a selezionare degli mp3 che ho caricato in Media, ma non li
+vedo.»*
+
+Non li vedeva perché non c'erano: la tendina leggeva solo i wav accanto al
+programma. Adesso mostra tre gruppi — i nostri brani, i wav messi in
+`/var/lib/dmd/suoni`, e i file audio della libreria media, wav o mp3,
+sottocartelle comprese.
+
+Un mp3 non entra nel mixer com'è: gli effetti escono tutti da un flusso solo,
+aperto una volta e tenuto aperto perché altrimenti ogni suono aprirebbe la
+scheda e si sentirebbe il ritardo — e dentro quel flusso ci entrano campioni
+mono a 22050 Hz, non file. Il brano si converte con ffmpeg **una volta**,
+quando lo si sceglie e quando si apre il gioco, mai durante una domanda; il
+risultato resta in `/var/lib/dmd/musiche` e si rifà solo se il file di
+partenza cambia. Si convertono al massimo 45 secondi: il mixer tiene i
+campioni in memoria, e un brano di quattro minuti sarebbero duecento megabyte
+di lista su un Raspberry.
+
+Il nome scelto resta controllato come prima — deve stare nell'elenco, e un
+`media:` che punti fuori dalla libreria non si converte e non si salva.
+
+### E una prova che passava per fortuna
+
+`test_offset.py` conta le righe di pixel dell'ora sul pannello, e le
+misurava sull'ora **vera**. Ma le cifre non sono alte tutte uguale: in DejaVu
+Bold il tetto dell'1, del 5 e del 7 sta un pixel più in basso di quello del
+2, del 3 e del 4, e l'ora si centra sul proprio ingombro. Alle 14:22 le cifre
+stanno alle righe 14–42, alle 11:57 alle 15–42, e la prova passava di
+pomeriggio e falliva di sera. Adesso l'orologio della prova segna sempre lo
+stesso minuto. Nel programma non è cambiato niente: era la prova a essere
+fortunata.
+
 ## [13.0.1]
 
 ### Il contenuto di prima restava in faccia a quello dopo

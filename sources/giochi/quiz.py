@@ -52,10 +52,33 @@ TRAGUARDI = (5, 10)
 
 # Quanto dura ogni momento, in secondi.
 DURATA_DOMANDA = 2.4       # la domanda compare, e si legge
-TEMPO_RISPOSTA = 30.0      # il tempo per decidere
+TEMPO_RISPOSTA = 60.0      # il tempo per decidere
+
+# Quanto resta ferma la schermata della scelta prima di partire da sola. Chi
+# ha premuto Start e si e' allontanato non deve lasciare il pannello su un
+# menu: dopo questo tempo si gioca con il tempo, che e' il modo normale.
+DURATA_SCELTA = 20.0
+
+# Senza tempo il gioco non si chiude per inattivita' come gli altri -- e' il
+# punto di giocare senza tempo -- ma un limite lontano resta: una partita
+# lasciata a meta' e dimenticata non puo' tenersi il pannello per sempre.
+# Mezz'ora e' «te ne sei andato», non «ci sto pensando».
+INATTIVITA_SENZA_TEMPO = 1800
+# Quanto resta la risposta prima della domanda dopo. Sono i tempi di riserva:
+# quando il brano del momento si sa quanto dura, comanda lui -- la musica
+# della risposta non e' un sottofondo, e' il tempo che passa, e tagliarla a
+# meta' per far comparire la domanda dopo si sente come un difetto. Questi
+# numeri restano per quando la musica e' spenta o il file non si legge.
 DURATA_GIUSTA = 3.6
 DURATA_SBAGLIATA = 4.6
 DURATA_FINALE = 5.0
+
+# I due estremi entro cui la musica puo' comandare. Sotto, un brano di mezzo
+# secondo farebbe sparire la risposta prima che si legga; sopra, un brano
+# lungo messo li' per sbaglio terrebbe il gioco fermo -- e il fuoco, che
+# salta l'attesa, e' comunque sempre buono.
+MINIMA_RISPOSTA = 2.0
+MASSIMA_RISPOSTA = 20.0
 
 LETTERE = "ABCD"
 
@@ -123,6 +146,7 @@ class Quiz(Gioco):
         self.lingua = "it"
         self.musiche = dict(self.MUSICHE)
         self.tempo_risposta = TEMPO_RISPOSTA
+        self.musica_accesa = True
         self._viste = []
         self._mazzo = None
         super(Quiz, self).__init__(seme)
@@ -137,11 +161,15 @@ class Quiz(Gioco):
         self.gradino = 0              # quante domande gia' indovinate
         self.vinto = 0                # quello che si porta a casa adesso
         self.scelta = 0
-        self.fase = "domanda"
+        # Si comincia scegliendo **come** si gioca. Con il tempo e' una gara
+        # con se stessi; senza, e' un gioco da tavolo in cui si discute la
+        # risposta -- ed e' il modo in cui lo si usa in due.
+        self.senza_tempo = False
+        self.fase = "avvio"
         self.messaggio = ""
         self.domanda = None
         self.rimasto = self.tempo_risposta
-        self._scadenza = DURATA_DOMANDA
+        self._scadenza = DURATA_SCELTA
         self._orologio = 0.0
         self._mazzo = banca.Mazzo(self.lingua, self._viste, seme)
         self._prossima()
@@ -154,10 +182,13 @@ class Quiz(Gioco):
             nome = str(musiche.get(momento, "") or "").strip()
             self.musiche[momento] = nome or self.MUSICHE[momento]
         try:
-            self.tempo_risposta = max(5.0, min(120.0, float(
+            self.tempo_risposta = max(5.0, min(180.0, float(
                 conf.get("quiz_tempo", TEMPO_RISPOSTA))))
         except (TypeError, ValueError):
             self.tempo_risposta = TEMPO_RISPOSTA
+        # Con la musica spenta la risposta non puo' durare quanto un brano
+        # che non parte: si torna ai tempi di riserva.
+        self.musica_accesa = bool(conf.get("musica", True))
         self._viste = list(conf.get("quiz_viste") or [])
         self.rimasto = self.tempo_risposta
         self._mazzo = banca.Mazzo(self.lingua, self._viste)
@@ -209,6 +240,9 @@ class Quiz(Gioco):
             self._orologio += dt
             return
         self._orologio += dt
+        if self.fase == "avvio":
+            self._scelta_del_tempo(tasti)
+            return
         if self.fase == "domanda":
             if self._orologio >= DURATA_DOMANDA or "fuoco" in tasti:
                 self.fase = "attesa"
@@ -221,13 +255,69 @@ class Quiz(Gioco):
             self._conferma(tasti)
             return
         if self.fase in ("giusta", "sbagliata"):
-            durata = DURATA_GIUSTA if self.fase == "giusta" else DURATA_SBAGLIATA
-            if self._orologio >= durata or "fuoco" in tasti:
+            if self._orologio >= self.durata_della_risposta() or "fuoco" in tasti:
                 self._avanti()
 
+    def durata_della_risposta(self):
+        """Quanto dura il momento della risposta: **il suo brano**.
+
+        La domanda dopo arriva quando la musica finisce. Con i brani di serie
+        vuol dire sette secondi per la risposta giusta e nove e mezzo per
+        quella sbagliata, invece dei tre e mezzo e quattro e mezzo di prima,
+        che li tagliavano a meta'. Chi ha fretta preme fuoco e va avanti; chi
+        mette un suo brano al posto del nostro se lo sente tutto, senza dover
+        toccare niente.
+
+        Se la musica e' spenta, o il file non si legge, valgono i tempi di
+        riserva: un gioco muto non deve aspettare una musica che non parte.
+        """
+        riserva = (DURATA_GIUSTA if self.fase == "giusta"
+                   else DURATA_SBAGLIATA)
+        if not self.musica_accesa:
+            return riserva
+        try:
+            quanto = float(self.durata_musica(self.musica_di_adesso()))
+        except Exception:
+            quanto = 0.0
+        if quanto <= 0.0:
+            return riserva
+        return max(MINIMA_RISPOSTA, min(MASSIMA_RISPOSTA, quanto))
+
+    def _scelta_del_tempo(self, tasti):
+        """Con il tempo o senza: la leva sceglie, il fuoco comincia."""
+        if "sinistra" in tasti and self.senza_tempo:
+            self.senza_tempo = False
+            self.suona("ping")
+        if "destra" in tasti and not self.senza_tempo:
+            self.senza_tempo = True
+            self.suona("ping")
+        if "fuoco" in tasti or self._orologio >= DURATA_SCELTA:
+            self.fase = "domanda"
+            self._orologio = 0.0
+            self.rimasto = self.tempo_risposta
+            self.suona("lancio")
+
+    def limite_inattivita(self, limite):
+        """Quanto puo' restare fermo il pannello prima che la partita si chiuda.
+
+        Senza tempo la partita non si chiude al limite degli altri giochi: e'
+        esattamente il motivo per cui si sceglie di giocare senza tempo, e una
+        domanda su cui si sta discutendo da tre minuti non e' una partita
+        abbandonata. Un limite lontano resta comunque, perche' un pannello
+        tenuto per sempre da una partita dimenticata e' un pannello rotto per
+        chi passa di li' e non sa cosa stava succedendo.
+        """
+        if self.senza_tempo and not self.finita:
+            return max(limite, INATTIVITA_SENZA_TEMPO)
+        return limite
+
     def _attesa(self, dt, tasti):
-        self.rimasto = max(0.0, self.rimasto - dt)
-        if self.rimasto <= 0:
+        if self.senza_tempo:
+            # Il tempo non passa: la barra non c'e' e non scade niente.
+            self.rimasto = self.tempo_risposta
+        else:
+            self.rimasto = max(0.0, self.rimasto - dt)
+        if not self.senza_tempo and self.rimasto <= 0:
             # Tempo scaduto: vale come una risposta sbagliata, ed e' giusto
             # cosi' -- in un quiz il tempo e' parte della domanda.
             self._sbagliato(scaduto=True)
@@ -297,7 +387,9 @@ class Quiz(Gioco):
     # ------------------------------------------------------------- la musica
 
     def musica_di_adesso(self):
-        if self.fase in ("domanda",):
+        if self.fase in ("avvio", "domanda"):
+            # La schermata della scelta ha la stessa musica della domanda che
+            # compare: e' lo stesso momento, il sipario che si apre.
             return self.musiche["domanda"]
         if self.fase in ("attesa", "conferma"):
             return self.musiche["attesa"]
@@ -318,6 +410,9 @@ class Quiz(Gioco):
         """
         img = Image.new("RGB", (LARGHEZZA, ALTEZZA), (0, 0, 0))
         px = img.load()
+        if self.fase == "avvio":
+            self._disegna_avvio(px)
+            return img
         if self.fase == "finale":
             self._disegna_finale(px)
             return img
@@ -326,6 +421,30 @@ class Quiz(Gioco):
         self._disegna_risposte(px)
         self._disegna_piede(px)
         return img
+
+    def _disegna_avvio(self, px):
+        centra(px, "SUPER QUIZ", 6, GIALLO, 0, LARGHEZZA)
+        domanda = ("COME VUOI GIOCARE?" if self.lingua == "it"
+                   else "HOW DO YOU WANT TO PLAY?")
+        centra(px, domanda, 18, GRIGIO, 0, LARGHEZZA)
+        voci = (("CON IL TEMPO", "TIMED"), ("SENZA TEMPO", "NO TIMER"))
+        for indice, voce in enumerate(voci):
+            testo = voce[0] if self.lingua == "it" else voce[1]
+            scelta = (indice == 1) == self.senza_tempo
+            x = 20 + indice * 122
+            scrivi(px, testo, x + 6, 32, BIANCO if scelta else GRIGIO)
+            if scelta:
+                for dy in range(6):
+                    px[x, 31 + dy] = GIALLO
+                    px[x + 1, 31 + dy] = GIALLO
+        secondi = ("%d SECONDI PER RISPONDERE" if self.lingua == "it"
+                   else "%d SECONDS TO ANSWER") % int(self.tempo_risposta)
+        centra(px, secondi if not self.senza_tempo else
+               ("TUTTO IL TEMPO CHE VUOI" if self.lingua == "it"
+                else "ALL THE TIME YOU WANT"), 44, AZZURRO, 0, LARGHEZZA)
+        aiuto = ("LEVA SCEGLIE - FUOCO COMINCIA" if self.lingua == "it"
+                 else "STICK CHOOSES - FIRE STARTS")
+        centra(px, aiuto, 55, GRIGIO, 0, LARGHEZZA)
 
     def _disegna_testa(self, px):
         domanda = self.domanda or {}
@@ -393,6 +512,12 @@ class Quiz(Gioco):
         self._disegna_tempo(px)
 
     def _disegna_tempo(self, px):
+        if self.senza_tempo:
+            traguardo = self.traguardo()
+            if traguardo:
+                testo = ("SICURO %s" if self.lingua == "it" else "SAFE %s") % soldi(traguardo)
+                centra(px, testo, 52, GRIGIO, 0, LARGHEZZA)
+            return
         quota = max(0.0, min(1.0, self.rimasto / max(1.0, self.tempo_risposta)))
         larghezza = int((LARGHEZZA - 8) * quota)
         colore = VERDE if quota > 0.5 else (GIALLO if quota > 0.2 else ROSSO)
@@ -423,5 +548,6 @@ class Quiz(Gioco):
     def stato(self):
         base = Gioco.stato(self)
         base.update({"gradino": self.gradino, "fase": self.fase,
-                     "vinto": self.vinto, "lingua": self.lingua})
+                     "vinto": self.vinto, "lingua": self.lingua,
+                     "senza_tempo": self.senza_tempo})
         return base

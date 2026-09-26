@@ -43,6 +43,7 @@ una voce a parte che si puo' spegnere.
 """
 
 import collections
+import hashlib
 import os
 import random
 import re
@@ -466,32 +467,169 @@ def percorso_servizio(cfg, chiave):
     return percorso_media(cfg, (_conf(cfg).get("servizi") or {}).get(chiave))
 
 
+# Dove finiscono i brani della libreria media convertiti nel formato del
+# mixer. Sta nella cartella dati e non accanto al programma: un
+# aggiornamento non deve portarsi via la musica di nessuno, e nemmeno
+# rimetterci dentro file che l'utente ha tolto dalla libreria.
+DATI = os.environ.get("DMD_DATA", "/var/lib/dmd")
+CARTELLA_CONVERTITI = os.path.join(DATI, "musiche")
+
+# Il prefisso dei brani che vengono dalla libreria media invece che da
+# `suoni/`. Non e' una cartella: e' un modo di dire "questo nome va cercato
+# di la'", e serve perche' i due elenchi finiscono nella stessa tendina.
+PREFISSO_MEDIA = "media:"
+
+# Quanto al massimo si converte di un brano scelto dalla libreria. Il mixer
+# tiene i campioni in memoria, e un brano di quattro minuti sarebbero
+# duecento megabyte di lista Python su un Raspberry: quarantacinque secondi
+# sono piu' di qualunque musica di gioco e restano una decina di megabyte.
+MASSIMO_CONVERTITO = 45
+
+
 def effetto(nome):
-    """Il percorso di un effetto dei giochi, o "" se non c'e'."""
-    intero = os.path.join(CARTELLA_EFFETTI, "%s.wav" % nome)
-    return intero if os.path.isfile(intero) else ""
+    """Il percorso di un suono, o "" se non c'e'.
+
+    Si guarda in tre posti, in quest'ordine: accanto al programma, nella
+    cartella dati (`/var/lib/dmd/suoni`, dove chi vuole mette i suoi wav
+    senza che un aggiornamento glieli tolga) e fra i brani convertiti dalla
+    libreria media.
+    """
+    nome = (nome or "").strip()
+    if not nome or "/" in nome or "\\" in nome or nome.startswith("."):
+        return ""
+    for cartella in (CARTELLA_EFFETTI, os.path.join(DATI, "suoni"),
+                     CARTELLA_CONVERTITI):
+        intero = os.path.join(cartella, "%s.wav" % nome)
+        if os.path.isfile(intero):
+            return intero
+    return ""
 
 
-def musiche_disponibili():
-    """I brani che si possono scegliere: i file `*_musica` e quelli del quiz.
+def _sigla_media(scelto):
+    """Il nome interno del brano `scelto` della libreria, convertito."""
+    impronta = hashlib.md5(scelto.encode("utf8")).hexdigest()[:12]
+    return "media-%s" % impronta
+
+
+def prepara(cfg, nome):
+    """Il nome con cui il mixer puo' suonare `nome`, o "" se non si puo'.
+
+    Un brano di `suoni/` e' gia' pronto e torna com'e'. Un brano scelto
+    dalla libreria media -- `media:cartella/brano.mp3` -- va prima
+    convertito: mono, 16 bit, 22050 Hz, che e' l'unico formato che il mixer
+    sa sommare senza fare conti a ogni blocco. La conversione si fa **una
+    volta**, con ffmpeg, e il risultato resta nella cartella dati; si rifa'
+    solo se il file di partenza cambia.
+
+    Perche' non suonarlo direttamente: gli effetti dei giochi escono da un
+    flusso solo, aperto una volta e tenuto aperto, altrimenti ogni suono
+    aprirebbe la scheda e si sentirebbe il ritardo. Dentro quel flusso ci
+    entrano campioni, non file.
+    """
+    nome = (nome or "").strip()
+    if not nome:
+        return ""
+    if not nome.startswith(PREFISSO_MEDIA):
+        return nome
+    scelto = nome[len(PREFISSO_MEDIA):]
+    sorgente = percorso_media(cfg, scelto)
+    if not sorgente:
+        return ""
+    sigla = _sigla_media(scelto)
+    destinazione = os.path.join(CARTELLA_CONVERTITI, "%s.wav" % sigla)
+    try:
+        if (os.path.isfile(destinazione)
+                and os.path.getmtime(destinazione) >= os.path.getmtime(sorgente)):
+            return sigla
+    except OSError:
+        pass
+    if not shutil.which("ffmpeg"):
+        return ""
+    try:
+        os.makedirs(CARTELLA_CONVERTITI, exist_ok=True)
+        provvisorio = destinazione + ".parte"
+        esito = subprocess.call(
+            ["ffmpeg", "-y", "-loglevel", "error", "-i", sorgente,
+             "-t", str(MASSIMO_CONVERTITO), "-ac", "1",
+             "-ar", str(FREQ_EFFETTI), "-acodec", "pcm_s16le",
+             # Il file provvisorio non finisce per .wav, e senza "-f wav"
+             # ffmpeg non saprebbe che formato scrivere e si fermerebbe.
+             "-f", "wav", provvisorio],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if esito != 0 or not os.path.isfile(provvisorio):
+            return ""
+        os.replace(provvisorio, destinazione)
+    except Exception:
+        return ""
+    _DURATE.pop(sigla, None)
+    return sigla
+
+
+_DURATE = {}
+
+
+def durata(nome):
+    """Quanto dura un brano o un effetto, in secondi. 0.0 se non si sa.
+
+    Serve a Super Quiz, dove la musica della risposta non fa da sottofondo:
+    **e' il tempo che passa**. La domanda dopo arriva quando il brano
+    finisce, non a un numero deciso qui dentro, cosi' chi mette la sua
+    musica al posto della nostra non se la sente tagliare a meta'.
+
+    Si legge la sola intestazione del wav -- numero di campioni diviso
+    frequenza -- e si tiene a mente: la stessa domanda arriva quindici volte
+    per partita, e riaprire il file quindici volte per sapere una cosa che
+    non cambia sarebbe disco sprecato durante il gioco.
+    """
+    if nome in _DURATE:
+        return _DURATE[nome]
+    quanto = 0.0
+    percorso = effetto(nome)
+    if percorso:
+        try:
+            with wave.open(percorso) as w:
+                frequenza = w.getframerate() or 0
+                if frequenza > 0:
+                    quanto = w.getnframes() / float(frequenza)
+        except Exception:
+            quanto = 0.0
+    _DURATE[nome] = quanto
+    return quanto
+
+
+def musiche_disponibili(cfg=None):
+    """I brani che si possono scegliere.
+
+    Sono i `*_musica` e i `quiz_*` che stanno accanto al programma, tutti i
+    wav che l'utente ha messo in `/var/lib/dmd/suoni`, e i file audio della
+    libreria media, che compaiono come `media:nome`.
 
     Serve alla pagina Giochi, dove le quattro musiche di Super Quiz si
     sostituiscono con una tendina. Si guarda **cosa c'e' sul disco** invece di
     tenere un elenco scritto: chi aggiunge un suo brano nella cartella lo
     trova nella tendina senza che nessuno debba aggiornare una lista.
     """
-    try:
-        nomi = os.listdir(CARTELLA_EFFETTI)
-    except OSError:
-        return []
     fuori = []
-    for nome in nomi:
-        if not nome.endswith(".wav"):
+    for cartella in (CARTELLA_EFFETTI, os.path.join(DATI, "suoni")):
+        try:
+            nomi = os.listdir(cartella)
+        except OSError:
             continue
-        corpo = nome[:-4]
-        if corpo.endswith("_musica") or corpo.startswith("quiz_"):
-            fuori.append(corpo)
-    return sorted(fuori)
+        for nome in nomi:
+            if not nome.endswith(".wav"):
+                continue
+            corpo = nome[:-4]
+            if corpo.endswith("_musica") or corpo.startswith("quiz_"):
+                fuori.append(corpo)
+            elif cartella != CARTELLA_EFFETTI:
+                # Nella cartella dati il nome non deve seguire nessuna regola:
+                # e' roba dell'utente, l'ha messa li' lui, e la vuole vedere.
+                fuori.append(corpo)
+    # E i file audio della libreria media, wav o mp3: e' li' che si carica la
+    # musica dalla pagina Media, ed e' li' che la si cerca.
+    for voce in file_disponibili(cfg):
+        fuori.append(PREFISSO_MEDIA + voce["nome"])
+    return sorted(set(fuori))
 
 
 # ------------------------------------------------- uscita PCM a bassa latenza
@@ -1625,7 +1763,18 @@ def effetti_musica(cfg, nome):
     # spesso gli effetti ma non la musica. Spento, la musica in corso si ferma.
     if nome and not ((cfg or {}).get("giochi") or {}).get("musica", True):
         nome = None
+    if nome:
+        # Un brano scelto dalla libreria media va convertito prima di poter
+        # entrare nel mixer. Si fa qui, e non dentro il mixer, perche' la
+        # libreria sta nella configurazione e il mixer non la conosce.
+        nome = prepara(cfg, nome) or None
     return _mixer.musica(nome)
+
+
+def durata_musica(cfg, nome):
+    """Quanto dura il brano scelto, convertendolo se viene dalla libreria."""
+    vero = prepara(cfg, nome)
+    return durata(vero) if vero else 0.0
 
 
 def effetti_accesi():

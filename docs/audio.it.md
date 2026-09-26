@@ -63,6 +63,7 @@ resto lo mettiamo noi.
 |---|---|---|
 | **Avvisi dei servizi** | quando una sorgente prende il pannello | libreria media, scelto da te |
 | **Effetti dei giochi** | Invaders e Breakout | `suoni/`, dentro il programma |
+| **Musica dei giochi** | il sottofondo di una partita | `suoni/`, `/var/lib/dmd/suoni`, o la libreria media |
 | **Audio di Doom** | la colonna sonora del gioco | i WAD, come nel gioco vero |
 | **Audio del Game Boy** | la musica della cartuccia | l'APU emulata da PyBoy |
 
