@@ -543,8 +543,9 @@ di una cassa che non suona e nessuno sa perché.
 
 ## Il volume in modalità notte
 
-Nel riquadro **Night mode e Sleep mode** c'è un quarto campo accanto alla
-luminosità notturna: **Volume %**, predefinito **0, cioè muto**.
+Nel riquadro **Night mode** delle Impostazioni — subito sotto la luminosità,
+dalla 14.1 — c'è un quarto campo accanto alla luminosità notturna:
+**Volume %**, predefinito **0, cioè muto**.
 
 Vale solo se il Night mode è acceso, e riguarda quello che il pannello dice
 **di sua iniziativa** — un aereo di passaggio, un compleanno, una notifica.

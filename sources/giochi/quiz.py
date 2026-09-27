@@ -78,7 +78,11 @@ DURATA_FINALE = 5.0
 # lungo messo li' per sbaglio terrebbe il gioco fermo -- e il fuoco, che
 # salta l'attesa, e' comunque sempre buono.
 MINIMA_RISPOSTA = 2.0
-MASSIMA_RISPOSTA = 20.0
+# Il tetto e' quello della conversione: chiesto cosi', «la domanda successiva
+# deve apparire dopo che il file audio e' terminato». Venti secondi tagliavano
+# un brano piu' lungo, cioe' facevano proprio la cosa che non si voleva. Il
+# fuoco salta l'attesa, e oltre i quarantacinque secondi non si converte.
+MASSIMA_RISPOSTA = 45.0
 
 LETTERE = "ABCD"
 
@@ -154,6 +158,13 @@ class Quiz(Gioco):
     # ----------------------------------------------------------- la partita
 
     def avvia_partita(self, seme=None):
+        # I tasti tenuti premuti nell'istante in cui la partita comincia non
+        # contano: si comincia da fermi, e il primo comando e' il primo tasto
+        # **premuto** da qui in avanti. Quelli gia' giu' restano giu' -- non
+        # si azzerano: e' proprio il fuoco che ha fatto ricominciare la
+        # partita, e azzerarlo lo farebbe valere una seconda volta,
+        # attraversando da solo la schermata della scelta.
+        self._premuti_prima = getattr(self, "_premuti_prima", set())
         self.punteggio = 0
         self.vite = 1
         self.livello = 1
@@ -161,6 +172,7 @@ class Quiz(Gioco):
         self.gradino = 0              # quante domande gia' indovinate
         self.vinto = 0                # quello che si porta a casa adesso
         self.scelta = 0
+        self.conferma = True          # SI o NO nella richiesta di conferma
         # Si comincia scegliendo **come** si gioca. Con il tempo e' una gara
         # con se stessi; senza, e' un gioco da tavolo in cui si discute la
         # risposta -- ed e' il modo in cui lo si usa in due.
@@ -235,7 +247,28 @@ class Quiz(Gioco):
 
     # ------------------------------------------------------------- il passo
 
+    def ignora_tasti(self, premuti):
+        """Quello che e' gia' premuto quando la partita si apre non conta."""
+        self._premuti_prima = set(premuti)
+
+    def _appena(self, tasti):
+        """I tasti **appena premuti**: quelli di adesso meno quelli di prima.
+
+        Il quiz e' un gioco di menu, non di riflessi: qui un tasto tenuto giu'
+        deve valere una volta, non trenta al secondo. Senza questa riga
+        succedeva quello che e' stato segnalato dal campo -- si rientra nel
+        gioco tenendo premuto il fuoco, e la schermata "con il tempo o senza"
+        passa in un fotogramma scegliendo da sola; e se il tasto tenuto era
+        una freccia, partiva nell'altro modo. Dal pad e' indistinguibile da
+        un gioco che decide per conto suo.
+        """
+        tasti = set(tasti)
+        nuovi = tasti - self._premuti_prima
+        self._premuti_prima = tasti
+        return nuovi
+
     def passo(self, dt, tasti):
+        tasti = self._appena(tasti)
         if self.finita and self.fase == "finale":
             self._orologio += dt
             # Fuoco ricomincia, come in tutti gli altri nove giochi. Mancava,
@@ -248,7 +281,7 @@ class Quiz(Gioco):
             # Il mezzo secondo di margine e' lo stesso ragionamento della
             # conferma: il fuoco che ha dato l'ultima risposta non deve
             # anche far ripartire la partita dopo.
-            if "fuoco" in tasti and self._orologio > 0.5:
+            if "fuoco" in tasti:
                 self.avvia_partita()
             return
         self._orologio += dt
@@ -293,7 +326,9 @@ class Quiz(Gioco):
             quanto = 0.0
         if quanto <= 0.0:
             return riserva
-        return max(MINIMA_RISPOSTA, min(MASSIMA_RISPOSTA, quanto))
+        # Mezzo secondo di margine sulla musica: il mixer scrive a blocchi
+        # di 23 ms e la domanda dopo non deve comparire sull'ultima nota.
+        return max(MINIMA_RISPOSTA, min(MASSIMA_RISPOSTA, quanto + 0.5))
 
     def _scelta_del_tempo(self, tasti):
         """Con il tempo o senza: la leva sceglie, il fuoco comincia."""
@@ -349,21 +384,39 @@ class Quiz(Gioco):
         if "fuoco" in tasti:
             self.fase = "conferma"
             self._orologio = 0.0
+            # Si riparte sempre da SI: la conferma e' un fermo, non un dubbio.
+            self.conferma = True
             self.suona("lancio")
 
     def _conferma(self, tasti):
-        """«La accendiamo?» -- il secondo fuoco vale, il tasto esci annulla."""
+        """«La accendiamo?» -- SI o NO con le frecce, il fuoco conferma.
+
+        Dalla 14.1 e' una scelta vera fra due caselle invece di due tasti da
+        ricordare: chiesto cosi', ed e' anche il modo in cui la domanda si
+        capisce senza istruzioni. Si parte da SI, che e' la risposta che si
+        vuole dare nove volte su dieci: chi ha premuto fuoco per rispondere
+        preme fuoco un'altra volta e ha risposto.
+        """
+        if "sinistra" in tasti and not self.conferma:
+            self.conferma = True
+            self.suona("ping")
+        if "destra" in tasti and self.conferma:
+            self.conferma = False
+            self.suona("ping")
         if "esci" in tasti or "speciale" in tasti:
             self.fase = "attesa"
             self.suona("ping")
             return
-        if "fuoco" in tasti and self._orologio > 0.25:
-            # Un quarto di secondo di margine: senza, il fuoco che ha aperto
-            # la conferma la chiuderebbe nello stesso istante.
-            if self.scelta == self.domanda["giusta"]:
-                self._giusto()
+        if "fuoco" in tasti:
+            if self.conferma:
+                if self.scelta == self.domanda["giusta"]:
+                    self._giusto()
+                else:
+                    self._sbagliato()
             else:
-                self._sbagliato()
+                # NO: si torna a scegliere la risposta, senza rispondere.
+                self.fase = "attesa"
+                self.suona("ping")
 
     def _giusto(self):
         self.gradino += 1
@@ -410,6 +463,13 @@ class Quiz(Gioco):
         if self.fase == "sbagliata":
             return self.musiche["sbagliata"]
         return None
+
+    def musica_da_capo(self):
+        """Nelle due schermate della risposta, sempre: il brano **e'** il
+        momento, e la domanda dopo aspetta che finisca. Sentirne la coda
+        perche' stava gia' suonando vuol dire, da fuori, che non e' partito.
+        """
+        return self.fase in ("giusta", "sbagliata")
 
     # ------------------------------------------------------------- il disegno
 
@@ -501,10 +561,8 @@ class Quiz(Gioco):
         domanda = self.domanda or {}
         if self.fase == "conferma":
             testo = "LA ACCENDIAMO?" if self.lingua == "it" else "IS THAT YOUR ANSWER?"
-            centra(px, testo, 46, AMBRA, 0, LARGHEZZA)
-            aiuto = ("FUOCO SI  -  ESCI NO" if self.lingua == "it"
-                     else "FIRE YES  -  BACK NO")
-            centra(px, aiuto, 55, GRIGIO, 0, LARGHEZZA)
+            centra(px, testo, 45, AMBRA, 0, LARGHEZZA)
+            self._disegna_si_no(px, 55)
             return
         if self.fase == "giusta":
             testo = self.messaggio or ("GIUSTA!" if self.lingua == "it" else "RIGHT!")
@@ -522,6 +580,24 @@ class Quiz(Gioco):
             return
         # Attesa: la barra del tempo, che e' l'unica cosa che si muove.
         self._disegna_tempo(px)
+
+    def _disegna_si_no(self, px, y):
+        """SI e NO affiancati, con la barretta su quello scelto.
+
+        La barretta e non il solo colore: e' la stessa grammatica della
+        schermata di avvio e di quella delle risposte, e a tre metri due
+        parole di colore diverso si distinguono peggio di un segno.
+        """
+        voci = ((("SI" if self.lingua == "it" else "YES"), True, VERDE),
+                ("NO", False, ROSSO))
+        for indice, (testo, quale, colore) in enumerate(voci):
+            scelto = (quale == self.conferma)
+            x = LARGHEZZA // 2 - 40 + indice * 56
+            scrivi(px, testo, x + 6, y, colore if scelto else GRIGIO)
+            if scelto:
+                for dy in range(6):
+                    px[x, y - 1 + dy] = colore
+                    px[x + 1, y - 1 + dy] = colore
 
     def _disegna_tempo(self, px):
         if self.senza_tempo:

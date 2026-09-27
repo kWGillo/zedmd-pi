@@ -155,7 +155,7 @@ class Gioco:
         self.suona = lambda nome: None
         # La musica di sottofondo, per chi ce l'ha: nome per farla partire,
         # None per fermarla. Come `suona`, la sostituisce chi apre la partita.
-        self.musica = lambda nome: None
+        self.musica = lambda nome, riparti=False: None
         # Quanto dura un brano, in secondi, o 0.0 se non si sa. Super Quiz lo
         # chiede perche' da lui la musica non fa da sottofondo: e' il tempo
         # che passa fra una risposta e la domanda dopo. Sta qui, e non dentro
@@ -196,11 +196,37 @@ class Gioco:
 
     def accompagna(self):
         """Chiede la musica giusta, ma solo quando cambia: non a ogni
-        fotogramma, e senza farla ricominciare."""
+        fotogramma, e senza farla ricominciare.
+
+        `musica_da_capo()` e' la deroga: un gioco in cui il brano **e'** il
+        momento -- il quiz, con la musica della risposta -- deve poterlo
+        sentire dall'attacco anche se quel brano stava gia' suonando.
+        """
         voluta = self.musica_di_adesso()
         if voluta != self._musica_voluta:
             self._musica_voluta = voluta
-            self.musica(voluta)
+            # Il secondo argomento si passa solo quando serve davvero: nove
+            # giochi su dieci non sanno nemmeno che esista, e chiederlo a
+            # tutti vorrebbe dire cambiare il patto per tutti.
+            if self.musica_da_capo():
+                self.musica(voluta, True)
+            else:
+                self.musica(voluta)
+
+    def musica_da_capo(self):
+        """Vero se il brano che sta partendo va suonato dall'inizio."""
+        return False
+
+    def ignora_tasti(self, premuti):
+        """I tasti gia' premuti nell'istante in cui la partita comincia.
+
+        Chi apre una partita lo fa premendo un tasto, e quel tasto e' ancora
+        giu' quando il primo fotogramma arriva. I giochi d'azione non se ne
+        accorgono -- una racchetta che parte a destra la si riporta indietro
+        -- ma un gioco di menu decide, e decide per conto suo. Di suo questo
+        metodo non fa niente: lo ridefinisce chi ha un menu.
+        """
+
 
     # --------------------------------------------------------------- comune
 

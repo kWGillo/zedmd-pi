@@ -11,6 +11,7 @@ import re
 import secrets
 import socket
 import subprocess
+import threading
 import time
 
 from flask import (Flask, has_request_context, jsonify, redirect,
@@ -1037,12 +1038,80 @@ def create_app(runtime):
             motori=vibra.motori(con_nome=True),
             classifica=(conf.get("classifica") or {}),
             brani=suoni.musiche_disponibili(cfg),
+            quiz_musiche=_quiz_musiche(),
             domande=domande.stato(), data_dir=domande.DATA_DIR,
             result=request.args.get("result"),
             doom_pronto=i18n.translate(
                 "giochi.doom.no" if errore else "giochi.doom.si",
                 current_language()),
             page="giochi")
+
+    def _quiz_musiche():
+        """I quattro brani del quiz, ciascuno con il suo stato.
+
+        Serve a rispondere alla domanda giusta quando un momento resta muto:
+        **quel** brano e' pronto? Prima l'unico modo di saperlo era giocare,
+        e un silenzio non dice se il file manca, se ffmpeg si e' rifiutato o
+        se la musica e' semplicemente spenta.
+        """
+        conf = cfg.get("giochi") or {}
+        scelte = conf.get("quiz_musica") or {}
+        fuori = []
+        for momento in ("domanda", "attesa", "giusta", "sbagliata"):
+            nome = (scelte.get(momento) or "").strip() or ("quiz_%s" % momento)
+            if nome.startswith(suoni.PREFISSO_MEDIA):
+                pronto = suoni.prepara(cfg, nome)
+                motivo = "" if pronto else (suoni.motivo_musica(nome)
+                                            or "non convertito")
+                durata = suoni.durata(pronto) if pronto else 0.0
+            else:
+                pronto = suoni.effetto(nome)
+                motivo = "" if pronto else "il file non c'e'"
+                durata = suoni.durata(nome) if pronto else 0.0
+            fuori.append({"momento": momento, "nome": nome,
+                          "pronto": bool(pronto), "motivo": motivo,
+                          "durata": round(durata, 1)})
+        return fuori
+
+    @app.route("/api/giochi/quiz/prova", methods=["POST"])
+    def api_giochi_quiz_prova():
+        """Fa sentire uno dei quattro brani, per qualche secondo.
+
+        E' la prova che chiude il dubbio: se qui si sente e in partita no, il
+        guasto non e' nel file; se non si sente nemmeno qui, la pagina dice
+        gia' perche'.
+        """
+        lang = current_language()
+        momento = (request.form.get("momento") or "").strip()
+        voce = next((v for v in _quiz_musiche() if v["momento"] == momento), None)
+        if voce is None:
+            return redirect(url_for("page_giochi"))
+        if not voce["pronto"]:
+            return redirect(url_for("page_giochi", result=i18n.translate(
+                "giochi.quiz.prova.muto", lang, motivo=voce["motivo"])))
+        secondi = max(3.0, min(10.0, voce["durata"] or 6.0))
+        acceso = False
+        try:
+            acceso = suoni.effetti_avvia(cfg)
+            suoni.effetti_musica(cfg, voce["nome"], riparti=True)
+        except Exception as exc:                        # pragma: no cover
+            print("[giochi] prova musica non riuscita: %s" % exc)
+        if acceso:
+            # Il mixer si chiude da solo dopo il pezzo di brano: la pagina non
+            # deve restare aperta ad aspettare, e nessuna partita lo vuole.
+            def spegni():
+                time.sleep(secondi)
+                try:
+                    suoni.effetti_musica(cfg, None)
+                    suoni.effetti_ferma()
+                except Exception:                       # pragma: no cover
+                    pass
+            threading.Thread(target=spegni, name="prova-musica",
+                             daemon=True).start()
+        chiave = ("giochi.quiz.prova.suona" if acceso
+                  else "giochi.quiz.prova.muta")
+        return redirect(url_for("page_giochi", result=i18n.translate(
+            chiave, lang, nome=voce["nome"], secondi=int(secondi))))
 
     @app.route("/api/giochi/quiz", methods=["POST"])
     def api_giochi_quiz():
@@ -2157,17 +2226,39 @@ def create_app(runtime):
 
     @app.route("/api/display", methods=["POST"])
     def api_display():
+        """Lo Sleep mode. Il Night mode ha un indirizzo suo, qui sotto.
+
+        Erano un modulo solo, e li ha divisi una richiesta che ha ragione: il
+        Night mode e' una regola di **luminosita'**, e la luminosita' sta
+        nelle Impostazioni. Dividere i moduli e' l'altra meta' del lavoro:
+        finche' questo scriveva anche i campi del Night mode, una pagina che
+        non li manda li avrebbe azzerati in silenzio.
+        """
         display = cfg["display"]
-        display["night_enabled"] = request.form.get("night_enabled") == "on"
-        display["night_start"] = request.form.get("night_start", "22:00")
-        display["night_end"] = request.form.get("night_end", "07:00")
         display["sleep_enabled"] = request.form.get("sleep_enabled") == "on"
         display["sleep_start"] = request.form.get("sleep_start", "01:00")
         display["sleep_end"] = request.form.get("sleep_end", "06:00")
         display["sleep_wake_on_zedmd"] = request.form.get("sleep_wake_on_zedmd") == "on"
+        # E questa casella, che c'era nella pagina da sempre e non veniva
+        # letta da nessuno: togliere la spunta non faceva niente, e una
+        # partita si risvegliava comunque. Ora conta.
+        display["sleep_wake_on_giochi"] = request.form.get("sleep_wake_on_giochi") == "on"
+        dmdconf.save()
+        runtime._applied_brightness = None
+        return redirect(request.form.get("next") or url_for("page_services",
+                                                            vista="timing"))
+
+    @app.route("/api/display/notte", methods=["POST"])
+    def api_display_notte():
+        """Il Night mode: la fascia, la luminosita' e il volume di quella fascia."""
+        display = cfg["display"]
+        display["night_enabled"] = request.form.get("night_enabled") == "on"
+        display["night_start"] = request.form.get("night_start", "22:00")
+        display["night_end"] = request.form.get("night_end", "07:00")
         try:
-            display["night_brightness"] = max(0, min(100, int(request.form.get("night_brightness", 15))))
-        except ValueError:
+            display["night_brightness"] = max(0, min(100, int(
+                request.form.get("night_brightness", 15))))
+        except (TypeError, ValueError):
             display["night_brightness"] = 15
         # Il volume notturno si scrive in percentuale nella pagina e si
         # conserva da 0 a 1, come tutti gli altri volumi del progetto: la
@@ -2175,11 +2266,11 @@ def create_app(runtime):
         try:
             display["night_volume"] = max(0, min(100, int(
                 request.form.get("night_volume", 0)))) / 100.0
-        except ValueError:
+        except (TypeError, ValueError):
             display["night_volume"] = 0.0
         dmdconf.save()
         runtime._applied_brightness = None
-        return redirect(url_for("page_settings"))
+        return redirect(request.form.get("next") or url_for("page_settings"))
 
     @app.route("/api/clock", methods=["POST"])
     def api_clock():

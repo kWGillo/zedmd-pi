@@ -1386,12 +1386,17 @@ class Mixer:
 
     # ---------------------------------------------------------- suonare
 
-    def musica(self, nome):
+    def musica(self, nome, riparti=False):
         """La musica di sottofondo: `nome` la fa partire, None la ferma.
 
         Richiederla mentre gia' suona non la fa ricominciare: il gioco la
         chiede a ogni stato in cui la vuole, e sentirla ripartire da capo a
         ogni pallina sarebbe un difetto, non una musica.
+
+        Con `riparti` invece si torna all'inizio, e serve a un caso preciso:
+        il brano della risposta di Super Quiz non fa da sottofondo, **e' il
+        momento**. Se quello stesso brano stava gia' suonando, sentirne la
+        coda invece dell'attacco vuol dire, da fuori, che "non e' partito".
         """
         if not nome:
             with self._lucchetto:
@@ -1399,6 +1404,8 @@ class Mixer:
             return True
         with self._lucchetto:
             if self._fondo is not None and self._fondo[2] == nome:
+                if riparti:
+                    self._fondo[1] = 0
                 return True
         campioni = self._carica(nome)
         if not campioni:
@@ -1789,7 +1796,7 @@ def effetti_ferma(svuota=True):
     _mixer.ferma()
 
 
-def effetti_musica(cfg, nome):
+def effetti_musica(cfg, nome, riparti=False):
     """La musica di sottofondo di una partita. None la ferma.
 
     Stessa levetta degli effetti: chi li spegne vuole silenzio, e la musica
@@ -1806,7 +1813,7 @@ def effetti_musica(cfg, nome):
         # entrare nel mixer. Si fa qui, e non dentro il mixer, perche' la
         # libreria sta nella configurazione e il mixer non la conosce.
         nome = prepara(cfg, nome) or None
-    return _mixer.musica(nome)
+    return _mixer.musica(nome, riparti=riparti)
 
 
 def durata_musica(cfg, nome):

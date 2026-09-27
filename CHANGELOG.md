@@ -2,6 +2,57 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [14.1]
+
+### Super Quiz: quattro cose, e tre erano difetti veri
+
+**«La accendiamo?» adesso si sceglie con le frecce.** SI e NO, due caselle, il
+fuoco conferma quella su cui sei; si parte da SI, così chi ha premuto fuoco
+per rispondere preme fuoco un'altra volta e ha risposto. Prima erano due tasti
+da ricordare — fuoco sì, esci no — e una domanda con due caselle si capisce
+senza istruzioni, che è il punto di avere una schermata.
+
+**Un tasto tenuto premuto vale una volta.** Dal campo: *«dopo aver perso,
+quando rientro nel gioco, non mi viene più chiesto se giocare a tempo o meno;
+addirittura, a seconda del tasto che premo, parte senza tempo o con tempo»*.
+La schermata c'era: la attraversava da sola nel primo fotogramma, scegliendo
+con il tasto che era **ancora giù** — quello con cui si era rientrati. Il
+quiz è un gioco di menu, non di riflessi, quindi adesso conta il momento in
+cui si preme; e il cabinato dice al gioco quali tasti erano già premuti
+quando la partita si è aperta, perché chi apre una partita lo fa premendo un
+tasto. Lo stesso vale per il fuoco che fa ricominciare: non attraversa la
+schermata che ha appena fatto comparire.
+
+**Il brano della risposta parte sempre dall'attacco.** *«In caso di risposta
+giusta non parte il file audio corretto»*: se quel brano stava già suonando un
+istante prima, il mixer non lo faceva ripartire — giusto per un sottofondo,
+sbagliato qui, dove il brano **è** il momento e sentirne la coda vuol dire, da
+fuori, che non è partito. E la domanda dopo aspetta che finisca per davvero:
+il tetto passa da venti a quarantacinque secondi, quello della conversione,
+perché fermarsi prima della fine era esattamente la cosa da non fare. Mezzo
+secondo di margine, che il mixer scrive a blocchi di 23 ms.
+
+E perché un silenzio non resti senza spiegazione: nella pagina Giochi, sotto
+ogni tendina, c'è scritto se quel brano è **pronto e quanto dura**, o il
+motivo per cui non lo è; e quattro pulsanti lo fanno sentire subito. Se si
+sente dalla pagina e non in partita, il guasto non è nel file.
+
+### Il Night mode torna nelle Impostazioni, sotto la luminosità
+
+Chiesto così, ed è il posto giusto: *«dalle 22 alle 7 il pannello sta al
+15%»* è una regola di **luminosità**, e va letta accanto alla cosa che
+regola, non in mezzo alle fasce dei servizi. Lo Sleep mode, che spegne il
+display, resta nella scheda Timing con le fasce degli altri: quella lì è
+un'altra domanda. Ogni pagina rimanda all'altra, perché una funzione che si
+sposta senza dire dove è peggio di una funzione scomoda.
+
+Dividere le pagine ha voluto dire dividere anche i moduli — `/api/display`
+per lo Sleep, `/api/display/notte` per il Night — e finché erano uno, una
+pagina che non mandava metà dei campi li avrebbe azzerati in silenzio. Nel
+farlo è venuta fuori una casella che stava nella pagina da versioni e **non
+veniva letta da nessuno**: *risveglia il display se si apre una partita
+durante lo Sleep*. Togliere la spunta non faceva niente. Adesso conta.
+
 ## [14.0]
 
 ### Status Player: chi sta giocando, a cosa, con quanti punti

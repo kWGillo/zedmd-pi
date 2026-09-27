@@ -212,26 +212,15 @@
    qui perché la domanda è la stessa — quando il pannello fa cosa — e averli
    in un'altra pagina voleva dire cercarli in due posti. #}
 <section class="card">
-  <h2>{{ t('settings.modes') }}</h2>
+  <h2>{{ t('settings.sleep.title') }}</h2>
+  {# Il Night mode e' andato nelle Impostazioni, sotto la luminosita': e' una
+     regola di luminosita', e li' sta accanto alla cosa che regola. Qui resta
+     il collegamento, perche' una funzione che sparisce senza dire dov'e'
+     andata e' peggio di una funzione scomoda. #}
+  <p class="hint">{{ t('settings.night.dove') }}
+    <a href="{{ url_for('page_settings') }}">{{ t('nav.settings') }}</a> &rarr;</p>
   <form method="post" action="{{ url_for('api_display') }}">
-    <input type="hidden" name="brightness" value="{{ cfg.display.brightness }}">
-
-    <label class="check">
-      <input type="checkbox" name="night_enabled" {{ 'checked' if cfg.display.night_enabled }}>
-      {{ t('settings.night') }}</label>
-    <div class="row4">
-      <div><label for="night_start">{{ t('common.from') }}</label>
-        <input type="time" id="night_start" name="night_start" value="{{ cfg.display.night_start }}"></div>
-      <div><label for="night_end">{{ t('common.to') }}</label>
-        <input type="time" id="night_end" name="night_end" value="{{ cfg.display.night_end }}"></div>
-      <div><label for="night_brightness">{{ t('settings.brightness') }}</label>
-        <input type="number" id="night_brightness" name="night_brightness" min="0" max="100"
-               value="{{ cfg.display.night_brightness }}"></div>
-      <div><label for="night_volume">{{ t('settings.night.volume') }}</label>
-        <input type="number" id="night_volume" name="night_volume" min="0" max="100" step="5"
-               value="{{ (cfg.display.night_volume * 100) | round | int }}"></div>
-    </div>
-    <p class="hint">{{ t('settings.night.volume.hint') }}</p>
+    <input type="hidden" name="next" value="{{ request.full_path }}">
 
     <label class="check">
       <input type="checkbox" name="sleep_enabled" {{ 'checked' if cfg.display.sleep_enabled }}>

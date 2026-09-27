@@ -364,9 +364,9 @@ class GiochiSource(Source):
     def congelata(self):
         return self._congelato.is_set()
 
-    def _musica(self, nome):
+    def _musica(self, nome, riparti=False):
         try:
-            suoni.effetti_musica(self.cfg, nome)
+            suoni.effetti_musica(self.cfg, nome, riparti=riparti)
         except Exception as exc:                    # pragma: no cover
             print("[giochi] musica non avviata: %s" % exc)
 
@@ -640,6 +640,10 @@ class GiochiSource(Source):
         self._prepara_musiche()
         self._gioco._record = max(record,
                                   int(self.conf().get("record", {}).get(nome, 0)))
+        # Il tasto con cui si e' aperta la partita e' ancora premuto: un gioco
+        # con un menu deve saperlo, o quel menu lo attraversa da solo nel
+        # primo fotogramma.
+        self._gioco.ignora_tasti(set(self._premuti))
         self._premuti.clear()
         self._epilogo = None
         self._epilogato = False

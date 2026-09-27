@@ -22,7 +22,13 @@ accendiamo?»**, e solo il secondo fuoco vale.
 Quella domanda in mezzo non è un vezzo copiato dalla televisione. È l'unica
 cosa che distingue «ho scelto» da «ho sfiorato il tasto», e su un pad tenuto
 in mano mentre si discute di una risposta la differenza capita più spesso di
-quanto si creda. Fuoco conferma, **Esci** ci ripensa.
+quanto si creda.
+
+Dalla 14.1 la conferma è una **scelta fra SI e NO**, con le frecce, e il fuoco
+conferma quella su cui sei. Si parte sempre da SI: chi ha premuto fuoco per
+rispondere preme fuoco un'altra volta e ha risposto. Prima erano due tasti da
+ricordare — fuoco sì, esci no — e una domanda con due caselle si capisce
+senza istruzioni, che è il punto di una schermata.
 
 Due **traguardi**, alla quinta e alla decima domanda: sbagliando si torna lì
 invece che a zero. Senza, quindici domande di fila sarebbero una scommessa
@@ -36,6 +42,19 @@ sola e nessuno arriverebbe in fondo.
 | Tempo | 60 secondi, regolabili da 5 a 180 — oppure nessuno |
 | Scala | 100 → 1.000.000 in quindici gradini |
 | Traguardi | quinta e decima domanda |
+
+## Un tasto tenuto premuto vale una volta
+
+Il quiz è un gioco di menu, non di riflessi: qui un tasto tenuto giù deve
+contare una volta, non trenta al secondo. Dalla 14.1 conta il **momento in cui
+si preme**, e il cabinato dice al gioco quali tasti erano già giù quando la
+partita si è aperta — perché chi apre una partita lo fa premendo un tasto, e
+quel tasto è ancora giù quando arriva il primo fotogramma.
+
+Senza questo, succedeva quello che è stato segnalato: *rientro nel gioco e non
+mi viene chiesto se giocare a tempo o meno; a seconda del tasto che premo
+parte senza tempo o con tempo*. La schermata c'era: la attraversava da sola
+nel primo fotogramma, scegliendo con il tasto che era ancora premuto.
 
 ## Con il tempo o senza
 
@@ -82,6 +101,17 @@ anche la musica di Pongo o quella di Kingo Bongo — i wav che metti in
 libreria media**: quelli che carichi dalla pagina Media, wav o mp3,
 sottocartelle comprese. L'elenco si legge dal disco, non da una lista scritta
 nel programma.
+
+**Il brano della risposta parte sempre dall'attacco**, anche se quello stesso
+brano stava già suonando un istante prima: sentirne la coda, da fuori, vuol
+dire «non è partito». E la domanda dopo aspetta che finisca per davvero — il
+tetto è quello della conversione, quarantacinque secondi, non venti come
+nella 13.1, perché fermarsi prima della fine era proprio la cosa da non fare.
+Il fuoco salta l'attesa.
+
+Nella pagina Giochi, sotto ogni tendina, c'è scritto se quel brano è **pronto
+e quanto dura**, o perché non lo è; e quattro pulsanti lo fanno sentire subito.
+Se si sente dalla pagina e non in partita, il guasto non è nel file.
 
 **Se un brano non si può preparare, si torna al nostro.** Il file tolto dalla
 libreria, un mp3 rotto, ffmpeg che manca: prima in quel caso il momento
@@ -201,7 +231,7 @@ sul Raspberry**.
 
 # 6. Come è stato provato
 
-`test_quiz.py`, 126 controlli, e `test_musica_media.py`, altri 31. Quelli che contano davvero:
+`test_quiz.py`, 144 controlli, e `test_musica_media.py`, altri 32. Quelli che contano davvero:
 
 - **un fuoco solo non risponde mai**: il primo apre la conferma, e lo stesso
   fuoco non la può chiudere — un quarto di secondo di margine, altrimenti su

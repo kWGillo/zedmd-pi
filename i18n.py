@@ -496,6 +496,17 @@ STRINGS = {
     "settings.modes": ("Night mode e Sleep mode", "Night mode and Sleep mode"),
     "settings.night": ("Night mode — abbassa la luminosità in una fascia oraria",
                        "Night mode — lowers brightness during a time range"),
+    "settings.night.title": ("Night mode", "Night mode"),
+    "settings.night.hint": (
+        "Lo Sleep mode ha la precedenza. La fascia può attraversare la mezzanotte.",
+        "Sleep mode takes precedence. The range may cross midnight."),
+    "settings.sleep.title": ("Sleep mode", "Sleep mode"),
+    "settings.night.dove": (
+        "Il Night mode sta nelle Impostazioni, sotto la luminosità:",
+        "Night mode lives in Settings, under brightness:"),
+    "settings.sleep.dove": (
+        "Lo Sleep mode e le fasce orarie dei servizi stanno nella scheda Timing:",
+        "Sleep mode and every service's time window live in the Timing tab:"),
     "settings.modes.spostati": (
         "Night mode, Sleep mode e le fasce orarie di tutti i servizi stanno "
         "adesso in un posto solo:",
@@ -2098,6 +2109,19 @@ STRINGS = {
     "giochi.quiz.momento.giusta": ("Risposta giusta", "Right answer"),
     "giochi.quiz.momento.sbagliata": ("Risposta sbagliata", "Wrong answer"),
     "giochi.quiz.tempo": ("Secondi per rispondere", "Seconds to answer"),
+    "giochi.quiz.brano.pronto": ("Pronto, %(secondi)s s.", "Ready, %(secondi)s s."),
+    "giochi.quiz.brano.no": ("Non pronto: %(motivo)s", "Not ready: %(motivo)s"),
+    "giochi.quiz.prova.hint": (
+        "Fa sentire il brano di quel momento, per qualche secondo.",
+        "Plays that moment's track for a few seconds."),
+    "giochi.quiz.prova.suona": (
+        "Sta suonando %(nome)s per %(secondi)d secondi.",
+        "Playing %(nome)s for %(secondi)d seconds."),
+    "giochi.quiz.prova.muta": (
+        "Nessuna scheda audio per i giochi: non si sente niente.",
+        "No audio card for the games: nothing can be heard."),
+    "giochi.quiz.prova.muto": ("Quel brano non e' pronto: %(motivo)s",
+                               "That track is not ready: %(motivo)s"),
     "giochi.quiz.tempo.hint": (
         "Valgono se si gioca con il tempo: a inizio partita si sceglie con la leva.",
         "They count when playing with time: the lever picks it at the start."),

@@ -2729,6 +2729,20 @@ Storico:
        il silenzio, con il motivo di ffmpeg nel log; e i dettagli della
        vibrazione durano il doppio e partono da mezza scala, perche' a
        trentacinque millesimi il motore non faceva in tempo a partire.
+  14.1 *Super Quiz, e il Night mode dove deve stare.* La conferma della
+       risposta si sceglie con le frecce -- SI o NO, si parte da SI -- invece
+       di ricordare quale tasto vuol dire no. Un tasto tenuto premuto vale
+       una volta: la schermata "con il tempo o senza" non si attraversa piu'
+       da sola con il tasto ancora giu' di chi e' appena rientrato, e il
+       cabinato dice al gioco cosa era premuto all'apertura. Il brano della
+       risposta riparte sempre dall'attacco anche se stava gia' suonando, e
+       la domanda dopo aspetta che finisca fino a quarantacinque secondi
+       invece di venti. La pagina Giochi dice se ogni brano e' pronto e
+       quanto dura, o perche' non lo e', e lo fa sentire. Il Night mode torna
+       nelle Impostazioni sotto la luminosita' -- e' una regola di
+       luminosita' -- mentre lo Sleep mode resta nel Timing; i due moduli
+       sono divisi, e per strada si e' scoperto che la casella del risveglio
+       dei giochi non veniva letta da nessuno.
 """
 
-__version__ = "14.0"
+__version__ = "14.1"

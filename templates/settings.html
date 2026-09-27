@@ -61,6 +61,35 @@
   {% endif %}
 </section>
 
+{# Il Night mode sta qui, subito sotto la luminosita': e' una regola di
+   luminosita' -- "dalle 22 alle 7 il pannello sta al 15%" -- e chiederla in
+   un'altra pagina vuol dire regolare la luminosita' in un posto e la
+   luminosita' della notte in un altro. #}
+<section class="card">
+  <h2>{{ t('settings.night.title') }}</h2>
+  <form method="post" action="{{ url_for('api_display_notte') }}">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <label class="check">
+      <input type="checkbox" name="night_enabled" {{ 'checked' if cfg.display.night_enabled }}>
+      {{ t('settings.night') }}</label>
+    <div class="row4">
+      <div><label for="night_start">{{ t('common.from') }}</label>
+        <input type="time" id="night_start" name="night_start" value="{{ cfg.display.night_start }}"></div>
+      <div><label for="night_end">{{ t('common.to') }}</label>
+        <input type="time" id="night_end" name="night_end" value="{{ cfg.display.night_end }}"></div>
+      <div><label for="night_brightness">{{ t('settings.brightness') }}</label>
+        <input type="number" id="night_brightness" name="night_brightness" min="0" max="100"
+               value="{{ cfg.display.night_brightness }}"></div>
+      <div><label for="night_volume">{{ t('settings.night.volume') }}</label>
+        <input type="number" id="night_volume" name="night_volume" min="0" max="100" step="5"
+               value="{{ (cfg.display.night_volume * 100) | round | int }}"></div>
+    </div>
+    <p class="hint">{{ t('settings.night.volume.hint') }}</p>
+    <p class="hint">{{ t('settings.night.hint') }}</p>
+    <button type="submit">{{ t('form.save') }}</button>
+  </form>
+</section>
+
 <section class="card">
   <h2>{{ t('settings.language') }}</h2>
   <form method="post" action="{{ url_for('api_language') }}" class="inline">
@@ -77,13 +106,12 @@
 </section>
 
 <section class="card">
-  <h2>{{ t('settings.modes') }}</h2>
-  {# Night mode e Sleep mode si sono spostati nella scheda Timing della pagina
-     Servizi, insieme alle fasce di tutti gli altri servizi. La domanda è la
-     stessa — quando il pannello fa cosa — e averla in due pagine voleva dire
-     cercarla in due posti. Qui resta il collegamento: una funzione che
-     scompare senza dire dov'è andata è peggio di una funzione scomoda. #}
-  <p class="hint">{{ t('settings.modes.spostati') }}
+  <h2>{{ t('settings.sleep.title') }}</h2>
+  {# Lo Sleep mode e le fasce di tutti i servizi stanno nella scheda Timing
+     della pagina Servizi: la' la domanda e' "quando il pannello fa cosa", e
+     spegnere il display in una fascia e' quella domanda. Il Night mode no:
+     quello e' luminosita', e sta qui sopra. #}
+  <p class="hint">{{ t('settings.sleep.dove') }}
     <a href="{{ url_for('page_services', vista='timing') }}">{{ t('timing.title') }}</a> →</p>
 </section>
 
