@@ -37,7 +37,7 @@ from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      GiochiSource, InutiliSource, MediaPlayerSource, MeteoSource,
                      NowPlayingSource,
                      NotificheSource, OnAirSource, PreviewSource,
-                     SatellitiSource,
+                     SatellitiSource, StatusPlayerSource,
                      ScadenzeSource, SvegliaSource,
                      TelecameraSource,
                      ZeDMDSource, controlla_rom, controlla_wad)
@@ -247,6 +247,11 @@ class Runtime:
         # sopra il radar: un passaggio ha un orario, un aereo no.
         self.satelliti = SatellitiSource(self.cfg, self.display.width,
                                          self.display.height)
+        # Status Player. Priorita' 62, appena sopra i satelliti: un amico che
+        # comincia a giocare e' un fatto del momento, ma non e' un allarme e
+        # non interrompe chi sta giocando davvero al pannello.
+        self.status_player = StatusPlayerSource(self.cfg, self.display.width,
+                                                self.display.height)
         # Le notifiche da Home Assistant. Priorita' 70, sopra tutte le
         # sorgenti che "tornano" (radar, satelliti, foto) perche' una notifica
         # succede adesso o non succede piu'. Conosce l'arbitro come Doom e il
@@ -396,7 +401,7 @@ class Runtime:
 
         for source in (self.sveglia,
                        self.zedmd, self.preview, self.notifiche,
-                       self.satelliti, self.radar,
+                       self.satelliti, self.status_player, self.radar,
                        self.meteo, self.cielo, self.inutili,
                        self.player,
                        self.birthdays, self.scadenze, self.calendario,

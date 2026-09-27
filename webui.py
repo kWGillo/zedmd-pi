@@ -4,9 +4,11 @@ Gira sulla porta 8080. La porta 80 e' riservata all'handshake ZeDMD,
 servito da `zedmd_http.py`, che redirige qui ogni altro percorso.
 """
 
+import hmac
 import json
 import os
 import re
+import secrets
 import socket
 import subprocess
 import time
@@ -37,6 +39,7 @@ import pulizia
 import pulsante
 import rete
 import satelliti
+import statusplayer
 import suoni
 import vibra
 import webcam
@@ -1586,8 +1589,8 @@ def create_app(runtime):
              "status": stato("birthdays")},
             {"key": "clock", "label": "Clock", "ready": True,
              "status": stato("clock")},
-            {"key": "status_player", "label": "Status Player", "ready": False,
-             "status": ""},
+            {"key": "status_player", "label": "Status Player", "ready": True,
+             "status": stato("status_player")},
             {"key": "air_radar", "label": "Air Radar", "ready": True,
              "status": stato("radar")},
             {"key": "scadenze", "label": "Scadenze", "ready": True,
@@ -3057,6 +3060,207 @@ def create_app(runtime):
         except Exception:      # noqa: BLE001
             pass
         return redirect(url_for("page_onair"))
+
+    # --------------------------------------------------------- status player
+
+    # Il registro di scorta: serve quando la pagina gira senza la sorgente
+    # accesa -- durante una prova, o con il servizio spento. Cosi' la pagina
+    # si apre e si configura lo stesso, invece di dare errore proprio a chi
+    # sta cercando di accendere il servizio.
+    _registro_scorta = statusplayer.Registro()
+
+    def _status_sorgente():
+        return getattr(runtime, "status_player", None)
+
+    def _status_registro():
+        sorgente = _status_sorgente()
+        return sorgente.registro if sorgente is not None else _registro_scorta
+
+    def _status_vigile():
+        sorgente = _status_sorgente()
+        return sorgente.vigile if sorgente is not None else None
+
+    def _status_minuti():
+        try:
+            return max(1, min(180, int(cfg["status_player"].get("minuti_vivo", 10))))
+        except (TypeError, ValueError):
+            return 10
+
+    def _status_istruzioni():
+        """Le tre righe da dare a un amico. Con il suo indirizzo dentro.
+
+        Un'istruzione con scritto <indirizzo del pannello> e' un'istruzione
+        che qualcuno copiera' cosi' com'e'. Qui l'indirizzo e il segreto
+        sono quelli veri, e quello che resta da scrivere e' il nome.
+        """
+        conf = cfg["status_player"]
+        indirizzo = "http://%s:%d" % (socket.gethostname(),
+                                      int((cfg.get("web") or {}).get("port", 8080)))
+        return "\n".join([
+            "# Sulla Batocera, da SSH:",
+            "mkdir -p /userdata/system/configs/emulationstation/scripts/game-start",
+            "mkdir -p /userdata/system/configs/emulationstation/scripts/game-end",
+            "curl -o /userdata/system/statusplayer.sh %s/static/statusplayer.sh" % indirizzo,
+            "chmod +x /userdata/system/statusplayer.sh",
+            "ln -sf /userdata/system/statusplayer.sh \\",
+            "  /userdata/system/configs/emulationstation/scripts/game-start/statusplayer.sh",
+            "ln -sf /userdata/system/statusplayer.sh \\",
+            "  /userdata/system/configs/emulationstation/scripts/game-end/statusplayer.sh",
+            "",
+            "# E il file con i tre dati, sempre sulla Batocera:",
+            "cat > /userdata/system/statusplayer.conf <<'FINE'",
+            "PANNELLO=%s" % indirizzo,
+            "TOKEN=%s" % (conf.get("token") or "<premi Genera qui sopra>"),
+            "NOME=IL-SUO-NOME",
+            "FINE",
+            "batocera-save-overlay",
+        ])
+
+    @app.route("/statusplayer")
+    def page_statusplayer():
+        sorgente = _status_sorgente()
+        registro = _status_registro()
+        conf = cfg["status_player"]
+        vivi = []
+        for voce in registro.in_gioco(_status_minuti()):
+            voce["punti_testo"] = ("{:,}".format(voce["punti"]).replace(",", ".")
+                                   if voce["punti"] else "\u2014")
+            voce["quando_testo"] = time.strftime("%H:%M:%S",
+                                                 time.localtime(voce["quando"]))
+            vivi.append(voce)
+        return render_template(
+            "statusplayer.html", cfg=cfg, conf=conf, in_gioco=vivi,
+            amici=(conf.get("amici") or []),
+            massimo=statusplayer.MAX_AMICI,
+            ha_chiave=bool((conf.get("chiave_ra") or "").strip()),
+            errore=registro.errore,
+            istruzioni=_status_istruzioni(),
+            esito=request.args.get("esito", ""),
+            stato=(sorgente.status(current_language()) if sorgente is not None
+                   else i18n.translate("status.disabled", current_language())),
+            page="statusplayer")
+
+    def _status_torna(esito=""):
+        return redirect(url_for("page_statusplayer", esito=esito))
+
+    @app.route("/api/status/ra", methods=["POST"])
+    def api_status_ra():
+        conf = cfg["status_player"]
+        conf["utente_ra"] = (request.form.get("utente_ra") or "").strip()[:32]
+        # Una chiave vuota **non** cancella quella salvata: la casella si
+        # presenta sempre vuota, perche' una credenziale non si rimanda al
+        # browser, e chi salva l'intervallo non deve riscrivere la chiave.
+        nuova = (request.form.get("chiave_ra") or "").strip()
+        if nuova:
+            conf["chiave_ra"] = nuova[:64]
+        conf["intervallo"] = _limite(request.form.get("intervallo"),
+                                     conf.get("intervallo", 120), 30, 3600,
+                                     intero=True)
+        conf["minuti_vivo"] = _limite(request.form.get("minuti_vivo"),
+                                      conf.get("minuti_vivo", 10), 1, 180,
+                                      intero=True)
+        dmdconf.save()
+        vigile = _status_vigile()
+        if vigile is not None:
+            vigile.adesso()
+        return _status_torna()
+
+    @app.route("/api/status/amici", methods=["POST"])
+    def api_status_amici():
+        conf = cfg["status_player"]
+        amici = []
+        for indice in range(statusplayer.MAX_AMICI):
+            nome = (request.form.get("nome_%d" % indice) or "").strip()[:20]
+            nick = (request.form.get("ra_%d" % indice) or "").strip()[:32]
+            if not nome and not nick:
+                continue
+            # Un nickname che non puo' esistere non si salva: finirebbe in una
+            # query string, e il giro fallirebbe ogni due minuti per sempre.
+            if nick and not statusplayer.nick_valido(nick):
+                continue
+            amici.append({"nome": (nome or nick).upper(), "ra": nick})
+        conf["amici"] = amici
+        dmdconf.save()
+        vigile = _status_vigile()
+        if vigile is not None:
+            vigile.adesso()
+        return _status_torna()
+
+    @app.route("/api/status/pannello", methods=["POST"])
+    def api_status_pannello():
+        conf = cfg["status_player"]
+        conf["notifica"] = request.form.get("notifica") == "on"
+        conf["giro"] = request.form.get("giro") == "on"
+        conf["durata_notifica"] = _limite(request.form.get("durata_notifica"),
+                                          conf.get("durata_notifica", 8), 3, 30,
+                                          intero=True)
+        conf["durata_schermata"] = _limite(request.form.get("durata_schermata"),
+                                           conf.get("durata_schermata", 7), 3, 30,
+                                           intero=True)
+        conf["intervallo_giro"] = _limite(request.form.get("intervallo_giro"),
+                                          conf.get("intervallo_giro", 300), 30, 7200,
+                                          intero=True)
+        dmdconf.save()
+        return _status_torna()
+
+    @app.route("/api/status/token", methods=["POST"])
+    def api_status_token():
+        conf = cfg["status_player"]
+        if request.form.get("genera"):
+            conf["token"] = secrets.token_urlsafe(18)
+        else:
+            conf["token"] = (request.form.get("token") or "").strip()[:64]
+        dmdconf.save()
+        return _status_torna()
+
+    @app.route("/api/status/prova", methods=["POST"])
+    def api_status_prova():
+        lang = current_language()
+        vigile = _status_vigile()
+        if vigile is None:
+            vigile = statusplayer.Vigile(cfg, _status_registro())
+        if not vigile.api().pronto():
+            return _status_torna(i18n.translate("player.prova.chiave", lang))
+        try:
+            quanti = vigile.giro()
+        except Exception as exc:                        # pragma: no cover
+            return _status_torna(i18n.translate("player.prova.errore", lang,
+                                                error=str(exc)[:80]))
+        registro = _status_registro()
+        if registro.errore:
+            return _status_torna(i18n.translate("player.prova.errore", lang,
+                                                error=registro.errore))
+        return _status_torna(i18n.translate("player.prova.ok", lang, count=quanti))
+
+    @app.route("/api/status/svuota", methods=["POST"])
+    def api_status_svuota():
+        _status_registro().dimentica()
+        return _status_torna()
+
+    @app.route("/api/status/evento", methods=["POST"])
+    def api_status_evento():
+        """L'agente su Batocera che dice cosa e' partito. O cosa e' finito.
+
+        Senza segreto configurato non si accetta niente: un indirizzo che
+        prende qualunque messaggio e' un cartello «scrivi qui» per chiunque
+        sia sulla rete di casa. Il confronto e' a tempo costante, perche' un
+        confronto normale su una stringa segreta si puo' misurare.
+        """
+        conf = cfg["status_player"]
+        atteso = (conf.get("token") or "").strip()
+        dato = (request.form.get("token") or "").strip()
+        if not atteso or not hmac.compare_digest(atteso, dato):
+            return plain("no"), 403
+        nome = (request.form.get("nome") or "").strip()
+        if not nome:
+            return plain("chi?"), 400
+        evento = "fine" if (request.form.get("evento") or "").strip() in (
+            "fine", "end", "game-end", "stop") else "inizio"
+        _status_registro().da_agente(
+            nome, evento,
+            sistema=(request.form.get("sistema") or "").strip(),
+            gioco=(request.form.get("gioco") or "").strip())
+        return plain("ok")
 
     # ------------------------------------------------------------- satelliti
 

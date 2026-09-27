@@ -26,6 +26,8 @@ from .zedmd import ZeDMDSource
 
 from .satelliti import SatellitiSource
 
+from .statusplayer import StatusPlayerSource
+
 from .notifiche import NotificheSource
 
 from .onair import OnAirSource, normalizza as normalizza_onair
@@ -41,7 +43,7 @@ from .sveglia import SvegliaSource, QUANTE as SVEGLIE_QUANTE, normalizza as norm
 __all__ = [
     "MeteoSource", "CieloSource", "InutiliSource", "SvegliaSource", "SVEGLIE_QUANTE", "normalizza_sveglia",
     "OnAirSource", "normalizza_onair",
-    "NotificheSource", "SatellitiSource", "Source", "ClockSource", "MediaPlayerSource", "ZeDMDSource", "AirRadarSource",
+    "NotificheSource", "SatellitiSource", "StatusPlayerSource", "Source", "ClockSource", "MediaPlayerSource", "ZeDMDSource", "AirRadarSource",
     "BirthdaysSource", "PreviewSource", "HOLD_SECONDS",
     "DoomSource", "DOOM_TASTI", "DOOM_PULSANTI", "tastiere", "controlla_wad",
     "GiochiSource", "giochi_elenco", "ScadenzeSource", "CalendarioSource",

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}{{ t('player.title') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('player.title') }}</h2>
+  <p class="hint">{{ t('player.intro') }}</p>
+  <p class="status{{ ' err' if errore }}">{{ stato }}</p>
+  {% if esito %}<p class="status">{{ esito }}</p>{% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ t('player.ora') }}</h2>
+  {% if in_gioco %}
+  <table class="elenco">
+    <tr>
+      <th>{{ t('player.col.nome') }}</th>
+      <th>{{ t('player.col.gioco') }}</th>
+      <th>{{ t('player.col.punti') }}</th>
+      <th>{{ t('player.col.fonte') }}</th>
+      <th>{{ t('player.col.quando') }}</th>
+    </tr>
+    {% for v in in_gioco %}
+    <tr>
+      <td><strong>{{ v.nome }}</strong></td>
+      <td>{{ v.gioco }}{% if v.sistema %}<br><small>{{ v.sistema }}</small>{% endif %}</td>
+      <td>{{ v.punti_testo }}{% if v.guadagnati %}<br><small>+{{ v.guadagnati }}</small>{% endif %}</td>
+      <td><small>{{ t('player.fonte.agente') if v.fonte == 'agente' else t('player.fonte.ra') }}</small></td>
+      <td><small>{{ v.quando_testo }}</small></td>
+    </tr>
+    {% endfor %}
+  </table>
+  <form method="post" action="{{ url_for('api_status_svuota') }}">
+    <button type="submit">{{ t('player.svuota') }}</button>
+  </form>
+  {% else %}
+  <p class="hint">{{ t('player.ora.vuoto') }}</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ t('player.ra') }}</h2>
+  <p class="hint">{{ t('player.ra.hint') }}</p>
+  <form method="post" action="{{ url_for('api_status_ra') }}">
+    <div class="row3">
+      <div>
+        <label for="utente_ra">{{ t('player.utente') }}</label>
+        <input type="text" id="utente_ra" name="utente_ra" maxlength="32"
+               value="{{ conf.utente_ra }}">
+      </div>
+      <div>
+        <label for="chiave_ra">{{ t('player.chiave') }}</label>
+        <input type="password" id="chiave_ra" name="chiave_ra" maxlength="64"
+               autocomplete="new-password" value="">
+        {% if ha_chiave %}<p class="hint">{{ t('player.chiave.presente') }}</p>{% endif %}
+      </div>
+      <div>
+        <label for="intervallo">{{ t('player.intervallo') }}</label>
+        <input type="number" id="intervallo" name="intervallo" min="30" max="3600"
+               value="{{ conf.intervallo }}">
+        <p class="hint">{{ t('player.intervallo.hint') }}</p>
+      </div>
+    </div>
+    <label for="minuti_vivo">{{ t('player.vivo') }}</label>
+    <input type="number" id="minuti_vivo" name="minuti_vivo" min="1" max="180"
+           value="{{ conf.minuti_vivo }}">
+    <p class="hint">{{ t('player.vivo.hint') }}</p>
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+  <form method="post" action="{{ url_for('api_status_prova') }}">
+    <button type="submit">{{ t('player.prova') }}</button>
+    <p class="hint">{{ t('player.prova.hint') }}</p>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('player.amici') }}</h2>
+  <p class="hint">{{ t('player.amici.hint') }}</p>
+  <form method="post" action="{{ url_for('api_status_amici') }}">
+    <table class="elenco">
+      <tr>
+        <th>{{ t('player.amici.nome') }}</th>
+        <th>{{ t('player.amici.nick') }}</th>
+      </tr>
+      {% for i in range(massimo) %}
+      {% set amico = amici[i] if i < amici|length else {'nome': '', 'ra': ''} %}
+      <tr>
+        <td><input type="text" name="nome_{{ i }}" maxlength="20" value="{{ amico.nome }}"></td>
+        <td><input type="text" name="ra_{{ i }}" maxlength="32" value="{{ amico.ra }}"></td>
+      </tr>
+      {% endfor %}
+    </table>
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('player.pannello') }}</h2>
+  <form method="post" action="{{ url_for('api_status_pannello') }}">
+    <label class="check"><input type="checkbox" name="notifica"
+           {{ 'checked' if conf.notifica }}> {{ t('player.notifica') }}</label>
+    <label for="durata_notifica">{{ t('player.durata.notifica') }}</label>
+    <input type="number" id="durata_notifica" name="durata_notifica" min="3" max="30"
+           value="{{ conf.durata_notifica }}">
+    <label class="check"><input type="checkbox" name="giro"
+           {{ 'checked' if conf.giro }}> {{ t('player.giro') }}</label>
+    <div class="row2">
+      <div>
+        <label for="durata_schermata">{{ t('player.durata.schermata') }}</label>
+        <input type="number" id="durata_schermata" name="durata_schermata"
+               min="3" max="30" value="{{ conf.durata_schermata }}">
+      </div>
+      <div>
+        <label for="intervallo_giro">{{ t('player.intervallo.giro') }}</label>
+        <input type="number" id="intervallo_giro" name="intervallo_giro"
+               min="30" max="7200" value="{{ conf.intervallo_giro }}">
+      </div>
+    </div>
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('player.agente') }}</h2>
+  <p class="hint">{{ t('player.agente.hint') }}</p>
+  <form method="post" action="{{ url_for('api_status_token') }}">
+    <label for="token">{{ t('player.token') }}</label>
+    <input type="text" id="token" name="token" maxlength="64" value="{{ conf.token }}">
+    <p class="hint">{{ t('player.token.hint') }}</p>
+    <button type="submit">{{ t('common.apply') }}</button>
+    <button type="submit" name="genera" value="1">{{ t('player.token.genera') }}</button>
+  </form>
+  <h3>{{ t('player.istruzioni') }}</h3>
+  <pre class="log">{{ istruzioni }}</pre>
+</section>
+
+{% endblock %}

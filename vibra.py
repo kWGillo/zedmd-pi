@@ -290,7 +290,11 @@ def aperti():
 # raffica manderebbe trenta impulsi al secondo: il motore non fa in tempo a
 # fermarsi, e quello che si sente non e' piu' un colpo ma un ronzio continuo
 # -- il modo piu' rapido di far spegnere la vibrazione a chi gioca.
-INTERVALLO_MINIMO = 0.045
+# Dalla 14.0 sono 60 millesimi e non 45: i colpi piccoli adesso durano dai
+# sessanta ai novanta, e un intervallo piu' corto della durata vorrebbe dire
+# troncare ogni impulso con quello dopo -- cioe' tornare a non sentire
+# niente, per la strada opposta.
+INTERVALLO_MINIMO = 0.060
 
 _ultimo_colpo = [0.0, 0.0]      # istante, forza: per la regola qui sopra
 _generazione = [0]              # per fermare una sequenza quando ne arriva una piu' forte

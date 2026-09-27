@@ -511,6 +511,23 @@ def _sigla_media(scelto):
     return "media-%s" % impronta
 
 
+# Perche' un brano della libreria non si e' potuto preparare. Chiave: il nome
+# con il prefisso. Serve alla pagina: un brano che non parte deve dire il
+# motivo, invece di essere semplicemente muto.
+_MOTIVI = {}
+
+
+def _riga(testo, quanto=60):
+    """Una riga sola, corta: un messaggio di ffmpeg ne ha tre e non servono."""
+    testo = re.sub(r"\s+", " ", str(testo or "")).strip()
+    return testo[:quanto]
+
+
+def motivo_musica(nome):
+    """Perche' quel brano non si e' potuto preparare, o "" se va tutto bene."""
+    return _MOTIVI.get(nome, "")
+
+
 def prepara(cfg, nome):
     """Il nome con cui il mixer puo' suonare `nome`, o "" se non si puo'.
 
@@ -534,33 +551,44 @@ def prepara(cfg, nome):
     scelto = nome[len(PREFISSO_MEDIA):]
     sorgente = percorso_media(cfg, scelto)
     if not sorgente:
+        _MOTIVI[nome] = "il file non c'e' piu' nella libreria media"
         return ""
     sigla = _sigla_media(scelto)
     destinazione = os.path.join(CARTELLA_CONVERTITI, "%s.wav" % sigla)
     try:
         if (os.path.isfile(destinazione)
                 and os.path.getmtime(destinazione) >= os.path.getmtime(sorgente)):
+            _MOTIVI.pop(nome, None)
             return sigla
     except OSError:
         pass
     if not shutil.which("ffmpeg"):
+        _MOTIVI[nome] = "manca ffmpeg"
         return ""
     try:
         os.makedirs(CARTELLA_CONVERTITI, exist_ok=True)
         provvisorio = destinazione + ".parte"
-        esito = subprocess.call(
+        fatto = subprocess.run(
             ["ffmpeg", "-y", "-loglevel", "error", "-i", sorgente,
              "-t", str(MASSIMO_CONVERTITO), "-ac", "1",
              "-ar", str(FREQ_EFFETTI), "-acodec", "pcm_s16le",
              # Il file provvisorio non finisce per .wav, e senza "-f wav"
              # ffmpeg non saprebbe che formato scrivere e si fermerebbe.
              "-f", "wav", provvisorio],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        if esito != 0 or not os.path.isfile(provvisorio):
+            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        if fatto.returncode != 0 or not os.path.isfile(provvisorio):
+            # Il motivo vero di ffmpeg, non un "non ha funzionato": e' la
+            # differenza fra sapere che il file e' rotto e cercare per
+            # mezz'ora un guasto nel pannello.
+            _MOTIVI[nome] = _riga(
+                (fatto.stderr or b"").decode("utf8", "replace").strip()
+                or "ffmpeg non ha convertito il file")
             return ""
         os.replace(provvisorio, destinazione)
-    except Exception:
+    except Exception as exc:
+        _MOTIVI[nome] = _riga(str(exc))
         return ""
+    _MOTIVI.pop(nome, None)
     _DURATE.pop(sigla, None)
     return sigla
 
@@ -1121,10 +1149,20 @@ class Mixer:
                                                   grezzi))
             except Exception:
                 dati = None
-        self._campioni[nome] = dati
         if dati:
+            self._campioni[nome] = dati
             self._impacchetta(nome, dati)
-        return dati
+            return dati
+        # Un caricamento fallito **non** si tiene a mente, e questa riga e'
+        # una correzione: prima il None finiva in tabella come qualunque
+        # altro risultato, e da li' in poi quel nome era muto per sempre --
+        # anche dopo che il file era comparso. Succedeva davvero: si sceglie
+        # un mp3 della libreria mentre la partita e' aperta, il gioco lo
+        # chiede un istante prima che la conversione finisca, e da quel
+        # momento quel brano non parte piu' fino al riavvio del servizio.
+        # Riprovare costa una `stat`, e solo quando qualcuno chiede il brano.
+        self._conti["mancanti"] += 1
+        return None
 
     def _impacchetta(self, nome, dati):
         guadagno = self._volume

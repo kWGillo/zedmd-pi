@@ -83,6 +83,12 @@ libreria media**: quelli che carichi dalla pagina Media, wav o mp3,
 sottocartelle comprese. L'elenco si legge dal disco, non da una lista scritta
 nel programma.
 
+**Se un brano non si può preparare, si torna al nostro.** Il file tolto dalla
+libreria, un mp3 rotto, ffmpeg che manca: prima in quel caso il momento
+restava muto, ed è il modo peggiore di dire che qualcosa non va — chi gioca
+sente il silenzio e pensa che sia rotto il gioco. Il motivo vero, quello che
+scrive ffmpeg, finisce nel log del servizio.
+
 Un mp3 non entra nel mixer com'è: gli effetti dei giochi escono tutti da un
 flusso solo, aperto una volta e tenuto aperto, e dentro quel flusso ci entrano
 campioni — mono, 16 bit, 22050 Hz — non file. Il brano si converte quindi una
@@ -91,6 +97,19 @@ domanda: il risultato resta in `/var/lib/dmd/musiche` e si rifà solo se
 cambi il file di partenza. Si convertono al massimo **45 secondi**, perché il
 mixer tiene i campioni in memoria e un brano di quattro minuti sarebbero
 duecento megabyte su un Raspberry.
+
+## Finita la partita, fuoco ne comincia un'altra
+
+Come negli altri nove giochi. Nella 13.0 e nella 13.1 non era così: a partita
+finita il quiz non rispondeva più a niente, e rientrando sullo stesso gioco si
+ritrovava la stessa partita finita — che dal pad è indistinguibile da un gioco
+che ha smesso di leggere i tasti. Adesso la schermata finale lo dice, e c'è
+mezzo secondo di margine perché il fuoco che ha dato l'ultima risposta non
+faccia anche ripartire la partita dopo.
+
+La stessa schermata non dice più «hai vinto» a chi ha perso alla prima
+domanda: chi arriva in fondo ha vinto, chi si ferma a un traguardo si porta a
+casa qualcosa, e chi sbaglia subito legge PARTITA FINITA.
 
 ## La risposta dura quanto la sua musica
 
@@ -182,7 +201,7 @@ sul Raspberry**.
 
 # 6. Come è stato provato
 
-`test_quiz.py`, 120 controlli, e `test_musica_media.py`, altri 24. Quelli che contano davvero:
+`test_quiz.py`, 126 controlli, e `test_musica_media.py`, altri 31. Quelli che contano davvero:
 
 - **un fuoco solo non risponde mai**: il primo apre la conferma, e lo stesso
   fuoco non la può chiudere — un quarto di secondo di margine, altrimenti su

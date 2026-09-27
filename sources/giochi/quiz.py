@@ -238,6 +238,18 @@ class Quiz(Gioco):
     def passo(self, dt, tasti):
         if self.finita and self.fase == "finale":
             self._orologio += dt
+            # Fuoco ricomincia, come in tutti gli altri nove giochi. Mancava,
+            # ed era un difetto vero: finita una partita il quiz non
+            # rispondeva piu' a niente, e l'unico modo di rigiocare era
+            # uscire dal cabinato e rientrare -- quando andava bene, perche'
+            # rientrando sullo stesso gioco si ritrovava la stessa partita
+            # finita, e sembrava che il pad avesse smesso di funzionare.
+            #
+            # Il mezzo secondo di margine e' lo stesso ragionamento della
+            # conferma: il fuoco che ha dato l'ultima risposta non deve
+            # anche far ripartire la partita dopo.
+            if "fuoco" in tasti and self._orologio > 0.5:
+                self.avvia_partita()
             return
         self._orologio += dt
         if self.fase == "avvio":
@@ -530,15 +542,29 @@ class Quiz(Gioco):
             centra(px, testo, 56, GRIGIO, 0, LARGHEZZA)
 
     def _disegna_finale(self, px):
-        titolo = ("HAI VINTO" if self.lingua == "it" else "YOU WON")
+        # Tre finali diversi, e dirli uguali sarebbe una presa in giro: chi
+        # e' arrivato in fondo ha vinto, chi si ferma a un traguardo si
+        # porta a casa qualcosa, chi sbaglia la prima non si porta niente.
+        if self.gradino >= len(SCALA):
+            titolo = "HAI VINTO" if self.lingua == "it" else "YOU WON"
+        elif self.vinto > 0:
+            titolo = "TI PORTI A CASA" if self.lingua == "it" else "YOU TAKE HOME"
+        else:
+            titolo = "PARTITA FINITA" if self.lingua == "it" else "GAME OVER"
         if self.messaggio.startswith("NESSUNA") or self.messaggio.startswith("NO "):
-            centra(px, self.messaggio, 28, ROSSO, 0, LARGHEZZA)
+            centra(px, self.messaggio, 24, ROSSO, 0, LARGHEZZA)
+            centra(px, "FUOCO PER RIPROVARE" if self.lingua == "it"
+                   else "FIRE TO TRY AGAIN", 44, GRIGIO, 0, LARGHEZZA)
             return
         centra(px, titolo, 16, GRIGIO, 0, LARGHEZZA)
         centra(px, soldi(self.vinto), 28, GIALLO, 0, LARGHEZZA)
         quante = ("%d RISPOSTE GIUSTE" if self.lingua == "it"
                   else "%d RIGHT ANSWERS") % self.gradino
-        centra(px, quante, 44, VERDE, 0, LARGHEZZA)
+        centra(px, quante, 40, VERDE, 0, LARGHEZZA)
+        # E come si rigioca. Una schermata finale che non dice cosa fare e'
+        # una schermata da cui si esce spegnendo.
+        centra(px, "FUOCO PER RIGIOCARE" if self.lingua == "it"
+               else "FIRE TO PLAY AGAIN", 52, GRIGIO, 0, LARGHEZZA)
 
     # Il campo non esiste: qui si disegna tutto a mano, e `disegna` non
     # chiama mai questo metodo. Sta qui perche' la classe base lo pretende.

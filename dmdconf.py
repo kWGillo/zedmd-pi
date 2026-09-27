@@ -654,6 +654,47 @@ DEFAULTS = {
         "in_onda": False,
     },
 
+    # --------------------------------------------------------- status player
+    #
+    # Chi sta giocando, e a cosa. Due sorgenti che si sommano: l'API di
+    # RetroAchievements, che da' il punteggio -- l'unico numero confrontabile
+    # fra uno che gioca a Sonic e uno che gioca a Metal Slug -- e l'agente
+    # sulla Batocera degli amici, che vede anche i giochi senza cheevos.
+    #
+    # La chiave API si comporta come la password del broker: esce
+    # dall'esportazione. E' una credenziale personale, e un file di
+    # configurazione gira -- finisce in un backup, in un allegato, in una
+    # segnalazione.
+    "status_player": {
+        # Il tuo nickname su RetroAchievements e la chiave web dell'API
+        # (retroachievements.org -> Settings -> Keys).
+        "utente_ra": "",
+        "chiave_ra": "",
+        # Ogni quanti secondi si chiede all'API come stanno gli amici. Due
+        # minuti e' il compromesso: una partita dura piu' di due minuti,
+        # quindi non se ne perde nessuna, e sono trenta richieste all'ora per
+        # amico invece di centoventi.
+        "intervallo": 120,
+        # Dopo quanti minuti di silenzio una persona non e' piu' "in gioco".
+        # Chi spegne la macchina non manda nessun avviso: sparisce.
+        "minuti_vivo": 10,
+        # Gli amici: nome mostrato sul pannello e nickname RetroAchievements.
+        # Chi ha solo l'agente lascia il nickname vuoto.
+        "amici": [],
+        # Il segreto che l'agente su Batocera deve presentare. Vuoto vuol
+        # dire che nessuno puo' scrivere: un indirizzo che accetta qualunque
+        # POST e' un cartello "scrivi qui" per chiunque sia sulla rete.
+        "token": "",
+        # La notifica quando qualcuno comincia, e il giro di chi sta
+        # giocando. Si spengono separatamente perche' rispondono a due
+        # domande diverse: "e' appena successo" e "chi c'e' adesso".
+        "notifica": True,
+        "durata_notifica": 8,
+        "giro": True,
+        "durata_schermata": 7,
+        "intervallo_giro": 300,
+    },
+
     # ------------------------------------------------------------- satelliti
     #
     # I passaggi visibili della Stazione Spaziale. Le coordinate non stanno
@@ -1303,6 +1344,13 @@ def snapshot(include_position=True):
     # dell'applicazione, e chi reimporta la riscrive una volta sola.
     if isinstance(data.get("google"), dict):
         data["google"]["client_secret"] = ""
+    # E per la chiave di RetroAchievements, che e' una credenziale personale
+    # come le altre due: chi reimporta la riscrive una volta sola. Il token
+    # dell'agente resta, invece: e' un segreto **di questo pannello**, e se
+    # sparisse dall'export tutti gli agenti gia' installati smetterebbero di
+    # parlare dopo un ripristino, senza che nessuno capisca perche'.
+    if isinstance(data.get("status_player"), dict):
+        data["status_player"]["chiave_ra"] = ""
     return data
 
 

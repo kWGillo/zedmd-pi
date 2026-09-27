@@ -134,6 +134,76 @@ STRINGS = {
     "satelliti.lasts.min": ("PER %(min)d MIN", "FOR %(min)d MIN"),
     "satelliti.lasts.sec": ("PER %(sec)d S", "FOR %(sec)d S"),
     # --- pagina Satelliti
+    # ----------------------------------------------------------- status player
+    "nav.statusplayer": ("Status Player", "Status Player"),
+    "player.title": ("Status Player", "Status Player"),
+    "player.intro": (
+        "Chi sta giocando adesso, e a cosa. I punti vengono da RetroAchievements.",
+        "Who is playing right now, and what. Points come from RetroAchievements."),
+    "player.panel.ingioco": ("IN GIOCO", "PLAYING"),
+    "player.panel.avviato": ("ha avviato", "started"),
+    "player.panel.punti": ("%(points)s punti", "%(points)s pts"),
+    "player.ora": ("Chi sta giocando adesso", "Playing right now"),
+    "player.ora.vuoto": (
+        "Nessuno, al momento. Compaiono qui appena qualcuno avvia un gioco.",
+        "Nobody right now. They show up here as soon as someone starts a game."),
+    "player.col.nome": ("Nome", "Name"),
+    "player.col.gioco": ("Gioco", "Game"),
+    "player.col.punti": ("Punti", "Points"),
+    "player.col.fonte": ("Da dove", "Source"),
+    "player.col.quando": ("Visto", "Seen"),
+    "player.fonte.ra": ("RetroAchievements", "RetroAchievements"),
+    "player.fonte.agente": ("Agente Batocera", "Batocera agent"),
+    "player.ra": ("RetroAchievements", "RetroAchievements"),
+    "player.ra.hint": (
+        "La chiave sta nel tuo profilo RetroAchievements, sezione Keys.",
+        "The key is in your RetroAchievements profile, Keys section."),
+    "player.utente": ("Il tuo nickname", "Your nickname"),
+    "player.chiave": ("Chiave API", "API key"),
+    "player.chiave.presente": ("È già salvata: lascia vuoto per non cambiarla.",
+                               "Already saved: leave empty to keep it."),
+    "player.intervallo": ("Ogni quanti secondi", "Every how many seconds"),
+    "player.intervallo.hint": (
+        "Una partita dura più di due minuti, quindi due minuti non ne perdono nessuna.",
+        "A game lasts more than two minutes, so two minutes never miss one."),
+    "player.vivo": ("Minuti prima di sparire", "Minutes before dropping off"),
+    "player.vivo.hint": (
+        "Chi spegne la macchina non avvisa nessuno: sparisce dopo questo silenzio.",
+        "Whoever powers the machine off warns nobody: they drop off after this silence."),
+    "player.amici": ("Gli amici", "Your friends"),
+    "player.amici.hint": (
+        "Nome sul pannello e nickname. Solo agente? Lascia vuoto il nickname.",
+        "Panel name and nickname. Agent only? Leave the nickname empty."),
+    "player.amici.nome": ("Nome sul pannello", "Name on the panel"),
+    "player.amici.nick": ("Nickname RetroAchievements", "RetroAchievements nickname"),
+    "player.pannello": ("Sul pannello", "On the panel"),
+    "player.notifica": ("Avvisa quando qualcuno comincia",
+                        "Announce when someone starts"),
+    "player.durata.notifica": ("Secondi dell'avviso", "Announcement seconds"),
+    "player.giro": ("Mostra ogni tanto chi sta giocando",
+                    "Show who is playing, now and then"),
+    "player.durata.schermata": ("Secondi per persona", "Seconds per person"),
+    "player.intervallo.giro": ("Ogni quanti secondi il giro",
+                               "Every how many seconds"),
+    "player.agente": ("L'agente su Batocera", "The Batocera agent"),
+    "player.agente.hint": (
+        "Per gli amici in rete di casa: vede anche i giochi senza cheevos.",
+        "For friends on your own network: it sees games without cheevos too."),
+    "player.token": ("Segreto dell'agente", "Agent secret"),
+    "player.token.hint": (
+        "Senza segreto nessuno può scrivere al pannello.",
+        "With no secret nobody can write to the panel."),
+    "player.token.genera": ("Genera", "Generate"),
+    "player.istruzioni": ("Come si installa", "How to install it"),
+    "player.prova": ("Prova adesso", "Test now"),
+    "player.prova.hint": (
+        "Fa subito un giro di richieste e scrive qui sotto com'è andata.",
+        "Runs a round of requests right away and writes the outcome below."),
+    "player.prova.ok": ("%(count)d amici aggiornati.", "%(count)d friends updated."),
+    "player.prova.errore": ("Non ha funzionato: %(error)s",
+                            "It did not work: %(error)s"),
+    "player.prova.chiave": ("Manca la chiave API.", "The API key is missing."),
+    "player.svuota": ("Svuota l'elenco", "Clear the list"),
     "nav.satelliti": ("Satelliti", "Satellites"),
     "satelliti.title": ("Satelliti", "Satellites"),
     "satelliti.intro": (
@@ -222,6 +292,16 @@ STRINGS = {
     "status.satelliti.none": (
         "nessun passaggio visibile in vista",
         "no visible pass coming up"),
+    "status.player.ok": (
+        "%(count)d in gioco: %(name)s a %(game)s (%(shown)d schermate)",
+        "%(count)d playing: %(name)s on %(game)s (%(shown)d screens)"),
+    "status.player.nessuno": (
+        "nessuno sta giocando (%(shown)d schermate finora)",
+        "nobody is playing (%(shown)d screens so far)"),
+    "status.player.vuoto": (
+        "nessuna chiave RetroAchievements e nessun agente configurato",
+        "no RetroAchievements key and no agent configured"),
+    "status.player.errore": ("non risponde: %(error)s", "not answering: %(error)s"),
 
     # ---------------------------------------------------------- profili pannello
     "preset.label": ("Profilo del pannello", "Panel profile"),

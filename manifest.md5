@@ -20,8 +20,8 @@ f4da634c02da1d2d9c2bf600287d09c3  copertine.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 ea2b0d24ff1827bdf031ed8393dc6db8  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
-a84ca955dba582ba1094d1c943e0705c  dmdconf.py
-a3a7b1fcd62599b256906812438cf147  dmdd.py
+961f5ed9a55a5e601008954b300ee48d  dmdconf.py
+1296a9d079a23aa140243c3f73418245  dmdd.py
 6c389cdd58dba7f17f2bd167c0b1dab6  domande.en.csv
 90cb07f6307f724e2036facc50587a37  domande.it.csv
 f7bdf6a4f25139971cd0935ea17fbe22  domande.py
@@ -37,7 +37,7 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 48b68ac87a2559a7efff49d54460ff57  giornate.csv
 0d83c8464fd5bd30a6fcb328e6dd0489  hass.py
-724e4cd4a98ca3d7b956e474583f4b57  i18n.py
+2f69c85723cfc0e507e57118336b2683  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
 7fe7fb617ddfdac829b0ee4990572ced  inutili.py
@@ -59,7 +59,7 @@ a1d8f7f59de7ddc70db9ab829de222dc  satelliti.py
 5698878038d0f306ecebc25bde34d88c  scadenze.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 7ee163e5c89f7ac983b26ae09a1a4b92  setup_share.sh
-59c2ea2c3905c5898da336bdc95ad205  sources/__init__.py
+be7a53f3a370b2550970f7cdb510bc53  sources/__init__.py
 09e41ccca7a0f91ade61fbfefe602f47  sources/airradar.py
 4839d9f4d5cbf59bfe83a946f7c272ee  sources/anteprima.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
@@ -71,7 +71,7 @@ fff9a6751fd27a17747c95d907945d19  sources/cielo.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 121811114e48abfc98e44fafee43e6f1  sources/doom.py
 bc025a8c4685b1cec20e46e3178346cb  sources/gameboy.py
-1f95041b0290eae21b9c067575e5742a  sources/giochi/__init__.py
+2328c7af8e640e2bdd70934bbbc9ada3  sources/giochi/__init__.py
 c0f5d0ee0d029e79912d10a8267ab000  sources/giochi/base.py
 f2aea72967c0e34ef150b26ddf000e8b  sources/giochi/bongo.py
 033d2a7403a0db024204329e95251214  sources/giochi/classifica.py
@@ -80,7 +80,7 @@ d8be4b827917e8c222dfe63615a6ff87  sources/giochi/invasori.py
 7463e5026b2ad71786d96d7e48187b62  sources/giochi/mattoni.py
 8e8d7180e98ea0aa81205ffd2a821b47  sources/giochi/mine.py
 ce067949314c5c7a779ef14aef2a479e  sources/giochi/pongo.py
-d25c1971c89cc1d31d1ca41c6323121c  sources/giochi/quiz.py
+4875bb686d7a71cb7f1b9750cf22078a  sources/giochi/quiz.py
 bf801c6443981bcbd2132b69bdf01cf8  sources/giochi/serpente.py
 9f1e1bc5394cdb3b6b7620eaeef5e07a  sources/giochi/squadriglia.py
 e6d3a6d006b2d1ff361934e64a1ae7e9  sources/giochi/trex.py
@@ -92,6 +92,7 @@ e6d3a6d006b2d1ff361934e64a1ae7e9  sources/giochi/trex.py
 06d7dfadf503750b66634ab808d1956a  sources/onair.py
 e6c140b184dd15f3c391ec123180f25e  sources/satelliti.py
 2a73be667459d2a58f2ddab91ff91a98  sources/scadenze.py
+58b2545ed6131205d23dd95b2d8617bf  sources/statusplayer.py
 09f13fd40ae8b7e45fe6da063bd6c4e6  sources/sveglia.py
 de7ee2495ed06fbae5a24e7de31e756f  sources/telecamera.py
 0ff9708f05c58f81a6050346055d16d2  sources/testo.py
@@ -99,8 +100,10 @@ de7ee2495ed06fbae5a24e7de31e756f  sources/telecamera.py
 9c78a0b718974f492c303164ac3d0dbf  sources/zedmd.py
 cf51e7306580b6f9b8782d36dc6aae8e  spotifyapi.py
 c750104c1eaa178d6958982586e89855  staccato.py
+c6d567ef3c2d1994fb9b9a6b555d62be  static/statusplayer.sh
 59a5d29dba6d1d0e47a7a02287950719  static/style.css
-4b9873c0b649230388b8c19e7234c1b4  suoni.py
+419ce44da92eb9731684549a240f3dc4  statusplayer.py
+9d60e7ad24bcb2b7712dc21022f1e84a  suoni.py
 eebb57ced82613a3b6cab246c94659c1  suoni/bongo_musica.wav
 29d12bc8ee326ef404bbe68d03677f67  suoni/breakout_musica.wav
 b2e39a45b2319abd500f8c72019d34c0  suoni/colpito.wav
@@ -140,7 +143,7 @@ f989ae9731b72c895aca8e14d94b517a  suoni/squadriglia_musica.wav
 20f388c98cf3e8c1565aac8909902ac3  suoni/tonfo.wav
 c193906bb0ae9364de937623953b62dc  suoni/trex_musica.wav
 e7cbc43ed729a6fc7f71dc5d266d5a98  templates/banner.html
-12a21862aa615c6c7a777e68d9163953  templates/base.html
+efbfe1f4254f03da4e2eff37e072f957  templates/base.html
 f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
 543d0923aa70d70713ab36b039dd126a  templates/calendario.html
 2151e5dc3cc2a6fe5b2e925c5237328c  templates/clock.html
@@ -159,13 +162,14 @@ c80b972bd47827c7383979aafb7fecc8  templates/satelliti.html
 403872d6a716a4b13b8775cfbbdd355a  templates/scadenze.html
 1498a19b2bb460b2b889af992b23128c  templates/services.html
 20c058c29688488c9e0514f736edbf97  templates/settings.html
+2263fa5fb665691a953b514719a40ec2  templates/statusplayer.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 2bc1da7de80749f0587cfc1c2c56f8fd  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-8c77c036c29508ee0b89914be49efb66  version.py
-45c5a5dd056537f5506b57583a4469d1  vibra.py
+1f5dabcf3b375ce5a1ba2e3b945988ee  version.py
+867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-1aadfa3749d7f4c05fa093b84b0b8903  webui.py
+fb713ef924001ddff94e6491ce8516d4  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

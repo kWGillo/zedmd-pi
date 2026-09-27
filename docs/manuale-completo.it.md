@@ -731,6 +731,12 @@ emulatori esterni che porta a Doom e al Game Boy. Guide in `docs/quiz.it.md`,
 > partita, in tutti i giochi, chi entra fra i tre migliori compone le sue tre
 > lettere come nei cabinati.
 
+**Status Player** — chi sta giocando adesso sulle Batocera degli amici: nome,
+gioco e punteggio. I punti vengono da RetroAchievements, che è l'unico
+punteggio confrontabile fra un gioco e un altro; i titoli possono arrivare
+anche da un agente installato sulla macchina dell'amico. Guida completa in
+`docs/statusplayer.it.md`.
+
 **Aggiornamenti** — controllo e installazione della nuova versione da GitHub,
 con verifica dell'archivio e ripristino automatico se il servizio non riparte.
 

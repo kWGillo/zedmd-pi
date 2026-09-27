@@ -2,6 +2,102 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [14.0]
+
+### Status Player: chi sta giocando, a cosa, con quanti punti
+
+*«Avevamo messo l'anteprima dello Status Player nei servizi. Vorrei che
+appaiano le informazioni di gioco dei giocatori in Batocera. Deve essere
+visualizzato il nome, il gioco e il punteggio.»*
+
+Era un segnaposto con scritto IN ARRIVO. Adesso è un servizio.
+
+**Il punto duro era il punteggio**, e vale la pena dirlo: Batocera non ne ha
+uno. Ogni gioco tiene il suo dentro la RAM dell'emulatore, a un indirizzo
+diverso, e non lo scrive da nessuna parte. Ne esiste uno solo che vale per
+tutti i giochi e per tutte le persone, ed è quello di **RetroAchievements**,
+che Batocera integra già: è anche l'unico confrontabile fra uno che gioca a
+Sonic e uno che gioca a Metal Slug.
+
+**Due sorgenti, un registro solo.** L'API di RetroAchievements dà i punti e
+dice a cosa sta giocando una persona anche se sta dall'altra parte d'Italia,
+senza installare niente da nessuno. L'agente su Batocera — uno script di
+dieci righe che EmulationStation esegue a ogni gioco avviato e chiuso — vede
+anche i giochi senza cheevos, in rete di casa. Su una persona che ha tutte e
+due c'è una riga sola: il gioco lo dice l'agente, che lo sa per certo, i
+punti RetroAchievements, che è l'unico a saperli.
+
+**Sul pannello, due modi di comparire**, perché rispondono a due domande
+diverse: l'avviso quando qualcuno comincia (è appena successo) e il giro di
+chi sta giocando (chi c'è adesso). Si spengono separatamente. Priorità 62,
+sopra i satelliti e sotto le notifiche: un amico che comincia a giocare non è
+un allarme, e non interrompe chi sta giocando davvero al pannello.
+
+Accanto ai punti compare quanti ne ha guadagnati **da quando ha cominciato
+quella partita**, ed è il numero che rende viva una schermata altrimenti
+ferma. Sotto, quando c'è, non il titolo ma la rich presence: «World 4-2, 3
+lives».
+
+Tre scelte che si vedono solo a guardarle da vicino:
+
+- **l'ora la dice l'API, non noi.** Se l'ultima presenza di qualcuno risale a
+  due ore fa, quella persona non sta giocando — e quando l'API l'ora non la
+  dice, una risposta identica ripetuta ogni due minuti non è la prova che
+  qualcuno stia giocando, è la prova che il profilo è fermo;
+- **un titolo si chiede una volta sola** e resta su disco: un titolo non
+  cambia mai, e chiederlo ogni due minuti per sempre a un servizio gratuito
+  sarebbe maleducazione;
+- **la chiave API esce dall'esportazione** come la password del broker; il
+  segreto dell'agente no, perché toglierlo farebbe ammutolire tutti gli
+  agenti già installati dopo un ripristino.
+
+La pagina detta le righe dell'installazione dell'agente con dentro
+l'indirizzo e il segreto **veri**: un'istruzione che dice «metti qui il tuo
+indirizzo» è un'istruzione che qualcuno copierà così com'è.
+
+Guida in `docs/statusplayer.it.md`; `test_statusplayer.py`, 76 controlli.
+
+### E quattro cose che non andavano, dette dal campo
+
+**Il quiz non si poteva rigiocare.** *«Se perdo, non posso riprendere la
+partita in nessun modo»*, e subito dopo *«sono uscito e rientrato, ora non
+posso selezionare nessuna risposta»*. Erano lo stesso difetto visto da due
+parti: a partita finita il quiz non rispondeva a niente, e rientrando sullo
+stesso gioco si ritrovava **quella** partita, già finita — che dal pad è
+indistinguibile da un gioco che ha smesso di leggere i tasti. Adesso il fuoco
+ricomincia, come negli altri nove, con mezzo secondo di margine perché il
+fuoco dell'ultima risposta non faccia ripartire la partita dopo; e la
+schermata finale lo dice, invece di essere una schermata muta da cui si esce
+spegnendo. Già che c'era: non dice più «hai vinto» a chi ha sbagliato la
+prima domanda.
+
+**I brani scelti dalla libreria non partivano.** *«Quando vinco o quando
+perdo non partono i suoni mp3 associati»*. Il difetto era nel mixer, e vale la
+pena raccontarlo perché è di una famiglia intera: un caricamento **fallito**
+finiva in tabella come qualunque altro risultato, e da quel momento quel nome
+era muto per sempre. Bastava scegliere un mp3 mentre la partita era aperta —
+il gioco lo chiede un istante prima che la conversione finisca, trova niente,
+e se lo ricorda fino al riavvio del servizio. Adesso un fallimento non si
+tiene a mente: riprovare costa una `stat`, e solo quando qualcuno chiede il
+brano.
+
+E perché un silenzio non resti mai senza spiegazione: se un brano della
+libreria non si può preparare — file tolto, mp3 rotto, ffmpeg che manca — il
+gioco **torna al nostro** invece di restare muto, e il motivo vero, quello che
+scrive ffmpeg, finisce nel log.
+
+**I dettagli della vibrazione non si sentivano.** *«In tutti i giochi mancano
+gli effetti aggiuntivi del motore di feedback: i principali funzionano, gli
+altri non si percepiscono»*. Vero, e il motivo è fisico: un motore a massa
+eccentrica ci mette venti o trenta millesimi a partire e sotto un terzo di
+scala non parte affatto. Erano trentacinque millesimi a 0,30, che al 70% di
+serie fanno 0,21: non un frizzare piano, niente. Adesso durano dai sessanta ai
+novanta millesimi e partono da mezza scala, e quelli che rappresentano un urto
+hanno anche un filo di motore grande, che è quello che si sente nei polsi.
+L'intervallo minimo fra due colpi sale da 45 a 60 millesimi, perché un
+intervallo più corto dell'impulso lo troncherebbe con quello dopo — cioè
+tornerebbe a non farlo sentire, per la strada opposta.
+
 ## [13.1]
 
 ### Super Quiz: il tempo si sceglie, e senza tempo non scade niente

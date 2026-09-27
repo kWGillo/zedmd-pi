@@ -370,7 +370,7 @@ class GiochiSource(Source):
         except Exception as exc:                    # pragma: no cover
             print("[giochi] musica non avviata: %s" % exc)
 
-    def _prepara_musiche(self, nomi=None):
+    def _prepara_musiche(self):
         """Converte adesso i brani presi dalla libreria media.
 
         Un mp3 caricato dalla pagina Media non entra nel mixer com'e': va
@@ -380,15 +380,32 @@ class GiochiSource(Source):
         arriva la risposta. Si fa qui, all'apertura del gioco, dove un
         decimo di secondo non lo nota nessuno -- e la volta dopo il file
         convertito c'e' gia'.
+
+        E se un brano non si puo' preparare -- il file tolto dalla libreria,
+        un mp3 rotto, ffmpeg che manca -- **si torna al nostro**. Prima in
+        quel caso il momento restava muto, che e' il modo peggiore di dire
+        che qualcosa non va: chi gioca sente il silenzio e pensa che il
+        gioco sia rotto. Il motivo finisce nel log e nella pagina Giochi.
         """
-        if nomi is None:
-            nomi = list((self.conf().get("quiz_musica") or {}).values())
-        for nome in nomi:
-            if nome and str(nome).startswith(suoni.PREFISSO_MEDIA):
-                try:
-                    suoni.prepara(self.cfg, nome)
-                except Exception as exc:            # pragma: no cover
-                    print("[giochi] brano non convertito: %s" % exc)
+        gioco = self._gioco
+        musiche = getattr(gioco, "musiche", None)
+        if not isinstance(musiche, dict):
+            return
+        predefinite = getattr(gioco, "MUSICHE", {}) or {}
+        for momento, nome in list(musiche.items()):
+            if not nome or not str(nome).startswith(suoni.PREFISSO_MEDIA):
+                continue
+            try:
+                pronto = suoni.prepara(self.cfg, nome)
+            except Exception as exc:                # pragma: no cover
+                pronto = ""
+                print("[giochi] brano non convertito: %s" % exc)
+            if not pronto:
+                print("[giochi] %s: %s -- si usa %s"
+                      % (nome, suoni.motivo_musica(nome) or "non convertito",
+                         predefinite.get(momento, "il silenzio")))
+                if predefinite.get(momento):
+                    musiche[momento] = predefinite[momento]
 
     def _durata_musica(self, nome):
         """Quanto dura un brano. Zero vuol dire "non lo so", e chi chiede
@@ -433,20 +450,32 @@ class GiochiSource(Source):
         "record": [(0.25, 0.20, 0.09), (0.50, 0.35, 0.09), (0.90, 0.60, 0.22)],
     }
 
-    # I dettagli: mattoncini, spari, bocconi. Stanno quasi tutti sul motorino
-    # e durano trenta o quaranta millesimi -- un frizzare, non un colpo.
-    # Valgono solo con «anche i dettagli» acceso, e anche allora restano
-    # sotto la regola dell'intervallo minimo di `vibra`: un gioco che spara a
-    # raffica non deve trasformare il pad in un ronzio continuo.
+    # I dettagli: mattoncini, spari, bocconi. Un frizzare, non un colpo --
+    # ma un frizzare che si deve **sentire**.
+    #
+    # I valori della 12.6 non si sentivano, ed e' stato detto dal campo:
+    # «mancano tutti gli effetti aggiuntivi, i principali funzionano, gli
+    # altri non si percepiscono». Il motivo e' fisico e si poteva prevedere:
+    # un motore a massa eccentrica ha un tempo di avvio di venti o trenta
+    # millesimi, e sotto un terzo di scala non parte nemmeno. Erano
+    # trentacinque millesimi a 0,30, che scalati al 70% di serie fanno 0,21
+    # per 35 ms: il motore faceva in tempo a mettersi in moto e gli si
+    # toglieva corrente. Non e' un frizzare piano, e' niente.
+    #
+    # Adesso durano dai sessanta ai novanta millesimi e partono da mezza
+    # scala, e quelli che rappresentano un urto -- il mattoncino, la parete,
+    # la sponda -- hanno anche un filo di motore grande, che e' quello che si
+    # sente davvero nei polsi. Restano comunque un'altra cosa dai colpi
+    # grossi: quelli stanno fra 0,60 e 1,00 sul grande e durano il doppio.
     DETTAGLI = {
-        "mattone": [(0.0, 0.30, 0.035)],   # il mattoncino che si rompe
-        "sparo": [(0.0, 0.22, 0.030)],     # il colpo che parte
-        "mangia": [(0.0, 0.28, 0.040)],    # il boccone di Gnam Gnam e Snake
-        "salto": [(0.15, 0.25, 0.040)],    # il T-Rex che stacca da terra
-        "muro": [(0.0, 0.25, 0.035)],      # la palla sulla parete
-        "sponda": [(0.0, 0.28, 0.040)],    # la sponda di Pongo
-        "lancio": [(0.25, 0.25, 0.050)],   # la palla che parte
-        "punto": [(0.20, 0.35, 0.060)],    # un punto messo a segno
+        "mattone": [(0.18, 0.70, 0.060)],  # il mattoncino che si rompe
+        "sparo": [(0.0, 0.55, 0.060)],     # il colpo che parte
+        "mangia": [(0.0, 0.65, 0.070)],    # il boccone di Gnam Gnam e Snake
+        "salto": [(0.22, 0.60, 0.070)],    # il T-Rex che stacca da terra
+        "muro": [(0.15, 0.60, 0.065)],     # la palla sulla parete
+        "sponda": [(0.18, 0.65, 0.070)],   # la sponda di Pongo
+        "lancio": [(0.30, 0.60, 0.080)],   # la palla che parte
+        "punto": [(0.28, 0.80, 0.090)],    # un punto messo a segno
     }
 
     def _suona_effetto(self, nome):

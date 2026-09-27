@@ -2705,6 +2705,30 @@ Storico:
        compresi: si convertono una volta con ffmpeg nel formato del mixer,
        quando si sceglie il brano e all'apertura del gioco, e restano in
        /var/lib/dmd/musiche.
+  14.0 **Status Player**, il servizio che era un segnaposto. Chi sta giocando
+       adesso sulle Batocera degli amici: nome, gioco e punteggio. Il
+       punteggio e' quello di RetroAchievements -- Batocera lo integra gia',
+       ed e' l'unico numero confrontabile fra uno che gioca a Sonic e uno che
+       gioca a Metal Slug, perche' un punteggio dentro un gioco vive nella
+       RAM dell'emulatore e non lo scrive nessuno. Due sorgenti che si
+       sommano in un registro solo: l'API di RetroAchievements, che non
+       chiede niente agli amici e funziona anche fuori casa, e un agente di
+       dieci righe su Batocera, che vede anche i giochi senza cheevos. Sul
+       pannello due modi di comparire, separabili: l'avviso quando qualcuno
+       comincia e il giro di chi sta giocando, con i punti guadagnati da
+       quando ha cominciato quella partita. La chiave API esce
+       dall'esportazione come la password del broker; il segreto dell'agente
+       resta, o dopo un ripristino tutti gli agenti gia' installati
+       smetterebbero di parlare.
+       E quattro correzioni dette dal campo: il quiz si puo' rigiocare con il
+       fuoco a partita finita (prima non rispondeva piu' a niente, e
+       rientrando si ritrovava la stessa partita finita); un caricamento
+       audio fallito non resta piu' in tabella per sempre -- era il motivo
+       per cui un mp3 scelto a partita aperta non partiva mai piu'; un brano
+       della libreria che non si converte torna al nostro invece di lasciare
+       il silenzio, con il motivo di ffmpeg nel log; e i dettagli della
+       vibrazione durano il doppio e partono da mezza scala, perche' a
+       trentacinque millesimi il motore non faceva in tempo a partire.
 """
 
-__version__ = "13.1"
+__version__ = "14.0"

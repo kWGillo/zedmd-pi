@@ -398,16 +398,29 @@ debba guardare il pannello.
 | lancio | la palla che parte |
 | punto | un punto messo a segno |
 
-Stanno quasi tutti **sul motorino piccolo** e durano tre o quattro centesimi:
-si sentono in punta di dita e non scuotono. Se scuotessero, dopo dieci
-mattoncini non scuoterebbe più niente.
+Stanno soprattutto **sul motorino piccolo**: si sentono in punta di dita e non
+scuotono. Se scuotessero, dopo dieci mattoncini non scuoterebbe più niente.
+
+> **Dalla 14.0 si sentono davvero.** Nella 12.6 duravano tre o quattro
+> centesimi a tre decimi di scala, e dal campo è arrivata la frase giusta: *i
+> principali funzionano, gli altri non si percepiscono*. Il motivo è fisico e
+> si poteva prevedere: un motore a massa eccentrica ci mette venti o trenta
+> millesimi a partire, e sotto un terzo di scala non parte affatto. Trentacinque
+> millesimi a 0,30, che al 70% di serie fanno 0,21, non erano un frizzare
+> piano: erano niente. Adesso durano dai sessanta ai novanta millesimi e
+> partono da mezza scala, e quelli che rappresentano un urto — il mattoncino,
+> la parete, la sponda — hanno anche un filo di motore grande, che è quello
+> che si sente davvero. Restano comunque un'altra cosa dai colpi grossi: quelli
+> arrivano a fondo scala sul grande e durano il doppio.
 
 Il passo degli invasori resta fuori in tutti e due i casi: è due volte al
 secondo per tutta la partita, e un pad che ronza di continuo smette di dire
 qualcosa dopo un minuto. Per la stessa ragione c'è un **intervallo minimo** di
-quarantacinque millesimi fra un colpo e l'altro: un gioco che spara a raffica
-non trasforma il pad in un ronzio. Un colpo più forte di quello in corso passa
-comunque — l'esplosione che arriva mentre raccogli monetine deve sentirsi.
+sessanta millesimi fra un colpo e l'altro — erano quarantacinque, e sono saliti
+con la durata dei dettagli: un intervallo più corto dell'impulso lo
+troncherebbe con quello dopo, cioè tornerebbe a non farlo sentire per la strada
+opposta. Un colpo più forte di quello in corso passa comunque — l'esplosione
+che arriva mentre raccogli monetine deve sentirsi.
 
 Sotto il cofano non c'è niente da installare, come per i tasti: il pad è lo
 stesso dispositivo di `/dev/input`, si carica un effetto nel pad con una ioctl
