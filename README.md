@@ -151,6 +151,7 @@ oppure si scaricano con `git clone` o dal pulsante *Code → Download ZIP*.
 | Audio: scheda USB, avvisi dei servizi, effetti dei giochi | `docs/DMD_audio.pdf` |
 | Satelliti: i passaggi della Stazione Spaziale, l'arco del cielo, il registro | `docs/DMD_satelliti.pdf` |
 | Notifiche da Home Assistant: il topic, i tre livelli, lo script pronto | `docs/DMD_notifiche.pdf` |
+| Status Player: chi gioca sulle Batocera degli amici, i punti, l'agente | `docs/DMD_statusplayer.pdf` |
 
 I PDF **non** vengono installati in `/opt/dmd`: sul Raspberry non servono, e
 l'aggiornamento via rete copia solo ciò che il servizio esegue.

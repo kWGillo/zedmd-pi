@@ -33,6 +33,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`calendario.it.md`](calendario.it.md) · [PDF](DMD_calendario.pdf) | Google Calendar: collegamento, permessi, cosa finisce sul pannello |
 | [`telecamera.it.md`](telecamera.it.md) · [PDF](DMD_telecamera.pdf) | FunCAM: la webcam sul pannello con pochi colori, e il pulsante fisico sulla Bonnet |
 | [`satelliti.it.md`](satelliti.it.md) · [PDF](DMD_satelliti.pdf) | I passaggi della Stazione Spaziale: preavviso, l'arco del cielo, lo spegnimento in ombra, il registro |
+| [`statusplayer.it.md`](statusplayer.it.md) · [PDF](DMD_statusplayer.pdf) | Status Player: chi sta giocando sulle Batocera degli amici, il punteggio di RetroAchievements, l'agente da installare |
 | [`notifiche.it.md`](notifiche.it.md) · [PDF](DMD_notifiche.pdf) | Le notifiche da Home Assistant: il topic, i tre livelli, lo script e le automazioni pronte |
 | [`worldtime.it.md`](worldtime.it.md) · [PDF](DMD_worldtime.pdf) | World Time: fino a cinque orari del mondo sotto l'orologio, perché il fuso e non le coordinate, e quante se ne vedono insieme |
 | [`onair-automazione.it.md`](onair-automazione.it.md) · [PDF](DMD_onair_automazione.pdf) | L'automazione di Home Assistant che collega il sensore della porta al pannello: i due nomi da leggere, lo YAML, e i tre errori facili |
