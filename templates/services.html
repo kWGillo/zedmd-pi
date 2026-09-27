@@ -211,38 +211,15 @@
    display, e agiscono **a valle** su qualunque sorgente abbia vinto. Stanno
    qui perché la domanda è la stessa — quando il pannello fa cosa — e averli
    in un'altra pagina voleva dire cercarli in due posti. #}
+{# Night mode e Sleep mode sono andati nelle Impostazioni, sotto la
+   luminosita': sono due modi del **display**, non due servizi, e chi li
+   cerca li cerca accanto alla luminosita'. Qui resta il collegamento, perche'
+   una funzione che sparisce senza dire dov'e' andata e' peggio di una
+   funzione scomoda. In questa scheda restano le fasce dei servizi. #}
 <section class="card">
-  <h2>{{ t('settings.sleep.title') }}</h2>
-  {# Il Night mode e' andato nelle Impostazioni, sotto la luminosita': e' una
-     regola di luminosita', e li' sta accanto alla cosa che regola. Qui resta
-     il collegamento, perche' una funzione che sparisce senza dire dov'e'
-     andata e' peggio di una funzione scomoda. #}
-  <p class="hint">{{ t('settings.night.dove') }}
+  <h2>{{ t('settings.modes') }}</h2>
+  <p class="hint">{{ t('settings.modi.dove') }}
     <a href="{{ url_for('page_settings') }}">{{ t('nav.settings') }}</a> &rarr;</p>
-  <form method="post" action="{{ url_for('api_display') }}">
-    <input type="hidden" name="next" value="{{ request.full_path }}">
-
-    <label class="check">
-      <input type="checkbox" name="sleep_enabled" {{ 'checked' if cfg.display.sleep_enabled }}>
-      {{ t('settings.sleep') }}</label>
-    <div class="row2">
-      <div><label for="sleep_start">{{ t('common.from') }}</label>
-        <input type="time" id="sleep_start" name="sleep_start" value="{{ cfg.display.sleep_start }}"></div>
-      <div><label for="sleep_end">{{ t('common.to') }}</label>
-        <input type="time" id="sleep_end" name="sleep_end" value="{{ cfg.display.sleep_end }}"></div>
-    </div>
-
-    <label class="check">
-      <input type="checkbox" name="sleep_wake_on_zedmd" {{ 'checked' if cfg.display.sleep_wake_on_zedmd }}>
-      {{ t('settings.wake') }}</label>
-    <label class="check">
-      <input type="checkbox" name="sleep_wake_on_giochi" {{ 'checked' if cfg.display.sleep_wake_on_giochi }}>
-      {{ t('settings.wake.giochi') }}</label>
-
-    <p class="hint">{{ t('settings.modes.hint') }}</p>
-    <p class="hint">{{ t('timing.sveglia.nota') }}</p>
-    <button type="submit">{{ t('form.save') }}</button>
-  </form>
 </section>
 
 {% for voce in timing %}

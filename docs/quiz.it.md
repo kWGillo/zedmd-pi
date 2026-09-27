@@ -102,9 +102,14 @@ libreria media**: quelli che carichi dalla pagina Media, wav o mp3,
 sottocartelle comprese. L'elenco si legge dal disco, non da una lista scritta
 nel programma.
 
-**Il brano della risposta parte sempre dall'attacco**, anche se quello stesso
-brano stava già suonando un istante prima: sentirne la coda, da fuori, vuol
-dire «non è partito». E la domanda dopo aspetta che finisca per davvero — il
+**Il brano della risposta parte sempre dall'attacco e suona una volta sola.**
+Dall'attacco anche se quello stesso brano stava già suonando un istante prima,
+perché sentirne la coda, da fuori, vuol dire «non è partito». E una volta
+sola perché non è un sottofondo: ha una fine, e la domanda dopo aspetta quella
+fine. Con il giro continuo — come nella 14.1 — un brano corto si risentiva da
+capo per il tempo che restava, e mezzo brano di troppo è un difetto: *«l'audio
+c'è ma lo ripete una volta e mezza»*. Gli altri momenti, quelli sì, girano: il
+pendolo dell'attesa è un sottofondo. E la domanda dopo aspetta che finisca per davvero — il
 tetto è quello della conversione, quarantacinque secondi, non venti come
 nella 13.1, perché fermarsi prima della fine era proprio la cosa da non fare.
 Il fuoco salta l'attesa.
@@ -231,7 +236,7 @@ sul Raspberry**.
 
 # 6. Come è stato provato
 
-`test_quiz.py`, 144 controlli, e `test_musica_media.py`, altri 32. Quelli che contano davvero:
+`test_quiz.py`, 146 controlli, e `test_musica_media.py`, altri 35. Quelli che contano davvero:
 
 - **un fuoco solo non risponde mai**: il primo apre la conferma, e lo stesso
   fuoco non la può chiudere — un quarto di secondo di margine, altrimenti su

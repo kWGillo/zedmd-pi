@@ -1386,7 +1386,7 @@ class Mixer:
 
     # ---------------------------------------------------------- suonare
 
-    def musica(self, nome, riparti=False):
+    def musica(self, nome, riparti=False, ciclo=True):
         """La musica di sottofondo: `nome` la fa partire, None la ferma.
 
         Richiederla mentre gia' suona non la fa ricominciare: il gioco la
@@ -1406,12 +1406,13 @@ class Mixer:
             if self._fondo is not None and self._fondo[2] == nome:
                 if riparti:
                     self._fondo[1] = 0
+                self._fondo[3] = bool(ciclo)
                 return True
         campioni = self._carica(nome)
         if not campioni:
             return False
         with self._lucchetto:
-            self._fondo = [campioni, 0, nome]
+            self._fondo = [campioni, 0, nome, bool(ciclo)]
         return True
 
     def musica_in_corso(self):
@@ -1459,16 +1460,27 @@ class Mixer:
             self._voci = vive
             fondo = None
             if self._fondo is not None:
-                campioni, posizione, _nome = self._fondo
+                campioni, posizione, _nome, ciclo = self._fondo
                 fine = posizione + BLOCCO
                 if fine <= len(campioni):
                     fondo = campioni[posizione:fine]
-                else:
+                    self._fondo[1] = fine
+                elif ciclo:
                     # In fondo al brano si riattacca l'inizio, senza buchi:
                     # un giro di musica che si ferma un istante a ogni ripresa
                     # si sente come un disco che salta.
                     fondo = campioni[posizione:] + campioni[:fine - len(campioni)]
-                self._fondo[1] = fine % len(campioni)
+                    self._fondo[1] = fine % len(campioni)
+                else:
+                    # Un brano che non gira: si finisce l'ultimo blocco con
+                    # il silenzio e si smette. Serve alla musica della
+                    # risposta di Super Quiz, che non e' un sottofondo ma un
+                    # pezzo che ha una fine -- e un pezzo corto, ripreso da
+                    # capo, si sente come un difetto: "lo ripete una volta e
+                    # mezza".
+                    coda = campioni[posizione:]
+                    fondo = coda + [0] * (BLOCCO - len(coda))
+                    self._fondo = None
         if not attive and fondo is None:
             return self._blocco_muto()
         if len(attive) == 1 and fondo is None:
@@ -1796,7 +1808,7 @@ def effetti_ferma(svuota=True):
     _mixer.ferma()
 
 
-def effetti_musica(cfg, nome, riparti=False):
+def effetti_musica(cfg, nome, riparti=False, ciclo=True):
     """La musica di sottofondo di una partita. None la ferma.
 
     Stessa levetta degli effetti: chi li spegne vuole silenzio, e la musica
@@ -1813,7 +1825,7 @@ def effetti_musica(cfg, nome, riparti=False):
         # entrare nel mixer. Si fa qui, e non dentro il mixer, perche' la
         # libreria sta nella configurazione e il mixer non la conosce.
         nome = prepara(cfg, nome) or None
-    return _mixer.musica(nome, riparti=riparti)
+    return _mixer.musica(nome, riparti=riparti, ciclo=ciclo)
 
 
 def durata_musica(cfg, nome):

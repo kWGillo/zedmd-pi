@@ -364,9 +364,9 @@ class GiochiSource(Source):
     def congelata(self):
         return self._congelato.is_set()
 
-    def _musica(self, nome, riparti=False):
+    def _musica(self, nome, riparti=False, ciclo=True):
         try:
-            suoni.effetti_musica(self.cfg, nome, riparti=riparti)
+            suoni.effetti_musica(self.cfg, nome, riparti=riparti, ciclo=ciclo)
         except Exception as exc:                    # pragma: no cover
             print("[giochi] musica non avviata: %s" % exc)
 

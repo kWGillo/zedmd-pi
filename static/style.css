@@ -120,7 +120,12 @@ label.check {
   color: var(--text); font-size: 15px; margin: 18px 0;
 }
 
-input[type=text], select {
+/* 14.2: `password` sta qui dentro. Non c'era, e una casella per una
+   credenziale restava con l'aspetto di serie del browser -- bianca, dentro
+   una pagina scura: si vede come un errore, e la si guarda due volte prima
+   di capire che funziona. Riguardava la chiave di RetroAchievements, il
+   segreto di Google e le password del wifi. */
+input[type=text], input[type=password], input[type=email], select {
   width: 100%;
   padding: 10px 12px;
   background: #0d1117;

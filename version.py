@@ -2743,6 +2743,17 @@ Storico:
        luminosita' -- mentre lo Sleep mode resta nel Timing; i due moduli
        sono divisi, e per strada si e' scoperto che la casella del risveglio
        dei giochi non veniva letta da nessuno.
+  14.2 *Il brano della risposta suona una volta.* La 14.1 lo faceva ripartire
+       dall'attacco ma lo lasciava girare come un sottofondo, e con un brano
+       corto si risentiva da capo mentre la domanda dopo aspettava la fine:
+       "lo ripete una volta e mezza". Il mixer adesso sa suonare un brano una
+       volta sola, e il quiz lo chiede per le due schermate della risposta.
+       Nella pagina Giochi i quattro pulsanti di prova hanno una riga loro,
+       staccata dal tasto Applica, con etichette corte: attaccati com'erano,
+       su un telefono si leggeva un blocco unico. Le caselle `password` non
+       erano mai state vestite nel foglio di stile e restavano bianche dentro
+       una pagina scura. E lo Sleep mode raggiunge il Night mode nelle
+       Impostazioni: sono due modi del display, non due servizi.
 """
 
-__version__ = "14.1"
+__version__ = "14.2"

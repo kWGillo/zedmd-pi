@@ -68,10 +68,13 @@
     <p class="hint">{{ t('player.vivo.hint') }}</p>
     <button type="submit">{{ t('common.apply') }}</button>
   </form>
-  <form method="post" action="{{ url_for('api_status_prova') }}">
-    <button type="submit">{{ t('player.prova') }}</button>
-    <p class="hint">{{ t('player.prova.hint') }}</p>
-  </form>
+  <hr class="sep">
+  <p class="hint">{{ t('player.prova.hint') }}</p>
+  <div class="actions">
+    <form method="post" action="{{ url_for('api_status_prova') }}">
+      <button type="submit" class="ghost">{{ t('player.prova') }}</button>
+    </form>
+  </div>
 </section>
 
 <section class="card">

@@ -91,6 +91,31 @@
 </section>
 
 <section class="card">
+  <h2>{{ t('settings.sleep.title') }}</h2>
+  <form method="post" action="{{ url_for('api_display') }}">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <label class="check">
+      <input type="checkbox" name="sleep_enabled" {{ 'checked' if cfg.display.sleep_enabled }}>
+      {{ t('settings.sleep') }}</label>
+    <div class="row2">
+      <div><label for="sleep_start">{{ t('common.from') }}</label>
+        <input type="time" id="sleep_start" name="sleep_start" value="{{ cfg.display.sleep_start }}"></div>
+      <div><label for="sleep_end">{{ t('common.to') }}</label>
+        <input type="time" id="sleep_end" name="sleep_end" value="{{ cfg.display.sleep_end }}"></div>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="sleep_wake_on_zedmd" {{ 'checked' if cfg.display.sleep_wake_on_zedmd }}>
+      {{ t('settings.wake') }}</label>
+    <label class="check">
+      <input type="checkbox" name="sleep_wake_on_giochi" {{ 'checked' if cfg.display.sleep_wake_on_giochi }}>
+      {{ t('settings.wake.giochi') }}</label>
+    <p class="hint">{{ t('settings.modes.hint') }}</p>
+    <p class="hint">{{ t('timing.sveglia.nota') }}</p>
+    <button type="submit">{{ t('form.save') }}</button>
+  </form>
+</section>
+
+<section class="card">
   <h2>{{ t('settings.language') }}</h2>
   <form method="post" action="{{ url_for('api_language') }}" class="inline">
     <input type="hidden" name="next" value="{{ request.path }}">
@@ -106,12 +131,11 @@
 </section>
 
 <section class="card">
-  <h2>{{ t('settings.sleep.title') }}</h2>
-  {# Lo Sleep mode e le fasce di tutti i servizi stanno nella scheda Timing
-     della pagina Servizi: la' la domanda e' "quando il pannello fa cosa", e
-     spegnere il display in una fascia e' quella domanda. Il Night mode no:
-     quello e' luminosita', e sta qui sopra. #}
-  <p class="hint">{{ t('settings.sleep.dove') }}
+  <h2>{{ t('timing.title') }}</h2>
+  {# Le fasce orarie dei singoli servizi restano nella scheda Timing: la'
+     sono quindici righe, una per servizio, e stanno accanto ai servizi che
+     regolano. Qui ci sono i due modi del display, che valgono per tutto. #}
+  <p class="hint">{{ t('settings.fasce.dove') }}
     <a href="{{ url_for('page_services', vista='timing') }}">{{ t('timing.title') }}</a> →</p>
 </section>
 

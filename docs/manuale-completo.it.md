@@ -605,15 +605,16 @@ server dedicato invia tutto in una sola scrittura.
 
 ### 10.2 Le pagine
 
-**Impostazioni** — luminosità con applicazione immediata e, subito sotto, il
-**Night mode**: la fascia oraria, la luminosità e il volume di quella fascia.
-Dalla 14.1 sta qui e non più nella scheda Timing, perché «dalle 22 alle 7 il
-pannello sta al 15%» è una regola di luminosità e va letta accanto alla cosa
-che regola; lo Sleep mode, che spegne il display, resta nel Timing con le
-fasce degli altri servizi. E poi lingua dell'interfaccia, server NTP, fuso
-orario, ora legale, regolazione fine del driver S-PWM, aggiornamenti,
-esportazione e importazione della configurazione, indirizzo IP locale,
-riavvio del servizio.
+**Impostazioni** — luminosità con applicazione immediata e, subito sotto, i
+due modi del display: il **Night mode** (fascia oraria, luminosità e volume di
+quella fascia) e lo **Sleep mode** (la fascia in cui il display sta spento, e
+i due risvegli). Dalla 14.1 stanno qui e non più nella scheda Timing: sono
+modi del display, non servizi, e «dalle 22 alle 7 il pannello sta al 15%» va
+letto accanto alla luminosità che regola. Nel Timing restano le fasce dei
+singoli servizi, accanto ai servizi che regolano, e ogni pagina rimanda
+all'altra. E poi lingua dell'interfaccia, server NTP, fuso orario, ora legale,
+regolazione fine del driver S-PWM, aggiornamenti, esportazione e importazione
+della configurazione, indirizzo IP locale, riavvio del servizio.
 
 **Orologio** — colori indipendenti per ora e data, formato 12 o 24 ore, lingua
 dei nomi dei giorni (italiano, francese, inglese), lampeggio dei due punti.

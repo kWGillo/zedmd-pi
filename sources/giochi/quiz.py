@@ -471,6 +471,16 @@ class Quiz(Gioco):
         """
         return self.fase in ("giusta", "sbagliata")
 
+    def musica_a_giro(self):
+        """Nelle due schermate della risposta il brano suona **una volta**.
+
+        La domanda dopo aspetta che finisca: se finito ricominciasse, si
+        sentirebbe un pezzo di attacco in piu' prima di andare avanti. Con un
+        brano corto e' la meta' del brano, e dal divano si sente come un
+        difetto -- perche' lo e'.
+        """
+        return self.fase not in ("giusta", "sbagliata")
+
     # ------------------------------------------------------------- il disegno
 
     def disegna(self):

@@ -61,15 +61,22 @@
         <p class="hint">{{ t('giochi.quiz.tempo.hint') }}</p>
         <button type="submit">{{ t('common.apply') }}</button>
       </form>
-      <div class="inline">
+      {# I quattro pulsanti di prova stanno in una riga loro, staccata dal
+         modulo delle impostazioni: quattro form affiancati senza lo stacco
+         di `.actions` si leggono come un blocco unico appiccicato al tasto
+         Applica -- e su un telefono ci si clicca sopra per sbaglio. La
+         spiegazione viene prima dei pulsanti, come in tutte le altre schede. #}
+      <hr class="sep">
+      <p class="hint"><strong>{{ t('giochi.quiz.prova.titolo') }}</strong> &mdash;
+        {{ t('giochi.quiz.prova.hint') }}</p>
+      <div class="actions">
         {% for momento in ('domanda', 'attesa', 'giusta', 'sbagliata') %}
-        <form method="post" action="{{ url_for('api_giochi_quiz_prova') }}" class="inline">
+        <form method="post" action="{{ url_for('api_giochi_quiz_prova') }}">
           <input type="hidden" name="momento" value="{{ momento }}">
-          <button type="submit" class="ghost small">{{ t('giochi.quiz.momento.' + momento) }}</button>
+          <button type="submit" class="ghost small">{{ t('giochi.quiz.breve.' + momento) }}</button>
         </form>
         {% endfor %}
       </div>
-      <p class="hint">{{ t('giochi.quiz.prova.hint') }}</p>
       <p class="hint">{{ t('giochi.quiz.domande', it=domande.it.quante, en=domande.en.quante) }}
         {{ t('giochi.quiz.fonte', dir=data_dir) }}</p>
       {% endif %}

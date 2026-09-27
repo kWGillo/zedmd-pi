@@ -155,7 +155,7 @@ class Gioco:
         self.suona = lambda nome: None
         # La musica di sottofondo, per chi ce l'ha: nome per farla partire,
         # None per fermarla. Come `suona`, la sostituisce chi apre la partita.
-        self.musica = lambda nome, riparti=False: None
+        self.musica = lambda nome, **come: None
         # Quanto dura un brano, in secondi, o 0.0 se non si sa. Super Quiz lo
         # chiede perche' da lui la musica non fa da sottofondo: e' il tempo
         # che passa fra una risposta e la domanda dopo. Sta qui, e non dentro
@@ -208,14 +208,25 @@ class Gioco:
             # Il secondo argomento si passa solo quando serve davvero: nove
             # giochi su dieci non sanno nemmeno che esista, e chiederlo a
             # tutti vorrebbe dire cambiare il patto per tutti.
-            if self.musica_da_capo():
-                self.musica(voluta, True)
+            if self.musica_da_capo() or not self.musica_a_giro():
+                self.musica(voluta, riparti=self.musica_da_capo(),
+                            ciclo=self.musica_a_giro())
             else:
                 self.musica(voluta)
 
     def musica_da_capo(self):
         """Vero se il brano che sta partendo va suonato dall'inizio."""
         return False
+
+    def musica_a_giro(self):
+        """Vero se il brano ricomincia quando finisce.
+
+        E' quello che vuole un sottofondo, ed e' quello che non vuole un
+        pezzo che ha una fine: un brano corto di tre secondi dentro un
+        momento che dura tre secondi e mezzo si sentirebbe ricominciare, e
+        da fuori e' un difetto -- "lo ripete una volta e mezza".
+        """
+        return True
 
     def ignora_tasti(self, premuti):
         """I tasti gia' premuti nell'istante in cui la partita comincia.

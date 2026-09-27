@@ -2,6 +2,47 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [14.2]
+
+### Il brano della risposta suona una volta, non a giro
+
+*«In caso di risposta positiva ora l'audio c'è ma lo ripete una volta e
+mezza.»*
+
+Vero, e la causa è la 14.1 che ha corretto metà del problema. Il brano della
+risposta partiva dall'attacco, ma restava un **sottofondo**: e un sottofondo,
+per definizione, quando finisce ricomincia. La domanda dopo aspetta la fine
+del brano, quindi con un brano corto si sentiva la ripresa — mezzo brano di
+troppo, che dal divano è un difetto perché lo è.
+
+Adesso il mixer sa suonare un brano **una volta sola**: finito l'ultimo
+blocco, il resto è silenzio e la musica si spegne. Il quiz lo chiede per le
+due schermate della risposta — quelle hanno una fine — e non per le altre: il
+pendolo dell'attesa è un sottofondo e continua a girare.
+
+### E la pagina Giochi non ha più i pulsanti appiccicati
+
+Dal campo, con lo screenshot: i quattro pulsanti di prova stavano attaccati
+al tasto Applica, in quattro moduli affiancati senza stacco, e su un telefono
+si leggono come un blocco unico dove si clicca per sbaglio. Adesso stanno in
+una riga loro, staccata da una riga orizzontale, con la spiegazione **prima**
+dei pulsanti come in tutte le altre schede, ed etichette corte: Domanda,
+Attesa, Giusta, Sbagliata. Il nome intero del momento sta bene sopra una
+tendina e male dentro un pulsante.
+
+Già che si guardavano le pagine su uno schermo stretto: una casella
+`password` non era mai stata vestita nel foglio di stile, e restava con
+l'aspetto di serie del browser — bianca, in mezzo a una pagina scura. Si vede
+come un errore. Riguardava la chiave di RetroAchievements, il segreto di
+Google e le password del wifi.
+
+### E lo Sleep mode raggiunge il Night mode nelle Impostazioni
+
+Chiesto subito dopo l'altro, e ha la stessa ragione: sono due **modi del
+display**, non due servizi, e chi li cerca li cerca accanto alla luminosità.
+Nella scheda Timing restano le fasce dei singoli servizi, che stanno accanto
+ai servizi che regolano; ogni pagina rimanda all'altra.
+
 ## [14.1]
 
 ### Super Quiz: quattro cose, e tre erano difetti veri

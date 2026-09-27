@@ -504,6 +504,12 @@ STRINGS = {
     "settings.night.dove": (
         "Il Night mode sta nelle Impostazioni, sotto la luminosità:",
         "Night mode lives in Settings, under brightness:"),
+    "settings.modi.dove": (
+        "Night mode e Sleep mode stanno nelle Impostazioni, sotto la luminosità:",
+        "Night mode and Sleep mode live in Settings, under brightness:"),
+    "settings.fasce.dove": (
+        "Le fasce orarie dei singoli servizi stanno nella scheda Timing:",
+        "Each service's own time window lives in the Timing tab:"),
     "settings.sleep.dove": (
         "Lo Sleep mode e le fasce orarie dei servizi stanno nella scheda Timing:",
         "Sleep mode and every service's time window live in the Timing tab:"),
@@ -2111,6 +2117,15 @@ STRINGS = {
     "giochi.quiz.tempo": ("Secondi per rispondere", "Seconds to answer"),
     "giochi.quiz.brano.pronto": ("Pronto, %(secondi)s s.", "Ready, %(secondi)s s."),
     "giochi.quiz.brano.no": ("Non pronto: %(motivo)s", "Not ready: %(motivo)s"),
+    # Le etichette corte dei quattro pulsanti di prova. Il nome intero del
+    # momento -- "Attesa della risposta" -- sta bene sopra una tendina e male
+    # dentro un pulsante: quattro pulsanti con una frase ciascuno vanno a capo
+    # uno per riga e si leggono come un elenco di comandi diversi.
+    "giochi.quiz.breve.domanda": ("Domanda", "Question"),
+    "giochi.quiz.breve.attesa": ("Attesa", "Waiting"),
+    "giochi.quiz.breve.giusta": ("Giusta", "Right"),
+    "giochi.quiz.breve.sbagliata": ("Sbagliata", "Wrong"),
+    "giochi.quiz.prova.titolo": ("Ascolta", "Listen"),
     "giochi.quiz.prova.hint": (
         "Fa sentire il brano di quel momento, per qualche secondo.",
         "Plays that moment's track for a few seconds."),
