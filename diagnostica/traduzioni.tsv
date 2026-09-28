@@ -1,0 +1,360 @@
+# Le domande di Open Trivia DB tradotte a mano in italiano.
+#
+# Una riga per domanda:
+#     id ~ domanda ~ risposta giusta ~ sbagliata ~ sbagliata ~ sbagliata
+# oppure, per quelle che non si traducono:
+#     id ~ SALTA ~ il motivo
+#
+# L'identificativo e' quello della domanda inglese, cosi' le due righe si
+# ritrovano. Le regole seguite:
+#   - i nomi propri restano come sono: L'Humanite' non diventa Umanita';
+#   - le risposte stanno in venti caratteri e le domande in cento, perche'
+#     quello e' lo spazio del pannello;
+#   - quello che in italiano non ha senso -- un gioco di parole inglese, la
+#     domanda su come si dice pomodoro in italiano -- si SALTA, invece di
+#     tradurlo lo stesso;
+#   - sport e televisione straniera restano fuori: chiesto cosi', e tradotte
+#     resterebbero comunque domande di un'altra cultura.
+#
+# Fonte: Open Trivia DB (opentdb.com), CC BY-SA 4.0. Anche queste traduzioni
+# sono CC BY-SA 4.0.
+tdb-1002 ~ La Terra si trova in quale galassia? ~ Via Lattea ~ Galassia di Marte ~ Galassia Note ~ Buco Nero
+tdb-1025 ~ Come si dice «asino» in spagnolo? ~ Burro ~ Caballo ~ Toro ~ Perro
+tdb-1060 ~ In che anno è stata coniata la parola «scienziato»? ~ 1833 ~ 1933 ~ 1942 ~ 1796
+tdb-1069 ~ Chi ha progettato il nuovo One World Trade Center di New York? ~ David Childs ~ Bjarke Ingels ~ Michael Arad ~ Fumihiko Maki
+tdb-1072 ~ Quale condimento è noto anche come rafano giapponese? ~ Wasabi ~ Mentsuyu ~ Karashi ~ Ponzu
+tdb-1080 ~ Quale nazione produce circa il 40% della vaniglia mondiale? ~ Madagascar ~ Indonesia ~ Cina ~ Messico
+tdb-110 ~ In quale paese è nata nel 1889 la Michelin? ~ Francia ~ Regno Unito ~ Italia ~ Germania
+tdb-1113 ~ Quanto pesa un lingotto d'oro in Fallout: New Vegas? ~ 35 libbre ~ 30 libbre ~ 40 libbre ~ 32,50 libbre
+tdb-1118 ~ Da quale paese europeo viene il coleslaw? ~ Paesi Bassi ~ Regno Unito ~ Danimarca ~ Germania
+tdb-1142 ~ Quale di queste parole inglesi indica uno spettatore sfaccendato? ~ Gongoozler ~ Gossypiboma ~ Jentacular ~ Meupareunia
+tdb-1146 ~ Dopo quanti anni si festeggiano le nozze di cristallo? ~ 15 ~ 20 ~ 10 ~ 25
+tdb-1148 ~ Come si scrive «Brasile» in portoghese? ~ Brasil ~ Brazil ~ Brasilia ~ Brasíl
+tdb-1150 ~ Quale segno zodiacale è rappresentato da una bilancia? ~ Bilancia ~ Ariete ~ Capricorno ~ Sagittario
+tdb-1154 ~ In Cile, El Teniente è la più grande miniera sotterranea di quale metallo? ~ Rame ~ Ferro ~ Nichel ~ Argento
+tdb-1208 ~ Quale organo del corpo produce la bile? ~ Fegato ~ Cistifellea ~ Pancreas ~ Stomaco
+tdb-121 ~ Quale elemento ha simbolo chimico Kr? ~ Kripton ~ Cherosene ~ Cineticio ~ Curio
+tdb-123 ~ Su che cosa cammina un funambolo? ~ Una corda tesa ~ Vetri rotti ~ Palle ~ La Luna
+tdb-1270 ~ Con quale nome fu lanciata in origine la bibita Pepsi? ~ Brad's Drink ~ Pepsin Pop ~ Carolina Cola ~ Pepsin Syrup
+tdb-1282 ~ Come si dice «inverno» in russo, traslitterato? ~ Zima ~ Leto ~ Vesna ~ Osen'
+tdb-1283 ~ Quale cofondatore di Oculus VR morì in un incidente d'auto nel 2013? ~ Andrew Reisse ~ Nate Mitchell ~ Jack McCauley ~ Palmer Luckey
+tdb-1291 ~ Qual è il massimo numero di stelle Michelin per un ristorante? ~ Tre ~ Quattro ~ Cinque ~ Sei
+tdb-1295 ~ Quale catena di fast food ha più locali al mondo? ~ Subway ~ Starbucks ~ McDonald's ~ KFC
+tdb-1329 ~ Che cos'è il «dabbing»? ~ Un ballo ~ Un intervento ~ Uno sport ~ Una lingua
+tdb-1335 ~ Quanti colori ha l'arcobaleno? ~ 7 ~ 8 ~ 9 ~ 10
+tdb-1340 ~ De Eemhof e Port Zelande sono villaggi vacanze di quale società? ~ Center Parcs ~ Yelloh Village ~ Keycamp ~ Villa Plus
+tdb-1342 ~ Come si dice «finestra» in svedese? ~ Fönster ~ Hål ~ Skärm ~ Ruta
+tdb-1343 ~ «A3», «B1» e «Legal» sono formati di quale oggetto? ~ Carta ~ Aerei ~ Codici di legge ~ Schermi telefono
+tdb-1344 ~ Quale di queste famiglie esiste davvero in «The Sims»? ~ I Goth ~ I Family ~ I Simoleon ~ I Proud
+tdb-1367 ~ Il motto del New York Times è «All the News That's Fit to...» ~ Print ~ Digest ~ Look ~ Read
+tdb-139 ~ All Souls e Merton sono college di quale università? ~ Oxford ~ Cambridge ~ Manchester ~ Leeds
+tdb-1391 ~ Come si chiama il cibo indiano cotto in un forno di argilla? ~ Tandoori ~ Biryani ~ Pani puri ~ Tikka masala
+tdb-1398 ~ Di che segno zodiacale è chi nasce a San Valentino? ~ Acquario ~ Pesci ~ Capricorno ~ Scorpione
+tdb-1430 ~ Quale di questi presidenti non è sul Monte Rushmore? ~ John F. Kennedy ~ Theodore Roosevelt ~ Abraham Lincoln ~ Thomas Jefferson
+tdb-1467 ~ La sciofobia è la paura di che cosa? ~ Le ombre ~ Mangiare ~ Le luci forti ~ I trasporti
+tdb-1489 ~ Quale cantautore americano ha vinto il Nobel per la letteratura? ~ Bob Dylan ~ Buddy Holly ~ Johnny Cash ~ Alice Cooper
+tdb-1507 ~ Quale segno zodiacale è rappresentato dal granchio? ~ Cancro ~ Bilancia ~ Vergine ~ Sagittario
+tdb-152 ~ Da quale paese europeo viene il formaggio Gouda? ~ Paesi Bassi ~ Belgio ~ Germania ~ Francia
+tdb-1520 ~ SALTA ~ sport
+tdb-1526 ~ La gomma arabica è la linfa indurita di quale albero? ~ Acacia ~ Palma ~ Ficus ~ Eucalipto
+tdb-1557 ~ Quale pianeta non prende il nome da un dio greco o romano? ~ Terra ~ Giove ~ Marte ~ Mercurio
+tdb-1565 ~ Nella sigla FBI, che cosa vuol dire la F? ~ Federal ~ Foreign ~ Formal ~ First
+tdb-1566 ~ Verso quale direzione guarda la Statua della Libertà? ~ Sud-est ~ Sud-ovest ~ Nord-ovest ~ Nord-est
+tdb-1576 ~ Chi è la persona più giovane ad aver ricevuto un premio Nobel? ~ Malala Yousafzai ~ Lawrence Bragg ~ Werner Heisenberg ~ Yasser Arafat
+tdb-1591 ~ In che anno è uscito il robot giocattolo RoboSapien? ~ 2004 ~ 2000 ~ 2001 ~ 2006
+tdb-162 ~ Quando è stata fondata Nintendo? ~ 23 settembre 1889 ~ 19 ottobre 1891 ~ 4 marzo 1887 ~ 27 dicembre 1894
+tdb-1660 ~ Chi ha inventato il pastafarianesimo? ~ Bobby Henderson ~ Eric Tignor ~ Bill Nye ~ Zach Soldi
+tdb-167 ~ Quale di queste aziende svedesi è stata fondata nel 1943? ~ IKEA ~ H&M ~ Lindex ~ Clas Ohlson
+tdb-1739 ~ Qual è il sostantivo più usato nella lingua inglese? ~ Time ~ Home ~ Water ~ Man
+tdb-1762 ~ La cinofobia è la paura di che cosa? ~ I cani ~ Gli uccelli ~ Volare ~ I germi
+tdb-1767 ~ Quale fu la prima linea della metropolitana di Londra? ~ Metropolitan ~ Circle ~ Bakerloo ~ Victoria
+tdb-1769 ~ La parola «dozzina» indica un gruppo di quanti oggetti? ~ 12 ~ 6 ~ 20 ~ 10
+tdb-1779 ~ In inglese, di che colore ha la pancia chi è codardo? ~ Gialla ~ Verde ~ Rossa ~ Blu
+tdb-179 ~ In quale punto cardinale sorge il Sole? ~ Est ~ Ovest ~ Nord ~ Sud
+tdb-1868 ~ Qual è il cognome del famoso Papa John? ~ Schnatter ~ Chowder ~ Williams ~ Anderson
+tdb-1876 ~ Quale elemento, numero 11 della tavola periodica, ha simbolo Na? ~ Sodio ~ Carbonio ~ Piombo ~ Azoto
+tdb-1879 ~ Come si chiama il capodanno ebraico? ~ Rosh Hashanah ~ Elul ~ Capodanno ~ Sukkot
+tdb-1904 ~ Che cosa fa e vende un modista? ~ Cappelli ~ Scarpe ~ Cinture ~ Camicie
+tdb-1908 ~ Quale presidente è sulla rara banconota americana da 2 dollari? ~ Thomas Jefferson ~ Martin Van Buren ~ Ulysses Grant ~ John Q. Adams
+tdb-1931 ~ Solo il 9% delle case americane aveva la televisione nel... ~ 1950 ~ 1965 ~ 1913 ~ 1969
+tdb-1936 ~ In quale catena di fast food si ordina un Jamocha Shake? ~ Arby's ~ McDonald's ~ Burger King ~ Wendy's
+tdb-1958 ~ Nel codice Morse, quale lettera è data da tre punti? ~ S ~ O ~ A ~ C
+tdb-1964 ~ Che cos'è l'H2O? ~ Acqua ~ Ossigeno ~ Idrogeno ~ Niente
+tdb-1988 ~ Che ordine seguono le parole in giapponese (S soggetto, V verbo, O oggetto)? ~ SOV ~ SVO ~ VSO ~ VOS
+tdb-2031 ~ Quale paese ha più birrifici trappisti? ~ Belgio ~ Paesi Bassi ~ Francia ~ Stati Uniti
+tdb-2037 ~ Quale capo indossa di solito uno scozzese a un matrimonio? ~ Kilt ~ Gonna ~ Abito lungo ~ Tunica
+tdb-2046 ~ Il Corano è il libro sacro di quale religione abramitica? ~ Islam ~ Cristianesimo ~ Ebraismo ~ Rastafarianesimo
+tdb-2058 ~ Il coquelicot, il papavero dei francesi, è una sfumatura di quale colore? ~ Rosso ~ Verde ~ Blu ~ Rosa
+tdb-2064 ~ Frank Lloyd Wright è l'architetto di quale edificio famoso? ~ Il Guggenheim ~ Villa Savoye ~ Opera di Sydney ~ Space Needle
+tdb-2077 ~ Di chi è la faccia in bianco e nero dell'emoticon Kappa su Twitch? ~ Josh DeSeno ~ Justin DeSeno ~ John DeSeno ~ Jimmy DeSeno
+tdb-2082 ~ Come si dice «pesce» in francese? ~ poisson ~ fiche ~ escargot ~ mer
+tdb-2105 ~ Quale di queste lingue indiane non è indoeuropea? ~ Tamil ~ Hindi ~ Punjabi ~ Urdu
+tdb-2113 ~ Quale azienda ha sviluppato la vocaloid Hatsune Miku? ~ Crypton Future Media ~ Sega ~ Sony ~ Yamaha
+tdb-2125 ~ Nel 2013 quanti soldi sono stati persi con le truffe nigeriane? ~ 12,7 miliardi $ ~ 95 milioni $ ~ 956 milioni $ ~ 2,7 miliardi $
+tdb-217 ~ Quale parola significa «riflettere a fondo»? ~ Contemplare ~ Confiscare ~ Costipare ~ Condensare
+tdb-2178 ~ Che forma ha il gioco inventato dal professor Ernő Rubik? ~ Cubo ~ Sfera ~ Cilindro ~ Piramide
+tdb-219 ~ Il cartello di Pablo Escobar nacque in quale città sudamericana? ~ Medellín ~ Bogotá ~ Quito ~ Cali
+tdb-2200 ~ Come chiamano i marinai il lato sinistro di una barca? ~ Babordo ~ Tribordo ~ Prua ~ Poppa
+tdb-2201 ~ L'astrafobia è la paura irrazionale di che cosa? ~ I tuoni ~ La pioggia ~ Il vento ~ La neve
+tdb-2204 ~ Quale di queste bibite gassate è stata lanciata per prima? ~ Dr. Pepper ~ Coca-Cola ~ Sprite ~ Mountain Dew
+tdb-2227 ~ Chi ha scritto Jurassic Park? ~ Michael Crichton ~ Peter Benchley ~ Chuck Palahniuk ~ Irvine Welsh
+tdb-2238 ~ Quale giocattolo del 1983 scatenò risse dentro i negozi? ~ Cabbage Patch Kids ~ Transformers ~ Care Bears ~ Cubo di Rubik
+tdb-2240 ~ In «Battle Cats», qual è la percentuale di critico di Moneko? ~ 15% ~ 20% ~ 10% ~ 25%
+tdb-2241 ~ Secondo la BBPA, qual è il nome di pub più comune nel Regno Unito? ~ Red Lion ~ Royal Oak ~ White Hart ~ King's Head
+tdb-2260 ~ Il malva prende il nome da un fiore: è una sfumatura di quale colore? ~ Viola ~ Rosso ~ Marrone ~ Rosa
+tdb-2312 ~ Quale cereale «mostro» della General Mills uscì per ultimo negli anni 70? ~ Fruit Brute ~ Count Chocula ~ Franken Berry ~ Boo-Berry
+tdb-2324 ~ Quando fu approvata la Dichiarazione d'Indipendenza americana? ~ 4 luglio 1776 ~ 4 maggio 1776 ~ 4 giugno 1776 ~ 2 luglio 1776
+tdb-2325 ~ Chi di questi non conduce un programma sulla radio americana NPR? ~ Ben Shapiro ~ Terry Gross ~ Ira Glass ~ Peter Sagal
+tdb-2331 ~ Di chi è la frase «ciò che non ti uccide ti rende più forte»? ~ Friedrich Nietzsche ~ G. Gordon Liddy ~ Kelly Clarkson ~ C. Hitchens
+tdb-2336 ~ Chi ha fondato la Khan Academy? ~ Sal Khan ~ Ben Khan ~ Kitt Khan ~ Adel Khan
+tdb-2338 ~ Quale paese ha sviluppato il fucile d'assalto AK-47? ~ Unione Sovietica ~ Iran ~ Israele ~ Polonia
+tdb-2345 ~ Qual è la lettera più usata nell'alfabeto inglese? ~ E ~ A ~ I ~ O
+tdb-2366 ~ Di quale azienda è Outlook? ~ Microsoft ~ Google ~ Apple ~ Yahoo
+tdb-2374 ~ A quale famiglia linguistica appartiene il kazako? ~ Turca ~ Mongola ~ Indoeuropea ~ Uralica
+tdb-2394 ~ Qual è la lingua più parlata in Svizzera? ~ Tedesco ~ Francese ~ Italiano ~ Svizzero
+tdb-2419 ~ Quale canale collega il Mediterraneo al Mar Rosso? ~ Canale di Suez ~ Canale di Panama ~ Canale del Sinai ~ Canale del Karakum
+tdb-2422 ~ Che cosa vuol dire la sigla VR? ~ Virtual Reality ~ Very Real ~ Visual Recognition ~ Voice Recognition
+tdb-246 ~ Quale elemento meccanico sta al centro di uno spinner? ~ Cuscinetti ~ Assi ~ Ingranaggi ~ Cinghie
+tdb-2473 ~ Come si dice «aereo» in cinese, traslitterato? ~ Feiji ~ Qiche ~ Zongxian ~ Huojian
+tdb-2483 ~ Quale di queste non è una spada tipicamente europea? ~ Scimitarra ~ Falcione ~ Ulfberht ~ Flamberga
+tdb-2495 ~ Da dove viene l'acqua in bottiglia Poland Spring? ~ Maine, Stati Uniti ~ Assia, Germania ~ Masovia, Polonia ~ Baviera, Polonia
+tdb-250 ~ Che tipo di velivolo sviluppò Igor Sikorsky nel 1942? ~ Elicottero ~ Dirigibile stealth ~ Jet ~ Capsula spaziale
+tdb-2524 ~ Dove si trova la stazione Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch? ~ Galles ~ Moldavia ~ Repubblica Ceca ~ Danimarca
+tdb-2529 ~ Il foie gras si fa con quale parte dell'anatra o dell'oca? ~ Il fegato ~ Il cuore ~ Lo stomaco ~ L'intestino
+tdb-253 ~ Se ti scoprono a fare «goldbricking», che cosa stai facendo? ~ Il lavativo ~ Fumare ~ Rubare ~ Barare
+tdb-2541 ~ Come si dice «cappello» in francese? ~ Chapeau ~ Bonnet ~ Écharpe ~ Casque
+tdb-2543 ~ La birra messicana Corona è di che tipo? ~ Pale Lager ~ India Pale Ale ~ Pilsner ~ Baltic Porter
+tdb-2550 ~ In che anno il Canada ha smesso di coniare il penny? ~ 2012 ~ 2013 ~ 2011 ~ 2010
+tdb-2579 ~ Quale di questi giochi di carte gira intorno ai numeri e ai conti? ~ Uno ~ Go Fish ~ Twister ~ Munchkin
+tdb-2588 ~ Chi è considerato il padre della filosofia moderna? ~ René Descartes ~ Platone ~ Albert Einstein ~ Antoine Lavoisier
+tdb-2605 ~ Quale paese ha la Union Jack dentro la propria bandiera? ~ Nuova Zelanda ~ Sudafrica ~ Canada ~ Hong Kong
+tdb-2617 ~ Come si chiama comunemente il perimetro di un cerchio? ~ Circonferenza ~ Diametro ~ Raggio ~ Arco
+tdb-2645 ~ Quando è uscita per la prima volta la gomma Hubba Bubba? ~ 1979 ~ 1984 ~ 1972 ~ 1980
+tdb-2662 ~ Quale stile di birra ha di solito più luppolo della media? ~ India Pale Ale ~ Stout ~ Extra Special Bitter ~ Scotch Ale
+tdb-2683 ~ In che anno è nata WhatsApp? ~ 2009 ~ 2007 ~ 2012 ~ 2010
+tdb-2690 ~ Quanti semi di mela servono, all'incirca, per una dose letale di cianuro? ~ 200 ~ 20 ~ 2.000 ~ 20.000
+tdb-2699 ~ Quante lettere ha l'alfabeto inglese? ~ 26 ~ 30 ~ 17 ~ 5
+tdb-2715 ~ Quale posata è la più adatta per mangiare la zuppa? ~ Cucchiaio ~ Forchetta ~ Coltello ~ Bacchette
+tdb-2727 ~ Red Vines è una marca di quale tipo di caramella? ~ Liquirizia ~ Lecca-lecca ~ Cioccolato ~ Gomma americana
+tdb-273 ~ Quale dei tre astronauti dell'Apollo 11 non camminò sulla Luna? ~ Michael Collins ~ Buzz Aldrin ~ Neil Armstrong ~ Nessuno dei tre
+tdb-2731 ~ Qual è la specie vivente di pinguino più grande? ~ Imperatore ~ Reale ~ Papua ~ Adelia
+tdb-2749 ~ Qual è il primo libro dell'Antico Testamento? ~ Genesi ~ Esodo ~ Levitico ~ Numeri
+tdb-2773 ~ Dove ha avuto origine la pianta dell'ananas? ~ Sud America ~ Hawaii ~ Europa ~ Asia
+tdb-2783 ~ Qual è la spezia più cara al mondo a peso? ~ Zafferano ~ Cannella ~ Cardamomo ~ Vaniglia
+tdb-2790 ~ Come si dice «luna» in arabo, traslitterato? ~ Qamar ~ Najma ~ Kawkab ~ Shams
+tdb-2797 ~ La xantofobia è la paura di quale colore? ~ Giallo ~ Blu ~ Rosso ~ Verde
+tdb-2798 ~ Se i capelli di una persona sono detti tizianeschi, di che colore sono? ~ Rossi ~ Biondi ~ Castani ~ Neri
+tdb-2799 ~ Con quale frutta secca si fa il marzapane? ~ Mandorle ~ Arachidi ~ Noci ~ Pistacchi
+tdb-2804 ~ In quale mese si celebra il Black History Month negli Stati Uniti? ~ Febbraio ~ Maggio ~ Novembre ~ Agosto
+tdb-2807 ~ Come si chiama il punto di poker con un tris e una coppia? ~ Full ~ Colore ~ Scala ~ Carta alta
+tdb-2810 ~ Quale monarca britannico non è mai apparso su una moneta in sterline? ~ Edoardo VIII ~ Vittoria ~ Giorgio VI ~ Carlo II
+tdb-2811 ~ In inglese, di che colore si dice sia chi è inesperto? ~ Verde ~ Rosso ~ Blu ~ Giallo
+tdb-2815 ~ Il tipo «folletto» è comparso in quale generazione dei giochi Pokémon? ~ Sesta ~ Seconda ~ Settima ~ Quarta
+tdb-2822 ~ Il chartreuse è un colore fra il giallo e quale altro? ~ Verde ~ Rosso ~ Nero ~ Viola
+tdb-2826 ~ Come si chiama la Polonia in polacco? ~ Polska ~ Pupcia ~ Polszka ~ Póland
+tdb-2830 ~ Quale azienda comprò Compaq per 25 miliardi di dollari nel 2002? ~ Hewlett-Packard ~ Toshiba ~ Asus ~ Dell
+tdb-2869 ~ Quando è nato YouTube? ~ 14 febbraio 2005 ~ 22 maggio 2004 ~ 12 settembre 2005 ~ 19 luglio 2009
+tdb-2895 ~ Un criminale che ha «truccato i libri» che reato ha commesso? ~ Frode contabile ~ Riciclaggio ~ Estorsione ~ Ricatto
+tdb-2915 ~ Di che colore si dice sia chi prova invidia? ~ Verde ~ Rosso ~ Blu ~ Giallo
+tdb-2916 ~ Qual è la lingua ufficiale del Brasile? ~ Portoghese ~ Brasiliano ~ Spagnolo ~ Inglese
+tdb-2921 ~ Quale di questi colori NON c'è nel logo di Google? ~ Rosa ~ Giallo ~ Blu ~ Verde
+tdb-2933 ~ Quale presidente americano inaugurò ufficialmente il canale di Panama? ~ Woodrow Wilson ~ Calvin Coolidge ~ Herbert Hoover ~ Theodore Roosevelt
+tdb-2964 ~ Nella sigla SIM, che cosa vuol dire la S? ~ Subscriber ~ Single ~ Secure ~ Solid
+tdb-2998 ~ In che anno è nata McDonald's? ~ 1955 ~ 1964 ~ 1951 ~ 1947
+tdb-3022 ~ Il tè Earl Grey è tè nero aromatizzato con che cosa? ~ Olio di bergamotto ~ Lavanda ~ Vaniglia ~ Miele
+tdb-3023 ~ Quale di queste nazioni NON combatté nella prima guerra mondiale? ~ Danimarca ~ Portogallo ~ Grecia ~ Romania
+tdb-303 ~ Quale presidente americano è sulla banconota da un dollaro? ~ George Washington ~ Thomas Jefferson ~ Abraham Lincoln ~ Benjamin Franklin
+tdb-3047 ~ Un dottore con un PhD è dottore in che cosa? ~ Filosofia ~ Psicologia ~ Frenologia ~ Fisioterapia
+tdb-3054 ~ Quale tecnologia prende il nome da un re danese del decimo secolo? ~ Bluetooth ~ Wi-Fi ~ GPS ~ Internet
+tdb-3056 ~ Qual è l'organo più grande del corpo umano? ~ La pelle ~ Il cuore ~ L'intestino crasso ~ Il fegato
+tdb-3072 ~ Quanto era alto Kingda Ka, l'ottovolante più alto del mondo dal 2005 al 2024? ~ 456 piedi ~ 500 piedi ~ 429 piedi ~ 396 piedi
+tdb-309 ~ In che giorno è stato lanciato Google Drive? ~ 24 aprile 2012 ~ 12 gennaio 2014 ~ 14 novembre 2008 ~ 20 gennaio 2010
+tdb-3096 ~ Come si chiama il pedale in più di un'auto con il cambio manuale? ~ Frizione ~ Cambio ~ Servofreno ~ Freno a mano
+tdb-3100 ~ L'azienda americana Campbell's è famosa per quale prodotto? ~ Zuppe in scatola ~ Cioccolato ~ Bibite ~ Salsicce
+tdb-3104 ~ Quale di queste aziende NON produce automobili? ~ Ducati ~ Nissan ~ GMC ~ Fiat
+tdb-3112 ~ Chi inventò la prima tavoletta di cioccolato, nel 1847? ~ Joseph Fry ~ Andrew Johnson ~ John Cadbury ~ John Tyler
+tdb-3128 ~ In Australia, dopo quanti anni di lavoro spetta il Long Service Leave? ~ 7 anni ~ 2 anni ~ 8 anni ~ 6 mesi
+tdb-3131 ~ Che figura retorica è la frase «un disastro annunciato»? ~ Modo di dire ~ Similitudine ~ Metafora ~ Analogia
+tdb-3133 ~ Che lavoro fa Maye Musk, la madre di Elon Musk? ~ La modella ~ La professoressa ~ La biologa ~ La musicista
+tdb-314 ~ Rolex è un'azienda specializzata in quale prodotto? ~ Orologi ~ Automobili ~ Computer ~ Attrezzi sportivi
+tdb-3147 ~ Quale sostanza si trova nei semi della melanzana? ~ Nicotina ~ Mescalina ~ Cianuro ~ Psilocibina
+tdb-3149 ~ In che anno è nata Apple? ~ 1976 ~ 1978 ~ 1980 ~ 1974
+tdb-3166 ~ Di che razza è Handsome Dan, la mascotte dell'università di Yale? ~ Bulldog ~ Yorkshire terrier ~ Boxer ~ Carlino
+tdb-3175 ~ Quale parola rappresenta la T nell'alfabeto fonetico NATO? ~ Tango ~ Target ~ Taxi ~ Turkey
+tdb-3198 ~ SALTA ~ in inglese il pollice non e' un dito, in italiano si'
+tdb-3240 ~ Steve Jobs è morto per un tumore a quale organo? ~ Al pancreas ~ Alle ossa ~ Al fegato ~ Allo stomaco
+tdb-3244 ~ Chi interpreta il generale Aladeen nel film Il dittatore? ~ Sacha Baron Cohen ~ Johnny Depp ~ James Franco ~ Leonardo DiCaprio
+tdb-3248 ~ SALTA ~ wrestling, cioe' sport
+tdb-3271 ~ Quale disciplina viene chiamata «la scienza triste»? ~ Economia ~ Filosofia ~ Politica ~ Fisica
+tdb-3284 ~ Come chiamano i marinai la parte posteriore di una barca? ~ Poppa ~ Prua ~ Tribordo ~ Babordo
+tdb-3285 ~ Quale componente del sangue forma il tappo sulle ferite? ~ Piastrine ~ Globuli rossi ~ Globuli bianchi ~ Plasma
+tdb-3288 ~ Qual è la seconda lingua più parlata in Spagna per numero di parlanti? ~ Catalano ~ Portoghese ~ Spagnolo ~ Francese
+tdb-3295 ~ Come chiamano i marinai il lato destro di una barca? ~ Tribordo ~ Babordo ~ Poppa ~ Prua
+tdb-3319 ~ Quale montagna ha la vetta più alta d'Europa? ~ Monte Elbrus, Russia ~ Shkhara, Georgia ~ Ararat, Turchia ~ Monte Bianco
+tdb-3347 ~ Il sito «Shut Up & Sit Down» recensisce quale genere di prodotti? ~ Giochi da tavolo ~ Serie TV ~ Videogiochi ~ Film
+tdb-3383 ~ Nella Haunted Mansion di Disney ci sono tre fantasmi autostoppisti: chi non c'è? ~ Harry ~ Gus ~ Phineas ~ Ezra
+tdb-3403 ~ Nei fumetti DC, in quale città vive Freccia Verde? ~ Star City ~ Central City ~ Gotham City ~ Metropolis
+tdb-3405 ~ Quale paese ha avuto primi ministri di nome Eden, Major, Peel, Law e Heath? ~ Regno Unito ~ Australia ~ Nuova Zelanda ~ Canada
+tdb-3412 ~ Quando è uscita la PlayStation 3? ~ 11 novembre 2006 ~ 8 gennaio 2007 ~ 25 dicembre 2007 ~ 16 luglio 2006
+tdb-3441 ~ Da quante sillabe è composto un haiku? ~ 17 ~ 15 ~ 10 ~ 21
+tdb-345 ~ SALTA ~ chiede come si dice pomodoro in italiano
+tdb-3484 ~ In Half-Life, come si chiama l'alieno che si attacca alla testa? ~ Headcrab ~ Bullsquid ~ Vortigaunt ~ Facehugger
+tdb-3499 ~ Gli antibiotici si prendono di solito contro che cosa? ~ Infezioni batteriche ~ Virus ~ Emicranie ~ Dolori muscolari
+tdb-3526 ~ L'Area 51 si trova in quale stato americano? ~ Nevada ~ Arizona ~ Nuovo Messico ~ Utah
+tdb-3582 ~ Qual è la moneta del Laos? ~ Kip ~ Rublo ~ Konra ~ Dollaro
+tdb-3584 ~ L'architetto Le Corbusier fu una figura chiave di quale stile? ~ Modernismo ~ Neoclassico ~ Barocco ~ Neogotico
+tdb-3599 ~ Che cosa teneva un tempo un gentiluomo nel taschino del panciotto? ~ L'orologio ~ I soldi ~ Le chiavi ~ Un taccuino
+tdb-3613 ~ Come chiamano gli olandesi la loro lingua? ~ Nederlands ~ Dansk ~ Deutsch ~ Hollander
+tdb-3616 ~ Qual è la moneta della Polonia? ~ Złoty ~ Rublo ~ Euro ~ Corona
+tdb-3624 ~ Qual è la moneta di India e Pakistan, e di altri paesi asiatici? ~ Rupia ~ Riyal ~ Peso ~ Dinaro
+tdb-3654 ~ Da quale paese viene la leggenda di Robin Hood? ~ Inghilterra ~ Francia ~ Portogallo ~ Scozia
+tdb-366 ~ Cinque dollari quanti nickel da cinque centesimi fanno? ~ 100 ~ 50 ~ 25 ~ 69
+tdb-3679 ~ SALTA ~ cartone animato, cioe' tv straniera
+tdb-3709 ~ In un mazzo di carte francesi, qual è l'unico re senza baffi? ~ Cuori ~ Picche ~ Quadri ~ Fiori
+tdb-3729 ~ Le parole «bungalow» e «shampoo» vengono dalle lingue di quale paese? ~ India ~ Papua Nuova Guinea ~ Etiopia ~ Cina
+tdb-3730 ~ Quale frase latina significa più o meno «cogli l'attimo»? ~ Carpe diem ~ Memento mori ~ Plus ultra ~ Sic semper tyrannis
+tdb-3735 ~ Quale di queste lingue NON usa il genere nella sua grammatica? ~ Turco ~ Tedesco ~ Danese ~ Polacco
+tdb-375 ~ Che cos'è un burgee? ~ Una bandiera ~ Una cima ~ Una finestra ~ Un cibo
+tdb-3751 ~ Qual è il codice IATA dell'aeroporto di Manchester? ~ MAN ~ EGLL ~ LHR ~ EGCC
+tdb-3757 ~ Quale di queste caramelle NON è prodotta da Mars? ~ Almond Joy ~ M&M's ~ Twix ~ Snickers
+tdb-3761 ~ Quando è uscito Pong? ~ 29 novembre 1972 ~ 29 marzo 2017 ~ 29 novembre 1970 ~ 14 dicembre 1974
+tdb-3777 ~ In quale paese si sono svolte le Olimpiadi estive del 1992? ~ Spagna ~ Russia ~ Corea ~ Stati Uniti
+tdb-3778 ~ Quale di queste catene di fast food NON vende soprattutto pizza? ~ Wendy's ~ Domino's ~ Little Caesars ~ Papa John's
+tdb-3781 ~ Quale di questi paesi si guida a sinistra? ~ Giappone ~ Germania ~ Russia ~ Cina
+tdb-3827 ~ Qual è la lingua più parlata nell'emisfero australe? ~ Portoghese ~ Inglese ~ Spagnolo ~ Francese
+tdb-383 ~ Oltre allo spagnolo, qual è la lingua ufficiale a Barcellona? ~ Catalano ~ Galiziano ~ Francese ~ Basco
+tdb-3835 ~ Quante stelle ha la bandiera dell'Unione Europea? ~ 12 ~ 10 ~ 14 ~ 16
+tdb-3852 ~ In «Resident Evil 3», quante caselle di inventario ha Jill all'inizio? ~ 8 ~ 6 ~ 10 ~ 12
+tdb-3879 ~ Quale di queste banche NON può emettere banconote a Hong Kong? ~ OCBC ~ HSBC ~ Standard Chartered ~ Bank of China
+tdb-3902 ~ Quale di questi mesi ha più giorni? ~ Dicembre ~ Aprile ~ Settembre ~ Novembre
+tdb-3916 ~ Quanti tasti ha un pianoforte a coda standard? ~ 88 ~ 98 ~ 108 ~ 78
+tdb-4005 ~ Che cosa vuol dire la sigla GMT del fuso orario? ~ Greenwich Mean Time ~ Global Meridian Time ~ General Median Time ~ Glasgow Man Time
+tdb-4029 ~ Qual è la velocità di crociera di una rondine scarica? ~ 24 mph ~ 15 mph ~ 20 mph ~ 200 mph
+tdb-4032 ~ Quale nome rappresenta la M nell'alfabeto fonetico NATO? ~ Mike ~ Matthew ~ Mark ~ Max
+tdb-4040 ~ Come si dice «arrivederci» in spagnolo? ~ Adiós ~ Hola ~ Au revoir ~ Salir
+tdb-4057 ~ Qual era il nome originale del motore di ricerca Google? ~ BackRub ~ CatMassage ~ SearchPro ~ Netscape Navigator
+tdb-4068 ~ In aerodinamica, quale forza spinge un oggetto verso l'alto? ~ La portanza ~ La resistenza ~ Il peso ~ La spinta
+tdb-4092 ~ In che anno il Ghana ha ottenuto l'indipendenza? ~ 1957 ~ 1947 ~ 1960 ~ 1958
+tdb-4093 ~ Di quale compagnia era l'aereo caduto al largo della Nuova Scozia nel 1998? ~ Swissair ~ Air France ~ British Airways ~ TWA
+tdb-4094 ~ Quale bevanda alcolica si ricava dalla melassa? ~ Rum ~ Gin ~ Vodka ~ Whisky
+tdb-4100 ~ Come si dice «università» in giapponese, traslitterato? ~ Daigaku ~ Toshokan ~ Jimusho ~ Shokudou
+tdb-4140 ~ In «Shrek», quale attore comico dà la voce a Ciuchino in originale? ~ Eddie Murphy ~ Chris Rock ~ Richard Pryor ~ Bernie Mac
+tdb-4141 ~ In che anno è nato il sito Facebook? ~ 2004 ~ 2005 ~ 2003 ~ 2006
+tdb-4142 ~ Che cosa vuol dire per esteso la sigla RAM? ~ Random Access Memory ~ Random Assist Memory ~ Rand Assist Mandate ~ Ram
+tdb-4175 ~ Nell'espressione inglese «G-Man», che cosa vuol dire la G? ~ Government ~ Going ~ Ghost ~ Geronimo
+tdb-4177 ~ Quale di questi termini anatomici indica la parte della coda? ~ Caudale ~ Ventrale ~ Prossimale ~ Coronale
+tdb-4209 ~ Con quale azienda ha collaborato Valve per creare il visore Vive? ~ HTC ~ Oculus ~ Google ~ Razer
+tdb-4231 ~ Quale di queste feste NON si celebra di solito a dicembre? ~ Il Ringraziamento ~ Natale ~ Kwanzaa ~ Hanukkah
+tdb-4236 ~ Quale prodotto vendeva in origine la Nokia? ~ Carta ~ Telefoni ~ Computer ~ Processori
+tdb-4239 ~ Sul bersaglio delle freccette, quale numero sta di fronte all'1? ~ 19 ~ 20 ~ 12 ~ 15
+tdb-4267 ~ Di quale esploratore inglese dell'Australia sono stati trovati i resti a Londra nel 2019? ~ Matthew Flinders ~ William Bourke ~ Abel Tasman ~ Dirk Hartog
+tdb-4270 ~ Quanti furlong ci sono in un miglio? ~ Otto ~ Due ~ Quattro ~ Sei
+tdb-428 ~ Che forma geometrica ha di solito il segnale di stop? ~ Ottagono ~ Esagono ~ Cerchio ~ Triangolo
+tdb-4290 ~ Con quale nome nacque la Bank of America? ~ Bank of Italy ~ Bank of Long Island ~ Bank of Pennsylvania ~ Bank of Charlotte
+tdb-4329 ~ Qual è il mese più corto dell'anno? ~ Febbraio ~ Dicembre ~ Aprile ~ Settembre
+tdb-4357 ~ Quale catena di ristoranti ha un pagliaccio come mascotte? ~ McDonald's ~ Whataburger ~ Burger King ~ Sonic
+tdb-4375 ~ Come si chiama il protagonista della serie di videogiochi Dead Space? ~ Isaac Clarke ~ Ellen Ripley ~ Commander Shepard ~ Captain Kirk
+tdb-438 ~ All'inizio di quale decennio è nata la sottocultura goth? ~ Anni 80 ~ Anni 90 ~ Anni 2000 ~ Anni 70
+tdb-4380 ~ In che anno è nato Walt Disney? ~ 1901 ~ 1902 ~ 1903 ~ 1900
+tdb-4399 ~ Da quale paese vengono il sushi e il karaoke? ~ Giappone ~ Cina ~ Corea del Sud ~ Vietnam
+tdb-4400 ~ Quale fiume attraversa la città scozzese di Glasgow? ~ Clyde ~ Tay ~ Dee ~ Tweed
+tdb-4407 ~ Qual è la lingua ufficiale e più parlata a Cuba? ~ Spagnolo ~ Portoghese ~ Francese ~ Italiano
+tdb-4436 ~ In media, gli americani consumano 100 libbre al secondo di che cosa? ~ Cioccolato ~ Patate ~ Ciambelle ~ Cocaina
+tdb-4458 ~ Come si chiama in inglese il carattere «&»? ~ Ampersand ~ Eightslash ~ And sign ~ Obelus
+tdb-4459 ~ Come si chiama il gruppo antagonista in Danganronpa Another Episode? ~ Warriors of Hope ~ The Monokubs ~ Warriors of Despair ~ The Ultimate Despair
+tdb-4469 ~ Qual era la destinazione del volo scomparso MH370? ~ Pechino ~ Kuala Lumpur ~ Singapore ~ Tokyo
+tdb-4478 ~ Qual è il vero nome del gatto diventato meme Grumpy Cat? ~ Tardar Sauce ~ Lil Bub ~ Maru ~ Colonel Meow
+tdb-4484 ~ Prima dell'Ottocento, in inglese il «living room» si chiamava... ~ Parlor ~ Open room ~ Sitting room ~ Loft
+tdb-465 ~ Quale star del cinema ha una statua a Leicester Square, a Londra? ~ Charlie Chaplin ~ Paul Newman ~ Rowan Atkinson ~ Alfred Hitchcock
+tdb-466 ~ Nella filastrocca, che frutto tirò fuori dalla torta Little Jack Horner? ~ Una prugna ~ Una mela ~ Una pesca ~ Una pera
+tdb-470 ~ In che anno è uscito il primo iPod di Apple? ~ 2001 ~ 2000 ~ 1999 ~ 1998
+tdb-479 ~ Come si chiama l'azienda del videogioco Lethal Company? ~ The Company ~ Planet Scrap Co. ~ Lethal Robotics ~ Gordian Shipping Co.
+tdb-494 ~ Come viene chiamata familiarmente la moneta canadese da un dollaro? ~ Loonie ~ Boolie ~ Foolie ~ Moodie
+tdb-534 ~ Quale di questi nomi inglesi NON indica la melanzana? ~ Potimarron ~ Brinjal ~ Guinea squash ~ Melongene
+tdb-557 ~ Qual è la capitale della Spagna? ~ Madrid ~ Parigi ~ Barcellona ~ Lisbona
+tdb-558 ~ Quanto è alto il Burj Khalifa? ~ 2.722 piedi ~ 2.717 piedi ~ 2.546 piedi ~ 3.024 piedi
+tdb-57 ~ Quale università della Ivy League ha il motto anche in ebraico, oltre che in latino? ~ Yale ~ Princeton ~ Harvard ~ Columbia
+tdb-596 ~ Nel calendario gregoriano, quanti mesi inglesi cominciano con la lettera J? ~ Tre ~ Quattro ~ Cinque ~ Due
+tdb-608 ~ Come chiamano i marinai la parte anteriore di una barca? ~ Prua ~ Poppa ~ Babordo ~ Tribordo
+tdb-623 ~ Che cosa ha vietato la Catalogna nel 2010, con effetto dal 2012? ~ La corrida ~ Le feste ~ Il flamenco ~ I mariachi
+tdb-624 ~ In «Katamari Damacy», quale personaggio si controlla? ~ Il Principe ~ Fujio ~ Ichigo ~ Foomin
+tdb-651 ~ Qual è l'ultima lettera dell'alfabeto greco? ~ Omega ~ Mi ~ Epsilon ~ Kappa
+tdb-661 ~ Nell'antica Grecia, se il tuo mestiere era «hippeus» che cosa possedevi? ~ Un cavallo ~ Un telaio ~ Una cetra ~ Una barca
+tdb-685 ~ In quale comune della Coruña ha sede Inditex, il primo gruppo mondiale della moda? ~ Arteijo ~ Sanjenjo ~ Mugía ~ Órdenes
+tdb-699 ~ Qual è il pianeta più vicino al Sole? ~ Mercurio ~ Marte ~ Giove ~ Terra
+tdb-70 ~ In quale paese è nata la Hyundai Motor Company? ~ Corea del Sud ~ Russia ~ Giappone ~ Cina
+tdb-710 ~ Quante carte ci sono in un mazzo di carte francesi completo? ~ 52 ~ 32 ~ 40 ~ 64
+tdb-714 ~ Quale di queste parole inglesi indica qualcosa fatto o venduto illegalmente? ~ Bootleg ~ Bootblack ~ Bootlace ~ Bootstrap
+tdb-727 ~ In che anno è nata la regina Elisabetta II? ~ 1926 ~ 1923 ~ 1929 ~ 1930
+tdb-733 ~ Come si dice «cuore» in coreano, traslitterato? ~ Simjang ~ Aejeong ~ Jeongsin ~ Segseu
+tdb-744 ~ Qual è il simbolo zodiacale dei Gemelli? ~ I gemelli ~ I pesci ~ La bilancia ~ La vergine
+tdb-765 ~ Quale di questi siti è il più visitato al mondo? ~ Google ~ YouTube ~ Facebook ~ Wikipedia
+tdb-769 ~ Che caratteristica ha una persona definita «irsuta»? ~ È pelosa ~ È scortese ~ È divertente ~ È alta
+tdb-801 ~ Nella serie Kingdom Hearts, che forma ha l'arma del protagonista? ~ Una chiave ~ Una spada ~ Una penna ~ Un telefono
+tdb-804 ~ Viaggiando a 80 miglia all'ora, quanto ci metti a percorrere 80 miglia? ~ 60 minuti ~ 90 minuti ~ 30 minuti ~ 50 minuti
+tdb-805 ~ In quale di queste città NON c'è una zecca degli Stati Uniti? ~ St. Louis, MO ~ San Francisco, CA ~ Philadelphia, PA ~ West Point, NY
+tdb-822 ~ Come si dice «cucchiaio» in tedesco? ~ Löffel ~ Gabel ~ Messer ~ Essstäbchen
+tdb-842 ~ Secondo il CDC americano, un americano su quanti muore ogni anno per il fumo? ~ Cinque ~ Venti ~ Dieci ~ Cento
+tdb-846 ~ Quale frutto è l'ingrediente tradizionale della torta Foresta Nera? ~ Ciliegie ~ Albicocche ~ Uvetta ~ Mele
+tdb-868 ~ Quale carattere è stato considerato la 27esima lettera dell'alfabeto inglese? ~ Ampersand ~ Interrobang ~ Tilde ~ Pilcrow
+tdb-873 ~ In che anno è nato il sito reddit? ~ 2005 ~ 2008 ~ 2004 ~ 2006
+tdb-877 ~ Quanto vive in media una formica da giardino? ~ 15 anni ~ 24 ore ~ Una settimana ~ 3 anni
+tdb-890 ~ Quale di queste lingue NON è indoeuropea? ~ Ungherese ~ Russo ~ Greco ~ Lettone
+tdb-898 ~ Come si chiama la moneta usata in Etiopia? ~ Birr ~ Dirham ~ Dollaro USA ~ Rand
+tdb-902 ~ Quale di questi NON è considerato un colore dell'arcobaleno? ~ Rosa ~ Blu ~ Violetto ~ Arancione
+tdb-905 ~ Quale bevanda alcolica si ricava soprattutto dalle bacche di ginepro? ~ Gin ~ Vodka ~ Rum ~ Tequila
+tdb-915 ~ Chi è raffigurato sulla banconota americana da cento dollari? ~ Benjamin Franklin ~ George Washington ~ Abraham Lincoln ~ Thomas Jefferson
+tdb-922 ~ Quale segno zodiacale sta fra Vergine e Scorpione? ~ Bilancia ~ Gemelli ~ Toro ~ Capricorno
+tdb-963 ~ Quale fu il terzo paese ad avere un ristorante McDonald's? ~ Costa Rica ~ Giappone ~ Francia ~ Australia
+tdb-966 ~ Qual è il soprannome dello stato americano della California? ~ Golden State ~ Sunshine State ~ Bay State ~ Treasure State
+tdb-987 ~ Whisky scozzese e Drambuie compongono quale cocktail? ~ Rusty Nail ~ Screwdriver ~ Sex on the Beach ~ Manhattan
+tdb-995 ~ Con che cosa sono fatti i cappelli panama? ~ Paglia ~ Seta ~ Canapa ~ Lino
+tdb-997 ~ Quante calorie ha una lattina da 355 ml di Pepsi Cola? ~ 150 ~ 200 ~ 100 ~ 155
+tdb-1019 ~ Qual è il fiume più lungo del mondo? ~ Nilo ~ Missouri ~ Rio delle Amazzoni ~ Yangtze
+tdb-1036 ~ Quale stato americano si trova interamente dentro la regione appalachiana? ~ Virginia Occidentale ~ Pennsylvania ~ Alabama ~ Kentucky
+tdb-105 ~ Qual è la capitale del Perù? ~ Lima ~ Santiago ~ Montevideo ~ Buenos Aires
+tdb-1055 ~ Quale di questi posti si trova in Cornovaglia? ~ Barcelona ~ Madrid ~ Alicante ~ Lisbona
+tdb-1077 ~ Qual è la capitale del Suriname? ~ Paramaribo ~ Antananarivo ~ Tegucigalpa ~ Sucre
+tdb-1105 ~ Quale di queste lingue europee è classificata come lingua isolata? ~ Basco ~ Galiziano ~ Maltese ~ Ungherese
+tdb-1114 ~ Bridgetown è la capitale di quale isola dei Caraibi? ~ Barbados ~ Cuba ~ Giamaica ~ Dominica
+tdb-1119 ~ Qual è la capitale della Svizzera? ~ Berna ~ Zurigo ~ Francoforte ~ Vienna
+tdb-1137 ~ Qual è l'unico paese al mondo con una bandiera senza quattro angoli retti? ~ Nepal ~ Panama ~ Angola ~ Egitto
+tdb-1147 ~ Quale paese ha tre capitali? ~ Sudafrica ~ Somalia ~ Cina ~ Regno Unito
+tdb-1153 ~ Broome è una città di quale stato australiano? ~ Australia Occ. ~ Territorio Nord ~ Australia Merid. ~ Tasmania
+tdb-1170 ~ Quale città tedesca sorge sul fiume Isar? ~ Monaco ~ Berlino ~ Amburgo ~ Dortmund
+tdb-1172 ~ Qual è lo stato più grande degli Stati Uniti? ~ Alaska ~ California ~ Texas ~ Washington
+tdb-1174 ~ Quale di questi non è un paese africano? ~ Guyana ~ Senegal ~ Liberia ~ Somalia
+tdb-1188 ~ In quale contea inglese si trova la città di Portsmouth? ~ Hampshire ~ Oxfordshire ~ Buckinghamshire ~ Surrey
+tdb-1205 ~ Dove si trova il fiume Volga? ~ Russia ~ Bulgaria ~ India ~ Svezia
+tdb-1218 ~ Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch sta su quale isola gallese? ~ Anglesey ~ Barry ~ Bardsey ~ Caldey
+tdb-1219 ~ Qual è la capitale delle Bermuda? ~ Hamilton ~ Santo Domingo ~ San Juan ~ L'Avana
+tdb-1222 ~ Un leone che brandisce una spada è sulla bandiera di quale paese? ~ Sri Lanka ~ Albania ~ Zambia ~ Moldavia
+tdb-1240 ~ Quale di queste NON è una città dell'Arabia Saudita? ~ Dubai ~ Riad ~ La Mecca ~ Medina
+tdb-1251 ~ Il Gambia si trova in quale continente? ~ Africa ~ Asia ~ Sud America ~ Europa
+tdb-1257 ~ Qual è la via di salita più battuta del K2? ~ Sperone Abruzzi ~ Magic Line ~ Via Cesen ~ Via polacca
+tdb-1319 ~ Quanti paesi al mondo sono più grandi dell'Australia? ~ 5 ~ 4 ~ 3 ~ 6
+tdb-1324 ~ Quale di queste NON è una città indiana? ~ Islamabad ~ Hyderabad ~ Ahmedabad ~ Ghaziabad
+tdb-1334 ~ Qual è la capitale del Cile? ~ Santiago ~ Valparaíso ~ Copiapó ~ Antofagasta
+tdb-1338 ~ Qual è la città più grande del Canada? ~ Toronto ~ Montreal ~ Vancouver ~ Ottawa
+tdb-1356 ~ Quale paese ha il maggior numero di vulcani storicamente attivi? ~ Indonesia ~ Giappone ~ Stati Uniti ~ India
+tdb-1359 ~ Qual è la provincia più piccola del Canada? ~ Prince Edward Island ~ New Brunswick ~ Nuova Scozia ~ Yukon
+tdb-1368 ~ Qual è la lingua nazionale ufficiale del Pakistan? ~ Urdu ~ Indiano ~ Punjabi ~ Pashtu
+tdb-1379 ~ La Groenlandia fa parte di quale regno? ~ Danimarca ~ Svezia ~ Norvegia ~ Regno Unito
+tdb-142 ~ Quale stato americano sta più a nord-est? ~ Maine ~ New York ~ Georgia ~ Florida
+tdb-1422 ~ Dove si trova l'antica città di Petra? ~ Giordania ~ Egitto ~ Israele ~ Italia
+tdb-1424 ~ Qual è il soprannome dello stato americano del Delaware? ~ The First State ~ The Fiftieth State ~ The Second State ~ The Sixteenth State
+tdb-1436 ~ Quale famiglia linguistica è la più discussa fra i linguisti di oggi? ~ Altaica ~ Sino-tibetana ~ Dravidica ~ Indoeuropea
+tdb-1443 ~ Quale di queste NON è una provincia cinese? ~ Yangtze ~ Fujian ~ Sichuan ~ Guangdong
+tdb-1454 ~ Qual è la capitale di Cipro? ~ Nicosia ~ Pafo ~ Limassol ~ Larnaca
+tdb-1463 ~ L'Eritrea, entrata all'ONU nel 1993, si trova in quale continente? ~ Africa ~ Europa ~ Asia ~ Sud America
+tdb-1465 ~ Qual è la capitale dello stato americano del Texas? ~ Austin ~ Dallas ~ Santa Fe ~ Houston
+tdb-1487 ~ Qual è la capitale dell'Ecuador? ~ Quito ~ Bogotá ~ Santiago ~ Santa Fé
+tdb-1492 ~ In quale città si trova l'università di Harvard? ~ Cambridge ~ Providence ~ New York ~ Washington
+tdb-1494 ~ Quale città polacca i tedeschi chiamano Danzica? ~ Gdańsk ~ Varsavia ~ Zakopane ~ Poznań
+tdb-1513 ~ Quale paese ha la sigla «CH»? ~ Svizzera ~ Cina ~ Canada ~ Nessuno
+tdb-1524 ~ Quale di queste isole del Mediterraneo appartiene alla Francia? ~ Corsica ~ Maiorca ~ Sardegna ~ Malta
+tdb-1525 ~ In quale continente si trova l'Angola? ~ Africa ~ Sud America ~ Europa ~ Asia
+tdb-1535 ~ Qual è la montagna più alta del mondo? ~ Everest ~ Mount Godwin Austen ~ Kangchenjunga ~ Annapurna
+tdb-1546 ~ Quale paese europeo non fa parte dell'Unione Europea? ~ Norvegia ~ Lituania ~ Irlanda ~ Repubblica Ceca
+tdb-1583 ~ Frankenmuth, la città americana detta «piccola Baviera», è in quale stato? ~ Michigan ~ Pennsylvania ~ Kentucky ~ Virginia
+tdb-1605 ~ Quale città europea ha più chilometri di canali al mondo? ~ Birmingham ~ Venezia ~ Amsterdam ~ Berlino

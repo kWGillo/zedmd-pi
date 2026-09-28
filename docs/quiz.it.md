@@ -163,8 +163,9 @@ multipla che esista con l'italiano dentro e una licenza che ne permette la
 ridistribuzione: **CC BY-SA 4.0**. È un progetto francese, ed è il motivo per
 cui il lavoro vero non è stato scaricare, è stato **buttare via**.
 
-Dei 3.323 quesiti italiani ne sono rimasti **1.301**, con altrettanti in
-inglese. Cosa è uscito, e perché:
+Dei 3.323 quesiti ne sono rimasti **1.307 in italiano e 1.431 in inglese** —
+numeri diversi, ed è il punto: ogni lingua paga solo i propri difetti. Cosa è
+uscito dall'italiano, e perché:
 
 | Scartate | Quante | Perché |
 |---|---|---|
@@ -176,7 +177,7 @@ inglese. Cosa è uscito, e perché:
 | risposte ripetute | 9 | quattro risposte che sono tre |
 
 La regola che ha lavorato di più è quella dei **nomi propri**, e usa il
-francese come arbitro: se una risposta francese ha una maiuscola in mezzo —
+francese come arbitro — una lingua per volta, dalla 15.0: se una risposta francese ha una maiuscola in mezzo —
 `L'Humanité`, `Mega Mindy`, `PlayStation 2` — allora è un nome, e le altre due
 lingue devono ripeterlo uguale. E se almeno due delle quattro sono nomi, lo
 sono tutte e quattro: quando le alternative sono Mega Mindy, Gwen Tennyson e
@@ -206,17 +207,71 @@ identificativo, vince la tua riga.
 Sono le domande che rendono il gioco vostro invece che di chiunque: quelle di
 famiglia, quelle che fanno ridere a Natale.
 
-# 4. Lo stesso numero nelle due lingue
+# 4. Due banche indipendenti
 
-Le due banche non sono due archivi diversi: sono lo **stesso** archivio, e la
-stessa domanda porta lo stesso identificativo in italiano e in inglese. Serve
-a una cosa sola, e non è un dettaglio: il conto delle domande già uscite vale
-per tutte e due le lingue. Chi gioca in inglese non si rivede in italiano
-quello che ha visto un minuto prima.
+Fino alla 14.2 erano gemelle: la stessa domanda con lo stesso identificativo
+nelle due lingue, così che il conto delle domande già uscite valesse per tutte
+e due. Sembrava elegante, e costava carissimo. La segnalazione che l'ha
+smontata è di una riga: *«le domande in inglese possono tranquillamente essere
+diverse da quelle in italiano»*. È vero, e legandole si pagava un prezzo
+assurdo: **ogni riga con la traduzione rotta in una sola delle due lingue
+veniva buttata da tutte e due**. L'italiano pulito e l'inglese che aveva
+tradotto un nome proprio? Persi tutti e due.
+
+Dalla 15.0 ogni lingua ha la sua banca, le sue regole di pulizia e i suoi
+identificativi, e il conto delle domande già uscite è **uno per lingua** — il
+che è anche l'unica cosa sensata quando le domande non sono le stesse. La
+memoria vecchia, se c'era, diventa quella italiana, e l'inglese riparte
+pulito.
+
+I numeri di adesso: **1.642 domande in italiano e 4.820 in inglese**. L'inglese
+è così avanti perché ha due fonti (vedi sotto); l'italiano cresce a ondate, con
+le traduzioni fatte a mano.
+
+L'identificativo dice da dove viene la riga: `oq-` da OpenQuizzDB, `tdb-` da
+Open Trivia DB, `otqa-` da OpenTriviaQA.
 
 Il gioco segue la lingua dell'interfaccia: se la pagina è in inglese, il quiz
 è in inglese. Le tue domande possono esistere in una lingua sola —
 semplicemente non compaiono nell'altra, invece di comparire vuote.
+
+## Le altre fonti, e perché l'italiano resta solo
+
+Per l'inglese OpenQuizzDB non è l'unica: ce ne sono due più grandi, con la
+stessa licenza.
+
+| Archivio | Quante | Lingua | Come sta |
+|---|---|---|---|
+| [OpenQuizzDB](https://github.com/Zeuh/OpenQuizzDB) | ~3.300 per lingua | it, en, fr, es, de, nl | l'unico con l'italiano |
+| [Open Trivia DB](https://opentdb.com/) | 5.298 verificate a mano | inglese | scaricato dall'API, o letto da una cartella con `--tdb-da` |
+| [OpenTriviaQA](https://github.com/uberspot/OpenTriviaQA) | 49.192 uniche | inglese | si attiva con `--con-otqa <clone>`, spento di serie |
+
+Per l'italiano non c'è altro di ridistribuibile: i siti di quiz per concorsi
+non hanno una licenza che lo permetta, e gli unici dataset italiani di
+«cultura generale» che girano sono generati da un modello, senza fonti citate.
+Per un gioco in cui la risposta giusta deve essere *giusta*, non basta.
+
+## Le domande tradotte a mano
+
+Quello che manca all'italiano non si risolve con una traduzione automatica —
+sarebbe rifare il difetto da cui veniamo. Si risolve traducendo a mano, una
+riga per volta, e il lavoro sta in `diagnostica/traduzioni.tsv`:
+
+```
+tdb-1002 ~ La Terra si trova in quale galassia? ~ Via Lattea ~ Galassia di Marte ~ ...
+tdb-345  ~ SALTA ~ chiede come si dice pomodoro in italiano
+```
+
+Le regole sono quattro, e la quarta è quella che conta: i nomi propri restano
+come sono; le risposte stanno in venti caratteri e le domande in cento, perché
+quello è lo spazio del pannello; sport e televisione straniera restano fuori,
+perché tradotti resterebbero comunque di un'altra cultura; e **quello che in
+italiano non ha senso si salta**, con il motivo scritto accanto, invece di
+tradurlo lo stesso. «In inglese il pollice non è un dito, in italiano sì» è
+un motivo valido per buttare una domanda.
+
+Il file cresce a ondate: le domande già tradotte restano, e chi rigenera le
+banche le ritrova. Sono anche loro CC BY-SA 4.0, come la fonte.
 
 # 5. Niente rete
 
@@ -236,13 +291,13 @@ sul Raspberry**.
 
 # 6. Come è stato provato
 
-`test_quiz.py`, 146 controlli, e `test_musica_media.py`, altri 35. Quelli che contano davvero:
+`test_quiz.py`, 157 controlli, e `test_musica_media.py`, altri 35. Quelli che contano davvero:
 
-- **un fuoco solo non risponde mai**: il primo apre la conferma, e lo stesso
-  fuoco non la può chiudere — un quarto di secondo di margine, altrimenti su
-  un pad tenuto in mano si risponderebbe per sbaglio;
-- **la stessa domanda ha lo stesso numero nelle due lingue**, verificato
-  confrontando i 1.301 identificativi uno per uno;
+- **un fuoco solo non risponde mai**: il primo apre la conferma, il secondo
+  vale su SI o su NO — e un tasto tenuto premuto conta una volta, non trenta
+  al secondo;
+- **le due banche non sono più gemelle**, e dentro ciascuna nessun
+  identificativo si ripete;
 - **la risposta giusta non sta sempre nello stesso posto**: nel file è sempre
   la prima, e un quiz in cui la risposta è sempre la A si vince senza
   leggere;

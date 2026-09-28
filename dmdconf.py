@@ -279,7 +279,12 @@ DEFAULTS = {
         "quiz_tempo": 60,
         # Gli identificativi delle domande gia' uscite, per non rifarle. Si
         # riempie da solo e si accorcia da solo.
-        "quiz_viste": [],
+        # Le domande gia' uscite, **una lista per lingua**. Erano una sola,
+        # perche' le due banche erano gemelle e la stessa domanda aveva lo
+        # stesso identificativo; dalla 15.0 le banche sono indipendenti -- le
+        # domande inglesi non sono la traduzione di quelle italiane -- e un
+        # conto solo mescolerebbe numeri che non vogliono dire la stessa cosa.
+        "quiz_viste": {},
         # Il tasto Start del cabinato scorre i giochi: premuto una volta si
         # gioca, premuto ancora si passa al successivo. I codici sono quelli
         # di una tastiera normale (invio, escape) ma su una pulsantiera da
@@ -1212,6 +1217,14 @@ def _migrate(raw):
             if punti > 0:
                 classifica[gioco] = [{"punti": punti, "nome": "---",
                                       "livello": 0, "quando": 0.0}]
+
+    # 15.0: la memoria delle domande del quiz diventa una per lingua, perche'
+    # le due banche non sono piu' gemelle. La lista vecchia era fatta di
+    # identificativi della banca comune: si tiene come memoria italiana, che
+    # e' la lingua in cui si e' giocato quasi sempre, e l'inglese riparte
+    # pulito -- sono domande diverse, quelle.
+    if isinstance(giochi.get("quiz_viste"), list):
+        giochi["quiz_viste"] = {"it": giochi["quiz_viste"], "en": []}
 
     wad = doom.get("wad") or ""
     if wad and not os.path.exists(wad):

@@ -126,6 +126,21 @@ def spezza(testo, quanti, righe=2):
     return fuori
 
 
+def _viste_per_lingua(valore):
+    """La memoria delle domande uscite, sempre nella forma nuova.
+
+    Accetta anche quella vecchia -- una lista sola, di quando le due banche
+    erano gemelle -- e la mette da parte come memoria italiana: e' la lingua
+    in cui quasi tutti hanno giocato, e nel dubbio si dimentica qualcosa,
+    non si finge di ricordare.
+    """
+    if isinstance(valore, dict):
+        return {lingua: list(valore.get(lingua) or []) for lingua in ("it", "en")}
+    if isinstance(valore, (list, tuple)):
+        return {"it": list(valore), "en": []}
+    return {"it": [], "en": []}
+
+
 def soldi(valore):
     """1000 diventa 1.000: sul pannello i punti si leggono, le cifre no."""
     return "{:,}".format(int(valore)).replace(",", ".")
@@ -149,6 +164,7 @@ class Quiz(Gioco):
     def __init__(self, seme=None):
         self.lingua = "it"
         self.musiche = dict(self.MUSICHE)
+        self._tutte_viste = {}
         self.tempo_risposta = TEMPO_RISPOSTA
         self.musica_accesa = True
         self._viste = []
@@ -201,7 +217,8 @@ class Quiz(Gioco):
         # Con la musica spenta la risposta non puo' durare quanto un brano
         # che non parte: si torna ai tempi di riserva.
         self.musica_accesa = bool(conf.get("musica", True))
-        self._viste = list(conf.get("quiz_viste") or [])
+        self._tutte_viste = _viste_per_lingua(conf.get("quiz_viste"))
+        self._viste = list(self._tutte_viste.get(self.lingua, []))
         self.rimasto = self.tempo_risposta
         self._mazzo = banca.Mazzo(self.lingua, self._viste)
         self._prossima()
@@ -209,12 +226,19 @@ class Quiz(Gioco):
     def configura_lingua(self, lingua):
         """Il quiz parla la lingua dell'interfaccia: la sceglie chi lo apre."""
         self.lingua = "en" if lingua == "en" else "it"
+        # Ogni lingua ha la sua memoria: le due banche non fanno le stesse
+        # domande, e un identificativo italiano dentro il conto inglese non
+        # vuol dire niente.
+        self._viste = list(self._tutte_viste.get(self.lingua, []))
         self._mazzo = banca.Mazzo(self.lingua, self._viste)
         self._prossima()
 
     def memoria_domande(self):
-        """Gli identificativi usciti, da ricordare per la prossima partita."""
-        return self._mazzo.memoria() if self._mazzo else []
+        """Gli identificativi usciti, per lingua: {"it": [...], "en": [...]}."""
+        fuori = dict(self._tutte_viste)
+        if self._mazzo is not None:
+            fuori[self.lingua] = self._mazzo.memoria()
+        return fuori
 
     def difficolta_del_gradino(self):
         """Le prime cinque facili, le ultime cinque da esperti."""

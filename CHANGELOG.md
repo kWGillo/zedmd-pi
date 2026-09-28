@@ -2,6 +2,74 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [15.0]
+
+### Le due banche di domande non sono piu' gemelle
+
+*«Penso che abbiamo fatto un errore logico. Le domande in inglese possono
+tranquillamente essere diverse da quelle in italiano.»*
+
+Vero, ed era un errore mio. Avevo legato le due banche con lo stesso
+identificativo per una ragione sola — far valere per entrambe la memoria
+delle domande già uscite — e l'ho pagata carissima: **ogni riga con la
+traduzione rotta in una sola delle due lingue veniva buttata da tutte e
+due**. L'italiano pulito e l'inglese che aveva tradotto un nome proprio?
+Persi entrambi.
+
+Adesso ogni lingua ha la sua banca, le sue regole e i suoi identificativi. Il
+francese resta l'arbitro dei nomi propri — «L'Humanité» diventato «Umanità»
+non è una risposta imprecisa, è una risposta sbagliata — ma arbitra una
+lingua per volta. Il conto: **1.307 in italiano e 1.431 in inglese**, numeri
+diversi, ed è esattamente il punto.
+
+La memoria delle domande già uscite diventa una per lingua, perché un
+identificativo italiano dentro il conto inglese non vorrebbe dire niente.
+Quella vecchia diventa la memoria italiana — è la lingua in cui si è giocato
+quasi sempre — e l'inglese riparte pulito.
+
+### E le altre fonti, visto che la domanda era buona
+
+*«Le domande che hai recuperato sono realmente l'unica fonte free
+disponibile?»*
+
+No, e per l'inglese nemmeno la migliore. Il generatore adesso le sa leggere
+tutte e tre:
+
+| Archivio | Quante | Lingua | Licenza |
+|---|---|---|---|
+| OpenQuizzDB | ~3.300 per lingua | it, en, fr, es, de, nl | CC BY-SA 4.0 |
+| Open Trivia DB | 5.298 verificate a mano | inglese | CC BY-SA 4.0 |
+| OpenTriviaQA | 49.192 uniche | inglese | CC BY-SA 4.0 |
+
+Open Trivia DB si scarica dall'API, e `--tdb-da <cartella>` legge risposte
+già scaricate altrove, per gli ambienti che a opentdb.com non arrivano — e
+questo è esattamente il caso: l'archivio è stato scaricato dal computer di
+casa e letto da lì. OpenTriviaQA si attiva con `--con-otqa <clone>` e di suo
+resta spento, perché è scritto da mille mani e metà è televisione americana
+— filtrato, ne restano circa tredicimila.
+
+**La banca inglese passa così da 1.431 a 4.820 domande.**
+
+### E l'italiano cresce con le traduzioni fatte a mano
+
+Per l'italiano non esiste una seconda fonte ridistribuibile — i siti di quiz
+per concorsi non hanno una licenza che lo permetta, e gli unici dataset
+italiani di «cultura generale» in giro sono generati da un modello, senza
+fonti citate. In un gioco in cui la risposta giusta deve essere giusta, non
+basta.
+
+Quindi si traduce **a mano**, una riga per volta, e il lavoro sta in
+`diagnostica/traduzioni.tsv`, dove resta e si può correggere. Le regole: i
+nomi propri restano come sono, le misure del pannello valgono anche per le
+traduzioni, sport e televisione straniera restano fuori — chiesto così, e
+tradotti resterebbero comunque di un'altra cultura — e quello che in italiano
+non ha senso **si salta**, con il motivo scritto accanto: «in inglese il
+pollice non è un dito, in italiano sì» è un motivo valido per buttare una
+domanda, tradurla lo stesso no.
+
+Prima ondata: **335 domande**, e la banca italiana passa da 1.307 a **1.642**.
+Il file cresce a ondate, e chi rigenera le banche ritrova quelle già fatte.
+
 ## [14.2]
 
 ### Il brano della risposta suona una volta, non a giro

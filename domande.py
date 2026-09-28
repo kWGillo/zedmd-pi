@@ -9,14 +9,16 @@ aggiungerne di sue -- quelle di famiglia, quelle che fanno ridere a Natale --
 mette un file con lo **stesso nome** nella cartella dati (`/var/lib/dmd`):
 viene letto dopo e si aggiunge, e gli aggiornamenti non lo toccano mai.
 
-Lo stesso numero nelle due lingue
----------------------------------
-La fonte e' parallela: la stessa domanda esiste in italiano e in inglese con
-lo **stesso identificativo**. E' quello che permette di tenere un conto solo
-delle domande gia' uscite: chi gioca in inglese non si rivede in italiano
-quello che ha gia' visto un minuto prima. Le domande scritte a mano da te
-possono benissimo esistere in una lingua sola -- semplicemente non compaiono
-quando l'interfaccia e' nell'altra, invece di comparire vuote.
+Due banche indipendenti
+-----------------------
+Fino alla 14.2 erano gemelle: la stessa domanda con lo stesso identificativo
+nelle due lingue, per tenere un conto solo delle domande gia' uscite. Costava
+carissimo -- ogni traduzione rotta in **una** delle due lingue buttava la riga
+da tutte e due -- e non serviva a niente che non si potesse fare altrimenti:
+dalla 15.0 le banche sono indipendenti e il conto delle domande uscite e' uno
+per lingua. Le domande scritte a mano da te possono benissimo esistere in una
+lingua sola: semplicemente non compaiono quando l'interfaccia e' nell'altra,
+invece di comparire vuote.
 
 Cosa non c'e'
 -------------

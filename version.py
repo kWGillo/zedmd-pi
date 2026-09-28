@@ -2754,6 +2754,22 @@ Storico:
        erano mai state vestite nel foglio di stile e restavano bianche dentro
        una pagina scura. E lo Sleep mode raggiunge il Night mode nelle
        Impostazioni: sono due modi del display, non due servizi.
+  15.0 *Le due banche di domande non sono piu' gemelle.* Erano legate dallo
+       stesso identificativo per far valere in tutte e due la memoria delle
+       domande uscite, e ogni traduzione rotta in **una** delle due lingue
+       buttava la riga da entrambe: adesso ogni lingua ha la sua banca, le
+       sue regole di pulizia e i suoi identificativi, e il conto delle
+       domande uscite e' uno per lingua (quello vecchio diventa l'italiano).
+       Il generatore sa leggere anche Open Trivia DB (5.298 domande
+       verificate a mano) e OpenTriviaQA (49.192), tutte e due solo in
+       inglese e tutte e due CC BY-SA 4.0: per l'italiano OpenQuizzDB resta
+       l'unica fonte ridistribuibile che esista. Con l'archivio di Open
+       Trivia DB scaricato dal computer di casa -- il proxy di rete non ci
+       arriva -- la banca inglese passa a 4.820 domande. E l'italiana cresce
+       con le traduzioni fatte a mano, una riga per volta, che stanno in
+       diagnostica/traduzioni.tsv e si possono correggere: prima ondata 335
+       domande, da 1.307 a 1.642. Niente traduzione automatica: quello che in
+       italiano non ha senso si salta, con il motivo scritto accanto.
 """
 
-__version__ = "14.2"
+__version__ = "15.0"
