@@ -180,3 +180,35 @@ sa dove sei, e non lo inventa.
 | Priorità | 53, fra OnAir e il meteo |
 | Home Assistant | interruttore **Moon** |
 | Pagina | **Moon**, nel menu |
+
+# 7. In Home Assistant
+
+Dalla 15.1 la Luna **esce dal pannello**. Chiesto così: *sarebbe bello che il
+DMD pubblicasse la fase lunare*. Il conto lo faceva già ogni sera per
+disegnarla, e tenerselo era uno spreco.
+
+| Entità | Contenuto |
+|---|---|
+| `sensor.dmd_luna_fase` | il nome della fase — *Gibbosa calante*, *Luna piena*; negli attributi c'è tutto il resto |
+| `sensor.dmd_luna_illuminazione` | quanta se ne vede, in percentuale (unità `%`, quindi si grafica) |
+| `sensor.dmd_luna_eta` | i giorni dalla Luna nuova |
+| `sensor.dmd_luna_sorge` | quando sorge stasera |
+| `sensor.dmd_luna_tramonta` | quando tramonta |
+| `sensor.dmd_luna_prossima_piena` | la prossima piena |
+| `sensor.dmd_luna_prossima_fase` | il prossimo quarto, qualunque sia |
+| `binary_sensor.dmd_luna_crescente` | acceso se cresce, spento se cala |
+| `binary_sensor.dmd_luna_sopra` | acceso se in questo momento è sopra l'orizzonte |
+
+I quattro orari sono `device_class: timestamp`: Home Assistant ci scrive
+sopra «fra due ore» da solo, senza template.
+
+Negli attributi di `sensor.dmd_luna_fase` c'è tutto quello che racconta questa
+pagina: le prossime quattro fasi, la prossima Luna con un nome (del raccolto,
+blu, superluna), il prossimo solstizio o equinozio, lo sciame di meteore in
+arrivo con quanto lo disturba la Luna, e i pianeti visibili stasera.
+
+> **I conti si rifanno ogni cinque minuti, non ogni due secondi.** Il ciclo che
+> pubblica su MQTT gira a due secondi; cercare il sorgere della Luna per
+> bisezione e calcolare le altezze dei pianeti a quel ritmo vorrebbe dire
+> tenere occupato un core del Raspberry per un numero che cambia di un
+> centesimo all'ora.

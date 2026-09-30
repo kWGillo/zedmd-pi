@@ -183,6 +183,27 @@ ICONE_RIFIUTI = {
 }
 
 
+def _prima_riga(voci, quanti=250):
+    """La prima voce di un elenco di oggi, pronta da leggere a voce.
+
+    Le righe arrivano come `[anno, chi, cosa]` o `[anno, testo]`: si
+    rimettono insieme in una frase e si tagliano a 250 caratteri, perche' lo
+    stato di un sensore di Home Assistant si ferma a 255 e una frase tagliata
+    li' dentro fa sparire l'entita', non la accorcia.
+    """
+    if not voci:
+        return NIENTE
+    prima = voci[0]
+    if isinstance(prima, (list, tuple)):
+        pezzi = [str(p).strip() for p in prima if str(p).strip()]
+        testo = "%s: %s" % (pezzi[0], " - ".join(pezzi[1:])) if len(pezzi) > 1 \
+            else " ".join(pezzi)
+    else:
+        testo = str(prima)
+    testo = " ".join(testo.split())
+    return testo[:quanti] if testo else NIENTE
+
+
 def slug(nome):
     """Nome della voce -> identificativo buono per un topic MQTT."""
     pulito = "".join(c.lower() if c.isalnum() else "_" for c in (nome or ""))
@@ -193,6 +214,12 @@ def slug(nome):
 # Ogni quanto si ripubblica lo stato anche se non e' cambiato nulla: serve a
 # ripopolare Home Assistant dopo un suo riavvio.
 HEARTBEAT = 30
+
+# Ogni quanto si rifanno i conti del cielo. Il ciclo pubblica ogni due
+# secondi; le effemeridi della Luna, il sorgere e il tramonto cercati per
+# bisezione e le altezze dei pianeti non si rifanno a quel ritmo per un
+# numero che cambia di un centesimo all'ora.
+LUNA_OGNI = 300
 
 # Ritardo prima di rispondere al messaggio di nascita di Home Assistant. La
 # sua documentazione lo raccomanda: al riavvio tutti i dispositivi MQTT della
@@ -220,6 +247,9 @@ class HassBridge:
         self._running = False
         self._last = {}
         self._last_publish = 0.0
+        # I conti del cielo, e quando sono stati fatti: vedi `_luna`.
+        self._luna_dati = None
+        self._luna_quando = 0.0
         self.announced = False
         # Le voci del calendario rifiuti gia' dichiarate. Le voci le decide
         # l'utente, quindi l'elenco delle entita' cambia nel tempo e va
@@ -427,6 +457,80 @@ class HassBridge:
             if chiave == "inutili_santo":
                 entity["json_attributes_topic"] = "%s/inutili/dettaglio" % base
             self._config("sensor", chiave, entity)
+
+        # Le altre info inutili: quelle che il pannello mostrava e teneva per
+        # se'. Lo stato e' corto -- un sensore di Home Assistant si ferma a
+        # 255 caratteri -- e il resto sta negli attributi, dove ci sta tutto.
+        for chiave, etichetta, topic, icona in (
+                ("inutili_tuoi", "Onomastici in rubrica", "tuoi",
+                 "mdi:cake-variant"),
+                ("inutili_accadde", "Accadde oggi", "accadde",
+                 "mdi:history"),
+                ("inutili_nati", "Nati oggi", "nati", "mdi:baby-face-outline"),
+                ("inutili_giornate", "Giornate mondiali di oggi", "giornate",
+                 "mdi:earth-plus"),
+        ):
+            entity = dict(common)
+            entity.update({
+                "name": etichetta,
+                "unique_id": "%s_%s" % (node, chiave),
+                "object_id": "%s_%s" % (node, chiave),
+                "state_topic": "%s/inutili/%s" % (base, topic),
+                "json_attributes_topic": "%s/inutili/dettaglio" % base,
+                "icon": icona,
+            })
+            self._config("sensor", chiave, entity)
+
+        # ------------------------------------------------------------- Luna
+        #
+        # Il pannello la disegna ogni sera e se la teneva. Con la fase in Home
+        # Assistant si accendono le luci del giardino quando c'e' la piena, o
+        # si legge a voce la sera che passano le Perseidi.
+        for chiave, etichetta, topic, icona, extra in (
+                ("luna_fase", "Fase lunare", "fase", "mdi:moon-waning-crescent",
+                 {"json_attributes_topic": "%s/luna/dettaglio" % base}),
+                ("luna_illuminazione", "Luna illuminata", "illuminazione",
+                 "mdi:brightness-percent",
+                 {"unit_of_measurement": "%", "state_class": "measurement"}),
+                ("luna_eta", "Eta' della Luna", "eta", "mdi:calendar-clock",
+                 {"unit_of_measurement": "d", "state_class": "measurement"}),
+                ("luna_sorge", "La Luna sorge", "sorge", "mdi:moon-waxing-crescent",
+                 {"device_class": "timestamp"}),
+                ("luna_tramonta", "La Luna tramonta", "tramonta",
+                 "mdi:moon-waning-crescent", {"device_class": "timestamp"}),
+                ("luna_prossima_piena", "Prossima Luna piena", "prossima_piena",
+                 "mdi:moon-full", {"device_class": "timestamp"}),
+                ("luna_prossima_fase", "Prossima fase lunare", "prossima_fase",
+                 "mdi:moon-first-quarter", {"device_class": "timestamp"}),
+        ):
+            entity = dict(common)
+            entity.update({
+                "name": etichetta,
+                "unique_id": "%s_%s" % (node, chiave),
+                "object_id": "%s_%s" % (node, chiave),
+                "state_topic": "%s/luna/%s" % (base, topic),
+                "icon": icona,
+            })
+            entity.update(extra)
+            self._config("sensor", chiave, entity)
+
+        for chiave, etichetta, topic, icona in (
+                ("luna_crescente", "Luna crescente", "crescente",
+                 "mdi:moon-waxing-gibbous"),
+                ("luna_sopra", "Luna sopra l'orizzonte", "sopra",
+                 "mdi:weather-night"),
+        ):
+            entity = dict(common)
+            entity.update({
+                "name": etichetta,
+                "unique_id": "%s_%s" % (node, chiave),
+                "object_id": "%s_%s" % (node, chiave),
+                "state_topic": "%s/luna/%s" % (base, topic),
+                "payload_on": "ON",
+                "payload_off": "OFF",
+                "icon": icona,
+            })
+            self._config("binary_sensor", chiave, entity)
 
         # ------------------------------------------------- aerei e satelliti
         #
@@ -654,7 +758,15 @@ class HassBridge:
                                        "meteo_massima", "meteo_minima",
                                        "meteo_condizione", "meteo_allerta",
                                        "inutili_santo", "inutili_onomastici",
-                                       "inutili_giornata")] +
+                                       "inutili_giornata", "inutili_tuoi",
+                                       "inutili_accadde", "inutili_nati",
+                                       "inutili_giornate",
+                                       "luna_fase", "luna_illuminazione",
+                                       "luna_eta", "luna_sorge",
+                                       "luna_tramonta", "luna_prossima_piena",
+                                       "luna_prossima_fase")] +
+                                     [("binary_sensor", k) for k in
+                                      ("luna_crescente", "luna_sopra")] +
                                      [("switch", key) for key, _ in SWITCHES] +
                                      [("switch", key) for key, _, _, _ in MODES] +
                                      [("switch", key) for key, _, _ in AZIONI] +
@@ -687,6 +799,7 @@ class HassBridge:
         self._send("%s/nowplaying/state" % base, payload, force)
 
         self._pubblica_cielo(base, force)
+        self._pubblica_luna(base, force)
 
         services = self.cfg.get("services") or {}
         for key, _label in SWITCHES:
@@ -771,6 +884,130 @@ class HassBridge:
                                "quando": ultimo.get("quando", 0)},
                               ensure_ascii=False), force)
 
+    # I nomi delle fasi come li scrive Home Assistant: in italiano e in
+    # minuscolo, non in stampatello come sul pannello -- li' servono a essere
+    # letti da tre metri, qui a finire dentro una frase di un annuncio vocale.
+    FASI_LUNA = {
+        "nuova": "Luna nuova",
+        "crescente": "Falce crescente",
+        "primo_quarto": "Primo quarto",
+        "gibbosa_crescente": "Gibbosa crescente",
+        "piena": "Luna piena",
+        "gibbosa_calante": "Gibbosa calante",
+        "ultimo_quarto": "Ultimo quarto",
+        "calante": "Falce calante",
+    }
+    FASI_PRINCIPALI = {"nuova": "Luna nuova", "primo_quarto": "Primo quarto",
+                       "piena": "Luna piena", "ultimo_quarto": "Ultimo quarto"}
+
+    def _luna(self):
+        """Il riepilogo del cielo, ricalcolato di rado.
+
+        Il ciclo di pubblicazione gira ogni due secondi; questo conto invece
+        cerca sorgere e tramonto della Luna per bisezione, calcola le fasi di
+        un mese e le altezze dei pianeti. Rifarlo ogni due secondi vorrebbe
+        dire tenere occupato un core del Raspberry per pubblicare un numero
+        che cambia di un centesimo all'ora. Cinque minuti sono molto meno di
+        quanto serva alla Luna per fare qualcosa di diverso.
+        """
+        adesso = time.time()
+        if (self._luna_dati is not None
+                and adesso - self._luna_quando < LUNA_OGNI):
+            return self._luna_dati
+        try:
+            self._luna_dati = self.runtime.cielo.riepilogo()
+        except Exception:                       # noqa: BLE001
+            self._luna_dati = None
+        self._luna_quando = adesso
+        return self._luna_dati
+
+    @staticmethod
+    def _istante(valore):
+        """Un istante in ISO, o NIENTE. E' quello che vuole un sensore
+        `device_class: timestamp`, che poi scrive "fra due ore" da solo."""
+        if valore is None:
+            return NIENTE
+        try:
+            return valore.isoformat()
+        except AttributeError:
+            return str(valore)
+
+    def _pubblica_luna(self, base, force):
+        """La Luna di stasera verso Home Assistant.
+
+        Chiesto cosi': *sarebbe bello che il DMD pubblicasse la fase lunare*.
+        Il pannello la sa gia' -- la disegna ogni sera -- e tenersela era uno
+        spreco: con la fase in Home Assistant si accendono le luci del giardino
+        quando c'e' la Luna piena, o si legge a voce la sera che passano le
+        Perseidi.
+        """
+        dati = self._luna()
+        if not dati:
+            return
+        luna = dati.get("luna") or {}
+        frazione = luna.get("frazione")
+        self._send("%s/luna/fase" % base,
+                   self.FASI_LUNA.get(luna.get("fase"), NIENTE), force)
+        self._send("%s/luna/illuminazione" % base,
+                   NIENTE if frazione is None else "%.1f" % (frazione * 100.0),
+                   force)
+        self._send("%s/luna/eta" % base,
+                   NIENTE if luna.get("eta_giorni") is None
+                   else "%.1f" % luna["eta_giorni"], force)
+        # Crescente o calante: due falci identiche da guardare e opposte da
+        # raccontare. E' un binario, e in Home Assistant si scrive ON/OFF.
+        self._send("%s/luna/crescente" % base,
+                   "ON" if luna.get("crescente") else "OFF", force)
+        sopra = luna.get("sopra")
+        self._send("%s/luna/sopra" % base,
+                   NIENTE if sopra is None else ("ON" if sopra else "OFF"),
+                   force)
+        self._send("%s/luna/sorge" % base, self._istante(luna.get("sorge")), force)
+        self._send("%s/luna/tramonta" % base,
+                   self._istante(luna.get("tramonta")), force)
+        self._send("%s/luna/prossima_piena" % base,
+                   self._istante(luna.get("prossima_piena")), force)
+
+        prossima = luna.get("prossima")
+        quando, quale = (prossima if prossima else (None, None))
+        self._send("%s/luna/prossima_fase" % base, self._istante(quando), force)
+
+        # Il dettaglio: tutto quello che la pagina Moon racconta, in un
+        # oggetto solo. Le date diventano testo ISO, perche' un datetime non
+        # entra in un JSON e perche' Home Assistant sa leggerlo.
+        def istanti(oggetto):
+            if isinstance(oggetto, dict):
+                return {k: istanti(v) for k, v in oggetto.items()}
+            if isinstance(oggetto, (list, tuple)):
+                return [istanti(v) for v in oggetto]
+            if hasattr(oggetto, "isoformat"):
+                return oggetto.isoformat()
+            return oggetto
+
+        dettaglio = {
+            "fase": self.FASI_LUNA.get(luna.get("fase"), ""),
+            "illuminazione": (round(frazione * 100.0, 1)
+                              if frazione is not None else None),
+            "eta_giorni": (round(luna["eta_giorni"], 1)
+                           if luna.get("eta_giorni") is not None else None),
+            "crescente": bool(luna.get("crescente")),
+            "sopra_orizzonte": sopra,
+            "sorge": self._istante(luna.get("sorge")),
+            "tramonta": self._istante(luna.get("tramonta")),
+            "prossima_fase": {"quando": self._istante(quando),
+                              "nome": self.FASI_PRINCIPALI.get(quale, quale or "")},
+            "fasi": [{"quando": self._istante(t),
+                      "nome": self.FASI_PRINCIPALI.get(tipo, tipo)}
+                     for t, tipo in (dati.get("fasi") or [])],
+            "luna_con_nome": istanti(dati.get("nome") or {}),
+            "stagione": istanti(dati.get("stagione") or {}),
+            "sciame": istanti(dati.get("sciame") or {}),
+            "serata": istanti(dati.get("serata") or {}),
+            "notte": bool(dati.get("notte")),
+        }
+        self._send("%s/luna/dettaglio" % base,
+                   json.dumps(dettaglio, ensure_ascii=False), force)
+
     def _pubblica_cielo(self, base, force):
         """Aerei e satelliti verso Home Assistant.
 
@@ -836,8 +1073,28 @@ class HassBridge:
                        ", ".join(nomi) if nomi else NIENTE, force)
             self._send("%s/inutili/giornata" % base,
                        oggi.get("giornata") or NIENTE, force)
+            # Solo i tuoi, su un sensore loro: e' l'unico di questi numeri su
+            # cui si scrive un'automazione -- un promemoria per telefonare --
+            # e mescolato ai nomi del giorno non si puo' usare.
+            self._send("%s/inutili/tuoi" % base,
+                       ", ".join(tuoi) if tuoi else NIENTE, force)
+            # Accadde oggi, i nati, le giornate mondiali. Lo stato di un
+            # sensore di Home Assistant si ferma a 255 caratteri: qui va la
+            # riga da leggere, e l'elenco intero sta negli attributi.
+            self._send("%s/inutili/accadde" % base,
+                       _prima_riga(oggi.get("eventi")), force)
+            self._send("%s/inutili/nati" % base,
+                       _prima_riga(oggi.get("nati")), force)
+            giornate = oggi.get("giornate") or []
+            self._send("%s/inutili/giornate" % base, str(len(giornate)), force)
+            # Il dettaglio senza le parti che cambiano a ogni giro: quante
+            # volte la schermata e' comparsa e a che punto e' la coda non
+            # sono fatti di oggi, e ripubblicarli ogni due secondi vorrebbe
+            # dire tenere sveglio il broker per niente.
+            fisso = {k: v for k, v in oggi.items()
+                     if k not in ("slide", "turno", "comparse")}
             self._send("%s/inutili/dettaglio" % base,
-                       json.dumps(oggi, ensure_ascii=False), force)
+                       json.dumps(fisso, ensure_ascii=False), force)
 
         try:
             passaggi = self.runtime.satelliti.riepilogo()

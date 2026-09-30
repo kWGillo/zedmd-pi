@@ -2770,6 +2770,20 @@ Storico:
        diagnostica/traduzioni.tsv e si possono correggere: prima ondata 335
        domande, da 1.307 a 1.642. Niente traduzione automatica: quello che in
        italiano non ha senso si salta, con il motivo scritto accanto.
+  15.1 *La Luna e le info inutili escono su MQTT.* Chiesto cosi': il pannello
+       la Luna la sapeva gia' -- la disegna ogni sera -- e se la teneva.
+       Adesso in Home Assistant ci sono sette sensori e due binari: fase per
+       nome, percentuale illuminata, eta' in giorni, sorgere, tramonto,
+       prossima piena e prossimo quarto come timestamp, crescente o calante e
+       sopra l'orizzonte; negli attributi tutto quello che racconta la pagina
+       Moon. I conti si rifanno ogni cinque minuti e non ogni due secondi,
+       che e' il ritmo del ciclo di pubblicazione. Delle info inutili ne
+       uscivano tre su sette: adesso escono anche gli onomastici della
+       rubrica su un sensore loro, l'accadde oggi gia' in forma di frase, i
+       nati di oggi e quante giornate mondiali cadono oggi. Lo stato resta
+       corto -- un sensore di Home Assistant si ferma a 255 caratteri, e una
+       riga piu' lunga non accorcia l'entita': la fa sparire -- e gli elenchi
+       interi stanno negli attributi.
 """
 
-__version__ = "15.0"
+__version__ = "15.1"

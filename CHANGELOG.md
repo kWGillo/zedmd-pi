@@ -2,6 +2,41 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [15.1]
+
+### La Luna e tutte le info inutili escono su MQTT
+
+*«Sarebbe bello che il DMD pubblicasse via MQTT tutte le info inutili e la
+fase lunare.»*
+
+Il pannello la Luna la sapeva già — la disegna ogni sera, con il sorgere, il
+tramonto, la prossima piena, lo sciame di meteore in arrivo — e se la teneva.
+Adesso in Home Assistant compaiono sette sensori e due binari: la fase per
+nome, quanta se ne vede in percentuale, l'età in giorni, i quattro orari come
+`device_class: timestamp` (così Home Assistant ci scrive sopra «fra due ore»
+da solo), crescente o calante, e se in questo momento è sopra l'orizzonte.
+Negli attributi c'è tutto quello che racconta la pagina Moon: le prossime
+quattro fasi, la prossima Luna con un nome, il solstizio, lo sciame e i
+pianeti di stasera.
+
+Delle info inutili ne uscivano tre su sette. Adesso escono anche gli
+onomastici **della tua rubrica** su un sensore loro — è l'unico su cui si
+scrive un'automazione che fa qualcosa, un promemoria per telefonare —
+l'«accadde oggi» già in forma di frase, il primo nato del giorno e quante
+giornate mondiali cadono oggi.
+
+Due cose imparate scrivendolo, e valgono per chiunque pubblichi su MQTT:
+
+- **lo stato di un sensore si ferma a 255 caratteri.** Un «accadde oggi» di
+  trecento non accorcia l'entità: la fa sparire. Quindi nello stato c'è la
+  riga da leggere a voce, e gli elenchi interi stanno negli attributi;
+- **i conti del cielo si rifanno ogni cinque minuti, non ogni due secondi**,
+  che è il ritmo del ciclo di pubblicazione. Cercare il sorgere della Luna per
+  bisezione trenta volte al minuto vorrebbe dire tenere occupato un core del
+  Raspberry per un numero che cambia di un centesimo all'ora. E dal JSON degli
+  attributi sono state tolte le parti che cambiano a ogni giro — quante volte
+  una schermata è comparsa — perché ripubblicarle è rumore sul broker.
+
 ## [15.0]
 
 ### Le due banche di domande non sono piu' gemelle

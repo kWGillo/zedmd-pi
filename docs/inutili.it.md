@@ -180,16 +180,28 @@ E tre pulsanti di prova, uno per schermata, per vederle subito sul pannello.
 
 # 8. In Home Assistant
 
-Oltre all'interruttore del servizio (`switch.dmd_inutili`), tre sensori:
+Oltre all'interruttore del servizio (`switch.dmd_inutili`), sette sensori —
+dalla 15.1 esce **tutto** quello che il pannello sa di oggi, non più metà:
 
 | Entità | Contenuto |
 |---|---|
-| `sensor.dmd_inutili_santo` | il santo del giorno; negli attributi c'è tutto il resto, personaggi compresi |
+| `sensor.dmd_inutili_santo` | il santo del giorno; negli attributi c'è tutto il resto |
 | `sensor.dmd_inutili_onomastici` | **i tuoi**, se oggi ne festeggia uno; altrimenti i nomi del giorno |
+| `sensor.dmd_inutili_tuoi` | solo i tuoi, su un sensore loro |
 | `sensor.dmd_inutili_giornata` | la giornata mondiale, vuoto se non ce n'è |
+| `sensor.dmd_inutili_giornate` | quante ne cadono oggi; l'elenco negli attributi |
+| `sensor.dmd_inutili_accadde` | il primo «accadde oggi», già in forma di frase |
+| `sensor.dmd_inutili_nati` | il primo nato di oggi; morti ed eventi negli attributi |
 
-Il secondo è l'unico su cui valga la pena scrivere un'automazione che *fa*
-qualcosa: un promemoria per telefonare a chi festeggia.
+`sensor.dmd_inutili_tuoi` è quello su cui vale la pena scrivere
+un'automazione che *fa* qualcosa: un promemoria per telefonare a chi
+festeggia. Gli altri servono all'annuncio della mattina.
+
+> **Perché lo stato è corto e l'elenco sta negli attributi.** Lo stato di un
+> sensore di Home Assistant si ferma a 255 caratteri, e un «accadde oggi» di
+> trecento non accorcia l'entità: la fa **sparire**. Quindi nello stato c'è la
+> riga da leggere a voce, e in `attributes` ci sono eventi, nati, morti e
+> giornate per intero.
 
 # 9. Come è stato provato
 

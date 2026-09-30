@@ -38,7 +38,7 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 0deddcae5b2a4a37f5a5165af774656e  gbsetup.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 48b68ac87a2559a7efff49d54460ff57  giornate.csv
-0d83c8464fd5bd30a6fcb328e6dd0489  hass.py
+c03356c6dc57a04a95e3b4318430fbb6  hass.py
 43b42f200ce05b2423d53164e92ff1b6  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
@@ -170,7 +170,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 2bc1da7de80749f0587cfc1c2c56f8fd  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-01e9bb68600030dd0c579b229089e8b0  version.py
+09beb306c289e571b8f57ec6999390fe  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 4d8267f4436960534aaad593e054fa45  webui.py
