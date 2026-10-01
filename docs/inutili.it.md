@@ -48,6 +48,36 @@ un servizio che non serve a niente, e due comparse di fila direbbero sempre la
 stessa cosa. Sei secondi per le schermate brevi e **dieci per i fatti
 storici**, che sono due righe da leggere: si regolano nella pagina Servizi.
 
+## Le righe lunghe scorrono
+
+Due righe della prima schermata le scrive qualcun altro, e sono lunghe quanto
+vogliono: il **santo** — *San Basilio Magno e San Gregorio di Nazianzo* — e la
+**giornata mondiale**, dove *Giornata contro lo sfruttamento dell'ambiente in
+guerra* è un titolo vero, preso dal calendario delle Nazioni Unite.
+
+Fino alla 15.1 finivano con i puntini, cioè mezza riga non si leggeva. Dalla
+15.2 **scorrono**, e scorrono in un modo preciso:
+
+1. restano ferme **un secondo**, il tempo di cominciare a leggere;
+2. vanno verso sinistra a trenta pixel al secondo — velocità di lettura, non
+   di corsa;
+3. arrivate all'ultima parola **si fermano lì** e ci restano.
+
+Niente giro infinito. Su una schermata che dura sei secondi un testo che
+riparte da capo non si legge mai: ricomincia sempre e viene interrotto sempre
+a metà. Fermarsi alla fine vuol dire che l'ultima parola resta sotto gli occhi.
+
+E la schermata **si allunga quanto serve** a vedere lo scorrimento intero: una
+riga che scorre per sei secondi dentro una schermata che dura sei secondi è
+ancora una riga tagliata, solo in un altro modo. Il tetto resta venti secondi,
+perché il servizio è quello che non serve a niente e non può tenersi il
+pannello più di così.
+
+Il santo prova prima a rimpicciolirsi — se nel corpo medio ci sta, sta fermo —
+e scorre solo quando non basta. Le altre due schermate non scorrono: i fatti
+storici vanno **a capo su tre righe**, che è il modo giusto per un testo lungo
+quando lo spazio in altezza c'è.
+
 # 3. La riga che fa fare una telefonata
 
 In fondo alla prima schermata, quando capita, c'è **l'onomastico dei tuoi**:
@@ -205,10 +235,17 @@ festeggia. Gli altri servono all'annuncio della mattina.
 
 # 9. Come è stato provato
 
-`test_inutili.py`, 110 controlli. I tre che contano davvero:
+`test_inutili.py`, 127 controlli. I quattro che contano davvero:
 
 - **il calendario è completo**: 366 giorni, 29 febbraio compreso, nessun
-  giorno senza nomi, nessun santo troppo lungo per il pannello;
+  giorno senza nomi, nessun santo oltre i 48 caratteri e nessuna giornata
+  oltre i 60 — il CSV resta ragionevole anche ora che le righe lunghe
+  scorrono;
+- **la riga che scorre si muove davvero**: non basta provare il calcolo dello
+  scorrimento, si chiede al servizio due fotogrammi di seguito e si verifica
+  che siano diversi. Il servizio disegna una volta per turno e di solito
+  risponde *niente di nuovo*: con quel «niente di nuovo» la riga più bella del
+  mondo resterebbe ferma sul vetro;
 - **senza rete il servizio si accorcia**: con la cache vuota resta una sola
   schermata, e quello che era già stato scaricato non viene cancellato da un
   errore di rete;
@@ -216,5 +253,9 @@ festeggia. Gli altri servono all'annuncio della mattina.
   chiude, il pannello passa a Info inutili, e le due schermate si fanno una
   dopo l'altra. Con il servizio spento, il meteo chiude e basta.
 
-Una schermata costa poco più di un millisecondo, e si disegna una volta per
-turno: non trenta volte al secondo come un gioco.
+Una schermata costa poco più di un millisecondo, e **si disegna una volta per
+turno**: non trenta volte al secondo come un gioco. Questo non è cambiato con
+lo scorrimento — il disegno resta uno, e quello che si ripete trenta volte al
+secondo è solo ricopiarlo e spostare la finestra della riga che scorre. Le
+schermate senza righe lunghe continuano a rispondere *niente di nuovo* e a non
+costare niente.

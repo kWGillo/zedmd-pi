@@ -2784,6 +2784,28 @@ Storico:
        corto -- un sensore di Home Assistant si ferma a 255 caratteri, e una
        riga piu' lunga non accorcia l'entita': la fa sparire -- e gli elenchi
        interi stanno negli attributi.
+  15.2 *Tre difetti piccoli, tutti e tre di testo.* Segnalati guardando il
+       pannello, che e' l'unico posto dove si vedevano.
+       **Nei giochi le lettere accentate erano uguali a quelle senza
+       accento.** Il font e' disegnato a mano, 3x5, e una «È» non ci sta:
+       fino alla 12.6 spariva del tutto -- «piu'» con l'accento diventava
+       «pi» -- e dalla 12.6 diventava «PIU», leggibile ma falso. Adesso
+       l'accento sta **fuori dal corpo**, nel pixel di interlinea sopra la
+       lettera: grave a sinistra, acuto a destra, circonflesso al centro,
+       dieresi ai due estremi, tilde tutti e tre, cediglia sotto. La
+       larghezza non cambia -- la «È» occupa una cella come la «E» -- quindi
+       una riga centrata resta centrata e il testo a capo conta gli stessi
+       caratteri.
+       **Nelle info inutili il santo e la giornata mondiale finivano con i
+       puntini**, cioe' mezza riga non si leggeva. Adesso scorrono: ferme un
+       secondo, poi verso sinistra a trenta pixel al secondo, e all'ultima
+       parola si fermano. Niente giro infinito: su una schermata di sei
+       secondi un testo che riparte da capo ricomincia sempre e viene
+       interrotto sempre a meta'. E la schermata si allunga quanto serve a
+       vederlo tutto, fino a venti secondi, perche' una riga che scorre per
+       sei secondi dentro una schermata di sei secondi e' ancora una riga
+       tagliata. Il disegno resta uno per turno: quello che si rifa' trenta
+       volte al secondo e' solo la finestra che si sposta.
 """
 
-__version__ = "15.1"
+__version__ = "15.2"

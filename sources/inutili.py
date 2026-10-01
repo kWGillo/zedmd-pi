@@ -18,6 +18,16 @@ Due schermate, e non e' estetica
    fare danno: senza dati la seconda schermata non si fa e il servizio dura
    la meta'. Si accorcia, non si rompe.
 
+Le righe lunghe scorrono (15.2)
+-------------------------------
+Il santo e la giornata mondiale le scrive qualcun altro -- i due CSV -- e sono
+lunghe quanto vogliono. Tagliate con i puntini volevano dire mezza riga non
+letta, che su un servizio che fa solo compagnia e' l'unico modo di sbagliare.
+Scorrono: ferme un secondo, poi a trenta pixel al secondo, e all'ultima parola
+si fermano. **Non a giro**, perche' un giro su una schermata di sei secondi
+viene interrotto sempre a meta'; e la schermata si allunga quanto serve a
+vederlo intero, con un tetto a venti secondi.
+
 La riga che fa fare una telefonata
 ----------------------------------
 In fondo alla prima schermata, quando capita, c'e' **l'onomastico dei tuoi**:
@@ -65,6 +75,31 @@ MESI = ("gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio",
 # dopo mezzanotte il giorno e' cambiato e la cache serve nuova.
 OGNI_MINUTI = 30
 
+# --------------------------------------------------- il testo che non ci sta
+
+# Due righe della prima schermata le scrive qualcun altro, e sono lunghe
+# quanto vogliono: il santo -- «SANTI CORNELIO E CIPRIANO» -- e la giornata
+# mondiale, dove «Giornata mondiale per la riduzione del rischio di disastri»
+# e' un titolo vero. Fino alla 15.1 finivano con i puntini, cioe' mezza riga
+# non si leggeva: su un pannello che serve solo a far compagnia, tagliare la
+# frase e' l'unico modo di sbagliare.
+#
+# Adesso **scorrono**, e scorrono in un modo preciso: partono ferme, vanno
+# fino all'ultima parola, e la' si fermano. Non a giro. Un giro infinito su
+# una schermata che dura sei secondi non si legge: ricomincia sempre da capo e
+# viene interrotto sempre a meta'. Fermarsi alla fine vuol dire che l'ultima
+# parola resta sotto gli occhi per il tempo di leggerla.
+VELOCITA = 30.0          # pixel al secondo: velocita' di lettura, non di corsa
+ATTESA_PRIMA = 1.0       # ferma all'inizio, il tempo di cominciare
+ATTESA_DOPO = 1.3        # ferma alla fine, il tempo di finire
+
+# E la schermata si allunga quanto serve a vedere lo scorrimento intero: una
+# riga che scorre per sei secondi dentro una schermata che dura sei secondi e'
+# ancora una riga tagliata, solo in un altro modo. Il tetto c'e' perche' il
+# servizio resta quello che non serve a niente: oltre venti secondi si tiene
+# il pannello troppo, e a quel punto meglio perdere l'ultima parola.
+TETTO_SLIDE = 20.0
+
 
 class InutiliSource(Source):
     name = "inutili"
@@ -78,6 +113,12 @@ class InutiliSource(Source):
         self._dirty = False
         self._fino_a = 0.0
         self._durata = 0.0
+        # Le righe che scorrono su questa schermata, e da quando: il disegno
+        # resta uno -- si fa una volta per turno, non trenta volte al secondo
+        # -- e sopra ci si appoggiano solo le finestre che si muovono.
+        self._scorrevoli = []
+        self._bande = []
+        self._inizio = 0.0
         self._slide = ""
         self._running = False
         self._vista = False
@@ -114,6 +155,7 @@ class InutiliSource(Source):
         with self._lock:
             self._image = None
             self._dirty = False
+            self._scorrevoli = []
 
     def _loop(self):
         """Una sola cosa da fare: tenere fresca la cache di Wikipedia."""
@@ -134,16 +176,30 @@ class InutiliSource(Source):
 
     def frame(self):
         with self._lock:
-            if not self._dirty or self._image is None:
+            if self._image is None:
                 return None
+            if not self._scorrevoli:
+                if not self._dirty:
+                    return None
+                self._dirty = False
+                return self._image
+            # Con una riga che scorre il fotogramma e' nuovo ogni volta, e la
+            # schermata sotto no: si ricopia quella e si cambia la finestra.
+            # Quando lo scorrimento e' finito torna due volte la stessa
+            # immagine, e il ciclo del pannello la butta via da solo.
             self._dirty = False
-            return self._image
+            return self._componi(self._image, self._scorrevoli,
+                                 time.time() - (self._inizio or time.time()))
 
     def in_onda(self):
         if self._vista:
             return
         self._vista = True
         self._comparse += 1
+        # Lo scorrimento parte da **adesso**: fra il disegno e il momento in
+        # cui l'arbitro da' il pannello puo' passare del tempo, e una riga che
+        # ha finito di scorrere prima di comparire non l'ha letta nessuno.
+        self._inizio = time.time()
         if self._durata:
             self._fino_a = time.time() + self._durata
 
@@ -228,13 +284,25 @@ class InutiliSource(Source):
             self._slide = ""
             self._fino_a = 0.0
             return
+        bande = self._bande
         with self._lock:
             self._image = immagine
             self._dirty = True
+            self._scorrevoli = bande
         self._slide = slide
         self._vista = False
-        self._durata = float(secondi)
+        self._inizio = time.time()
+        self._durata = self._quanto_dura(float(secondi), bande)
         self._fino_a = time.time() + self._durata
+
+    @staticmethod
+    def _quanto_dura(secondi, bande):
+        """La durata della schermata, allungata se una riga deve scorrere."""
+        if not bande:
+            return secondi
+        corsa = max(b["massimo"] for b in bande) / VELOCITA
+        serve = ATTESA_PRIMA + corsa + ATTESA_DOPO
+        return max(secondi, min(TETTO_SLIDE, serve))
 
     def avanza(self):
         """La schermata dopo, se ce n'e' un'altra in coda. Torna True se ha
@@ -269,6 +337,12 @@ class InutiliSource(Source):
     def _disegna(self, slide):
         img = Image.new("RGB", (self.width, self.height), (0, 0, 0))
         d = ImageDraw.Draw(img)
+        # Le righe che scorrono le mette da parte chi disegna: la schermata
+        # resta un'immagine sola, come e' sempre stata, e `_apri` le prende da
+        # qui. Le altre due schermate non ne hanno -- i fatti storici vanno a
+        # capo su tre righe, che e' il modo giusto per un testo lungo quando
+        # lo spazio in altezza c'e'.
+        self._bande = []
         if slide == "storia":
             self._storia(d)
         elif slide == "eventi":
@@ -276,6 +350,36 @@ class InutiliSource(Source):
         else:
             self._festa(d)
         return img
+
+    def _componi(self, base, bande, passato):
+        """La schermata con le finestre delle righe che scorrono al punto in
+        cui sono adesso. `passato` sono i secondi da quando e' comparsa."""
+        img = base.copy()
+        avanti = max(0.0, passato - ATTESA_PRIMA) * VELOCITA
+        for banda in bande:
+            dove = int(min(banda["massimo"], avanti))
+            alta = banda["striscia"].height
+            img.paste(banda["striscia"].crop((dove, 0, dove + banda["area"],
+                                             alta)),
+                      (banda["x"], banda["y"]))
+        return img
+
+    def _scorri(self, d, testo, font, colore, x, y, area):
+        """Mette in coda una riga che scorre, se non ci sta.
+
+        La striscia e' il testo intero su una tela sua: quello che si vede e'
+        un taglio largo `area`, e il taglio che si sposta e' lo scorrimento.
+        Torna True quando la riga scorre -- cioe' quando chi chiama non deve
+        aggiungere altro -- e False quando il testo ci stava.
+        """
+        larghezza, alta = self._riquadro(d, testo, font)
+        if larghezza <= area:
+            return False
+        striscia = Image.new("RGB", (larghezza, alta), (0, 0, 0))
+        ImageDraw.Draw(striscia).text((0, 0), testo, font=font, fill=colore)
+        self._bande.append({"striscia": striscia, "x": x, "y": y,
+                            "area": area, "massimo": larghezza - area})
+        return True
 
     # ---- schermata 1: oggi si festeggia
 
@@ -307,6 +411,11 @@ class InutiliSource(Source):
         alto_santo = int(self.height * 0.17) + 2
         if coda is None:
             alto_santo = int(self.height * 0.30)
+        # Il santo scorre se non ci sta nemmeno nel corpo piccolo. La riga
+        # tagliata si disegna comunque sotto: e' quello che si vede nella
+        # pagina di prova e nel primo fotogramma, e la finestra che scorre le
+        # passa sopra appena il pannello e' suo.
+        self._scorri(d, santo, font, FESTA, margine, alto_santo, disponibile)
         d.text((margine, alto_santo), self._taglia(d, santo, font, disponibile),
                font=font, fill=FESTA)
 
@@ -318,6 +427,13 @@ class InutiliSource(Source):
 
         if coda is not None:
             basso = self.height - int(self.height * 0.17) - 2
+            # La giornata mondiale e' la riga lunga per vocazione: «Giornata
+            # internazionale per l'eliminazione della violenza contro le
+            # donne» non ci sta in nessun corpo che si legga, e tagliata non
+            # dice niente. Scorre anche l'onomastico dei tuoi, che sta nello
+            # stesso posto e con cinque nomi arriva alla stessa lunghezza.
+            self._scorri(d, coda[0], self._font_piccolo, coda[1], margine,
+                         basso, disponibile)
             d.text((margine, basso), self._taglia(d, coda[0], self._font_piccolo, disponibile),
                    font=self._font_piccolo, fill=coda[1])
 
@@ -433,6 +549,21 @@ class InutiliSource(Source):
             return riquadro[2] - riquadro[0]
         except AttributeError:                    # pragma: no cover - PIL vecchia
             return d.textsize(testo, font=font)[0]
+
+    def _riquadro(self, d, testo, font):
+        """Quanta tela serve a scrivere `testo` partendo da (0, 0).
+
+        Non e' `_largo` piu' `_alto`: quelli misurano l'inchiostro, qui serve
+        il posto che occupa **dal punto in cui si scrive**, perche' la striscia
+        si incolla nello stesso punto dove sarebbe andata la riga. Un pixel in
+        meno e la «g» resta senza la coda.
+        """
+        try:
+            riquadro = d.textbbox((0, 0), testo, font=font)
+            return max(1, riquadro[2] + 1), max(1, riquadro[3] + 1)
+        except AttributeError:                    # pragma: no cover - PIL vecchia
+            larga, alta = d.textsize(testo, font=font)
+            return max(1, larga + 1), max(1, alta + 1)
 
     def _alto(self, d, font):
         try:

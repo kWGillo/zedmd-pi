@@ -2,6 +2,58 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [15.2]
+
+### Tre difetti piccoli, tutti e tre di testo
+
+*«In super quiz le lettere accentate non si distinguono da quelle non
+accentate. Quando il testo della giornata mondiale è troppo lungo viene
+troncato: dovrebbe essere scorrevole. Lo stesso per il santo del giorno.»*
+
+**Gli accenti nei giochi.** Il font è disegnato a mano, tre pixel per cinque,
+e una «È» in una griglia così non esiste: fino alla 12.6 la lettera accentata
+spariva del tutto — *piu'* con l'accento diventava «PI» — e dalla 12.6
+diventava la lettera senza accento, leggibile ma falsa. Sul pannello «E» e «È»
+erano lo stesso disegno, e una domanda che chiede «QUAL E IL PIU GRANDE» è
+scritta male.
+
+Adesso l'accento sta **fuori dal corpo della lettera**, nel pixel di
+interlinea sopra: l'interlinea è due pixel, uno lo prende il segno e l'altro
+resta a dividere le righe. Tre pixel di larghezza bastano a dire *quale*:
+grave a sinistra, acuto a destra, circonflesso al centro, dieresi ai due
+estremi, tilde tutti e tre, cediglia sotto. All'italiano servono i primi due;
+gli altri arrivano gratis con le domande inglesi, dove un nome francese o
+tedesco capita. **La larghezza non cambia** — la «È» occupa una cella come la
+«E» — quindi una riga centrata resta centrata e il testo a capo conta gli
+stessi caratteri di prima.
+
+**Le righe lunghe delle info inutili.** Il santo e la giornata mondiale sono
+le due righe che scrive qualcun altro: *San Basilio Magno e San Gregorio di
+Nazianzo* e *Giornata contro lo sfruttamento dell'ambiente in guerra* sono
+testi veri, dai due CSV, e più larghi del pannello. Finivano con i puntini.
+
+Adesso scorrono, e scorrono in un modo preciso: **ferme un secondo** — il
+tempo di cominciare a leggere — poi verso sinistra a trenta pixel al secondo,
+e **all'ultima parola si fermano**. Niente giro infinito: su una schermata che
+dura sei secondi un testo che riparte da capo non si legge mai, ricomincia
+sempre e viene interrotto sempre a metà.
+
+E la schermata **si allunga quanto serve** a vedere lo scorrimento intero,
+fino a venti secondi: una riga che scorre per sei secondi dentro una schermata
+che dura sei secondi è ancora una riga tagliata, solo in un altro modo. Oltre
+i venti no, perché è il servizio che non serve a niente e non può tenersi il
+pannello più di così.
+
+Il santo prova prima a rimpicciolirsi, come faceva già, e scorre solo quando
+nemmeno il corpo medio basta. Le altre due schermate non scorrono: i fatti
+storici vanno a capo su tre righe, che è il modo giusto per un testo lungo
+quando lo spazio in altezza c'è.
+
+Il costo non cambia: **il disegno resta uno per turno**, e quello che si rifà
+trenta volte al secondo è solo ricopiarlo e spostare la finestra della riga
+che scorre. Una schermata senza righe lunghe continua a rispondere *niente di
+nuovo*.
+
 ## [15.1]
 
 ### La Luna e tutte le info inutili escono su MQTT

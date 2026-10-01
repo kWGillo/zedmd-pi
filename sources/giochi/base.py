@@ -81,10 +81,11 @@ _F = {
     "\u2026": (0, 0, 0, 0, 0b111),
 }
 
-# Le lettere accentate diventano la lettera senza accento. Un font 3x5 non ha
-# lo spazio per un accento -- sarebbe un pixel sopra una lettera alta cinque
-# -- e in italiano una «e» al posto di una «è» si legge lo stesso, mentre un
-# buco no: fino alla 12.6 «piu'» scritto con l'accento diventava «pi».
+# Il **corpo** della lettera accentata e' quello della lettera senza accento:
+# un font 3x5 non ha una «È» disegnata a parte, e non la puo' avere. Fino alla
+# 12.6 il carattere mancante spariva -- «piu'» con l'accento diventava «pi» --
+# e dalla 12.6 diventava «PIU»: leggibile, ma falso, perche' sul pannello «E»
+# e «È» finivano per essere lo stesso disegno. L'accento vero sta qui sotto.
 _EQUIVALENTI = {}
 for _senza, _con in (("A", "ÀÁÂÃÄÅ"), ("E", "ÈÉÊË"), ("I", "ÌÍÎÏ"),
                      ("O", "ÒÓÔÕÖØ"), ("U", "ÙÚÛÜ"), ("C", "Ç"),
@@ -94,8 +95,33 @@ for _senza, _con in (("A", "ÀÁÂÃÄÅ"), ("E", "ÈÉÊË"), ("I", "ÌÍÎÏ")
                      ("-", "\u2013\u2014")):
     for _lettera in _con:
         _EQUIVALENTI[_lettera] = _senza
+
+# **L'accento sta fuori dal corpo**, nella riga che separa una riga di testo
+# dall'altra: l'interlinea e' due pixel, uno lo prende il segno e l'altro
+# resta a dividere. Dentro i cinque pixel della lettera non ci stava -- ed e'
+# il motivo per cui prima non c'era -- sopra la lettera ci sta, e costa un
+# pixel di interlinea su due.
+#
+# Tre pixel di larghezza bastano a dire **quale** accento: a sinistra il
+# grave, a destra l'acuto, in mezzo il circonflesso, i due estremi la dieresi,
+# tutti e tre la tilde. All'italiano servono i primi due -- «PERCHÉ» e «CAFFÈ»
+# non sono la stessa parola, e una domanda che chiede «PIU» invece di «PIÙ»
+# e' scritta male -- e gli altri arrivano gratis con le domande inglesi, dove
+# un nome francese o tedesco capita.
+_SOPRA = {}
+for _segno, _con in ((0b100, "ÀÈÌÒÙ"), (0b001, "ÁÉÍÓÚÝ"),
+                     (0b010, "ÂÊÎÔÛ"), (0b101, "ÄËÏÖÜ"),
+                     (0b111, "ÃÕÑ")):
+    for _lettera in _con:
+        _SOPRA[_lettera] = _segno
+
+# E quello che sta sotto: la cediglia della «Ç», un pixel nella riga dopo. Lo
+# stesso ragionamento al contrario, e lo stesso prezzo.
+_SOTTO = {"Ç": 0b010}
+
 PASSO = 4       # 3 pixel di glifo piu' uno di spazio
 RIGA = 7        # 5 pixel di altezza piu' due di interlinea
+ALTO = 5        # righe del glifo: l'accento va a -1, la cediglia a +5
 
 
 def larghezza_testo(testo):
@@ -105,24 +131,54 @@ def larghezza_testo(testo):
 
 
 def senza_accenti(testo):
-    """Il testo come lo sa scrivere il font: maiuscolo e senza accenti."""
+    """Il corpo del testo come lo sa scrivere il font: maiuscolo e senza
+    accenti. Serve a **misurare**: la «È» occupa una cella come la «E», e
+    l'accento che le sta sopra non cambia la larghezza di niente."""
     fuori = []
     for carattere in str(testo).upper():
         fuori.append(_EQUIVALENTI.get(carattere, carattere))
     return "".join(fuori)
 
 
+def celle(testo):
+    """Il testo come celle da disegnare: `(lettera, sopra, sotto)`.
+
+    Una cella per ogni tre pixel di pannello. «Æ» ne fa due, e l'accento --
+    quando c'e' -- resta attaccato alla prima: cosi' la misura di
+    `larghezza_testo` e il disegno contano le stesse celle.
+    """
+    fuori = []
+    for carattere in str(testo).upper():
+        sopra = _SOPRA.get(carattere, 0)
+        sotto = _SOTTO.get(carattere, 0)
+        for lettera in _EQUIVALENTI.get(carattere, carattere):
+            fuori.append((lettera, sopra, sotto))
+            sopra = sotto = 0
+    return fuori
+
+
+def _riga_di_bit(px, bit, x, y, colore):
+    """Tre pixel in una riga, quelli accesi. Il taglio ai bordi e' qui e non
+    nei chiamanti: un accento sulla prima riga del pannello non deve far
+    cadere il disegno, deve solo non vedersi."""
+    for colonna in range(3):
+        if bit & (1 << (2 - colonna)):
+            xx = x + colonna
+            if 0 <= xx < LARGHEZZA and 0 <= y < ALTEZZA:
+                px[xx, y] = colore
+
+
 def scrivi(px, testo, x, y, colore):
     """Testo 3x5 pixel per pixel. `px` e' l'accesso ai pixel dell'immagine."""
-    for carattere in senza_accenti(testo):
+    for carattere, sopra, sotto in celle(testo):
         glifo = _F.get(carattere)
         if glifo is not None:
             for riga, bit in enumerate(glifo):
-                for colonna in range(3):
-                    if bit & (1 << (2 - colonna)):
-                        xx, yy = x + colonna, y + riga
-                        if 0 <= xx < LARGHEZZA and 0 <= yy < ALTEZZA:
-                            px[xx, yy] = colore
+                _riga_di_bit(px, bit, x, y + riga, colore)
+        if sopra:
+            _riga_di_bit(px, sopra, x, y - 1, colore)
+        if sotto:
+            _riga_di_bit(px, sotto, x, y + ALTO, colore)
         x += PASSO
 
 

@@ -43,6 +43,36 @@ sola e nessuno arriverebbe in fondo.
 | Scala | 100 → 1.000.000 in quindici gradini |
 | Traguardi | quinta e decima domanda |
 
+## «PERCHÉ» e «PERCHE» non sono la stessa parola
+
+Il font dei giochi è disegnato a mano, **tre pixel per cinque**: un TTF
+rimpicciolito a sei pixel su un pannello LED diventa poltiglia. In una griglia
+così una lettera accentata non esiste — dentro cinque righe non c'è posto per
+il corpo della lettera *e* per il segno sopra.
+
+Fino alla 12.6 la lettera accentata spariva del tutto: *piu'* scritto con
+l'accento diventava «PI». Dalla 12.6 diventava la lettera senza accento:
+leggibile, ma sul pannello «E» e «È» erano lo stesso disegno, e una domanda
+che chiede «QUAL E IL PIU GRANDE» è scritta male.
+
+Dalla 15.2 **l'accento sta fuori dal corpo**, nel pixel di interlinea sopra la
+lettera. L'interlinea è due pixel: uno lo prende il segno, l'altro resta a
+dividere le righe. Tre pixel di larghezza bastano a dire *quale* accento:
+
+| Segno | Dove | Lettere |
+|---|---|---|
+| grave | il pixel a sinistra | À È Ì Ò Ù |
+| acuto | il pixel a destra | Á É Í Ó Ú Ý |
+| circonflesso | il pixel al centro | Â Ê Î Ô Û |
+| dieresi | i due estremi | Ä Ë Ï Ö Ü |
+| tilde | tutti e tre | Ã Õ Ñ |
+| cediglia | sotto, nella riga dopo | Ç |
+
+All'italiano servono i primi due. Gli altri arrivano gratis con le domande
+inglesi, dove un nome francese o tedesco capita. **La larghezza non cambia**:
+la «È» occupa una cella come la «E», quindi una riga centrata resta centrata e
+il testo a capo conta gli stessi caratteri di prima.
+
 ## Un tasto tenuto premuto vale una volta
 
 Il quiz è un gioco di menu, non di riflessi: qui un tasto tenuto giù deve
@@ -291,7 +321,11 @@ sul Raspberry**.
 
 # 6. Come è stato provato
 
-`test_quiz.py`, 157 controlli, e `test_musica_media.py`, altri 35. Quelli che contano davvero:
+`test_quiz.py`, 162 controlli, e `test_musica_media.py`, altri 35. Quelli che contano davvero:
+
+- **«È» e «E» non sono il disegno uguale**, e il grave non è l'acuto: si
+  confrontano i pixel, perché è un difetto che si vede solo guardando il
+  pannello;
 
 - **un fuoco solo non risponde mai**: il primo apre la conferma, il secondo
   vale su SI o su NO — e un tasto tenuto premuto conta una volta, non trenta
