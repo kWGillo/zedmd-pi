@@ -82,7 +82,7 @@ ce067949314c5c7a779ef14aef2a479e  sources/giochi/pongo.py
 bf801c6443981bcbd2132b69bdf01cf8  sources/giochi/serpente.py
 9f1e1bc5394cdb3b6b7620eaeef5e07a  sources/giochi/squadriglia.py
 e6d3a6d006b2d1ff361934e64a1ae7e9  sources/giochi/trex.py
-120743a6dc3bd230e867ee6ee26a4420  sources/inutili.py
+f6615ee6a1eb29f4e1017f7a9c832bb2  sources/inutili.py
 979ff6783335db960335d79570c831a3  sources/media.py
 9d5c71443d63c261e79811e3d8d42b7d  sources/meteo.py
 1d2251eff5cc8b014100149bd68d0103  sources/notifiche.py
@@ -164,7 +164,7 @@ dd535a2225eb95cd2648a2c26ffbcafb  templates/statusplayer.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 2bc1da7de80749f0587cfc1c2c56f8fd  templates/updates.html
-fdbe70b7b1fce06cd153923bd4a8f5db  version.py
+c1a4fe96b22aeb328275ec39049e931a  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 4d8267f4436960534aaad593e054fa45  webui.py

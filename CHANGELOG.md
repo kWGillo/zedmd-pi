@@ -2,6 +2,43 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [15.3]
+
+### L'«accadde oggi» sale come i titoli di coda
+
+*«Il testo delle notizie inutili "accadde oggi", quando è troppo lungo, viene
+troncato. Dovrebbe scorrere verso l'alto come la sigla di Guerre Stellari, e
+dovrebbe esserci qualche secondo di pausa alla fine, per permetterne la
+lettura.»*
+
+Era l'ultimo testo tagliato del servizio, e non si poteva curare come gli
+altri due della 15.2: **non è una riga lunga, è un paragrafo**. Una frase di
+Wikipedia va a capo da sola su quattro o cinque righe, e farla scorrere di
+lato vorrebbe dire cinque strisce che si muovono insieme — illeggibile. Prima
+veniva impaginata su tre righe e il resto finiva con i puntini, e quelle tre
+righe erano decise dall'altezza del pannello, non dal fatto.
+
+Adesso il testo si impagina **quanto è lungo** e la colonna **sale**. Due
+numeri diversi da quelli dello scorrimento di lato, e per forza:
+
+- **dodici pixel al secondo** invece di trenta. Di lato si inseguono le
+  lettere, in verticale si leggono righe intere: a questa velocità una riga
+  alta quattordici pixel resta leggibile per più di un secondo mentre sale;
+- **tre secondi di pausa in cima** invece di uno. Quando la salita si ferma,
+  le ultime righe sono appena arrivate e sono proprio quelle che nessuno ha
+  ancora letto.
+
+Il titolo *ACCADDE OGGI* e l'anno grande a sinistra **non si muovono**: sale
+soltanto la colonna del testo. Sono il punto fermo da cui si legge, e un
+pannello in cui si muove tutto non si legge — nei controlli si confrontano i
+pixel del primo fotogramma con quelli dell'ultimo in quelle due zone, e devono
+essere identici.
+
+Dodici righe al massimo. Non è un troncamento travestito — un fatto storico di
+dodici righe non esiste — è che una pagina di Wikipedia malformata non deve
+produrre una salita di tre minuti dentro il tetto di venti secondi, che
+sarebbe di nuovo un testo tagliato.
+
 ## [15.2]
 
 ### Tre difetti piccoli, tutti e tre di testo

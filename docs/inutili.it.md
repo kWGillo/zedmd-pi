@@ -74,9 +74,38 @@ perché il servizio è quello che non serve a niente e non può tenersi il
 pannello più di così.
 
 Il santo prova prima a rimpicciolirsi — se nel corpo medio ci sta, sta fermo —
-e scorre solo quando non basta. Le altre due schermate non scorrono: i fatti
-storici vanno **a capo su tre righe**, che è il modo giusto per un testo lungo
-quando lo spazio in altezza c'è.
+e scorre solo quando non basta.
+
+## Il fatto storico invece sale
+
+L'«accadde oggi» non è una riga lunga: è un **paragrafo**. Una frase di
+Wikipedia va a capo da sola su quattro o cinque righe, e farla scorrere di
+lato vorrebbe dire cinque strisce che si muovono insieme — illeggibile. Fino
+alla 15.2 veniva impaginata su tre righe e il resto finiva con i puntini, e
+quelle tre righe erano decise dall'altezza del pannello, non dal fatto.
+
+Dalla 15.3 il testo si impagina **quanto è lungo** e la colonna **sale**, come
+i titoli di coda. Chiesto così: *dovrebbe scorrere verso l'alto come la sigla
+di Guerre Stellari, e dovrebbe esserci qualche secondo di pausa alla fine, per
+permetterne la lettura.*
+
+Due numeri diversi da quelli dello scorrimento di lato, e per forza:
+
+- **dodici pixel al secondo** invece di trenta. Di lato si inseguono le
+  lettere, in verticale si leggono righe intere: a questa velocità una riga
+  alta quattordici pixel resta leggibile per più di un secondo mentre sale;
+- **tre secondi di pausa in cima** invece di uno. Quando la salita si ferma,
+  le ultime righe sono appena arrivate e sono proprio quelle che nessuno ha
+  ancora letto.
+
+Il titolo *ACCADDE OGGI* e l'anno grande a sinistra **non si muovono**: sono
+il punto fermo da cui si legge, e sale soltanto la colonna del testo. Un
+pannello in cui si muove tutto non si legge.
+
+Si impaginano al massimo **dodici righe**. Non è un troncamento travestito —
+un fatto storico di dodici righe non esiste — è che una pagina di Wikipedia
+malformata non deve produrre una salita di tre minuti dentro un tetto di
+venti secondi, che sarebbe di nuovo un testo tagliato.
 
 # 3. La riga che fa fare una telefonata
 
@@ -162,7 +191,8 @@ esserci.
 
 Si tengono gli otto fatti più recenti — sono quelli che uno ha sentito
 nominare — e a ogni passaggio ne compare uno, a rotazione. L'anno sta grande a
-sinistra, il fatto a destra su due o tre righe.
+sinistra, il fatto a destra: se ci sta è fermo, se è più lungo **sale**, come
+spiegato nel capitolo 2.
 
 # 6. I personaggi famosi
 
@@ -235,7 +265,7 @@ festeggia. Gli altri servono all'annuncio della mattina.
 
 # 9. Come è stato provato
 
-`test_inutili.py`, 127 controlli. I quattro che contano davvero:
+`test_inutili.py`, 140 controlli. I cinque che contano davvero:
 
 - **il calendario è completo**: 366 giorni, 29 febbraio compreso, nessun
   giorno senza nomi, nessun santo oltre i 48 caratteri e nessuna giornata
@@ -246,6 +276,10 @@ festeggia. Gli altri servono all'annuncio della mattina.
   che siano diversi. Il servizio disegna una volta per turno e di solito
   risponde *niente di nuovo*: con quel «niente di nuovo» la riga più bella del
   mondo resterebbe ferma sul vetro;
+- **mentre il fatto storico sale, il titolo e l'anno non si muovono**: si
+  confrontano i pixel del primo fotogramma con quelli dell'ultimo nella fascia
+  del titolo e nella colonna dell'anno, e devono essere identici. È la
+  differenza fra una colonna che scorre e un pannello che trema;
 - **senza rete il servizio si accorcia**: con la cache vuota resta una sola
   schermata, e quello che era già stato scaricato non viene cancellato da un
   errore di rete;

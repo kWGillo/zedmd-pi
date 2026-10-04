@@ -2806,6 +2806,20 @@ Storico:
        sei secondi dentro una schermata di sei secondi e' ancora una riga
        tagliata. Il disegno resta uno per turno: quello che si rifa' trenta
        volte al secondo e' solo la finestra che si sposta.
+  15.3 *L'accadde oggi sale come i titoli di coda.* Chiesto cosi': «dovrebbe
+       scorrere verso l'alto come la sigla di Guerre Stellari, e dovrebbe
+       esserci qualche secondo di pausa alla fine, per permetterne la
+       lettura». Era l'ultimo testo tagliato del servizio, e non si poteva
+       curare come gli altri due: non e' una riga lunga, e' un paragrafo --
+       una frase di Wikipedia va a capo su quattro o cinque righe, e di lato
+       sarebbero cinque strisce in movimento insieme. Adesso il testo si
+       impagina quanto e' lungo, fino a dodici righe, e la colonna sale a
+       dodici pixel al secondo con tre secondi di pausa in cima: di lato si
+       inseguono le lettere, in verticale si leggono righe intere, quindi piu'
+       piano e con una pausa piu' lunga, perche' le ultime righe sono appena
+       arrivate e sono quelle che nessuno ha ancora letto. Il titolo e l'anno
+       grande non si muovono: sale solo la colonna del testo, e un pannello in
+       cui si muove tutto non si legge.
 """
 
-__version__ = "15.2"
+__version__ = "15.3"

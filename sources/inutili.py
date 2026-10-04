@@ -18,15 +18,23 @@ Due schermate, e non e' estetica
    fare danno: senza dati la seconda schermata non si fa e il servizio dura
    la meta'. Si accorcia, non si rompe.
 
-Le righe lunghe scorrono (15.2)
--------------------------------
-Il santo e la giornata mondiale le scrive qualcun altro -- i due CSV -- e sono
-lunghe quanto vogliono. Tagliate con i puntini volevano dire mezza riga non
-letta, che su un servizio che fa solo compagnia e' l'unico modo di sbagliare.
-Scorrono: ferme un secondo, poi a trenta pixel al secondo, e all'ultima parola
-si fermano. **Non a giro**, perche' un giro su una schermata di sei secondi
-viene interrotto sempre a meta'; e la schermata si allunga quanto serve a
-vederlo intero, con un tetto a venti secondi.
+Niente viene piu' tagliato (15.2, 15.3)
+---------------------------------------
+Tre testi di questo servizio li scrive qualcun altro -- i due CSV e Wikipedia
+-- e sono lunghi quanto vogliono. Tagliati con i puntini volevano dire mezza
+riga non letta, che su un servizio che fa solo compagnia e' l'unico modo di
+sbagliare. Adesso si muovono, in due modi diversi perche' sono due cose
+diverse:
+
+- il **santo** e la **giornata mondiale** sono righe: scorrono di lato, ferme
+  un secondo, poi trenta pixel al secondo, e all'ultima parola si fermano;
+- l'**accadde oggi** e' un paragrafo: va a capo su quante righe serve e la
+  colonna **sale**, come i titoli di coda, piu' piano e con tre secondi di
+  pausa in cima. Di lato sarebbero cinque strisce in movimento insieme.
+
+**Non a giro**, in nessuno dei due casi: un giro su una schermata di pochi
+secondi viene interrotto sempre a meta'. E la schermata si allunga quanto
+serve a vedere tutto, con un tetto a venti secondi.
 
 La riga che fa fare una telefonata
 ----------------------------------
@@ -92,6 +100,31 @@ OGNI_MINUTI = 30
 VELOCITA = 30.0          # pixel al secondo: velocita' di lettura, non di corsa
 ATTESA_PRIMA = 1.0       # ferma all'inizio, il tempo di cominciare
 ATTESA_DOPO = 1.3        # ferma alla fine, il tempo di finire
+
+# L'«accadde oggi» e' un'altra cosa, e lo e' per una ragione geometrica: non e'
+# una riga lunga, e' un **paragrafo**. Una frase di Wikipedia va a capo da
+# sola su quattro o cinque righe, e farla scorrere di lato vorrebbe dire
+# cinque strisce che si muovono insieme: illeggibile. Quelle righe stanno una
+# sotto l'altra e scorrono **verso l'alto**, come i titoli di coda -- chiesto
+# cosi': «come la sigla di Guerre Stellari».
+#
+# Due numeri diversi da quelli di sopra, e per forza:
+#  - **piu' lento.** Di lato si inseguono le lettere, in verticale si leggono
+#    righe intere: a dodici pixel al secondo una riga alta quattordici resta
+#    leggibile per piu' di un secondo mentre sale.
+#  - **la pausa in fondo e' piu' lunga.** Chiesta: «qualche secondo di pausa
+#    alla fine, per permetterne la lettura». Quando la salita si ferma, le
+#    ultime righe sono appena arrivate e sono quelle che nessuno ha ancora
+#    letto -- un secondo non basta, tre si'.
+VELOCITA_ALTO = 12.0
+ATTESA_DOPO_ALTO = 3.0
+
+# Quante righe al massimo si impaginano. Non e' un troncamento travestito: un
+# fatto storico di dodici righe non esiste, e il numero sta qui perche' un
+# giorno una pagina di Wikipedia malformata non faccia una salita di tre
+# minuti dentro un tetto di venti secondi -- che sarebbe, di nuovo, un testo
+# tagliato.
+RIGHE_MASSIME = 12
 
 # E la schermata si allunga quanto serve a vedere lo scorrimento intero: una
 # riga che scorre per sei secondi dentro una schermata che dura sei secondi e'
@@ -297,11 +330,16 @@ class InutiliSource(Source):
 
     @staticmethod
     def _quanto_dura(secondi, bande):
-        """La durata della schermata, allungata se una riga deve scorrere."""
+        """La durata della schermata, allungata se qualcosa deve scorrere.
+
+        Ogni banda ha la sua velocita' e la sua pausa finale -- di lato si
+        corre, in verticale si legge -- quindi il conto si fa su ciascuna e
+        comanda la piu' lenta.
+        """
         if not bande:
             return secondi
-        corsa = max(b["massimo"] for b in bande) / VELOCITA
-        serve = ATTESA_PRIMA + corsa + ATTESA_DOPO
+        serve = max(ATTESA_PRIMA + b["massimo"] / b["velocita"] + b["dopo"]
+                    for b in bande)
         return max(secondi, min(TETTO_SLIDE, serve))
 
     def avanza(self):
@@ -352,20 +390,22 @@ class InutiliSource(Source):
         return img
 
     def _componi(self, base, bande, passato):
-        """La schermata con le finestre delle righe che scorrono al punto in
-        cui sono adesso. `passato` sono i secondi da quando e' comparsa."""
+        """La schermata con le finestre di cio' che scorre al punto in cui e'
+        adesso. `passato` sono i secondi da quando la schermata e' comparsa."""
         img = base.copy()
-        avanti = max(0.0, passato - ATTESA_PRIMA) * VELOCITA
         for banda in bande:
+            avanti = max(0.0, passato - ATTESA_PRIMA) * banda["velocita"]
             dove = int(min(banda["massimo"], avanti))
-            alta = banda["striscia"].height
-            img.paste(banda["striscia"].crop((dove, 0, dove + banda["area"],
-                                             alta)),
-                      (banda["x"], banda["y"]))
+            larga, alta = banda["area"], banda["altezza"]
+            if banda["verso"] == "alto":
+                finestra = banda["striscia"].crop((0, dove, larga, dove + alta))
+            else:
+                finestra = banda["striscia"].crop((dove, 0, dove + larga, alta))
+            img.paste(finestra, (banda["x"], banda["y"]))
         return img
 
     def _scorri(self, d, testo, font, colore, x, y, area):
-        """Mette in coda una riga che scorre, se non ci sta.
+        """Mette in coda una riga che scorre **di lato**, se non ci sta.
 
         La striscia e' il testo intero su una tela sua: quello che si vede e'
         un taglio largo `area`, e il taglio che si sposta e' lo scorrimento.
@@ -378,8 +418,39 @@ class InutiliSource(Source):
         striscia = Image.new("RGB", (larghezza, alta), (0, 0, 0))
         ImageDraw.Draw(striscia).text((0, 0), testo, font=font, fill=colore)
         self._bande.append({"striscia": striscia, "x": x, "y": y,
-                            "area": area, "massimo": larghezza - area})
+                            "area": area, "altezza": alta, "verso": "lato",
+                            "velocita": VELOCITA, "dopo": ATTESA_DOPO,
+                            "massimo": larghezza - area})
         return True
+
+    def _scorri_in_alto(self, d, righe, font, colore, x, y, area, altezza,
+                        passo):
+        """Mette in coda un paragrafo che sale, se non ci sta in `altezza`.
+
+        Le righe sono gia' impaginate: qui si impilano su una tela alta quanto
+        serve, e la finestra che si vede sale da sola. Torna le righe che chi
+        chiama deve disegnare al posto suo -- tutte se non c'e' niente da far
+        salire, le prime se invece sale -- cosi' la schermata ferma e' giusta
+        anche nella pagina di prova.
+        """
+        quante = max(1, altezza // passo)
+        if len(righe) <= quante:
+            return righe
+        # Due pixel in piu' dell'ultima riga: senza, la salita si ferma con la
+        # coda della «g» appoggiata al bordo di sotto, cioe' tagliata di un
+        # pixel proprio nell'unica riga che nessuno ha ancora letto.
+        alta_riga = max(1, self._riquadro(d, "Ag", font)[1]) + 2
+        striscia = Image.new("RGB", (max(1, area),
+                                     (len(righe) - 1) * passo + alta_riga),
+                             (0, 0, 0))
+        dis = ImageDraw.Draw(striscia)
+        for indice, riga in enumerate(righe):
+            dis.text((0, indice * passo), riga, font=font, fill=colore)
+        self._bande.append({"striscia": striscia, "x": x, "y": y,
+                            "area": area, "altezza": altezza, "verso": "alto",
+                            "velocita": VELOCITA_ALTO, "dopo": ATTESA_DOPO_ALTO,
+                            "massimo": max(0, striscia.height - altezza)})
+        return righe[:quante]
 
     # ---- schermata 1: oggi si festeggia
 
@@ -443,11 +514,17 @@ class InutiliSource(Source):
     # ---- schermata 2: accadde oggi (i fatti)
 
     def _eventi(self, d, adesso=None):
-        """L'anno grande a sinistra, il fatto a destra su due o tre righe.
+        """L'anno grande a sinistra, il fatto a destra, e se e' lungo **sale**.
 
         L'anno e' la cosa che si guarda per prima -- «1969» dice gia' mezza
         storia -- quindi sta da solo, grande, e il testo gli scorre accanto
         invece di andargli sotto.
+
+        Il testo e' l'unico paragrafo del servizio: quello che prima non ci
+        stava in tre righe finiva con i puntini, e quelle tre righe erano
+        decise dall'altezza del pannello, non dal fatto. Adesso si impagina
+        **quanto e' lungo** e la colonna sale, che e' il modo in cui si legge
+        un paragrafo -- di lato si inseguirebbero cinque righe insieme.
         """
         adesso = adesso or datetime.now()
         quando = adesso.timetuple()
@@ -463,10 +540,17 @@ class InutiliSource(Source):
                font=self._font_grande, fill=ANNO_EVENTO)
         sinistra = margine + self._largo(d, "0000", self._font_grande) + 6
         disponibile = self.width - sinistra - margine
-        righe = self._a_capo(d, testo, self._font_piccolo, disponibile, 3)
         alto = int(self.height * 0.17) + 1
-        passo = int(self.height * 0.22)
-        for i, riga in enumerate(righe):
+        passo = max(1, int(self.height * 0.22))
+        righe = self._a_capo(d, testo, self._font_piccolo, disponibile,
+                             RIGHE_MASSIME)
+        # Le righe che si vedono ferme sono quelle che ci stanno: le altre
+        # arrivano salendo. La colonna parte dove partiva prima e arriva in
+        # fondo al pannello -- l'anno sta a sinistra e non le da' fastidio.
+        ferme = self._scorri_in_alto(d, righe, self._font_piccolo, NOMI,
+                                     sinistra, alto, disponibile,
+                                     self.height - alto, passo)
+        for i, riga in enumerate(ferme):
             d.text((sinistra, alto + i * passo), riga,
                    font=self._font_piccolo, fill=NOMI)
 
