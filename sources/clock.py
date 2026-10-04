@@ -132,6 +132,48 @@ def _load_font(size):
     return ImageFont.load_default()
 
 
+def scrivi_ora(draw, dove, testo, font, colore):
+    """Scrive un'ora grande con **i due punti centrati sulle cifre**.
+
+    Nel font i due punti stanno appoggiati alla linea di base, e in una frase
+    e' giusto: dividono due parole scritte in minuscolo, e stanno all'altezza
+    della loro pancia. Accanto a due cifre alte il doppio finiscono nella
+    meta' di sotto -- su un pannello alto 64 pixel sono quattro pixel sotto il
+    centro -- e l'ora sembra scritta di sbieco. Si vede, e una volta visto non
+    si riesce piu' a non vederlo.
+
+    Quindi i due punti si disegnano **a parte**, alzati di quanto serve a far
+    coincidere il loro centro con quello delle cifre. Le cifre invece restano
+    esattamente dove sarebbero state: la posizione di ogni pezzo e' la penna
+    del font sul testo **intero**, non la somma delle larghezze dei pezzi, per
+    cui niente si sposta di mezzo pixel e l'ora resta centrata come prima.
+
+    Senza due punti -- il lampeggio li sostituisce con uno spazio -- non c'e'
+    niente da spostare: si scrive la riga e basta.
+    """
+    x, y = dove
+    taglio = testo.find(":")
+    if taglio < 0:
+        draw.text((x, y), testo, font=font, fill=colore)
+        return
+    # Il riferimento e' lo **zero**, non le cifre di adesso. Misurare «14:22»
+    # e poi «14:11» da' due riquadri diversi di un pixel -- la pancia del 2
+    # sfiora una riga piu' in alto di quanto arrivi l'1 -- e i due punti
+    # scatterebbero di un pixel al cambio di minuto. Lo zero e' tondo sopra e
+    # sotto, quindi e' l'altezza vera delle cifre, e non cambia mai.
+    riquadro = draw.textbbox((0, 0), "0", font=font)
+    punti = draw.textbbox((0, 0), ":", font=font)
+    # Mezzo pixel non esiste: nel dubbio si alza di meno.
+    alza = int(((riquadro[1] + riquadro[3]) - (punti[1] + punti[3])) / 2.0)
+    for pezzo, da, su in ((testo[:taglio], 0, 0),
+                          (":", taglio, alza),
+                          (testo[taglio + 1:], taglio + 1, 0)):
+        if not pezzo:
+            continue
+        penna = x + int(round(draw.textlength(testo[:da], font=font)))
+        draw.text((penna, y + su), pezzo, font=font, fill=colore)
+
+
 def voce_mondo():
     return {"enabled": False, "etichetta": "", "fuso": ""}
 
@@ -412,7 +454,7 @@ class ClockSource(Source):
         # pagina lo dice invece di lasciar credere che sia rotto.
         y = min(y, self._fondo_cifre(mondo) - box[3])
         y = max(y, -box[1])
-        draw.text((x, y), shown, font=self._font, fill=time_color)
+        scrivi_ora(draw, (x, y), shown, self._font, time_color)
         ora_destra = x + box[2]
         ora_sotto = y + box[3]
 

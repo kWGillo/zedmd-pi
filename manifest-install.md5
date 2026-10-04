@@ -64,7 +64,7 @@ be7a53f3a370b2550970f7cdb510bc53  sources/__init__.py
 d231417597b54592614b20b12ac8b82d  sources/base.py
 ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 fff9a6751fd27a17747c95d907945d19  sources/cielo.py
-08a1c0883a230ddd814aa282d6d745a3  sources/clock.py
+cfb81c9f2f373ec214fb422cf1cd475e  sources/clock.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 121811114e48abfc98e44fafee43e6f1  sources/doom.py
@@ -91,7 +91,7 @@ f6615ee6a1eb29f4e1017f7a9c832bb2  sources/inutili.py
 e6c140b184dd15f3c391ec123180f25e  sources/satelliti.py
 2a73be667459d2a58f2ddab91ff91a98  sources/scadenze.py
 58b2545ed6131205d23dd95b2d8617bf  sources/statusplayer.py
-09f13fd40ae8b7e45fe6da063bd6c4e6  sources/sveglia.py
+ff27405b1c4d1fe0582038f21ca6374e  sources/sveglia.py
 de7ee2495ed06fbae5a24e7de31e756f  sources/telecamera.py
 0ff9708f05c58f81a6050346055d16d2  sources/testo.py
 6d5ef6752df8e9a29e51b9eb8940fa0b  sources/turni.py
@@ -164,7 +164,7 @@ dd535a2225eb95cd2648a2c26ffbcafb  templates/statusplayer.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 2bc1da7de80749f0587cfc1c2c56f8fd  templates/updates.html
-c1a4fe96b22aeb328275ec39049e931a  version.py
+85c1c14cb1dbf6c0af9fd82ea48e89f7  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 4d8267f4436960534aaad593e054fa45  webui.py

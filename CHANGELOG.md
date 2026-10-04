@@ -2,6 +2,41 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [15.4]
+
+### I due punti dell'orologio stanno in mezzo alle cifre
+
+*«Puoi centrare i due punti dell'orologio rispetto ai numeri di ore e
+minuti?»*
+
+Nel font i due punti stanno **appoggiati alla linea di base**, e in una frase
+è giusto: dividono due parole scritte in minuscolo e stanno all'altezza della
+loro pancia. Accanto a due cifre alte il doppio finiscono nella metà di sotto
+— quattro pixel sotto il centro su un pannello alto 64 — e l'ora sembra
+scritta di sbieco.
+
+Adesso si disegnano a parte, alzati di quanto serve a far coincidere il loro
+centro con quello delle cifre. Due cose fatte apposta, e sono quelle che
+distinguono una correzione da un nuovo difetto:
+
+- **le cifre restano esattamente dove erano.** La posizione di ogni pezzo è la
+  penna del font sul testo *intero*, non la somma delle larghezze dei pezzi:
+  nei controlli il pannello disegnato in tre pezzi, con i due punti cancellati,
+  deve essere identico pixel per pixel a quello disegnato con una scrittura
+  sola;
+- **l'alzata si misura sullo zero, non sull'ora di adesso.** Il riquadro di
+  «14:11» e quello di «14:22» non sono identici — la pancia del 2 sfiora una
+  riga più in alto dell'1 — e misurando l'ora vera i due punti scatterebbero di
+  un pixel al cambio di minuto. Lo zero è tondo sopra e sotto, quindi è
+  l'altezza vera delle cifre, e non cambia mai.
+
+Lo stesso vale nella **schermata della sveglia**, che è lo stesso orologio
+grande: due schermate che scrivono l'ora in due modi diversi sono un difetto
+anche quando una delle due è giusta.
+
+Il lampeggio sostituisce i due punti con uno spazio: lì non c'è niente da
+alzare, e si scrive la riga e basta.
+
 ## [15.3]
 
 ### L'«accadde oggi» sale come i titoli di coda

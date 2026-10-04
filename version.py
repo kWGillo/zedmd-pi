@@ -2820,6 +2820,20 @@ Storico:
        arrivate e sono quelle che nessuno ha ancora letto. Il titolo e l'anno
        grande non si muovono: sale solo la colonna del testo, e un pannello in
        cui si muove tutto non si legge.
+  15.4 *I due punti dell'orologio stanno in mezzo alle cifre.* Nel font sono
+       appoggiati alla linea di base -- in una frase e' giusto, dividono due
+       parole scritte in minuscolo -- e accanto a cifre alte il doppio
+       finivano nella meta' di sotto: quattro pixel sotto il centro su un
+       pannello alto 64, e l'ora sembrava scritta di sbieco. Adesso si
+       disegnano a parte, alzati di quanto serve a far coincidere il loro
+       centro con quello delle cifre. Due cose fatte apposta: le cifre
+       restano **esattamente** dove erano, perche' la posizione di ogni pezzo
+       e' la penna del font sul testo intero e non la somma delle larghezze;
+       e l'alzata si misura sullo zero e non sull'ora di adesso, perche' il
+       riquadro di «14:11» e quello di «14:22» non sono identici -- la pancia
+       del 2 sfiora una riga piu' in alto dell'1 -- e misurando l'ora vera i
+       due punti scatterebbero di un pixel al cambio di minuto. Lo stesso
+       anche nella schermata della sveglia, che e' lo stesso orologio grande.
 """
 
-__version__ = "15.3"
+__version__ = "15.4"

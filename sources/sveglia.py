@@ -48,7 +48,7 @@ import time
 from PIL import Image, ImageDraw
 
 from .base import Source
-from .clock import _load_font, parse_color
+from .clock import _load_font, parse_color, scrivi_ora
 
 # Sopra tutto, ZeDMD compreso. Durante una partita a flipper una sveglia che
 # aspetta educatamente il proprio turno non suona mai.
@@ -428,10 +428,13 @@ class SvegliaSource(Source):
             if (alta <= spazio and larga <= self.width - 8) or misura <= 10:
                 break
             misura -= 1
-        # E si centra nello spazio che ha, non contro il bordo in alto.
+        # E si centra nello spazio che ha, non contro il bordo in alto. I due
+        # punti li mette in mezzo `scrivi_ora`, come nell'orologio: e' lo
+        # stesso orologio grande, e due schermate che scrivono l'ora in due
+        # modi diversi sono un difetto anche quando una delle due e' giusta.
         cima = margine + (spazio - alta) // 2
-        draw.text(((self.width - larga) // 2 - riquadro[0], cima - riquadro[1]),
-                  ora, font=font, fill=colore)
+        scrivi_ora(draw, ((self.width - larga) // 2 - riquadro[0],
+                          cima - riquadro[1]), ora, font, colore)
         return image
 
     @staticmethod
