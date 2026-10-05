@@ -865,6 +865,63 @@ DEFAULTS = {
         # Come i satelliti: senza coordinate non ha niente da dire, e le
         # coordinate non le mettiamo noi.
         "meteo": False,
+        # Energia: spento di suo, come le notifiche. Il numero lo pubblica
+        # un'automazione di Home Assistant, e finche' dall'altra parte non c'e'
+        # nessuno che parla questo servizio avrebbe solo due trattini da
+        # mostrare -- cioe' un posto sotto l'orologio occupato per dire che non
+        # si sa niente.
+        "energia": False,
+    },
+    # Energia: un numero che arriva da Home Assistant e sta sotto l'orologio,
+    # al centro della banda del World Time. Il pannello non misura niente --
+    # misurare la casa e' il mestiere di Home Assistant -- e qui arriva il
+    # numero gia' fatto.
+    #
+    # I due modi hanno **soglie diverse e separate**, e non e' pignoleria: la
+    # potenza deve stare dentro un intervallo, la batteria di un accumulo
+    # scende lungo una scala. Un solo insieme di soglie avrebbe voluto dire,
+    # in meta' dei casi, campi che non vogliono dire niente. Separate, cambiare
+    # modo avanti e indietro non cancella i numeri dell'altro.
+    "energia": {
+        "topic": "dmd/energia",
+        "modo": "potenza",            # «potenza» o «batteria»
+        # Due parole davanti al numero: «CASA 1250 W» invece di «1250 W». Con
+        # due fusi accanto sulla stessa banda, dire di che cosa si parla vale
+        # i pixel che costa.
+        "etichetta": "",
+        "unita": "W",
+        "decimali": 0,
+        # Dopo quanti minuti di silenzio il valore diventa «--». Un numero
+        # fermo da mezz'ora e' peggio di nessun numero: ci si fida di un dato
+        # che non esiste piu'. Zero vuol dire «tienilo per sempre».
+        "scade_minuti": 5,
+        # Le quattro soglie della potenza, tutte facoltative: vuota vuol dire
+        # spenta. Rosso (e lampeggio) fuori dai due estremi, giallo nella
+        # fascia di preallarme appena dentro, verde in mezzo. Niente numeri di
+        # serie: un impianto da tre chilowatt e uno da sei hanno soglie
+        # diverse, e un valore inventato qui sarebbe un allarme che suona in
+        # casa di qualcuno senza motivo.
+        "potenza": {
+            "minima": None,
+            "preallarme_basso": None,
+            "preallarme_alto": None,
+            "massima": None,
+        },
+        # Le tre della batteria. Qui i numeri di serie vogliono dire qualcosa,
+        # perche' la scala e' sempre la stessa -- da 0 a 100 -- e questi sono
+        # quelli che userebbe chiunque abbia un accumulo.
+        "batteria": {
+            "gialla": 50,
+            "rossa": 20,
+            # Il lampeggio ha la sua soglia, sotto il rosso: un accumulo al 18%
+            # e' rosso e si guarda, al 10% e' rosso e chiama.
+            "lampeggio": 10,
+        },
+        "colori": {
+            "verde": "#3ccf5a",
+            "giallo": "#ffc000",
+            "rosso": "#ff3b30",
+        },
     },
     # Info inutili. Il calendario (santo, nomi, giornata mondiale) e' nei CSV
     # del programma e non chiede niente a nessuno; i personaggi famosi

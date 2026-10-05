@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}{{ t('energia.title') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('energia.title') }}</h2>
+  <p class="hint">{{ t('energia.intro') }}</p>
+  {% if esito == 'provato' %}<p class="status ok">{{ t('energia.esito.provato') }}</p>
+  {% elif esito == 'dimenticato' %}<p class="status ok">{{ t('energia.esito.dimenticato') }}</p>
+  {% elif esito == 'illeggibile' %}<p class="status err">{{ t('energia.esito.illeggibile') }}</p>
+  {% endif %}
+  {% if not attivo %}
+  <p class="status">{{ t('energia.spento') }}</p>
+  {% endif %}
+
+  {% if dati %}
+  <table class="files">
+    <tr><td>{{ t('energia.ora') }}</td>
+        <td><strong>{{ dati.testo or '--' }}</strong>
+            {% if dati.lampeggia %} · {{ t('energia.lampeggia') }}{% endif %}</td></tr>
+    <tr><td>{{ t('energia.ultimo') }}</td>
+        <td>{% if dati.da_quanto is none %}{{ t('energia.mai') }}
+            {%- else %}{{ dati.da_quanto | round | int }} s{% endif %}</td></tr>
+    <tr><td>{{ t('energia.conteggio') }}</td>
+        <td>{{ dati.ricevuti }}{% if dati.scartati %} · {{ t('energia.scartati') }}: {{ dati.scartati }}{% endif %}</td></tr>
+    {% if dati.errore %}
+    <tr><td>{{ t('energia.errore') }}</td><td>{{ dati.errore }}</td></tr>
+    {% endif %}
+  </table>
+  {% endif %}
+  <p class="hint">{{ t('energia.fusi', quanti=fusi_massimi) }}</p>
+</section>
+
+<section class="card">
+  <h2>{{ t('energia.cosa') }}</h2>
+  <form method="post" action="{{ url_for('api_energia') }}">
+    <label for="modo">{{ t('energia.modo') }}</label>
+    <select id="modo" name="modo" onchange="cambiaModo(this.value)">
+      {% for nome in modi %}
+      <option value="{{ nome }}" {{ 'selected' if conf.modo == nome }}>{{ t('energia.modo.' ~ nome) }}</option>
+      {% endfor %}
+    </select>
+    <p class="hint">{{ t('energia.modo.hint') }}</p>
+
+    <div class="row3">
+      <div>
+        <label for="etichetta">{{ t('energia.etichetta') }}</label>
+        <input type="text" id="etichetta" name="etichetta" maxlength="12"
+               value="{{ conf.etichetta }}" placeholder="CASA">
+      </div>
+      <div>
+        <label for="unita">{{ t('energia.unita') }}</label>
+        <input type="text" id="unita" name="unita" maxlength="6"
+               value="{{ conf.unita }}" placeholder="W">
+      </div>
+      <div>
+        <label for="decimali">{{ t('energia.decimali') }}</label>
+        <input type="number" id="decimali" name="decimali" min="0" max="3"
+               value="{{ conf.decimali }}">
+      </div>
+    </div>
+    <p class="hint">{{ t('energia.etichetta.hint') }}</p>
+
+    <!-- Le soglie della potenza. Tutte facoltative: vuota vuol dire spenta. -->
+    <div id="soglie-potenza" class="soglie">
+      <h3>{{ t('energia.soglie.potenza') }}</h3>
+      <p class="hint">{{ t('energia.soglie.potenza.hint') }}</p>
+      <div class="row2">
+        <div>
+          <label for="pot_minima">{{ t('energia.pot.minima') }}</label>
+          <input type="text" id="pot_minima" name="pot_minima" class="mono"
+                 value="{{ '' if conf.potenza.minima is none else conf.potenza.minima }}">
+        </div>
+        <div>
+          <label for="pot_preallarme_basso">{{ t('energia.pot.giallo_basso') }}</label>
+          <input type="text" id="pot_preallarme_basso" name="pot_preallarme_basso" class="mono"
+                 value="{{ '' if conf.potenza.preallarme_basso is none else conf.potenza.preallarme_basso }}">
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="pot_preallarme_alto">{{ t('energia.pot.giallo_alto') }}</label>
+          <input type="text" id="pot_preallarme_alto" name="pot_preallarme_alto" class="mono"
+                 value="{{ '' if conf.potenza.preallarme_alto is none else conf.potenza.preallarme_alto }}">
+        </div>
+        <div>
+          <label for="pot_massima">{{ t('energia.pot.massima') }}</label>
+          <input type="text" id="pot_massima" name="pot_massima" class="mono"
+                 value="{{ '' if conf.potenza.massima is none else conf.potenza.massima }}">
+        </div>
+      </div>
+    </div>
+
+    <!-- E quelle della batteria: una scala che scende, con il lampeggio suo. -->
+    <div id="soglie-batteria" class="soglie">
+      <h3>{{ t('energia.soglie.batteria') }}</h3>
+      <p class="hint">{{ t('energia.soglie.batteria.hint') }}</p>
+      <div class="row3">
+        <div>
+          <label for="bat_gialla">{{ t('energia.bat.gialla') }}</label>
+          <input type="number" id="bat_gialla" name="bat_gialla" min="0" max="100"
+                 value="{{ '' if conf.batteria.gialla is none else conf.batteria.gialla }}">
+        </div>
+        <div>
+          <label for="bat_rossa">{{ t('energia.bat.rossa') }}</label>
+          <input type="number" id="bat_rossa" name="bat_rossa" min="0" max="100"
+                 value="{{ '' if conf.batteria.rossa is none else conf.batteria.rossa }}">
+        </div>
+        <div>
+          <label for="bat_lampeggio">{{ t('energia.bat.lampeggio') }}</label>
+          <input type="number" id="bat_lampeggio" name="bat_lampeggio" min="0" max="100"
+                 value="{{ '' if conf.batteria.lampeggio is none else conf.batteria.lampeggio }}">
+        </div>
+      </div>
+    </div>
+
+    <h3>{{ t('energia.colori') }}</h3>
+    <div class="row3">
+      <div>
+        <label for="colore_verde">{{ t('energia.colore.verde') }}</label>
+        <input type="color" id="colore_verde" name="colore_verde"
+               value="{{ conf.colori.verde }}">
+      </div>
+      <div>
+        <label for="colore_giallo">{{ t('energia.colore.giallo') }}</label>
+        <input type="color" id="colore_giallo" name="colore_giallo"
+               value="{{ conf.colori.giallo }}">
+      </div>
+      <div>
+        <label for="colore_rosso">{{ t('energia.colore.rosso') }}</label>
+        <input type="color" id="colore_rosso" name="colore_rosso"
+               value="{{ conf.colori.rosso }}">
+      </div>
+    </div>
+
+    <h3>{{ t('energia.arrivo') }}</h3>
+    <div class="row2">
+      <div>
+        <label for="topic">{{ t('energia.topic') }}</label>
+        <input type="text" id="topic" name="topic" class="mono" maxlength="120"
+               value="{{ conf.topic }}">
+      </div>
+      <div>
+        <label for="scade_minuti">{{ t('energia.scade') }}</label>
+        <input type="number" id="scade_minuti" name="scade_minuti" min="0" max="1440"
+               value="{{ conf.scade_minuti }}">
+      </div>
+    </div>
+    <p class="hint">{{ t('energia.topic.hint') }}</p>
+    <p class="hint">{{ t('energia.scade.hint') }}</p>
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('energia.prova') }}</h2>
+  <p class="hint">{{ t('energia.prova.hint') }}</p>
+  <form method="post" action="{{ url_for('api_energia_prova') }}">
+    <label for="valore">{{ t('energia.prova.valore') }}</label>
+    <input type="text" id="valore" name="valore" class="mono" placeholder="1250">
+    <div class="actions">
+      <button type="submit">{{ t('energia.prova.manda') }}</button>
+      <button type="submit" class="ghost" name="valore" value="">{{ t('energia.prova.pulisci') }}</button>
+    </div>
+  </form>
+</section>
+
+<section class="card">
+  <h2>{{ t('energia.ha') }}</h2>
+  <p class="hint">{{ t('energia.ha.hint') }}</p>
+  <pre class="log">{{ t('energia.ha.esempio', topic=conf.topic) }}</pre>
+</section>
+
+<script>
+// Si vedono le soglie del modo scelto, e solo quelle. Gli altri campi restano
+// nel form -- e quindi si salvano -- perche' chi prova la batteria e torna
+// alla potenza deve ritrovare i suoi watt, non delle caselle vuote.
+function cambiaModo(modo) {
+  const potenza = document.getElementById('soglie-potenza');
+  const batteria = document.getElementById('soglie-batteria');
+  if (potenza) potenza.style.display = (modo === 'batteria') ? 'none' : '';
+  if (batteria) batteria.style.display = (modo === 'batteria') ? '' : 'none';
+}
+cambiaModo(document.getElementById('modo').value);
+</script>
+
+{% endblock %}

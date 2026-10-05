@@ -221,6 +221,11 @@ class ClockSource(Source):
         # Se c'e' una versione nuova da installare. Stessa regola: il runtime
         # attacca qui una funzione, l'orologio non sa che esista GitHub.
         self.aggiornamento = None
+        # Il numero del servizio Energia, quando c'e'. Stessa regola di tutti
+        # gli altri: una funzione attaccata dal runtime, e l'orologio non sa
+        # che esistano un inverter, un contatore e un broker MQTT. Sa che
+        # qualcuno ogni tanto gli da' una riga da scrivere al centro.
+        self.energia = None
         self._font = _load_font(max(12, int(height * 0.60)))
         self._font_small = _load_font(max(8, int(height * 0.20)))
         # Font della colonna dei rifiuti, dal piu' grande al piu' piccolo. Si
@@ -418,9 +423,18 @@ class ClockSource(Source):
         # quella del momento in cui e' cambiato qualcos'altro.
         barra = self._barra_timer()
         diretta = self._tratto_onair()
-        mondo = self._mondo(now)
+        # L'energia prima del World Time: e' lei che si prende il centro della
+        # banda, e quante localita' ci stiano lo si sa solo dopo aver misurato
+        # quanto e' larga la sua riga.
+        energia = self._energia()
+        mondo = self._mondo(now, energia)
         novita = self._segno_aggiornamento()
         time_color = self.colore_ora(now)
+        # Il lampeggio dell'energia va **nella firma**, altrimenti il pannello
+        # non si ridisegna e la riga non lampeggia. La fase e' quella del
+        # secondo pari: la stessa dei due punti dell'ora e della scadenza
+        # passata, perche' tre cose che lampeggiano insieme sono un battito.
+        energia_accesa = not (energia and energia.get("lampeggia")) or second_even
 
         # Ridisegna solo quando cambia qualcosa di visibile. Il colore entra
         # come **valore calcolato**, non come impostazione: con il colore
@@ -429,7 +443,9 @@ class ClockSource(Source):
                      time_color, clock["date_color"],
                      tuple((v["nome"], v["colore"]) for v in colonna),
                      stato_sem, sem_acceso, barra, diretta,
-                     tuple(mondo), novita, self._offset())
+                     tuple(mondo), novita, self._offset(),
+                     (energia or {}).get("testo", ""),
+                     (energia or {}).get("colore", ""), energia_accesa)
         if signature == self._signature:
             return None
         self._signature = signature
@@ -439,20 +455,27 @@ class ClockSource(Source):
         image = Image.new("RGB", (self.width, self.height), (0, 0, 0))
         draw = ImageDraw.Draw(image)
 
+        # La banda in fondo esiste se c'e' qualcosa da scriverci: gli orari del
+        # mondo, il numero dell'energia, o tutti e due. Fino alla 15.4 era solo
+        # il World Time, e quello che segue guardava `mondo`; con il solo
+        # servizio Energia acceso le cifre sarebbero rimaste appoggiate sopra
+        # la sua riga.
+        banda = bool(mondo) or energia is not None
+
         box = draw.textbbox((0, 0), shown, font=self._font)
         x = (self.width - (box[2] - box[0])) // 2 - box[0]
         y = (self.height - (box[3] - box[1])) // 2 - box[1]
-        # Con il World Time acceso le cifre salgono di qualche pixel, per non
-        # restare appoggiate alla banda degli orari del mondo. Poi si somma
-        # l'offset scelto dall'utente, che vale sempre: vedi `_offset()`.
-        if mondo:
+        # Con la banda in fondo accesa le cifre salgono di qualche pixel, per
+        # non restarle appoggiate sopra. Poi si somma l'offset scelto
+        # dall'utente, che vale sempre: vedi `_offset()`.
+        if banda:
             y -= self.MONDO_ALZATA
         y += self._offset()
         # Un limite fisico, non un ripensamento sul gusto di chi regola: le
         # cifre non devono finire dentro la banda degli orari del mondo ne'
         # sotto il bordo. Oltre quel punto il cursore smette di muovere, e la
         # pagina lo dice invece di lasciar credere che sia rotto.
-        y = min(y, self._fondo_cifre(mondo) - box[3])
+        y = min(y, self._fondo_cifre(banda) - box[3])
         y = max(y, -box[1])
         scrivi_ora(draw, (x, y), shown, self._font, time_color)
         ora_destra = x + box[2]
@@ -463,7 +486,7 @@ class ClockSource(Source):
         # sposta quando arriva un promemoria e torna indietro quando se ne va
         # e' un orologio che si muove per conto suo.
         self._disegna_colonna(draw, colonna, limite=x - 3,
-                              fondo=(self.MONDO_CIMA - 1) if mondo else None)
+                              fondo=(self.MONDO_CIMA - 1) if banda else None)
 
         if clock["show_date"]:
             box = draw.textbbox((0, 0), date, font=self._font_small)
@@ -498,8 +521,8 @@ class ClockSource(Source):
                                (self.cfg.get("sveglia") or {}).get("colore"),
                                (255, 59, 48)))
 
-        if mondo:
-            self._disegna_mondo(draw, mondo)
+        if banda:
+            self._disegna_mondo(draw, mondo, energia, energia_accesa)
 
         if diretta:
             # In cima e corto, dalla parte opposta della barra del timer, che
@@ -607,7 +630,16 @@ class ClockSource(Source):
     def _conf_mondo(self):
         return (self.cfg.get("clock") or {}).get("world") or {}
 
-    def _mondo(self, adesso=None):
+    # Quante localita' restano quando il centro della banda e' dell'energia:
+    # **due**, una per lato. Chiesto cosi': «se questo servizio e' attivo, il
+    # fuso orario potra' visualizzare solo 2 fusi, quello centrale non sara'
+    # disponibile». Non e' solo una questione di spazio -- la riga dell'energia
+    # e' corta e a volte tre ci starebbero -- e' che il centro deve restare
+    # suo: un numero che si sposta a destra quando cambia una citta' non si
+    # trova piu' con la coda dell'occhio.
+    MONDO_CON_ENERGIA = 2
+
+    def _mondo(self, adesso=None, energia=None):
         """Le righe del World Time da mostrare adesso. Lista vuota se spento.
 
         Ogni voce e' (etichetta, ora, segno), dove il segno e' `+` o `-`
@@ -619,6 +651,11 @@ class ClockSource(Source):
         La rotazione conta i secondi dell'ora corrente e non un contatore
         interno, cosi' due pannelli accesi nella stessa stanza girano insieme
         invece che sfasati, e un riavvio non fa ripartire il giro da capo.
+
+        Con l'energia accesa ne entrano al massimo due, e la rotazione resta:
+        chi ne ha configurate cinque le vede comunque tutte, due per volta.
+        Rifiutarle sarebbe stato peggio -- una citta' configurata che non
+        compare mai sembra un guasto.
         """
         if fusi is None:
             return []
@@ -643,7 +680,12 @@ class ClockSource(Source):
         if not pronte:
             return []
 
-        quante = self._quante_ci_stanno(pronte)
+        quante = self._quante_ci_stanno(pronte, energia)
+        if quante <= 0:
+            # Lo spazio ai lati del numero non basta a nessuno: la banda e'
+            # tutta dell'energia. Non e' un errore, e' una scelta fra un
+            # numero leggibile e due citta' tagliate.
+            return []
         if quante >= len(pronte):
             return pronte
         gruppi = (len(pronte) + quante - 1) // quante
@@ -662,7 +704,7 @@ class ClockSource(Source):
             self._mondo_font = _load_font(self.MONDO_CORPO)
         return self._mondo_font
 
-    def _quante_ci_stanno(self, pronte):
+    def _quante_ci_stanno(self, pronte, energia=None):
         """Quante voci entrano in una banda larga quanto il pannello.
 
         Si misurano le **piu' larghe**, non le prime. La differenza si vede
@@ -670,9 +712,16 @@ class ClockSource(Source):
         «SYDNEY LOS ANGELES NEW YORK» no, e il numero deve valere per tutti i
         gruppi -- altrimenti un giro su due l'ultima citta' esce dal bordo.
         Contare le prime tre dava esattamente quel difetto.
+
+        Con l'energia al centro lo spazio e' quello che resta ai due lati, e il
+        numero e' comunque tagliato a due: vedi `MONDO_CON_ENERGIA`.
         """
         misura = ImageDraw.Draw(Image.new("RGB", (1, 1)))
         font = self._font_mondo()
+        disponibile = self.width - 2
+        if energia is not None:
+            disponibile -= (self._largo_energia(misura, energia)
+                            + 2 * self.MONDO_STACCO)
         # Il segno si conta sempre, che ci sia o no: vedi MONDO_SEGNO.
         larghe = sorted((misura.textlength(e, font=font) + self.MONDO_ACCOSTO
                          + misura.textlength(o + self.MONDO_SEGNO, font=font)
@@ -680,20 +729,37 @@ class ClockSource(Source):
         quante, usati = 0, 0.0
         for largo in larghe:
             aggiunta = largo + (self.MONDO_STACCO if quante else 0)
-            if usati + aggiunta > self.width - 2:
+            if usati + aggiunta > disponibile:
                 break
             usati += aggiunta
             quante += 1
+        if energia is not None:
+            quante = min(quante, self.MONDO_CON_ENERGIA)
+            # Qui lo zero e' una risposta vera: con una riga dell'energia lunga
+            # -- «FOTOVOLTAICO 1250 W» -- ai lati non ci sta nessuno, e meglio
+            # nessuna citta' che una citta' tagliata a metà dal numero.
+            return max(0, quante)
         # Almeno una: se una sola etichetta fosse piu' larga del pannello, la
         # banda resterebbe vuota per sempre invece di mostrare qualcosa.
         return max(1, quante)
 
-    def _disegna_mondo(self, draw, voci):
+    def _largo_energia(self, draw, energia):
+        """Quanto occupa la riga dell'energia, zero se non c'e'."""
+        if not energia or not energia.get("testo"):
+            return 0.0
+        return draw.textlength(energia["testo"], font=self._font_mondo())
+
+    def _disegna_mondo(self, draw, voci, energia=None, energia_accesa=True):
         """La banda in fondo: nome nel colore della data, ora piu' chiara.
 
         Due colori e non uno: il nome e l'ora sono due informazioni diverse e
         con tre citta' affiancate, tutte dello stesso colore, la riga si
         legge come una frase sola.
+
+        Con l'energia, il centro e' suo e le citta' si appoggiano ai bordi: la
+        prima a sinistra, la seconda a destra. Non si distribuiscono piu' da
+        bordo a bordo, perche' distribuire tre cose di cui una deve stare al
+        centro vuol dire spostare il centro.
         """
         font = self._font_mondo()
         conf = self._conf_mondo()
@@ -708,6 +774,23 @@ class ClockSource(Source):
             pezzi.append((etichetta, testo_ora,
                           draw.textlength(etichetta, font=font) + self.MONDO_ACCOSTO,
                           draw.textlength(testo_ora, font=font)))
+
+        if energia is not None:
+            self._disegna_energia(draw, energia, energia_accesa)
+            # Una per lato: la prima a sinistra, la seconda appoggiata al bordo
+            # destro. Con una sola resta a sinistra invece di saltare a destra,
+            # perche' la banda si legge da li'.
+            for indice, (nome, ora, largo_nome, largo_ora) in enumerate(pezzi[:2]):
+                if indice == 0:
+                    x = 1.0
+                else:
+                    x = self.width - 1 - (largo_nome + largo_ora)
+                draw.text((x, self.MONDO_CIMA), nome, font=font,
+                          fill=colore_nome)
+                draw.text((x + largo_nome, self.MONDO_CIMA), ora, font=font,
+                          fill=colore_ora)
+            return
+
         totale = sum(n + o for _e, _o, n, o in pezzi)
         if len(pezzi) > 1:
             stacco = max(self.MONDO_STACCO,
@@ -722,6 +805,41 @@ class ClockSource(Source):
             draw.text((x + largo_nome, self.MONDO_CIMA), ora, font=font,
                       fill=colore_ora)
             x += largo_nome + largo_ora + stacco
+
+    # ---------------------------------------------------------- l'energia
+
+    def _energia(self):
+        """La riga del servizio Energia, o None quando non c'e' niente.
+
+        Come il timer, come la diretta, come la versione nuova: l'orologio non
+        sa che esistano un inverter e un broker MQTT. Sa che qualcuno ogni
+        tanto gli da' un testo, un colore e un «lampeggia», e che quel
+        qualcuno puo' anche non esserci.
+        """
+        if self.energia is None:
+            return None
+        try:
+            stato = self.energia()
+        except Exception:                            # pragma: no cover
+            return None
+        if not stato or not stato.get("testo"):
+            return None
+        return stato
+
+    def _disegna_energia(self, draw, energia, accesa=True):
+        """Il numero al centro della banda. Spento, nel lampeggio, non si scrive.
+
+        Il centro si calcola **sempre**, anche nel fotogramma spento: cosi' il
+        numero lampeggia restando dov'e' invece di spostarsi di un pixel fra
+        un battito e l'altro.
+        """
+        if not accesa:
+            return
+        font = self._font_mondo()
+        largo = draw.textlength(energia["testo"], font=font)
+        x = (self.width - largo) / 2
+        draw.text((x, self.MONDO_CIMA), energia["testo"], font=font,
+                  fill=parse_color(energia.get("colore"), (200, 200, 200)))
 
     # ------------------------------------------------------------ la diretta
 
@@ -786,9 +904,14 @@ class ClockSource(Source):
             return 0
         return max(-self.OFFSET_MASSIMO, min(self.OFFSET_MASSIMO, valore))
 
-    def _fondo_cifre(self, mondo):
-        """L'ultima riga su cui le cifre possono arrivare."""
-        if mondo:
+    def _fondo_cifre(self, banda):
+        """L'ultima riga su cui le cifre possono arrivare.
+
+        `banda` e' vero quando in fondo c'e' qualcosa -- gli orari del mondo,
+        il numero dell'energia, o tutti e due -- e in quel caso le cifre si
+        fermano sopra di essa, qualunque cosa dica il cursore dell'offset.
+        """
+        if banda:
             return self.MONDO_CIMA - 1
         return self.height - 1
 

@@ -70,6 +70,11 @@ SWITCHES = [
     ("onair", "OnAir"),
     ("moon", "Moon"),
     ("inutili", "Info inutili"),
+    # Energia: l'interruttore dice se il numero si vede sotto l'orologio, non
+    # se l'automazione pubblica. Spegnerlo da qui e' il modo giusto per
+    # togliere il numero senza fermare l'automazione -- a cena, con gli ospiti,
+    # o quando serve tornare a tre fusi invece di due.
+    ("energia", "Energia"),
 ]
 
 # Night mode e Sleep mode non sono servizi: sono modi del display, e stanno in

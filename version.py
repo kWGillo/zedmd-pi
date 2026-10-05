@@ -2834,6 +2834,39 @@ Storico:
        del 2 sfiora una riga piu' in alto dell'1 -- e misurando l'ora vera i
        due punti scatterebbero di un pixel al cambio di minuto. Lo stesso
        anche nella schermata della sveglia, che e' lo stesso orologio grande.
+  16.0 *Energia: un numero di Home Assistant sotto l'orologio.* Il pannello non
+       misura niente -- misurare la casa e' il mestiere di Home Assistant, che
+       ha gia' l'inverter e il contatore -- e qui arriva il numero gia' fatto,
+       su un topic MQTT, al centro della banda sotto le cifre.
+       **Due tipi, con soglie diverse e separate.** La *potenza* deve stare
+       dentro un intervallo: verde in mezzo, giallo nelle due fasce di
+       preallarme, rosso e lampeggiante oltre i due estremi, e ogni soglia
+       facoltativa, perche' chi guarda solo il picco mette la massima e basta.
+       L'*accumulo* fotovoltaico e' una scala che scende: un semaforo -- verde,
+       giallo, rosso -- con il lampeggio su una soglia sua, piu' in basso del
+       rosso, perche' un accumulo al 18% si guarda e al 10% chiama. Un solo
+       insieme di soglie per tutti e due avrebbe voluto dire, in meta' dei
+       casi, campi che non vogliono dire niente; separati, cambiare tipo non
+       cancella i numeri dell'altro.
+       **Il centro e' del numero**, e per questo il World Time si ferma a due
+       localita', una per lato: un valore che si sposta quando cambia una
+       citta' non si trova piu' con la coda dell'occhio. Chi ne ha configurate
+       di piu' le vede comunque tutte, a turno. E le cifre dell'ora si alzano
+       anche con il solo servizio Energia acceso: la banda in fondo esiste
+       perche' c'e' qualcosa dentro, non perche' c'e' il World Time.
+       **Un valore vecchio diventa due trattini in grigio**, dopo cinque minuti
+       di serie: un numero fermo da mezz'ora e' peggio di nessun numero, perche'
+       ci si fida di un dato che non esiste piu'. La riga non sparisce -- il
+       servizio e' acceso, e deve dire «non mi arriva niente», che e' una
+       informazione.
+       Sul topic si pubblica un numero e basta; un JSON con valore, unita' ed
+       etichetta serve a chi alterna due misure sullo stesso topic. La pagina ha
+       un pulsante di prova, perche' tarare la soglia del lampeggio aspettando
+       che la batteria scenda davvero al 10% e' un'altra cosa. Le automazioni
+       pronte stanno in docs/ha/dmd_energia.yaml, e quello che conta piu' di
+       tutto il resto e' non pubblicare trenta volte al minuto: un sensore di
+       potenza cambia ogni due secondi, e il pannello si leggerebbe come un
+       tachimetro.
 """
 
-__version__ = "15.4"
+__version__ = "16.0"

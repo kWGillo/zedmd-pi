@@ -2,6 +2,81 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [16.0]
+
+### Energia: un numero di Home Assistant sotto l'orologio
+
+*«Voglio aggiungere il servizio energia. Sotto l'orologio, al centro, devi
+segnalare un valore mandato da HA via MQTT. Il valore può essere una
+percentuale di una batteria o un valore di potenza istantanea. Se questo
+servizio è attivo, il fuso orario potrà visualizzare solo 2 fusi. Devo poter
+impostare l'unità di misura e un valore di soglia minima e massima: al di sotto
+o al di sopra deve lampeggiare e cambiare colore da verde a rosso. Nel caso del
+livello di batterie di accumulo fotovoltaico, deve cambiare colore come un
+semaforo e lampeggiare sotto una soglia. I valori e le tipologie di soglia
+devono cambiare in base al servizio scelto.»*
+
+Il pannello **non misura niente**. Misurare la casa è il mestiere di Home
+Assistant, che ha già l'inverter, il contatore e le automazioni che leggono
+tutto; qui arriva il numero **già fatto**, su un topic MQTT, e il pannello fa
+l'unica cosa che Home Assistant non sa fare: tenerlo sotto gli occhi di chi
+passa in corridoio.
+
+**Due tipi, e non sono la stessa cosa con un'unità diversa.** La *potenza* è un
+valore che deve stare dentro un intervallo: verde in mezzo, giallo nelle due
+fasce di preallarme, rosso e lampeggiante oltre i due estremi. L'*accumulo*
+fotovoltaico è un valore che scende lungo una scala: un semaforo — verde,
+giallo, rosso — con il lampeggio su una soglia **sua**, più in basso del rosso,
+perché un accumulo al 18% è rosso e si guarda, al 10% è rosso e *chiama*.
+
+Per questo le soglie sono quattro per la potenza e tre per l'accumulo, e
+stanno in due blocchi separati. Un solo insieme per tutti e due avrebbe voluto
+dire, nella metà dei casi, campi che non vogliono dire niente — una «soglia
+massima» su una batteria che non passa il 100%. Separati, cambiare tipo avanti
+e indietro non cancella i numeri dell'altro.
+
+Le soglie della potenza nascono **vuote**, e una casella vuota resta vuota: non
+diventa zero. Un numero di serie inventato qui sarebbe un allarme che suona in
+casa di qualcuno senza che nessuno l'abbia chiesto, e con la minima non scritta
+un valore negativo — l'energia che si immette in rete — resta verde invece di
+far lampeggiare il pannello di notte. Il **giallo non lampeggia**: è un avviso,
+e se lampeggiasse anche lui il lampeggio smetterebbe di voler dire qualcosa.
+
+**Il centro della banda è del numero**, e per questo il World Time si ferma a
+due località, una per lato. Non è solo questione di spazio — la riga
+dell'energia a volte è corta e tre ci starebbero — è che un valore che si
+sposta quando cambia una città non si trova più con la coda dell'occhio. Chi ne
+ha configurate di più le vede comunque tutte, due per volta, con la rotazione
+di sempre: una città configurata che non compare mai sembra un guasto.
+
+E le cifre dell'ora si alzano anche con il **solo** servizio Energia acceso: la
+banda in fondo esiste perché c'è qualcosa dentro, non perché c'è il World Time.
+Era la riga che fino alla 15.4 guardava soltanto i fusi.
+
+**Un valore vecchio diventa due trattini in grigio**, passati cinque minuti di
+silenzio. Un numero fermo da mezz'ora è peggio di nessun numero: ci si fida di
+un dato che non esiste più. La riga però non sparisce, perché il servizio è
+acceso e il pannello deve dire *non mi sta arrivando niente*, che è una
+informazione e non un buco. Chi vuole il valore per sempre mette zero minuti.
+
+Sul topic si pubblica **un numero e basta** — e si accettano anche `1250,4`,
+`1250 W` e i negativi, che sono le forme che Home Assistant produce da sé. Un
+JSON con `valore`, `unita` ed `etichetta` serve a chi alterna due misure sullo
+stesso topic, e vale per quel messaggio, non per sempre.
+
+La pagina ha un **pulsante di prova**: ci si scrive un numero e compare sul
+pannello subito. Serve davvero — tarare la soglia del lampeggio aspettando che
+la batteria scenda al 10% è un'altra cosa — e la riga di stato nella pagina
+Servizi dice *cosa è arrivato* e non «acceso», perché un interruttore acceso su
+un numero che non arriva fa credere che sia rotto il pannello quando invece non
+ha parlato l'automazione.
+
+Le automazioni pronte stanno in `docs/ha/dmd_energia.yaml`: potenza, accumulo,
+i due a turno fra giorno e sera, e uno script di prova. La cosa che conta più
+di tutto il resto è scritta lì in grande: **non pubblicare trenta volte al
+minuto**. Un sensore di potenza cambia a ogni lettura, cioè ogni due secondi, e
+un pannello aggiornato a quel ritmo si legge come un tachimetro.
+
 ## [15.4]
 
 ### I due punti dell'orologio stanno in mezzo alle cifre

@@ -36,6 +36,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 | [`statusplayer.it.md`](statusplayer.it.md) · [PDF](DMD_statusplayer.pdf) | Status Player: chi sta giocando sulle Batocera degli amici, il punteggio di RetroAchievements, l'agente da installare |
 | [`notifiche.it.md`](notifiche.it.md) · [PDF](DMD_notifiche.pdf) | Le notifiche da Home Assistant: il topic, i tre livelli, lo script e le automazioni pronte |
 | [`worldtime.it.md`](worldtime.it.md) · [PDF](DMD_worldtime.pdf) | World Time: fino a cinque orari del mondo sotto l'orologio, perché il fuso e non le coordinate, e quante se ne vedono insieme |
+| [`energia.it.md`](energia.it.md) · [PDF](DMD_energia.pdf) | Energia: un numero da Home Assistant sotto l'orologio — potenza o carica dell'accumulo, le soglie dei due tipi, il lampeggio, e l'automazione pronta |
 | [`onair-automazione.it.md`](onair-automazione.it.md) · [PDF](DMD_onair_automazione.pdf) | L'automazione di Home Assistant che collega il sensore della porta al pannello: i due nomi da leggere, lo YAML, e i tre errori facili |
 | [`onair.it.md`](onair.it.md) · [PDF](DMD_onair.pdf) | OnAir: il pannello dice che si sta registrando — la scritta, il trattino sull'orologio, l'automazione dalla porta |
 | [`meteo.it.md`](meteo.it.md) · [PDF](DMD_meteo.pdf) | Il bollettino del mattino e l'aggiornamento ogni poche ore, le icone disegnate, e perché l'allerta della Protezione Civile non c'è ancora |

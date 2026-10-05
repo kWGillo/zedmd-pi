@@ -83,6 +83,12 @@ un interruttore anche in Home Assistant.
   di quarant'anni fa sapeva mostrare. Il servizio **arma** e basta: la ripresa
   parte da un pulsante fisico o dai comandi della pagina, mai dal solo
   interruttore. Le immagini non escono dal Raspberry.
+- **Energia** — un numero che arriva da Home Assistant via MQTT e sta al centro
+  della banda sotto l'orologio: la potenza di adesso, o la carica dell'accumulo
+  fotovoltaico. Due tipi con soglie proprie — un intervallo per la potenza, un
+  semaforo che scende per l'accumulo — e il lampeggio quando il valore va dove
+  non deve. Con questo acceso il World Time mostra due località invece di tre:
+  il centro è del numero.
 
 ## Partite
 
@@ -152,6 +158,7 @@ oppure si scaricano con `git clone` o dal pulsante *Code → Download ZIP*.
 | Satelliti: i passaggi della Stazione Spaziale, l'arco del cielo, il registro | `docs/DMD_satelliti.pdf` |
 | Notifiche da Home Assistant: il topic, i tre livelli, lo script pronto | `docs/DMD_notifiche.pdf` |
 | Status Player: chi gioca sulle Batocera degli amici, i punti, l'agente | `docs/DMD_statusplayer.pdf` |
+| Energia: un numero da Home Assistant sotto l'orologio, le soglie, il lampeggio | `docs/DMD_energia.pdf` |
 
 I PDF **non** vengono installati in `/opt/dmd`: sul Raspberry non servono, e
 l'aggiornamento via rete copia solo ciò che il servizio esegue.

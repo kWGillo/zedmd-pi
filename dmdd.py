@@ -19,6 +19,7 @@ import threading
 import time
 
 import dmdconf
+import energia
 import fasce
 import hass
 import libcheck
@@ -377,6 +378,13 @@ class Runtime:
         # Stessa forma per il puntino verde della versione nuova: l'orologio
         # chiede, il runtime risponde, e nessuno dei due sa cosa sia GitHub.
         self.clock.aggiornamento = self._aggiornamento_disponibile
+        # Il numero dell'energia, al centro della banda sotto le cifre. Il
+        # lettore e' una casella con un orologio sopra: lo riempie il broker, lo
+        # legge l'orologio, e i due non si conoscono. Nasce sempre, anche a
+        # servizio spento, perche' la pagina web lo interroga comunque -- ed e'
+        # `stato()` a rispondere None quando l'interruttore e' giu'.
+        self.energia = energia.Lettore(self.cfg)
+        self.clock.energia = self.energia.stato
         self.mqtt = mqttbus.MqttBus(self.cfg)
         # Nasce qui e non in `_start_metadati` perche' `shutdown` la nomina:
         # un arresto che arriva mentre l'avvio e' ancora a meta' non deve
@@ -754,6 +762,15 @@ class Runtime:
             for livello in ("info", "avviso", "allarme"):
                 self.mqtt.subscribe("%s/%s" % (notifiche, livello),
                                     self.notifiche.handle_mqtt)
+
+        # Il topic dell'energia. Si iscrive **anche a servizio spento**: chi
+        # accende l'interruttore dalla pagina si aspetta di vedere il numero
+        # subito, non al prossimo riavvio del servizio, e un'automazione che
+        # pubblica ogni minuto ha gia' parlato prima che lui accendesse.
+        valore = str((self.cfg.get("energia") or {}).get("topic")
+                     or "").strip("/")
+        if valore:
+            self.mqtt.subscribe(valore, self.energia.handle_mqtt)
 
     def reconnect_mqtt(self):
         """Riapre la connessione dopo un cambio di impostazioni dalla web UI."""

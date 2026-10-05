@@ -1808,6 +1808,120 @@ STRINGS = {
         "apre, l'allarme inserito, la lavatrice finita.",
         "Messages Home Assistant sends to the panel: the door opening, the "
         "alarm armed, the washing machine done."),
+    "services.desc.energia": (
+        "Un numero da Home Assistant sotto l'orologio: la potenza di adesso o "
+        "la carica dell'accumulo, con le soglie che lo colorano.",
+        "A number from Home Assistant under the clock: current power or "
+        "battery charge, coloured by its thresholds."),
+
+    # ---------------------------------------------------------------- energia
+    "nav.energia": ("Energia", "Energy"),
+    "energia.title": ("Energia", "Energy"),
+    "energia.intro": (
+        "Un numero che arriva da Home Assistant via MQTT, sotto l'orologio al centro.",
+        'A number from Home Assistant over MQTT, under the clock, in the middle.'),
+    "energia.spento": (
+        "Servizio spento: il numero non si vede. L'interruttore e' nei Servizi.",
+        'Service off: the number is not shown. The switch is on the Services page.'),
+    "energia.fusi": (
+        "Con l'energia accesa il World Time ne mostra %(quanti)s, una per lato: le altre a turno.",
+        'With energy on, World Time shows %(quanti)s, one per side: the rest take turns.'),
+    "energia.ora": ("Adesso si legge", "Showing now"),
+    "energia.lampeggia": ("lampeggia", "blinking"),
+    "energia.ultimo": ("Ultimo messaggio", "Last message"),
+    "energia.mai": ("mai arrivato niente", "nothing ever arrived"),
+    "energia.conteggio": ("Messaggi ricevuti", "Messages received"),
+    "energia.scartati": ("scartati", "discarded"),
+    "energia.errore": ("Ultimo errore", "Last error"),
+    "energia.cosa": ("Che cosa si misura", "What is measured"),
+    "energia.modo": ("Tipo di valore", "Kind of value"),
+    "energia.modo.potenza": ("Potenza o assorbimento", "Power or draw"),
+    "energia.modo.batteria": ("Carica di un accumulo (%)", "Storage charge (%)"),
+    "energia.modo.hint": (
+        "I due tipi hanno soglie diverse e separate: cambiare tipo non cancella l'altro.",
+        "The two kinds have separate thresholds: switching keeps the other's."),
+    "energia.etichetta": ("Etichetta", "Label"),
+    "energia.unita": ("Unita'", "Unit"),
+    "energia.decimali": ("Decimali", "Decimals"),
+    "energia.etichetta.hint": (
+        "Sul pannello: «CASA 1250 W», «BATT 84%». Puo' restare vuota.",
+        'On the panel: «HOME 1250 W», «BATT 84%». It may be left empty.'),
+    "energia.soglie.potenza": ("Soglie della potenza", "Power thresholds"),
+    "energia.soglie.potenza.hint": (
+        "Tutte facoltative: vuota e' spenta. Verde in mezzo, giallo nel preallarme, rosso oltre.",
+        'All optional: empty is off. Green inside, yellow in the warning band, red beyond.'),
+    "energia.pot.minima": ("Minima (rosso sotto)", "Minimum (red below)"),
+    "energia.pot.giallo_basso": ("Preallarme basso (giallo)",
+                                 "Low warning (yellow)"),
+    "energia.pot.giallo_alto": ("Preallarme alto (giallo)",
+                                "High warning (yellow)"),
+    "energia.pot.massima": ("Massima (rosso sopra)", "Maximum (red above)"),
+    "energia.soglie.batteria": ("Soglie dell'accumulo", "Storage thresholds"),
+    "energia.soglie.batteria.hint": (
+        'Un semaforo che scende. Il lampeggio ha la sua soglia, sotto il rosso.',
+        'A traffic light on the way down. Blinking has its own threshold, below red.'),
+    "energia.bat.gialla": ("Soglia gialla (%)", "Yellow threshold (%)"),
+    "energia.bat.rossa": ("Soglia rossa (%)", "Red threshold (%)"),
+    "energia.bat.lampeggio": ("Soglia lampeggio (%)", "Blink threshold (%)"),
+    "energia.colori": ("I tre colori", "The three colours"),
+    "energia.colore.verde": ("Verde", "Green"),
+    "energia.colore.giallo": ("Giallo", "Yellow"),
+    "energia.colore.rosso": ("Rosso", "Red"),
+    "energia.arrivo": ("Da dove arriva", "Where it comes from"),
+    "energia.topic": ("Topic MQTT", "MQTT topic"),
+    "energia.topic.hint": (
+        "Si pubblica un numero. Per dire di piu', un JSON con valore, unita' ed etichetta.",
+        'Publish a bare number. To say more, JSON with valore, unita and etichetta.'),
+    "energia.scade": ("Scade dopo (minuti)", "Expires after (minutes)"),
+    "energia.scade.hint": (
+        'Passati questi minuti senza messaggi, al posto del valore ci sono due trattini.',
+        'After this many minutes without messages, two dashes replace the value.'),
+    "energia.prova": ("Prova senza Home Assistant", "Test without Home Assistant"),
+    "energia.prova.hint": (
+        "Un valore finto, per vedere soglie e lampeggio senza aspettare l'automazione.",
+        'A fake value, to see thresholds and blinking without waiting for the automation.'),
+    "energia.prova.valore": ("Valore da mostrare", "Value to show"),
+    "energia.prova.manda": ("Mostralo", "Show it"),
+    "energia.prova.pulisci": ("Dimentica il valore", "Forget the value"),
+    "energia.esito.provato": ("Fatto: guarda il pannello.",
+                             "Done: look at the panel."),
+    "energia.esito.dimenticato": (
+        "Valore dimenticato: il pannello mostra i due trattini.",
+        "Value forgotten: the panel shows the two dashes."),
+    "energia.esito.illeggibile": (
+        "Quel valore non sembra un numero.", "That value does not look like a number."),
+    "energia.ha": ("L'automazione di Home Assistant", "The Home Assistant automation"),
+    "energia.ha.hint": (
+        'Una completa, con i due casi, sta in docs/ha/dmd_energia.yaml.',
+        'A complete one, covering both cases, is in docs/ha/dmd_energia.yaml.'),
+    "energia.ha.esempio": (
+        "automation:\n"
+        "  - alias: DMD - energia\n"
+        "    trigger:\n"
+        "      - platform: state\n"
+        "        entity_id: sensor.potenza_casa\n"
+        "    action:\n"
+        "      - service: mqtt.publish\n"
+        "        data:\n"
+        "          topic: %(topic)s\n"
+        "          payload: \"{{ states('sensor.potenza_casa') }}\"",
+        "automation:\n"
+        "  - alias: DMD - energy\n"
+        "    trigger:\n"
+        "      - platform: state\n"
+        "        entity_id: sensor.house_power\n"
+        "    action:\n"
+        "      - service: mqtt.publish\n"
+        "        data:\n"
+        "          topic: %(topic)s\n"
+        "          payload: \"{{ states('sensor.house_power') }}\""),
+    "energia.status.muto": (
+        "Acceso, ma non e' ancora arrivato niente sul topic",
+        "On, but nothing has arrived on the topic yet"),
+    "energia.status.vecchio": (
+        "Ultimo valore di %(minuti)s minuti fa: sul pannello ci sono due trattini",
+        "Last value %(minuti)s minutes ago: the panel shows two dashes"),
+    "energia.status.ok": ("Sul pannello: %(valore)s", "On the panel: %(valore)s"),
     # Il pulsante di prova nella pagina Servizi. Le due risposte sono
     # diverse apposta: dicono **quale meta' della catena** ha funzionato, che
     # e' l'unica cosa che si voglia sapere premendo un pulsante di prova.

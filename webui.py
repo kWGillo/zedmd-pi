@@ -22,6 +22,7 @@ import bt
 import cassa
 import dmdconf
 import domande
+import energia
 import fasce
 import i18n
 import libcheck
@@ -1645,6 +1646,35 @@ def create_app(runtime):
             except Exception as exc:
                 return str(exc)
 
+        def stato_energia():
+            """L'energia non e' una sorgente: non ha `status`, ha un lettore.
+
+            La riga che si vede qui e' l'unica diagnosi del servizio, quindi
+            dice **cosa e' arrivato** e non «acceso»: un interruttore acceso su
+            un numero che non arriva fa credere che il pannello sia rotto,
+            quando invece non ha parlato l'automazione.
+            """
+            lettore = getattr(runtime, "energia", None)
+            if lettore is None:
+                return ""
+            try:
+                dati = lettore.riepilogo()
+            except Exception as exc:              # noqa: BLE001
+                return str(exc)
+            # Vale la stessa regola di `stato()` qui sopra, e per la stessa
+            # ragione: questa e' la pagina dove si va quando qualcosa non
+            # funziona, e deve aprirsi sempre. Un lettore che risponde qualcosa
+            # di inatteso e' una riga vuota, non una pagina rotta.
+            if not isinstance(dati, dict):
+                return ""
+            if dati["valore"] is None:
+                return i18n.translate("energia.status.muto", lang)
+            if not dati["fresco"]:
+                return i18n.translate("energia.status.vecchio", lang,
+                                      minuti=int((dati["da_quanto"] or 0) / 60))
+            return i18n.translate("energia.status.ok", lang,
+                                  valore=dati["testo"])
+
         services = [
             {"key": "zedmd", "label": "ZeDMD", "ready": True,
              "status": stato("zedmd")},
@@ -1682,6 +1712,8 @@ def create_app(runtime):
              "status": stato("onair")},
             {"key": "moon", "label": "Moon", "ready": True,
              "status": stato("cielo")},
+            {"key": "energia", "label": "Energia", "ready": True,
+             "status": stato_energia()},
         ]
         for voce in services:
             voce["suono"] = voce["key"] in suoni.SERVIZI_CON_SUONO
@@ -3206,6 +3238,99 @@ def create_app(runtime):
             "FINE",
             "batocera-save-overlay",
         ])
+
+    # --------------------------------------------------------------- energia
+
+    def _energia_lettore():
+        return getattr(runtime, "energia", None)
+
+    @app.route("/energia")
+    def page_energia():
+        """La pagina Energia: il modo, le soglie del modo, e cosa sta arrivando.
+
+        Le soglie dei due modi stanno **tutte** nella pagina, e il browser
+        mostra solo quelle del modo scelto. Non si cancellano passando da uno
+        all'altro: chi prova la batteria e torna alla potenza ritrova i suoi
+        watt dove li aveva lasciati.
+        """
+        lettore = _energia_lettore()
+        try:
+            dati = lettore.riepilogo() if lettore is not None else None
+        except Exception as exc:                  # noqa: BLE001
+            print("[energia] riepilogo non calcolato: %s" % exc)
+            dati = None
+        from sources.clock import ClockSource
+        conf = cfg["energia"]
+        return render_template(
+            "energia.html", cfg=cfg, conf=conf, dati=dati,
+            modi=energia.MODI,
+            attivo=bool(cfg["services"].get("energia")),
+            fusi_massimi=ClockSource.MONDO_CON_ENERGIA,
+            esito=request.args.get("esito", ""),
+            page="energia")
+
+    @app.route("/api/energia", methods=["POST"])
+    def api_energia():
+        conf = cfg["energia"]
+        modo = (request.form.get("modo") or "").strip().lower()
+        conf["modo"] = modo if modo in energia.MODI else energia.MODO_PREDEFINITO
+        conf["topic"] = ((request.form.get("topic") or "").strip()
+                         or "dmd/energia")[:120]
+        conf["etichetta"] = (request.form.get("etichetta") or "").strip()[:12]
+        conf["unita"] = (request.form.get("unita") or "").strip()[:6]
+        try:
+            conf["decimali"] = max(0, min(3, int(request.form.get("decimali", 0))))
+        except (TypeError, ValueError):
+            conf["decimali"] = 0
+        try:
+            conf["scade_minuti"] = max(0, min(1440, int(
+                request.form.get("scade_minuti", 5))))
+        except (TypeError, ValueError):
+            conf["scade_minuti"] = 5
+        # Le soglie: una casella vuota resta vuota, cioe' spenta. Scrivere zero
+        # al posto di «niente» accenderebbe un allarme che nessuno ha chiesto,
+        # ed e' il genere di aiuto che fa lampeggiare un pannello di notte.
+        potenza = conf.setdefault("potenza", {})
+        for chiave in ("minima", "preallarme_basso", "preallarme_alto",
+                       "massima"):
+            potenza[chiave] = energia.soglia(request.form.get("pot_%s" % chiave))
+        batteria = conf.setdefault("batteria", {})
+        for chiave in ("gialla", "rossa", "lampeggio"):
+            valore = energia.soglia(request.form.get("bat_%s" % chiave))
+            if valore is not None:
+                valore = max(0.0, min(100.0, valore))
+            batteria[chiave] = valore
+        colori = conf.setdefault("colori", {})
+        for chiave, predefinito in (("verde", energia.VERDE),
+                                    ("giallo", energia.GIALLO),
+                                    ("rosso", energia.ROSSO)):
+            colori[chiave] = (request.form.get("colore_%s" % chiave)
+                              or predefinito).strip()
+        dmdconf.save()
+        runtime.clock.invalidate()
+        return redirect(url_for("page_energia"))
+
+    @app.route("/api/energia/prova", methods=["POST"])
+    def api_energia_prova():
+        """Mette un valore finto, per vedere il pannello senza Home Assistant.
+
+        Serve davvero: fra «ho scritto le soglie» e «il numero lampeggia come
+        volevo» c'e' di mezzo un'automazione che magari non c'e' ancora, e
+        provare le soglie aspettando che la batteria scenda al 10% e' un'altra
+        cosa che chiedere al pannello di farlo vedere adesso.
+        """
+        lettore = _energia_lettore()
+        if lettore is None:                       # pragma: no cover - difensivo
+            return redirect(url_for("page_energia", esito="niente"))
+        grezzo = (request.form.get("valore") or "").strip()
+        if not grezzo:
+            lettore.dimentica()
+            runtime.clock.invalidate()
+            return redirect(url_for("page_energia", esito="dimenticato"))
+        fatto = lettore.aggiorna(grezzo)
+        runtime.clock.invalidate()
+        return redirect(url_for("page_energia",
+                                esito="provato" if fatto else "illeggibile"))
 
     @app.route("/statusplayer")
     def page_statusplayer():
