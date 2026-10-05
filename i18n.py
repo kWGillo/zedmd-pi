@@ -1892,29 +1892,32 @@ STRINGS = {
         "Quel valore non sembra un numero.", "That value does not look like a number."),
     "energia.ha": ("L'automazione di Home Assistant", "The Home Assistant automation"),
     "energia.ha.hint": (
-        'Una completa, con i due casi, sta in docs/ha/dmd_energia.yaml.',
-        'A complete one, covering both cases, is in docs/ha/dmd_energia.yaml.'),
+        "Si incolla cosi' com'e' nell'editor YAML, senza la riga «automation:».",
+        "Paste it as is into the YAML editor, without the «automation:» line."),
+    # L'esempio e' scritto **come lo vuole l'editor di una automazione**: una
+    # mappa sola, senza la riga «automation:» e senza il trattino davanti ad
+    # `alias`. Con quelle righe Home Assistant risponde «Message malformed: not
+    # a valid option at 'automation'», ed e' un errore che fa perdere la serata
+    # perche' sembra parlare del contenuto e invece parla della forma.
     "energia.ha.esempio": (
-        "automation:\n"
-        "  - alias: DMD - energia\n"
-        "    trigger:\n"
-        "      - platform: state\n"
-        "        entity_id: sensor.consumo_casa\n"
-        "    action:\n"
-        "      - service: mqtt.publish\n"
-        "        data:\n"
-        "          topic: %(topic)s\n"
-        "          payload: \"{{ states('sensor.consumo_casa') }}\"",
-        "automation:\n"
-        "  - alias: DMD - energy\n"
-        "    trigger:\n"
-        "      - platform: state\n"
-        "        entity_id: sensor.house_consumption\n"
-        "    action:\n"
-        "      - service: mqtt.publish\n"
-        "        data:\n"
-        "          topic: %(topic)s\n"
-        "          payload: \"{{ states('sensor.house_consumption') }}\""),
+        "alias: DMD - assorbimento istantaneo\n"
+        "trigger:\n"
+        "  - platform: time_pattern\n"
+        "    seconds: /30\n"
+        "action:\n"
+        "  - service: mqtt.publish\n"
+        "    data:\n"
+        "      topic: %(topic)s\n"
+        "      payload: \"{{ states('sensor.consumo_casa') }}\"",
+        "alias: DMD - instant draw\n"
+        "trigger:\n"
+        "  - platform: time_pattern\n"
+        "    seconds: /30\n"
+        "action:\n"
+        "  - service: mqtt.publish\n"
+        "    data:\n"
+        "      topic: %(topic)s\n"
+        "      payload: \"{{ states('sensor.house_consumption') }}\""),
     "energia.status.muto": (
         "Acceso, ma non e' ancora arrivato niente sul topic",
         "On, but nothing has arrived on the topic yet"),

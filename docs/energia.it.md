@@ -167,8 +167,34 @@ sempre.
 # 6. L'automazione di Home Assistant
 
 Il file pronto è [`ha/dmd_energia.yaml`](ha/dmd_energia.yaml), con quattro
-blocchi: la potenza, l'accumulo, i due a turno (giorno e sera) e uno script di
-prova. Ne serve **uno**.
+blocchi separati da una riga `---`: l'assorbimento istantaneo, l'accumulo, i
+due a turno (giorno e sera) e uno script di prova. Ne serve **uno** fra i primi
+tre.
+
+## Si incolla un blocco, non il file
+
+L'editor YAML di Home Assistant vuole **una automazione sola**: si copia dalla
+riga `alias:` fino al `---` successivo, e si incolla in
+
+> Impostazioni → Automazioni e scene → Crea automazione → *Crea nuova
+> automazione* → i tre puntini in alto a destra → **Modifica in YAML** →
+> cancella quello che c'è → incolla → Salva.
+
+Dando all'editor un file di configurazione — cioè incollando anche la riga
+`automation:` e il trattino davanti ad `alias` — risponde:
+
+```
+Message malformed: not a valid option at 'automation'
+```
+
+Sembra parlare del contenuto e invece parla della forma: *mi hai dato un file,
+io volevo una automazione*. Per questo nel file i blocchi sono già scritti
+senza quelle righe. Chi invece lo usa come **package** in `configuration.yaml`
+deve rimetterle: lì `automation:` e il trattino servono, con tutto il blocco
+rientrato di due spazi.
+
+Lo script di prova (blocco D) non va nelle Automazioni ma negli **Script** —
+stessa pagina, scheda accanto.
 
 La cosa che conta, e che vale per qualunque automazione si scriva a mano:
 
@@ -207,13 +233,20 @@ e basta a capire da che parte sta il problema:
 | *ultimo valore di N minuti fa* | l'automazione ha pubblicato una volta e poi ha smesso: guarda le sue tracce |
 | *Sul pannello: CASA 1250 W* | tutto funziona; se non lo vedi, il servizio è spento o il pannello mostra un'altra sorgente |
 
+E se l'automazione non si salva nemmeno:
+
+| Home Assistant dice | Vuol dire |
+|---|---|
+| `Message malformed: not a valid option at 'automation'` | hai incollato il file invece di un blocco: togli la riga `automation:` e il trattino davanti ad `alias` |
+| `Message malformed: required key not provided @ data['triggers']` | hai incollato solo metà blocco: serve da `alias:` fino al `---` |
+
 Le altre due cose da controllare sono sempre le stesse: il **topic** è lo
 stesso nei due posti, e il servizio è **acceso** (pagina Servizi, o
 `switch.dmd_energia`).
 
 # 9. Come è stato provato
 
-`test_energia.py`, 110 controlli. I cinque che contano davvero:
+`test_energia.py`, 113 controlli. I cinque che contano davvero:
 
 - **le soglie dei due tipi restano separate**: si scrive la potenza, si passa
   all'accumulo, si torna indietro, e i watt sono dove erano. È la metà del
