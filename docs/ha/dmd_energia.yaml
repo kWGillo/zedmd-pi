@@ -17,7 +17,7 @@
 #
 #  Piu' sotto ci sono due automazioni. Ne serve UNA:
 #
-#    A) POTENZA        la potenza o l'assorbimento di adesso, in watt
+#    A) ASSORBIMENTO   quanto sta tirando la casa adesso, in watt
 #    B) ACCUMULO       la carica della batteria del fotovoltaico, in percento
 #
 #  Se le vuoi tutte e due devi usare due topic diversi e due pannelli, oppure
@@ -27,10 +27,10 @@
 #  ------------------------------------------------------------------------
 #  COME SI INSTALLA
 #
-#  1. Trova il nome della tua entita'
-#     Strumenti per sviluppatori -> Stati -> cerca «power» o «battery».
-#     Esempi veri: sensor.shellyem_channel_1_power,
-#     sensor.solaredge_current_power, sensor.victron_battery_soc.
+#  1. Il nome della tua entita'
+#     Qui sotto e' gia' scritto  sensor.consumo_casa : se la tua si chiama
+#     cosi', non c'e' niente da cambiare. Altrimenti, Strumenti per
+#     sviluppatori -> Stati -> cerca «consumo», «power» o «battery».
 #
 #  2. L'automazione
 #     Impostazioni -> Automazioni e scene -> Crea automazione
@@ -81,14 +81,15 @@
 
 
 # -------------------------------------------------------------------------
-# A) POTENZA - la potenza o l'assorbimento di adesso
+# A) ASSORBIMENTO ISTANTANEO - quanto sta tirando la casa adesso
 # -------------------------------------------------------------------------
-# Cambia SOLO  sensor.potenza_casa  con il nome della tua entita'.
-# Sul DMD: tipo «Potenza», unita' «W».
+# E' il blocco scritto sull'entita'  sensor.consumo_casa .
+# Sul DMD: tipo «Potenza», unita' «W», e le tre soglie -- da qui giallo, da
+# qui rosso, potenza dell'impianto.
 automation:
-  - alias: DMD - potenza istantanea
+  - alias: DMD - assorbimento istantaneo
     description: >-
-      Manda al pannello la potenza di adesso, due volte al minuto.
+      Manda al pannello il consumo di adesso, due volte al minuto.
       Le soglie e i colori stanno sul DMD, non qui.
     mode: single
     max_exceeded: silent
@@ -108,7 +109,7 @@ automation:
       # di uno zero inventato qui.
       - condition: template
         value_template: >-
-          {{ states('sensor.potenza_casa') not in
+          {{ states('sensor.consumo_casa') not in
              ['unknown', 'unavailable', 'none', ''] }}
     action:
       - service: mqtt.publish
@@ -116,7 +117,7 @@ automation:
           topic: dmd/energia
           # `| round(0)` perche' sul pannello i decimali della potenza non si
           # leggono e fanno ballare la riga.
-          payload: "{{ states('sensor.potenza_casa') | float(0) | round(0) }}"
+          payload: "{{ states('sensor.consumo_casa') | float(0) | round(0) }}"
 
 
 # -------------------------------------------------------------------------
@@ -188,7 +189,7 @@ automation:
                 data:
                   topic: dmd/energia
                   payload: >-
-                    {"valore": {{ states('sensor.potenza_casa')
+                    {"valore": {{ states('sensor.consumo_casa')
                                   | float(0) | round(0) }},
                      "unita": "W", "etichetta": "CASA"}
         # Di sera interessa quanto resta nelle batterie.

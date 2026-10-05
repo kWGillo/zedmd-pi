@@ -1899,22 +1899,22 @@ STRINGS = {
         "  - alias: DMD - energia\n"
         "    trigger:\n"
         "      - platform: state\n"
-        "        entity_id: sensor.potenza_casa\n"
+        "        entity_id: sensor.consumo_casa\n"
         "    action:\n"
         "      - service: mqtt.publish\n"
         "        data:\n"
         "          topic: %(topic)s\n"
-        "          payload: \"{{ states('sensor.potenza_casa') }}\"",
+        "          payload: \"{{ states('sensor.consumo_casa') }}\"",
         "automation:\n"
         "  - alias: DMD - energy\n"
         "    trigger:\n"
         "      - platform: state\n"
-        "        entity_id: sensor.house_power\n"
+        "        entity_id: sensor.house_consumption\n"
         "    action:\n"
         "      - service: mqtt.publish\n"
         "        data:\n"
         "          topic: %(topic)s\n"
-        "          payload: \"{{ states('sensor.house_power') }}\""),
+        "          payload: \"{{ states('sensor.house_consumption') }}\""),
     "energia.status.muto": (
         "Acceso, ma non e' ancora arrivato niente sul topic",
         "On, but nothing has arrived on the topic yet"),
