@@ -62,27 +62,21 @@
     </div>
     <p class="hint">{{ t('energia.etichetta.hint') }}</p>
 
-    <!-- Le soglie della potenza. Tutte facoltative: vuota vuol dire spenta. -->
+    <!-- Le soglie della potenza: tre, nell'ordine in cui si sale. Tutte
+         facoltative, e una casella vuota e' una soglia spenta. -->
     <div id="soglie-potenza" class="soglie">
       <h3>{{ t('energia.soglie.potenza') }}</h3>
       <p class="hint">{{ t('energia.soglie.potenza.hint') }}</p>
-      <div class="row2">
+      <div class="row3">
         <div>
-          <label for="pot_minima">{{ t('energia.pot.minima') }}</label>
-          <input type="text" id="pot_minima" name="pot_minima" class="mono"
-                 value="{{ '' if conf.potenza.minima is none else conf.potenza.minima }}">
+          <label for="pot_giallo">{{ t('energia.pot.giallo') }}</label>
+          <input type="text" id="pot_giallo" name="pot_giallo" class="mono"
+                 value="{{ '' if conf.potenza.giallo is none else conf.potenza.giallo }}">
         </div>
         <div>
-          <label for="pot_preallarme_basso">{{ t('energia.pot.giallo_basso') }}</label>
-          <input type="text" id="pot_preallarme_basso" name="pot_preallarme_basso" class="mono"
-                 value="{{ '' if conf.potenza.preallarme_basso is none else conf.potenza.preallarme_basso }}">
-        </div>
-      </div>
-      <div class="row2">
-        <div>
-          <label for="pot_preallarme_alto">{{ t('energia.pot.giallo_alto') }}</label>
-          <input type="text" id="pot_preallarme_alto" name="pot_preallarme_alto" class="mono"
-                 value="{{ '' if conf.potenza.preallarme_alto is none else conf.potenza.preallarme_alto }}">
+          <label for="pot_rosso">{{ t('energia.pot.rosso') }}</label>
+          <input type="text" id="pot_rosso" name="pot_rosso" class="mono"
+                 value="{{ '' if conf.potenza.rosso is none else conf.potenza.rosso }}">
         </div>
         <div>
           <label for="pot_massima">{{ t('energia.pot.massima') }}</label>
@@ -90,6 +84,7 @@
                  value="{{ '' if conf.potenza.massima is none else conf.potenza.massima }}">
         </div>
       </div>
+      <p class="hint">{{ t('energia.pot.massima.hint') }}</p>
     </div>
 
     <!-- E quelle della batteria: una scala che scende, con il lampeggio suo. -->

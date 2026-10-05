@@ -895,16 +895,16 @@ DEFAULTS = {
         # fermo da mezz'ora e' peggio di nessun numero: ci si fida di un dato
         # che non esiste piu'. Zero vuol dire «tienilo per sempre».
         "scade_minuti": 5,
-        # Le quattro soglie della potenza, tutte facoltative: vuota vuol dire
-        # spenta. Rosso (e lampeggio) fuori dai due estremi, giallo nella
-        # fascia di preallarme appena dentro, verde in mezzo. Niente numeri di
-        # serie: un impianto da tre chilowatt e uno da sei hanno soglie
-        # diverse, e un valore inventato qui sarebbe un allarme che suona in
-        # casa di qualcuno senza motivo.
+        # Le tre soglie della potenza, come il quadrante di Home Assistant:
+        # la potenza dell'impianto, dove comincia il giallo, dove comincia il
+        # rosso. Tutto il resto e' verde, e sopra la massima -- il punto in cui
+        # il contatore salta -- lampeggia. Tutte facoltative: vuota vuol dire
+        # spenta, e niente numeri di serie, perche' un impianto da tre
+        # chilowatt e uno da sei hanno soglie diverse e un valore inventato qui
+        # sarebbe un allarme che suona in casa di qualcuno senza motivo.
         "potenza": {
-            "minima": None,
-            "preallarme_basso": None,
-            "preallarme_alto": None,
+            "giallo": None,
+            "rosso": None,
             "massima": None,
         },
         # Le tre della batteria. Qui i numeri di serie vogliono dire qualcosa,
@@ -1153,6 +1153,21 @@ def _migrate(raw):
         raw["arbiter"]["force_source"] = "clock"
     if raw.get("web", {}).get("port") == 80:
         raw["web"]["port"] = 8080
+    # La 16.0 aveva quattro soglie per la potenza, con due estremi: un valore
+    # «dentro un intervallo». La 16.1 ne ha tre, come il quadrante di Home
+    # Assistant -- giallo, rosso, massima dell'impianto -- perche' davanti alla
+    # pagina due caselle restavano sempre vuote. Chi aveva scritto qualcosa se
+    # lo ritrova dove vuol dire la stessa cosa: il preallarme alto era il
+    # giallo, la vecchia massima era dove cominciava il rosso.
+    potenza = (raw.get("energia") or {}).get("potenza")
+    if isinstance(potenza, dict) and "preallarme_alto" in potenza:
+        if potenza.get("preallarme_alto") is not None:
+            potenza.setdefault("giallo", potenza["preallarme_alto"])
+        if potenza.get("massima") is not None:
+            potenza.setdefault("rosso", potenza["massima"])
+            potenza["massima"] = None
+        for morta in ("minima", "preallarme_basso", "preallarme_alto"):
+            potenza.pop(morta, None)
     # 4.10 chiamava "otto" lo stile a colori della telecamera, perche' otto
     # erano. Adesso i livelli per canale si scelgono, quindi il nome sarebbe
     # diventato una bugia: il valore vecchio si traduce, e chi lo aveva si

@@ -85,9 +85,9 @@ un interruttore anche in Home Assistant.
   interruttore. Le immagini non escono dal Raspberry.
 - **Energia** — un numero che arriva da Home Assistant via MQTT e sta al centro
   della banda sotto l'orologio: la potenza di adesso, o la carica dell'accumulo
-  fotovoltaico. Due tipi con soglie proprie — un intervallo per la potenza, un
-  semaforo che scende per l'accumulo — e il lampeggio quando il valore va dove
-  non deve. Con questo acceso il World Time mostra due località invece di tre:
+  fotovoltaico. Due tipi con soglie proprie — giallo, rosso e la potenza
+  dell'impianto per i watt, un semaforo che scende per l'accumulo — e il
+  lampeggio quando il valore arriva dove non deve. Con questo acceso il World Time mostra due località invece di tre:
   il centro è del numero.
 
 ## Partite

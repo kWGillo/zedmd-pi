@@ -22,7 +22,7 @@ c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
 a508962738ddb4832dd5cca7d6795e9f  diagnostica/traduzioni.tsv
 ea2b0d24ff1827bdf031ed8393dc6db8  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
-ac198c0a60fe61fe7d815d0ca88e0bc0  dmdconf.py
+7e72d5c67da63894e0432b9464c726b0  dmdconf.py
 1931da520138f84f973f9f25e757463c  dmdd.py
 0e17dea503190ddc88c7c33c37b5e19f  domande.en.csv
 ed464137667cbfc5cc010d2bd06d64e6  domande.it.csv
@@ -31,7 +31,7 @@ bb3118ed4b5ebb8d9f49cc8bbcd6f341  doom/Makefile
 bbfb28cef53489faeaf3f40271c6f5bd  doom/doomgeneric_dmd.c
 7c5f28cafc9299975fcdb11e54937469  doom/setup_doom.sh
 df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
-ef12a70e418133cc8f6657256bf6bcfe  energia.py
+dfdf560983ea1fbb6640e94af5ef6863  energia.py
 2a032dc6d2a74a9e9aa16eded4a976b3  fasce.py
 1a11ba22870748dec75083c146dcb650  fusi.py
 f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
@@ -40,7 +40,7 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 48b68ac87a2559a7efff49d54460ff57  giornate.csv
 e45d351b601929bd837040f66702dfe0  hass.py
-57f91aafd87bef655f2e6b0455621271  i18n.py
+dbf9009c57ef0cbc13ffa29af2fc7770  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 f9ef2687746d85deb7a5301d3952c14c  install.sh
 7fe7fb617ddfdac829b0ee4990572ced  inutili.py
@@ -151,7 +151,7 @@ f69ec52c85851bbd3db36b8f2feeb3c3  templates/birthdays.html
 543d0923aa70d70713ab36b039dd126a  templates/calendario.html
 2151e5dc3cc2a6fe5b2e925c5237328c  templates/clock.html
 e335f8f24edc17c812b333673ee4bdca  templates/doom.html
-611d897e96fde1662d582e2e923611d1  templates/energia.html
+70cb4e7f17854e0ee440d2fb05401fe2  templates/energia.html
 856a6ac0a358de34d3026f01599c3a1d  templates/gameboy.html
 e90b74b6a4a417388ebe58b61388a836  templates/giochi.html
 c90514a7d6c33024a6cc6ad452ce3ef3  templates/manager.html
@@ -172,8 +172,8 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 2bc1da7de80749f0587cfc1c2c56f8fd  templates/updates.html
 216d881d91392bde6f3e2e55fdeef782  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-3e2dcf085754d4fe45e01be32e457454  version.py
+f6ccc519f6f2d24f1db59b33db6afb1d  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-67bf254ef737c1123ef0e9f375659640  webui.py
+79bf1d80ae2acf509c0504136c8ca1d3  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

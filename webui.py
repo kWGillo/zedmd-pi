@@ -3291,9 +3291,12 @@ def create_app(runtime):
         # al posto di «niente» accenderebbe un allarme che nessuno ha chiesto,
         # ed e' il genere di aiuto che fa lampeggiare un pannello di notte.
         potenza = conf.setdefault("potenza", {})
-        for chiave in ("minima", "preallarme_basso", "preallarme_alto",
-                       "massima"):
+        for chiave in ("giallo", "rosso", "massima"):
             potenza[chiave] = energia.soglia(request.form.get("pot_%s" % chiave))
+        # Le quattro caselle della 16.0 non esistono piu': si tolgono alla
+        # prima scrittura, invece di restare nel file a far compagnia.
+        for morta in ("minima", "preallarme_basso", "preallarme_alto"):
+            potenza.pop(morta, None)
         batteria = conf.setdefault("batteria", {})
         for chiave in ("gialla", "rossa", "lampeggio"):
             valore = energia.soglia(request.form.get("bat_%s" % chiave))

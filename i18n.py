@@ -1848,14 +1848,14 @@ STRINGS = {
         'On the panel: «HOME 1250 W», «BATT 84%». It may be left empty.'),
     "energia.soglie.potenza": ("Soglie della potenza", "Power thresholds"),
     "energia.soglie.potenza.hint": (
-        "Tutte facoltative: vuota e' spenta. Verde in mezzo, giallo nel preallarme, rosso oltre.",
-        'All optional: empty is off. Green inside, yellow in the warning band, red beyond.'),
-    "energia.pot.minima": ("Minima (rosso sotto)", "Minimum (red below)"),
-    "energia.pot.giallo_basso": ("Preallarme basso (giallo)",
-                                 "Low warning (yellow)"),
-    "energia.pot.giallo_alto": ("Preallarme alto (giallo)",
-                                "High warning (yellow)"),
-    "energia.pot.massima": ("Massima (rosso sopra)", "Maximum (red above)"),
+        "Verde fino al giallo, giallo fino al rosso, rosso oltre. Vuota e' spenta.",
+        "Green up to yellow, yellow up to red, red beyond. Empty means off."),
+    "energia.pot.giallo": ("Da qui giallo", "Yellow from here"),
+    "energia.pot.rosso": ("Da qui rosso", "Red from here"),
+    "energia.pot.massima": ("Potenza dell'impianto", "Plant power"),
+    "energia.pot.massima.hint": (
+        "La massima e' quella del contratto: arrivarci vuol dire che salta, e da li' lampeggia.",
+        "The maximum is the contract one: reaching it means the meter trips, and it blinks."),
     "energia.soglie.batteria": ("Soglie dell'accumulo", "Storage thresholds"),
     "energia.soglie.batteria.hint": (
         'Un semaforo che scende. Il lampeggio ha la sua soglia, sotto il rosso.',

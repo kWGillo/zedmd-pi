@@ -2867,6 +2867,27 @@ Storico:
        tutto il resto e' non pubblicare trenta volte al minuto: un sensore di
        potenza cambia ogni due secondi, e il pannello si leggerebbe come un
        tachimetro.
+  16.1 *Le soglie della potenza diventano tre, come un quadrante.* Segnalate
+       guardando la pagina: «mi sembrano confusionarie; devo dichiararti la
+       potenza massima dell'impianto, il livello di giallo e quello di rosso,
+       il resto deve essere verde». Aveva ragione. La 16.0 ne aveva quattro --
+       minima, preallarme basso, preallarme alto, massima -- perche' trattava
+       la potenza come «un valore che deve stare dentro un intervallo». Sulla
+       carta e' giusto, davanti alla pagina no: un contatore di casa si guarda
+       in una direzione sola, e di quattro caselle due restavano sempre vuote
+       senza che si capisse perche' ci fossero.
+       Adesso sono i tre numeri del quadrante di Home Assistant: **da qui
+       giallo, da qui rosso, potenza dell'impianto**, e tutto il resto verde.
+       La massima e' quella del contratto -- il punto in cui salta -- e da li'
+       lampeggia: arrivarci non e' «un po' piu' rosso», e' la cosa che si vuole
+       sapere subito. Ogni soglia resta facoltativa e si guardano dall'alto in
+       basso, cosi' chi riempie solo la potenza dell'impianto ha comunque
+       l'allarme che conta e chi riempie solo il giallo ha un avviso senza
+       doversi inventare il resto. Un valore negativo -- l'energia che si
+       immette in rete -- resta verde: si guarda in una direzione sola.
+       Chi aveva gia' scritto le quattro soglie se le ritrova dove vogliono
+       dire la stessa cosa: il preallarme alto diventa il giallo, la vecchia
+       massima diventa il rosso, e le caselle morte spariscono dal file.
 """
 
-__version__ = "16.0"
+__version__ = "16.1"

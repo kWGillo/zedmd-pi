@@ -72,8 +72,16 @@ SOGLIE_BATTERIA = {"gialla": 50.0, "rossa": 20.0, "lampeggio": 10.0}
 # impianto da tre chilowatt e uno da sei hanno soglie diverse, e un valore
 # inventato qui sarebbe un allarme che suona a casa di qualcuno senza motivo.
 # Vuote vuol dire spente, ed e' il comportamento giusto appena acceso.
-SOGLIE_POTENZA = {"minima": None, "preallarme_basso": None,
-                  "preallarme_alto": None, "massima": None}
+#
+# **Tre numeri, come il quadrante.** La 16.0 ne aveva quattro -- minima,
+# preallarme basso, preallarme alto, massima -- perche' trattava la potenza
+# come «un valore che deve stare dentro un intervallo». Sulla carta e' giusto,
+# davanti alla pagina no: un contatore di casa si guarda in una direzione
+# sola, e di quattro caselle due restavano sempre vuote senza che si capisse
+# perche' ci fossero. Chi ha in mano un quadrante di Home Assistant dichiara
+# **la potenza dell'impianto, dove comincia il giallo e dove comincia il
+# rosso**, e tutto il resto e' verde. Si fa cosi' anche qui.
+SOGLIE_POTENZA = {"giallo": None, "rosso": None, "massima": None}
 
 
 def numero(valore):
@@ -264,23 +272,28 @@ class Lettore(object):
     # ------------------------------------------------------------ il colore
 
     def _colore_potenza(self, valore, soglie, colori):
-        """Dentro l'intervallo verde, oltre il preallarme giallo, fuori rosso.
+        """Il quadrante di casa: verde fino al giallo, giallo fino al rosso.
 
-        Ogni soglia e' facoltativa: chi guarda solo il picco di consumo mette
-        la massima e lascia vuoto il resto, e le soglie vuote non colorano
-        niente invece di colorare a caso.
+        Tre numeri e una direzione sola, perche' un contatore si guarda in una
+        direzione sola. **La massima e' quella dell'impianto**: i tre chilowatt
+        del contratto, il punto in cui salta. Arrivarci non e' «un po' piu'
+        rosso», e' la cosa che si vuole sapere subito: da li' lampeggia.
+
+        Ogni soglia e' facoltativa, e si guarda dall'alto in basso: cosi' chi
+        riempie solo la massima ha comunque l'allarme che conta, e chi riempie
+        solo il giallo ha un avviso senza doversi inventare il resto. Le
+        soglie scritte alla rovescia non rompono niente: vale la prima che il
+        valore supera, e il pannello resta leggibile anche se i numeri non lo
+        sono.
         """
-        minima = soglie.get("minima")
         massima = soglie.get("massima")
-        giallo_basso = soglie.get("preallarme_basso")
-        giallo_alto = soglie.get("preallarme_alto")
-        if minima is not None and valore <= minima:
-            return colori["rosso"], True
+        rosso = soglie.get("rosso")
+        giallo = soglie.get("giallo")
         if massima is not None and valore >= massima:
             return colori["rosso"], True
-        if giallo_basso is not None and valore <= giallo_basso:
-            return colori["giallo"], False
-        if giallo_alto is not None and valore >= giallo_alto:
+        if rosso is not None and valore >= rosso:
+            return colori["rosso"], False
+        if giallo is not None and valore >= giallo:
             return colori["giallo"], False
         return colori["verde"], False
 

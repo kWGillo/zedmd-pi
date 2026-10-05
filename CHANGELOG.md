@@ -2,6 +2,50 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [16.1]
+
+### Le soglie della potenza diventano tre, come un quadrante
+
+*«Mi sembrano confusionarie le soglie di potenza. Devo dichiararti la potenza
+massima dell'impianto, il livello di giallo e quello di rosso. Il resto deve
+essere verde.»*
+
+Aveva ragione. La 16.0 ne aveva quattro — minima, preallarme basso, preallarme
+alto, massima — perché trattava la potenza come *un valore che deve stare
+dentro un intervallo*. Sulla carta è giusto; davanti alla pagina no. **Un
+contatore di casa si guarda in una direzione sola**, e di quattro caselle due
+restavano sempre vuote senza che si capisse perché ci fossero.
+
+Adesso sono i tre numeri di un quadrante di Home Assistant, nell'ordine in cui
+si sale:
+
+```
+        verde            giallo        rosso    lampeggia
+ ──────────────────┬───────────────┬───────────┬─────────▶
+                 giallo          rosso      potenza
+                                          dell'impianto
+```
+
+| Soglia | Che cosa vuol dire |
+|---|---|
+| **Da qui giallo** | il consumo si sta facendo notare |
+| **Da qui rosso** | ci siamo quasi |
+| **Potenza dell'impianto** | i chilowatt del contratto: arrivarci vuol dire che **salta** |
+
+Il lampeggio si sposta dove conta: non su «rosso», ma sull'arrivo al limite
+dell'impianto. Arrivare ai tre chilowatt del contratto non è *un po' più
+rosso*, è la cosa che si vuole sapere subito.
+
+Ogni soglia resta facoltativa e si guardano dall'alto in basso, così **ognuna
+da sola vuol dire qualcosa**: chi riempie solo la potenza dell'impianto ha
+comunque l'allarme che conta e tutto il resto verde, chi riempie solo il giallo
+ha un avviso senza doversi inventare il resto. E un valore negativo — l'energia
+che si immette in rete — resta verde, perché si guarda in una direzione sola.
+
+Chi aveva già scritto le quattro soglie se le ritrova dove vogliono dire la
+stessa cosa: il preallarme alto diventa il giallo, la vecchia massima diventa
+il rosso, e le caselle morte spariscono dal file alla prima lettura.
+
 ## [16.0]
 
 ### Energia: un numero di Home Assistant sotto l'orologio

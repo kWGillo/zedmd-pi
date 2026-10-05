@@ -33,41 +33,55 @@ proprio quello — lo si guarda senza leggerlo.
 
 | Tipo | Che cos'è | Come si colora |
 |---|---|---|
-| **Potenza** | watt, ampere, kW: un valore che deve stare **dentro un intervallo** | verde in mezzo, giallo nelle due fasce di preallarme, rosso e lampeggiante oltre i due estremi |
+| **Potenza** | watt, ampere, kW: un valore che **sale** verso il limite dell'impianto | verde fino al giallo, giallo fino al rosso, rosso oltre — e lampeggia quando arriva alla potenza dell'impianto |
 | **Accumulo** | la percentuale della batteria del fotovoltaico: un valore che **scende** | un semaforo che scende — verde, giallo, rosso — e lampeggia sotto una soglia sua |
 
-Per questo le soglie **non sono le stesse e non si riusano**: la potenza ne ha
-quattro, l'accumulo tre. Un solo insieme di soglie per tutti e due avrebbe
-voluto dire, nella metà dei casi, campi che non vogliono dire niente — una
-«soglia massima» su una batteria che non deve superare il 100%, o una «soglia
-gialla in percento» su dei watt.
+Tre numeri per uno, ma **non gli stessi tre**, e non si riusano. Un solo
+insieme di soglie per tutti e due avrebbe voluto dire, nella metà dei casi,
+campi che non vogliono dire niente — una «potenza dell'impianto» su una
+batteria che non passa il 100%, o una «soglia di lampeggio in percento» su dei
+watt.
 
 I numeri dei due tipi stanno in due blocchi separati e **restano dove sono**:
 chi prova l'accumulo e torna alla potenza ritrova i suoi watt, non delle
 caselle vuote. La pagina mostra solo quelli del tipo scelto.
 
-## Le quattro soglie della potenza
+## Le tre soglie della potenza
+
+Sono le stesse tre di un quadrante di Home Assistant, e si dichiarano nello
+stesso ordine in cui si sale:
 
 ```
-   rosso      giallo        verde        giallo      rosso
- ─────────┬───────────┬───────────────┬───────────┬─────────
-  lampeggia│          │               │           │lampeggia
-         minima   preallarme     preallarme    massima
-                   basso           alto
+        verde            giallo        rosso    lampeggia
+ ──────────────────┬───────────────┬───────────┬─────────▶
+                 giallo          rosso      potenza
+                                          dell'impianto
 ```
 
-**Tutte facoltative**: una casella vuota è una soglia spenta. Chi guarda solo
-il picco di consumo mette la massima e lascia il resto in bianco — e il
-pannello non si inventa un minimo a zero, che sarebbe un allarme che suona in
-casa di qualcuno senza che nessuno l'abbia chiesto.
+| Soglia | Che cosa vuol dire |
+|---|---|
+| **Da qui giallo** | il consumo si sta facendo notare |
+| **Da qui rosso** | ci siamo quasi |
+| **Potenza dell'impianto** | i chilowatt del contratto: arrivarci vuol dire che **salta**, e da lì il numero lampeggia |
 
-Il **giallo non lampeggia**: è un avviso, non un allarme. Lampeggia solo il
-rosso, perché se lampeggiasse anche il giallo il lampeggio smetterebbe di
-voler dire qualcosa.
+Tutto il resto è verde. **Tutte facoltative**: una casella vuota è una soglia
+spenta, e si guardano dall'alto in basso — chi riempie solo la potenza
+dell'impianto ha comunque l'allarme che conta, chi riempie solo il giallo ha un
+avviso senza doversi inventare il resto. Niente numeri di serie: un impianto da
+tre chilowatt e uno da sei hanno soglie diverse, e un valore inventato qui
+sarebbe un allarme che suona in casa di qualcuno senza che nessuno l'abbia
+chiesto.
 
-La soglia stessa è dentro l'allarme: a 3000 W con massima a 3000 il numero è
-già rosso. *Al di sopra di questi valori* letto come *arrivato a questi
-valori*, che è il modo in cui si guarda un contatore.
+Si guarda **in una direzione sola**, come un contatore: un valore negativo —
+l'energia che si immette in rete — resta verde. Fino alla 16.0 le soglie erano
+quattro, con un estremo anche in basso, perché la potenza era trattata come «un
+valore che deve stare dentro un intervallo». Sulla carta è giusto; davanti alla
+pagina due caselle restavano sempre vuote senza che si capisse perché ci
+fossero.
+
+Il **giallo non lampeggia**, e nemmeno il rosso da solo: lampeggia solo
+l'arrivo al limite dell'impianto. Se lampeggiasse anche il resto, il lampeggio
+smetterebbe di voler dire qualcosa.
 
 ## Le tre soglie dell'accumulo
 
@@ -199,14 +213,14 @@ stesso nei due posti, e il servizio è **acceso** (pagina Servizi, o
 
 # 9. Come è stato provato
 
-`test_energia.py`, 104 controlli. I cinque che contano davvero:
+`test_energia.py`, 110 controlli. I cinque che contano davvero:
 
 - **le soglie dei due tipi restano separate**: si scrive la potenza, si passa
   all'accumulo, si torna indietro, e i watt sono dove erano. È la metà del
   motivo per cui esistono due blocchi invece di uno;
-- **una casella vuota resta vuota**, non diventa zero: con la minima non
-  scritta un valore negativo resta verde invece di far lampeggiare il pannello
-  di notte;
+- **una casella vuota resta vuota**, non diventa zero, e ogni soglia da sola
+  deve voler dire qualcosa: con la sola potenza dell'impianto si ha l'allarme
+  che conta e tutto il resto è verde;
 - **il numero è al centro del pannello entro tre pixel**, e le due località
   sono appoggiate ai due bordi senza uscire;
 - **le cifre dell'ora si alzano anche con il solo servizio Energia acceso**, e
