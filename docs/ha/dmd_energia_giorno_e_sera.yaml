@@ -1,0 +1,72 @@
+# =========================================================================
+#  DMD - energia, assorbimento di giorno e accumulo di sera
+#  Un pannello, un topic, due significati che si alternano con il sole.
+# =========================================================================
+#
+#  COME SI USA:  seleziona **tutto questo file** e incollalo in
+#
+#      Impostazioni -> Automazioni e scene -> Crea automazione
+#      -> «Crea nuova automazione» -> i tre puntini in alto a destra
+#      -> «Modifica in YAML» -> cancella quello che c'e' -> incolla -> Salva.
+#
+#  Questo file **sostituisce** gli altri due: dmd_energia.yaml (assorbimento)
+#  e dmd_energia_accumulo.yaml. Tre automazioni sullo stesso topic si
+#  pesterebbero i piedi.
+#
+#  ------------------------------------------------------------------------
+#  LEGGERE QUESTO PRIMA DI SCEGLIERLO
+#
+#  Il DMD colora con le soglie del tipo scelto nella pagina Energia, **una
+#  sola alla volta**. Alternando i due significati, i colori saranno sempre
+#  quelli del tipo impostato: di sera l'84% della batteria verra' giudicato
+#  con le soglie dei watt, o viceversa.
+#
+#  Quindi va bene per **guardare i numeri**, e non per gli allarmi. Se il
+#  lampeggio deve voler dire qualcosa, meglio sceglierne uno e usare il suo
+#  file.
+#
+#  Qui il JSON serve davvero: porta anche unita' ed etichetta, cosi' il
+#  pannello scrive «CASA 1250 W» di giorno e «BATT 84%» di sera senza che
+#  nessuno vada a cambiare la configurazione del DMD.
+#
+#  ------------------------------------------------------------------------
+#  DA CAMBIARE PRIMA DI SALVARE
+#
+#  Le due entita':  sensor.consumo_casa  e  sensor.batteria_soc .
+#
+# =========================================================================
+
+alias: DMD - energia, assorbimento di giorno e accumulo di sera
+description: >-
+  Di giorno il consumo, di sera la carica dell'accumulo, sullo stesso topic.
+mode: single
+max_exceeded: silent
+trigger:
+  - platform: time_pattern
+    seconds: /30
+  - platform: homeassistant
+    event: start
+action:
+  - choose:
+      # Di giorno, con il sole, interessa quanto si sta consumando.
+      - conditions:
+          - condition: sun
+            after: sunrise
+            before: sunset
+        sequence:
+          - service: mqtt.publish
+            data:
+              topic: dmd/energia
+              payload: >-
+                {"valore": {{ states('sensor.consumo_casa')
+                              | float(0) | round(0) }},
+                 "unita": "W", "etichetta": "CASA"}
+    # Di sera interessa quanto resta nelle batterie.
+    default:
+      - service: mqtt.publish
+        data:
+          topic: dmd/energia
+          payload: >-
+            {"valore": {{ states('sensor.batteria_soc')
+                          | float(0) | round(0) }},
+             "unita": "%", "etichetta": "BATT"}

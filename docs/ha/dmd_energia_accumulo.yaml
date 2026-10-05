@@ -1,0 +1,88 @@
+# =========================================================================
+#  DMD - carica dell'accumulo fotovoltaico
+#  Manda al pannello la percentuale della batteria.
+# =========================================================================
+#
+#  COME SI USA:  seleziona **tutto questo file** e incollalo in
+#
+#      Impostazioni -> Automazioni e scene -> Crea automazione
+#      -> «Crea nuova automazione» -> i tre puntini in alto a destra
+#      -> «Modifica in YAML» -> cancella quello che c'e' -> incolla -> Salva.
+#
+#  Un file, una automazione: non c'e' niente da ritagliare e i commenti si
+#  possono incollare insieme al resto, Home Assistant li ignora.
+#
+#  ------------------------------------------------------------------------
+#  DA CAMBIARE PRIMA DI SALVARE
+#
+#  1. L'ENTITA'.  Qui sotto c'e'  sensor.batteria_soc , che e' un nome di
+#     esempio: il tuo quasi certamente e' un altro, e compare in due punti
+#     (il trigger di stato e il payload, piu' la condizione). Strumenti per
+#     sviluppatori -> Stati -> cerca «soc» o «battery».
+#     Nomi veri che capitano: sensor.victron_battery_soc,
+#     sensor.solaredge_battery_level,
+#     sensor.huawei_battery_state_of_capacity.
+#
+#  2. IL TIPO SUL DMD.  Pagina Energia -> Tipo di valore -> **Accumulo**,
+#     unita' «%», e le tre soglie: gialla, rossa, lampeggio.
+#
+#  ------------------------------------------------------------------------
+#  UN PANNELLO, UN TIPO PER VOLTA
+#
+#  Il DMD colora con le soglie del tipo scelto nella pagina, **una sola alla
+#  volta**: questa automazione quindi non si affianca a quella
+#  dell'assorbimento sullo stesso topic. O questa, o quella.
+#
+#  Chi li vuole tutti e due usi  dmd_energia_giorno_e_sera.yaml , che li
+#  alterna -- ma i colori restano quelli del tipo impostato, quindi va bene
+#  per guardare i numeri e non per gli allarmi.
+#
+#  ------------------------------------------------------------------------
+#  PERCHE' OGNI CINQUE MINUTI
+#
+#  Una batteria da dieci chilowattora non cambia di un punto in trenta
+#  secondi, e chiedere piu' spesso vuol dire solo traffico sul broker: un
+#  numero che balla non e' piu' informazione, e' rumore. Il calo veloce pero'
+#  si vede senza aspettare, grazie al terzo trigger qui sotto.
+#
+#  Se il numero non compare, la pagina Energia del DMD dice da che parte sta
+#  il problema; per tagliarlo in due c'e'  dmd_energia_prova.yaml .
+#
+# =========================================================================
+
+alias: DMD - carica dell'accumulo
+description: >-
+  Manda al pannello la percentuale dell'accumulo fotovoltaico.
+  Il semaforo e il lampeggio li fa il DMD con le sue tre soglie.
+mode: single
+max_exceeded: silent
+trigger:
+  - platform: time_pattern
+    minutes: /5
+  # Una volta subito, quando Home Assistant riparte: senza questa riga, dopo
+  # un riavvio il pannello resta con i due trattini fino al prossimo giro --
+  # cinque minuti in cui sembra rotto.
+  - platform: homeassistant
+    event: start
+  # E quando la percentuale si muove e poi resta ferma venti secondi, senza
+  # aspettare il giro. E' la sera d'inverno, quando l'accumulo scende mentre
+  # si cucina: e' li' che quel numero serve.
+  - platform: state
+    entity_id: sensor.batteria_soc
+    for: "00:00:20"
+condition:
+  # Un sensore non disponibile non si pubblica. Meglio che il DMD mostri i due
+  # trattini -- che vogliono dire «non lo so» -- di uno zero inventato qui: su
+  # una batteria, uno zero inventato e' esattamente l'allarme che non si vuole
+  # vedere lampeggiare per niente.
+  - condition: template
+    value_template: >-
+      {{ states('sensor.batteria_soc') not in
+         ['unknown', 'unavailable', 'none', ''] }}
+action:
+  - service: mqtt.publish
+    data:
+      topic: dmd/energia
+      # Senza decimali: un accumulo all'84,3% e' un accumulo all'84%, e la
+      # virgola sul pannello ruba due caratteri a chi lo guarda da lontano.
+      payload: "{{ states('sensor.batteria_soc') | float(0) | round(0) }}"

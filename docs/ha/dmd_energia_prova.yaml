@@ -1,0 +1,42 @@
+# =========================================================================
+#  DMD - prova energia
+#  Uno script che manda un numero a mano, per capire dove si inceppa.
+# =========================================================================
+#
+#  COME SI USA:  seleziona **tutto questo file** e incollalo in
+#
+#      Impostazioni -> Automazioni e scene -> scheda **Script**
+#      -> Crea script -> i tre puntini in alto a destra
+#      -> «Modifica in YAML» -> cancella quello che c'e' -> incolla -> Salva.
+#
+#  Attenzione alla scheda: questo e' uno **script**, non una automazione. Nel
+#  posto sbagliato Home Assistant si lamenta, e ha ragione lui.
+#
+#  Poi si lancia da Strumenti per sviluppatori -> Azioni ->
+#  script.dmd_energia_prova -> valore: 1250 -> Esegui azione.
+#
+#  ------------------------------------------------------------------------
+#  A CHE COSA SERVE
+#
+#  A tagliare il problema in due. Se mandando  1250  il pannello scrive
+#  «1250 W», allora la catena -- Home Assistant, broker, DMD, servizio acceso,
+#  topic giusto -- funziona tutta, e quello che non va sta nel sensore o nel
+#  trigger dell'automazione. Se invece non compare niente, il problema e' da
+#  questa parte e l'automazione non c'entra.
+#
+#  Per vedere soltanto come reagiscono le soglie -- il giallo, il rosso, il
+#  lampeggio -- c'e' di meglio: il pulsante «Mostralo» nella pagina Energia
+#  del DMD, che non passa nemmeno dal broker.
+#
+# =========================================================================
+
+alias: DMD - prova energia
+fields:
+  valore:
+    description: Il numero da mandare al pannello
+    example: "1250"
+sequence:
+  - service: mqtt.publish
+    data:
+      topic: dmd/energia
+      payload: "{{ valore | default(1234) }}"

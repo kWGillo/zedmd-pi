@@ -166,35 +166,40 @@ sempre.
 
 # 6. L'automazione di Home Assistant
 
-Il file pronto è [`ha/dmd_energia.yaml`](ha/dmd_energia.yaml), con quattro
-blocchi separati da una riga `---`: l'assorbimento istantaneo, l'accumulo, i
-due a turno (giorno e sera) e uno script di prova. Ne serve **uno** fra i primi
-tre.
+**Un file, una automazione**: si seleziona tutto il file e si incolla, senza
+ritagliare niente. I commenti si incollano insieme al resto, Home Assistant li
+ignora.
 
-## Si incolla un blocco, non il file
+| File | Che cosa manda | Dove si incolla |
+|---|---|---|
+| [`ha/dmd_energia.yaml`](ha/dmd_energia.yaml) | l'assorbimento istantaneo, in watt | Automazioni |
+| [`ha/dmd_energia_accumulo.yaml`](ha/dmd_energia_accumulo.yaml) | la carica della batteria, in percento | Automazioni |
+| [`ha/dmd_energia_giorno_e_sera.yaml`](ha/dmd_energia_giorno_e_sera.yaml) | i due a turno, con il sole | Automazioni |
+| [`ha/dmd_energia_prova.yaml`](ha/dmd_energia_prova.yaml) | un numero a mano, per diagnosi | **Script** |
 
-L'editor YAML di Home Assistant vuole **una automazione sola**: si copia dalla
-riga `alias:` fino al `---` successivo, e si incolla in
+Ne serve **uno** fra i primi tre: il pannello colora con le soglie del tipo
+scelto nella pagina, una alla volta, e tre automazioni sullo stesso topic si
+pesterebbero i piedi. Il quarto è facoltativo e va nella scheda *Script*, non
+in *Automazioni*.
 
 > Impostazioni → Automazioni e scene → Crea automazione → *Crea nuova
 > automazione* → i tre puntini in alto a destra → **Modifica in YAML** →
 > cancella quello che c'è → incolla → Salva.
 
-Dando all'editor un file di configurazione — cioè incollando anche la riga
-`automation:` e il trattino davanti ad `alias` — risponde:
+## I due errori che abbiamo preso, e cosa volevano dire
 
-```
-Message malformed: not a valid option at 'automation'
-```
+Sono due messaggi di Home Assistant che sembrano parlare del contenuto e
+invece parlano della **forma del file**:
 
-Sembra parlare del contenuto e invece parla della forma: *mi hai dato un file,
-io volevo una automazione*. Per questo nel file i blocchi sono già scritti
-senza quelle righe. Chi invece lo usa come **package** in `configuration.yaml`
-deve rimetterle: lì `automation:` e il trattino servono, con tutto il blocco
-rientrato di due spazi.
+| Dice | Vuol dire |
+|---|---|
+| `Message malformed: not a valid option at 'automation'` | il testo incollato comincia con `automation:`. L'editor vuole una automazione, non un file di configurazione |
+| `expected a single document in the stream, but found more` | nel testo incollato c'è una riga `---`, che in YAML separa due documenti. L'editor ne vuole uno |
 
-Lo script di prova (blocco D) non va nelle Automazioni ma negli **Script** —
-stessa pagina, scheda accanto.
+Per questo i file sono quattro e non uno: ogni cosa che va ritagliata, prima o
+poi viene incollata intera. Chi invece usa i file come **package** in
+`configuration.yaml` deve fare il contrario — lì serve la riga `automation:` e
+il trattino davanti ad `alias`, con tutto il blocco rientrato di due spazi.
 
 La cosa che conta, e che vale per qualunque automazione si scriva a mano:
 
@@ -229,16 +234,12 @@ e basta a capire da che parte sta il problema:
 
 | Dice | Vuol dire |
 |---|---|
-| *non è ancora arrivato niente sul topic* | il problema è in Home Assistant: prova lo script del blocco D |
+| *non è ancora arrivato niente sul topic* | il problema è in Home Assistant: prova `dmd_energia_prova.yaml` |
 | *ultimo valore di N minuti fa* | l'automazione ha pubblicato una volta e poi ha smesso: guarda le sue tracce |
 | *Sul pannello: CASA 1250 W* | tutto funziona; se non lo vedi, il servizio è spento o il pannello mostra un'altra sorgente |
 
-E se l'automazione non si salva nemmeno:
-
-| Home Assistant dice | Vuol dire |
-|---|---|
-| `Message malformed: not a valid option at 'automation'` | hai incollato il file invece di un blocco: togli la riga `automation:` e il trattino davanti ad `alias` |
-| `Message malformed: required key not provided @ data['triggers']` | hai incollato solo metà blocco: serve da `alias:` fino al `---` |
+Se invece è l'automazione a non salvarsi, i due messaggi e il loro
+significato stanno nel capitolo 6.
 
 Le altre due cose da controllare sono sempre le stesse: il **topic** è lo
 stesso nei due posti, e il servizio è **acceso** (pagina Servizi, o
@@ -246,7 +247,7 @@ stesso nei due posti, e il servizio è **acceso** (pagina Servizi, o
 
 # 9. Come è stato provato
 
-`test_energia.py`, 113 controlli. I cinque che contano davvero:
+`test_energia.py`, 137 controlli. I cinque che contano davvero:
 
 - **le soglie dei due tipi restano separate**: si scrive la potenza, si passa
   all'accumulo, si torna indietro, e i watt sono dove erano. È la metà del
@@ -262,4 +263,8 @@ stesso nei due posti, e il servizio è **acceso** (pagina Servizi, o
 - **il lampeggio si vede**: si chiedono all'orologio il fotogramma del secondo
   pari e quello del dispari e devono essere diversi — e con un valore
   tranquillo devono essere identici, altrimenti si riscriverebbe la matrice
-  trenta volte al secondo per niente.
+  trenta volte al secondo per niente;
+- **ogni file YAML è un documento solo**, senza righe `---` e senza
+  `automation:`. Non è pignoleria sul formato: sono i due errori che Home
+  Assistant ha davvero restituito, e la prova esiste perché non si riscoprano
+  una terza volta.

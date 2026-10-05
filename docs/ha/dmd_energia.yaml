@@ -1,98 +1,59 @@
 # =========================================================================
-#  DMD Controller 16.1 - le automazioni che mandano l'energia al pannello
+#  DMD - assorbimento istantaneo
+#  Manda al pannello quanto sta tirando la casa adesso, in watt.
 # =========================================================================
 #
-#  Il DMD ascolta un solo topic:  dmd/energia
-#  Sopra ci si pubblica **un numero**, e basta:
-#
-#      1250        -> «1250 W» sotto l'orologio
-#      84          -> «84%» se il tipo e' «accumulo»
-#
-#  Il pannello non misura niente e non calcola niente: le soglie, i colori e
-#  il lampeggio stanno nella pagina Energia del DMD. Qui si decide soltanto
-#  **quale numero** mandare e **quando**.
-#
-#  ------------------------------------------------------------------------
-#  COME SI INCOLLA — leggere questo per primo
-#
-#  Questo file contiene **quattro blocchi separati dalla riga `---`**, e ogni
-#  blocco e' gia' scritto come lo vuole Home Assistant: si copia dalla riga
-#  `alias:` fino al `---` successivo, e si incolla.
+#  COME SI USA:  seleziona **tutto questo file** e incollalo in
 #
 #      Impostazioni -> Automazioni e scene -> Crea automazione
-#      -> «Crea nuova automazione» -> in alto a destra i tre puntini
-#      -> «Modifica in YAML» -> cancella quello che c'e' -> incolla -> Salva
+#      -> «Crea nuova automazione» -> i tre puntini in alto a destra
+#      -> «Modifica in YAML» -> cancella quello che c'e' -> incolla -> Salva.
 #
-#  NON si incolla il file intero, e NON si incollano le righe `automation:`
-#  o `script:` — qui infatti non ci sono. L'editor di Home Assistant vuole
-#  **una automazione sola**, senza la riga `automation:` e senza il trattino
-#  davanti ad `alias`. Dandogli un file di configurazione risponde:
+#  Un file, una automazione: non c'e' niente da ritagliare e i commenti si
+#  possono incollare insieme al resto, Home Assistant li ignora.
 #
-#      Message malformed: not a valid option at 'automation'
+#  GLI ALTRI FILE, accanto a questo:
+#      dmd_energia_accumulo.yaml        la carica della batteria, in percento
+#      dmd_energia_giorno_e_sera.yaml   i due a turno, sullo stesso pannello
+#      dmd_energia_prova.yaml           uno script per capire dove si inceppa
 #
-#  che e' il suo modo di dire «mi hai dato un file, io volevo una
-#  automazione». Se invece lo vuoi usare come *package* in
-#  configuration.yaml, allora li' serve la riga `automation:` e il trattino
-#  davanti ad `alias` di ogni blocco, rientrando tutto di due spazi.
-#
-#  ------------------------------------------------------------------------
-#  QUALE BLOCCO SERVE
-#
-#    A) ASSORBIMENTO   quanto sta tirando la casa adesso, in watt
-#    B) ACCUMULO       la carica della batteria del fotovoltaico, in percento
-#    C) TUTTI E DUE    assorbimento di giorno, accumulo di sera
-#    D) PROVA          uno script da lanciare a mano, per capire dove si
-#                      inceppa quando il numero non compare
-#
-#  Ne serve **uno** fra A, B e C. Il D e' facoltativo e si incolla negli
-#  Script, non nelle Automazioni (Impostazioni -> Automazioni e scene ->
-#  scheda Script -> Crea script -> tre puntini -> Modifica in YAML).
+#  Serve **uno solo** fra questo, l'accumulo e il giorno-e-sera: il DMD colora
+#  con le soglie del tipo scelto nella pagina, una alla volta.
 #
 #  ------------------------------------------------------------------------
-#  PRIMA DI INCOLLARE
+#  DA CAMBIARE PRIMA DI SALVARE
 #
-#  Qui sotto c'e' gia' scritto  sensor.consumo_casa : se la tua entita' si
-#  chiama cosi', non c'e' niente da cambiare. Altrimenti, Strumenti per
-#  sviluppatori -> Stati -> cerca «consumo», «power» o «battery», e sostituisci
-#  il nome dappertutto nel blocco.
+#  L'entita':  sensor.consumo_casa , qui sotto in due punti (la condizione e
+#  il payload). Se la tua si chiama cosi', non c'e' niente da toccare.
+#  Altrimenti: Strumenti per sviluppatori -> Stati -> cerca «consumo» o
+#  «power».
 #
-#  Poi, sul DMD: pagina Energia, scegli il tipo (Potenza o Accumulo),
-#  l'unita' (W, kW, %) e le soglie; accendi il servizio nella pagina Servizi
-#  — oppure da qui, con  switch.dmd_energia.
+#  E sul DMD: pagina Energia -> tipo **Potenza**, unita' «W», e le tre soglie
+#  (da qui giallo, da qui rosso, potenza dell'impianto). Poi si accende il
+#  servizio nella pagina Servizi, o da qui con  switch.dmd_energia.
 #
 #  ------------------------------------------------------------------------
-#  LA COSA CHE CONTA: NON PUBBLICARE TRENTA VOLTE AL MINUTO
+#  PERCHE' OGNI TRENTA SECONDI E NON A OGNI CAMBIO
 #
 #  Un sensore di potenza cambia a ogni lettura, cioe' ogni due secondi. Un
-#  `platform: state` nudo pubblicherebbe ogni due secondi per sempre: traffico
-#  inutile sul broker e un numero che balla sul pannello, perche' 1250 e 1248
-#  sono lo stesso dato scritto due volte.
-#
-#  I blocchi qui sotto usano  platform: time_pattern  con  seconds: /30:
-#  il pannello si aggiorna due volte al minuto, che e' piu' spesso di quanto
-#  serva a chi passa in corridoio. Per l'accumulo bastano cinque minuti.
+#  `platform: state` nudo pubblicherebbe per sempre a quel ritmo: traffico
+#  inutile sul broker e un numero che balla, perche' 1250 e 1248 sono lo
+#  stesso dato scritto due volte. Due volte al minuto e' gia' piu' spesso di
+#  quanto serva a chi passa in corridoio.
 #
 #  ------------------------------------------------------------------------
 #  SE IL NUMERO NON COMPARE
 #
 #  - il servizio Energia e' acceso?  (pagina Servizi, o switch.dmd_energia)
 #  - il topic e' lo stesso nei due posti?  (pagina Energia del DMD)
-#  - la pagina Energia dice «non e' ancora arrivato niente»? allora il
-#    problema e' qui, in Home Assistant: prova il blocco D
+#  - la pagina Energia dice «non e' ancora arrivato niente»? il problema e'
+#    qui, in Home Assistant: prova  dmd_energia_prova.yaml
 #  - dice «ultimo valore di N minuti fa»? l'automazione ha pubblicato una
 #    volta e poi ha smesso: guarda le sue tracce
 #  - sul pannello ci sono due trattini: il DMD e' vivo e sta dicendo che non
 #    gli arriva piu' niente. E' il comportamento giusto, non un guasto
 #
 # =========================================================================
-
----
-# -------------------------------------------------------------------------
-# A) ASSORBIMENTO ISTANTANEO - quanto sta tirando la casa adesso
-# -------------------------------------------------------------------------
-# Sul DMD: tipo «Potenza», unita' «W», e le tre soglie — da qui giallo, da qui
-# rosso, potenza dell'impianto.
-# Si copia da qui sotto fino alla riga di trattini.
 
 alias: DMD - assorbimento istantaneo
 description: >-
@@ -101,8 +62,6 @@ description: >-
 mode: single
 max_exceeded: silent
 trigger:
-  # Due volte al minuto. Non «a ogni cambio»: un sensore di potenza cambia
-  # ogni due secondi, e il pannello si leggerebbe come un tachimetro.
   - platform: time_pattern
     seconds: /30
   # E una volta subito, quando Home Assistant riparte: senza questa riga, dopo
@@ -112,7 +71,7 @@ trigger:
     event: start
 condition:
   # Un sensore non disponibile non si pubblica: meglio che il DMD mostri i due
-  # trattini — che vogliono dire «non lo so» — di un numero vecchio o di uno
+  # trattini -- che vogliono dire «non lo so» -- di un numero vecchio o di uno
   # zero inventato qui.
   - condition: template
     value_template: >-
@@ -125,109 +84,3 @@ action:
       # `| round(0)` perche' sul pannello i decimali della potenza non si
       # leggono e fanno ballare la riga.
       payload: "{{ states('sensor.consumo_casa') | float(0) | round(0) }}"
-
----
-# -------------------------------------------------------------------------
-# B) ACCUMULO - la carica della batteria del fotovoltaico
-# -------------------------------------------------------------------------
-# Sul DMD: tipo «Accumulo», unita' «%», e le tre soglie (gialla, rossa,
-# lampeggio).
-
-alias: DMD - carica dell'accumulo
-description: >-
-  Manda al pannello la percentuale dell'accumulo, ogni cinque minuti.
-  Il semaforo e il lampeggio li fa il DMD con le sue soglie.
-mode: single
-max_exceeded: silent
-trigger:
-  # Cinque minuti: una batteria da dieci chilowattora non cambia di un punto
-  # in trenta secondi, e chiedere piu' spesso non aggiunge niente.
-  - platform: time_pattern
-    minutes: /5
-  - platform: homeassistant
-    event: start
-  # Ma un calo si vede subito: se la percentuale si muove e resta ferma venti
-  # secondi, si pubblica senza aspettare il prossimo giro. E' la sera
-  # d'inverno, quando l'accumulo scende mentre si cucina.
-  - platform: state
-    entity_id: sensor.batteria_soc
-    for: "00:00:20"
-condition:
-  - condition: template
-    value_template: >-
-      {{ states('sensor.batteria_soc') not in
-         ['unknown', 'unavailable', 'none', ''] }}
-action:
-  - service: mqtt.publish
-    data:
-      topic: dmd/energia
-      payload: "{{ states('sensor.batteria_soc') | float(0) | round(0) }}"
-
----
-# -------------------------------------------------------------------------
-# C) TUTTI E DUE, A TURNO - assorbimento di giorno, accumulo di sera
-# -------------------------------------------------------------------------
-# Un pannello, un topic, due significati. Qui il JSON serve davvero: porta
-# **anche** unita' ed etichetta, cosi' il DMD scrive «CASA 1250 W» o
-# «BATT 84%» senza che nessuno cambi la sua configurazione.
-#
-# Attenzione: le soglie sul DMD sono quelle del tipo scelto nella pagina, una
-# sola alla volta. Alternando i due significati i colori saranno quelli del
-# tipo impostato: va bene per guardare i numeri, non per gli allarmi. Se gli
-# allarmi contano, scegli il blocco A o il blocco B.
-
-alias: DMD - energia, assorbimento di giorno e accumulo di sera
-mode: single
-max_exceeded: silent
-trigger:
-  - platform: time_pattern
-    seconds: /30
-  - platform: homeassistant
-    event: start
-action:
-  - choose:
-      # Di giorno, con il sole, interessa quanto si sta consumando.
-      - conditions:
-          - condition: sun
-            after: sunrise
-            before: sunset
-        sequence:
-          - service: mqtt.publish
-            data:
-              topic: dmd/energia
-              payload: >-
-                {"valore": {{ states('sensor.consumo_casa')
-                              | float(0) | round(0) }},
-                 "unita": "W", "etichetta": "CASA"}
-    # Di sera interessa quanto resta nelle batterie.
-    default:
-      - service: mqtt.publish
-        data:
-          topic: dmd/energia
-          payload: >-
-            {"valore": {{ states('sensor.batteria_soc')
-                          | float(0) | round(0) }},
-             "unita": "%", "etichetta": "BATT"}
-
----
-# -------------------------------------------------------------------------
-# D) LO SCRIPT DI PROVA - per capire da che parte sta il problema
-# -------------------------------------------------------------------------
-# Questo va negli **Script**, non nelle Automazioni: Impostazioni ->
-# Automazioni e scene -> scheda Script -> Crea script -> tre puntini ->
-# Modifica in YAML.
-#
-# Poi si lancia da Strumenti per sviluppatori -> Azioni. Se dopo questo il
-# numero compare sul pannello, la catena MQTT funziona e il problema sta nel
-# sensore o nel trigger dell'automazione.
-
-alias: DMD - prova energia
-fields:
-  valore:
-    description: Il numero da mandare al pannello
-    example: "1250"
-sequence:
-  - service: mqtt.publish
-    data:
-      topic: dmd/energia
-      payload: "{{ valore | default(1234) }}"
