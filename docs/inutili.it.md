@@ -48,6 +48,16 @@ un servizio che non serve a niente, e due comparse di fila direbbero sempre la
 stessa cosa. Sei secondi per le schermate brevi e **dieci per i fatti
 storici**, che sono due righe da leggere: si regolano nella pagina Servizi.
 
+> **Un difetto che si vedeva solo guardando il pannello per un pomeriggio.**
+> Fino alla 16.1 quell'alternanza non c'era: usciva sempre *accadde oggi* e
+> *nati e morti* mai. Chi sceglieva contava le **comparse**, che crescono di
+> uno per ogni schermata che va in onda — cioè di **due** a ogni turno, il
+> calendario più l'altra. Con due schermate possibili, due modulo due fa
+> sempre lo stesso resto. Adesso il conto è sui turni, e *quale* fatto
+> raccontare lo decide un terzo conto ancora: quante volte quella schermata si
+> è aperta. Sono tre numeri diversi perché contano tre cose diverse, e
+> confonderne due è esattamente come è nato il difetto.
+
 ## Le righe lunghe scorrono
 
 Due righe della prima schermata le scrive qualcun altro, e sono lunghe quanto
@@ -75,6 +85,23 @@ pannello più di così.
 
 Il santo prova prima a rimpicciolirsi — se nel corpo medio ci sta, sta fermo —
 e scorre solo quando non basta.
+
+## Quando una foto si prende il pannello a metà
+
+Questo servizio ha **priorità 49** e il Media Player **50**: la foto
+successiva gli porta via il pannello, ed è voluto — il turno glielo dà `Turni`
+nella pausa fra due foto, non strappandolo a nessuno.
+
+Fino alla 16.1 però l'orologio della schermata correva lo stesso, anche mentre
+la schermata non si vedeva. Una schermata lunga interrotta da una foto tornava
+indietro con mezzo secondo di vita: un lampo, con lo scorrimento già arrivato
+in fondo. Dalla 16.2 **il tempo passato fuori dal pannello non conta**: la
+scadenza e lo scorrimento si spostano in avanti dell'intervallo perso, e la
+riga riprende da dove era rimasta.
+
+Con un tetto, perché serve: si recupera al massimo un'altra volta la durata.
+Senza, un Media Player molto attivo terrebbe viva la stessa schermata per
+sempre.
 
 ## Il fatto storico invece sale
 
@@ -265,7 +292,7 @@ festeggia. Gli altri servono all'annuncio della mattina.
 
 # 9. Come è stato provato
 
-`test_inutili.py`, 140 controlli. I cinque che contano davvero:
+`test_inutili.py`, 153 controlli. I sei che contano davvero:
 
 - **il calendario è completo**: 366 giorni, 29 febbraio compreso, nessun
   giorno senza nomi, nessun santo oltre i 48 caratteri e nessuna giornata
@@ -280,6 +307,14 @@ festeggia. Gli altri servono all'annuncio della mattina.
   confrontano i pixel del primo fotogramma con quelli dell'ultimo nella fascia
   del titolo e nella colonna dell'anno, e devono essere identici. È la
   differenza fra una colonna che scorre e un pannello che trema;
+- **le due schermate di coda si alternano davvero**: si fanno girare sei turni
+  di fila e si pretende di vedere sia i fatti storici sia i personaggi, con
+  fatti diversi ogni volta. È la prova che mancava, ed è il motivo per cui il
+  difetto è sopravvissuto a tre versioni;
+- **il tempo di una schermata conta quando si vede**: si simula il Media
+  Player che porta via il pannello per sei secondi e si verifica che la
+  scadenza e la salita si spostino dello stesso intervallo — e che oltre il
+  tetto la schermata si chiuda invece di restare appesa;
 - **senza rete il servizio si accorcia**: con la cache vuota resta una sola
   schermata, e quello che era già stato scaricato non viene cancellato da un
   errore di rete;

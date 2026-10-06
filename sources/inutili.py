@@ -133,6 +133,12 @@ RIGHE_MASSIME = 12
 # il pannello troppo, e a quel punto meglio perdere l'ultima parola.
 TETTO_SLIDE = 20.0
 
+# Quanto puo' passare fra due fotogrammi prima di dire «il pannello era di un
+# altro». Il ciclo gira a trenta fotogrammi al secondo, cioe' trentatre'
+# millisecondi: mezzo secondo e' quindici volte tanto, abbastanza da non
+# confondere una pausa vera con un giro lento. Vedi `_recupera`.
+PAUSA_FUORI = 0.5
+
 
 class InutiliSource(Source):
     name = "inutili"
@@ -156,6 +162,23 @@ class InutiliSource(Source):
         self._running = False
         self._vista = False
         self._comparse = 0
+        # **I turni, non le comparse.** Chi sceglie la seconda schermata e il
+        # fatto da raccontare conta i *turni*, e per forza: `_comparse` cresce
+        # di uno per ogni schermata che va in onda, cioe' di **due** a ogni
+        # turno -- festa piu' l'altra. Con due schermate possibili, «due»
+        # modulo due fa sempre lo stesso resto: la seconda schermata era
+        # «accadde oggi» ogni volta e i nati di oggi non si vedevano mai,
+        # mentre dei fatti storici ne uscivano solo quelli di posto pari.
+        # Si vedeva solo guardando il pannello per un pomeriggio.
+        self._turno = 0
+        # E quante volte ciascuna schermata si e' aperta. Serve a scegliere
+        # *quale* fatto raccontare, ed e' un conto diverso da quello dei
+        # turni: «accadde oggi» compare un turno su due, quindi contando i
+        # turni il resto sarebbe sempre lo stesso -- la stessa trappola di
+        # `_comparse`, un piano piu' sotto.
+        self._quante = {}
+        self._ultimo_frame = 0.0
+        self._recuperato = 0.0
         self._prossima = "festa"     # da quale delle due si comincia il giro
         self.storia = dati.Storia(self._cartella())
         self._thread = None
@@ -189,6 +212,8 @@ class InutiliSource(Source):
             self._image = None
             self._dirty = False
             self._scorrevoli = []
+            self._ultimo_frame = 0.0
+            self._recuperato = 0.0
 
     def _loop(self):
         """Una sola cosa da fare: tenere fresca la cache di Wikipedia."""
@@ -207,10 +232,46 @@ class InutiliSource(Source):
     def active(self):
         return self._running and time.time() < self._fino_a
 
+    def _recupera(self, adesso):
+        """Il tempo passato fuori dal pannello non conta.
+
+        `frame()` la chiama il ciclo del pannello **solo quando questa
+        sorgente e' quella che si vede**: fra due chiamate passano trenta
+        millisecondi, non di piu'. Se ne passano molti di piu', il pannello
+        in mezzo era di qualcun altro -- il Media Player ha priorita' 50 e
+        questo servizio 49, quindi la foto successiva se lo prende -- e quei
+        secondi la schermata non li ha avuti.
+
+        Fino alla 16.1 li contava lo stesso: una schermata lunga interrotta
+        da una foto tornava indietro con mezzo secondo di vita e appariva per
+        un lampo, con lo scorrimento gia' in fondo. Adesso l'orologio della
+        schermata si sposta in avanti dell'intervallo perso, e lo scorrimento
+        riprende da dove era rimasto.
+
+        Il tetto esiste perche' un Media Player molto attivo, senza, terrebbe
+        viva la stessa schermata per sempre: si recupera al massimo un'altra
+        volta la durata, poi la schermata finisce comunque.
+        """
+        if not self._ultimo_frame:
+            self._ultimo_frame = adesso
+            return
+        perso = adesso - self._ultimo_frame
+        self._ultimo_frame = adesso
+        if perso <= PAUSA_FUORI:
+            return
+        ancora = max(0.0, self._durata - self._recuperato)
+        perso = min(perso, ancora)
+        if perso <= 0:
+            return
+        self._recuperato += perso
+        self._fino_a += perso
+        self._inizio += perso
+
     def frame(self):
         with self._lock:
             if self._image is None:
                 return None
+            self._recupera(time.time())
             if not self._scorrevoli:
                 if not self._dirty:
                     return None
@@ -267,12 +328,16 @@ class InutiliSource(Source):
         mezzo minuto. Il calendario c'e' sempre, e dietro di lui si alternano
         i fatti storici e i personaggi -- un passaggio l'uno, un passaggio
         l'altro. Cosi' due comparse di fila non dicono mai la stessa cosa.
+
+        Il conto e' sui **turni** e non sulle comparse: vedi `_turno`. E la
+        funzione resta senza effetti collaterali, perche' la chiama anche la
+        pagina web -- e una pagina aperta non deve far girare il pannello.
         """
         pronte = self.slide_disponibili(adesso)
         dietro = [s for s in ("eventi", "storia") if s in pronte]
         coda = [s for s in pronte if s == "festa"]
         if dietro:
-            coda.append(dietro[self._comparse % len(dietro)])
+            coda.append(dietro[self._turno % len(dietro)])
         return coda
 
     def durata_di(self, slide):
@@ -302,6 +367,10 @@ class InutiliSource(Source):
         if not self._running:
             return False
         adesso = adesso or datetime.now()
+        # Il turno avanza **qui**, prima di comporre la coda: cosi' la pagina
+        # web, che chiama `coda_del_turno` per far vedere cosa viene dopo,
+        # legge la stessa cosa che sta per andare in onda.
+        self._turno += 1
         coda = self.coda_del_turno(adesso)
         if not coda:
             return False
@@ -322,7 +391,13 @@ class InutiliSource(Source):
             self._image = immagine
             self._dirty = True
             self._scorrevoli = bande
+            # Schermata nuova, conto nuovo: il primo fotogramma non deve
+            # vedere come «perso» il tempo passato dall'ultimo della
+            # schermata di prima.
+            self._ultimo_frame = 0.0
+            self._recuperato = 0.0
         self._slide = slide
+        self._quante[slide] = self._quante.get(slide, 0) + 1
         self._vista = False
         self._inizio = time.time()
         self._durata = self._quanto_dura(float(secondi), bande)
@@ -363,6 +438,9 @@ class InutiliSource(Source):
                           else bool(self.storia.eventi(self._quando())))
                 if not pronta:
                     return False, motivo or "niente da mostrare"
+        # La prova non tocca il giro dei turni -- quello e' del pannello --
+        # ma `_apri` conta comunque l'apertura, quindi premendo due volte il
+        # pulsante si vede il fatto dopo e non due volte lo stesso.
         self._coda = []
         self._apri(slide, secondi or self.durata_di(slide))
         return bool(self._slide), ""
@@ -535,7 +613,11 @@ class InutiliSource(Source):
             d.text((margine, int(self.height * 0.4)), "niente da raccontare",
                    font=self._font_medio, fill=DATA)
             return
-        anno, testo = fatti[self._comparse % len(fatti)]
+        # Il fatto scorre con le **aperture di questa schermata**: una per
+        # volta, in fila. Contando le comparse se ne saltava uno su due --
+        # ne passano due per turno -- e contando i turni pure, perche'
+        # «accadde oggi» compare un turno su due.
+        anno, testo = fatti[self._quante.get("eventi", 0) % len(fatti)]
         d.text((margine, int(self.height * 0.30)), str(anno),
                font=self._font_grande, fill=ANNO_EVENTO)
         sinistra = margine + self._largo(d, "0000", self._font_grande) + 6
@@ -594,7 +676,7 @@ class InutiliSource(Source):
         righe = []
         nati = self.storia.nati(quando)
         morti = self.storia.morti(quando) if conf.get("morti", True) else []
-        scelta = self._comparse
+        scelta = self._quante.get("storia", 0)   # una apertura, un personaggio
         if nati:
             righe.append(("nato", nati[scelta % len(nati)]))
         if morti:
@@ -691,4 +773,5 @@ class InutiliSource(Source):
         riassunto["slide"] = self.slide_disponibili()
         riassunto["turno"] = self.coda_del_turno()
         riassunto["comparse"] = self._comparse
+        riassunto["giro"] = self._turno
         return riassunto

@@ -2,6 +2,54 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [16.2]
+
+### Due «accadde oggi» di fila, e il secondo che dura un lampo
+
+*«Oggi sta mostrando due "accadde oggi" distinti. Il primo appare per il tempo
+corretto. Il secondo, che è anche più lungo, permane per pochissimi istanti.»*
+
+Due difetti sovrapposti, e si spiegano a vicenda: il primo fa uscire *accadde
+oggi* a ogni turno invece di alternarlo con i personaggi, il secondo fa durare
+un lampo quello che capita fra due foto.
+
+**Il giro delle due schermate di coda era fermo.** Chi sceglieva fra i fatti
+storici e i personaggi contava le **comparse**, che crescono di uno per ogni
+schermata che va in onda — cioè di **due** a ogni turno, il calendario più
+l'altra. Con due schermate possibili, due modulo due fa sempre lo stesso
+resto: usciva *accadde oggi* ogni volta e *nati e morti* mai, e dei fatti
+storici solo quelli di posto pari.
+
+Adesso il giro conta i **turni**, e *quale* fatto raccontare lo decide un
+terzo conto ancora: quante volte quella schermata si è aperta. Sono tre numeri
+diversi perché contano tre cose diverse — le comparse servono alla pagina e a
+MQTT, i turni all'alternanza, le aperture alla scelta del fatto — ed è
+confonderne due che ha fatto nascere il difetto.
+
+Il codice lo prometteva da tre versioni, «un passaggio l'uno, un passaggio
+l'altro», e non lo faceva. È sopravvissuto perché **nessuna prova faceva
+girare più di un turno**: adesso ce n'è una che ne gira sei e pretende di
+vedere tutte e due le schermate, con fatti diversi ogni volta.
+
+**E il tempo di una schermata correva anche mentre non si vedeva.** Questo
+servizio ha priorità 49 e il Media Player 50: la foto successiva gli porta via
+il pannello, ed è voluto — il turno glielo dà `Turni` nella pausa fra due
+foto. Ma l'orologio della schermata andava avanti lo stesso, e dalla 15.3 un
+*accadde oggi* lungo può durare fino a venti secondi perché il testo sale.
+Interrotto da una foto, tornava indietro con mezzo secondo di vita: un lampo,
+con la salita già arrivata in fondo.
+
+Dalla 16.2 **il tempo passato fuori dal pannello non conta**. Il servizio se
+ne accorge da solo: `frame()` lo chiama il ciclo del pannello soltanto quando
+è lui che si vede, quindi fra due chiamate passano trenta millisecondi; se ne
+passano molti di più, quei secondi la schermata non li ha avuti. Scadenza e
+scorrimento si spostano in avanti dell'intervallo perso, e la riga riprende da
+dove era rimasta.
+
+Con un tetto, perché serve: si recupera al massimo un'altra volta la durata.
+Senza, un Media Player molto attivo terrebbe viva la stessa schermata per
+sempre.
+
 ## [16.1]
 
 ### Le soglie della potenza diventano tre, come un quadrante

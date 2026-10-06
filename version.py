@@ -2888,6 +2888,31 @@ Storico:
        Chi aveva gia' scritto le quattro soglie se le ritrova dove vogliono
        dire la stessa cosa: il preallarme alto diventa il giallo, la vecchia
        massima diventa il rosso, e le caselle morte spariscono dal file.
+  16.2 *Due «accadde oggi» di fila, e il secondo che dura un lampo.* Segnalato
+       guardando il pannello, ed erano due difetti sovrapposti.
+       **Il giro delle due schermate di coda era fermo.** Chi sceglieva fra i
+       fatti storici e i personaggi contava le *comparse*, che crescono di uno
+       per ogni schermata che va in onda, cioe' di **due** a ogni turno --
+       festa piu' l'altra. Con due schermate possibili, due modulo due fa
+       sempre lo stesso resto: usciva «accadde oggi» ogni volta e «nati e
+       morti» mai, e dei fatti storici solo quelli di posto pari. Adesso il
+       giro conta i **turni**, e quale fatto raccontare lo decide un terzo
+       conto ancora, quante volte quella schermata si e' aperta: tre numeri
+       diversi perche' contano tre cose diverse, ed e' confonderne due che ha
+       fatto nascere il difetto. Il codice lo prometteva da tre versioni --
+       «un passaggio l'uno, un passaggio l'altro» -- e non lo faceva, perche'
+       nessuna prova faceva girare piu' di un turno.
+       **E il tempo di una schermata correva anche mentre non si vedeva.**
+       Questo servizio ha priorita' 49 e il Media Player 50: la foto
+       successiva gli porta via il pannello, ed e' voluto. Ma l'orologio della
+       schermata andava avanti lo stesso, quindi una schermata lunga -- dalla
+       15.3 l'«accadde oggi» puo' durare fino a venti secondi, se il testo
+       sale -- interrotta da una foto tornava indietro con mezzo secondo di
+       vita: un lampo, con la salita gia' arrivata in fondo. Adesso il tempo
+       passato fuori dal pannello non conta: scadenza e scorrimento si
+       spostano dell'intervallo perso e la riga riprende da dove era rimasta,
+       con un tetto a un'altra volta la durata -- senza, un Media Player molto
+       attivo terrebbe viva la stessa schermata per sempre.
 """
 
-__version__ = "16.1"
+__version__ = "16.2"
