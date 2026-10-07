@@ -166,7 +166,7 @@ dd535a2225eb95cd2648a2c26ffbcafb  templates/statusplayer.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 2bc1da7de80749f0587cfc1c2c56f8fd  templates/updates.html
-3306cee888167b36c02bfca7a4213f86  version.py
+15bddb40cf25545ab137e2bf44b0dff8  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 79bf1d80ae2acf509c0504136c8ca1d3  webui.py

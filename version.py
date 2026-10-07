@@ -2913,6 +2913,15 @@ Storico:
        spostano dell'intervallo perso e la riga riprende da dove era rimasta,
        con un tetto a un'altra volta la durata -- senza, un Media Player molto
        attivo terrebbe viva la stessa schermata per sempre.
+  16.3 **Satelliti: la casella «visual» torna a contare.** Gli oggetti del
+       gruppo venivano scaricati, calcolati e poi scartati dal filtro dei
+       noti, che conosce solo ISS e CSS. Quel filtro serve contro i CubeSat,
+       ma `visual` CelesTrak lo compila apposta per luminosita': adesso i suoi
+       oggetti passano (`GRUPPI_FIDATI`). Sotto c'era un secondo difetto: il
+       tetto di 40 passaggi contava visibili e non visibili insieme in ordine
+       di tempo, e con centocinquanta oggetti la sera restava fuori. Adesso i
+       tetti sono due. E gli oggetti del gruppo visual hanno un promemoria
+       solo, al preavviso: ISS e CSS mantengono il giro intero.
 """
 
-__version__ = "16.2"
+__version__ = "16.3"

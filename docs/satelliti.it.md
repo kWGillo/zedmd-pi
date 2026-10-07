@@ -259,6 +259,12 @@ Con preavviso 10 e cadenza 5 compaiono due promemoria: a T−10 e a T−5. Ogni
 promemoria resta a schermo una ventina di secondi e poi lascia lavorare le
 altre sorgenti: non è una sorgente che occupa il pannello per un quarto d'ora.
 
+Il giro completo vale per **ISS e CSS**. Gli oggetti del gruppo *visual* hanno
+**un promemoria solo**, al preavviso: sono un centinaio di passaggi al giorno,
+e cinque promemoria ciascuno terrebbero il pannello occupato quasi sempre per
+stadi di razzo. La schermata del passaggio, con l'arco e il puntino, resta per
+tutti.
+
 ### Famiglie
 
 Le famiglie le pubblica CelesTrak e non le classifichiamo noi. Di
@@ -271,10 +277,18 @@ corretto, sono davvero fra gli oggetti più brillanti del cielo, ma quelle
 sigle su un pannello in salotto non dicono niente a nessuno, e in una notte
 sola riempivano l'elenco con 252 passaggi.
 
+Per questo non è acceso di partenza, ma **chi lo spunta li vede** (dalla 16.3).
+`visual` non è una famiglia come *weather* o *amateur*: CelesTrak lo compila
+apposta per luminosità, quindi i suoi oggetti passano il filtro dei noti senza
+bisogno della casella qui sotto. Prima venivano scaricati, calcolati e poi
+scartati tutti, e la casella non cambiava niente. Per non esserne sommersi:
+elevazione minima a 40–45° e una fascia oraria serale nella scheda Timing.
+
 ### Anche gli oggetti di luminosità sconosciuta
 
 Sconsigliato, e sta nella pagina per chi vuole sperimentare. Acceso, il
-pannello annuncia anche i CubeSat: passaggi veri, oggetti invisibili.
+pannello annuncia anche i CubeSat di *weather*, *noaa* e *amateur*: passaggi
+veri, oggetti invisibili. Per il gruppo *visual* non serve.
 
 ### Sole al massimo a (gradi)
 

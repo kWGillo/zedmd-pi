@@ -2,6 +2,39 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [16.3]
+
+### Satelliti: la casella «visual» torna a contare
+
+*«Secondo me non sta più funzionando. Come è possibile che non mi segnali più
+gli oggetti diversi dalla ISS?»*
+
+Il servizio funzionava, ma la casella **visual** non cambiava niente. Gli
+oggetti del gruppo venivano scaricati, calcolati e poi scartati tutti dal
+filtro dei noti, la tabella `NOTI` con due righe: ISS e CSS. Quel filtro esiste
+per i CubeSat, invisibili a occhio nudo, ma `visual` non è una famiglia come
+*weather* o *amateur*: CelesTrak lo compila proprio per luminosità. Dalla 16.3
+chi lo spunta li vede: `GRUPPI_FIDATI` dice quali gruppi passano il filtro, e
+se lo stesso oggetto arriva da due gruppi vale il «noto» di quello fidato,
+qualunque sia l'ordine delle caselle.
+
+**E sotto ce n'era un secondo, che avrebbe annullato il primo.** In memoria
+restavano i primi 40 passaggi in ordine di tempo, visibili e non visibili
+insieme. Con due oggetti non se ne accorgeva nessuno; con centocinquanta i
+primi 40 sono tutti diurni, e la sera — l'unico momento che conta — restava
+fuori dal tetto. In una prova con 150 orbite: **zero** passaggi visibili
+sopravvissuti. Adesso visibili e non visibili hanno un tetto ciascuno.
+
+**Un promemoria solo per gli oggetti del gruppo visual.** Sono un centinaio di
+passaggi visibili al giorno, e il giro completo — un promemoria ogni tre minuti
+per un quarto d'ora — terrebbe il pannello occupato quasi sempre per stadi di
+razzo. ISS e CSS mantengono il giro intero; gli altri hanno un avviso al
+preavviso e poi la schermata del passaggio. Lo decide `satelliti.promemoria`,
+una funzione sola per il pannello e per il calcolo dei momenti.
+
+I testi della pagina non promettono più «dieci minuti» fissi: il preavviso è
+quello che si sceglie.
+
 ## [16.2]
 
 ### Due «accadde oggi» di fila, e il secondo che dura un lampo
