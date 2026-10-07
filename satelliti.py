@@ -785,6 +785,36 @@ PREAVVISO_MIN = 10
 CADENZA_MIN = 5
 
 
+def e_stazione(passaggio):
+    """Vero per gli oggetti della tabella `NOTI` -- la ISS, la CSS.
+
+    Sono gli unici con una magnitudine scritta a mano, ed e' quella che li
+    distingue: gli oggetti del gruppo *luminosi* sono noti ma senza
+    magnitudine. La differenza decide quanti promemoria meritano.
+    """
+    return passaggio.get("magnitudine") is not None
+
+
+def promemoria(passaggio, preavviso=PREAVVISO_MIN, cadenza=CADENZA_MIN):
+    """I minuti di anticipo a cui compare un avviso, dal piu' lontano.
+
+    Le stazioni hanno il giro completo: un avviso a ogni `cadenza`, a partire
+    da `preavviso`. Gli altri oggetti **uno solo**, al preavviso. Con il
+    gruppo *luminosi* acceso i passaggi visibili diventano un centinaio al
+    giorno, e cinque promemoria ciascuno terrebbero il pannello occupato
+    quasi sempre per stadi di razzo: un avviso basta a far alzare lo
+    sguardo, il resto lo fa la schermata del passaggio.
+    """
+    if not e_stazione(passaggio):
+        return [preavviso] if preavviso >= 1 else []
+    fuori = []
+    minuto = preavviso
+    while minuto >= cadenza:
+        fuori.append(minuto)
+        minuto -= cadenza
+    return fuori
+
+
 def momenti(passaggio, preavviso=PREAVVISO_MIN, cadenza=CADENZA_MIN):
     """Gli istanti in cui il pannello ha qualcosa da dire su un passaggio.
 
@@ -794,11 +824,9 @@ def momenti(passaggio, preavviso=PREAVVISO_MIN, cadenza=CADENZA_MIN):
     di istanti, non un comportamento nel tempo.
     """
     fuori = []
-    minuto = preavviso
-    while minuto >= cadenza:
+    for minuto in promemoria(passaggio, preavviso, cadenza):
         fuori.append({"quando": passaggio["sorge"] - timedelta(minutes=minuto),
                       "stato": "avviso", "mancano_min": minuto})
-        minuto -= cadenza
     fuori.append({"quando": passaggio["sorge"], "stato": "adesso",
                   "fino_a": passaggio["tramonta"]})
     return fuori

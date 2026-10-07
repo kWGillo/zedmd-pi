@@ -617,12 +617,12 @@ class SatellitiSource(Source):
         """
         durata = int(self._conf().get("durata_avviso_secondi", 20))
         mancano = (passaggio["sorge"] - adesso).total_seconds()
-        minuto = preavviso
-        while minuto >= cadenza:
+        # Quali promemoria, lo decide `satelliti.promemoria`: il giro intero
+        # per ISS e CSS, uno solo per gli oggetti del gruppo luminosi.
+        for minuto in satelliti.promemoria(passaggio, preavviso, cadenza):
             inizio = minuto * 60.0
             if inizio >= mancano > inizio - durata:
                 return True
-            minuto -= cadenza
         return False
 
     def _testo(self, d, x, y, s, font, colore, ancora="la"):

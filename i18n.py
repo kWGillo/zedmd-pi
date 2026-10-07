@@ -241,8 +241,8 @@ STRINGS = {
         "A pass lasts two to seven minutes: announcing it as it happens is too late."),
     "satelliti.step": ("Promemoria ogni (min)", "Reminder every (min)"),
     "satelliti.step.hint": (
-        "Con preavviso 10 e cadenza 5 compaiono due avvisi: a T-10 e a T-5.",
-        "With lead 10 and step 5 there are two reminders: at T-10 and T-5."),
+        "Con preavviso 10 e cadenza 5 compaiono due avvisi: a T-10 e a T-5. Vale per ISS e CSS: gli oggetti del gruppo visual hanno un avviso solo, al preavviso.",
+        "With lead 10 and step 5 there are two reminders: at T-10 and T-5. For ISS and CSS only: objects in the visual group get a single reminder, at the lead time."),
     "satelliti.groups": ("Famiglie", "Families"),
     "satelliti.groups.hint": (
         "Le famiglie le pubblica CelesTrak. Più se ne scelgono, più il calcolo è lungo.",
