@@ -37,7 +37,7 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 48b68ac87a2559a7efff49d54460ff57  giornate.csv
 e45d351b601929bd837040f66702dfe0  hass.py
-042f4cfed7c57a539d19efc3ebf81259  i18n.py
+47661fbf58fd07f3beb148eb9bf04ce8  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 7fe7fb617ddfdac829b0ee4990572ced  inutili.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
@@ -54,7 +54,7 @@ acf8a6145e40984fc50e310c763bc7c4  pulsante.py
 6921403aa108685fc815df75682f552d  rete.py
 374d8f430239d5d2ebb9ab5748c9fec5  rifiuti.py
 3c11488d3dd9c9c4018c4d535395a513  santi.csv
-a1d8f7f59de7ddc70db9ab829de222dc  satelliti.py
+29b0b58fdd304bcf7b84383b4ff154b9  satelliti.py
 5698878038d0f306ecebc25bde34d88c  scadenze.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 7ee163e5c89f7ac983b26ae09a1a4b92  setup_share.sh
@@ -89,7 +89,7 @@ fde88e5eb77974689dac50e7529f6f76  sources/inutili.py
 1d2251eff5cc8b014100149bd68d0103  sources/notifiche.py
 48225cc518aa6df9897f3fa93880a8ba  sources/nowplaying.py
 06d7dfadf503750b66634ab808d1956a  sources/onair.py
-e6c140b184dd15f3c391ec123180f25e  sources/satelliti.py
+8e2865f42f79b8327ab7f04f09bfe1b6  sources/satelliti.py
 2a73be667459d2a58f2ddab91ff91a98  sources/scadenze.py
 58b2545ed6131205d23dd95b2d8617bf  sources/statusplayer.py
 ff27405b1c4d1fe0582038f21ca6374e  sources/sveglia.py

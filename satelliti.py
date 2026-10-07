@@ -65,12 +65,13 @@ GRUPPI = {
     "stazioni": "stations",   # ISS, Tiangong: pochissime e luminosissime
     # Gli altri esistono ma **non** sono attivi per scelta.
     #
-    # `luminosi` (i ~100 piu' brillanti) e' stato provato e scartato: due
-    # terzi di quel gruppo sono stadi di razzo esausti -- SL-16 R/B, CZ-2C
-    # R/B, ARIANE 40+ R/B. Il dato e' giusto, sono davvero fra gli oggetti
-    # piu' luminosi del cielo, ma quelle sigle su un pannello in salotto non
-    # dicono niente a nessuno, e in una notte sola riempivano l'elenco con
-    # 252 passaggi. Restano selezionabili per chi li vuole.
+    # `luminosi` (i ~100 piu' brillanti) e' stato provato e scartato come
+    # predefinito: due terzi di quel gruppo sono stadi di razzo esausti --
+    # SL-16 R/B, CZ-2C R/B, ARIANE 40+ R/B. Il dato e' giusto, sono davvero
+    # fra gli oggetti piu' luminosi del cielo, ma quelle sigle su un pannello
+    # in salotto non dicono niente a nessuno, e in una notte sola riempivano
+    # l'elenco con 252 passaggi. Resta selezionabile per chi li vuole, e chi
+    # lo sceglie li vede davvero: vedi `GRUPPI_FIDATI`.
     "luminosi": "visual",
     "meteo": "weather",
     "noaa": "noaa",
@@ -124,6 +125,21 @@ NOMI_NOTI = (
     ("ZARYA", "ISS", -3.1),
     ("TIANHE", "CSS", -1.0),
 )
+
+
+# I gruppi di CelesTrak che sono **gia'** una lista di oggetti visibili a
+# occhio nudo. `visual` non e' una famiglia per mestiere, come *weather* o
+# *amateur*: e' scelto da CelesTrak proprio per la luminosita' -- i ~150
+# oggetti piu' brillanti, con dentro ISS, HST e i grandi stadi di razzo.
+# Chi lo spunta chiede quegli oggetti, e il filtro `NOTI` non deve
+# toglierglieli: ci sono gia' passati, a monte, con un criterio migliore del
+# nostro. Fino alla 16.2 venivano scaricati, calcolati e poi buttati tutti,
+# e la casella "visual" nella pagina non cambiava niente.
+#
+# La magnitudine resta `None`: CelesTrak non la pubblica, e inventarne una
+# sarebbe peggio che non averla. Cosi' nei doppioni vince comunque la riga
+# della tabella `NOTI` (vedi `_migliore`).
+GRUPPI_FIDATI = ("luminosi",)
 
 
 def _conosciuto(norad, nome):
@@ -224,6 +240,7 @@ def carica(gruppo, cartella):
             continue
         pulito = nome.strip()
         breve, magnitudine = _conosciuto(sat.satnum, pulito)
+        noto = breve is not None or gruppo in GRUPPI_FIDATI
         elenco.append({
             "nome": pulito,
             # Il nome corto e' quello che va sul pannello: "ISS", non
@@ -234,7 +251,7 @@ def carica(gruppo, cartella):
             "sat": sat,
             "gruppo": gruppo,
             "magnitudine": magnitudine,
-            "noto": breve is not None,
+            "noto": noto,
         })
     return elenco
 
@@ -246,13 +263,22 @@ def unisci(*elenchi):
     anche fra i *luminosi* -- e senza questo finirebbe due volte in elenco,
     con lo stesso orario. Il numero NORAD e' l'identita' vera: il nome no,
     puo' cambiare fra un file e l'altro.
+
+    Se lo stesso oggetto arriva prima da un gruppo qualunque e poi da uno
+    fidato, vale il "noto" del secondo: altrimenti un satellite meteo che sta
+    anche fra i *luminosi* resterebbe scartato o tenuto a seconda dell'ordine
+    delle caselle.
     """
     visti = {}
     for elenco in elenchi:
         for voce in elenco:
-            if voce["norad"] in visti:
-                continue
-            visti[voce["norad"]] = voce
+            gia = visti.get(voce["norad"])
+            if gia is None:
+                visti[voce["norad"]] = voce
+            elif voce.get("noto") and not gia.get("noto"):
+                visti[voce["norad"]] = dict(gia, noto=True,
+                                            breve=voce.get("breve", gia["breve"]),
+                                            magnitudine=voce.get("magnitudine"))
     return list(visti.values())
 
 

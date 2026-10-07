@@ -207,8 +207,8 @@ STRINGS = {
     "nav.satelliti": ("Satelliti", "Satellites"),
     "satelliti.title": ("Satelliti", "Satellites"),
     "satelliti.intro": (
-        "Avvisa dieci minuti prima di un passaggio della Stazione Spaziale, e dice dove guardare.",
-        "It warns ten minutes before a Space Station pass, and shows where to look."),
+        "Avvisa prima di un passaggio visibile -- la Stazione Spaziale e, se scelti, gli oggetti del gruppo visual -- e dice dove guardare.",
+        "It warns before a visible pass -- the Space Station and, if chosen, the objects in the visual group -- and shows where to look."),
     "satelliti.nocoords": (
         "Mancano le coordinate: le prende da quelle dell'Air Radar.",
         "Coordinates are missing: they come from the Air Radar ones."),
@@ -257,8 +257,8 @@ STRINGS = {
         "Anche gli oggetti di luminosita' sconosciuta",
         "Objects of unknown brightness too"),
     "satelliti.allobjects.hint": (
-        "Sconsigliato: il gruppo contiene anche i CubeSat, invisibili a occhio nudo.",
-        "Not recommended: the group also holds CubeSats, invisible to the naked eye."),
+        "Sconsigliato: weather, noaa e amateur contengono anche i CubeSat, invisibili a occhio nudo. Per il gruppo visual non serve: passa comunque.",
+        "Not recommended: weather, noaa and amateur also hold CubeSats, invisible to the naked eye. Not needed for the visual group: it always gets through."),
     "satelliti.sunmax": ("Sole al massimo a (gradi)",
                          "Sun at most at (degrees)"),
     "satelliti.sunmax.hint": (
@@ -1963,10 +1963,10 @@ STRINGS = {
     "status.notifiche.error": ("ultimo messaggio scartato: %(error)s",
                                "last message dropped: %(error)s"),
     "services.desc.satelliti": (
-        "Avvisa dieci minuti prima che la Stazione Spaziale passi sopra casa, "
-        "e durante il passaggio mostra dove guardare.",
-        "Warns ten minutes before the Space Station flies over, and during "
-        "the pass shows where to look."),
+        "Avvisa prima che la Stazione Spaziale, o un oggetto luminoso, passi "
+        "sopra casa, e durante il passaggio mostra dove guardare.",
+        "Warns before the Space Station, or another bright object, flies "
+        "over, and during the pass shows where to look."),
     # ---------------------------------------------------------------- meteo
     "services.meteo": ("Meteo", "Weather"),
     "services.desc.meteo": (

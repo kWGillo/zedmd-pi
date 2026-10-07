@@ -86,6 +86,26 @@ def bussola(gradi):
     return PUNTI_BUSSOLA[int((gradi + 11.25) % 360 / 22.5)]
 
 
+
+# Quanti passaggi tenere in memoria, per tipo. Il tetto c'era gia' (40), ma
+# contava visibili e non visibili insieme, in ordine di tempo: con le sole
+# ISS e CSS non se ne accorgeva nessuno, con i ~150 *luminosi* i primi 40
+# passaggi sono tutti diurni e la sera -- l'unico momento che conta --
+# restava fuori dal tetto. Adesso i visibili hanno un tetto loro.
+MASSIMO_PASSAGGI = 40
+
+
+def _sfoltisci(passaggi, massimo):
+    """I primi `massimo` visibili e i primi `massimo` non visibili, in ordine.
+
+    I non visibili servono al registro e alla pagina ("perche' non ha detto
+    niente?"), i visibili al pannello: nessuno dei due deve rubare posto
+    all'altro.
+    """
+    visibili = [p for p in passaggi if p.get("visibile")][:massimo]
+    altri = [p for p in passaggi if not p.get("visibile")][:massimo]
+    return sorted(visibili + altri, key=lambda p: p["sorge"])
+
 class SatellitiSource(Source):
     name = "satelliti"
     label = "Satelliti"
@@ -344,12 +364,13 @@ class SatellitiSource(Source):
         # puo' rispondere alla domanda vera -- "perche' stasera il DMD non ha
         # detto niente?" -- con "perche' e' passata a 70 gradi alle 14:20, in
         # pieno giorno".
-        self._passaggi = satelliti.prossimi(
+        tutti = satelliti.prossimi(
             elenco, lat, lon, datetime.now(timezone.utc),
             ore=int(conf.get("finestra_ore", 24)),
             elevazione_minima=float(conf.get("elevazione_minima", 10.0)),
-            solo_visibili=False, massimo=40,
+            solo_visibili=False, massimo=None,
             solo_noti=not bool(conf.get("tutti_gli_oggetti", False)))
+        self._passaggi = _sfoltisci(tutti, MASSIMO_PASSAGGI)
 
     def ricalcola(self):
         """Butta via i passaggi e li rifa' al prossimo giro.
