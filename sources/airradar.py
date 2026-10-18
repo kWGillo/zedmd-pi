@@ -133,6 +133,119 @@ def haversine_km(lat1, lon1, lat2, lon2):
     return 2 * radius * math.asin(math.sqrt(a))
 
 
+# Velocita' al suolo piu' alta che si mette in conto, in metri al secondo:
+# 250 m/s sono 900 km/h, un liner in crociera con vento in coda. Serve a
+# decidere quanto largo guardare perche' nessun aereo possa attraversare il
+# raggio fra due interrogazioni senza farsi vedere ne' prima ne' dopo.
+VELOCITA_MASSIMA_MS = 250.0
+
+# Due posizioni dello stesso aereo si uniscono con un segmento solo se sono
+# abbastanza vicine nel tempo: oltre, l'aereo puo' aver virato e la linea
+# retta inventerebbe un passaggio che non c'e' stato.
+TRATTO_MASSIMO_S = 150.0
+
+# Quanto a lungo si ricorda l'ultima posizione di un aereo.
+MEMORIA_TRACCE_S = 300.0
+
+KT_TO_MS = 0.514444
+
+
+def _piano_km(lat0, lon0, lat, lon):
+    """Coordinate piane in km, con l'origine in (lat0, lon0).
+
+    Su qualche decina di chilometri la Terra e' piatta quanto basta: l'errore
+    e' di metri, e il raggio si misura in centinaia.
+    """
+    x = (lon - lon0) * 111.320 * math.cos(math.radians(lat0))
+    y = (lat - lat0) * 110.574
+    return x, y
+
+
+def distanza_dal_segmento(ax, ay, bx, by):
+    """Distanza minima dell'origine dal segmento A-B, in km."""
+    dx, dy = bx - ax, by - ay
+    lunghezza2 = dx * dx + dy * dy
+    if lunghezza2 <= 1e-12:
+        return math.hypot(ax, ay)
+    t = max(0.0, min(1.0, -(ax * dx + ay * dy) / lunghezza2))
+    return math.hypot(ax + t * dx, ay + t * dy)
+
+
+def raggio_di_ascolto(radius_km, margine_km, intervallo_s):
+    """Quanto lontano chiedere al provider, in km.
+
+    **Il raggio mostrato non basta come raggio di interrogazione.** Fra due
+    giri un aereo veloce percorre `VELOCITA_MASSIMA_MS * intervallo`: a 40 s
+    sono 10 km, piu' del triplo del diametro di un raggio da 1,5 km. Chiedere
+    solo il raggio voleva dire vedere l'aereo soltanto se l'interrogazione
+    cadeva proprio negli undici secondi in cui ci stava dentro -- e un aereo
+    passato esattamente sopra casa poteva sfuggire del tutto. Si guarda
+    abbastanza lontano da vederlo almeno una volta prima e una dopo, e il
+    passaggio si decide sulla traiettoria.
+
+    **Ma non piu' largo di quanto si sappia poi unire.** L'intervallo si
+    regola fino a un'ora dalla pagina Radar: a 3600 secondi la corsa sarebbe
+    di 900 km, cioe' cinquecento miglia nautiche chieste a ogni giro a un
+    servizio pubblico e gratuito -- il modo piu' rapido per farsi bloccare, e
+    per niente, perche' due posizioni lontane nel tempo piu' di
+    `TRATTO_MASSIMO_S` non si uniscono comunque con un segmento. Oltre quel
+    limite restano la posizione attuale e la previsione, che guardano quello
+    che c'e' adesso: chiedere piu' lontano non aggiungerebbe un passaggio,
+    aggiungerebbe solo traffico.
+    """
+    corsa = VELOCITA_MASSIMA_MS * min(intervallo_s, TRATTO_MASSIMO_S) / 1000.0
+    return max(radius_km + margine_km, radius_km + corsa)
+
+
+def avvicinamento_minimo(casa, pos, t_pos, precedente, intervallo_s):
+    """Distanza minima dalla casa lungo la traiettoria, in km, e come e' stata trovata.
+
+    Tre candidati, vince il piu' vicino:
+      * la posizione attuale;
+      * il tratto percorso dall'interrogazione precedente a questa, se lo
+        stesso aereo era gia' stato visto da poco -- e' il passaggio certo;
+      * il tratto che percorrera' fino alla prossima interrogazione, stimato
+        con rotta e velocita' -- serve a mostrarlo *mentre* passa, invece di
+        un giro dopo, e a non perderlo se al giro dopo non c'e' piu'.
+
+    `casa` e' (lat, lon), `pos` e' un dict con lat, lon, gs (nodi), track
+    (gradi), `precedente` e' (lat, lon, istante) oppure None.
+    """
+    lat0, lon0 = casa
+    px, py = _piano_km(lat0, lon0, pos["lat"], pos["lon"])
+    migliore = math.hypot(px, py)
+    come = "attuale"
+
+    if precedente is not None:
+        plat, plon, pt = precedente
+        dt = t_pos - pt
+        if 0 < dt <= TRATTO_MASSIMO_S:
+            ax, ay = _piano_km(lat0, lon0, plat, plon)
+            # Un salto impossibile e' un dato sbagliato, non un aereo.
+            if math.hypot(px - ax, py - ay) * 1000.0 / dt <= VELOCITA_MASSIMA_MS * 1.5:
+                d = distanza_dal_segmento(ax, ay, px, py)
+                if d < migliore:
+                    migliore, come = d, "tratto"
+
+    try:
+        gs = float(pos.get("gs"))
+        track = float(pos.get("track"))
+    except (TypeError, ValueError):
+        gs = track = None
+    if gs and track is not None and gs > 30:
+        # Da quando e' stata presa la posizione fino alla prossima
+        # interrogazione, piu' qualche secondo di tolleranza.
+        orizzonte = max(0.0, time.time() - t_pos) + intervallo_s + 5.0
+        km = gs * KT_TO_MS * orizzonte / 1000.0
+        rad = math.radians(track)
+        bx, by = px + km * math.sin(rad), py + km * math.cos(rad)
+        d = distanza_dal_segmento(px, py, bx, by)
+        if d < migliore:
+            migliore, come = d, "previsto"
+
+    return migliore, come
+
+
 def fetch_json(url, timeout=12):
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(request, timeout=timeout) as response:
@@ -194,6 +307,9 @@ class AirRadarSource(Source):
         self._seen = 0
 
         self._logged = {}       # hex -> istante dell'ultima riga scritta
+        # hex -> (lat, lon, istante) dell'ultima posizione vista: serve a unire
+        # due interrogazioni con un tratto e accorgersi di chi e' passato in mezzo.
+        self._tracce = {}
         self._font_big = _load_font(max(14, int(height * 0.40)))
         self._font_small = _load_font(max(8, int(height * 0.20)))
         self._route_cache = {}
@@ -404,7 +520,13 @@ class AirRadarSource(Source):
         # memoria, e la pagina Radar li elenca. Cosi' la domanda ha una
         # risposta invece di un'opinione.
         margine = max(0.0, float(cfg.get("margine_km", 2.0) or 0.0))
-        nm = math.ceil(max(1.0, (radius_km + margine) / KM_PER_NM))
+        try:
+            intervallo = max(INTERVALLO_MINIMO, float(cfg["poll_interval"]))
+        except (TypeError, ValueError):
+            intervallo = INTERVALLO_MINIMO
+        # Si interroga largo e si decide stretto: vedi `raggio_di_ascolto`.
+        ascolto = raggio_di_ascolto(radius_km, margine, intervallo)
+        nm = math.ceil(max(1.0, ascolto / KM_PER_NM))
         params = {"lat": lat, "lon": lon, "nm": float(nm)}
 
         order = [cfg["provider"]] + [p for p in PROVIDERS if p != cfg["provider"]]
@@ -424,6 +546,10 @@ class AirRadarSource(Source):
         self._last_poll = time.time()
         rows = payload.get("ac") or payload.get("aircraft") or []
 
+        adesso = time.time()
+        self._tracce = {k: v for k, v in self._tracce.items()
+                        if adesso - v[2] < MEMORIA_TRACCE_S}
+
         found = []
         for row in rows:
             try:
@@ -431,7 +557,22 @@ class AirRadarSource(Source):
                 plane_lon = float(row.get("lon"))
             except (TypeError, ValueError):
                 continue
-            distance = haversine_km(lat, lon, plane_lat, plane_lon)
+            chiave = (row.get("hex") or "").strip().upper()
+            # L'istante vero della posizione: il provider dice da quanti
+            # secondi non la aggiorna, e a 200 m/s anche dieci secondi sono
+            # due chilometri.
+            try:
+                t_pos = adesso - max(0.0, float(row.get("seen_pos") or 0.0))
+            except (TypeError, ValueError):
+                t_pos = adesso
+            precedente = self._tracce.get(chiave) if chiave else None
+            if chiave:
+                self._tracce[chiave] = (plane_lat, plane_lon, t_pos)
+            distance, come = avvicinamento_minimo(
+                (lat, lon),
+                {"lat": plane_lat, "lon": plane_lon,
+                 "gs": row.get("gs"), "track": row.get("track")},
+                t_pos, precedente, intervallo)
             if distance > radius_km:
                 if distance <= radius_km + margine:
                     self._ricorda_vicino(row, distance)
@@ -458,7 +599,10 @@ class AirRadarSource(Source):
                 "speed": row.get("gs"),
                 "track": row.get("track"),
                 "squawk": (row.get("squawk") or "").strip(),
+                # La distanza minima di passaggio, non quella del momento:
+                # e' il numero che risponde a «quanto vicino e' passato».
                 "distance": distance,
+                "passaggio": come,
                 "lat": plane_lat,
                 "lon": plane_lon,
             })
@@ -585,7 +729,20 @@ class AirRadarSource(Source):
         return sorted(self._vicini, key=lambda v: -v["quando"])
 
     def _log_flights(self, aircraft, cfg):
-        """Scrive una riga per ogni volo, una sola volta per passaggio."""
+        """Scrive una riga per ogni volo, una sola volta per passaggio.
+
+        **Nel registro va quello che e' successo, non quello che sta per
+        succedere.** Dalla 16.4 un aereo compare sul pannello anche sulla
+        previsione -- rotta e velocita' dicono che fra mezzo minuto passa
+        sopra casa, ed e' giusto mostrarlo *mentre* arriva invece che un giro
+        dopo. Ma una previsione non e' un passaggio: se vira, quel passaggio
+        non c'e' stato, e la distanza minima scritta nel CSV sarebbe un numero
+        che non e' mai accaduto. Il registro aspetta il giro successivo, dove
+        le due posizioni fanno un segmento e la distanza e' misurata.
+
+        Chi non si conferma non entra, ed e' il comportamento giusto: e'
+        esattamente il caso in cui non sappiamo se sia passato.
+        """
         if not cfg.get("log_enabled", True) or not aircraft:
             return
 
@@ -594,7 +751,9 @@ class AirRadarSource(Source):
         self._logged = {k: t for k, t in self._logged.items() if now - t < window}
 
         fresh = [p for p in aircraft
-                 if (p["hex"] or p["flight"]) and (p["hex"] or p["flight"]) not in self._logged]
+                 if (p["hex"] or p["flight"])
+                 and (p["hex"] or p["flight"]) not in self._logged
+                 and p.get("passaggio") != "previsto"]
         if not fresh:
             return
 

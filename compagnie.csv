@@ -244,3 +244,19 @@ JSF,Jet Stream,Jet Stream Charter
 LNX,Luxaviation UK,Luxaviation UK
 JNY,Journey Aviation,Journey Aviation
 AMB,DRF Luftrettung,DRF Luftrettung
+
+# Aggiunte nella 16.4 dai passaggi registrati sul campo. Quasi tutta
+# aviazione d'affari, piu' una di Stato: sono gli operatori che un catalogo
+# commerciale non elenca, e che compaiono qui perche' passano davvero sopra
+# casa. Il nome e' quello dell'operatore, non del proprietario dell'aereo.
+ELI,Elio Jet,Elio Jet
+RMB,Air Adriatic,Air Adriatic
+FIZ,Let's Fly,Let's Fly Helicopter & Jet
+GAV,Global Reach,Global Reach Aviation
+IEI,Esercito,Aviazione dell'Esercito Italiano
+SUZ,Zeusch,Zeusch Aviation
+XMT,FCM Jets,FCM Jets
+# Questa sigla l'ho trovata su una fonte sola, e la lascio segnata: se un
+# giorno il nome sul pannello non torna con l'aereo che si vede passare,
+# questa e' la riga da correggere per prima.
+JTH,JetHouse,JetHouse

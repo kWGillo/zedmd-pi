@@ -1,4 +1,4 @@
-03004847c1d49cbffaa07bf2351ab0c9  aerei.csv
+a17ed8cfaf9bae3390d1f91d9c3000d3  aerei.csv
 08c3469c3a1911510abcd22e0ce19238  aeroporti.csv
 ebdccc3875a93eba4f6eb06f6912436c  allerte.py
 13e95841fe78d3774935f35182209ae3  autotune.py
@@ -8,7 +8,7 @@ ebdccc3875a93eba4f6eb06f6912436c  allerte.py
 317b5c25e3823c1d8ab42e17a361118b  catalogo-aeroporti.csv
 9ef07da26b85673808aef01a1b2ee2fd  catalogo-compagnie.csv
 5d9b8ba9b76ce93f8fb49810ec675684  cielo.py
-fde7157614ba1d6353d7f2ea0612e6c9  compagnie.csv
+1837439b1bf3899e8b57cd757cac73bb  compagnie.csv
 12f95f900631c29be5386812760db42b  compleanni.py
 dffdb5951d4776068d87865067fb4195  congela.py
 f4da634c02da1d2d9c2bf600287d09c3  copertine.py
@@ -16,6 +16,8 @@ f4da634c02da1d2d9c2bf600287d09c3  copertine.py
 323e7433e983c9d3b69e8f5caadcc395  diagnostica/genera_domande.py
 8475027d8a5b75dac3cdad504cd7d5da  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
+826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
+3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
 a508962738ddb4832dd5cca7d6795e9f  diagnostica/traduzioni.tsv
 ea2b0d24ff1827bdf031ed8393dc6db8  display.py
@@ -59,7 +61,7 @@ c05a1ffb6fadd1bf3bc93852e683c453  satelliti.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 7ee163e5c89f7ac983b26ae09a1a4b92  setup_share.sh
 be7a53f3a370b2550970f7cdb510bc53  sources/__init__.py
-09e41ccca7a0f91ade61fbfefe602f47  sources/airradar.py
+74e731b5a4332bae5a6f322c0b68bade  sources/airradar.py
 4839d9f4d5cbf59bfe83a946f7c272ee  sources/anteprima.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
 d231417597b54592614b20b12ac8b82d  sources/base.py
@@ -166,7 +168,7 @@ dd535a2225eb95cd2648a2c26ffbcafb  templates/statusplayer.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 2bc1da7de80749f0587cfc1c2c56f8fd  templates/updates.html
-15bddb40cf25545ab137e2bf44b0dff8  version.py
+24b027e759f71fdf431175c0cfe49e57  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 79bf1d80ae2acf509c0504136c8ca1d3  webui.py

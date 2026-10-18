@@ -2922,6 +2922,29 @@ Storico:
        di tempo, e con centocinquanta oggetti la sera restava fuori. Adesso i
        tetti sono due. E gli oggetti del gruppo visual hanno un promemoria
        solo, al preavviso: ISS e CSS mantengono il giro intero.
+  16.4 **Air Radar: gli aerei che passano sopra casa non si perdono piu'.**
+       Si interrogava solo il raggio piu' il margine, e fra due giri un aereo
+       veloce percorre piu' strada di quanto sia largo il cerchio: con 1,5 km
+       e 40 s un liner ci sta dentro una decina di secondi, e il radar lo
+       vedeva solo se l'interrogazione cadeva li'. Adesso si interroga largo
+       quanto la corsa possibile fra due giri (`raggio_di_ascolto`) e il
+       passaggio si decide sulla traiettoria: tratto fra le due ultime
+       posizioni e tratto previsto con rotta e velocita' fino al giro dopo
+       (`avvicinamento_minimo`). La distanza registrata e' quella minima di
+       passaggio.
+       Nel registro pero' va quello che e' **successo**: un passaggio soltanto
+       previsto si mostra sul pannello e aspetta la conferma del giro dopo,
+       altrimenti un aereo che vira lascerebbe nel CSV una distanza minima mai
+       accaduta. E il raggio di interrogazione ha un tetto, li' dove due
+       posizioni smettono di potersi unire con un segmento: senza, con
+       l'intervallo a un'ora si sarebbero chieste cinquecento miglia nautiche
+       a ogni giro a un servizio gratuito.
+       Le prove tornano dentro il progetto, in `diagnostica/`: vivevano in una
+       cartella di servizio fuori dal repository e sono sparite con lei,
+       ottanta file. Con loro `rifai_manifest.sh`, che genera le impronte che
+       `verify.sh` controllava da sempre senza che niente le scrivesse.
+       Dodici sigle nuove dai passaggi sul campo: otto operatori, e quattro
+       che non sono aeromobili ma mezzi di terra (GND, SERV, TWR, EMER).
 """
 
-__version__ = "16.3"
+__version__ = "16.4"

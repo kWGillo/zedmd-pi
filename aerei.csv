@@ -245,3 +245,14 @@ C150,Cessna 150,Cessna 150 / A150 Aerobat
 GLAS,Glasair,Stoddard-Hamilton Glasair
 MM22,Magni M-22,Magni Gyro M-22 Voyager
 TRAL,Groppo Trail,Groppo Trail
+
+# Aggiunti nella 16.4, e non sono aeromobili. Sono le sigle che i ricevitori
+# della rete mettono nel campo del modello per quello che **sta a terra**:
+# mezzi di servizio dell'aeroporto, stazioni fisse. Non stanno nel Doc 8643
+# dell'ICAO, stanno nelle tabelle di tar1090 e readsb -- ed e' giusto
+# tradurle, perche' altrimenti sul pannello compare la sigla nuda e sembra un
+# aereo sconosciuto invece di un furgone.
+GND,Veicolo a terra,Veicolo di servizio a terra
+SERV,Mezzo servizio,Mezzo di servizio aeroportuale
+TWR,Torre,Stazione fissa o torre di controllo
+EMER,Mezzo soccorso,Mezzo di soccorso a terra

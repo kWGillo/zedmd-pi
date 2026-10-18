@@ -2,6 +2,87 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [16.4]
+
+### Air Radar: gli aerei che passano sopra casa non si perdono più
+
+*«Sono appena passati due aerei sopra la mia testa, li ho visti benissimo, e il
+DMD non li ha segnalati.»*
+
+Con il raggio a 1,5 km il radar non vedeva quasi niente, e non per sfortuna.
+Al provider si chiedeva il raggio più il margine, arrotondato a miglia: 2 NM,
+3,7 km. Fra due interrogazioni a 40 secondi un aereo in crociera percorre una
+decina di chilometri, e dentro un cerchio da 3 km di diametro ci sta in media
+una decina di secondi. Lo si vedeva solo se l'interrogazione cadeva proprio
+lì. In simulazione, su mille passaggi entro 1,5 km il vecchio metodo ne
+coglieva il 36%, e **la metà di quelli passati esattamente sopra la testa**.
+
+Adesso si interroga largo quanto la strada che un aereo può fare fra due giri
+(`raggio_di_ascolto`: a 40 s sono 13 km), e il passaggio si decide sulla
+traiettoria e non sul singolo punto (`avvicinamento_minimo`):
+
+- il **tratto** fra la posizione precedente e quella attuale dello stesso
+  aereo: se passa dentro il raggio, è passato, anche se nessuna delle due
+  posizioni ci cadeva;
+- il **tratto previsto** con rotta e velocità fino all'interrogazione
+  successiva: così l'aereo compare sul pannello mentre arriva, e non un giro
+  dopo quando è già lontano.
+
+La posizione si data con `seen_pos`, perché a 200 m/s anche pochi secondi di
+ritardo del provider sono chilometri. Due posizioni troppo lontane nel tempo
+(oltre 150 s) non si uniscono, e un salto impossibile si scarta come dato
+sbagliato. Nella stessa simulazione: 100% dei passaggi entro il raggio, nessun
+falso positivo fra 1,5 e 3 km.
+
+La distanza nel registro e sul pannello è adesso quella **minima di
+passaggio**, che è la risposta a «quanto vicino è passato»; latitudine e
+longitudine restano quelle della posizione letta. Le colonne del CSV non
+cambiano, quindi il registro non viene rinominato.
+
+**Nel registro va però quello che è successo, non quello che sta per
+succedere.** La previsione è giusta per il pannello — mostrare l'aereo mentre
+arriva è tutto il punto — ma una previsione non è un passaggio: se vira, nel
+CSV resterebbe una distanza minima che non è mai accaduta. Un passaggio solo
+previsto quindi si mostra e aspetta: al giro dopo il tratto lo conferma, con
+la distanza misurata. Chi non si conferma non entra, ed è esattamente il caso
+in cui non sappiamo se sia passato.
+
+**E il raggio di interrogazione ha un tetto.** L'intervallo si regola fino a
+un'ora dalla pagina Radar: senza tetto, a 3600 secondi si sarebbero chieste
+cinquecento miglia nautiche a ogni giro a un servizio pubblico e gratuito — il
+modo più rapido per farsi bloccare, e per niente, perché due posizioni lontane
+nel tempo più di 150 secondi non si uniscono comunque. Il tetto sta lì, dove
+il tratto smette di potersi fare: oltre, guardare più lontano non aggiunge un
+passaggio, aggiunge solo traffico.
+
+### Le prove tornano nel progetto
+
+La simulazione che dimostra tutto questo — duemila aerei con rotta, velocità e
+fase casuali, vecchio metodo contro nuovo — adesso sta in
+`diagnostica/prova_passaggi_radar.py`, dentro il repository. Le prove di
+questo progetto vivevano in una cartella di servizio fuori dal repo: quando
+quella cartella è sparita se le è portate via tutte, ottanta file, e non c'era
+copia da nessuna parte. **Una prova che non sta nel progetto non esiste.**
+
+Accanto c'è `diagnostica/rifai_manifest.sh`, che genera le impronte dei due
+manifest: `verify.sh` le controllava da sempre, ma nel repository non c'era
+niente che le **scrivesse**, e anche quella regola viveva fuori.
+
+### Sigle nuove dai passaggi registrati
+
+Otto operatori e quattro sigle di terra, prese dall'elenco delle sigle non
+tradotte della pagina Radar. Gli operatori sono quasi tutti aviazione
+d'affari — Elio Jet, Air Adriatic, Let's Fly Helicopter & Jet, Global Reach
+Aviation, Zeusch Aviation, FCM Jets, JetHouse — più l'Aviazione dell'Esercito
+Italiano.
+
+Le altre quattro non sono aeromobili: `GND`, `SERV`, `TWR` ed `EMER` sono le
+sigle che i ricevitori della rete mettono nel campo del modello per quello che
+sta a terra — mezzi di servizio dell'aeroporto, stazioni fisse. Non stanno nel
+Doc 8643 dell'ICAO: stanno nelle tabelle di tar1090 e readsb. Tradurle serve,
+perché altrimenti sul pannello compare la sigla nuda e sembra un aereo
+sconosciuto invece di un furgone.
+
 ## [16.3]
 
 ### Satelliti: la casella «visual» torna a contare

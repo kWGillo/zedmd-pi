@@ -775,6 +775,19 @@ indica in chilometri e viene convertito in miglia nautiche; la distanza di ogni
 aereo viene poi ricalcolata con l'emisenoverso perché il filtro dell'API è
 approssimativo.
 
+**Si interroga largo e si conta stretto.** Il raggio della pagina è il raggio
+di *conteggio*: quello chiesto al provider è più grande, abbastanza da coprire
+la strada che un aereo può fare fra due interrogazioni — con 40 secondi di
+intervallo sono una decina di chilometri. Serve perché un cerchio stretto lo
+si attraversa in pochi secondi: chiedendo solo il raggio, un aereo passato
+esattamente sopra casa poteva entrare e uscire fra un giro e l'altro senza
+comparire da nessuna parte. Il passaggio si decide poi sulla **traiettoria** —
+il tratto fra le due ultime posizioni dello stesso aereo, e quello previsto
+con rotta e velocità fino al giro successivo — quindi il raggio si può
+abbassare a qualche centinaio di metri senza perdere passaggi. La distanza
+registrata è la minima di passaggio, non quella del momento in cui si è
+guardato.
+
 La rotta origine → destinazione arriva dal servizio `routeset` di adsb.lol
 (`POST https://api.adsb.lol/api/0/routeset`), che accetta fino a 100 voli per
 richiesta: tutte le rotte di un giro si ottengono con una sola chiamata.
