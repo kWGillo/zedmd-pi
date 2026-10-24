@@ -234,7 +234,9 @@ chiede prima all'italiano (se un giorno lo riempiranno, è suo) e poi
 all'inglese, e i nomi si **traducono**: i titoli inglesi passano da
 `langlinks`, che dà il titolo italiano quando la voce c'è anche da noi —
 *Charles the Bald* diventa *Carlo il Calvo* — e le descrizioni brevi si
-prendono in italiano. In tutto sei richieste al giorno.
+prendono in italiano, nella stessa chiamata che chiede anche quante volte
+quella pagina è stata letta nell'ultimo mese. I titoli viaggiano a gruppi di
+cinquanta, il massimo per chiamata: una manciata di richieste al giorno.
 
 Si chiede **una volta al giorno** e si tiene in cache, quindi:
 
@@ -242,9 +244,20 @@ Si chiede **una volta al giorno** e si tiene in cache, quindi:
 - se la rete manca del tutto, la seconda schermata non compare e basta;
 - se la rete torna, alla mezz'ora dopo c'è di nuovo tutto.
 
-Si prendono i sei nati e i sei morti più recenti — sono quelli che uno
-riconosce — e a ogni passaggio ne compare uno per tipo, a rotazione: due
-passaggi di fila non dicono la stessa cosa.
+Si prendono i sei nati e i sei morti **più letti su it.wikipedia nell'ultimo
+mese**, e a ogni passaggio ne compare uno per tipo, a rotazione: due passaggi
+di fila non dicono la stessa cosa.
+
+Fino alla 16.4 si prendevano i sei più recenti, «perché sono quelli che uno
+riconosce»: per i fatti è vero, per le persone è il contrario. L'anno di
+nascita più recente seleziona chi è appena arrivato — di un calciatore nato
+nel 1997 Wikipedia sa tutto perché è di oggi, non perché sia famoso — e
+l'anno di morte più recente inchioda la schermata ai necrologi dell'anno
+scorso per dodici mesi. Le letture del mese dicono invece quanta gente, in
+Italia, è andata davvero a cercare quella persona. Quando non si sanno —
+rete caduta a metà, wiki senza l'estensione che le conta — i nomi si pescano
+**a ventaglio** sull'arco degli anni: meglio sei nomi sparsi su tre secoli
+che sei coetanei.
 
 I **morti** hanno la loro casella, e non è pro forma: su un pannello in cucina
 possono essere lugubri. Spenti, la seconda schermata mostra due nati e resta

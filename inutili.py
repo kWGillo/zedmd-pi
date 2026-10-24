@@ -53,7 +53,10 @@ CACHE = "inutili.json"
 # titoli inglesi si passano a `langlinks`, che per ciascuno da' il titolo
 # italiano quando la voce esiste anche da noi (Charles the Bald -> Carlo il
 # Calvo). Le descrizioni brevi si prendono in italiano con una seconda
-# chiamata. Tre richieste al giorno in tutto.
+# chiamata, che nello stesso giro chiede anche quante volte quella pagina e'
+# stata letta nell'ultimo mese: e' il metro con cui si sceglie chi mostrare.
+# I titoli vanno a gruppi di cinquanta, che e' il massimo per chiamata: una
+# manciata di richieste al giorno in tutto.
 API = "https://%s.wikipedia.org/api/rest_v1/feed/onthisday/%s/%02d/%02d"
 LINGUA = "it"
 LINGUA_FEED = "en"
@@ -63,6 +66,8 @@ API_QUERY = "https://%s.wikipedia.org/w/api.php"
 AGENTE = "zedmd-pi/1.0 (https://github.com/kWGillo/zedmd-pi) info-inutili"
 TIMEOUT = 12
 QUANTI = 6                  # nati e morti da tenere in cache, per tipo
+ROSA = 40                   # tetto ai candidati per tipo, prima di scegliere
+GIORNI_VISTE = 30           # su quanti giorni si contano le letture
 EVENTI = 8                  # fatti storici da tenere in cache
 MESI_IT = ("gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
            "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre")
@@ -256,61 +261,159 @@ def _query(lingua, parametri):
         return {}
 
 
-def _in_italiano(titoli):
-    """{titolo inglese: titolo italiano} per quelli che da noi esistono."""
-    fuori = {}
-    if not titoli:
-        return fuori
-    dati = _query(LINGUA_FEED, {"action": "query", "prop": "langlinks",
-                                "lllang": LINGUA, "lllimit": "max",
-                                "redirects": "1",
-                                "titles": "|".join(titoli[:50])})
+def _a_pezzi(titoli, quanti=50):
+    """I titoli a gruppi: l'API ne accetta cinquanta per volta."""
+    return [titoli[i:i + quanti] for i in range(0, len(titoli), quanti)]
+
+
+def _pagine(dati):
+    """L'elenco delle pagine di una risposta, nei due formatversion."""
     pagine = ((dati.get("query") or {}).get("pages")) or []
     if isinstance(pagine, dict):                  # formatversion 1
         pagine = list(pagine.values())
-    for pagina in pagine:
-        collegamenti = pagina.get("langlinks") or []
-        for collegamento in collegamenti:
-            titolo = collegamento.get("title") or collegamento.get("*")
-            if titolo:
-                fuori[pagina.get("title", "")] = titolo
-                break
-    return fuori
+    return pagine
 
 
-def _descrizioni(titoli):
-    """La descrizione breve italiana di ogni titolo, quando c'e'."""
+def _in_italiano(titoli):
+    """{titolo inglese: titolo italiano} per quelli che da noi esistono."""
     fuori = {}
-    if not titoli:
-        return fuori
-    dati = _query(LINGUA, {"action": "query", "prop": "description",
-                           "redirects": "1", "titles": "|".join(titoli[:50])})
-    pagine = ((dati.get("query") or {}).get("pages")) or []
-    if isinstance(pagine, dict):
-        pagine = list(pagine.values())
-    for pagina in pagine:
-        if pagina.get("description"):
-            fuori[pagina.get("title", "")] = pagina["description"]
+    for gruppo in _a_pezzi(titoli):
+        dati = _query(LINGUA_FEED, {"action": "query", "prop": "langlinks",
+                                    "lllang": LINGUA, "lllimit": "max",
+                                    "redirects": "1",
+                                    "titles": "|".join(gruppo)})
+        for pagina in _pagine(dati):
+            collegamenti = pagina.get("langlinks") or []
+            for collegamento in collegamenti:
+                titolo = collegamento.get("title") or collegamento.get("*")
+                if titolo:
+                    fuori[pagina.get("title", "")] = titolo
+                    break
     return fuori
 
 
-def traduci(voci):
-    """Da [(anno, nome inglese, mestiere)] a [(anno, nome italiano, mestiere)].
+# Se questa wiki non sa contare le letture -- `prop=pageviews` e' un'estensione,
+# non il nucleo di MediaWiki -- lo si scopre alla prima chiamata e non si
+# insiste piu' per tutta la vita del processo.
+_VISTE = True
 
-    Se la traduzione non riesce -- rete che cade a meta', voce che da noi non
-    c'e' -- resta quello che c'era: un nome inglese e' meglio di niente, e
-    quasi sempre e' anche lo stesso nome.
+
+def _schede(titoli):
+    """{titolo: (descrizione breve, letture dell'ultimo mese)}.
+
+    Due informazioni in una chiamata sola, perche' arrivano dalla stessa
+    pagina della stessa wiki e perche' il budget di questo modulo e' di tre
+    richieste al giorno.
+    """
+    global _VISTE
+    fuori = {}
+    for gruppo in _a_pezzi(titoli):
+        comuni = {"action": "query", "redirects": "1",
+                  "titles": "|".join(gruppo)}
+        dati = {}
+        if _VISTE:
+            dati = _query(LINGUA, dict(comuni, prop="description|pageviews",
+                                       pvipdays=str(GIORNI_VISTE)))
+            if dati.get("error"):
+                # Il server ha risposto e si e' lamentato: le letture qui non
+                # ci sono. Si chiede la sola descrizione, oggi e per sempre.
+                _VISTE = False
+                dati = {}
+            elif not dati:
+                continue      # rete giu': niente descrizioni e niente conti
+        if not dati:
+            dati = _query(LINGUA, dict(comuni, prop="description"))
+        for pagina in _pagine(dati):
+            viste = 0
+            for giorno in (pagina.get("pageviews") or {}).values():
+                if isinstance(giorno, int):
+                    viste += giorno
+            fuori[pagina.get("title", "")] = (pagina.get("description") or "",
+                                              viste)
+    return fuori
+
+
+def rifinisci(voci, tradurre=None):
+    """Da [(anno, nome, mestiere)] a [(anno, nome, mestiere, letture)].
+
+    Il nome passa all'italiano quando da noi la voce esiste, la descrizione
+    diventa quella breve di it.wikipedia, e in piu' si porta dietro quante
+    volte quella pagina e' stata letta nell'ultimo mese.
+
+    `tradurre` e' una lista di bool lunga come `voci` -- i nomi che vengono
+    dal feed inglese -- oppure None per tradurli tutti. Se qualcosa non
+    riesce -- rete che cade a meta', voce che da noi non c'e' -- resta quello
+    che c'era: un nome inglese e' meglio di niente, e quasi sempre e' anche
+    lo stesso nome.
     """
     if not voci:
-        return voci
+        return []
+    if tradurre is None:
+        tradurre = [True] * len(voci)
     nomi = [v[1] for v in voci]
-    italiani = _in_italiano(nomi)
-    descrizioni = _descrizioni(sorted(set(italiani.values()))) if italiani else {}
+    italiani = _in_italiano([n for n, t in zip(nomi, tradurre) if t])
+    finali = [italiani.get(n, n) if t else n for n, t in zip(nomi, tradurre)]
+    schede = _schede(sorted(set(finali)))
     fuori = []
-    for anno, nome, mestiere in voci:
-        tradotto = italiani.get(nome, nome)
-        fuori.append((anno, tradotto, descrizioni.get(tradotto) or mestiere))
+    for (anno, _inglese, mestiere), titolo in zip(voci, finali):
+        descrizione, viste = schede.get(titolo, ("", 0))
+        fuori.append((anno, titolo, descrizione or mestiere, viste))
     return fuori
+
+
+def _a_ventaglio(voci, quanti):
+    """`quanti` voci sparse il piu' possibile su tutto l'arco degli anni.
+
+    Il feed di un giorno qualunque ha molti piu' nati recenti che antichi --
+    di chi e' nato nel 1998 Wikipedia sa tutto, del 1498 sa chi e' rimasto --
+    percio' tenere le prime sei dopo un ordinamento per anno vuol dire
+    mostrare sempre e solo gli ultimi arrivati.
+
+    Nemmeno pescare a passo costante nell'elenco basta: il passo e' sugli
+    indici, e dove i nomi si affollano -- trenta calciatori in trent'anni --
+    il ventaglio si affolla con loro. Si prendono allora i due estremi e poi,
+    ogni volta, l'anno piu' **lontano** da quelli gia' presi: cosi' lo spazio
+    coperto e' quello degli anni, non quello della lista.
+    """
+    if quanti <= 0:
+        return []
+    ordinate = sorted(voci, key=lambda v: -v[0])
+    if len(ordinate) <= quanti:
+        return ordinate
+    if quanti == 1:
+        return [ordinate[0]]
+    presi = {0, len(ordinate) - 1}
+    while len(presi) < quanti:
+        migliore, distanza = None, -1
+        for i, voce in enumerate(ordinate):
+            if i in presi:
+                continue
+            sua = min(abs(voce[0] - ordinate[j][0]) for j in presi)
+            if sua > distanza:
+                migliore, distanza = i, sua
+        presi.add(migliore)
+    return [ordinate[i] for i in sorted(presi)]
+
+
+def _i_piu_letti(voci, quanti):
+    """Le `quanti` voci piu' lette su Wikipedia, in ordine di anno.
+
+    E' la misura piu' onesta di "famoso" che possa chiedere un pannello in
+    cucina: quanta gente e' andata a leggere quella pagina nell'ultimo mese.
+    Non premia chi e' nato di recente ne' chi e' morto l'anno scorso, premia
+    chi qualcuno cerca ancora.
+
+    Quando le letture non si sanno -- wiki senza l'estensione, rete caduta a
+    meta' -- si torna al ventaglio: meglio sei nomi sparsi su tre secoli che
+    sei coetanei.
+    """
+    if not voci:
+        return []
+    if max(v[3] for v in voci) <= 0:
+        scelte = _a_ventaglio(voci, quanti)
+    else:
+        scelte = sorted(voci, key=lambda v: (-v[3], -v[0]))[:quanti]
+    return [tuple(v[:3]) for v in sorted(scelte, key=lambda v: -v[0])]
 
 
 def _persona(voce):
@@ -369,21 +472,23 @@ def scarica(quando=None, tipi=("births", "deaths")):
                     voci.append(persona)
             if voci:
                 break
-        # Dalle piu' recenti: sono quelle che uno riconosce.
-        voci.sort(key=lambda v: -v[0])
-        fuori[etichetta] = voci[:QUANTI]
+        # Una rosa larga e sparsa su tutti i secoli: la scelta vera si fa
+        # dopo, sulle letture, e si puo' fare solo su chi e' in lista.
+        fuori[etichetta] = _a_ventaglio(voci, ROSA)
         da_tradurre[etichetta] = lingua != LINGUA
     if not any(fuori.values()):
         return None, "Wikipedia non ha nati ne' morti per oggi"
-    # I nomi si traducono tutti insieme, nati e morti: due chiamate in tutto
-    # invece di due per lista.
-    insieme = [v for etichetta, voci in fuori.items() if da_tradurre.get(etichetta)
-               for v in voci]
-    if insieme:
-        tradotti = dict(zip([v[1] for v in insieme], traduci(insieme)))
-        for etichetta, voci in fuori.items():
-            if da_tradurre.get(etichetta):
-                fuori[etichetta] = [tradotti.get(v[1], v) for v in voci]
+    # Nomi, descrizioni e letture si chiedono per nati e morti insieme: due
+    # chiamate in tutto invece di due per lista.
+    etichette = [e for e in fuori if fuori[e]]
+    insieme = [v for e in etichette for v in fuori[e]]
+    bandiere = [da_tradurre.get(e, False) for e in etichette for _ in fuori[e]]
+    rifinite = rifinisci(insieme, bandiere)
+    da = 0
+    for etichetta in etichette:
+        quante = len(fuori[etichetta])
+        fuori[etichetta] = _i_piu_letti(rifinite[da:da + quante], QUANTI)
+        da += quante
     return fuori, ""
 
 

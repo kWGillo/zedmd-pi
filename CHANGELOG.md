@@ -2,6 +2,56 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [16.5]
+
+### Informazioni inutili: nati e morti famosi, non recenti
+
+*«Il display mostra sempre nati nella seconda metà degli anni 90 e morti nel
+2024.»*
+
+Una riga sola, con una giustificazione che sembrava buona:
+
+```python
+# Dalle piu' recenti: sono quelle che uno riconosce.
+voci.sort(key=lambda v: -v[0])
+fuori[etichetta] = voci[:QUANTI]
+```
+
+Per i **fatti** è vero — un fatto recente è un fatto che hai vissuto — e per
+«accadde oggi» quella regola è rimasta. Per le **persone** è esattamente il
+contrario. L'anno di nascita più recente seleziona chi è appena arrivato: di
+un calciatore nato nel 1997 Wikipedia sa tutto perché è di oggi, non perché
+sia famoso, e in una giornata qualunque i nati dopo il 1985 sono più numerosi
+di tutti gli altri secoli messi insieme. L'anno di morte più recente, dal
+canto suo, inchioda la schermata ai necrologi dell'anno scorso e ce li tiene
+per dodici mesi.
+
+**La fama non si misura con l'orologio.** Fra i candidati del giorno si
+tengono adesso i sei **più letti su it.wikipedia nell'ultimo mese**: è il
+numero che dice quanta gente, in Italia, è andata davvero a cercare quella
+persona. Non premia chi è nato di recente né chi è morto l'anno scorso,
+premia chi qualcuno cerca ancora.
+
+Le letture arrivano nella stessa chiamata delle descrizioni brevi
+(`prop=description|pageviews`, trenta giorni), quindi non costano una
+richiesta in più; i titoli viaggiano a gruppi di cinquanta, che è il massimo
+per chiamata. Se la wiki le letture non le conta — `pageviews` è
+un'estensione, non il nucleo di MediaWiki — il server risponde con un errore,
+lo si scopre alla prima chiamata e non si insiste più.
+
+**Senza letture non si torna al difetto.** Rete caduta a metà o estensione
+assente, i nomi si pescano **a ventaglio** sull'arco degli anni: si prendono i
+due estremi e poi, ogni volta, l'anno più lontano da quelli già presi. Non a
+passo costante nell'elenco, perché il passo è sugli indici e dove trenta
+coetanei si affollano il ventaglio si affollerebbe con loro. Meglio sei nomi
+sparsi su tre secoli che sei coetanei.
+
+La prova sta in `diagnostica/prova_nati_e_morti.py`: trentaquattro controlli
+con Wikipedia simulata, compreso quello che **riproduce la segnalazione** con
+la vecchia regola — sei nati tutti dal 1990 in poi, sei morti tutti del 2024 —
+e quelli sul numero di richieste, sulla wiki senza `pageviews` e sulla rete
+che cade a metà.
+
 ## [16.4]
 
 ### Air Radar: gli aerei che passano sopra casa non si perdono più

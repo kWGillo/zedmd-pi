@@ -2945,6 +2945,30 @@ Storico:
        `verify.sh` controllava da sempre senza che niente le scrivesse.
        Dodici sigle nuove dai passaggi sul campo: otto operatori, e quattro
        che non sono aeromobili ma mezzi di terra (GND, SERV, TWR, EMER).
+  16.5 **Informazioni inutili: nati e morti famosi, non recenti.** Il pannello
+       mostrava sempre nati nella seconda meta' degli anni Novanta e morti nel
+       2024, e la causa era una riga sola con una giustificazione che sembrava
+       buona: «dalle piu' recenti, sono quelle che uno riconosce». Per i
+       **fatti** e' vero, ed e' rimasta. Per le **persone** e' il contrario:
+       l'anno di nascita piu' recente seleziona chi e' appena arrivato -- di
+       un calciatore del 1997 Wikipedia sa tutto perche' e' di oggi, non
+       perche' sia famoso -- e l'anno di morte piu' recente inchioda la
+       schermata ai necrologi dell'anno scorso per dodici mesi.
+       Adesso la fama non si misura con l'orologio: fra i candidati del giorno
+       si tengono i sei **piu' letti su it.wikipedia nell'ultimo mese**, che
+       e' il numero che dice quanta gente in Italia e' andata davvero a
+       cercarli. Le letture arrivano nella stessa chiamata delle descrizioni
+       brevi (`prop=description|pageviews`), quindi non costano una richiesta
+       in piu'; i titoli viaggiano a gruppi di cinquanta, il massimo per
+       chiamata. Se quella wiki le letture non le conta, lo si scopre alla
+       prima risposta e non si insiste piu'.
+       Senza letture non si torna al difetto: i nomi si pescano **a
+       ventaglio** sull'arco degli anni, prendendo ogni volta l'anno piu'
+       lontano da quelli gia' presi -- non a passo costante nell'elenco, che
+       dove i coetanei si affollano si affollerebbe con loro.
+       La prova sta in `diagnostica/prova_nati_e_morti.py`: trentaquattro
+       controlli, compreso quello che riproduce la segnalazione con la
+       vecchia regola.
 """
 
-__version__ = "16.4"
+__version__ = "16.5"

@@ -16,6 +16,7 @@ f4da634c02da1d2d9c2bf600287d09c3  copertine.py
 323e7433e983c9d3b69e8f5caadcc395  diagnostica/genera_domande.py
 8475027d8a5b75dac3cdad504cd7d5da  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
+6f6f3eda48e12c7f3baf5f9cbe1efda0  diagnostica/prova_nati_e_morti.py
 826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
 3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
@@ -41,7 +42,7 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 e45d351b601929bd837040f66702dfe0  hass.py
 6dff2884153d230408bf04d066c8f25c  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
-7fe7fb617ddfdac829b0ee4990572ced  inutili.py
+1ac13b80fea00e4ef49841661298ea1a  inutili.py
 25fa37c1928c04e04e0724461d0140b6  libcheck.py
 33804e1f60d47bc20ea370bb2e0b6502  lookup.py
 501367bdb38413b33dbd3b3c5fe8bb17  metadati.py
@@ -168,7 +169,7 @@ dd535a2225eb95cd2648a2c26ffbcafb  templates/statusplayer.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 2bc1da7de80749f0587cfc1c2c56f8fd  templates/updates.html
-24b027e759f71fdf431175c0cfe49e57  version.py
+147219ad854ab1102757907aef714949  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 79bf1d80ae2acf509c0504136c8ca1d3  webui.py
