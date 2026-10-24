@@ -35,6 +35,7 @@ import lookup
 import rifiuti
 import scadenze
 import nowplaying
+import piattaforma
 import presets
 import ota
 import pulizia
@@ -266,6 +267,7 @@ def create_app(runtime):
             sleeping=runtime.sleeping, night=runtime.night,
             presets=presets.choices(cfg["panel"]),
             preset_now=presets.detect(cfg["panel"]),
+            pannello_possibile=piattaforma.pannello_possibile(),
             taratura=autotune.stato(), taratura_in_corso=autotune.in_corso(),
             cablaggi=presets.CABLAGGI,
             config_result=request.args.get("config_result"),
@@ -2556,6 +2558,88 @@ def create_app(runtime):
         if request.form.get("restart") == "1":
             subprocess.Popen(["systemctl", "restart", "dmd"])
         return redirect(url_for("page_settings"))
+
+    @app.route("/video")
+    def page_video():
+        """Dove finisce il disegno: il pannello LED, o un monitor.
+
+        Dalla 17.0 sono due cose diverse, e questa pagina e' l'unico posto
+        dove si scelgono. Mostra prima quello che **sta succedendo adesso**
+        -- che macchina e', dove sta andando il disegno, quanto e' grande la
+        tela e di quanto viene ingrandita -- perche' il primo motivo per
+        aprirla e' che il vetro e' nero e si vuole sapere perche'.
+        """
+        import display as uscita_video
+        schermo = getattr(runtime.display, "compositore", None)
+        return render_template(
+            "video.html", cfg=cfg,
+            macchina=piattaforma.nome(),
+            pannello_possibile=piattaforma.pannello_possibile(),
+            uscita=uscita_video.uscita_scelta(cfg),
+            motivo=getattr(runtime.display, "motivo", ""),
+            tela_largo=runtime.display.width, tela_alto=runtime.display.height,
+            schermo_largo=schermo.schermo[0] if schermo else 0,
+            schermo_alto=schermo.schermo[1] if schermo else 0,
+            scala=schermo.scala if schermo else 0,
+            page="video")
+
+    @app.route("/api/video", methods=["POST"])
+    def api_video():
+        """L'uscita, la risoluzione, la finestra: tutte cose da riavvio.
+
+        La matrice e la superficie si creano una volta sola, all'avvio, e la
+        misura della tela viene passata alle sorgenti li' e congelata. Non
+        c'e' niente da applicare a caldo, ed e' la stessa ragione per cui la
+        taratura del pannello riavvia il servizio.
+        """
+        conf = cfg["video"]
+        scelta = (request.form.get("uscita") or "auto").strip().lower()
+        conf["uscita"] = (scelta if scelta in ("auto", "pannello", "schermo")
+                          else "auto")
+        conf["risoluzione"] = (request.form.get("risoluzione") or "").strip()[:16]
+        finestra = (request.form.get("finestra") or "auto").strip().lower()
+        conf["finestra"] = finestra if finestra in ("auto", "si", "no") else "auto"
+        dmdconf.save()
+        if request.form.get("restart") == "1":
+            subprocess.Popen(["systemctl", "restart", "dmd"])
+        return redirect(url_for("page_video"))
+
+    @app.route("/api/video/filtro", methods=["POST"])
+    def api_video_filtro():
+        """Il filtro e la scala dei giochi, che valgono subito.
+
+        Questi non toccano ne' la superficie ne' la misura della tela: sono
+        numeri che il compositore legge mentre lavora, quindi si applicano
+        senza riavviare. Il compositore pero' tiene la maschera in cache, e
+        va avvisato.
+        """
+        conf = cfg["video"]
+        if request.form.get("c_e_filtro") == "1":
+            conf["filtro_dmd"] = request.form.get("filtro_dmd") == "on"
+        for chiave, basso, alto, predefinito in (
+                ("filtro_punto", 10, 100, 80),
+                ("filtro_bagliore", 0, 100, 25)):
+            try:
+                valore = max(basso, min(alto, int(
+                    request.form.get(chiave, predefinito))))
+            except (TypeError, ValueError):
+                valore = predefinito
+            conf[chiave] = valore / 100.0
+        fondo = (request.form.get("filtro_fondo") or "").strip()
+        if re.fullmatch(r"#[0-9a-fA-F]{6}", fondo or ""):
+            conf["filtro_fondo"] = fondo.lower()
+        scala = (request.form.get("scala_giochi") or "intera").strip().lower()
+        conf["scala_giochi"] = scala if scala in ("intera", "pieno") else "intera"
+        dmdconf.save()
+        compositore = getattr(runtime.display, "compositore", None)
+        if compositore is not None:
+            compositore.filtro = conf["filtro_dmd"]
+            compositore.punto = conf["filtro_punto"]
+            compositore.bagliore = conf["filtro_bagliore"]
+            compositore.fondo = conf["filtro_fondo"]
+            compositore.ridimensiona(compositore.schermo)
+        runtime._ridisegna()
+        return redirect(url_for("page_video"))
 
     @app.route("/api/update/check", methods=["POST"])
     def api_update_check():

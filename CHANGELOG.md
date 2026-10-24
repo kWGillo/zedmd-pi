@@ -2,6 +2,131 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.0]
+
+### Il programma esce dal pannello: Ubuntu, un monitor, il filtro DMD
+
+Fino alla 16.5 c'era una macchina sola — un Raspberry con un pannello LED
+attaccato ai GPIO — e cento punti del codice lo davano per scontato senza mai
+dirlo. L'installazione compilava i binding della libreria matrice o si
+fermava; l'audio scartava di proposito le schede HDMI e bcm2835; nel progetto
+non esisteva **nessun** rilevamento di piattaforma.
+
+Adesso la domanda si fa una volta sola, in `piattaforma.py`, leggendo quello
+che la macchina dice di sé (`/proc/device-tree/model`, con `/proc/cpuinfo` di
+riserva). Non l'architettura: un Pi 4 a 64 bit e un PC ARM rispondono la
+stessa cosa, e la domanda vera non è «che processore è» ma «c'è un pannello
+che posso pilotare». La risposta decide tre cose: se offrire il pannello,
+quali schede audio rimandare in seconda fila, e dove mandare il disegno.
+
+**Il pannello si offre solo su Pi 3 e 4.** La libreria di hzeller pilota il
+blocco PWM del BCM; sul Pi 5 il controller GPIO è l'RP1 e la libreria non lo
+supporta, quindi un Pi 5 qui vale come un PC. Un Compute Module 4 invece è un
+Pi 4 con i GPIO su una portante, e il pannello lì funziona.
+
+### La tela e l'uscita diventano due cose
+
+`display.width` non era solo la misura del pannello. Era anche quello che
+viene passato a una trentina di sorgenti all'avvio e congelato lì dentro, ed
+era il protocollo ZeDMD — larghezza e altezza stanno nell'handshake, e
+`/get_width` le dà al client su Batocera. Farla diventare la risoluzione di un
+monitor avrebbe rotto tre cose insieme: sorgenti tarate su 256×64 che ricevono
+una geometria per cui nessuno le ha disegnate, i giochi, e un client che
+comincia a trasmettere fotogrammi della misura sbagliata.
+
+Quindi sono due. La **tela** è ciò su cui disegnano le sorgenti e resta
+256×64; l'**uscita** è il pannello o il monitor, e sul monitor la tela viene
+ingrandita. `display.crea()` sceglie, e il `Compositore` fa i conti:
+moltiplicatore intero, centraggio, filtro, luminosità. Il compositore non
+parla con nessun dispositivo, ed è voluto — una finestra SDL non si apre su
+una macchina di sviluppo, ma il moltiplicatore e la maschera sì, e i difetti
+vivono lì.
+
+La tela a pieno schermo, con le informazioni riproporzionate al rapporto del
+monitor, è la 17.1.
+
+### Il filtro DMD
+
+Ogni pixel diventa un punto con la sua intercapedine, come su un pannello
+vero, e si spegne per avere l'immagine piena. Due scelte che vale la pena
+scrivere:
+
+- **il bagliore sta nella maschera, non in una sfocatura.** La via ovvia
+  sarebbe sfocare il fotogramma ingrandito e sommarlo: su 1792×448 sono venti
+  millisecondi, e un gioco a trenta fotogrammi al secondo li paga tutti.
+  Invece il punto si disegna una volta sola con il suo alone, e per fotogramma
+  resta una moltiplicazione. Un punto di un pannello vero è fatto così
+  davvero: un LED dietro un diffusore, non un quadrato. Misurato: 8,2 ms per
+  fotogramma a 1920×1080;
+- **il moltiplicatore è intero.** Se la tela venisse ingrandita di 7,3 volte i
+  punti cadrebbero a cavallo dei pixel e il reticolo si vedrebbe ondeggiare.
+
+**La luminosità su un monitor è una moltiplicazione.** Sul LED è un registro
+della matrice; su HDMI non esiste niente del genere, e senza questo lo slider
+della pagina e la modalità notte fingerebbero di funzionare. Viaggia dentro la
+maschera, così con il filtro acceso resta una moltiplicazione sola.
+
+### I giochi
+
+Restano 256×64 e si ingrandiscono di un intero, centrati, con il nero intorno
+— le aree non usate sono una scelta, non una mancanza. `LARGHEZZA`, `ALTEZZA`
+e `CAMPO` in `base.py` sono costanti di modulo che tutti e tredici i giochi
+importano, il campo prende i 200 pixel di sinistra e i 56 di destra sono il
+tabellone, la fisica di bongo è in pixel al secondo quadrato e il labirinto di
+gnam è arte disegnata a mano su quelle celle: portarli a proporzioni qualsiasi
+non sarebbe una moltiplicazione, sarebbe riprogettare tredici giochi.
+
+Il risultato è una funzione in un file solo. I tredici file non si toccano.
+
+### Il vetro è un accessorio quanto l'interfaccia web
+
+Su una macchina senza `rgbmatrix` il costruttore moriva, `main()` moriva con
+lui e systemd riavviava all'infinito: pannello nero, **nessuna interfaccia
+web**, e nessun modo comodo di capire perché. È lo stesso difetto che
+l'interfaccia web aveva già risolto per conto suo — «è un accessorio, se non
+parte il pannello deve comunque accendersi» — applicato nell'altro verso.
+Adesso il programma continua, stampa il motivo e lo mostra nella pagina Video.
+
+Non è un ripiego silenzioso: un pannello chiesto e non acceso **non** diventa
+una finestra senza dirlo. Sarebbe un guasto travestito da funzione.
+
+### Il contorno
+
+- **Audio.** `suoni.py` scartava hdmi, bcm2835 e headphones perché sul Pi non
+  possono suonare. Su un PC sono quello che c'è: l'elenco diventa due elenchi,
+  e su PC si rimanda in seconda fila il solo HDMI — che suona solo se il
+  monitor ha gli altoparlanti, il che è probabile ma non certo. In più si
+  accettano gli innesti ALSA (`default`, `pulse`, `pipewire`), perché su un
+  desktop il server audio tiene la scheda e `plughw:` risponde «device busy».
+- **`install.sh`** non pretende più la cartella della libreria matrice e non
+  compila i binding dove non servono — oggi era un errore fatale. Su PC
+  installa SDL, scrive `video.uscita = schermo` e accende l'audio.
+- **La taratura del pannello e la libreria matrice spariscono** dove il
+  pannello non c'è: parlerebbero di registri S-PWM e di profili di un chip che
+  non esiste, e il modo giusto di dirlo è non dirlo.
+- **Un profilo con un `profile_dir` che non esiste non lo scrive.** Il
+  percorso è quello della macchina su cui il fork è stato compilato; altrove
+  si chiede a `libcheck` dov'è davvero la libreria, e se non si sa si lascia
+  il valore che c'era.
+- **`diagnostica/` si installa intera.** `install.sh` copiava solo gli script
+  di shell mentre l'OTA copiava anche i `.py`, perché li legge dal manifest:
+  due strade diverse per gli stessi file, e un'installazione nuova che
+  `verify.sh` segnalava come incompleta.
+
+Prove nuove: `diagnostica/prova_schermo.py` (89 controlli: moltiplicatore,
+centraggio, il filtro che toglie luce e non ne aggiunge, un pixel acceso che
+finisce nella sua cella e da nessun'altra parte) e
+`diagnostica/prova_piattaforma.py` (46: i modelli, le tre risposte, la scheda
+audio scelta su un PC e su un Raspberry).
+
+### Quello che su un PC non c'è
+
+Il pulsante GPIO. La taratura del pannello, che non ha senso. La luminosità
+come registro, emulata. Tutto il resto — ZeDMD compreso, che resta 256×64 e
+viene ingrandito all'uscita — funziona. La modalità finestra vuole una
+sessione grafica dell'utente: dal servizio, che gira come root, si va a tutto
+schermo sul KMS.
+
 ## [16.5]
 
 ### Informazioni inutili: nati e morti famosi, non recenti

@@ -32,6 +32,7 @@ STRINGS = {
     # ---------------------------------------------------------------- comuni
     "app.title": ("kWGillo DMD Server", "kWGillo DMD Server"),
     "nav.settings": ("Impostazioni", "Settings"),
+    "nav.video": ("Video", "Video"),
     "nav.clock": ("Orologio", "Clock"),
     "nav.media": ("Media", "Media"),
     # La pulizia delle briciole dei Mac, nella pagina Media.
@@ -1925,6 +1926,73 @@ STRINGS = {
         "Ultimo valore di %(minuti)s minuti fa: sul pannello ci sono due trattini",
         "Last value %(minuti)s minutes ago: the panel shows two dashes"),
     "energia.status.ok": ("Sul pannello: %(valore)s", "On the panel: %(valore)s"),
+
+    # ------------------------------------------------------------------ video
+    #
+    # Dove finisce il disegno. Dalla 17.0 sono due cose -- la tela su cui le
+    # sorgenti disegnano e l'uscita dove va a finire -- e questa pagina e'
+    # l'unico posto dove si scelgono.
+    "video.title": ("Uscita video", "Video output"),
+    "video.intro": (
+        "Dove finisce il disegno: sul pannello LED, o su un monitor collegato.",
+        "Where the drawing ends up: on the LED panel, or on a monitor."),
+    "video.guasto": ("L'uscita video non si è accesa:",
+                     "The video output did not come up:"),
+    "video.macchina": ("Macchina", "Machine"),
+    "video.ora": ("Adesso disegna su", "Currently drawing on"),
+    "video.tela.ora": ("Tela", "Canvas"),
+    "video.schermo.ora": ("Schermo", "Screen"),
+    "video.solo.schermo": (
+        "Il pannello LED si offre solo su Raspberry Pi 3 e 4: la libreria "
+        "pilota il PWM del BCM.",
+        "The LED panel is offered on Raspberry Pi 3 and 4 only: the library "
+        "drives the BCM PWM."),
+    "video.dove": ("Dove disegnare", "Where to draw"),
+    "video.uscita": ("Uscita", "Output"),
+    "video.uscita.auto": ("Decide la macchina", "Let the machine decide"),
+    "video.uscita.pannello": ("Pannello LED", "LED panel"),
+    "video.uscita.schermo": ("Monitor", "Monitor"),
+    "video.uscita.hint": (
+        "«Decide la macchina» sceglie il pannello su Pi 3 e 4, il monitor su "
+        "tutto il resto.",
+        "“Let the machine decide” picks the panel on Pi 3 and 4, the "
+        "monitor elsewhere."),
+    "video.risoluzione": ("Risoluzione", "Resolution"),
+    "video.risoluzione.hint": (
+        "Vuota vale quella che c'è adesso, ed è quasi sempre la risposta "
+        "giusta.",
+        "Empty means the current one, which is almost always right."),
+    "video.finestra": ("Finestra", "Window"),
+    "video.finestra.auto": ("Se c'è un desktop", "If a desktop is running"),
+    "video.finestra.si": ("Sempre", "Always"),
+    "video.finestra.no": ("Mai, tutto schermo", "Never, full screen"),
+    "video.applica": ("Applica e riavvia", "Apply and restart"),
+    "video.riavvio": (
+        "Queste tre valgono dal riavvio: la tela si crea all'avvio e non si "
+        "cambia a caldo.",
+        "These three take effect on restart: the canvas is created at startup."),
+    "video.filtro": ("Filtro DMD", "DMD filter"),
+    "video.filtro.intro": (
+        "Ogni pixel diventa un punto con la sua intercapedine, come su un "
+        "pannello vero.",
+        "Every pixel becomes a dot with its gap, like on a real panel."),
+    "video.filtro.acceso": ("Filtro acceso", "Filter on"),
+    "video.filtro.punto": ("Punto %", "Dot %"),
+    "video.filtro.bagliore": ("Bagliore %", "Glow %"),
+    "video.filtro.fondo": ("Fondo", "Background"),
+    "video.filtro.hint": (
+        "Punto è quanto della cella è acceso; bagliore è l'alone intorno. A "
+        "zero il bordo è netto.",
+        "Dot is how much of the cell is lit; glow is the halo. At zero the "
+        "edge is sharp."),
+    "video.giochi": ("Giochi sullo schermo", "Games on screen"),
+    "video.giochi.intera": ("Ingranditi di un intero", "Enlarged by a whole number"),
+    "video.giochi.pieno": ("Stirati a tutto schermo", "Stretched to full screen"),
+    "video.giochi.hint": (
+        "I giochi sono disegnati su 256×64: ingranditi di un intero i pixel "
+        "restano pixel.",
+        "Games are drawn at 256×64: enlarged by a whole number, pixels stay "
+        "pixels."),
     # Il pulsante di prova nella pagina Servizi. Le due risposte sono
     # diverse apposta: dicono **quale meta' della catena** ha funzionato, che
     # e' l'unica cosa che si voglia sapere premendo un pulsante di prova.

@@ -68,6 +68,64 @@ DEFAULTS = {
             "SPWM_FRAME_END_SLEEP_US": "300",
         },
     },
+    # Dove finisce il disegno. Fino alla 16.5 la risposta era una sola -- il
+    # pannello LED -- e stava scritta dentro `panel`, che e' la **taratura**
+    # del pannello e non la scelta dell'uscita. Dalla 17.0 sono due cose, e
+    # questa sezione sta da parte per un motivo pratico: `presets.apply()`
+    # riscrive blocchi interi di `panel` e `presets.detect()` marca il profilo
+    # come "personalizzata" appena un numero non corrisponde piu'. Delle
+    # chiavi video la' dentro verrebbero sovrascritte da un cambio di profilo.
+    "video": {
+        # "auto" decide la macchina: pannello su Raspberry Pi 3 e 4, schermo
+        # su tutto il resto (`piattaforma.pannello_possibile`). Si puo' forzare
+        # con "pannello" o "schermo" -- su un Pi con un monitor sulla
+        # scrivania la seconda e' una scelta legittima.
+        "uscita": "auto",
+        # La **tela**, cioe' la misura su cui disegnano le sorgenti. E' una
+        # cosa diversa dalla risoluzione dell'uscita, e tenerle separate e'
+        # il cardine di tutta la 17.0: "dmd" vuol dire che la tela resta
+        # quella del pannello e sul monitor viene ingrandita, "schermo" che
+        # la tela e' il monitor e le sorgenti disegnano in grande.
+        #
+        # Nella 17.0 vale solo "dmd": le sorgenti sono tarate su 256x64 e
+        # dargli una geometria per cui nessuno le ha disegnate si vedrebbe.
+        # La chiave nasce qui perche' la 17.1 la accende, e un file di
+        # configurazione che non la ha non va migrato.
+        "tela": "dmd",
+        # La risoluzione dell'uscita su schermo. Vuoto = quella che c'e'
+        # adesso, che e' la risposta giusta per un monitor attaccato a una
+        # macchina sola: cambiarla da qui vorrebbe dire cambiare il modo
+        # video, e non e' il mestiere di questo programma.
+        "risoluzione": "",
+        # A tutto schermo, o in una finestra. "auto" guarda se c'e' una
+        # sessione grafica: con il desktop avviato apre una finestra -- che
+        # e' quello che serve per provare -- e senza va a tutto schermo sul
+        # framebuffer, che e' quello che serve a un apparecchio.
+        "finestra": "auto",
+        # Il filtro DMD: ogni pixel della tela diventa un punto tondo con la
+        # sua intercapedine, come su un pannello vero. Acceso di default,
+        # perche' chi installa questo programma su un monitor sta cercando un
+        # DMD e non un terminale; si spegne e si vede l'immagine piena.
+        "filtro_dmd": True,
+        # Quanto del lato della cella e' punto acceso. 0.80 lascia
+        # l'intercapedine che si vede su un pannello da 3 mm di passo.
+        "filtro_punto": 0.80,
+        # Il bagliore intorno al punto, come frazione da aggiungere. Zero lo
+        # spegne: su un monitor molto grande il bagliore fa la differenza fra
+        # "pixel quadrati" e "pannello", su uno piccolo e' solo sfocatura.
+        "filtro_bagliore": 0.25,
+        # Il fondo fra i punti. Nero pieno e' corretto per un DMD; un grigio
+        # molto scuro somiglia piu' al vetro di un pannello spento.
+        "filtro_fondo": "#000000",
+        # I giochi restano alla loro base 256x64 e si ingrandiscono di un
+        # moltiplicatore **intero**: i pixel restano pixel invece di diventare
+        # poltiglia interpolata, e le aree che restano fuori restano nere. E'
+        # una scelta dichiarata, non una mancanza: la geometria dei tredici
+        # giochi, la fisica di bongo e il labirinto di gnam sono disegnati su
+        # quelle proporzioni. "pieno" li stira a tutta la tela per chi
+        # preferisce cosi'.
+        "scala_giochi": "intera",
+    },
     "display": {
         "brightness": 50,
         "night_enabled": False,

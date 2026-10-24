@@ -122,8 +122,19 @@ def check(cfg):
         "local": {},
         "remote": {},
         "behind": False,
+        "serve": True,
         "checked": time.time(),
     }
+
+    # Dalla 17.0 il disegno puo' finire su un monitor, e allora questa
+    # libreria non c'entra niente: non e' installata, non deve esserlo, e
+    # dire "cartella non trovata" sarebbe segnalare come guasto una cosa che
+    # funziona. Si risponde che non serve, e la pagina lo scrive cosi'.
+    import display
+    if display.uscita_scelta(cfg) != "pannello":
+        result["serve"] = False
+        result["ok"] = True
+        return result
 
     try:
         result["local"] = local_commit(path)

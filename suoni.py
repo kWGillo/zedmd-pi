@@ -183,12 +183,35 @@ def _finta(nome, breve):
 # Restano elencate perche' una macchina diversa potrebbe usarle davvero, ma
 # non devono mai essere la scelta automatica: ci finisce l'audio e non lo
 # sente nessuno, senza un errore da leggere.
-_INTERNE = ("hdmi", "bcm2835", "headphones")
+#
+# **E una macchina diversa esiste, dalla 17.0.** Su un PC quelle stesse schede
+# sono quello che c'e': il codec analogico integrato e' l'uscita giusta, non
+# una trappola, e scartarlo vorrebbe dire che su un PC senza chiavetta USB il
+# DMD resta muto. Quindi l'elenco e' due elenchi, e la ragione di ciascuno e'
+# diversa: sul Raspberry si scartano perche' **non possono** suonare, sul PC
+# si rimanda l'HDMI in seconda fila perche' suona solo se il monitor ha gli
+# altoparlanti -- il che e' probabile ma non certo, e il codec integrato e'
+# la scelta prudente.
+_INTERNE_PI = ("hdmi", "bcm2835", "headphones")
+_INTERNE_PC = ("hdmi",)
+
+# I nomi che non sono schede ma innesti di ALSA. Su un desktop con PipeWire o
+# PulseAudio la scheda vera e' tenuta dal server audio e `plughw:` risponde
+# "device busy": l'unica strada e' passare dal mixer di sistema. Non compaiono
+# in `/proc/asound/cards` perche' non sono schede, quindi vanno accettati a
+# parte quando qualcuno li scrive a mano.
+INNESTI = ("default", "sysdefault", "pulse", "pipewire")
+
+
+def _interne():
+    """Le uscite da rimandare in seconda fila su questa macchina."""
+    import piattaforma
+    return _INTERNE_PI if piattaforma.e_raspberry() else _INTERNE_PC
 
 
 def _interna(nome, breve):
     testo = ("%s %s" % (nome, breve)).lower()
-    return any(marchio in testo for marchio in _INTERNE)
+    return any(marchio in testo for marchio in _interne())
 
 
 def dispositivi():
@@ -263,6 +286,12 @@ def uscita(cfg):
     schede = dispositivi()
     presenti = [d["alsa"] for d in schede]
     if voluto:
+        # Un innesto di ALSA non e' una scheda e in `/proc/asound/cards` non
+        # c'e': su un desktop con PipeWire e' pero' l'unica strada, perche' la
+        # scheda vera e' tenuta dal server audio. Si accetta sulla parola, e
+        # se non funziona lo dice `motivo()` come per tutte le altre.
+        if voluto.split(":")[0] in INNESTI:
+            return voluto
         return voluto if voluto in presenti else ""
     vere = [d for d in schede if not d["finta"]]
     esterne = [d["alsa"] for d in vere if not d["interna"]]

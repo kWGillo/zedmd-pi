@@ -969,7 +969,53 @@ class GiochiSource(Source):
             if not self._dirty or self._image is None:
                 return None
             self._dirty = False
-            return self._image
+            immagine = self._image
+        return self._alla_tela(immagine)
+
+    # ---------------------------------------------------- dalla base alla tela
+
+    def _alla_tela(self, immagine):
+        """Il fotogramma del gioco, portato sulla misura della tela.
+
+        I giochi disegnano su 256x64 e li' restano: `LARGHEZZA`, `ALTEZZA` e
+        `CAMPO` in `base.py` sono costanti di modulo che tutti e tredici
+        importano, il campo di gioco prende i 200 pixel di sinistra e i 56 di
+        destra sono il tabellone, la fisica di bongo e' in pixel al secondo
+        quadrato e il labirinto di gnam e' arte disegnata a mano su quelle
+        celle. Portare tutto questo a proporzioni qualsiasi non sarebbe una
+        moltiplicazione: sarebbe riprogettare tredici giochi.
+
+        Su una tela piu' grande si ingrandisce di un moltiplicatore
+        **intero**, centrato, con il nero intorno. I pixel restano pixel
+        invece di diventare poltiglia interpolata, ed e' la stessa scelta del
+        compositore in `display.py` -- la' per non far ondeggiare i punti del
+        filtro, qui per non sfocare uno sprite disegnato a mano.
+
+        `video.scala_giochi = "pieno"` stira il fotogramma a tutta la tela,
+        per chi preferisce lo schermo pieno alla nitidezza.
+        """
+        if immagine is None or immagine.size == (self.width, self.height):
+            return immagine
+        pieno = ((self.cfg.get("video") or {}).get("scala_giochi")
+                 or "intera") == "pieno"
+        if pieno:
+            return immagine.resize((self.width, self.height), Image.NEAREST)
+        largo, alto = immagine.size
+        scala = min(self.width // largo, self.height // alto)
+        if scala >= 1:
+            misura = (largo * scala, alto * scala)
+            filtro = Image.NEAREST
+        else:
+            # Tela piu' piccola della base: si riduce per starci dentro, e
+            # li' l'interpolazione aiuta invece di rovinare.
+            riduci = min(self.width / float(largo), self.height / float(alto))
+            misura = (max(1, int(largo * riduci)), max(1, int(alto * riduci)))
+            filtro = Image.BILINEAR
+        tela = Image.new("RGB", (self.width, self.height), (0, 0, 0))
+        tela.paste(immagine.resize(misura, filtro),
+                   ((self.width - misura[0]) // 2,
+                    (self.height - misura[1]) // 2))
+        return tela
 
     def stato(self):
         gioco = self._gioco

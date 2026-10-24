@@ -248,6 +248,11 @@
   <p class="hint">{{ t('audio.services.hint') }}</p>
 </section>
 
+{# Il pannello LED e la sua taratura esistono solo dove c'e' un
+   pannello. Su un PC queste due schede parlerebbero di registri
+   S-PWM e di profili di un chip che non c'e', e il modo giusto di
+   dirlo e' non dirlo. #}
+{% if pannello_possibile %}
 <section class="card">
   <h2>{{ t('settings.panel') }}</h2>
   <p class="hint">{{ t('settings.panel.hint') | safe }}</p>
@@ -389,6 +394,7 @@
   {% endif %}
 </section>
 
+{% endif %}
 <section class="card">
   <h2>{{ t('settings.config') }}</h2>
   <p class="hint">{{ t('settings.config.hint') }}</p>

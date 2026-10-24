@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}{{ t('video.title') }}{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <h2>{{ t('video.title') }}</h2>
+  <p class="hint">{{ t('video.intro') }}</p>
+
+  {% if motivo %}
+  <p class="status err">{{ t('video.guasto') }} {{ motivo }}</p>
+  {% endif %}
+
+  <table class="files">
+    <tr><td>{{ t('video.macchina') }}</td><td><strong>{{ macchina }}</strong></td></tr>
+    <tr><td>{{ t('video.ora') }}</td>
+        <td>{% if uscita == 'pannello' %}{{ t('video.uscita.pannello') }}
+            {%- else %}{{ t('video.uscita.schermo') }}{% endif %}</td></tr>
+    <tr><td>{{ t('video.tela.ora') }}</td>
+        <td class="mono">{{ tela_largo }}&times;{{ tela_alto }}</td></tr>
+    {% if schermo_largo %}
+    <tr><td>{{ t('video.schermo.ora') }}</td>
+        <td class="mono">{{ schermo_largo }}&times;{{ schermo_alto }}
+            {%- if scala %} &middot; &times;{{ scala }}{% endif %}</td></tr>
+    {% endif %}
+  </table>
+  {% if not pannello_possibile %}
+  <p class="hint">{{ t('video.solo.schermo') }}</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>{{ t('video.dove') }}</h2>
+  <form method="post" action="{{ url_for('api_video') }}">
+    <label for="uscita">{{ t('video.uscita') }}</label>
+    <select id="uscita" name="uscita">
+      {% for valore in ('auto', 'pannello', 'schermo') %}
+      <option value="{{ valore }}"
+              {{ 'selected' if cfg.video.uscita == valore }}>{{ t('video.uscita.' + valore) }}</option>
+      {% endfor %}
+    </select>
+    <p class="hint">{{ t('video.uscita.hint') }}</p>
+
+    <div class="row2">
+      <label for="risoluzione">{{ t('video.risoluzione') }}
+        <input type="text" id="risoluzione" name="risoluzione" class="mono"
+               placeholder="1920x1080" value="{{ cfg.video.risoluzione }}">
+      </label>
+      <label for="finestra">{{ t('video.finestra') }}
+        <select id="finestra" name="finestra">
+          {% for valore in ('auto', 'si', 'no') %}
+          <option value="{{ valore }}"
+                  {{ 'selected' if cfg.video.finestra|string == valore }}>{{ t('video.finestra.' + valore) }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <p class="hint">{{ t('video.risoluzione.hint') }}</p>
+
+    <input type="hidden" name="restart" value="1">
+    <button type="submit">{{ t('video.applica') }}</button>
+  </form>
+  <p class="hint">{{ t('video.riavvio') }}</p>
+</section>
+
+<section class="card">
+  <h2>{{ t('video.filtro') }}</h2>
+  <p class="hint">{{ t('video.filtro.intro') }}</p>
+  <form method="post" action="{{ url_for('api_video_filtro') }}">
+    {# Una casella non spuntata non viene inviata affatto: il campo nascosto
+       dice al ricevente che questo modulo porta davvero l'interruttore, e
+       senza di lui un salvataggio da un'altra pagina lo spegnerebbe. #}
+    <input type="hidden" name="c_e_filtro" value="1">
+    <label class="check">
+      <input type="checkbox" name="filtro_dmd" {{ 'checked' if cfg.video.filtro_dmd }}>
+      {{ t('video.filtro.acceso') }}
+    </label>
+
+    <div class="row3">
+      <label for="filtro_punto">{{ t('video.filtro.punto') }}
+        <input type="number" id="filtro_punto" name="filtro_punto"
+               min="10" max="100" step="5"
+               value="{{ (cfg.video.filtro_punto * 100) | round | int }}">
+      </label>
+      <label for="filtro_bagliore">{{ t('video.filtro.bagliore') }}
+        <input type="number" id="filtro_bagliore" name="filtro_bagliore"
+               min="0" max="100" step="5"
+               value="{{ (cfg.video.filtro_bagliore * 100) | round | int }}">
+      </label>
+      <label for="filtro_fondo">{{ t('video.filtro.fondo') }}
+        <input type="color" id="filtro_fondo" name="filtro_fondo"
+               value="{{ cfg.video.filtro_fondo }}">
+      </label>
+    </div>
+    <p class="hint">{{ t('video.filtro.hint') }}</p>
+
+    <label for="scala_giochi">{{ t('video.giochi') }}</label>
+    <select id="scala_giochi" name="scala_giochi">
+      {% for valore in ('intera', 'pieno') %}
+      <option value="{{ valore }}"
+              {{ 'selected' if cfg.video.scala_giochi == valore }}>{{ t('video.giochi.' + valore) }}</option>
+      {% endfor %}
+    </select>
+    <p class="hint">{{ t('video.giochi.hint') }}</p>
+
+    <button type="submit">{{ t('common.apply') }}</button>
+  </form>
+</section>
+
+{% endblock %}

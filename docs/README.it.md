@@ -20,6 +20,7 @@ La descrizione del progetto e le istruzioni di installazione stanno nel
 |---|---|
 | [`manuale-completo.it.md`](manuale-completo.it.md) · [PDF](DMD_manuale_completo.pdf) | Dal Raspberry nudo al pannello acceso: hardware, cablaggio, alimentazione, installazione, diagnostica, risoluzione problemi |
 | [`taratura.it.md`](taratura.it.md) · [PDF](DMD_taratura.pdf) | Far sparire righe chiare e sfarfallio: profili del pannello, taratura automatica, registri del driver |
+| [`video.it.md`](video.it.md) | Il pannello LED o un monitor: come il programma riconosce la macchina, il filtro DMD, i giochi ingranditi, l'audio su un PC |
 | [`rete.it.md`](rete.it.md) · [PDF](DMD_rete.pdf) | Configurare il wifi dalla pagina web invece che con monitor e tastiera |
 | [`aggiornamenti.it.md`](aggiornamenti.it.md) · [PDF](DMD_aggiornamenti.pdf) | Perché il pannello non si aggiorna da solo, come avvisa che dovrebbe, e cosa succede quando un aggiornamento va storto |
 

@@ -12,6 +12,7 @@ Aggiungere un tipo di pannello significa aggiungere una voce a PRESETS: il
 resto — menu a tendina, applicazione, etichette — funziona da solo.
 """
 
+import os
 import re
 
 # I valori sono esattamente quelli del capitolo 7 del manuale piu' la
@@ -218,6 +219,22 @@ def apply(panel, key):
     valori = _valori(panel, key)
     if not valori:
         return False
+    valori = dict(valori)
+    catalogo = valori.get("profile_dir")
+    if catalogo and not os.path.isdir(catalogo):
+        # Il catalogo dei profili di registro e' scritto qui con il percorso
+        # della macchina su cui il fork e' stato compilato. Su un'altra
+        # installazione quella cartella non esiste, e scriverla farebbe
+        # cercare alla libreria un posto che non c'e'. Si chiede allora dove
+        # sta davvero la libreria; e se non si sa, meglio lasciare il valore
+        # che c'era che metterne uno sbagliato.
+        import libcheck
+        radice = libcheck.library_dir({"panel": panel})
+        trovato = os.path.join(radice, "lib", "spwm", "registertest", "data")
+        if os.path.isdir(trovato):
+            valori["profile_dir"] = trovato
+        else:
+            valori.pop("profile_dir")
     for nome, valore in valori.items():
         if isinstance(valore, dict):
             ramo = panel.setdefault(nome, {})

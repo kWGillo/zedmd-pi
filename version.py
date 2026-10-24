@@ -2969,6 +2969,47 @@ Storico:
        La prova sta in `diagnostica/prova_nati_e_morti.py`: trentaquattro
        controlli, compreso quello che riproduce la segnalazione con la
        vecchia regola.
+  17.0 **Il programma esce dal pannello: Ubuntu, un monitor, il filtro DMD.**
+       Fino alla 16.5 c'era una macchina sola -- un Raspberry con un pannello
+       LED sui GPIO -- e cento punti del codice lo davano per scontato senza
+       dirlo. Adesso `piattaforma.py` fa la domanda una volta sola, leggendo
+       quello che la macchina dice di se' (`/proc/device-tree/model`), e la
+       risposta decide tre cose: se offrire il pannello -- solo Pi 3 e 4,
+       perche' la libreria pilota il PWM del BCM e sul Pi 5 il controller
+       GPIO e' un altro -- quali schede audio rimandare in seconda fila, e
+       dove mandare il disegno.
+       **La tela e l'uscita diventano due cose.** `display.width` non e' solo
+       la misura del pannello: e' anche quello che viene passato a trenta
+       sorgenti all'avvio e congelato li', ed e' il protocollo ZeDMD, che
+       nell'handshake dichiara larghezza e altezza. Farla diventare la
+       risoluzione di un monitor romperebbe tre cose insieme. Quindi la tela
+       resta 256x64 e sul monitor viene ingrandita: `display.crea()` torna il
+       pannello o uno schermo, e il `Compositore` -- che non parla con nessun
+       dispositivo, quindi si prova -- fa moltiplicatore intero, centraggio,
+       filtro e luminosita'. La tela a pieno schermo e' la 17.1.
+       Il **filtro DMD** fa di ogni pixel un punto con la sua intercapedine.
+       Il bagliore sta nella maschera e non in una sfocatura per fotogramma:
+       otto millisecondi a 1920x1080 invece di venti, e un punto di un
+       pannello vero e' fatto cosi' davvero. La **luminosita' su schermo** e'
+       una moltiplicazione, perche' senza di quella lo slider e la modalita'
+       notte fingerebbero di funzionare.
+       I **giochi** restano 256x64 e si ingrandiscono di un intero, centrati,
+       con il nero intorno. Una funzione in un file solo: i tredici giochi
+       non si toccano, la fisica di bongo non si rimette in discussione e il
+       labirinto di gnam resta quello disegnato a mano.
+       **Il vetro e' un accessorio quanto l'interfaccia web.** Se l'uscita
+       non si accende il programma continua, stampa il motivo e lo mostra
+       nella pagina Video: prima l'eccezione usciva dal costruttore, systemd
+       riavviava all'infinito e non c'era nessun posto dove guardare.
+       Contorno: l'audio interno non si scarta piu' dove e' l'unico che c'e',
+       e gli innesti ALSA (`default`, `pulse`) si accettano, per i desktop
+       dove PipeWire tiene la scheda; `install.sh` non compila i binding
+       della matrice dove non servono; la taratura del pannello e la libreria
+       matrice non compaiono dove il pannello non c'e'; un profilo con un
+       `profile_dir` che non esiste non lo scrive; `diagnostica/` si installa
+       intera, come l'OTA faceva gia' e `install.sh` no.
+       Prove nuove: `diagnostica/prova_schermo.py` (89) e
+       `diagnostica/prova_piattaforma.py` (46).
 """
 
-__version__ = "16.5"
+__version__ = "17.0"

@@ -5,6 +5,19 @@
 #
 set -e
 
+SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Che macchina e' questa. Dalla 17.0 l'installazione ha due strade, e la
+# differenza non e' cosmetica: su un Raspberry 3 o 4 si compilano i binding
+# della libreria matrice -- un passo che su un PC fallirebbe, perche' quella
+# libreria pilota il blocco PWM del BCM -- e su tutto il resto si installa
+# invece di che cosa serve per disegnare su un monitor.
+#
+# La domanda la fa `piattaforma.py`, lo stesso modulo che la fara' a ogni
+# avvio: una risposta sola, scritta in un posto solo.
+PANNELLO=$(python3 "$SRC_DIR/piattaforma.py" --pannello 2>/dev/null || echo no)
+echo "==> Macchina: $(python3 "$SRC_DIR/piattaforma.py" --nome 2>/dev/null || echo sconosciuta)"
+
 MATRIX_DIR="${MATRIX_DIR:-$HOME/rpi-rgb-led-matrix_pwm_experiment}"
 if [ -n "$SUDO_USER" ]; then
     REAL_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
@@ -14,8 +27,6 @@ if [ -n "$SUDO_USER" ]; then
     fi
 fi
 
-SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
-
 if [ -f "$SRC_DIR/manifest.md5" ]; then
     bash "$SRC_DIR/verify.sh" "$SRC_DIR" || {
         echo
@@ -24,12 +35,16 @@ if [ -f "$SRC_DIR/manifest.md5" ]; then
     }
 fi
 
-echo "==> Libreria matrice attesa in: $MATRIX_DIR"
-if [ ! -d "$MATRIX_DIR" ]; then
-    echo "ERRORE: cartella della libreria non trovata."
-    echo "Impostala esplicitamente, ad esempio:"
-    echo "  sudo MATRIX_DIR=/home/gillo/rpi-rgb-led-matrix_pwm_experiment ./install.sh"
-    exit 1
+if [ "$PANNELLO" = "si" ]; then
+    echo "==> Libreria matrice attesa in: $MATRIX_DIR"
+    if [ ! -d "$MATRIX_DIR" ]; then
+        echo "ERRORE: cartella della libreria non trovata."
+        echo "Impostala esplicitamente, ad esempio:"
+        echo "  sudo MATRIX_DIR=/home/gillo/rpi-rgb-led-matrix_pwm_experiment ./install.sh"
+        exit 1
+    fi
+else
+    echo "==> Niente pannello LED su questa macchina: si disegna sul monitor"
 fi
 
 echo "==> Installazione pacchetti di sistema"
@@ -37,6 +52,15 @@ apt update
 apt install -y python3 python3-pip python3-dev python3-numpy python3-pil \
                python3-flask python3-paho-mqtt cython3 fonts-dejavu-core \
                tzdata ffmpeg samba samba-common-bin
+
+# Su un monitor il disegno esce da SDL: una finestra se c'e' un desktop
+# avviato, il KMS se non c'e'. Se non si installa, `display.py` ripiega su
+# /dev/fb0, che non ha bisogno di niente ma nemmeno di una finestra.
+if [ "$PANNELLO" != "si" ]; then
+    echo "==> Uscita su monitor (SDL)"
+    apt install -y python3-pygame || \
+      echo "    python3-pygame non installato: si usera' il framebuffer"
+fi
 
 # Calcolo orbitale per la sorgente Satelliti. Non e' in apt: si prende da pip,
 # che sui Raspberry a 64 bit ha la ruota gia' compilata. Se fallisce non si
@@ -46,9 +70,12 @@ echo "==> Libreria di calcolo orbitale (sgp4)"
 pip install sgp4 --break-system-packages 2>/dev/null || pip install sgp4 || \
   echo "    sgp4 non installata: la sorgente Satelliti restera' spenta"
 
-echo "==> Compilazione dei binding Python della libreria matrice"
-cd "$MATRIX_DIR"
-pip install . --break-system-packages 2>/dev/null || pip install .
+if [ "$PANNELLO" = "si" ]; then
+    echo "==> Compilazione dei binding Python della libreria matrice"
+    cd "$MATRIX_DIR"
+    pip install . --break-system-packages 2>/dev/null || pip install .
+    cd "$SRC_DIR"
+fi
 
 echo "==> Copia dei file in /opt/dmd"
 mkdir -p /opt/dmd
@@ -70,11 +97,16 @@ fi
 # script di preparazione. PyBoy **non** si installa adesso — e' un pacchetto
 # di sistema, e chi non vuole l'emulatore non deve trovarselo installato.
 # Lo installa gb/setup_gb.sh, dal pulsante nella pagina Game Boy.
-# Gli strumenti di misura: non servono al servizio, servono a chi lo tara.
+# Gli strumenti di misura e le prove: non servono al servizio, servono a chi
+# lo tara e a chi cerca un difetto. Si copia la cartella **intera**: fino alla
+# 16.5 si prendevano solo gli script di shell, mentre l'aggiornamento OTA
+# copiava anche i `.py`, perche' li legge dal manifest. Due strade diverse per
+# gli stessi file, e un'installazione nuova che `verify.sh` segnalava come
+# incompleta.
 if [ -d "$SRC_DIR/diagnostica" ]; then
     mkdir -p /opt/dmd/diagnostica
-    cp "$SRC_DIR"/diagnostica/*.sh /opt/dmd/diagnostica/
-    chmod +x /opt/dmd/diagnostica/*.sh
+    cp -r "$SRC_DIR"/diagnostica/. /opt/dmd/diagnostica/
+    chmod +x /opt/dmd/diagnostica/*.sh 2>/dev/null || true
 fi
 
 if [ -d "$SRC_DIR/gb" ]; then
@@ -97,15 +129,28 @@ mkdir -p /etc/dmd
 if [ ! -f /etc/dmd/config.json ]; then
     cp "$SRC_DIR/config.json" /etc/dmd/config.json
     PROFILE_DIR="$MATRIX_DIR/lib/spwm/registertest/data"
-    python3 - "$PROFILE_DIR" <<'PYEOF'
+    python3 - "$PROFILE_DIR" "$PANNELLO" <<'PYEOF'
 import json, sys
 path = "/etc/dmd/config.json"
 with open(path) as handle:
     cfg = json.load(handle)
-cfg["panel"]["profile_dir"] = sys.argv[1]
+if sys.argv[2] == "si":
+    cfg["panel"]["profile_dir"] = sys.argv[1]
+    print("profile_dir impostato su", sys.argv[1])
+else:
+    # Senza pannello il catalogo dei profili di registro non esiste e non
+    # serve: lasciarlo scritto farebbe cercare alla libreria una cartella
+    # che non c'e', il giorno in cui qualcuno accendesse il pannello per
+    # sbaglio.
+    cfg["panel"]["profile_dir"] = ""
+    cfg.setdefault("video", {})["uscita"] = "schermo"
+    # E l'audio nasce acceso: su un PC la scheda integrata c'e' sempre, e un
+    # DMD muto su una macchina che ha gli altoparlanti e' solo una casella
+    # da trovare.
+    cfg.setdefault("audio", {})["enabled"] = True
+    print("uscita video: schermo; audio acceso sulla scheda integrata")
 with open(path, "w") as handle:
     json.dump(cfg, handle, indent=2)
-print("profile_dir impostato su", sys.argv[1])
 PYEOF
 else
     echo "    configurazione già presente, lasciata invariata"
@@ -122,9 +167,14 @@ systemctl enable dmd
 echo
 echo "Installazione completata."
 echo
-echo "Prima di avviare, controlla i valori in /etc/dmd/config.json:"
-echo "  panel.slowdown   -> 1 (Zero W) | 3 (Zero 2 W, Pi 3) | 5 (Pi 4)"
-echo "  panel.chain      -> numero di pannelli in cascata"
+if [ "$PANNELLO" = "si" ]; then
+    echo "Prima di avviare, controlla i valori in /etc/dmd/config.json:"
+    echo "  panel.slowdown   -> 1 (Zero W) | 3 (Zero 2 W, Pi 3) | 5 (Pi 4)"
+    echo "  panel.chain      -> numero di pannelli in cascata"
+else
+    echo "Il disegno uscira' sul monitor collegato. Dalla pagina Video puoi"
+    echo "scegliere risoluzione, finestra e filtro DMD."
+fi
 echo
 echo "Poi:   sudo systemctl start dmd"
 echo "Log:   journalctl -u dmd -f"

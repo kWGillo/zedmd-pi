@@ -31,8 +31,8 @@ import pulizia
 import pulsante
 import spotifyapi
 import cassa
+import display as uscita_video
 import suoni
-from display import Display
 from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      CalendarioSource, CieloSource, ClockSource, DoomSource, GameBoySource,
                      GiochiSource, InutiliSource, MediaPlayerSource, MeteoSource,
@@ -226,7 +226,21 @@ class Runtime:
 
     def __init__(self):
         self.cfg = dmdconf.get()
-        self.display = Display(self.cfg)
+        # Il vetro e' un accessorio quanto lo e' l'interfaccia web, e per lo
+        # stesso motivo: se non si accende, tutto il resto deve comunque
+        # partire, perche' e' da li' -- dalla pagina -- che si legge **perche'**
+        # non si e' acceso. Prima l'eccezione usciva dal costruttore, `main()`
+        # moriva, systemd riavviava all'infinito, e non c'era nessun posto
+        # dove guardare.
+        try:
+            self.display = uscita_video.crea(self.cfg)
+        except Exception as exc:
+            import traceback
+            print("[dmd] ATTENZIONE: uscita video non disponibile", flush=True)
+            traceback.print_exc()
+            print("[dmd] il resto del programma continua; apri la pagina "
+                  "Video e correggi", flush=True)
+            self.display = uscita_video.DisplayAssente(self.cfg, str(exc))
         self.arbiter = Arbiter(self.cfg)
 
         self.zedmd = ZeDMDSource(
@@ -454,9 +468,13 @@ class Runtime:
         self.update_info["checked"] = 0
         # Non si interroga GitHub all'avvio: il controllo della libreria e'
         # su richiesta, dal pulsante nella pagina Impostazioni.
+        # `serve` dice se questa libreria c'entra qualcosa con questa
+        # macchina: su un monitor non c'entra, e la pagina non ne parla.
         self.lib_info = {"ok": False, "error": "", "path": "",
                          "repo": libcheck.REPO, "branch": libcheck.BRANCH,
-                         "local": {}, "remote": {}, "behind": False, "checked": 0}
+                         "local": {}, "remote": {}, "behind": False,
+                         "serve": uscita_video.uscita_scelta(self.cfg)
+                         == "pannello", "checked": 0}
         self._ota_thread = threading.Thread(target=self._ota_loop, name="ota", daemon=True)
         self._ota_thread.start()
 
@@ -928,7 +946,7 @@ class Runtime:
             self.lib_info = {"ok": False, "error": str(exc), "path": "",
                              "repo": libcheck.REPO, "branch": libcheck.BRANCH,
                              "local": {}, "remote": {}, "behind": False,
-                             "checked": time.time()}
+                             "serve": True, "checked": time.time()}
         return self.lib_info
 
     def check_update(self):

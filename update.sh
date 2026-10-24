@@ -41,8 +41,10 @@ fi
 # Gli strumenti di misura: non servono al servizio, servono a chi lo tara.
 if [ -d "$SRC_DIR/diagnostica" ]; then
     mkdir -p /opt/dmd/diagnostica
-    cp "$SRC_DIR"/diagnostica/*.sh /opt/dmd/diagnostica/
-    chmod +x /opt/dmd/diagnostica/*.sh
+    # La cartella intera, come in install.sh dalla 17.0: gli script di shell
+    # e le prove, che sono quello che si lancia quando qualcosa non torna.
+    cp -r "$SRC_DIR"/diagnostica/. /opt/dmd/diagnostica/
+    chmod +x /opt/dmd/diagnostica/*.sh 2>/dev/null || true
 fi
 
 if [ -d "$SRC_DIR/gb" ]; then

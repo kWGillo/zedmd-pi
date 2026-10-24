@@ -99,6 +99,11 @@
   {% endif %}
 </section>
 
+{# La libreria della matrice esiste solo dove c'e' il pannello: su un
+   monitor non e' installata, non deve esserlo, e un avviso giallo
+   che dice "cartella non trovata" segnalerebbe come guasto una
+   cosa che funziona. #}
+{% if lib.serve %}
 <section class="card">
   <h2>{{ t('settings.lib') }}</h2>
   <p class="hint">{{ t('settings.lib.hint') }}</p>
@@ -145,5 +150,6 @@
        target="_blank" rel="noopener">{{ t('settings.lib.doc') }} — spwm.md</a>
   </p>
 </section>
+{% endif %}
 
 {% endblock %}
