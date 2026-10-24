@@ -204,6 +204,7 @@ class GameBoySource(Source):
     # esiste. `enabled` resta False, cosi' non c'e' nessuna strada per cui
     # possa comparire per sbaglio.
     priority = 0
+    in_fascia = False   # interattiva: vuole tutto lo schermo
 
     def __init__(self, cfg, width, height, arbiter=None):
         super().__init__(cfg, width, height)

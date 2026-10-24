@@ -2581,6 +2581,9 @@ def create_app(runtime):
             schermo_largo=schermo.schermo[0] if schermo else 0,
             schermo_alto=schermo.schermo[1] if schermo else 0,
             scala=schermo.scala if schermo else 0,
+            quante=getattr(runtime.display, "fasce", 1),
+            banda_largo=schermo.banda[0] if schermo else 0,
+            banda_alto=schermo.banda[1] if schermo else 0,
             page="video")
 
     @app.route("/api/video", methods=["POST"])
@@ -2599,6 +2602,10 @@ def create_app(runtime):
         conf["risoluzione"] = (request.form.get("risoluzione") or "").strip()[:16]
         finestra = (request.form.get("finestra") or "auto").strip().lower()
         conf["finestra"] = finestra if finestra in ("auto", "si", "no") else "auto"
+        modo = (request.form.get("modo") or "auto").strip().lower()
+        conf["modo"] = modo if modo in ("auto", "fasce", "singola") else "auto"
+        fasce = (request.form.get("fasce") or "auto").strip().lower()
+        conf["fasce"] = fasce if fasce in ("auto", "2", "3", "4") else "auto"
         dmdconf.save()
         if request.form.get("restart") == "1":
             subprocess.Popen(["systemctl", "restart", "dmd"])

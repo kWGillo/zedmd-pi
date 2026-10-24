@@ -42,6 +42,17 @@ TELA_PREDEFINITA = (256, 64)
 FINESTRA_SCALA = 4
 
 
+def _quante_fasce(scelta):
+    """`video.fasce`: "auto" (o vuoto) -> 0, un numero -> quello, al massimo 8."""
+    testo = str(scelta if scelta is not None else "").strip().lower()
+    if not testo or testo in ("auto", "automatico"):
+        return 0
+    try:
+        return max(1, min(8, int(testo)))
+    except ValueError:
+        return 0
+
+
 def tela_dmd(cfg):
     """La misura della tela DMD secondo la configurazione del pannello.
 
@@ -88,16 +99,22 @@ class Compositore:
         self.punto = max(0.1, min(1.0, float(conf.get("filtro_punto", 0.80))))
         self.bagliore = max(0.0, min(1.0, float(conf.get("filtro_bagliore", 0.25))))
         self.fondo = conf.get("filtro_fondo") or "#000000"
+        self.volute = _quante_fasce(conf.get("fasce"))
         self.luminosita = 100
         self._maschera = None          # (chiave, immagine RGB) in cache
         self._tavola = None            # (luminosita, tabella) in cache
         self._quadro = None            # il fotogramma, riusato
+        # L'ultimo fotogramma di ogni fascia. Serve perche' `frame()` torna
+        # None quando l'immagine non e' cambiata: con una sorgente sola non
+        # si ridisegnava e basta, con tre una fascia ferma diventerebbe nera
+        # al primo giro in cui le altre si muovono.
+        self._ultime = []
         self.scala, self.riquadro = self._misura()
 
     # ---- geometria
 
     def _misura(self):
-        """Il moltiplicatore e il riquadro dove finisce la tela.
+        """Il moltiplicatore, quante fasce ci stanno, e dove va la prima.
 
         Il moltiplicatore e' **intero**: un pixel della tela diventa una
         cella di celle intere, altrimenti i punti del filtro cadrebbero a
@@ -105,18 +122,56 @@ class Compositore:
         e' piu' piccolo della tela -- caso strano ma non impossibile, una
         finestra rimpicciolita a mano -- si rinuncia all'intero e si riduce
         per stare dentro.
+
+        **Le fasce nascono da qui.** La tela e' 4:1 e lo schermo non lo e':
+        ingrandendo al massimo restano due bande nere sopra e sotto, e quelle
+        bande sono alte un numero esatto di tele. A 1024x768 con scala 4 lo
+        schermo e' alto 192 righe logiche, cioe' **tre tele esatte**. Invece
+        di lasciarle vuote ci si mettono altre sorgenti.
+
+        Con `fasce` in automatico si prende la scala piu' grande che sta in
+        larghezza e si contano le fasce che ne derivano; con un numero si fa
+        il contrario, cioe' la scala piu' grande che fa stare quelle fasce.
+        Sono le due facce della stessa scelta: fasce grandi o fasce tante.
         """
         tw, th = self.tela
         sw, sh = self.schermo
-        scala = min(sw // tw, sh // th) if tw and th else 0
+        if not tw or not th:
+            return 0, (0, 0, max(1, sw), max(1, sh))
+        if self.volute:
+            scala = min(sw // tw, sh // (th * self.volute))
+        else:
+            scala = min(sw // tw, sh // th)
         if scala >= 1:
             largo, alto = tw * scala, th * scala
+            quante = max(1, sh // alto)
+            if self.volute:
+                quante = min(quante, self.volute)
         else:
+            # Non ci sta nemmeno una tela intera: si rinuncia all'intero, si
+            # riduce per stare dentro, e di fasce ce n'e' una sola.
             scala = min(sw / float(tw), sh / float(th))
             largo, alto = max(1, int(tw * scala)), max(1, int(th * scala))
+            quante = 1
+        self.quante = quante
+        self.banda = (largo, alto)
         x = (sw - largo) // 2
         y = (sh - alto) // 2
         return scala, (x, y, largo, alto)
+
+    def riquadro_fascia(self, indice, usate=1):
+        """Dove va la fascia `indice`, con `usate` fasce in tutto.
+
+        Il gruppo delle fasce occupate si centra in verticale: una fascia
+        sola sta al centro -- ed e' l'orologio da solo, cioe' esattamente il
+        pannello di prima -- due stanno al centro con mezza fascia vuota
+        sopra e sotto, tre riempiono lo schermo.
+        """
+        largo, alto = self.banda
+        sw, sh = self.schermo
+        usate = max(1, min(usate, self.quante))
+        cima = (sh - usate * alto) // 2
+        return ((sw - largo) // 2, cima + indice * alto, largo, alto)
 
     def ridimensiona(self, schermo):
         """Lo schermo e' cambiato misura: si rifanno i conti e la maschera."""
@@ -124,6 +179,7 @@ class Compositore:
         self.scala, self.riquadro = self._misura()
         self._maschera = None
         self._quadro = None
+        self._ultime = []
 
     # ---- la maschera dei punti
 
@@ -209,16 +265,16 @@ class Compositore:
 
     # ---- il fotogramma
 
-    def componi(self, immagine):
-        """Il fotogramma da mandare allo schermo, della sua misura esatta."""
+    def _ingrandita(self, immagine):
+        """Una tela portata alla misura di una fascia, filtro e luce inclusi."""
         if immagine.size != self.tela:
-            # Difensivo, e nuovo: fino alla 16.5 nessuno controllava la
-            # misura di quello che le sorgenti producevano, e un'immagine
-            # sbagliata finiva dritta in `SetImage`.
+            # Difensivo, e nuovo dalla 17.0: fino alla 16.5 nessuno
+            # controllava la misura di quello che le sorgenti producevano, e
+            # un'immagine sbagliata finiva dritta in `SetImage`.
             immagine = immagine.resize(self.tela, Image.NEAREST)
         if immagine.mode != "RGB":
             immagine = immagine.convert("RGB")
-        x, y, largo, alto = self.riquadro
+        largo, alto = self.banda
         filtro = Image.NEAREST if self.scala >= 1 else Image.BILINEAR
         grande = immagine.resize((largo, alto), filtro)
         if self.filtro:
@@ -229,13 +285,56 @@ class Compositore:
             grande = ImageChops.multiply(grande, self.maschera())
         elif self.luminosita < 100:
             grande = grande.point(self.tavola())
-        if (largo, alto) == self.schermo:
-            return grande
+        return grande
+
+    def componi(self, immagine):
+        """Il fotogramma da mandare allo schermo, della sua misura esatta.
+
+        Una fascia sola, centrata: e' il pannello di sempre, ingrandito.
+        """
+        return self.componi_fasce([immagine])
+
+    def componi_fasce(self, immagini):
+        """Lo schermo composto da piu' tele, una per fascia, dall'alto.
+
+        `immagini` e' lunga quanto le fasce assegnate; una voce puo' essere
+        `None`, e allora vale l'ultimo fotogramma che quella fascia aveva --
+        perche' `frame()` torna `None` quando non e' cambiato niente, e una
+        fascia ferma non deve diventare nera mentre le altre si muovono.
+        """
+        quante = max(1, min(len(immagini), self.quante))
+        if len(self._ultime) != quante:
+            self._ultime = (list(self._ultime) + [None] * quante)[:quante]
+        pronte = []
+        for i in range(quante):
+            arrivata = immagini[i] if i < len(immagini) else None
+            if arrivata is not None:
+                self._ultime[i] = self._ingrandita(arrivata)
+            pronte.append(self._ultime[i])
+        # Le fasce occupate sono quelle fino all'ultima piena: un buco in
+        # mezzo resta un buco, e non fa salire quelle sotto. Una fascia che
+        # cambia posto quando quella sopra finisce e' il modo piu' sicuro di
+        # rendere illeggibile un cruscotto.
+        usate = 0
+        for i, pronta in enumerate(pronte):
+            if pronta is not None:
+                usate = i + 1
+        if usate == 0:
+            usate = 1
+        x, y, largo, alto = self.riquadro_fascia(0, usate)
+        if usate == 1 and pronte[0] is not None and (largo, alto) == self.schermo:
+            return pronte[0]
         # Il quadro si riusa invece di rifarlo: a 1920x1080 sono sei megabyte
-        # per fotogramma, e le bande intorno alla tela non cambiano mai.
+        # per fotogramma, e il fondo intorno alle fasce non cambia mai.
         if self._quadro is None or self._quadro.size != self.schermo:
             self._quadro = Image.new("RGB", self.schermo, self.fondo)
-        self._quadro.paste(grande, (x, y))
+        else:
+            self._quadro.paste(self.fondo, (0, 0) + self.schermo)
+        for i in range(usate):
+            if pronte[i] is None:
+                continue
+            fx, fy, _l, _a = self.riquadro_fascia(i, usate)
+            self._quadro.paste(pronte[i], (fx, fy))
         return self._quadro
 
 
@@ -386,6 +485,18 @@ class DisplaySchermo:
                  self.compositore.scala,
                  "acceso" if self.compositore.filtro else "spento"))
 
+    @property
+    def fasce(self):
+        """Quante tele ci stanno sullo schermo, una sopra l'altra.
+
+        «singola» ne vuole una sola anche dove ce ne starebbero tre: e' la
+        17.0, e resta disponibile perche' un cruscotto non lo vuole per forza
+        chiunque abbia un monitor.
+        """
+        if ((self.cfg.get("video") or {}).get("modo") or "auto") == "singola":
+            return 1
+        return self.compositore.quante
+
     def set_brightness(self, value):
         value = max(0, min(100, int(value)))
         with self._lock:
@@ -395,6 +506,11 @@ class DisplaySchermo:
     def show(self, image):
         with self._lock:
             self._superficie.mostra(self.compositore.componi(image))
+
+    def mostra_fasce(self, immagini):
+        """Piu' tele insieme, una per fascia, dall'alto."""
+        with self._lock:
+            self._superficie.mostra(self.compositore.componi_fasce(immagini))
 
     def clear(self):
         with self._lock:
@@ -410,6 +526,9 @@ class DisplayLed:
     Un solo processo puo' pilotare i GPIO: tutto il rendering passa da qui.
     Le sorgenti non disegnano mai direttamente, producono immagini PIL.
     """
+
+    # Il pannello e' una tela sola: le fasce sono una cosa dello schermo.
+    fasce = 1
 
     def __init__(self, cfg):
         panel = cfg["panel"]
@@ -540,6 +659,8 @@ class DisplayAssente:
     notifiche arrivano, MQTT parla -- ed e' solo il vetro a non esserci.
     """
 
+    fasce = 1
+
     def __init__(self, cfg, motivo=""):
         self.motivo = motivo or "uscita video non disponibile"
         self.width, self.height = tela_dmd(cfg)
@@ -550,6 +671,9 @@ class DisplayAssente:
         return self.brightness
 
     def show(self, image):
+        pass
+
+    def mostra_fasce(self, immagini):
         pass
 
     def clear(self):

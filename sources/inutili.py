@@ -144,6 +144,7 @@ class InutiliSource(Source):
     name = "inutili"
     label = "Info inutili"
     priority = 49                    # sotto il media, sopra niente: il turno lo da' Turni
+    gruppo = "turni"   # una fascia sola, a carosello
 
     def __init__(self, cfg, width, height):
         Source.__init__(self, cfg, width, height)

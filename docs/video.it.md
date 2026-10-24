@@ -43,11 +43,42 @@ protocollo ZeDMD: larghezza e altezza stanno nell'handshake, e Batocera le
 usa per decidere che fotogrammi trasmettere. Farla diventare la risoluzione
 del monitor romperebbe tre cose insieme.
 
-Nella 17.0 quindi, su un monitor, si vede un DMD grande. Le informazioni
-riproporzionate al rapporto dello schermo — 4:3, 16:9, 16:10, 21:9 — sono la
-17.1.
+Nella 17.0, su un monitor, si vedeva un DMD grande con due bande nere. Dalla
+17.1 quelle bande sono fasce, e ci stanno dentro altre sorgenti (sezione 3).
+Le informazioni riproporzionate al rapporto dello schermo — 4:3, 16:9, 16:10,
+21:9 — restano un lavoro a parte.
 
-# 3. La pagina Video
+# 3. Le fasce
+
+Dalla 17.1 la tela ingrandita non lascia piu' due bande nere: ci stanno
+dentro altre sorgenti.
+
+A 1024x768 con scala 4 lo schermo e' alto 192 righe logiche, cioe' **tre tele
+esatte**. L'orologio sta nella fascia in cima e non concorre per le altre;
+sotto vanno le sorgenti attive in ordine di priorita'; quando non c'e'
+nient'altro l'orologio resta solo, al centro, e quella e' la 17.0.
+
+**Le fasce non cambiano posto.** Chi ne ha una la tiene finche' resta attivo:
+se quella sopra finisce, le altre non salgono e il posto va al prossimo in
+attesa. L'occhio impara dove guardare, e la volta dopo trova ancora qualcosa.
+
+**Meteo, cielo e Info inutili condividono una fascia** e ci girano a
+carosello: non sono mai attivi insieme, e per chi guarda sono una cosa sola,
+la fascia che ogni tanto cambia argomento.
+
+**Restano a schermo intero** Doom, il Game Boy, i giochi, l'anteprima della
+gestione media e le notifiche di livello allarme. Le prime quattro perche'
+sono interattive; l'allarme perche' e' il livello che non si puo' non vedere.
+
+| a 1920x1080 | scala | fascia | quante |
+|---|---|---|---|
+| auto | x7 | 1792x448 | 2 |
+| 3 | x5 | 1280x320 | 3 |
+| 4 | x4 | 1024x256 | 4 |
+
+Poche fasce grandi o tante piccole: e' la stessa scelta vista dai due lati.
+
+# 4. La pagina Video
 
 | Comando | Cosa fa |
 |---|---|
@@ -59,6 +90,8 @@ riproporzionate al rapporto dello schermo — 4:3, 16:9, 16:10, 21:9 — sono la
 | **Bagliore %** | l'alone intorno al punto. A zero il bordo è netto |
 | **Fondo** | il colore fra i punti. Nero pieno è corretto per un DMD |
 | **Giochi sullo schermo** | ingranditi di un intero, o stirati a tutto schermo |
+| **Come disegnare** | a fasce dove ce ne sta piu' di una, o una tela sola al centro |
+| **Quante fasce** | quante ce ne stanno, oppure un numero: fasce grandi o fasce tante |
 
 Le prime tre valgono dal **riavvio del servizio**: la superficie e la misura
 della tela si creano una volta sola, all'avvio. È la stessa ragione per cui la
@@ -68,7 +101,7 @@ La pagina dice anche che macchina è, dove sta andando il disegno, quanto è
 grande la tela e di quanto viene ingrandita. Se il vetro è nero, è lì che si
 guarda: il motivo è scritto in cima.
 
-# 4. Il filtro DMD
+# 5. Il filtro DMD
 
 Due cose fatte di proposito.
 
@@ -90,7 +123,7 @@ ondeggiare.
 registro della matrice. Su HDMI non esiste niente del genere, e senza
 moltiplicare lo slider e la modalità notte fingerebbero di funzionare.
 
-# 5. I giochi
+# 6. I giochi
 
 Restano 256×64 e si ingrandiscono di un intero, centrati, con il nero intorno.
 Le aree non usate sono una scelta, non una mancanza.
@@ -105,7 +138,7 @@ nuovo, disegnato da una persona.
 «Stirati a tutto schermo» esiste per chi preferisce comunque lo schermo pieno
 alla nitidezza.
 
-# 6. L'audio su un PC
+# 7. L'audio su un PC
 
 Sul Raspberry le uscite HDMI e bcm2835 si scartano di proposito: non c'è
 nessun cavo HDMI — il pannello è attaccato al bonnet, non a un monitor — e il
@@ -121,7 +154,7 @@ dal mixer di sistema, scrivendo come dispositivo `default` o `pulse` nella
 pagina Impostazioni. Non compaiono nell'elenco delle schede perché non sono
 schede, ma si accettano scritti a mano.
 
-# 7. Avvio automatico
+# 8. Avvio automatico
 
 Il servizio è lo stesso di sempre, `dmd.service`, e parte da solo
 all'accensione. Gira come root — serve per `/dev/input`, per la porta 80
@@ -136,7 +169,7 @@ per provare.
 Se SDL non è installato si ripiega su `/dev/fb0`, che non ha bisogno di niente
 ma nemmeno di una finestra.
 
-# 8. Cosa su un PC non c'è
+# 9. Cosa su un PC non c'è
 
 | | |
 |---|---|
@@ -146,7 +179,7 @@ ma nemmeno di una finestra.
 | Luminosità, modalità notte | emulate in software |
 | Joystick, tastiera, webcam, MQTT, Home Assistant, AirPlay, Samba, servizi internet | funzionano |
 
-# 9. Se il vetro resta nero
+# 10. Se il vetro resta nero
 
 Il programma non muore più quando l'uscita non si accende: continua, stampa il
 motivo nel giornale di bordo e lo scrive in cima alla pagina Video. Il radar

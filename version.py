@@ -3010,6 +3010,42 @@ Storico:
        intera, come l'OTA faceva gia' e `install.sh` no.
        Prove nuove: `diagnostica/prova_schermo.py` (89) e
        `diagnostica/prova_piattaforma.py` (46).
+  17.1 **Le fasce: il monitor smette di essere un pannello con le bande.**
+       La tela e' 4:1 e lo schermo non lo e', quindi ingrandendola al massimo
+       restano due bande nere sopra e sotto -- e quelle bande sono alte un
+       numero **esatto** di tele: a 1024x768 con scala 4 lo schermo e' alto
+       192 righe logiche, cioe' tre tele. Adesso ci stanno dentro altre
+       sorgenti, e il pannello diventa un cruscotto.
+       L'orologio sta nella fascia in cima e non concorre per le altre; sotto
+       vanno le sorgenti attive per priorita'; quando non c'e' nient'altro
+       l'orologio resta solo, e una fascia sola centrata **e'** il pannello
+       di prima. Il gruppo delle fasce occupate si centra in verticale.
+       **Le fasce non cambiano posto.** Chi ne ha una la tiene finche' resta
+       attivo; se quella sopra finisce, le altre non salgono e il posto va al
+       prossimo in attesa. Una fascia che si sposta quando quella sopra
+       sparisce e' il modo piu' sicuro di rendere illeggibile un cruscotto.
+       Meteo, cielo e Info inutili condividono **una** fascia: non sono mai
+       attivi insieme -- li da' il cambio `turni.py` -- e per l'occhio sono
+       una cosa sola, la fascia che ogni tanto cambia argomento. Il posto lo
+       tiene il loro `gruppo`, non il nome, altrimenti alla chiusura di una
+       finestra lo prenderebbe un altro e il carosello salterebbe in giro.
+       E con le fasce **il carosello non aspetta piu' i media**: la regola
+       «ogni due media» esisteva perche' su uno schermo solo le foto avrebbero
+       tenuto il posto per sempre, e adesso il Media Player ha la sua fascia.
+       Sul pannello LED Turni resta esattamente com'era.
+       Restano a schermo intero le sorgenti interattive -- Doom, Game Boy, i
+       giochi, l'anteprima (`in_fascia = False`) -- chi tiene la presa, e una
+       sorgente forzata a mano. Le notifiche ci arrivano gratis: `interrompe`
+       e' gia' il solo livello `allarme`, e la presa ora vuol dire schermo
+       intero.
+       Dettaglio che senza non funzionerebbe: `frame()` torna `None` quando
+       non e' cambiato niente, e con una sorgente sola voleva dire «non
+       ridisegnare». Con tre, il compositore deve ricordarsi l'ultimo
+       fotogramma di ognuna, o una fascia ferma diventa nera appena le altre
+       si muovono.
+       `video.modo` (auto, fasce, singola) e `video.fasce` (auto, o quante se
+       ne vogliono: fasce grandi o fasce tante). Prova nuova:
+       `diagnostica/prova_fasce.py`, 40 controlli.
 """
 
-__version__ = "17.0"
+__version__ = "17.1"

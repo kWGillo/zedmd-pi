@@ -191,6 +191,7 @@ class DoomSource(Source):
     # si discute — oppure non esiste proprio. `enabled` resta False per
     # sempre, cosi' non c'e' nessuna strada per cui possa comparire per sbaglio.
     priority = 0
+    in_fascia = False   # interattiva: vuole tutto lo schermo
 
     def __init__(self, cfg, width, height, arbiter=None):
         super().__init__(cfg, width, height)

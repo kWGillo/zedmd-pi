@@ -117,6 +117,24 @@ DEFAULTS = {
         # Il fondo fra i punti. Nero pieno e' corretto per un DMD; un grigio
         # molto scuro somiglia piu' al vetro di un pannello spento.
         "filtro_fondo": "#000000",
+        # Una tela sola al centro, o piu' tele impilate.
+        #
+        # La tela e' 4:1 e lo schermo non lo e': ingrandendo al massimo
+        # restano due bande nere sopra e sotto, e quelle bande sono alte un
+        # numero esatto di tele -- a 1024x768 con scala 4 lo schermo e' alto
+        # tre tele esatte. "fasce" ci mette dentro altre sorgenti e il
+        # pannello diventa un cruscotto; "singola" e' la 17.0, una tela sola
+        # al centro. "auto" sceglie le fasce quando ce n'e' piu' di una, cioe'
+        # praticamente sempre su un monitor -- e mai sul pannello LED, che di
+        # tele ne ha una per costruzione.
+        "modo": "auto",
+        # Quante fasce. "auto" prende la scala piu' grande che sta in
+        # larghezza e conta le fasce che ne derivano; un numero fa il
+        # contrario, cioe' la scala piu' grande che fa stare quelle fasce.
+        # Sono le due facce della stessa scelta: fasce grandi o fasce tante.
+        # A 1920x1080: auto da' due fasce da 1792x448, 3 ne da' tre da
+        # 1280x320, 4 quattro da 1024x256.
+        "fasce": "auto",
         # I giochi restano alla loro base 256x64 e si ingrandiscono di un
         # moltiplicatore **intero**: i pixel restano pixel invece di diventare
         # poltiglia interpolata, e le aree che restano fuori restano nere. E'

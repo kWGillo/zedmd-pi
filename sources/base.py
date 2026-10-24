@@ -11,6 +11,24 @@ class Source:
     name = "base"
     label = "Base"
     priority = 0
+    # Questa sorgente puo' stare in una fascia, o vuole tutto lo schermo?
+    #
+    # Dalla 17.1 un monitor mostra piu' tele insieme, una per fascia. Quasi
+    # tutte le sorgenti ci stanno volentieri -- sono disegnate per 256x64 e
+    # quella misura resta -- ma le **interattive** no: un gioco, Doom, il
+    # Game Boy e l'anteprima della gestione media si guardano mentre si fa
+    # qualcosa, e dentro una fascia su uno schermo grande sarebbero una
+    # partita giocata col binocolo rovesciato. Quelle prendono la presa del
+    # pannello e lo schermo intero, come hanno sempre fatto.
+    in_fascia = True
+    # Sorgenti che si danno il cambio e che devono stare **nella stessa**
+    # fascia. Meteo, cielo e Info inutili non sono mai attivi insieme -- se
+    # li da' il cambio `turni.py`, una finestra per volta -- e all'occhio
+    # sono una cosa sola: la fascia che ogni tanto cambia argomento. Senza
+    # questo, alla chiusura di una finestra il posto tornerebbe libero e
+    # potrebbe prenderlo un altro, e il carosello salterebbe da una fascia
+    # all'altra.
+    gruppo = ""
 
     def __init__(self, cfg, width, height):
         self.cfg = cfg

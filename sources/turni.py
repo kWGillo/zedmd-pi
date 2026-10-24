@@ -58,6 +58,9 @@ class Turni(object):
         self._running = False
         self._thread = None
         self._sveglia = threading.Event()
+        # Lo schermo mostra piu' fasce insieme? Lo dice il runtime all'avvio.
+        # Cambia una cosa sola, ma grossa: vedi `passo`.
+        self.fasce = False
         # I numeri, per la pagina: quanti spazi dati e a chi.
         self.dati = {"meteo": 0, "cielo": 0, "inutili": 0, "persi": 0}
 
@@ -204,6 +207,17 @@ class Turni(object):
             if ora < self._riprova:
                 return None
             self._riprova = 0.0
+            dovuto = True
+        elif self.fasce:
+            # **Con le fasce il carosello gira per conto suo.** La regola
+            # «ogni due media» esisteva perche' su uno schermo solo le foto
+            # avrebbero tenuto il posto per sempre: contarle era il modo di
+            # strappargli uno spazio. Dalla 17.1 il Media Player ha la sua
+            # fascia e il meteo la sua, quindi non c'e' piu' niente da
+            # strappare -- e aspettare due foto vorrebbe dire una fascia
+            # ferma sullo stesso bollettino per mezz'ora quando le foto sono
+            # spente. Si gira e basta: chiusa una finestra si apre la
+            # prossima, ognuna per il suo tempo.
             dovuto = True
         else:
             dovuto = False

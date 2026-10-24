@@ -46,6 +46,7 @@ class PreviewSource(Source):
     name = "preview"
     label = "Anteprima"
     priority = 90   # conta solo fuori dalla gestione media
+    in_fascia = False   # interattiva: vuole tutto lo schermo
 
     def __init__(self, cfg, width, height, media):
         super().__init__(cfg, width, height)

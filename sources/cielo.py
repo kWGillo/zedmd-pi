@@ -443,6 +443,7 @@ class CieloSource(Source):
     name = "moon"
     label = "Moon"
     priority = PRIORITA
+    gruppo = "turni"   # una fascia sola, a carosello
 
     def __init__(self, cfg, width, height):
         super().__init__(cfg, width, height)

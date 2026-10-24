@@ -2,6 +2,100 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.1]
+
+### Le fasce: il monitor smette di essere un pannello con le bande nere
+
+La tela è 4:1 e lo schermo non lo è. Ingrandendola al massimo restano due
+bande nere sopra e sotto — e quelle bande sono alte un numero **esatto** di
+tele: a 1024×768 con scala 4 lo schermo è alto 192 righe logiche, cioè tre
+tele. Invece di lasciarle vuote ci si mettono altre sorgenti, e il pannello
+diventa un cruscotto.
+
+L'orologio sta nella fascia in cima e non concorre per le altre. Sotto vanno
+le sorgenti attive in ordine di priorità, una per fascia. Quando non c'è
+nient'altro l'orologio resta solo — e una fascia sola, centrata, **è** il
+pannello di prima. Il gruppo delle fasce occupate si centra in verticale: una
+al centro, due con mezza fascia vuota sopra e sotto, tre che riempiono lo
+schermo.
+
+### Le fasce non cambiano posto
+
+Una sorgente che ha una fascia la tiene finché resta attiva. Se quella sopra
+finisce, le altre **non** salgono: il posto libero va al prossimo in attesa.
+
+Non è un dettaglio implementativo, è la regola che rende leggibile un
+cruscotto. Una fascia che si sposta quando quella sopra sparisce insegna
+all'occhio dove guardare e poi non ci mette più niente.
+
+### Il carosello dei turni, in una fascia sola
+
+Meteo, cielo e Info inutili condividono **una** fascia. Non sono mai attivi
+insieme — se li dà il cambio `turni.py`, una finestra per volta — e per
+l'occhio sono una cosa sola: la fascia che ogni tanto cambia argomento.
+
+Il posto lo tiene il loro `gruppo`, non il nome. Senza, alla chiusura di una
+finestra il posto tornerebbe libero per tutti, e il carosello salterebbe da
+una fascia all'altra a ogni cambio.
+
+**E con le fasce il carosello non aspetta più i media.** La regola «ogni due
+media compare il meteo» esisteva perché su uno schermo solo le foto avrebbero
+tenuto il posto per sempre: contarle era il modo di strappargli uno spazio.
+Adesso il Media Player ha la sua fascia e il meteo la sua, quindi non c'è più
+niente da strappare — e aspettare due foto vorrebbe dire una fascia ferma
+sullo stesso bollettino per mezz'ora quando le foto sono spente. Sul pannello
+LED Turni resta esattamente com'era.
+
+### Chi resta a schermo intero
+
+Le sorgenti **interattive**: Doom, il Game Boy, i giochi e l'anteprima della
+gestione media, che adesso lo dichiarano (`in_fascia = False`). Una partita
+dentro una fascia da 256×64 su uno schermo grande sarebbe un gioco giocato col
+binocolo rovesciato.
+
+Più chiunque tenga la presa del pannello, e una sorgente forzata a mano dalla
+pagina Servizi: in tutti e due i casi qualcuno ha chiesto quella sorgente e
+basta, e darle un terzo di schermo sarebbe disobbedire.
+
+Le **notifiche** ci arrivano senza che ci sia stato bisogno di scriverlo:
+`interrompe` è già il solo livello `allarme`, e dalla 17.1 la presa vuol dire
+schermo intero. Quindi `info` e `avviso` si prendono una fascia come tutti, e
+solo l'allarme copre tutto — che è esattamente la distinzione per cui il
+livello esiste.
+
+### Il dettaglio senza cui non funzionerebbe
+
+`frame()` torna `None` quando non è cambiato niente. Con una sorgente sola
+voleva dire «non ridisegnare»; con tre, se il compositore non si ricordasse
+l'ultimo fotogramma di ognuna, una fascia ferma diventerebbe nera appena le
+altre si muovono. Adesso ogni fascia ha la sua memoria.
+
+E allo schermo si manda solo quando c'è qualcosa di nuovo: comporre e spedire
+tre fasce ferme trenta volte al secondo sarebbe lavoro buttato, e su un Atom
+si sente.
+
+### Le manopole
+
+`video.modo`: **auto** (a fasce dove ce ne sta più di una, cioè su un monitor;
+mai sul pannello, che di tele ne ha una per costruzione), **fasce**,
+**singola** — che è la 17.0, e resta disponibile perché un cruscotto non lo
+vuole per forza chiunque abbia un monitor.
+
+`video.fasce`: **auto** prende la scala più grande che sta in larghezza e
+conta le fasce che ne derivano; un numero fa il contrario, cioè la scala più
+grande che fa stare quelle fasce. Sono le due facce della stessa scelta:
+
+| a 1920×1080 | scala | fascia | quante |
+|---|---|---|---|
+| auto | ×7 | 1792×448 | 2 |
+| 3 | ×5 | 1280×320 | 3 |
+| 4 | ×4 | 1024×256 | 4 |
+
+Prova nuova: `diagnostica/prova_fasce.py`, 40 controlli — la geometria a sette
+risoluzioni, il centraggio del gruppo, la memoria dei fotogrammi, il buco che
+resta buco, le fasce che non si spostano, il carosello che resta nella sua, e
+la presa che copre tutto.
+
 ## [17.0]
 
 ### Il programma esce dal pannello: Ubuntu, un monitor, il filtro DMD

@@ -101,6 +101,9 @@ class Arbiter:
         # gli torni all'orologio, e a chiudere ci pensa la sorgente.
         self.hold_name = ""
         self.hold_until = 0.0
+        # Chi sta in quale fascia, dalla 17.1. Il posto si tiene finche' la
+        # sorgente resta attiva: vedi `fasce_scelte`.
+        self._fasce = {}
 
     def register(self, source):
         self.sources[source.name] = source
@@ -219,6 +222,70 @@ class Arbiter:
             if best is None or source.priority > best.priority:
                 best = source
         return best
+
+    # ------------------------------------------------------------- le fasce
+
+    def fasce_scelte(self, quante):
+        """Le sorgenti delle fasce, dalla cima in giu'. None = schermo intero.
+
+        L'arbitro di sempre sceglie **una** sorgente: la piu' alta in
+        priorita' fra quelle attive. Qui ne sceglie N, e le regole sono le
+        stesse applicate N volte, con due aggiunte.
+
+        **L'orologio sta in cima e non concorre.** Nella fascia 0 c'e' lui,
+        sempre, e non partecipa alla gara per le altre. Quando non c'e'
+        nient'altro resta da solo -- e una fascia sola, centrata, e' esatta-
+        mente il pannello di prima.
+
+        **Le fasce sono stabili.** Una sorgente che ha una fascia la tiene
+        finche' resta attiva. Se quella sopra finisce, le altre **non**
+        salgono: il posto libero va al prossimo in attesa. Una fascia che
+        cambia posto quando quella sopra sparisce e' il modo piu' sicuro di
+        rendere illeggibile un cruscotto -- l'occhio impara dove guardare e
+        poi non trova piu' niente.
+
+        Torna None quando le fasce non si applicano: qualcuno tiene la presa
+        del pannello, o una sorgente e' stata forzata a mano dalla pagina
+        Servizi. In tutti e due i casi qualcuno ha chiesto quella sorgente e
+        basta, e darle una fascia su tre sarebbe disobbedire.
+        """
+        if quante <= 1 or self.holding():
+            return None
+        if self.cfg["arbiter"]["force_source"] != "auto":
+            return None
+        scelte = [None] * quante
+        orologio = self.sources.get("clock")
+        if orologio is not None and not (orologio.enabled and orologio.active()):
+            orologio = None
+        primo = 0
+        if orologio is not None:
+            scelte[0] = orologio
+            primo = 1
+
+        # Il posto non lo tiene la sorgente ma la sua **chiave**: il gruppo
+        # se ne ha uno, il nome altrimenti. Serve al carosello di meteo,
+        # cielo e Info inutili, che si danno il cambio uno per volta: per
+        # l'occhio sono una fascia sola che cambia argomento, e senza questo
+        # alla chiusura di una finestra il posto tornerebbe libero per tutti.
+        candidati = {}
+        for source in sorted(self.sources.values(), key=lambda s: -s.priority):
+            if (source is orologio or not source.enabled or not source.active()
+                    or not source.in_fascia):
+                continue
+            candidati.setdefault(source.gruppo or source.name, source)
+        # Chi una fascia ce l'ha gia' se la tiene, allo stesso posto.
+        for i in range(primo, quante):
+            chiave = self._fasce.get(i)
+            if chiave and chiave in candidati:
+                scelte[i] = candidati.pop(chiave)
+        # E i posti liberi vanno ai piu' alti in priorita' fra chi aspetta.
+        attesa = sorted(candidati.values(), key=lambda s: -s.priority)
+        for i in range(primo, quante):
+            if scelte[i] is None and attesa:
+                scelte[i] = attesa.pop(0)
+        self._fasce = {i: (s.gruppo or s.name)
+                       for i, s in enumerate(scelte) if s is not None}
+        return scelte
 
 
 class Runtime:
@@ -441,6 +508,9 @@ class Runtime:
                          daemon=True).start()
         self.turni = Turni(self.cfg, self.meteo, self.cielo, self.media,
                            self.inutili)
+        # Con piu' di una fascia il carosello non aspetta piu' i media: sul
+        # pannello LED, che di fasce ne ha una, Turni resta esattamente com'e'.
+        self.turni.fasce = getattr(self.display, "fasce", 1) > 1
         self.turni.start()
         # Doom non passa da apply_services: non e' un servizio. Qui parte solo
         # la lettura della tastiera, se e' stata chiesta.
@@ -494,6 +564,9 @@ class Runtime:
         self._ultimo_frame = None
         self.frame_mostrati = 0
         self.frame_saltati = 0
+        # I nomi che occupano le fasce adesso, per sapere chi entra. Vedi
+        # `_rendi_fasce`.
+        self._fasce_mostrate = ()
 
     # ------------------------------------------------------------------ musica
 
@@ -1118,6 +1191,56 @@ class Runtime:
         """
         self._ultimo_frame = None
 
+    def _rendi_fasce(self, fasce):
+        """Un giro del ciclo in modalita' fasce.
+
+        Il trattamento di una sorgente che **entra** in una fascia e' lo
+        stesso che riceveva il vincitore unico: il suono del servizio, il
+        ridisegno completo, e `in_onda()` -- che e' il solo istante in cui si
+        sa che qualcuno la sta davvero guardando, e su cui il meteo conta i
+        suoi turni.
+
+        La differenza e' che adesso puo' entrarne piu' di una per volta, e
+        che le altre restano dove sono.
+        """
+        nomi = tuple(s.name if s is not None else "" for s in fasce)
+        cambiato = nomi != self._fasce_mostrate
+        if cambiato:
+            for source in fasce:
+                if source is None or source.name in self._fasce_mostrate:
+                    continue
+                if source.name not in suoni.SUONO_PROPRIO:
+                    try:
+                        suoni.suona_servizio(self.cfg, source.name)
+                    except Exception as exc:      # pragma: no cover
+                        print("[suoni] avviso non riprodotto: %s" % exc)
+                if hasattr(source, "_dirty"):
+                    source._dirty = True
+                if hasattr(source, "invalidate"):
+                    source.invalidate()
+                try:
+                    source.in_onda()
+                except Exception as exc:          # pragma: no cover
+                    print("[arbitro] in_onda fallita per %s: %s"
+                          % (source.name, exc))
+            self._fasce_mostrate = nomi
+            # La pagina Servizi chiede "cosa c'e' sul display": con le fasce
+            # la risposta e' la fascia piu' alta in priorita' che non sia
+            # l'orologio, cioe' la cosa per cui vale la pena guardare.
+            vive = [s for s in fasce if s is not None]
+            altre = [s for s in vive if s.name != "clock"]
+            self.arbiter.current = (max(altre, key=lambda s: s.priority)
+                                    if altre else (vive[0] if vive else None))
+            self._blank_shown = False
+            self._ridisegna()
+        immagini = [s.frame() if s is not None else None for s in fasce]
+        # Si manda allo schermo solo quando c'e' qualcosa di nuovo: le
+        # sorgenti tornano None quando non e' cambiato niente, e comporre e
+        # spedire tre fasce ferme trenta volte al secondo sarebbe lavoro
+        # buttato -- su un Atom si sente.
+        if cambiato or any(i is not None for i in immagini):
+            self.display.mostra_fasce(immagini)
+
     def render_loop(self):
         from PIL import Image
 
@@ -1152,6 +1275,18 @@ class Runtime:
                     self.arbiter.current = None
                     self._ridisegna()
                 time.sleep(0.2)
+                continue
+
+            # Dalla 17.1: se lo schermo ha piu' di una fascia, l'arbitro ne
+            # sceglie una per fascia invece di una sola. Torna None quando le
+            # fasce non si applicano -- la presa del pannello, una sorgente
+            # forzata -- e allora si ricade nel ciclo di sempre.
+            fasce = self.arbiter.fasce_scelte(getattr(self.display, "fasce", 1))
+            if fasce is not None:
+                self._rendi_fasce(fasce)
+                elapsed = time.time() - started
+                if elapsed < period:
+                    time.sleep(period - elapsed)
                 continue
 
             winner = self.arbiter.pick()

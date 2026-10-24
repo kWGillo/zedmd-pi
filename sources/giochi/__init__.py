@@ -150,6 +150,7 @@ class GiochiSource(Source):
     # Come Doom: non partecipa alla gara di priorita'. O la partita e' aperta,
     # e allora il pannello e' preso, oppure non c'e' niente in esecuzione.
     priority = 0
+    in_fascia = False   # interattiva: vuole tutto lo schermo
 
     def __init__(self, cfg, width, height, arbiter=None):
         super().__init__(cfg, width, height)

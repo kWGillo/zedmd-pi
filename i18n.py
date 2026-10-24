@@ -1988,6 +1988,23 @@ STRINGS = {
     "video.giochi": ("Giochi sullo schermo", "Games on screen"),
     "video.giochi.intera": ("Ingranditi di un intero", "Enlarged by a whole number"),
     "video.giochi.pieno": ("Stirati a tutto schermo", "Stretched to full screen"),
+    # Le fasce, dalla 17.1: la tela e' 4:1 e lo schermo no, quindi le bande
+    # nere sopra e sotto sono alte un numero esatto di tele.
+    "video.modo": ("Come disegnare", "How to draw"),
+    "video.modo.auto": ("A fasce, se ci stanno", "In bands, if they fit"),
+    "video.modo.fasce": ("A fasce", "In bands"),
+    "video.modo.singola": ("Una tela sola, al centro", "A single canvas, centred"),
+    "video.fasce": ("Quante fasce", "How many bands"),
+    "video.fasce.auto": ("Quante ce ne stanno", "As many as fit"),
+    "video.fasce.ora": ("Fasce", "Bands"),
+    "video.fasce.sola": ("Una sola, al centro", "One only, centred"),
+    "video.fasce.quante": ("%(quante)d da %(largo)d×%(alto)d",
+                           "%(quante)d of %(largo)d×%(alto)d"),
+    "video.fasce.hint": (
+        "Poche fasce grandi o tante piccole: a 1920×1080 sono due da 1792, "
+        "o quattro da 1024.",
+        "Few large bands or many small: at 1920×1080 that is two of 1792, or "
+        "four of 1024."),
     "video.giochi.hint": (
         "I giochi sono disegnati su 256×64: ingranditi di un intero i pixel "
         "restano pixel.",

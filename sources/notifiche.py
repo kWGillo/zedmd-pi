@@ -295,6 +295,12 @@ class NotificheSource(Source):
             # La presa del pannello, la stessa che usano Doom e il Game Boy.
             # E' l'unico modo per passare sopra a una partita: la priorita' da
             # sola non basta, perche' chi tiene il pannello lo tiene.
+            #
+            # Dalla 17.1 questa riga fa una seconda cosa senza che ci sia
+            # stato bisogno di scriverla: su un monitor a fasce la presa vale
+            # **schermo intero**, quindi `info` e `avviso` si prendono una
+            # fascia come tutti e solo `allarme` copre tutto. Che e'
+            # esattamente la distinzione per cui il livello esiste.
             self.arbiter.hold_on(self.name)
             preso = True
         try:
