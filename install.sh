@@ -53,6 +53,24 @@ apt install -y python3 python3-pip python3-dev python3-numpy python3-pil \
                python3-flask python3-paho-mqtt cython3 fonts-dejavu-core \
                tzdata ffmpeg samba samba-common-bin
 
+# ------------------------------------------------- il nome sulla rete
+#
+# Senza questo, `nomemacchina.local` non risponde. Su Raspberry Pi OS avahi
+# c'e' gia' installato e la cosa non si nota mai; su una Debian minimale non
+# c'e', e ci si ritrova a cercare l'indirizzo IP nel router ogni volta.
+#
+# Due pacchetti e fanno due cose diverse: `avahi-daemon` fa in modo che
+# **questa** macchina risponda al suo nome, `libnss-mdns` fa in modo che
+# **questa** macchina sappia chiamare le altre per nome. Il primo serve a
+# te, il secondo serve a lei.
+echo "==> Il nome sulla rete (nomemacchina.local)"
+apt install -y avahi-daemon libnss-mdns 2>/dev/null \
+  || echo "    avahi non installato: si usera' l'indirizzo IP"
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl enable --now avahi-daemon >/dev/null 2>&1 || true
+fi
+echo "    questa macchina risponde come $(hostname).local"
+
 # ----------------------------------------------- il font dell'orologio
 #
 # L'orologio e' disegnato sulle larghezze di `DejaVuSansMono-Bold`. Non e'

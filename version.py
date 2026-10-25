@@ -3460,6 +3460,23 @@ Storico:
        e' un altro. La prova quindi non pretende lo stesso punteggio -- che
        sul pannello resti identico al pixel, e che sulla tela alta la schiera
        abbia dove muoversi e stia tutta sopra i ripari.
+  17.4.6 **`nomemacchina.local` non rispondeva, e mancava un pacchetto.**
+       *«Ho chiamato il computer virtuadmd, mi aspettavo di accedervi
+       scrivendo virtuadmd.local.»* Aspettativa giusta, e il motivo per cui
+       non succedeva e' che su Raspberry Pi OS **avahi c'e' di serie**: in
+       sette anni di Raspberry la cosa non si e' mai notata, perche' non
+       c'era niente da installare. Su una Debian minimale non c'e'.
+       `install.sh` adesso installa `avahi-daemon` e `libnss-mdns`, che
+       fanno due cose diverse e vale la pena distinguerle: il primo fa in
+       modo che **questa** macchina risponda al suo nome -- ed e' quello che
+       serve per scrivere `virtuadmd.local` dal Mac -- il secondo che
+       **questa** macchina sappia chiamare le altre per nome, che serve a
+       lei per raggiungere il broker MQTT o la cassa AirPlay senza IP.
+       Alla fine l'installazione lo dice: *«questa macchina risponde come
+       virtuadmd.local»*. E il manuale di Debian spiega anche il caso che
+       fa impazzire, cioe' due macchine con lo stesso nome: avahi rinomina
+       la seconda in `-2` da sola, e quando `.local` smette di rispondere
+       senza motivo e' il primo sospetto.
 """
 
-__version__ = "17.4.5"
+__version__ = "17.4.6"

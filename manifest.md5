@@ -53,7 +53,7 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 e45d351b601929bd837040f66702dfe0  hass.py
 9cccf0b6ec77f512b011083451a4dd48  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
-0925ecd33f6644a201321b84b9f0006c  install.sh
+d7ed711036597d7f61ae5c05fb8785d8  install.sh
 1ac13b80fea00e4ef49841661298ea1a  inutili.py
 456a3e6e24373f6acbd608aea6c34c8e  libcheck.py
 33804e1f60d47bc20ea370bb2e0b6502  lookup.py
@@ -185,7 +185,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 3b29a3298d7020ed5416a9b633083bb4  templates/video.html
 dfdb476800003318473f792504d1259b  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-0a3b1f8568bf474f991314bada0cab8f  version.py
+c96f71989b5d0e6b92351c4404733e5e  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 afe563a2fdf7b6e501024d34f74ea6a9  webui.py

@@ -2,6 +2,32 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.6]
+
+### `nomemacchina.local` non rispondeva, e mancava un pacchetto
+
+*«Ho chiamato il computer virtuadmd, mi aspettavo di accedervi scrivendo
+virtuadmd.local.»*
+
+Aspettativa giusta. Il motivo per cui non succedeva è che su Raspberry Pi OS
+**avahi c'è di serie**: in sette anni di Raspberry non si è mai notato, perché
+non c'era niente da installare. Su una Debian minimale non c'è.
+
+`install.sh` adesso installa `avahi-daemon` e `libnss-mdns`, che fanno due cose
+diverse e vale la pena distinguerle:
+
+| | |
+|---|---|
+| `avahi-daemon` | **questa** macchina risponde al suo nome: è quello che serve per scrivere `virtuadmd.local` dal Mac |
+| `libnss-mdns` | **questa** macchina sa chiamare le altre per nome: serve a lei, per raggiungere il broker MQTT o la cassa AirPlay senza IP |
+
+Alla fine l'installazione lo dice: *«questa macchina risponde come
+virtuadmd.local»*.
+
+Il manuale di Debian spiega anche il caso che fa impazzire: due macchine con lo
+stesso nome. Avahi rinomina la seconda in `-2` da sola, e quando `.local` smette
+di rispondere senza motivo apparente è il primo sospetto.
+
 ## [17.4.5]
 
 ### Invasori, e tornano le cinque file

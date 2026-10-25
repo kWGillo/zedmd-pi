@@ -203,6 +203,37 @@ sudo usermod -aG adm gillo
 
 `http://INDIRIZZO:8080/`, dal Mac o da qualunque cosa abbia un browser.
 
+## Chiamarla per nome invece che per indirizzo
+
+Su Raspberry Pi OS `nomemacchina.local` funziona da sempre, e non perché il
+Raspberry abbia qualcosa di magico: ha **avahi** installato di serie. Una
+Debian minimale no, e quindi `virtuadmd.local` non risponde finché non lo
+installi.
+
+Dalla 17.4.6 lo fa `install.sh`. A mano sono due pacchetti:
+
+```
+sudo apt install -y avahi-daemon libnss-mdns
+```
+
+Fanno due cose diverse, e vale la pena saperlo:
+
+| | |
+|---|---|
+| `avahi-daemon` | **questa** macchina risponde al suo nome: è quello che ti serve per scrivere `virtuadmd.local` dal Mac |
+| `libnss-mdns` | **questa** macchina sa chiamare le altre per nome: serve a lei, per raggiungere il broker MQTT o la cassa AirPlay senza IP |
+
+Il nome è quello di sistema: `hostnamectl` lo dice, `sudo hostnamectl
+set-hostname virtuadmd` lo cambia. Se in casa ci fossero due macchine con lo
+stesso nome, avahi rinomina la seconda in `virtuadmd-2.local` da solo — e se
+un giorno `.local` smette di rispondere senza motivo, è il primo sospetto.
+
+Dal Mac si controlla così:
+
+```
+ping virtuadmd.local
+```
+
 La prima da aprire è **Video**: dice che macchina è, dove sta andando il
 disegno, quanto è grande la tela logica e in quante regioni è divisa. Se lo
 schermo è nero, il motivo è scritto lì in cima.

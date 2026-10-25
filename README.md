@@ -338,6 +338,11 @@ journalctl -u dmd -f
 L'interfaccia è su `http://dmdpi.local:8080/`. Aprendo l'indirizzo senza porta
 si viene rediretti automaticamente.
 
+Il nome `.local` funziona perché la macchina pubblica sé stessa con **avahi**,
+che su Raspberry Pi OS c'è di serie. Su una Debian minimale non c'è, e dalla
+17.4.6 `install.sh` lo installa: senza, resta solo l'indirizzo IP
+(`hostname -I`).
+
 ### Aggiornare un'installazione esistente
 
 ```bash
