@@ -3116,6 +3116,19 @@ Storico:
        zedmd, moon, inutili, scadenze -- quindi chi si aspetta l'orologio
        grande vedrebbe un orologio piccolo e nessuna spiegazione. Elencarli
        trasforma «non funziona» in «ah, devo spegnere quelli».
+  17.2.2 **Le istruzioni per un PC, che non c'erano.** `docs/debian.it.md`:
+       dall'immagine netinst al servizio avviato su Debian 13 trixie, con
+       dentro le cose che si scoprono solo provandole -- la password di root
+       da lasciare vuota perche' l'utente finisca nel gruppo sudo, le quattro
+       verifiche sulle scatolette Atom (larghezza dell'UEFI, audio Cherry
+       Trail, `/dev/dri`, zram), il lampo del login, i cinque servizi accesi
+       di serie che tengono l'orologio a meta', e il misuratore del
+       compositore da lanciare sulla macchina vera.
+       Il README principale si intitolava ancora **8.1**, nove versioni
+       indietro, ed era il primo file che uno legge. Adesso non ha un numero
+       -- un titolo con la versione dentro invecchia da solo -- e
+       l'installazione si divide in due strade dichiarate, con il rimando al
+       manuale del PC.
 """
 
-__version__ = "17.2.1"
+__version__ = "17.2.2"

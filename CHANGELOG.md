@@ -2,6 +2,37 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.2.2]
+
+### Le istruzioni per un PC, che non c'erano
+
+`docs/debian.it.md`: dall'immagine netinst al servizio avviato su Debian 13
+«trixie», con dentro le cose che si scoprono solo provandole e che finora
+stavano soltanto in una conversazione.
+
+- la **password di root da lasciare vuota** nell'installatore, altrimenti il
+  tuo utente non finisce nel gruppo `sudo` e te ne accorgi via SSH;
+- le quattro verifiche che su una scatoletta Atom valgono il minuto che
+  costano: larghezza dell'UEFI, audio Cherry Trail, `/dev/dri`, zram e il
+  tetto al giornale di sistema su una eMMC;
+- perché **Ubuntu Desktop no**: Canonical chiede 6 GB di RAM per Desktop e 1,5
+  per Server, e su 2 GB il desktop gira a meno di un terzo del suo minimo
+  dichiarato;
+- le due sorprese che non sono difetti: **l'orologio grande che non si vede**
+  perché cinque servizi nascono accesi, e il lampo del login all'avvio;
+- il **misuratore del compositore**, da lanciare sulla macchina vera senza
+  installare niente, con il budget di 33 ms e cosa fare se non ci si sta.
+
+### Il README si intitolava ancora 8.1
+
+Nove versioni indietro, ed era il primo file che uno legge. Adesso non ha un
+numero — un titolo con la versione dentro invecchia da solo, in silenzio, ed è
+lo stesso motivo per cui `docs/README.it.md` è soltanto un indice.
+
+L'installazione si divide in due strade dichiarate, con il rimando al manuale
+del PC, e la nota che a scegliere non è un'opzione ma la macchina:
+`piattaforma.py` lo dice in una riga.
+
 ## [17.2.1]
 
 ### L'orologio grande solo quando non può arrivare nient'altro

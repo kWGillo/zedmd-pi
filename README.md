@@ -1,8 +1,9 @@
-# DMD Controller 8.1
+# DMD Controller
 
-Servizio unico che possiede il pannello LED (256×64, FM6373 + DP32020B) su un
-Raspberry Pi e lo condivide fra più sorgenti di contenuto, con interfaccia web
-di controllo in italiano e inglese.
+Servizio unico che possiede il vetro — il pannello LED 256×64 (FM6373 +
+DP32020B) su un Raspberry Pi, oppure un monitor collegato a un PC — e lo
+condivide fra più sorgenti di contenuto, con interfaccia web di controllo in
+italiano e inglese.
 
 Nasce come emulatore di **ZeDMD-WiFi** per un cabinato, ma il pannello resta
 acceso anche quando non si gioca: l'obiettivo è un oggetto da salotto che
@@ -233,9 +234,33 @@ chi la usa, e una regola cieca si mangerebbe un `.stfolder` di Syncthing o un
 
 ---
 
+## Due macchine, due procedure
+
+Dalla 17.0 il programma gira su due tipi di macchina, e l'installazione si
+divide qui:
+
+- **Raspberry Pi 3 o 4 con il pannello LED**: è il caso di sempre, e la
+  procedura è quella che segue;
+- **un PC con un monitor collegato**: niente pannello, niente libreria
+  matrice, niente taratura. La procedura completa — immagine, trappole,
+  audio, primo avvio — sta in
+  [`docs/debian.it.md`](docs/debian.it.md), e quello che il programma fa
+  diversamente in [`docs/video.it.md`](docs/video.it.md).
+
+Chi decide non sei tu e non è un'opzione: lo decide la macchina, leggendo
+quello che dichiara di sé. Il pannello si offre **solo** su Pi 3 e 4, perché
+la libreria pilota il blocco PWM del BCM — sul Pi 5 il controller GPIO è un
+altro e la libreria non lo supporta. Lo si vede con:
+
+```bash
+python3 piattaforma.py
+```
+
+---
+
 ## Requisiti
 
-Un Raspberry Pi già preparato secondo la procedura del progetto:
+Per il **Raspberry**, un Pi già preparato secondo la procedura del progetto:
 
 - audio integrato disattivato (`dtparam=audio=off`)
 - `isolcpus=3` sui modelli quad-core
@@ -268,6 +293,10 @@ sudo ./install.sh
 Lo script installa le dipendenze, compila i binding Python della libreria
 matrice, copia i file in `/opt/dmd`, crea `/etc/dmd/config.json` e registra il
 servizio systemd.
+
+Su un PC lo stesso script salta la libreria matrice — che lì non serve e non si
+compilerebbe — installa SDL e accende l'audio sulla scheda integrata. La
+differenza la decide `piattaforma.py`, non un argomento da ricordare.
 
 Se la libreria matrice non è nella home dell'utente:
 
