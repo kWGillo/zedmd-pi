@@ -86,6 +86,19 @@ piu'.
 gestione media e le notifiche di livello allarme. Le prime quattro perche'
 sono interattive; l'allarme perche' e' il livello che non si puo' non vedere.
 
+Dalla 17.3 «schermo intero» per **Doom e il Game Boy** vuol dire davvero tutto
+lo schermo: disegnano alla misura della tela logica con le loro proporzioni --
+Doom 320:200, il Game Boy 160:144 -- invece che in una fascia da pannello. Per
+Doom serve ricompilare l'helper una volta sola:
+
+```
+sudo /opt/dmd/doom/setup_doom.sh
+```
+
+I **tredici giochi** scritti per il pannello restano per ora 256x64 ingranditi
+di un intero e centrati: la loro geometria e' fatta di costanti di modulo e di
+righe assolute, e riproporzionarla e' un lavoro a parte.
+
 | a 1024x768 | righe logiche |
 |---|---|
 | orologio da solo | 184 |

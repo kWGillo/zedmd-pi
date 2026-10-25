@@ -117,17 +117,28 @@ DEFAULTS = {
         # Il fondo fra i punti. Nero pieno e' corretto per un DMD; un grigio
         # molto scuro somiglia piu' al vetro di un pannello spento.
         "filtro_fondo": "#000000",
-        # Staccare la console di testo dal monitor.
+        # Che fare della console di testo del kernel, sotto il nostro disegno.
         #
         # Con SDL su KMS prendiamo il controllo della scheda, ma `fbcon` --
         # la console del kernel -- possiede ancora il terminale virtuale:
-        # all'avvio `getty` ci scrive sopra il suo prompt per un istante, e il
-        # suo cursore resta a lampeggiare perche' lo disegna il kernel. Il
-        # cursore e il risparmio schermo si spengono sempre; staccare la
-        # console del tutto toglie anche il lampo del login, ma se il servizio
-        # muore lo schermo resta nero e per capire perche' serve la pagina web
-        # o un'altra macchina. Per questo non e' il predefinito.
-        "console_staccata": False,
+        # all'avvio `getty` ci scrive sopra il suo prompt per un istante, e
+        # il suo cursore resta a lampeggiare perche' lo disegna il kernel.
+        #
+        #   "zitta"     spegne il cursore e il risparmio schermo della
+        #               console. E' il predefinito, e si fa **prima** di
+        #               impostare il modo video: farlo dopo si e' gia' pagato
+        #               una volta con uno schermo nero e un giornale pieno di
+        #               «Could not queue pageflip: -22», perche' `fbcon` si
+        #               riprendeva la CRTC e il framebuffer di SDL non
+        #               corrispondeva piu'.
+        #   "staccata"  stacca `fbcon` dal framebuffer: nessuno puo' piu'
+        #               scriverci sopra, nemmeno `getty`, e sparisce anche il
+        #               lampo del login. Ma la console sparisce davvero, e se
+        #               il servizio muore lo schermo resta nero.
+        #   "lascia"    non tocca niente. E' il comportamento fino alla 17.1,
+        #               e serve come via d'uscita dove anche solo scrivere in
+        #               `/sys` basta a far litigare `fbcon` con SDL.
+        "console": "zitta",
         # Una tela sola al centro, o lo schermo diviso in due regioni.
         #
         # La tela e' 4:1 e lo schermo non lo e': ingrandendola al massimo
@@ -1236,6 +1247,15 @@ def _migrate(raw):
         raw["arbiter"]["force_source"] = "clock"
     if raw.get("web", {}).get("port") == 80:
         raw["web"]["port"] = 8080
+    # La 17.1.1 aveva un interruttore booleano, `video.console_staccata`. Dalla
+    # 17.3.1 i modi sono tre -- zitta, staccata, lascia -- e chi aveva messo
+    # "true" la voleva staccata: e' esattamente la via d'uscita di chi aveva
+    # gia' visto `fbcon` litigare con SDL, e sarebbe scortese rimetterlo al
+    # predefinito proprio a lui.
+    video = raw.get("video")
+    if isinstance(video, dict) and "console_staccata" in video:
+        if video.pop("console_staccata") and not video.get("console"):
+            video["console"] = "staccata"
     # La 16.0 aveva quattro soglie per la potenza, con due estremi: un valore
     # «dentro un intervallo». La 16.1 ne ha tre, come il quadrante di Home
     # Assistant -- giallo, rosso, massima dell'impianto -- perche' davanti alla

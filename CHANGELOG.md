@@ -2,6 +2,105 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.3.1]
+
+### Lo schermo nero: si metteva a tacere la console dopo aver preso la scheda
+
+*«Dopo l'aggiornamento lo schermo è tutto nero.»*
+
+Il servizio era **vivo**, aveva preso lo schermo, e il giornale era pieno di una
+riga sola, venti volte al secondo:
+
+```
+ERROR: Could not queue pageflip: -22
+```
+
+`-22` è `EINVAL` da `drmModePageFlip`, e vuol dire che il framebuffer che SDL
+sta presentando non corrisponde più al modo impostato sulla CRTC. La colpa era
+dell'ordine, e l'ordine era mio: dalla 17.1.1 `zittisci_console` stava **in
+fondo** al costruttore della superficie. Quindi SDL impostava il modo video, e
+subito dopo noi andavamo a toccare `fbcon` — che si riprendeva la CRTC con il
+*suo* modo. Da lì in poi il programma girava, credeva di disegnare, e ogni
+fotogramma veniva rifiutato.
+
+Il nero non era un difetto di disegno: era la console di testo, tornata a
+possedere lo schermo.
+
+Adesso la console si mette a tacere **prima** di prendere la scheda. Chi la
+prende per ultimo la tiene.
+
+### Tre modi invece di un interruttore
+
+L'episodio dice che su questo punto serve una via d'uscita, non un booleano.
+`video.console_staccata` diventa `video.console`:
+
+| | |
+|---|---|
+| `zitta` | il predefinito: cursore e risparmio schermo della console spenti, prima di prendere la scheda |
+| `staccata` | `fbcon` staccata dal framebuffer, così non può riprendersi niente — e sparisce anche il lampo del login. Se il servizio muore lo schermo resta nero |
+| `lascia` | non tocca niente: il comportamento fino alla 17.1, per le macchine dove anche solo scrivere in `/sys` basta a far litigare `fbcon` con SDL |
+
+Chi aveva messo `console_staccata: true` se la ritrova migrata su `staccata`:
+l'aveva accesa proprio per questo motivo, e rimetterlo al predefinito sarebbe
+stato scortese proprio con lui.
+
+## [17.3]
+
+### Doom e il Game Boy a tutto schermo
+
+*«Doom resta piccolo come se fosse su un dmd. Non va in full screen. Presumo
+anche PyBoy a questo punto.»*
+
+Giusto tutte e due le volte, e per due motivi diversi.
+
+**Il Game Boy era un difetto latente dalla 17.0.** All'helper si passava la
+misura vera della tela e poi si leggevano fotogrammi da `256*64*3` byte
+**fissi**: a qualunque altra misura i due numeri non coincidevano e la pipe si
+desincronizzava per sempre. Nessuno se n'era accorto perché fino alla 17.0 una
+tela diversa non esisteva. Adesso la misura la dice la tela, e l'helper — che è
+Python e onora già `--larghezza`/`--altezza` — disegna grande quanto gli si
+chiede.
+
+**Doom aveva la misura compilata dentro:**
+
+```c
+#define USCITA_L 256
+#define USCITA_A 64
+```
+
+Sono diventate due opzioni di riga di comando, `--uscita-larga` e
+`--uscita-alta`, con il buffer allocato invece che statico e un tetto a 1024 —
+oltre non ci sarebbe niente da ingrandire, visto che Doom disegna 320×200, e un
+numero assurdo passato per sbaglio chiederebbe mezzo gigabyte al `malloc`.
+
+> **Serve ricompilare l'helper**, una volta sola:
+> `sudo /opt/dmd/doom/setup_doom.sh`. Il sorgente è cambiato, il binario no.
+
+**E su una tela alta la fascia non serve più.** Il ritaglio attorno
+all'orizzonte — 96 righe a partire dalla 36 — esiste per schiacciare i 200
+righe di Doom dentro 64, e su un pannello è l'unica cosa sensata da fare. Dove
+lo spazio c'è si prende il fotogramma intero con le sue proporzioni: 256×160 su
+una tela da 192 righe, cioè 1024×640 centrati su 1024×768. Le due manopole
+della pagina restano quelle del pannello, dove contano.
+
+### La riga che fa la differenza
+
+`componi` accetta ora **qualunque** tela fino alla tela logica, non più solo i
+256×64 del pannello. Prima riportava tutto a 256×64 prima di ingrandire: era
+giusto per le sorgenti, che su quella misura sono tarate, ma per chi la sua
+immagine se la disegna da solo era uno spreco — e il risultato era Doom alto un
+terzo di schermo, cioè esattamente come su un pannello.
+
+Una tela da 256×64 resta la striscia centrata di sempre.
+
+### I tredici giochi restano come sono
+
+La loro geometria è fatta di costanti di **modulo** — `LARGHEZZA = 256`,
+`ALTEZZA = 64`, `CAMPO = 200` — che tutti e tredici importano così, e di righe
+assolute: il suolo del T-Rex a 58, la nave di Invasori a 58, i bunker a 46, la
+racchetta di Mattoni a 60. Ingrandire la tela senza toccare quei numeri non fa
+un gioco più grande, fa un gioco rotto. È il lavoro della 17.4.
+
 ## [17.2.2]
 
 ### Le istruzioni per un PC, che non c'erano

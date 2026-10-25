@@ -366,12 +366,19 @@ class Runtime:
         # meteo -- «subito dopo il meteo stesso», come e' stato chiesto.
         self.inutili = InutiliSource(self.cfg, self.display.width,
                                      self.display.height)
+        # **La tela piena**, per chi la sua immagine se la disegna invece di
+        # impaginarne una nostra: Doom, il Game Boy, i giochi. Quanto grande
+        # la facciano glielo diciamo noi, e su un monitor glielo diciamo
+        # grande quanto la tela logica -- cosi' vanno a tutto schermo invece
+        # di restare in una fascia da pannello. Sul pannello e' il pannello.
+        tela_piena = getattr(self.display, "tela_piena",
+                             (self.display.width, self.display.height))
         # Doom prende e restituisce il pannello da solo, quindi conosce
         # l'arbitro: e' l'unica sorgente che lo fa. Non e' un servizio e non
         # compare fra gli interruttori — `enabled` resta False per sempre — e
         # va a schermo solo quando ha la presa, cioe' solo durante una partita.
-        self.doom = DoomSource(self.cfg, self.display.width,
-                               self.display.height, self.arbiter)
+        self.doom = DoomSource(self.cfg, tela_piena[0], tela_piena[1],
+                               self.arbiter)
         # Il Game Boy e' la terza partita: stessa presa del pannello, stesso
         # arbitro, stessa regola. Non e' un servizio.
         #
@@ -380,8 +387,8 @@ class Runtime:
         # che l'oggetto esista faceva morire il servizio all'avvio. Sembrava
         # innocuo perche' quelle funzioni si chiamano solo dopo, ma
         # `self.gameboy.in_sessione` si valuta subito.
-        self.gameboy = GameBoySource(self.cfg, self.display.width,
-                                     self.display.height, self.arbiter)
+        self.gameboy = GameBoySource(self.cfg, tela_piena[0], tela_piena[1],
+                                     self.arbiter)
         # Stessa storia per i giochi scritti per il pannello: partita, non
         # servizio. Prendono la presa allo stesso modo e con lo stesso arbitro.
         self.giochi = GiochiSource(self.cfg, self.display.width,

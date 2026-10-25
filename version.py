@@ -3129,6 +3129,53 @@ Storico:
        -- un titolo con la versione dentro invecchia da solo -- e
        l'installazione si divide in due strade dichiarate, con il rimando al
        manuale del PC.
+  17.3 **Doom e il Game Boy a tutto schermo.** *«Doom resta piccolo come se
+       fosse su un dmd. Non va in full screen. Presumo anche PyBoy.»* Giusto
+       tutte e due le volte, e per due motivi diversi.
+       Il **Game Boy** era un difetto latente dalla 17.0: all'helper si
+       passava la misura vera della tela e poi si leggevano fotogrammi da
+       `256*64*3` byte **fissi**. A qualunque altra misura i due numeri non
+       coincidevano e la pipe si desincronizzava per sempre. Adesso la misura
+       la dice la tela, e l'helper -- che e' Python e onora gia'
+       `--larghezza`/`--altezza` -- disegna grande quanto gli si chiede.
+       **Doom** aveva la misura di uscita compilata dentro: `#define USCITA_L
+       256`, `USCITA_A 64`. Sono diventate due opzioni, `--uscita-larga` e
+       `--uscita-alta`, con il buffer allocato e un tetto a 1024 -- oltre non
+       ci sarebbe niente da ingrandire, visto che Doom disegna 320x200.
+       **Serve ricompilare l'helper** (`sudo /opt/dmd/doom/setup_doom.sh`):
+       il sorgente e' cambiato, il binario no.
+       E su una tela alta la **fascia non serve piu'**: esiste per schiacciare
+       200 righe dentro 64, e dove lo spazio c'e' si prende il fotogramma
+       intero con le sue proporzioni -- 256x160 su una tela da 192, cioe'
+       1024x640 centrati su 1024x768.
+       Sotto, `componi` accetta qualunque tela fino alla tela logica, non piu'
+       solo i 256x64 del pannello: e' la riga che fa la differenza fra «a
+       tutto schermo» e «una fascia come sul pannello», e serviva a tutte e
+       due le partite. Una tela da 256x64 resta la striscia di sempre.
+       I tredici giochi scritti per il pannello restano come sono: la loro
+       geometria e' fatta di costanti di modulo e di righe assolute, e
+       riproporzionarli e' il lavoro della 17.4.
+  17.3.1 **Lo schermo nero: si metteva a tacere la console dopo aver preso la
+       scheda.** *«Dopo l'aggiornamento lo schermo e' tutto nero»*, con il
+       giornale pieno di `Could not queue pageflip: -22`. Il servizio era
+       vivo e aveva lo schermo: fallivano tutti gli scambi di pagina.
+       EINVAL da `drmModePageFlip` vuol dire che il framebuffer non
+       corrisponde piu' al modo impostato sulla CRTC, e la colpa era
+       dell'ordine: dalla 17.1.1 `zittisci_console` stava **in fondo** al
+       costruttore della superficie, quindi SDL impostava il modo e subito
+       dopo noi andavamo a toccare `fbcon`, che si riprendeva la CRTC con il
+       suo. Da li' in poi il programma girava, credeva di disegnare, e non si
+       vedeva niente: il nero era la console, non un difetto di disegno.
+       Adesso la console si mette a tacere **prima** di prendere la scheda.
+       Chi la prende per ultimo la tiene.
+       E l'interruttore booleano `video.console_staccata` diventa
+       `video.console` con tre valori: **zitta** (il predefinito: cursore e
+       risparmio schermo spenti), **staccata** (`fbcon` staccata dal
+       framebuffer, cosi' nessuno puo' riprendersi niente -- al prezzo che se
+       il servizio muore lo schermo resta nero), **lascia** (non si tocca
+       niente, il comportamento fino alla 17.1, come via d'uscita). Chi aveva
+       messo `console_staccata: true` se la ritrova migrata su "staccata":
+       l'aveva accesa proprio per questo.
 """
 
-__version__ = "17.2.2"
+__version__ = "17.3.1"

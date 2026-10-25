@@ -52,6 +52,30 @@ LARGHEZZA = 256
 ALTEZZA = 64
 BYTE_FOTOGRAMMA = LARGHEZZA * ALTEZZA * 3
 
+# Doom disegna 320x200, e su un pannello alto 64 righe non ci si puo' fare
+# niente: si ritaglia una fascia attorno all'orizzonte -- 96 righe a partire
+# dalla 36 -- e si accetta di non vedere il cielo. Su un monitor pero' lo
+# spazio c'e', e allora si prende il fotogramma intero con le sue proporzioni.
+DOOM_L = 320
+DOOM_A = 200
+# Sopra queste righe di tela si considera che ci sia spazio per il fotogramma
+# intero. 64 e' il pannello; 96 e' gia' una mezza regione di monitor.
+TELA_ALTA = 96
+
+
+def tela_doom(largo, alto):
+    """La misura su cui far disegnare Doom dentro una tela di `largo` x `alto`.
+
+    Sul pannello e' la tela stessa, e la fascia fa il suo mestiere. Su una
+    tela alta si prende il riquadro 320:200 piu' grande che ci sta: cosi' il
+    fotogramma esce con le proporzioni vere invece di essere schiacciato, e
+    chi compone lo centra.
+    """
+    if alto < TELA_ALTA:
+        return (largo, alto)
+    scala = min(largo / float(DOOM_L), alto / float(DOOM_A))
+    return (max(16, int(DOOM_L * scala)), max(8, int(DOOM_A * scala)))
+
 # Codici tasto di Doom (doomkeys.h). Non sono ASCII e non sono quelli di
 # Linux: sono una numerazione sua, e questa tabella e' l'unico posto del
 # progetto che deve saperlo.
@@ -195,6 +219,7 @@ class DoomSource(Source):
 
     def __init__(self, cfg, width, height, arbiter=None):
         super().__init__(cfg, width, height)
+        self.width, self.height = tela_doom(width, height)
         self.arbiter = arbiter
 
         self._lock = threading.Lock()
@@ -279,10 +304,20 @@ class DoomSource(Source):
         processo dentro il livello costa un secondo e non sbaglia mai.
         """
         conf = self.cfg["doom"]
+        # La fascia serve a schiacciare 200 righe dentro 64: su una tela alta
+        # non serve piu', e si prende il fotogramma intero. Le due manopole
+        # della pagina restano quelle del pannello, dove contano.
+        if self.height >= TELA_ALTA:
+            alto, altezza = 0, DOOM_A
+        else:
+            alto = int(conf.get("band_top", 36))
+            altezza = int(conf.get("band_height", 96))
         args = [conf["binary"],
                 "-iwad", conf["wad"],
-                "--fascia-alto=%d" % int(conf.get("band_top", 36)),
-                "--fascia-altezza=%d" % int(conf.get("band_height", 96)),
+                "--uscita-larga=%d" % self.width,
+                "--uscita-alta=%d" % self.height,
+                "--fascia-alto=%d" % alto,
+                "--fascia-altezza=%d" % altezza,
                 "--gamma=%.2f" % float(conf.get("gamma", 1.15)),
                 ]
         # L'audio di Doom nasceva spento: il suono del cabinato era quello di
@@ -406,14 +441,17 @@ class DoomSource(Source):
         proc = self._proc
         if proc is None or proc.stdout is None:
             return
-        buffer = bytearray(BYTE_FOTOGRAMMA)
+        # La misura la dice la tela di adesso, non una costante: dalla 17.3
+        # l'helper disegna grande quanto gli abbiamo chiesto.
+        attesi = self.width * self.height * 3
+        buffer = bytearray(attesi)
         vista = memoryview(buffer)
         while self._running and proc.poll() is None:
             riempito = 0
             # Una pipe consegna quel che ha, non quel che si chiede: il
             # fotogramma si ricompone qui, altrimenti bastano due letture
             # corte per sfasare tutto il flusso che segue.
-            while riempito < BYTE_FOTOGRAMMA:
+            while riempito < attesi:
                 try:
                     letti = proc.stdout.readinto(vista[riempito:])
                 except (OSError, ValueError):
@@ -422,12 +460,12 @@ class DoomSource(Source):
                     return
                 riempito += letti
             try:
-                immagine = Image.frombytes("RGB", (LARGHEZZA, ALTEZZA),
+                immagine = Image.frombytes("RGB", (self.width, self.height),
                                            bytes(buffer))
             except ValueError:
                 continue
-            if (LARGHEZZA, ALTEZZA) != (self.width, self.height):
-                immagine = immagine.resize((self.width, self.height))
+            # Niente ridimensionamento: l'helper disegna gia' nella misura
+            # che gli abbiamo chiesto.
             with self._lock:
                 self._image = immagine
                 self._dirty = True

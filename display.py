@@ -312,21 +312,35 @@ class Compositore:
         return grande
 
     def componi(self, immagine):
-        """Il fotogramma da mandare allo schermo, della sua misura esatta.
+        """Una tela sola, centrata e ingrandita del moltiplicatore.
 
-        Una tela sola, centrata: e' il pannello di sempre, ingrandito. Resta
-        la strada della modalita' «singola» e del pannello LED.
+        Accetta **qualunque** tela fino alla tela logica, non solo i 256x64
+        del pannello, e questa e' la differenza che fa andare a tutto schermo
+        le sorgenti interattive. Una da 256x64 diventa la striscia di sempre;
+        una da 256x192 -- la tela logica a 1024x768 -- riempie lo schermo.
+
+        Fino alla 17.2.2 questo metodo riportava tutto a 256x64 prima di
+        ingrandire: Doom e il Game Boy, che disegnano la loro immagine, si
+        vedevano come una fascia alta un terzo di schermo, cioe' esattamente
+        come su un pannello. Era voluto per le sorgenti, che su 256x64 sono
+        tarate; per chi la sua immagine se la fa da solo, era uno spreco.
         """
-        if immagine.size != self.tela:
+        lw, lh = self.tela_logica
+        if immagine.size[0] > lw or immagine.size[1] > lh:
             # Difensivo, e nuovo dalla 17.0: fino alla 16.5 nessuno
             # controllava la misura di quello che le sorgenti producevano, e
             # un'immagine sbagliata finiva dritta in `SetImage`.
-            immagine = immagine.resize(self.tela, Image.NEAREST)
-        grande = self._grande(immagine, self.banda)
-        if self.banda == self.schermo:
+            immagine = immagine.resize((min(immagine.size[0], lw),
+                                        min(immagine.size[1], lh)),
+                                       Image.NEAREST)
+        largo = max(1, int(round(immagine.size[0] * self.scala)))
+        alto = max(1, int(round(immagine.size[1] * self.scala)))
+        grande = self._grande(immagine, (largo, alto))
+        if (largo, alto) == self.schermo:
             return grande
-        x, y, _l, _a = self.riquadro
-        return self._sfondo_con(((grande, (x, y)),))
+        sw, sh = self.schermo
+        return self._sfondo_con(((grande, ((sw - largo) // 2,
+                                           (sh - alto) // 2)),))
 
     def componi_regioni(self, pezzi):
         """Lo schermo composto a regioni: l'orologio, e sotto il contenuto.
@@ -386,7 +400,7 @@ class Compositore:
 
 # ------------------------------------------------------- le due superfici
 
-def zittisci_console(stacca=False):
+def zittisci_console(modo="zitta"):
     """Toglie di mezzo la console di testo, sotto il DMD a tutto schermo.
 
     Il difetto visto sulla 17.1: all'avvio compare per un istante il login di
@@ -414,6 +428,12 @@ def zittisci_console(stacca=False):
     file non c'e' o non si lascia scrivere si tira dritto: questa e' una
     rifinitura, non deve poter impedire al pannello di accendersi.
     """
+    if modo in (False, "lascia", "no"):
+        # Non toccare niente. E' il comportamento della 17.1, e serve come
+        # via d'uscita: se su una macchina il solo fatto di scrivere in
+        # `/sys` basta a far riprendere la CRTC a `fbcon`, qui si spegne.
+        return []
+    stacca = modo in (True, "staccata")
     fatto = []
     for percorso, valore in (
             ("/sys/class/graphics/fbcon/cursor_blink", "0"),
@@ -453,7 +473,8 @@ class SuperficieSDL:
     nient'altro.
     """
 
-    def __init__(self, misura=None, finestra=False, titolo="DMD", stacca=False):
+    def __init__(self, misura=None, finestra=False, titolo="DMD",
+                 console="zitta"):
         import pygame                                   # noqa: F401
         self._pygame = pygame
         if not finestra and not os.environ.get("SDL_VIDEODRIVER"):
@@ -462,6 +483,22 @@ class SuperficieSDL:
                 # Nessuna sessione grafica: si va sul KMS. Senza questo SDL
                 # proverebbe prima x11, non lo troverebbe, e si fermerebbe.
                 os.environ["SDL_VIDEODRIVER"] = "kmsdrm"
+        # **Prima** di impostare il modo video, non dopo.
+        #
+        # Nella 17.1.1 questa riga stava in fondo al costruttore, e il
+        # risultato e' stato uno schermo nero con il giornale pieno di
+        # `Could not queue pageflip: -22`. Il motivo: SDL imposta il modo
+        # sulla CRTC, poi noi andiamo a toccare `fbcon`, `fbcon` si
+        # riprende la CRTC con il **suo** modo, e da quel momento ogni
+        # scambio di pagina di SDL viene rifiutato con EINVAL -- il suo
+        # framebuffer non corrisponde piu' a quello che la scheda ha
+        # impostato. Il programma gira, crede di disegnare, e non si vede
+        # niente.
+        #
+        # L'ordine giusto e' questo: si mette a tacere la console, e poi si
+        # prende la scheda. Chi la prende per ultimo la tiene.
+        if not finestra:
+            zittisci_console(console)
         pygame.display.init()
         bandiere = 0 if finestra else pygame.FULLSCREEN
         if not misura and not finestra:
@@ -473,8 +510,6 @@ class SuperficieSDL:
         except pygame.error:
             pass
         self.width, self.height = self._schermo.get_size()
-        if not finestra:
-            zittisci_console(stacca)
 
     def mostra(self, immagine):
         # Gli eventi vanno consumati anche se non ce ne importa niente:
@@ -504,10 +539,11 @@ class SuperficieFramebuffer:
     DISPOSITIVO = "/dev/fb0"
     INFO = "/sys/class/graphics/fb0/"
 
-    def __init__(self, misura=None, finestra=False, titolo="DMD", stacca=False):
+    def __init__(self, misura=None, finestra=False, titolo="DMD",
+                 console="zitta"):
         del finestra, titolo
+        zittisci_console(console)
         self.width, self.height = misura or self._misura_dichiarata()
-        zittisci_console(stacca)
         self._bit = self._bit_dichiarati()
         if self._bit not in (16, 32):
             raise OSError("framebuffer a %d bit per pixel: non so scriverci"
@@ -554,12 +590,13 @@ class SuperficieFramebuffer:
             pass
 
 
-def _apri_superficie(misura, finestra, stacca=False):
+def _apri_superficie(misura, finestra, console="zitta"):
     """SDL se c'e', framebuffer altrimenti. Con il motivo, se non c'e' niente."""
     motivi = []
     for classe in (SuperficieSDL, SuperficieFramebuffer):
         try:
-            return classe(misura=misura, finestra=finestra, stacca=stacca)
+            return classe(misura=misura, finestra=finestra,
+                          console=console)
         except Exception as exc:
             motivi.append("%s: %s" % (classe.__name__, exc))
     raise RuntimeError("nessuna uscita video disponibile -- " + "; ".join(motivi))
@@ -576,7 +613,7 @@ class DisplaySchermo:
         misura = _misura_richiesta(conf.get("risoluzione"))
         finestra = _vuole_finestra(conf.get("finestra"))
         self._superficie = superficie or _apri_superficie(
-            misura, finestra, bool(conf.get("console_staccata")))
+            misura, finestra, conf.get("console") or "zitta")
         schermo = (self._superficie.width, self._superficie.height)
         if (conf.get("tela") or "dmd") == "schermo":
             tela = schermo
@@ -591,6 +628,19 @@ class DisplaySchermo:
               % (schermo[0], schermo[1], tela[0], tela[1],
                  self.compositore.scala,
                  "acceso" if self.compositore.filtro else "spento"))
+
+    @property
+    def tela_piena(self):
+        """La tela che una sorgente interattiva deve disegnare per riempire.
+
+        Doom, il Game Boy e i giochi non ricevono un'immagine da impaginare:
+        la **fanno**, e quanto grande la facciano glielo diciamo noi. Su un
+        monitor glielo diciamo grande quanto la tela logica, cosi' vanno a
+        tutto schermo invece di restare in una fascia da pannello.
+        """
+        if ((self.cfg.get("video") or {}).get("modo") or "auto") == "singola":
+            return (self.width, self.height)
+        return self.compositore.tela_logica
 
     @property
     def tele(self):
@@ -639,6 +689,10 @@ class DisplayLed:
 
     # Il pannello e' una tela sola: le regioni sono una cosa dello schermo.
     tele = 1
+
+    @property
+    def tela_piena(self):
+        return (self.width, self.height)
 
     def __init__(self, cfg):
         panel = cfg["panel"]
@@ -770,6 +824,10 @@ class DisplayAssente:
     """
 
     tele = 1
+
+    @property
+    def tela_piena(self):
+        return (self.width, self.height)
 
     def __init__(self, cfg, motivo=""):
         self.motivo = motivo or "uscita video non disponibile"

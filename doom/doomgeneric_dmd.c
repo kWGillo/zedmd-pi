@@ -64,9 +64,20 @@
 extern int sfxVolume;
 extern int musicVolume;
 
-#define USCITA_L 256
-#define USCITA_A 64
-#define USCITA_BYTE (USCITA_L * USCITA_A * 3)
+/* La misura dell'immagine che esce da qui.
+ *
+ * Erano due `#define`, cioe' 256x64 compilati dentro, e andava bene finche'
+ * dall'altra parte c'era un pannello. Dalla 17.3 dall'altra parte puo' esserci
+ * un monitor, e un Doom alto un terzo di schermo e' Doom visto da lontano:
+ * adesso la misura arriva da riga di comando e il buffer si alloca.
+ *
+ * Il tetto non e' prudenza generica: oltre quella misura non ci sarebbe piu'
+ * niente da ingrandire -- Doom disegna 320x200 e basta -- e un numero assurdo
+ * passato per sbaglio chiederebbe mezzo gigabyte al malloc. */
+#define USCITA_MAX_L 1024
+#define USCITA_MAX_A 1024
+static int uscita_l = 256;
+static int uscita_a = 64;
 
 /* Fascia ritagliata dai 200 righe di Doom. I valori predefiniti sono il
  * risultato della prova sul pannello: 96 righe a partire dalla 36 tengono
@@ -85,7 +96,8 @@ static int fascia_altezza = 96;
 static double gamma_valore = 1.15;
 static unsigned char gamma_tabella[256];
 
-static unsigned char uscita[USCITA_BYTE];
+static unsigned char* uscita = NULL;
+static size_t uscita_byte = 0;
 
 /* Doom scrive i suoi messaggi con printf, cioe' su stdout, che qui e' il
  * flusso dei fotogrammi: una riga di testo in mezzo a un'immagine sfasa tutto
@@ -211,15 +223,15 @@ static void prepara_gamma(void)
 static void riduci(const pixel_t* sorgente)
 {
     int ux, uy;
-    for (uy = 0; uy < USCITA_A; uy++) {
-        int y0 = fascia_alto + (uy * fascia_altezza) / USCITA_A;
-        int y1 = fascia_alto + ((uy + 1) * fascia_altezza) / USCITA_A;
+    for (uy = 0; uy < uscita_a; uy++) {
+        int y0 = fascia_alto + (uy * fascia_altezza) / uscita_a;
+        int y1 = fascia_alto + ((uy + 1) * fascia_altezza) / uscita_a;
         if (y1 <= y0) y1 = y0 + 1;
         if (y1 > DOOMGENERIC_RESY) y1 = DOOMGENERIC_RESY;
 
-        for (ux = 0; ux < USCITA_L; ux++) {
-            int x0 = (ux * DOOMGENERIC_RESX) / USCITA_L;
-            int x1 = ((ux + 1) * DOOMGENERIC_RESX) / USCITA_L;
+        for (ux = 0; ux < uscita_l; ux++) {
+            int x0 = (ux * DOOMGENERIC_RESX) / uscita_l;
+            int x1 = ((ux + 1) * DOOMGENERIC_RESX) / uscita_l;
             unsigned int r = 0, g = 0, b = 0, n = 0;
             int x, y;
             if (x1 <= x0) x1 = x0 + 1;
@@ -237,7 +249,7 @@ static void riduci(const pixel_t* sorgente)
             }
             if (!n) n = 1;
             {
-                unsigned char* out = uscita + ((size_t)uy * USCITA_L + ux) * 3;
+                unsigned char* out = uscita + ((size_t)uy * uscita_l + ux) * 3;
                 out[0] = gamma_tabella[r / n];
                 out[1] = gamma_tabella[g / n];
                 out[2] = gamma_tabella[b / n];
@@ -260,8 +272,8 @@ void DG_DrawFrame(void)
     ultimo_frame_ms = DG_GetTicksMs();
 
     riduci(DG_ScreenBuffer);
-    while (scritti < USCITA_BYTE) {
-        ssize_t n = write(fd_frame, uscita + scritti, USCITA_BYTE - scritti);
+    while (scritti < uscita_byte) {
+        ssize_t n = write(fd_frame, uscita + scritti, uscita_byte - scritti);
         if (n > 0) {
             scritti += (size_t)n;
             continue;
@@ -320,6 +332,10 @@ int main(int argc, char** argv)
             fascia_alto = atoi(argv[i] + 14);
         } else if (!strncmp(argv[i], "--fascia-altezza=", 17)) {
             fascia_altezza = atoi(argv[i] + 17);
+        } else if (!strncmp(argv[i], "--uscita-larga=", 15)) {
+            uscita_l = atoi(argv[i] + 15);
+        } else if (!strncmp(argv[i], "--uscita-alta=", 14)) {
+            uscita_a = atoi(argv[i] + 14);
         } else if (!strncmp(argv[i], "--gamma=", 8)) {
             gamma_valore = atof(argv[i] + 8);
         } else if (!strncmp(argv[i], "--volume=", 9)) {
@@ -335,9 +351,23 @@ int main(int argc, char** argv)
     if (fascia_alto + fascia_altezza > DOOMGENERIC_RESY) {
         fascia_altezza = DOOMGENERIC_RESY - fascia_alto;
     }
+    if (uscita_l < 16) uscita_l = 16;
+    if (uscita_a < 8) uscita_a = 8;
+    if (uscita_l > USCITA_MAX_L) uscita_l = USCITA_MAX_L;
+    if (uscita_a > USCITA_MAX_A) uscita_a = USCITA_MAX_A;
+    uscita_byte = (size_t)uscita_l * uscita_a * 3;
+    uscita = malloc(uscita_byte);
+    if (!uscita) {
+        fprintf(stderr, "[doom-dmd] niente memoria per %dx%d\n",
+                uscita_l, uscita_a);
+        return 1;
+    }
+    memset(uscita, 0, uscita_byte);
+
     if (gamma_valore < 0.2) gamma_valore = 0.2;
     if (gamma_valore > 2.0) gamma_valore = 2.0;
 
+    fprintf(stderr, "[doom-dmd] uscita %dx%d\n", uscita_l, uscita_a);
     fprintf(stderr, "[doom-dmd] fascia %d..%d di %d, gamma %.2f\n",
             fascia_alto, fascia_alto + fascia_altezza, DOOMGENERIC_RESY,
             gamma_valore);

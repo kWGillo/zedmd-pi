@@ -360,11 +360,18 @@ class GameBoySource(Source):
         proc = self._proc
         if proc is None or proc.stdout is None:
             return
-        buffer = bytearray(BYTE_FOTOGRAMMA)
+        # La misura la dice la tela di **adesso**, non una costante: fino
+        # alla 17.2.2 qui c'era `BYTE_FOTOGRAMMA`, cioe' 256x64x3 fisso,
+        # mentre all'helper si passava `self.width/self.height`. A qualunque
+        # altra misura i due numeri non coincidevano e la pipe si
+        # desincronizzava per sempre -- un difetto latente da quando la
+        # 17.0 ha reso possibile una tela diversa.
+        attesi = self.width * self.height * 3
+        buffer = bytearray(attesi)
         vista = memoryview(buffer)
         while self._running and proc.poll() is None:
             riempito = 0
-            while riempito < BYTE_FOTOGRAMMA:
+            while riempito < attesi:
                 try:
                     letti = proc.stdout.readinto(vista[riempito:])
                 except (OSError, ValueError):
@@ -373,12 +380,12 @@ class GameBoySource(Source):
                     return
                 riempito += letti
             try:
-                immagine = Image.frombytes("RGB", (LARGHEZZA, ALTEZZA),
+                immagine = Image.frombytes("RGB", (self.width, self.height),
                                            bytes(buffer))
             except ValueError:
                 continue
-            if (LARGHEZZA, ALTEZZA) != (self.width, self.height):
-                immagine = immagine.resize((self.width, self.height))
+            # Niente ridimensionamento: adesso l'helper disegna gia' nella
+            # misura che gli abbiamo chiesto, ed e' la tela vera.
             with self._lock:
                 self._image = immagine
                 self._dirty = True

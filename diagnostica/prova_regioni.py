@@ -310,6 +310,39 @@ esigi(schermo._superficie.visti[-1].size == (1024, 768),
       "quello che finisce sulla superficie e' grande come lo schermo")
 
 
+sep("10. Doom e il Game Boy vanno a tutto schermo")
+
+from sources.doom import tela_doom, DOOM_L, DOOM_A   # noqa: E402
+
+esigi(tela_doom(256, 64) == (256, 64),
+      "sul pannello Doom disegna la tela del pannello: la fascia fa il resto")
+largo, alto = tela_doom(256, 192)
+esigi((largo, alto) == (256, 160),
+      "su una tela da 192 righe disegna 256x160 (%dx%d)" % (largo, alto))
+esigi(abs(largo / float(alto) - DOOM_L / float(DOOM_A)) < 0.01,
+      "cioe' con le proporzioni vere di Doom, non schiacciato")
+for tela in ((256, 144), (256, 154), (256, 240)):
+    l, a = tela_doom(*tela)
+    esigi(l <= tela[0] and a <= tela[1]
+          and abs(l / float(a) - DOOM_L / float(DOOM_A)) < 0.02,
+          "su %dx%d sta dentro e tiene le proporzioni: %dx%d"
+          % (tela[0], tela[1], l, a))
+
+c = display.Compositore(TELA, (1024, 768), {"filtro_dmd": False})
+pieno = c.componi(Image.new("RGB", (256, 192), (40, 0, 0))).copy()
+esigi(pieno.getpixel((512, 8)) == (40, 0, 0)
+      and pieno.getpixel((512, 760)) == (40, 0, 0),
+      "una tela piena riempie lo schermo da cima a fondo")
+striscia = c.componi(Image.new("RGB", (256, 64), (40, 0, 0))).copy()
+esigi(striscia.getpixel((512, 8)) == (0, 0, 0)
+      and striscia.getpixel((512, 384)) == (40, 0, 0),
+      "e una tela da pannello resta la striscia centrata di sempre")
+doom_tela = c.componi(Image.new("RGB", (256, 160), (40, 0, 0))).copy()
+esigi(doom_tela.getpixel((512, 384)) == (40, 0, 0)
+      and doom_tela.getpixel((512, 8)) == (0, 0, 0),
+      "quella di Doom sta in mezzo, alta 640 su 768")
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

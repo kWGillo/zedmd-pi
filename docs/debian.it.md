@@ -199,10 +199,20 @@ quelli che non usi.
 
 **Il lampo del login all'avvio.** Per un istante compare il prompt di Debian,
 poi torna l'orologio. È `getty` che scrive sul terminale virtuale sotto di
-noi. Il cursore che restava a lampeggiare è corretto dalla 17.1.1; il lampo si
-toglie con `video.console_staccata` nella configurazione, al prezzo che se il
-servizio muore lo schermo resta nero e per capire perché servono la pagina web
-o un'altra macchina.
+noi. Il cursore che restava a lampeggiare è corretto dalla 17.1.1. La manopola è
+`video.console` e ha tre valori:
+
+| | |
+|---|---|
+| `zitta` | predefinito: spegne cursore e risparmio schermo della console |
+| `staccata` | stacca `fbcon` del tutto: sparisce anche il lampo del login, ma se il servizio muore lo schermo resta nero |
+| `lascia` | non tocca niente: la via d'uscita se su questa macchina `fbcon` litiga con SDL |
+
+**Se lo schermo è nero e il giornale è pieno di `Could not queue pageflip:
+-22`**, è esattamente quel litigio: SDL ha impostato il modo video e `fbcon`
+se l'è ripreso, quindi ogni fotogramma viene rifiutato. Dalla 17.3.1 la
+console si mette a tacere *prima* di prendere la scheda, che è l'ordine
+giusto; se su questa macchina non bastasse, `lascia` o `staccata`.
 
 # 8. L'audio su un PC
 
