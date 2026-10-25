@@ -2,6 +2,43 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.10]
+
+### Due regioni anche su uno schermo ultralargo
+
+Su un **2560×1080** le due regioni non si formavano, e il motivo è aritmetico.
+Il conto della scala prendeva sempre il moltiplicatore *più grande*, cioè quello
+che riempie la larghezza: dieci. A dieci la tela logica viene alta **108 righe**,
+e 108 non bastano a due tele da 64 — quindi una regione sola, uno schermo
+enorme, e niente orologio sopra e media sotto.
+
+Adesso si prende la scala più grande che lascia stare **due** tele in altezza:
+
+| schermo | prima | adesso | tela logica | regioni |
+|---|---|---|---|---|
+| 1024×768 | 4 | 4 | 256×192 | 3 |
+| 1920×1080 | 7 | 7 | 256×154 | 2 |
+| **2560×1080** | **10** | **8** | **256×135** | **2** |
+| 2560×1440 | 10 | 10 | 256×144 | 2 |
+
+Su quello schermo il disegno diventa largo 2048 invece di 2560, con due bande ai
+lati, e in cambio ci sono le due regioni. Dove la scala massima già lasciava due
+tele, il conto nuovo dà esattamente lo stesso numero di prima.
+
+### Il pannello parlava inglese
+
+*«Nelle previsioni del tempo, "domani" viene mostrato come "Tomorrow".»*
+
+La regola è scritta anche in `config.json`: «`web.language` non ha effetto sul
+testo mostrato sul pannello, che segue `clock.language`». Solo che `Source.t()`
+guardava proprio `web.language`, che di serie è **vuoto** — vuol dire «decidi tu
+dalla lingua del browser» — e il vuoto cadeva su `FALLBACK`, che è l'inglese.
+
+Si vedeva nel meteo, ma riguardava **tutte** le sorgenti che scrivono una parola
+sul vetro: quattordici punti in sei file. Adesso il testo senza lingua esplicita
+segue `clock.language`, e una lingua chiesta da una pagina web continua a vincere
+su tutto — sono due cose diverse e restano due cose diverse.
+
 ## [17.4.9]
 
 ### Super Quiz e Gnam: tredici su tredici

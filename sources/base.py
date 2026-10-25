@@ -39,14 +39,27 @@ class Source:
     # ------------------------------------------------------------------ lingua
 
     def t(self, key, lang=None, **values):
-        """Testo tradotto per la riga di stato.
+        """Testo tradotto, per la riga di stato o per il pannello.
 
-        La lingua arriva dalla richiesta web quando c'e'; altrimenti si usa
-        quella salvata in configurazione. I messaggi di log restano in
-        italiano: sono per chi legge `journalctl`, non per l'interfaccia.
+        La lingua arriva dalla richiesta web quando c'e': quella la passa
+        chi risponde a una pagina, e vince su tutto.
+
+        **Senza, e' testo che finisce sul pannello**, e li' la lingua e'
+        `clock.language` -- e' la regola scritta anche in `config.json`,
+        «web.language non ha effetto sul testo mostrato sul pannello». Fino
+        alla 17.4.10 questa riga guardava pero' `web.language`, che di serie
+        e' **vuoto** perche' vuol dire «decidi tu dal browser»: il vuoto
+        cadeva su `FALLBACK`, che e' l'inglese, e sul pannello italiano
+        comparivano parole inglesi. Si vedeva nel meteo -- *«domani viene
+        mostrato come Tomorrow»* -- ma riguardava tutte le sorgenti che
+        scrivono una parola sul vetro.
+
+        I messaggi di log restano in italiano: sono per chi legge
+        `journalctl`, non per l'interfaccia.
         """
         if not lang:
-            lang = (self.cfg.get("web") or {}).get("language") or ""
+            lang = ((self.cfg.get("clock") or {}).get("language")
+                    or (self.cfg.get("web") or {}).get("language") or "")
         return i18n.translate(key, lang or i18n.FALLBACK, **values)
 
     def start(self):

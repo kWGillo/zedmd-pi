@@ -21,12 +21,12 @@ c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
 72931dc03f74bec40978aa3ab61f8278  diagnostica/prova_regioni.py
-beeb31f075263aa7275254683f3ca4b9  diagnostica/prova_schermo.py
+91312161068340397a56f5350213223a  diagnostica/prova_schermo.py
 3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
 1fafe8f1f25c976ce09b10c613b98f86  diagnostica/schermo_dal_vivo.py
 a508962738ddb4832dd5cca7d6795e9f  diagnostica/traduzioni.tsv
-004fa44fcadb54b9e045271986680757  display.py
+adf9a961f1dcfd13ca0fb1b8d56c5d1f  display.py
 7f7ba2ea976ec345c5be99c1478eef09  dmdconf.py
 26d1cf49cb3897c06a3bdef0c2325b6a  dmdd.py
 0e17dea503190ddc88c7c33c37b5e19f  domande.en.csv
@@ -74,7 +74,7 @@ be7a53f3a370b2550970f7cdb510bc53  sources/__init__.py
 74e731b5a4332bae5a6f322c0b68bade  sources/airradar.py
 7d9c12d70da7c4fb14dc7291eec051ea  sources/anteprima.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
-62774ea638052119d4dc225d1290e3e6  sources/base.py
+7bca42221ed1585ce540409512f3c35d  sources/base.py
 ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 2a299afa099afba8a35b19d1049595bb  sources/cielo.py
 df011fd90578116e3fdc68d5a84ec696  sources/clock.py
@@ -179,7 +179,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 8e4da1571d2f55b9211b110179be1607  templates/updates.html
 12de3dfc1ea2b2ed0fe2fd8a25723388  templates/video.html
-876c7e3fd8b75c007c968b38677c76bf  version.py
+fab6f14b9ea72b877b72553cf03bd92c  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 43b04420e7a48c57a0315b40e42e902e  webui.py

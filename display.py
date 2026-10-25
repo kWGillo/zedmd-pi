@@ -142,7 +142,28 @@ class Compositore:
         if self.volute:
             scala = min(sw // tw, sh // (th * self.volute))
         else:
-            scala = min(sw // tw, sh // th)
+            # **La scala piu' grande non e' sempre la scala giusta.**
+            #
+            # La piu' grande e' quella che riempie la larghezza, e su uno
+            # schermo molto largo lascia troppo poche righe logiche: su un
+            # 2560x1080 il moltiplicatore massimo e' dieci, la tela logica
+            # viene alta 108 righe, e 108 non bastano a due tele da 64. Il
+            # risultato e' uno schermo enorme con **una sola** regione --
+            # niente orologio sopra e media sotto, che e' tutto il senso
+            # della 17.2 su un monitor.
+            #
+            # Quindi si prende la scala piu' grande che lascia stare **due**
+            # tele in altezza. Su un 2560x1080 scende da dieci a otto: il
+            # disegno e' largo 2048 invece di 2560, con due bande ai lati, e
+            # in cambio ci sono 135 righe logiche e le due regioni. Dove la
+            # scala massima gia' lasciava due tele -- 1024x768, 1920x1080 --
+            # questo conto da' lo stesso numero di prima, e non cambia
+            # niente.
+            scala = min(sw // tw, sh // (2 * th))
+            if scala < 1:
+                # Due tele non ci stanno a nessuna scala: si torna al
+                # massimo. E' il pannello, ed e' uno schermo molto basso.
+                scala = min(sw // tw, sh // th)
         if scala >= 1:
             largo, alto = tw * scala, th * scala
             quante = max(1, sh // alto)

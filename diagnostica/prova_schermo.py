@@ -83,12 +83,20 @@ def luce(immagine):
                for banda in immagine.split())
 
 
-sep("1. Il moltiplicatore e' intero e il piu' grande che sta dentro")
+sep("1. Il moltiplicatore e' intero, e il piu' grande che lascia due tele")
+
+# Dalla 17.4.10 non si prende piu' la scala **massima** ma la piu' grande che
+# lascia stare due tele in altezza: su uno schermo molto largo la massima
+# riempie la larghezza e lascia troppe poche righe logiche per le due
+# regioni. Dove la massima gia' lasciava due tele -- quasi tutti gli schermi
+# -- il conto da' lo stesso numero di prima.
 
 for misura in MISURE:
     c = display.Compositore(TELA, misura)
     x, y, largo, alto = c.riquadro
-    atteso = min(misura[0] // TELA[0], misura[1] // TELA[1])
+    due = min(misura[0] // TELA[0], misura[1] // (2 * TELA[1]))
+    atteso = due if due >= 1 else min(misura[0] // TELA[0],
+                                      misura[1] // TELA[1])
     esigi(c.scala == atteso,
           "%dx%d: scala %s, attesa %d" % (misura[0], misura[1], c.scala, atteso))
     esigi(largo == TELA[0] * atteso and alto == TELA[1] * atteso,
@@ -98,6 +106,14 @@ for misura in MISURE:
     esigi(abs((misura[0] - largo) - 2 * x) <= 1
           and abs((misura[1] - alto) - 2 * y) <= 1,
           "   centrato, con le bande uguali")
+    # E la prova che conta, quella che nasce dallo schermo 21:9: dove ci
+    # stanno due tele, la tela logica deve essere alta abbastanza da
+    # contenerle, se no le due regioni non si formano e resta un solo
+    # riquadro enorme.
+    if misura[1] >= 2 * TELA[1] and misura[0] >= TELA[0]:
+        esigi(c.tela_logica[1] >= 2 * TELA[1] and c.quante >= 2,
+              "   e la tela logica tiene due tele (%d righe, %d tele)"
+              % (c.tela_logica[1], c.quante))
 
 c = display.Compositore(TELA, (1920, 1080))
 # Il vincolo e' la larghezza, non l'altezza: 1920 / 256 fa sette e mezzo, e
@@ -615,6 +631,38 @@ esigi(spento_a_mano.standby(True) is False,
       "e con l'impostazione spenta non tocca niente")
 esigi(not hasattr(display.DisplayLed, "standby"),
       "sul pannello LED il metodo non esiste: non c'e' nessun monitor")
+
+
+# ------------------------- 17.4.10: la lingua del testo che va sul pannello
+#
+# *«Nelle previsioni del tempo, domani viene mostrato come Tomorrow.»* La
+# regola e' scritta anche in `config.json`: «web.language non ha effetto sul
+# testo mostrato sul pannello, che segue clock.language». `Source.t()` pero'
+# guardava `web.language`, che di serie e' **vuoto** -- vuol dire «decidi tu
+# dal browser» -- e il vuoto cadeva sull'inglese.
+
+print()
+print("-- la lingua del testo sul pannello (17.4.10)")
+
+from sources.base import Source                           # noqa: E402
+
+
+class _Sorgente(Source):
+    def __init__(self, cfg):
+        self.cfg = cfg
+
+
+CHIAVE = "meteo.giorno.domani"
+esigi(_Sorgente({"clock": {"language": "it"}, "web": {"language": ""}}).t(
+          CHIAVE) == "DOMANI",
+      "con il pannello in italiano e la pagina non scelta si legge DOMANI")
+esigi(_Sorgente({"clock": {"language": "it"}, "web": {"language": "en"}}).t(
+          CHIAVE) == "DOMANI",
+      "e resta DOMANI anche se la **pagina** e' in inglese: sono due cose")
+esigi(_Sorgente({"clock": {"language": "en"}}).t(CHIAVE) == "TOMORROW",
+      "con il pannello in inglese si legge TOMORROW")
+esigi(_Sorgente({"clock": {"language": "it"}}).t(CHIAVE, "en") == "TOMORROW",
+      "e una lingua chiesta a voce -- da una pagina web -- vince su tutto")
 
 
 print()

@@ -3552,6 +3552,31 @@ Storico:
        esattamente le duecento colonne del pannello. Due numeri uguali per
        coincidenza. Appena le due misure si separano -- ed e' quello che
        succede su un monitor -- Gnam sarebbe sparito nello scarto.
+  17.4.10 **Due regioni anche su uno schermo ultralargo, e il pannello che
+       parlava inglese.** Due difetti diversi, trovati tutti e due su una
+       macchina vera.
+       **Su un 2560x1080 le due regioni non si formavano.** Il conto della
+       scala prendeva sempre il moltiplicatore **piu' grande**, cioe' quello
+       che riempie la larghezza: dieci. A dieci la tela logica viene alta
+       108 righe, e 108 non bastano a due tele da 64 -- quindi una regione
+       sola, uno schermo enorme, e niente orologio sopra e media sotto.
+       Adesso si prende la scala piu' grande che lascia stare **due** tele
+       in altezza. Su quello schermo scende da dieci a otto: il disegno e'
+       largo 2048 invece di 2560, con due bande ai lati, e in cambio ci sono
+       135 righe logiche e le due regioni. Dove la scala massima gia'
+       lasciava due tele -- 1024x768, 1920x1080, 2560x1440 -- il conto nuovo
+       da' esattamente lo stesso numero di prima.
+       **E il pannello parlava inglese.** *«Nelle previsioni del tempo,
+       domani viene mostrato come Tomorrow.»* La regola e' scritta anche in
+       `config.json`: «`web.language` non ha effetto sul testo mostrato sul
+       pannello, che segue `clock.language`». Solo che `Source.t()` guardava
+       proprio `web.language`, che di serie e' **vuoto** -- vuol dire
+       «decidi tu dalla lingua del browser» -- e il vuoto cadeva su
+       `FALLBACK`, che e' l'inglese.
+       Si vedeva nel meteo, ma riguardava **tutte** le sorgenti che scrivono
+       una parola sul vetro: quattordici punti in sei file. Adesso il testo
+       senza lingua esplicita segue `clock.language`, e una lingua chiesta
+       da una pagina web continua a vincere su tutto.
 """
 
-__version__ = "17.4.9"
+__version__ = "17.4.10"
