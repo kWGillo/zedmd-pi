@@ -416,14 +416,14 @@ finally:
     display.SuperficieSDL, display.SuperficieFramebuffer = sdl_vero, fb_vero
 
 
-# --------------------------------- 17.3.2: le misure che dichiara il monitor
+# --------------------------------- 17.3.3: le misure che dichiara il monitor
 #
 # Si leggono da `/sys/class/drm`, che qui si finge: una scheda con due
 # uscite, una collegata e una no, e la stessa misura ripetuta a frequenze
 # diverse -- com'e' fatto un file `modes` vero.
 
 print()
-print("-- le risoluzioni si leggono dal monitor (17.3.2)")
+print("-- le risoluzioni si leggono dal monitor (17.3.3)")
 
 finto = tempfile.mkdtemp()
 

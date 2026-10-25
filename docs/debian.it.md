@@ -303,7 +303,7 @@ il pacchetto e, se non basta, installa da sé la copia che viaggia nel progetto
 ls /usr/share/fonts/truetype/dejavu/ /usr/local/share/fonts/dmd/ 2>/dev/null
 ```
 
-Con un font proporzionale il programma funziona lo stesso — dalla 17.3.2 le
+Con un font proporzionale il programma funziona lo stesso — dalla 17.3.3 le
 cifre non si spostano più — ma l'ora centrata respira in modo diverso a ogni
 minuto, perché le cifre non hanno tutte la stessa larghezza.
 

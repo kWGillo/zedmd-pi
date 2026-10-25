@@ -343,10 +343,10 @@ esigi(doom_tela.getpixel((512, 384)) == (40, 0, 0)
       "quella di Doom sta in mezzo, alta 640 su 768")
 
 
-sep("11. Il lampeggio dei due punti non sposta le cifre (17.3.2)")
+sep("11. Il lampeggio dei due punti non sposta le cifre (17.3.3)")
 
 # *«Quando i due punti scompaiono, l'ultima cifra si sposta a sinistra di
-# qualche pixel.»* Fino alla 17.3.2 il lampeggio sostituiva i due punti con
+# qualche pixel.»* Fino alla 17.3.3 il lampeggio sostituiva i due punti con
 # uno **spazio**. Con `DejaVuSansMono-Bold` i due occupano lo stesso posto e
 # non si vedeva niente; con un font proporzionale -- quello su cui si
 # ripiega una macchina dove il Mono non e' installato -- lo spazio e' piu'

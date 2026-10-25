@@ -13,7 +13,7 @@ Fino a Debian 12 il font stava in `fonts-dejavu-core`, che
 `install.sh` ha sempre installato. Dalla 13 le facce monospaziate sono in un
 pacchetto a parte, `fonts-dejavu-mono`, e su quelle macchine ci si ritrovava
 senza — con il ripiego su `DejaVuSans-Bold`, che è proporzionale. Il difetto
-che ne è venuto fuori è raccontato nella 17.3.2: *«quando i due punti
+che ne è venuto fuori è raccontato nella 17.3.3: *«quando i due punti
 scompaiono, l'ultima cifra si sposta a sinistra di qualche pixel»*.
 
 Il programma adesso regge qualunque font, ma le proporzioni giuste sono

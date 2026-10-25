@@ -19,8 +19,8 @@ c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 6f6f3eda48e12c7f3baf5f9cbe1efda0  diagnostica/prova_nati_e_morti.py
 826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
-cf36ba969f24c8fb0a42d4cf6da5b58f  diagnostica/prova_regioni.py
-e0926a3461f47061b2a80cd9f74d3323  diagnostica/prova_schermo.py
+72931dc03f74bec40978aa3ab61f8278  diagnostica/prova_regioni.py
+0b72c06c22eed81bd2a8fd3774dd6d16  diagnostica/prova_schermo.py
 3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
 1fafe8f1f25c976ce09b10c613b98f86  diagnostica/schermo_dal_vivo.py
@@ -38,7 +38,7 @@ df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 dfdf560983ea1fbb6640e94af5ef6863  energia.py
 2a032dc6d2a74a9e9aa16eded4a976b3  fasce.py
 33df9c0888683eb0c10e75127ac97c08  font/DejaVuSansMono-Bold.ttf
-275c2e8daff275d1ecaf63b265ba6bcf  font/LEGGIMI.it.md
+bab9f0a6d041931bf0a4b8f951602df0  font/LEGGIMI.it.md
 425865e1c534c5788b1341d401f131d9  font/LICENZA-DejaVu.txt
 1a11ba22870748dec75083c146dcb650  fusi.py
 f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
@@ -76,7 +76,7 @@ be7a53f3a370b2550970f7cdb510bc53  sources/__init__.py
 62774ea638052119d4dc225d1290e3e6  sources/base.py
 ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 2a299afa099afba8a35b19d1049595bb  sources/cielo.py
-7c59b4cfd4b5c20765b517919e3eefe2  sources/clock.py
+df011fd90578116e3fdc68d5a84ec696  sources/clock.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 0aec5e5925af657819f9a3367c4e76fb  sources/doom.py
@@ -178,7 +178,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 8e4da1571d2f55b9211b110179be1607  templates/updates.html
 3b29a3298d7020ed5416a9b633083bb4  templates/video.html
-46b46f7739a6e3582e93ef1a1daff809  version.py
+904a0708f1b681079b62daa2bda2e0bd  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 0cdd6b91c1a261c50e25bad3619fe998  webui.py

@@ -3203,7 +3203,12 @@ Storico:
        Il ripiego non e' silenzioso. Chi ripiega se lo porta scritto addosso,
        la pagina Video lo mostra in cima, e all'avvio si legge
        `[display] si ripiega su SuperficieFramebuffer -- ...`.
-       **I due punti che lampeggiano spostavano le cifre.** *«Quando i due
+       Nuova `diagnostica/schermo_dal_vivo.py`: dipinge tre schermate piene
+       sullo schermo vero -- framebuffer, SDL, SDL con la console staccata --
+       e chiede quali si sono viste. Le altre prove di `display.py` girano su
+       superfici finte apposta, perche' una macchina di sviluppo non ha un
+       vetro; questa e' l'altra meta', e si lancia dove il vetro c'e'.
+  17.3.3 **I due punti che lampeggiano spostavano le cifre.** *«Quando i due
        punti scompaiono, l'ultima cifra si sposta a sinistra di qualche
        pixel.»* Il lampeggio li sostituiva con uno spazio: con
        `DejaVuSansMono-Bold` -- il primo della lista, e quello che c'e' su un
@@ -3235,11 +3240,6 @@ Storico:
        grafica, si legge anche dal servizio. Solo le uscite collegate, e la
        stessa misura a frequenze diverse una volta sola. Resta una casella
        di testo, cosi' ci si puo' ancora scrivere quello che si vuole.
-       Nuova `diagnostica/schermo_dal_vivo.py`: dipinge tre schermate piene
-       sullo schermo vero -- framebuffer, SDL, SDL con la console staccata --
-       e chiede quali si sono viste. Le altre prove di `display.py` girano su
-       superfici finte apposta, perche' una macchina di sviluppo non ha un
-       vetro; questa e' l'altra meta', e si lancia dove il vetro c'e'.
 """
 
-__version__ = "17.3.2"
+__version__ = "17.3.3"

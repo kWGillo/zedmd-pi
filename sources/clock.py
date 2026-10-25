@@ -164,7 +164,7 @@ def scrivi_ora(draw, dove, testo, font, colore, punti=True):
     cui niente si sposta di mezzo pixel e l'ora resta centrata come prima.
 
     Nel lampeggio i due punti **non si disegnano**, e la riga resta la stessa.
-    Fino alla 17.3.2 si sostituivano con uno spazio, e con un font a larghezza
+    Fino alla 17.3.3 si sostituivano con uno spazio, e con un font a larghezza
     fissa non si vedeva niente: lo spazio e i due punti occupano lo stesso
     posto. Con un font proporzionale -- quello su cui si ripiega una macchina
     dove `DejaVuSansMono-Bold` non c'e' -- lo spazio e' piu' stretto dei due
