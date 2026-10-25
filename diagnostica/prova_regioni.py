@@ -343,6 +343,73 @@ esigi(doom_tela.getpixel((512, 384)) == (40, 0, 0)
       "quella di Doom sta in mezzo, alta 640 su 768")
 
 
+sep("11. Il lampeggio dei due punti non sposta le cifre (17.3.2)")
+
+# *«Quando i due punti scompaiono, l'ultima cifra si sposta a sinistra di
+# qualche pixel.»* Fino alla 17.3.2 il lampeggio sostituiva i due punti con
+# uno **spazio**. Con `DejaVuSansMono-Bold` i due occupano lo stesso posto e
+# non si vedeva niente; con un font proporzionale -- quello su cui si
+# ripiega una macchina dove il Mono non e' installato -- lo spazio e' piu'
+# stretto, e si spostavano sia i minuti sia (per via del centraggio) le ore.
+#
+# La prova guarda i pixel: le due immagini, con e senza due punti, devono
+# essere identiche **dappertutto tranne che nella colonna dei due punti**.
+
+from PIL import ImageDraw, ImageFont                     # noqa: E402
+from sources.clock import scrivi_ora                     # noqa: E402
+
+FONT_PROVA = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+]
+
+
+def colonne_accese(img):
+    """Quali colonne hanno almeno un pixel acceso."""
+    px = img.load()
+    fuori = set()
+    for x in range(img.width):
+        for y in range(img.height):
+            if px[x, y][0] > 40:
+                fuori.add(x)
+                break
+    return fuori
+
+
+provati = 0
+for percorso in FONT_PROVA:
+    try:
+        esiste = ImageFont.truetype(percorso, 38)
+    except OSError:
+        continue
+    provati += 1
+    nome = percorso.rsplit("/", 1)[1]
+    for corpo in (38, 83):
+        font = ImageFont.truetype(percorso, corpo)
+        rese = {}
+        for punti in (True, False):
+            img = Image.new("RGB", (420, 140))
+            scrivi_ora(ImageDraw.Draw(img), (20, 10), "14:22", font,
+                       (255, 255, 255), punti=punti)
+            rese[punti] = img
+        con, senza = colonne_accese(rese[True]), colonne_accese(rese[False])
+        esigi(senza <= con,
+              "%s corpo %d: spegnendo i due punti non si accende niente"
+              % (nome, corpo))
+        sparite = sorted(con - senza)
+        larghe = (max(sparite) - min(sparite) + 1) if sparite else 0
+        esigi(sparite and larghe == len(sparite) and larghe < corpo // 2,
+              "%s corpo %d: sparisce una colonna sola, larga %d -- i due punti"
+              % (nome, corpo, larghe))
+        d = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+        meta_cifre = 20 + d.textlength("14", font=font)
+        esigi(min(sparite) >= meta_cifre,
+              "%s corpo %d: e sta fra le ore e i minuti, non dentro le cifre"
+              % (nome, corpo))
+
+esigi(provati > 0, "almeno un font di prova trovato sulla macchina")
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

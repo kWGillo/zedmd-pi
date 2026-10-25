@@ -2576,6 +2576,10 @@ def create_app(runtime):
             macchina=piattaforma.nome(),
             pannello_possibile=piattaforma.pannello_possibile(),
             uscita=uscita_video.uscita_scelta(cfg),
+            # Le misure le dichiara il monitor, e il kernel le scrive in
+            # chiaro: la casella si riempie da sola invece di chiedere a chi
+            # guarda di sapere a memoria che cosa regge il suo schermo.
+            risoluzioni=uscita_video.risoluzioni_disponibili(),
             motivo=getattr(runtime.display, "motivo", ""),
             tela_largo=runtime.display.width, tela_alto=runtime.display.height,
             schermo_largo=schermo.schermo[0] if schermo else 0,

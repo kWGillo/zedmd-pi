@@ -53,6 +53,15 @@ apt install -y python3 python3-pip python3-dev python3-numpy python3-pil \
                python3-flask python3-paho-mqtt cython3 fonts-dejavu-core \
                tzdata ffmpeg samba samba-common-bin
 
+# Il font dell'orologio e' `DejaVuSansMono-Bold`, e l'orologio e' disegnato
+# sulle larghezze di quel font. Fino a Debian 12 stava dentro
+# `fonts-dejavu-core`; dalla 13 le facce monospaziate sono in un pacchetto a
+# parte, e senza questa riga su quelle macchine si finisce sul font
+# proporzionale. Dove il pacchetto non esiste non succede niente: vuol dire
+# che era gia' tutto in `core`.
+apt install -y fonts-dejavu-mono 2>/dev/null || \
+  echo "    fonts-dejavu-mono non c'e' in questa distribuzione: va bene cosi'"
+
 # Su un monitor il disegno esce da SDL: una finestra se c'e' un desktop
 # avviato, il KMS se non c'e'. Se non si installa, `display.py` ripiega su
 # /dev/fb0, che non ha bisogno di niente ma nemmeno di una finestra.

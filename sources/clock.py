@@ -132,7 +132,7 @@ def _load_font(size):
     return ImageFont.load_default()
 
 
-def scrivi_ora(draw, dove, testo, font, colore):
+def scrivi_ora(draw, dove, testo, font, colore, punti=True):
     """Scrive un'ora grande con **i due punti centrati sulle cifre**.
 
     Nel font i due punti stanno appoggiati alla linea di base, e in una frase
@@ -148,8 +148,18 @@ def scrivi_ora(draw, dove, testo, font, colore):
     del font sul testo **intero**, non la somma delle larghezze dei pezzi, per
     cui niente si sposta di mezzo pixel e l'ora resta centrata come prima.
 
-    Senza due punti -- il lampeggio li sostituisce con uno spazio -- non c'e'
-    niente da spostare: si scrive la riga e basta.
+    Nel lampeggio i due punti **non si disegnano**, e la riga resta la stessa.
+    Fino alla 17.3.2 si sostituivano con uno spazio, e con un font a larghezza
+    fissa non si vedeva niente: lo spazio e i due punti occupano lo stesso
+    posto. Con un font proporzionale -- quello su cui si ripiega una macchina
+    dove `DejaVuSansMono-Bold` non c'e' -- lo spazio e' piu' stretto dei due
+    punti di quattro pixel a corpo 83, e i minuti scattavano a sinistra a
+    ogni lampeggio: *«quando i due punti scompaiono, l'ultima cifra si sposta
+    a sinistra di qualche pixel»*. E siccome anche il riquadro dell'intera
+    riga si stringeva, il centraggio spostava pure le ore, dall'altra parte.
+    Adesso la riga misurata e la penna sono **sempre** quelle di `14:22`:
+    quello che cambia e' solo se i due punti si disegnano o no, e niente
+    altro si puo' muovere, con qualunque font.
     """
     x, y = dove
     taglio = testo.find(":")
@@ -162,11 +172,12 @@ def scrivi_ora(draw, dove, testo, font, colore):
     # scatterebbero di un pixel al cambio di minuto. Lo zero e' tondo sopra e
     # sotto, quindi e' l'altezza vera delle cifre, e non cambia mai.
     riquadro = draw.textbbox((0, 0), "0", font=font)
-    punti = draw.textbbox((0, 0), ":", font=font)
+    riquadro_punti = draw.textbbox((0, 0), ":", font=font)
     # Mezzo pixel non esiste: nel dubbio si alza di meno.
-    alza = int(((riquadro[1] + riquadro[3]) - (punti[1] + punti[3])) / 2.0)
+    alza = int(((riquadro[1] + riquadro[3])
+                - (riquadro_punti[1] + riquadro_punti[3])) / 2.0)
     for pezzo, da, su in ((testo[:taglio], 0, 0),
-                          (":", taglio, alza),
+                          (":" if punti else "", taglio, alza),
                           (testo[taglio + 1:], taglio + 1, 0)):
         if not pezzo:
             continue
@@ -506,10 +517,9 @@ class ClockSource(Source):
             meridiem = "AM" if now.tm_hour < 12 else "PM"
 
         second_even = (now.tm_sec % 2 == 0)
-        if clock["blink_colon"] and not second_even:
-            shown = text.replace(":", " ")
-        else:
-            shown = text
+        # Il lampeggio spegne i due punti, non li sostituisce: la riga che si
+        # misura e si scrive e' sempre `text`. Vedi `scrivi_ora`.
+        punti_accesi = second_even or not clock["blink_colon"]
 
         days = DAY_NAMES.get(clock["language"], DAY_NAMES["it"])
         date = "%s %02d/%02d" % (days[now.tm_wday], now.tm_mday, now.tm_mon)
@@ -544,7 +554,8 @@ class ClockSource(Source):
         # Ridisegna solo quando cambia qualcosa di visibile. Il colore entra
         # come **valore calcolato**, non come impostazione: con il colore
         # casuale l'impostazione resta ferma e il colore cambia ogni ora.
-        signature = (shown, date if clock["show_date"] else "", meridiem,
+        signature = (text, punti_accesi, date if clock["show_date"] else "",
+                     meridiem,
                      time_color, clock["date_color"],
                      tuple((v["nome"], v["colore"]) for v in colonna),
                      stato_sem, sem_acceso, barra, diretta,
@@ -567,7 +578,7 @@ class ClockSource(Source):
         # la sua riga.
         banda = bool(mondo) or energia is not None
 
-        box = draw.textbbox((0, 0), shown, font=self._font)
+        box = draw.textbbox((0, 0), text, font=self._font)
         x = (self.width - (box[2] - box[0])) // 2 - box[0]
         y = (self.height - (box[3] - box[1])) // 2 - box[1]
         # Con la banda in fondo accesa le cifre salgono di qualche pixel, per
@@ -582,7 +593,8 @@ class ClockSource(Source):
         # pagina lo dice invece di lasciar credere che sia rotto.
         y = min(y, self._fondo_cifre(banda) - box[3])
         y = max(y, -box[1])
-        scrivi_ora(draw, (x, y), shown, self._font, time_color)
+        scrivi_ora(draw, (x, y), text, self._font, time_color,
+                   punti=punti_accesi)
         ora_destra = x + box[2]
         ora_sotto = y + box[3]
 

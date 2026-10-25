@@ -54,7 +54,14 @@
     <div class="row2">
       <label for="risoluzione">{{ t('video.risoluzione') }}
         <input type="text" id="risoluzione" name="risoluzione" class="mono"
-               placeholder="1920x1080" value="{{ cfg.video.risoluzione }}">
+               list="risoluzioni-viste"
+               placeholder="{{ risoluzioni[0] if risoluzioni else '1920x1080' }}"
+               value="{{ cfg.video.risoluzione }}">
+        <datalist id="risoluzioni-viste">
+          {% for misura in risoluzioni %}
+          <option value="{{ misura }}"></option>
+          {% endfor %}
+        </datalist>
       </label>
       <label for="finestra">{{ t('video.finestra') }}
         <select id="finestra" name="finestra">
@@ -65,7 +72,13 @@
         </select>
       </label>
     </div>
-    <p class="hint">{{ t('video.risoluzione.hint') }}</p>
+    <p class="hint">{{ t('video.risoluzione.hint') }}
+      {% if risoluzioni %}
+      {{ t('video.risoluzione.rilevate').replace('{elenco}', risoluzioni[:6]|join(', ')) }}
+      {% else %}
+      {{ t('video.risoluzione.mute') }}
+      {% endif %}
+    </p>
 
     <div class="row2">
       <label for="modo">{{ t('video.modo') }}

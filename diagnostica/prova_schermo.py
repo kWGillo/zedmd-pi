@@ -416,6 +416,44 @@ finally:
     display.SuperficieSDL, display.SuperficieFramebuffer = sdl_vero, fb_vero
 
 
+# --------------------------------- 17.3.2: le misure che dichiara il monitor
+#
+# Si leggono da `/sys/class/drm`, che qui si finge: una scheda con due
+# uscite, una collegata e una no, e la stessa misura ripetuta a frequenze
+# diverse -- com'e' fatto un file `modes` vero.
+
+print()
+print("-- le risoluzioni si leggono dal monitor (17.3.2)")
+
+finto = tempfile.mkdtemp()
+
+
+def _uscita(nome, stato, modi):
+    cartella = os.path.join(finto, nome)
+    os.makedirs(cartella)
+    with open(os.path.join(cartella, "status"), "w") as f:
+        f.write(stato + "\n")
+    with open(os.path.join(cartella, "modes"), "w") as f:
+        f.write("\n".join(modi) + "\n")
+
+
+_uscita("card0-Virtual-1", "connected",
+        ["1920x1080", "1920x1080", "1280x1024", "1024x768", "800x600"])
+_uscita("card0-HDMI-A-2", "disconnected", ["3840x2160"])
+_uscita("card0-DP-1", "connected", ["2560x1440", "1920x1080"])
+
+viste = display.risoluzioni_disponibili(finto)
+esigi(viste == ["2560x1440", "1920x1080", "1280x1024", "1024x768", "800x600"],
+      "le misure tornano dalla piu' grande alla piu' piccola: %s"
+      % ", ".join(viste))
+esigi("3840x2160" not in viste,
+      "l'uscita non collegata non porta la sua misura")
+esigi(viste.count("1920x1080") == 1,
+      "la stessa misura a frequenze diverse conta una volta sola")
+esigi(display.risoluzioni_disponibili(os.path.join(finto, "niente")) == [],
+      "e dove non c'e' niente da leggere torna una lista vuota, non un errore")
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

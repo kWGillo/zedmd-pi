@@ -3203,6 +3203,27 @@ Storico:
        Il ripiego non e' silenzioso. Chi ripiega se lo porta scritto addosso,
        la pagina Video lo mostra in cima, e all'avvio si legge
        `[display] si ripiega su SuperficieFramebuffer -- ...`.
+       **I due punti che lampeggiano spostavano le cifre.** *«Quando i due
+       punti scompaiono, l'ultima cifra si sposta a sinistra di qualche
+       pixel.»* Il lampeggio li sostituiva con uno spazio: con
+       `DejaVuSansMono-Bold` -- il primo della lista, e quello che c'e' su un
+       Raspberry -- occupano lo stesso posto e non si e' mai visto niente. Su
+       una macchina senza quel font si ripiega su `DejaVuSans-Bold`, che e'
+       proporzionale, e lo spazio e' piu' stretto dei due punti di quattro
+       pixel a corpo 83: i minuti scattavano, e il riquadro piu' stretto
+       spostava anche le ore dall'altra parte, per via del centraggio.
+       Adesso il lampeggio **spegne** i due punti invece di sostituirli: la
+       riga misurata e la penna sono sempre quelle di `14:22`. Con qualunque
+       font, niente si puo' muovere. La prova guarda i pixel con tutti e due
+       i font: deve sparire una colonna sola, larga quanto i due punti, in
+       mezzo alle cifre. Il font giusto resta quello per cui la pagina e'
+       disegnata: `sudo apt install fonts-dejavu-core`.
+       **Le risoluzioni si leggono dal monitor.** La casella Risoluzione
+       della pagina Video si apre su quello che la macchina dichiara in
+       `/sys/class/drm/card0-*/modes` -- niente SDL, niente sessione
+       grafica, si legge anche dal servizio. Solo le uscite collegate, e la
+       stessa misura a frequenze diverse una volta sola. Resta una casella
+       di testo, cosi' ci si puo' ancora scrivere quello che si vuole.
        Nuova `diagnostica/schermo_dal_vivo.py`: dipinge tre schermate piene
        sullo schermo vero -- framebuffer, SDL, SDL con la console staccata --
        e chiede quali si sono viste. Le altre prove di `display.py` girano su

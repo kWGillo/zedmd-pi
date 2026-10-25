@@ -1962,6 +1962,12 @@ STRINGS = {
         "Vuota vale quella che c'è adesso, ed è quasi sempre la risposta "
         "giusta.",
         "Empty means the current one, which is almost always right."),
+    "video.risoluzione.rilevate": (
+        "Il monitor dichiara: {elenco}",
+        "The monitor reports: {elenco}"),
+    "video.risoluzione.mute": (
+        "Il monitor non dichiara nessuna misura: si scrive a mano.",
+        "The monitor reports no size: type it by hand."),
     "video.finestra": ("Finestra", "Window"),
     "video.finestra.auto": ("Se c'è un desktop", "If a desktop is running"),
     "video.finestra.si": ("Sempre", "Always"),

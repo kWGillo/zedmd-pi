@@ -703,6 +703,50 @@ class SuperficieFramebuffer:
             pass
 
 
+def risoluzioni_disponibili(radice="/sys/class/drm"):
+    """Le misure che il monitor dichiara, dalla piu' grande alla piu' piccola.
+
+    Non ci vuole SDL e non ci vuole una sessione grafica: il kernel le
+    scrive in chiaro, una per riga, nel file `modes` di ogni uscita della
+    scheda, e si leggono anche dal servizio.
+
+        /sys/class/drm/card0-HDMI-A-1/status   -> connected
+        /sys/class/drm/card0-HDMI-A-1/modes    -> 1920x1080
+                                                  1680x1050
+                                                  ...
+
+    Si tengono solo le uscite collegate -- su un portatile ce n'e' sempre
+    una dozzina censite e una sola attaccata -- e si toglie il doppione
+    della stessa misura a frequenze diverse, che a noi non dice niente: il
+    programma non sceglie la frequenza, sceglie quanti pixel ha.
+
+    Torna una lista di stringhe `larghezzaxaltezza`. Vuota non e' un
+    errore: vuol dire che la macchina non lo dice, e allora la casella si
+    riempie a mano come si e' sempre fatto.
+    """
+    import glob
+    import re
+    viste = []
+    for stato in sorted(glob.glob(os.path.join(radice, "card*-*", "status"))):
+        try:
+            with open(stato, encoding="ascii") as f:
+                if f.read().strip() != "connected":
+                    continue
+            with open(os.path.join(os.path.dirname(stato), "modes"),
+                      encoding="ascii") as f:
+                righe = f.read().split()
+        except OSError:
+            continue
+        for riga in righe:
+            trovato = re.match(r"^(\d{3,5})x(\d{3,5})", riga)
+            if not trovato:
+                continue
+            misura = "%dx%d" % (int(trovato.group(1)), int(trovato.group(2)))
+            if misura not in viste:
+                viste.append(misura)
+    return sorted(viste, key=lambda m: [-int(n) for n in m.split("x")])
+
+
 def _apri_superficie(misura, finestra, console="zitta"):
     """SDL se c'e' **e disegna**, framebuffer altrimenti.
 

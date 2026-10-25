@@ -19,13 +19,13 @@ c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 6f6f3eda48e12c7f3baf5f9cbe1efda0  diagnostica/prova_nati_e_morti.py
 826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
-e9586d217d80679719c9616ef632b54c  diagnostica/prova_regioni.py
-8426f50d101ebd315f83c8210c82fd56  diagnostica/prova_schermo.py
+b0c3d50a7128a7cf2d7d3d966714b1f6  diagnostica/prova_regioni.py
+e0926a3461f47061b2a80cd9f74d3323  diagnostica/prova_schermo.py
 3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
 1fafe8f1f25c976ce09b10c613b98f86  diagnostica/schermo_dal_vivo.py
 a508962738ddb4832dd5cca7d6795e9f  diagnostica/traduzioni.tsv
-27a299b480ec860f8fd12f6a0a06e7c9  display.py
+5661dedbda3fe00c3c04e6acefa428cd  display.py
 bed93c59a4e582b9db2ee345d52ab038  dmdconf.py
 df5882ad13a821f60a0ba35956669ac3  dmdd.py
 0e17dea503190ddc88c7c33c37b5e19f  domande.en.csv
@@ -44,7 +44,7 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 48b68ac87a2559a7efff49d54460ff57  giornate.csv
 e45d351b601929bd837040f66702dfe0  hass.py
-714c3f15e3f95d058a349e652d7428cd  i18n.py
+2709a21809071a9eb600655dbc20d361  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 1ac13b80fea00e4ef49841661298ea1a  inutili.py
 456a3e6e24373f6acbd608aea6c34c8e  libcheck.py
@@ -73,7 +73,7 @@ be7a53f3a370b2550970f7cdb510bc53  sources/__init__.py
 62774ea638052119d4dc225d1290e3e6  sources/base.py
 ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 2a299afa099afba8a35b19d1049595bb  sources/cielo.py
-6d110ef0eaedb3524e1e2b866db30a6a  sources/clock.py
+12d76a1d9875bf521e142da14adb8149  sources/clock.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 0aec5e5925af657819f9a3367c4e76fb  sources/doom.py
@@ -174,9 +174,9 @@ dd535a2225eb95cd2648a2c26ffbcafb  templates/statusplayer.html
 d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 8e4da1571d2f55b9211b110179be1607  templates/updates.html
-323a2022c60dc631dbba5861f7536da1  templates/video.html
-0b8ce7d8eab8983c81ef1416a000fdbd  version.py
+3b29a3298d7020ed5416a9b633083bb4  templates/video.html
+90aae31657a68ca2eacea3d585b55399  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-0b1e11daaf3d4083d3b16151c2fc89db  webui.py
+0cdd6b91c1a261c50e25bad3619fe998  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

@@ -110,7 +110,7 @@ righe assolute, e riproporzionarla e' un lavoro a parte.
 | Comando | Cosa fa |
 |---|---|
 | **Uscita** | «Decide la macchina» sceglie il pannello su Pi 3 e 4 e il monitor altrove. Si può forzare: su un Pi con un monitor sulla scrivania, «Monitor» è una scelta legittima |
-| **Risoluzione** | vuota vale quella che c'è adesso, ed è quasi sempre la risposta giusta |
+| **Risoluzione** | vuota vale quella che c'è adesso, ed è quasi sempre la risposta giusta. Dalla 17.3.2 la casella si apre sulle misure che il monitor dichiara, lette da `/sys/class/drm` |
 | **Finestra** | «Se c'è un desktop» apre una finestra quando trova una sessione grafica, altrimenti va a tutto schermo |
 | **Filtro DMD** | ogni pixel diventa un punto con la sua intercapedine |
 | **Punto %** | quanto della cella è acceso: 80 lascia l'intercapedine di un pannello da 3 mm |

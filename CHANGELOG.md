@@ -50,6 +50,48 @@ Il ripiego non è silenzioso. All'avvio si legge:
 
 e la stessa frase sta in cima alla pagina Video.
 
+### I due punti che lampeggiano spostavano le cifre
+
+*«Quando i due punti scompaiono, l'ultima cifra si sposta a sinistra di qualche
+pixel.»*
+
+Il lampeggio sostituiva i due punti con uno **spazio**. Con
+`DejaVuSansMono-Bold` — il primo font della lista, e quello che c'è su un
+Raspberry — i due occupano esattamente lo stesso posto, e in cinque anni non si
+è visto niente. Su una macchina dove quel font non è installato si ripiega su
+`DejaVuSans-Bold`, che è proporzionale, e lì lo spazio è più stretto dei due
+punti: **4 pixel** a corpo 83. I minuti scattavano a sinistra a ogni lampeggio,
+e siccome anche il riquadro dell'intera riga si stringeva, il centraggio
+spostava pure le ore, dall'altra parte.
+
+Adesso il lampeggio **spegne** i due punti invece di sostituirli: la riga
+misurata e la penna sono sempre quelle di `14:22`, e l'unica cosa che cambia è
+se i due punti si disegnano. Con qualunque font, niente si può muovere.
+
+La prova guarda i pixel, con tutti e due i font: fra le due immagini deve
+sparire una colonna sola, larga quanto i due punti, e in mezzo alle cifre.
+
+Vale comunque la pena di installare il font giusto, che è quello per cui la
+pagina è disegnata:
+
+```
+sudo apt install fonts-dejavu-core
+```
+
+### Le risoluzioni si leggono dal monitor
+
+La casella **Risoluzione** della pagina Video adesso si apre su quello che il
+monitor dichiara, invece di chiedere di saperlo a memoria. Non serve né SDL né
+una sessione grafica: il kernel le scrive in chiaro, una per riga, in
+`/sys/class/drm/card0-*/modes`, e si leggono anche dal servizio.
+
+Si tengono solo le uscite collegate — su un portatile ce n'è sempre una dozzina
+censite e una sola attaccata — e la stessa misura a frequenze diverse conta una
+volta sola: il programma non sceglie la frequenza, sceglie quanti pixel ha.
+Resta una casella di testo, quindi si può continuare a scriverci dentro quello
+che si vuole; e dove la macchina non dichiara niente la pagina lo dice, invece
+di mostrare un elenco vuoto.
+
 ### `diagnostica/schermo_dal_vivo.py`
 
 Le prove di `display.py` girano su superfici finte, apposta: una macchina di
