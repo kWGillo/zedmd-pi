@@ -58,8 +58,18 @@ pixel logici -- tre volte le righe del pannello -- e le cifre crescono con lui,
 da corpo 38 a corpo 83. La data resta piccola in alto a destra, gli orari del
 mondo e il valore dell'energia restano in fondo.
 
-**Quando c'e' qualcos'altro da mostrare**, l'orologio sale nella meta' di
-sopra e si rimpicciolisce, e la meta' di sotto ospita una sorgente per volta:
+**L'orologio prende tutto solo se non puo' arrivare nient'altro**, cioe' se
+tutti i servizi sono spenti o fuori dalla loro fascia oraria. Non basta che in
+questo momento non ci sia niente da mostrare: altrimenti passerebbe un aereo e
+l'orologio si rimpicciolirebbe, poi tornerebbe grande, dieci volte all'ora.
+
+Attenzione: con la configurazione di serie **cinque servizi sono gia' accesi**
+-- sveglia, zedmd, moon, inutili, scadenze -- perche' sono quelli che non
+mostrano niente finche' non li configuri. La pagina Video li elenca sotto
+«Tengono l'orologio a meta'»: spegni quelli che non usi dalla pagina Servizi.
+
+**Quando un servizio e' acceso**, l'orologio sta nella meta' di sopra e la
+meta' di sotto ospita una sorgente per volta:
 il Media Player, un aereo, il meteo. La sceglie la priorita', come ha sempre
 fatto l'arbitro -- finche' un aereo sta passando resta l'aereo.
 

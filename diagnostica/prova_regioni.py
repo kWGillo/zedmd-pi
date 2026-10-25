@@ -236,7 +236,47 @@ a.cfg["arbiter"]["force_source"] = "auto"
 esigi(a.a_regioni() is True, "tolto il blocco si torna alle regioni")
 
 
-sep("8. L'uscita: quante tele ci stanno, e il modo")
+sep("8. L'orologio grande solo se non puo' arrivare nient'altro")
+
+# Chiesto cosi': «l'orologio grande deve essere attivo solo se tutti i servizi
+# sono spenti o al di fuori della fascia oraria». Senza, l'orologio si
+# rimpiccioliva a ogni aereo che passava e tornava grande un minuto dopo.
+for s in (radar, meteo, media, doom):
+    s.enabled = False
+    s.acceso = False
+clock.enabled = True
+clock.acceso = True
+esigi(a.orologio_solo() is True,
+      "tutti i servizi spenti: l'orologio prende tutto")
+
+media.enabled = True
+esigi(a.orologio_solo() is False,
+      "basta un servizio **acceso** perche' l'orologio resti a meta', anche "
+      "se adesso non mostra niente")
+esigi(a.contenuto() is None,
+      "e intanto la meta' di sotto resta vuota, non si riempie di niente")
+
+media.acceso = True
+esigi(a.contenuto().name == "mediaplayer" and a.orologio_solo() is False,
+      "poi il contenuto arriva, e l'orologio non si muove: era gia' a meta'")
+
+media.acceso = False
+esigi(a.orologio_solo() is False,
+      "il contenuto se ne va e l'orologio **resta** a meta': e' il punto di "
+      "tutta questa regola")
+
+media.enabled = False
+esigi(a.orologio_solo() is True,
+      "spento il servizio -- o uscito dalla sua fascia oraria -- l'orologio "
+      "torna grande")
+
+doom.enabled = True
+esigi(a.orologio_solo() is True,
+      "una sorgente interattiva non conta: non scende mai in una regione")
+doom.enabled = False
+
+
+sep("9. L'uscita: quante tele ci stanno, e il modo")
 
 
 class Superficie:

@@ -252,6 +252,41 @@ class Arbiter:
         return not (self.holding()
                     or self.cfg["arbiter"]["force_source"] != "auto")
 
+    def orologio_solo(self):
+        """Vero se l'orologio puo' prendersi tutto lo schermo.
+
+        Non basta che adesso non ci sia nient'altro da mostrare: la domanda e'
+        se qualcosa **potrebbe** arrivare. Chiesto cosi': *«l'orologio grande
+        deve essere attivo solo se tutti i servizi sono spenti o al di fuori
+        della fascia oraria»*, ed e' la richiesta giusta -- senza, l'orologio
+        si rimpiccioliva a ogni aereo che passava e tornava grande un minuto
+        dopo, una decina di volte all'ora. Un orologio che cambia misura da
+        solo, mentre lo guardi, non e' un cruscotto: e' un difetto.
+
+        La risposta sta gia' in `enabled`, e non per caso: `apply_services`
+        lo accende solo quando il servizio e' acceso **e** dentro la sua
+        fascia oraria, e lo rifa' una volta al secondo. Quindi "nessuno
+        acceso e in fascia" si legge senza chiedere niente a nessuno.
+        """
+        return not self.trattengono()
+
+    def trattengono(self):
+        """I servizi che tengono l'orologio a meta' schermo.
+
+        Serve alla pagina Video: con la configurazione di serie piu' di un
+        servizio e' gia' acceso -- la sveglia, le scadenze, ZeDMD -- e chi
+        si aspetta l'orologio grande non vedrebbe nessuna spiegazione, solo
+        un orologio piccolo. Elencarli trasforma «non funziona» in «ah,
+        devo spegnere quelli».
+        """
+        fuori = []
+        for source in self.sources.values():
+            if source.name == "clock" or not source.in_fascia:
+                continue
+            if source.enabled:
+                fuori.append(source.name)
+        return sorted(fuori)
+
 
 class Runtime:
     """Stato condiviso tra il ciclo di rendering e la web UI."""
@@ -1173,7 +1208,9 @@ class Runtime:
         `in_onda()` -- che e' il solo istante in cui si sa che qualcuno la
         sta davvero guardando, e su cui il meteo conta i suoi turni.
         """
-        riquadri = self.display.regioni(contenuto is not None)
+        # Le regioni le decide chi **potrebbe** arrivare, non chi c'e' adesso:
+        # altrimenti la misura dell'orologio cambierebbe a ogni passaggio.
+        riquadri = self.display.regioni(not self.arbiter.orologio_solo())
         orologio = riquadri.get("orologio")
         if orologio and (self.clock.width, self.clock.height) != orologio[2:]:
             self.clock.ridimensiona(orologio[2], orologio[3])

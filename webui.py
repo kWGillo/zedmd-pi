@@ -2582,6 +2582,7 @@ def create_app(runtime):
             schermo_alto=schermo.schermo[1] if schermo else 0,
             scala=schermo.scala if schermo else 0,
             quante=getattr(runtime.display, "tele", 1),
+            trattengono=runtime.arbiter.trattengono(),
             logica_largo=schermo.tela_logica[0] if schermo else 0,
             logica_alto=schermo.tela_logica[1] if schermo else 0,
             page="video")

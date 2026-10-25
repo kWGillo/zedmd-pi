@@ -3099,6 +3099,23 @@ Storico:
        stessa intenzione. La chiave `video.fasce` non serve piu'.
        Prova nuova: `diagnostica/prova_regioni.py`, 46 controlli; via la
        `prova_fasce.py`, che provava un meccanismo che non c'e' piu'.
+  17.2.1 **L'orologio grande solo quando non puo' arrivare nient'altro.**
+       *«L'orologio grande deve essere attivo solo se tutti i servizi sono
+       spenti o al di fuori della fascia oraria.»* Nella 17.2 le regioni le
+       decideva chi c'era **adesso**: passava un aereo e l'orologio si
+       rimpiccioliva, finiva il passaggio e tornava grande, una decina di
+       volte all'ora. Un orologio che cambia misura da solo mentre lo guardi
+       non e' un cruscotto, e' un difetto.
+       Adesso le decide chi **potrebbe** arrivare, e la risposta era gia'
+       dentro `enabled`: `apply_services` lo accende solo quando il servizio
+       e' acceso **e** dentro la sua fascia oraria, e lo rifa' una volta al
+       secondo. Quindi «nessuno acceso e in fascia» si legge senza chiedere
+       niente a nessuno, e il layout smette di oscillare.
+       **E la pagina Video dice chi lo tiene a meta'.** Con la
+       configurazione di serie cinque servizi sono gia' accesi -- sveglia,
+       zedmd, moon, inutili, scadenze -- quindi chi si aspetta l'orologio
+       grande vedrebbe un orologio piccolo e nessuna spiegazione. Elencarli
+       trasforma «non funziona» in «ah, devo spegnere quelli».
 """
 
-__version__ = "17.2"
+__version__ = "17.2.1"

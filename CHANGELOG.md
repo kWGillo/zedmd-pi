@@ -2,6 +2,38 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.2.1]
+
+### L'orologio grande solo quando non può arrivare nient'altro
+
+*«L'orologio grande deve essere attivo solo se tutti i servizi sono spenti o al
+di fuori della fascia oraria di media.»*
+
+Nella 17.2 le regioni le decideva chi c'era **adesso**: passava un aereo e
+l'orologio si rimpiccioliva, finiva il passaggio e tornava grande. Una decina
+di volte all'ora. Un orologio che cambia misura da solo mentre lo guardi non è
+un cruscotto, è un difetto.
+
+Adesso le decide chi **potrebbe** arrivare, e la risposta era già dentro
+`enabled`: `apply_services` lo accende solo quando il servizio è acceso **e**
+dentro la sua fascia oraria, e lo rifà una volta al secondo. Quindi «nessuno
+acceso e in fascia» si legge senza chiedere niente a nessuno, e il layout
+smette di oscillare. Finché un servizio è acceso, l'orologio resta a metà
+anche nei minuti in cui la metà di sotto è vuota.
+
+### E la pagina Video dice chi lo tiene a metà
+
+Provandolo è saltata fuori una cosa che da sola avrebbe fatto perdere una
+serata: con la configurazione di serie **cinque servizi sono già accesi** —
+sveglia, zedmd, moon, inutili, scadenze — perché sono quelli che non mostrano
+niente finché non li configuri, e per questo nascono accesi. Con la regola
+nuova tengono l'orologio a metà, e chi si aspetta quello grande vedrebbe un
+orologio piccolo e nessuna spiegazione.
+
+La pagina Video adesso li elenca: *«Tengono l'orologio a metà: inutili, moon,
+scadenze, sveglia, zedmd»*. Trasforma «non funziona» in «ah, devo spegnere
+quelli».
+
 ## [17.2]
 
 ### Due regioni: l'orologio grande, e il contenuto sotto

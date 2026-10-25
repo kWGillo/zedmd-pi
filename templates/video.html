@@ -23,8 +23,13 @@
         <td class="mono">{{ schermo_largo }}&times;{{ schermo_alto }}
             {%- if scala %} &middot; &times;{{ scala }}{% endif %}</td></tr>
     <tr><td>{{ t('video.regioni.ora') }}</td>
-        <td>{% if quante > 1 %}{{ t('video.regioni.due') }}
-            {%- else %}{{ t('video.regioni.una') }}{% endif %}</td></tr>
+        <td>{% if quante <= 1 %}{{ t('video.regioni.una') }}
+            {%- elif trattengono %}{{ t('video.regioni.due') }}
+            {%- else %}{{ t('video.regioni.grande') }}{% endif %}</td></tr>
+    {% if quante > 1 and trattengono %}
+    <tr><td>{{ t('video.regioni.perche') }}</td>
+        <td class="mono">{{ trattengono | join(', ') }}</td></tr>
+    {% endif %}
     <tr><td>{{ t('video.tela.ora') }}</td>
         <td class="mono">{{ logica_largo }}&times;{{ logica_alto }}</td></tr>
     {% endif %}
@@ -72,7 +77,8 @@
         </select>
       </label>
     </div>
-    <p class="hint">{{ t('video.regioni.hint') }}</p>
+    <p class="hint">{{ t('video.regioni.hint') }}
+    <p class="hint">{{ t('video.regioni.spegni') }}</p></p>
 
     <input type="hidden" name="restart" value="1">
     <button type="submit">{{ t('video.applica') }}</button>

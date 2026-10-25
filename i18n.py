@@ -2001,6 +2001,14 @@ STRINGS = {
                           "Clock above, content below"),
     "video.regioni.una": ("Una sola: l'orologio prende tutto",
                           "One only: the clock takes it all"),
+    "video.regioni.grande": ("Una sola: l'orologio grande",
+                            "One only: the big clock"),
+    "video.regioni.perche": ("Tengono l'orologio a metà", "Keeping the clock halved"),
+    "video.regioni.spegni": (
+        "L'orologio prende tutto solo se nessun servizio è acceso e dentro la "
+        "sua fascia oraria.",
+        "The clock takes it all only when no service is on and within its time "
+        "window."),
     "video.regioni.hint": (
         "Da solo l'orologio prende tutta l'altezza; con qualcos'altro scende "
         "al cinquanta per cento.",
