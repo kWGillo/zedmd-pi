@@ -3364,6 +3364,32 @@ Storico:
        resta `video.console: "staccata"`: con `fbcon` staccato dal
        framebuffer nessuno puo' scriverci sopra, nemmeno quando il
        terminale torna in modalita' testo.
+  17.4.2 **Pongo e T-Rex.** Due conversioni, due strade diverse, e la
+       differenza la fa la forma del gioco.
+       **Pongo** e' un campo chiuso, e si riproporziona come Breakout: due
+       fattori, uno per asse. Racchette piu' alte, rete col passo in
+       proporzione, punti piu' grandi -- ma di un salto intero, perche' il
+       font si ingrandisce replicando pixel e mezzo pixel non esiste -- e
+       l'angolo di rimbalzo conservato in proporzione al campo. La pallina
+       prende la **media** dei due fattori e non il minimo: attraversa
+       campo aperto e deve vedersi, mentre in Breakout vive in mezzo a una
+       griglia di mattoni e il minimo e' piu' prudente.
+       **T-Rex scorre di lato**, e li' il 4:3 impone uno scambio: lo
+       schermo e' piu' alto ma non piu' largo, quindi o le figure restano
+       piccole, o si ingrandiscono e si vedono arrivare per meno tempo. La
+       scelta e' stata la seconda, e la si e' presa guardando i numeri: a
+       zoom due un cactus attraversa in poco piu' di un secondo invece che
+       in due e mezzo; a zoom tre in otto decimi, e non si fa piu' in tempo
+       a saltarlo. Quindi `ZOOM_MAX = 2`.
+       Il modo in cui e' fatto e' la parte che conta: **il mondo di T-Rex
+       resta in unita' di pannello**. La fisica, le velocita', i salti, le
+       maschere di collisione non sono stati toccati -- il mondo e' sempre
+       alto 64 e largo 256 unita'. Cambia soltanto lo zoom con cui lo si
+       disegna, e di conseguenza quante unita' ci stanno nella tela: a zoom
+       due la finestra e' larga 128 unita' invece di 256. Lo zoom vive in
+       due funzioni di disegno, e nient'altro del gioco sa che esista.
+       La prova lo mostra: stessa partita, stesso seme, **stesso punteggio**
+       sulle due tele, per tutti e quattro i giochi convertiti.
 """
 
-__version__ = "17.4.1"
+__version__ = "17.4.2"

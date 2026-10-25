@@ -2,6 +2,44 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.2]
+
+### Pongo e T-Rex
+
+Due conversioni, due strade diverse: la differenza la fa la forma del gioco.
+
+**Pongo** è un campo chiuso, e si riproporziona come Breakout — due fattori, uno
+per asse. Racchette più alte, rete col passo in proporzione, punti più grandi (di
+un salto intero: il font si ingrandisce replicando pixel, e mezzo pixel non
+esiste), angolo di rimbalzo conservato in proporzione al campo. La pallina prende
+la **media** dei due fattori e non il minimo, perché attraversa campo aperto e
+deve vedersi; in Breakout vive in mezzo a una griglia di mattoni e il minimo è
+più prudente.
+
+**T-Rex scorre di lato**, e lì il 4:3 impone uno scambio: lo schermo è più alto
+ma non più largo. O le figure restano piccole, o si ingrandiscono e si vedono
+arrivare per meno tempo. La scelta è la seconda, presa guardando i numeri:
+
+| zoom | dino | un cactus attraversa in |
+|---|---|---|
+| 1 | 15 px | 2,3 s |
+| **2** | **30 px** | **1,2 s** |
+| 3 | 45 px | 0,8 s — non si fa più in tempo a saltare |
+
+Quindi `ZOOM_MAX = 2`.
+
+Il modo in cui è fatto è la parte che conta: **il mondo di T-Rex resta in unità
+di pannello**. La fisica, le velocità, i salti, le maschere di collisione non
+sono stati toccati — il mondo è sempre alto 64 e largo 256 unità. Cambia solo lo
+zoom con cui lo si disegna, e di conseguenza quante unità ci stanno nella tela: a
+zoom due la finestra è larga 128 unità invece di 256. Lo zoom vive in due
+funzioni di disegno, e nient'altro del gioco sa che esista.
+
+La prova lo mostra: stessa partita, stesso seme, **stesso punteggio** sulle due
+tele — per tutti e quattro i giochi convertiti.
+
+Restano Mine vaganti, Kingo Bongo, Invasori, Squadriglia, Gnam e Super Quiz.
+
 ## [17.4.1]
 
 ### La tela non arrivava al gioco

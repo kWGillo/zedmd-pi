@@ -35,6 +35,8 @@ from PIL import Image                                     # noqa: E402
 from sources.giochi import base                           # noqa: E402
 from sources.giochi.serpente import Serpente              # noqa: E402
 from sources.giochi.mattoni import Mattoni                # noqa: E402
+from sources.giochi.pongo import Pongo                    # noqa: E402
+from sources.giochi.trex import TRex                      # noqa: E402
 
 esiti = []
 
@@ -66,7 +68,7 @@ ALTA = (256, 192)
 
 sep("1. Il campo e il tabellone")
 
-for classe in (Serpente, Mattoni):
+for classe in (Serpente, Mattoni, Pongo, TRex):
     g = classe()
     esigi((g.largo, g.alto) == (256, 64),
           "%s: di serie la tela e' quella del pannello" % g.nome)
@@ -213,6 +215,43 @@ esigi(img.getbbox() is None,
 base.imposta_tela(256, 64)
 esigi(base._CAMPO[2] == 200,
       "«centra» senza argomenti si centra sul campo, che sul pannello e' 200")
+
+
+sep("6-bis. Pongo e T-Rex (17.4.2)")
+
+p = Pongo()
+esigi((p.racchetta_l, p.racchetta_h) == (2, 12),
+      "pongo: la racchetta e' 2x12")
+esigi((int(p.x_sinistra), int(p.x_avanti), int(p.x_destra)) == (4, 62, 250),
+      "pongo: le colonne sono 4, 62 e 250")
+esigi((p.palla, p.corpo_punti) == (2, 2),
+      "pongo: pallina 2x2 e punti al doppio, come dalla 12.0")
+
+pa = gioca(Pongo, 200)
+al = gioca(Pongo, 200, ALTA)
+esigi((pa.tu, pa.cpu) == (al.tu, al.cpu),
+      "pongo: stesso punteggio sulle due tele (%d-%d e %d-%d)"
+      % (pa.tu, pa.cpu, al.tu, al.cpu))
+
+t = TRex()
+esigi((t.z, t.largo_u, t.alto_u) == (1, 256, 64),
+      "trex: sul pannello il mondo e' 256x64 a zoom uno")
+esigi((t.suolo_u, t.cima_u) == (58, 7),
+      "trex: la pista sta sulla riga 58, come sempre")
+
+t = TRex()
+t.configura_tela(*ALTA)
+esigi(t.z == 2 and (t.largo_u, t.alto_u) == (128, 96),
+      "trex: su una tela alta zoom due, e la finestra sul mondo e' 128x96")
+esigi(t.z <= TRex.ZOOM_MAX,
+      "trex: lo zoom non supera il massimo, se no non si fa in tempo a saltare")
+
+pa = gioca(TRex, 200)
+al = gioca(TRex, 200, ALTA)
+esigi(pa.punteggio == al.punteggio,
+      "trex: stesso punteggio dopo duecento passi (%d e %d) -- il mondo e'"
+      " lo stesso, cambia solo quanto se ne vede"
+      % (pa.punteggio, al.punteggio))
 
 
 sep("7. La tela arriva davvero fino al gioco (17.4.1)")

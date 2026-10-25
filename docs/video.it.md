@@ -177,7 +177,14 @@ campo si riprende le 56 colonne e tutte le righe in più. Sul pannello resta
 identico al pixel — il 4:1 impone la colonna a destra, ed è il ragionamento
 che quella colonna l'ha inventata.
 
-Convertiti finora: **Snake** (da 49×15 a 50×36 caselle) e **Breakout**.
+Convertiti finora: **Snake** (da 49×15 a 50×36 caselle), **Breakout**,
+**Pongo** e **T-Rex**.
+
+Un gioco che scorre di lato — T-Rex, e domani Squadriglia — ha un problema
+in più: lo schermo è più alto ma non più largo, quindi ingrandire le figure
+vuol dire vederle arrivare per meno tempo. Lì si ingrandisce di un fattore
+intero (due, non di più) e il mondo resta quello: cambia solo quanta parte
+se ne vede.
 
 Gli altri undici restano 256×64 ingranditi di un intero e centrati, finché non
 tocca a loro. Non è pigrizia: la loro geometria è fatta di costanti di modulo e

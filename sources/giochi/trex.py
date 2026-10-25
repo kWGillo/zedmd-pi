@@ -37,7 +37,9 @@ import random
 
 from PIL import Image
 
-from .base import ALTEZZA, LARGHEZZA, Gioco, centra, scrivi
+from .base import ALTEZZA as ALTEZZA_BASE
+from .base import LARGHEZZA as LARGHEZZA_BASE
+from .base import STRISCIA, Gioco, centra, imposta_tela, scrivi
 
 # ------------------------------------------------------------------ la pista
 
@@ -245,7 +247,7 @@ ALTO_PTERO = len(PTERO[0])
 class Ostacolo(object):
     __slots__ = ("tipo", "x", "y", "larghezza", "quanti", "quota", "ali")
 
-    def __init__(self, tipo, x, quanti=1, quota=0):
+    def __init__(self, tipo, x, quanti=1, quota=0, suolo=SUOLO):
         self.tipo = tipo
         self.x = float(x)
         self.quanti = quanti
@@ -253,10 +255,10 @@ class Ostacolo(object):
         self.ali = 0.0
         if tipo == "ptero":
             self.larghezza = LARGO_PTERO
-            self.y = SUOLO - quota - ALTO_PTERO
+            self.y = suolo - quota - ALTO_PTERO
         else:
             self.larghezza = quanti * (LARGO[tipo] + 1) - 1
-            self.y = SUOLO - ALTO[tipo]
+            self.y = suolo - ALTO[tipo]
 
     def pezzi(self):
         """(maschera, pixel, x, y) di ogni sagoma dell'ostacolo."""
@@ -273,8 +275,37 @@ class TRex(Gioco):
     etichetta = "T-Rex"
     colore_hud = GIORNO["titolo"]
     MUSICA = MUSICA
+    TELA_LIBERA = True
 
     COMANDI = ("su", "giu", "fuoco", "avvia", "esci")
+
+    # Oltre questo la finestra sul mondo diventa troppo stretta: a zoom tre
+    # un cactus attraversa lo schermo in otto decimi di secondo, e non si fa
+    # piu' in tempo a saltarlo. Due e' la misura scelta: figure grandi il
+    # doppio, poco piu' di un secondo per reagire invece di due e mezzo.
+    ZOOM_MAX = 2
+
+    def _misura(self):
+        """Il mondo resta in unita' di pannello; cambia quanto se ne vede.
+
+        E' la scelta che rende questa conversione sicura: la fisica, le
+        velocita', i salti, le maschere di collisione restano **identici**
+        -- il mondo e' sempre quello alto 64 e largo 256 unita'. Quello che
+        cambia e' lo zoom con cui lo si disegna, e di conseguenza quante
+        unita' di mondo ci stanno nella tela.
+
+        A zoom due, su 256 colonne, la finestra e' larga 128 unita' invece
+        di 256: il dinosauro e i cactus sono grandi il doppio, e si vedono
+        arrivare per meta' tempo. E' lo scambio che il 4:3 impone a un gioco
+        che scorre di lato, e il cielo in piu' resta cielo.
+        """
+        self.z = max(1, min(self.ZOOM_MAX, self.alto // ALTEZZA_BASE))
+        self.largo_u = max(64, self.largo // self.z)
+        self.alto_u = max(32, self.alto // self.z)
+        # La striscia del tabellone si misura in pixel di tela, non in
+        # unita': il font non si ingrandisce con lo zoom.
+        self.cima_u = max(1, -(-STRISCIA // self.z))
+        self.suolo_u = self.alto_u - 6
 
     # ---------------------------------------------------------------- partita
 
@@ -286,6 +317,7 @@ class TRex(Gioco):
         self.livello = 1
         self.finita = False
         self.iniziata = False
+        self._misura()
         self.velocita = VELOCITA_INIZIALE
         self.strada = 0.0
         self.y = 0.0                 # altezza dei piedi sopra il suolo
@@ -296,11 +328,17 @@ class TRex(Gioco):
         self._passo_zampe = 0.0
         self.ostacoli = []
         self._prossimo = 90.0        # pixel di strada prima del primo ostacolo
-        self.nuvole = [[self._rnd.uniform(0, LARGHEZZA), self._rnd.uniform(CIMA + 3, 28)]
+        cielo = self.suolo_u - self.cima_u
+        self.nuvole = [[self._rnd.uniform(0, self.largo_u),
+                        self._rnd.uniform(self.cima_u + cielo * 0.06,
+                                          self.cima_u + cielo * 0.41)]
                        for _ in range(3)]
-        self.sassi = [[self._rnd.uniform(0, LARGHEZZA), self._rnd.randint(1, 4)]
+        self.sassi = [[self._rnd.uniform(0, self.largo_u),
+                       self._rnd.randint(1, 4)]
                       for _ in range(18)]
-        self.stelle = [(self._rnd.randint(0, LARGHEZZA - 1), self._rnd.randint(CIMA + 1, 36))
+        self.stelle = [(self._rnd.randint(0, self.largo_u - 1),
+                        self._rnd.randint(self.cima_u + 1,
+                                          self.cima_u + int(cielo * 0.57)))
                        for _ in range(22)]
         self._segnale = 0.0          # il lampeggio del punteggio ogni 100
         self._morto_da = 0.0
@@ -426,27 +464,31 @@ class TRex(Gioco):
         for n in self.nuvole:
             n[0] -= avanti * 0.2
             if n[0] < -12:
-                n[0] = LARGHEZZA + self._rnd.uniform(0, 60)
-                n[1] = self._rnd.uniform(CIMA + 3, 28)
+                cielo = self.suolo_u - self.cima_u
+                n[0] = self.largo_u + self._rnd.uniform(0, 60)
+                n[1] = self._rnd.uniform(self.cima_u + cielo * 0.06,
+                                         self.cima_u + cielo * 0.41)
         for s in self.sassi:
             s[0] -= avanti
             if s[0] < 0:
-                s[0] += LARGHEZZA + self._rnd.uniform(0, 8)
+                s[0] += self.largo_u + self._rnd.uniform(0, 8)
                 s[1] = self._rnd.randint(1, 4)
 
     def _genera(self, avanti):
         self._prossimo -= avanti
         if self._prossimo > 0:
             return
-        x = LARGHEZZA + 2
+        x = self.largo_u + 2
         if self.punteggio >= PTERODATTILI_DA and self._rnd.random() < 0.25:
-            o = Ostacolo("ptero", x, quota=self._rnd.choice(QUOTE_PTERO))
+            o = Ostacolo("ptero", x, quota=self._rnd.choice(QUOTE_PTERO),
+                         suolo=self.suolo_u)
         else:
             # Da una certa velocita' i cactus grandi, e i gruppi fino a tre.
             grande = self.velocita > 135 and self._rnd.random() < 0.45
             tipo = "grande" if grande else "piccolo"
             massimo = 1 if self.velocita < 125 else (2 if grande else 3)
-            o = Ostacolo(tipo, x, quanti=self._rnd.randint(1, massimo))
+            o = Ostacolo(tipo, x, quanti=self._rnd.randint(1, massimo),
+                         suolo=self.suolo_u)
         self.ostacoli.append(o)
         # Lo spazio al prossimo: tempo di reazione piu' la lunghezza del
         # salto, che a velocita' alta si fa piu' lungo in pixel.
@@ -459,8 +501,8 @@ class TRex(Gioco):
         """(maschera, pixel, x, y) del dinosauro adesso."""
         f = int(self._passo_zampe * 8) % 2
         if self.giu and not self.in_aria:
-            return M_GIU[f], P_GIU[f], X_DINO, SUOLO - ALTO_GIU
-        y = SUOLO - ALTO_DINO - int(round(self.y))
+            return M_GIU[f], P_GIU[f], X_DINO, self.suolo_u - ALTO_GIU
+        y = self.suolo_u - ALTO_DINO - int(round(self.y))
         if self.in_aria:
             return M_CORRE[0], P_FERMO, X_DINO, y
         return M_CORRE[f], P_CORRE[f], X_DINO, y
@@ -488,41 +530,68 @@ class TRex(Gioco):
     def disegna_campo(self, img, px):          # pragma: no cover - non usata
         pass
 
-    @staticmethod
-    def _metti(px, pixel, x0, y0, tavolozza, colori=None):
+    def _metti(self, px, pixel, x0, y0, tavolozza, colori=None):
+        """Uno sprite dal mondo alla tela: ogni unita' diventa un quadrato.
+
+        E' l'unico posto in cui lo zoom esiste. Tutto il resto del gioco --
+        la fisica, le maschere, le velocita' -- vive in unita' di mondo e
+        non sa che la tela sia grande il doppio.
+        """
+        z = self.z
         for x, y, c in pixel:
-            xx, yy = x0 + x, y0 + y
-            if 0 <= xx < LARGHEZZA and CIMA <= yy < ALTEZZA:
-                colore = (colori or {}).get(c) or tavolozza.get(c)
-                if colore:
+            colore = (colori or {}).get(c) or tavolozza.get(c)
+            if not colore:
+                continue
+            for dy in range(z):
+                yy = (y0 + y) * z + dy
+                if not (STRISCIA <= yy < self.alto):
+                    continue
+                for dx in range(z):
+                    xx = (x0 + x) * z + dx
+                    if 0 <= xx < self.largo:
+                        px[xx, yy] = colore
+
+    def _punto(self, px, x, y, colore):
+        """Un pixel di mondo, ingrandito come gli sprite."""
+        z = self.z
+        for dy in range(z):
+            yy = y * z + dy
+            if not (STRISCIA <= yy < self.alto):
+                continue
+            for dx in range(z):
+                xx = x * z + dx
+                if 0 <= xx < self.largo:
                     px[xx, yy] = colore
 
     def disegna(self):
-        img = Image.new("RGB", (LARGHEZZA, ALTEZZA), (0, 0, 0))
+        img = Image.new("RGB", (self.largo, self.alto), (0, 0, 0))
+        imposta_tela(self.largo, self.alto, (0, 0, self.largo, self.alto))
         px = img.load()
         t = NOTTE if self.notte() else GIORNO
 
         if self.notte():
             for x, y in self.stelle:
-                px[x, y] = COLORE_STELLA
+                self._punto(px, x, y, COLORE_STELLA)
             # La luna: una falce di contorno, in alto a destra.
-            cx, cy = 222, 16
+            cielo = self.suolo_u - self.cima_u
+            cx = int(self.largo_u * 0.867)
+            cy = int(self.cima_u + cielo * 0.18)
             for yy in range(-5, 6):
                 for xx in range(-5, 6):
                     d1 = xx * xx + yy * yy
                     d2 = (xx - 3) ** 2 + (yy + 1) ** 2
                     if 16 <= d1 <= 26 and d2 > 16:
-                        px[cx + xx, cy + yy] = COLORE_LUNA
+                        self._punto(px, cx + xx, cy + yy, COLORE_LUNA)
         for n in self.nuvole:
             self._metti(px, P_NUVOLA, int(n[0]), int(n[1]), {"x": t["nuvola"]})
 
         # La pista: una riga, e i sassi sotto che scorrono.
-        for x in range(LARGHEZZA):
-            px[x, SUOLO] = t["suolo"]
+        for x in range(self.largo_u):
+            self._punto(px, x, self.suolo_u, t["suolo"])
         for sx, sy in self.sassi:
             xx = int(sx)
-            if 0 <= xx < LARGHEZZA and SUOLO + sy < ALTEZZA:
-                px[xx, SUOLO + sy] = t["sasso"]
+            if 0 <= xx < self.largo_u and self.suolo_u + sy < self.alto_u:
+                self._punto(px, xx, self.suolo_u + sy, t["sasso"])
 
         for o in self.ostacoli:
             for _m, pixel, ox, oy in o.pezzi():
@@ -534,10 +603,11 @@ class TRex(Gioco):
                                 {"C": t["cactus"], "c": t["cactus_scuro"]})
 
         if self.finita:
-            self._metti(px, P_MORTO, X_DINO, SUOLO - ALTO_DINO - int(round(self.y)), t)
+            self._metti(px, P_MORTO, X_DINO,
+                        self.suolo_u - ALTO_DINO - int(round(self.y)), t)
         elif not self.iniziata:
             # In attesa: fermo sulla pista.
-            self._metti(px, P_FERMO, X_DINO, SUOLO - ALTO_DINO, t)
+            self._metti(px, P_FERMO, X_DINO, self.suolo_u - ALTO_DINO, t)
         else:
             _m, pixel, x, y = self.sagoma()
             self._metti(px, pixel, x, y, t)
@@ -551,11 +621,11 @@ class TRex(Gioco):
             scrivi(px, "%06d" % self.punteggio, 1, 1, t["titolo"])
         scrivi(px, "HI %06d" % self.record(), 32, 1, t["record"])
         scrivi(px, "LIV %d" % self.livello, 76, 1, t["hud"])
-        scrivi(px, "T-REX", LARGHEZZA - 20, 1, t["hud"])
+        scrivi(px, "T-REX", self.largo - 20, 1, t["hud"])
         if not self.iniziata and not self.finita:
-            centra(px, "T-REX", 24, t["titolo"], larghezza=LARGHEZZA)
-            centra(px, "FUOCO PER PARTIRE", 34, t["hud"], larghezza=LARGHEZZA)
+            centra(px, "T-REX", self.alto * 24 // 64, t["titolo"], larghezza=self.largo)
+            centra(px, "FUOCO PER PARTIRE", self.alto * 34 // 64, t["hud"], larghezza=self.largo)
         if self.finita:
-            centra(px, "GAME OVER", 24, COLORE_FINE, larghezza=LARGHEZZA)
+            centra(px, "GAME OVER", self.alto * 24 // 64, COLORE_FINE, larghezza=self.largo)
             if self._morto_da >= RIPARTENZA:
-                centra(px, "FUOCO PER RIGIOCARE", 34, t["hud"], larghezza=LARGHEZZA)
+                centra(px, "FUOCO PER RIGIOCARE", self.alto * 34 // 64, t["hud"], larghezza=self.largo)

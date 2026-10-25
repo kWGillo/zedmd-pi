@@ -46,7 +46,9 @@ numeri.
 import math
 import random
 
-from .base import ALTEZZA, LARGHEZZA, Gioco, _F, centra
+from .base import ALTEZZA as ALTEZZA_BASE
+from .base import LARGHEZZA as LARGHEZZA_BASE
+from .base import Gioco, _F, centra, imposta_tela, larghezza_testo
 
 # ---------------------------------------------------------------- il campo
 
@@ -57,8 +59,8 @@ X_SINISTRA = 4                          # colonna della racchetta tua, a riposo
 # pannello. Avanzare accorcia gli angoli all'avversario ma toglie a te il
 # tempo di reagire: a meta' campo una pallina veloce arriva in un terzo di
 # secondo. E' uno scambio, non un vantaggio gratis.
-X_AVANTI = LARGHEZZA // 4 - RACCHETTA_L  # 62: la racchetta finisce a 64
-X_DESTRA = LARGHEZZA - 4 - RACCHETTA_L  # colonna di quella del computer
+X_AVANTI = LARGHEZZA_BASE // 4 - RACCHETTA_L  # 62: la racchetta finisce a 64
+X_DESTRA = LARGHEZZA_BASE - 4 - RACCHETTA_L   # quella del computer
 PALLA = 2
 RACCHETTA_V = 95.0      # pixel al secondo, tasto premuto: 0,55 s da un bordo all'altro
 RACCHETTA_VX = 95.0     # in avanti e indietro, alla stessa velocita'
@@ -104,7 +106,8 @@ ORDINE = ("persa", "punto", "ping", "sponda")
 SUONI_PER_FRAME = 2
 
 
-def cifra_grande(px, testo, x, y, colore, scala=2):
+def cifra_grande(px, testo, x, y, colore, scala=2,
+                 limiti=(LARGHEZZA_BASE, ALTEZZA_BASE)):
     """Il font 3x5 del progetto, ingrandito: ogni pixel diventa un quadrato.
 
     Non un TTF: un carattere vettoriale rimpicciolito su un pannello LED
@@ -120,7 +123,7 @@ def cifra_grande(px, testo, x, y, colore, scala=2):
                             for dy in range(scala):
                                 xx = x + colonna * scala + dx
                                 yy = y + riga * scala + dy
-                                if 0 <= xx < LARGHEZZA and 0 <= yy < ALTEZZA:
+                                if 0 <= xx < limiti[0] and 0 <= yy < limiti[1]:
                                     px[xx, yy] = colore
         x += 4 * scala
 
@@ -133,6 +136,57 @@ class Pongo(Gioco):
     nome = "pongo"
     etichetta = "Pongo"
     MUSICA = "pongo_musica"
+    TELA_LIBERA = True
+
+    def _misura(self):
+        """Le misure del campo su questa tela.
+
+        Due fattori, uno per asse, rispetto al pannello: su 256x64 valgono
+        tutti e due uno e ogni numero torna quello che era. Il campo di
+        Pongo e' **tutta** la tela -- non ha il tabellone comune, i punti se
+        li scrive da solo in cima -- quindi qui non c'e' nessuna striscia da
+        scontare.
+
+        La pallina resta quadrata, e le due velocita' della racchetta
+        seguono due assi diversi: su e giu' con l'altezza, avanti e indietro
+        con la larghezza.
+        """
+        self.fx = self.largo / 256.0
+        self.fy = self.alto / 64.0
+        self.racchetta_h = max(2, int(round(RACCHETTA_H * self.fy)))
+        self.racchetta_l = max(1, int(round(RACCHETTA_L * self.fx)))
+        self.x_sinistra = X_SINISTRA * self.fx
+        self.x_avanti = self.largo / 4.0 - self.racchetta_l
+        self.x_destra = self.largo - 4 * self.fx - self.racchetta_l
+        # La pallina e' tonda: su un campo con due fattori diversi non
+        # c'e' una misura giusta, e si prende la media. Con il minimo
+        # resterebbe un puntino, con il massimo un sasso.
+        self.palla = max(1, int(round(PALLA * (self.fx + self.fy) / 2)))
+        self.racchetta_v = RACCHETTA_V * self.fy
+        self.racchetta_vx = RACCHETTA_VX * self.fx
+        # I punti: il doppio sul pannello, e un po' piu' grandi dove c'e'
+        # posto. Non proporzionali -- a corpo diciotto due cifre si
+        # mangerebbero la rete -- ma un salto intero, perche' il font si
+        # ingrandisce replicando pixel e mezzo pixel non esiste.
+        self.corpo_punti = max(2, min(4, int(round(2 * self.fy))))
+        # La rete: trattini di due pixel ogni quattro, in proporzione.
+        self.rete_passo = max(2, int(round(4 * self.fy)))
+        self.rete_segno = max(1, int(round(2 * self.fy)))
+
+    def _riga(self, quota):
+        """Una riga del pannello, portata su questa tela."""
+        return int(round(quota * self.fy))
+
+    def _dai_angolo(self, angolo, verso):
+        """La velocita' da un angolo misurato **come sul pannello**.
+
+        L'angolo si conserva in proporzione al campo e non in radianti: su
+        un campo tre volte piu' alto cinquanta gradi non vogliono piu' dire
+        «quasi di traverso», e la pallina rimbalzerebbe fra le sponde invece
+        di andare avanti.
+        """
+        self.vx = math.cos(angolo) * self.velocita * self.fx * verso
+        self.vy = math.sin(angolo) * self.velocita * self.fy
 
     def musica_di_adesso(self):
         return self.MUSICA if (self.iniziata and not self.finita) else None
@@ -170,10 +224,11 @@ class Pongo(Gioco):
         self.finita = False
         self.iniziata = False
         self.scambio = 0            # colpi di racchetta di questo scambio
-        self.y_tu = (ALTEZZA - RACCHETTA_H) / 2.0
-        self.x_tu = float(X_SINISTRA)
+        self._misura()
+        self.y_tu = (self.alto - self.racchetta_h) / 2.0
+        self.x_tu = float(self.x_sinistra)
         self._avanza = False
-        self.y_cpu = (ALTEZZA - RACCHETTA_H) / 2.0
+        self.y_cpu = (self.alto - self.racchetta_h) / 2.0
         self._eventi = []
         self.suoni_del_frame = ()
         # Il primo servizio va verso di te: e' la tua partita, cominci a
@@ -182,8 +237,8 @@ class Pongo(Gioco):
 
     def _metti_in_campo(self, verso):
         """La pallina al centro, ferma, in attesa della battuta."""
-        self.bx = (LARGHEZZA - PALLA) / 2.0
-        self.by = (ALTEZZA - PALLA) / 2.0
+        self.bx = (self.largo - self.palla) / 2.0
+        self.by = (self.alto - self.palla) / 2.0
         self.vx = 0.0
         self.vy = 0.0
         self.velocita = VELOCITA_INIZIALE
@@ -194,12 +249,13 @@ class Pongo(Gioco):
         self._pensa_fra = None
 
     def _battuta(self):
-        angolo = self._rnd.uniform(-0.45, 0.45)
-        self.vx = math.cos(angolo) * self.velocita * self._verso_battuta
-        self.vy = math.sin(angolo) * self.velocita
+        self._dai_angolo(self._rnd.uniform(-0.45, 0.45),
+                         self._verso_battuta)
         # Si parte da un punto a caso della rete: sempre dal centro
         # esatto, dopo tre battute il giocatore sa gia' dove andare.
-        self.by = self._rnd.uniform(12, ALTEZZA - 12 - PALLA)
+        bordo = 12 * self.fy
+        self.by = self._rnd.uniform(bordo,
+                                    self.alto - bordo - self.palla)
         self._pensa_fra = None
         self._bersaglio = None
         if self.vx > 0:
@@ -286,20 +342,20 @@ class Pongo(Gioco):
     def _muovi(self, y, tasti):
         dt = self._dt_corrente
         if "su" in tasti:
-            y -= RACCHETTA_V * dt
+            y -= self.racchetta_v * dt
         if "giu" in tasti:
-            y += RACCHETTA_V * dt
-        return max(0.0, min(ALTEZZA - RACCHETTA_H, y))
+            y += self.racchetta_v * dt
+        return max(0.0, min(self.alto - self.racchetta_h, y))
 
     def _avanti(self, x, tasti):
         """Avanti e indietro, dentro la prima meta' del tuo campo."""
         dt = self._dt_corrente
         self._avanza = "destra" in tasti and "sinistra" not in tasti
         if "destra" in tasti:
-            x += RACCHETTA_VX * dt
+            x += self.racchetta_vx * dt
         if "sinistra" in tasti:
-            x -= RACCHETTA_VX * dt
-        return max(float(X_SINISTRA), min(float(X_AVANTI), x))
+            x -= self.racchetta_vx * dt
+        return max(self.x_sinistra, min(self.x_avanti, x))
 
     # `_muovi` usa il dt del fotogramma, annotato da `passo`: cosi' ha la
     # stessa firma per le due racchette, e servira' al secondo giocatore.
@@ -313,38 +369,38 @@ class Pongo(Gioco):
             self.by = 0.0
             self.vy = abs(self.vy)
             self._segna("sponda")
-        elif self.by >= ALTEZZA - PALLA:
-            self.by = float(ALTEZZA - PALLA)
+        elif self.by >= self.alto - self.palla:
+            self.by = float(self.alto - self.palla)
             self.vy = -abs(self.vy)
             self._segna("sponda")
 
         colonna_tu = int(round(self.x_tu))
         if self.vx < 0 and self._tocca(colonna_tu, self.y_tu):
-            self.bx = float(colonna_tu + RACCHETTA_L)
+            self.bx = float(colonna_tu + self.racchetta_l)
             self._rimanda(self.y_tu, verso=1, schiaccia=self._avanza)
-        elif self.vx > 0 and self._tocca(X_DESTRA, self.y_cpu):
-            self.bx = float(X_DESTRA - PALLA)
+        elif self.vx > 0 and self._tocca(self.x_destra, self.y_cpu):
+            self.bx = float(self.x_destra - self.palla)
             self._rimanda(self.y_cpu, verso=-1)
 
-        if self.bx + PALLA < 0:
+        if self.bx + self.palla < 0:
             self._punto(chi="cpu")
-        elif self.bx > LARGHEZZA:
+        elif self.bx > self.largo:
             self._punto(chi="tu")
 
     def _tocca(self, x, y):
         """La pallina e' sulla colonna della racchetta e ne copre l'altezza."""
-        if not (x - PALLA <= self.bx <= x + RACCHETTA_L):
+        if not (x - self.palla <= self.bx <= x + self.racchetta_l):
             return False
-        return y - PALLA < self.by < y + RACCHETTA_H
+        return y - self.palla < self.by < y + self.racchetta_h
 
     def _rimanda(self, y_racchetta, verso, schiaccia=False):
-        centro = y_racchetta + RACCHETTA_H / 2.0
-        scarto = (self.by + PALLA / 2.0 - centro) / (RACCHETTA_H / 2.0)
+        centro = y_racchetta + self.racchetta_h / 2.0
+        scarto = ((self.by + self.palla / 2.0 - centro)
+                  / (self.racchetta_h / 2.0))
         angolo = max(-1.0, min(1.0, scarto)) * ANGOLO_MAX
         spinta = ACCELERAZIONE * (SCHIACCIATA if schiaccia else 1.0)
         self.velocita = min(VELOCITA_MASSIMA, self.velocita * spinta)
-        self.vx = math.cos(angolo) * self.velocita * verso
-        self.vy = math.sin(angolo) * self.velocita
+        self._dai_angolo(angolo, verso)
         self.scambio += 1
         self._aggiorna_record()
         self._segna("ping")
@@ -387,9 +443,9 @@ class Pongo(Gioco):
         """
         if self.vx <= 0:
             return None
-        tempo = (X_DESTRA - PALLA - self.bx) / self.vx
+        tempo = (self.x_destra - self.palla - self.bx) / self.vx
         y = self.by + self.vy * tempo
-        alto = ALTEZZA - PALLA
+        alto = self.alto - self.palla
         # Le sponde riflettono: si "srotola" il campo in una striscia infinita
         # e si ripiega. Periodo: due altezze.
         periodo = 2.0 * alto
@@ -400,7 +456,7 @@ class Pongo(Gioco):
 
     def _mossa_destra(self, dt):
         p = self.parametri()
-        obiettivo = (ALTEZZA - RACCHETTA_H) / 2.0       # a riposo, al centro
+        obiettivo = (self.alto - self.racchetta_h) / 2.0   # a riposo, al centro
         if self.in_gioco() and self.vx > 0:
             if self._pensa_fra is not None:
                 self._pensa_fra -= dt
@@ -409,10 +465,12 @@ class Pongo(Gioco):
                     stima = self.arrivo()
                     if stima is not None:
                         rapporto = self.velocita / VELOCITA_INIZIALE
-                        errore = self._rnd.gauss(0.0, p["errore"] * rapporto)
+                        errore = self._rnd.gauss(
+                            0.0, p["errore"] * rapporto * self.fy)
                         self._bersaglio = stima + errore
             if self._bersaglio is not None:
-                obiettivo = self._bersaglio + PALLA / 2.0 - RACCHETTA_H / 2.0
+                obiettivo = (self._bersaglio + self.palla / 2.0
+                             - self.racchetta_h / 2.0)
             else:
                 obiettivo = self.y_cpu        # non ha ancora deciso: sta fermo
         passo = p["velocita"] * dt
@@ -421,14 +479,17 @@ class Pongo(Gioco):
             self.y_cpu = obiettivo
         else:
             self.y_cpu += passo if differenza > 0 else -passo
-        self.y_cpu = max(0.0, min(ALTEZZA - RACCHETTA_H, self.y_cpu))
+        self.y_cpu = max(0.0, min(self.alto - self.racchetta_h,
+                                  self.y_cpu))
 
     # -------------------------------------------------------------- disegno
 
     def disegna(self):
         # Senza il tabellone comune: vedi l'intestazione.
         from PIL import Image
-        img = Image.new("RGB", (LARGHEZZA, ALTEZZA), (0, 0, 0))
+        img = Image.new("RGB", (self.largo, self.alto), (0, 0, 0))
+        imposta_tela(self.largo, self.alto,
+                     (0, 0, self.largo, self.alto))
         px = img.load()
         self.disegna_campo(img, px)
         if self.finita:
@@ -436,58 +497,72 @@ class Pongo(Gioco):
         return img
 
     def disegna_campo(self, img, px):
-        meta = LARGHEZZA // 2
+        meta = self.largo // 2
         # La rete: trattini di due pixel, uno si' e uno no.
-        for y in range(0, ALTEZZA, 4):
-            for dy in range(2):
-                px[meta - 1, y + dy] = COLORE_RETE
-                px[meta, y + dy] = COLORE_RETE
+        for y in range(0, self.alto, self.rete_passo):
+            for dy in range(self.rete_segno):
+                if y + dy < self.alto:
+                    for dx in range(max(1, self.racchetta_l)):
+                        px[meta - 1 + dx, y + dy] = COLORE_RETE
 
         # I punti, grandi e un po' spenti: la pallina ci passa sopra e deve
         # restare lei la cosa piu' luminosa del pannello.
+        corpo = self.corpo_punti
+        limiti = (self.largo, self.alto)
+        stacco = max(4, int(round(8 * self.fx)))
         sinistro = str(self.tu)
-        cifra_grande(px, sinistro, meta - 8 - larghezza_grande(sinistro), 3,
-                     COLORE_PUNTI)
-        cifra_grande(px, str(self.cpu), meta + 8, 3, COLORE_PUNTI)
+        cifra_grande(px, sinistro,
+                     meta - stacco - larghezza_grande(sinistro, corpo),
+                     self._riga(3), COLORE_PUNTI, corpo, limiti)
+        cifra_grande(px, str(self.cpu), meta + stacco, self._riga(3),
+                     COLORE_PUNTI, corpo, limiti)
 
-        for colonna, y, colore in ((int(round(self.x_tu)), self.y_tu, COLORE_TU),
-                                   (X_DESTRA, self.y_cpu, COLORE_CPU)):
-            for dx in range(RACCHETTA_L):
-                for dy in range(RACCHETTA_H):
-                    yy = int(round(y)) + dy
-                    if 0 <= yy < ALTEZZA:
-                        px[colonna + dx, yy] = colore
+        for colonna, y, colore in (
+                (int(round(self.x_tu)), self.y_tu, COLORE_TU),
+                (int(round(self.x_destra)), self.y_cpu, COLORE_CPU)):
+            for dx in range(self.racchetta_l):
+                for dy in range(self.racchetta_h):
+                    xx, yy = colonna + dx, int(round(y)) + dy
+                    if 0 <= xx < self.largo and 0 <= yy < self.alto:
+                        px[xx, yy] = colore
 
         if not self.finita and (self.in_gioco() or self.iniziata):
-            for dx in range(PALLA):
-                for dy in range(PALLA):
+            for dx in range(self.palla):
+                for dy in range(self.palla):
                     x, y = int(self.bx) + dx, int(self.by) + dy
-                    if 0 <= x < LARGHEZZA and 0 <= y < ALTEZZA:
+                    if 0 <= x < self.largo and 0 <= y < self.alto:
                         px[x, y] = COLORE_PALLA
 
         if not self.iniziata and not self.finita:
-            self._riquadro(px, 36, 52)
-            centra(px, "FUOCO PER INIZIARE", 39, (150, 150, 160),
-                   larghezza=LARGHEZZA)
-            centra(px, self.difficolta.upper(), 47, COLORE_CPU,
-                   larghezza=LARGHEZZA)
+            self._riquadro(px, self._riga(36), self._riga(52))
+            centra(px, "FUOCO PER INIZIARE", self._riga(39), (150, 150, 160),
+                   larghezza=self.largo)
+            centra(px, self.difficolta.upper(), self._riga(47), COLORE_CPU,
+                   larghezza=self.largo)
 
     def _riquadro(self, px, alto, basso):
-        """Il fondo nero delle scritte, largo quanto la scritta piu' lunga
-        (19 caratteri, 75 pixel) e non di piu': dalla colonna 86 alla 170.
-        Tu arrivi al massimo alla 64, il computer sta alla 250, quindi il
-        riquadro non copre mai una racchetta."""
-        for y in range(alto, basso):
-            for x in range(86, 171):
+        """Il fondo nero delle scritte, largo quanto la scritta piu' lunga.
+
+        Fino alla 17.4.2 erano due numeri, 86 e 170, misurati a mano sui
+        diciannove caratteri di «FUOCO PER RIGIOCARE». Adesso la larghezza
+        la dice il font: cosi' resta giusta su qualunque tela, e resta
+        **stretta** -- tu arrivi al massimo a un quarto del campo, il
+        computer sta in fondo, e il riquadro non deve coprire una racchetta.
+        """
+        larga = larghezza_testo("FUOCO PER RIGIOCARE") + 10
+        x0 = max(0, (self.largo - larga) // 2)
+        for y in range(max(0, alto), min(self.alto, basso)):
+            for x in range(x0, min(self.largo, x0 + larga)):
                 px[x, y] = (0, 0, 0)
 
     def _disegna_fine(self, px):
-        self._riquadro(px, 34, 54)
+        self._riquadro(px, self._riga(34), self._riga(54))
         if self.tu > self.cpu:
-            centra(px, "HAI VINTO!", 37, COLORE_TU, larghezza=LARGHEZZA)
+            centra(px, "HAI VINTO!", self._riga(37), COLORE_TU,
+                   larghezza=self.largo)
         else:
-            centra(px, "VINCE IL PANNELLO", 37, COLORE_CPU,
-                   larghezza=LARGHEZZA)
-        centra(px, "FUOCO PER RIGIOCARE", 45, (150, 150, 160),
-               larghezza=LARGHEZZA)
+            centra(px, "VINCE IL PANNELLO", self._riga(37), COLORE_CPU,
+                   larghezza=self.largo)
+        centra(px, "FUOCO PER RIGIOCARE", self._riga(45), (150, 150, 160),
+               larghezza=self.largo)
 

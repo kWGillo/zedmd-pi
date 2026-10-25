@@ -114,6 +114,12 @@ class Mattoni(Gioco):
         self.racchetta_h = max(1, int(round(RACCHETTA_H * self.fy)))
         self.racchetta_y = RACCHETTA_Y * self.fy
         self.racchetta_v = RACCHETTA_V * self.fx
+        # La palla resta **quadrata**, ed e' l'unica misura che non puo'
+        # seguire due fattori diversi senza diventare un mattoncino. Qui si
+        # prende il fattore piu' piccolo e non la media: la palla vive in
+        # mezzo a una griglia di mattoni, e una palla piu' larga della fuga
+        # fra due mattoni comincia a rimbalzare dove non dovrebbe. In Pongo,
+        # dove attraversa campo aperto, la scelta e' un'altra.
         self.palla = max(1, int(round(PALLA * min(self.fx, self.fy))))
         # La fuga fra un mattone e l'altro: un pixel sul pannello, e di
         # piu' dove i mattoni sono piu' grandi, se no non si vede.
