@@ -2,6 +2,45 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.1]
+
+### La tela non arrivava al gioco
+
+*«I giochi sono rimasti alla proporzione 4:1.»*
+
+Le fondamenta erano giuste, i due giochi convertiti erano giusti, e sullo
+schermo non cambiava niente. Il motivo è una riga sola:
+
+```python
+self.giochi = GiochiSource(self.cfg, self.display.width,
+                           self.display.height, self.arbiter)
+```
+
+`display.width/height` è la tela del **DMD** — 256×64 anche su un monitor — non
+la tela piena. Doom e il Game Boy ricevono `tela_piena` dalla 17.3; i giochi no,
+e nella 17.4 non me ne sono accorto perché avevo provato i pezzi (le fondamenta,
+i due giochi) e non il percorso.
+
+Adesso la prova segue il percorso intero: dalla riga di `dmdd` fino alla tela
+che il gioco si ritrova addosso.
+
+### Il testo del login tornava premendo Invio
+
+Il ricontrollo della modalità grafica stava dentro la superficie del framebuffer
+e si contava in **fotogrammi**. Ma un fotogramma che non cambia non si
+ridisegna, e il momento in cui `getty` si riprende il vetro è proprio quello in
+cui lo schermo sta fermo: fra una partita e l'altra, con il dito sull'Invio. Il
+controllo non girava mai quando serviva.
+
+Adesso lo chiede il giro di disegno, quattro volte al secondo, che gira
+comunque. Sono tre chiamate di sistema, ed è la differenza fra un lampo che si
+intravede e una riga di login che resta lì.
+
+**Su una macchina che fa solo da apparecchio** la risposta definitiva resta
+`video.console: "staccata"` in `/etc/dmd/config.json`: con `fbcon` staccato dal
+framebuffer nessuno può scriverci sopra, nemmeno quando il terminale torna in
+modalità testo. Il prezzo è che se il servizio muore lo schermo resta nero.
+
 ## [17.4]
 
 ### I giochi su una tela qualunque: le fondamenta, e i primi due

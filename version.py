@@ -3341,6 +3341,29 @@ Storico:
        piu' facile dei difficili: il censimento dice che basta far scendere
        la base dei palazzi, perche' quello che conta in una parabola e' il
        dislivello fra i tetti e quello non cambia.
+  17.4.1 **La tela non arrivava al gioco, e il terminale tornava di testo.**
+       Due difetti in una volta, e tutti e due nella stessa riga di
+       ragionamento: una cosa provata nei pezzi e non nel percorso intero.
+       **I giochi restavano 4:1.** Le fondamenta erano giuste, i due giochi
+       convertiti erano giusti, e sullo schermo non cambiava niente: a
+       `GiochiSource` si passava `display.width/height`, cioe' la tela del
+       **DMD** -- 256x64 anche su un monitor -- invece di `tela_piena`, che
+       e' quella che prendono Doom e il Game Boy dalla 17.3. Una riga.
+       Adesso la prova segue il percorso intero, dalla riga di `dmdd` fino
+       alla tela che il gioco si ritrova addosso.
+       **Il testo del login tornava premendo Invio** fra una partita e
+       l'altra. Il ricontrollo della modalita' grafica stava dentro la
+       superficie del framebuffer e si contava in **fotogrammi**: ma un
+       fotogramma che non cambia non si ridisegna, e il momento in cui
+       `getty` si riprende il vetro e' proprio quello in cui lo schermo sta
+       fermo. Il controllo non girava mai quando serviva. Adesso lo chiede
+       il giro di disegno, quattro volte al secondo, che gira comunque: sono
+       tre chiamate di sistema, ed e' la differenza fra un lampo che si
+       intravede e una riga di login che resta li'.
+       Su una macchina che fa solo da apparecchio, la risposta definitiva
+       resta `video.console: "staccata"`: con `fbcon` staccato dal
+       framebuffer nessuno puo' scriverci sopra, nemmeno quando il
+       terminale torna in modalita' testo.
 """
 
-__version__ = "17.4"
+__version__ = "17.4.1"

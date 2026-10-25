@@ -391,8 +391,14 @@ class Runtime:
                                      self.arbiter)
         # Stessa storia per i giochi scritti per il pannello: partita, non
         # servizio. Prendono la presa allo stesso modo e con lo stesso arbitro.
-        self.giochi = GiochiSource(self.cfg, self.display.width,
-                                   self.display.height, self.arbiter)
+        # ...e la tela **piena**, come Doom e il Game Boy. Fino alla 17.4 qui
+        # si passava `display.width/height`, cioe' la tela del DMD: 256x64
+        # anche su un monitor. I giochi convertiti ricevevano quindi la
+        # misura del pannello e si disegnavano da pannello, e la 17.4 sembrava
+        # non aver fatto niente. Il difetto non era nei giochi: era in questa
+        # riga.
+        self.giochi = GiochiSource(self.cfg, tela_piena[0], tela_piena[1],
+                                   self.arbiter)
         # Il giro dei giochi puo' comprendere Doom, ma la sorgente dei giochi
         # non deve conoscerlo: le si danno due funzioni e le basta.
         self.giochi.doom_pronto = lambda: not controlla_wad(
@@ -1263,9 +1269,28 @@ class Runtime:
         blank = Image.new("RGB", (self.display.width, self.display.height), (0, 0, 0))
         period = 1.0 / FPS
         last_mode_check = 0.0
+        last_console_check = 0.0
 
         while self.running:
             started = time.time()
+
+            # Il terminale e' ancora nostro? La domanda si fa **qui** e non
+            # solo quando si disegna, ed e' la 17.4.1: il controllo viveva
+            # dentro la superficie del framebuffer, contato in fotogrammi, e
+            # un fotogramma che non cambia non si ridisegna. Proprio nel
+            # momento in cui lo schermo sta fermo -- fra una partita e
+            # l'altra, con il dito sull'Invio -- il controllo non girava, e
+            # `getty` si riprendeva il vetro e ci restava.
+            #
+            # Quattro volte al secondo: sono tre chiamate di sistema, e la
+            # differenza fra un lampo che si intravede e una riga di login
+            # che resta li'.
+            if started - last_console_check >= 0.25:
+                try:
+                    self.display.ricontrolla_console()
+                except Exception:
+                    pass
+                last_console_check = started
 
             if started - last_mode_check >= 1.0:
                 self._update_modes()

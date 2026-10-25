@@ -794,6 +794,12 @@ class SuperficieFramebuffer:
     # rimettere in modalita' testo da sotto: SDL uscendo, un cambio di
     # terminale, un altro programma. Senza, basta una volta sola e per il
     # resto della giornata il cursore torna a lampeggiare sopra la partita.
+    #
+    # Dalla 17.4.1 non e' piu' l'unica rete: il giro di disegno lo chiede
+    # quattro volte al secondo per conto suo, perche' il momento in cui
+    # serve davvero e' quello in cui **non si disegna** -- lo schermo fermo
+    # fra una partita e l'altra, che e' esattamente quando non si passava
+    # mai di qui.
     OGNI_QUANTI = 30
 
     def __init__(self, misura=None, finestra=False, titolo="DMD",
@@ -1009,6 +1015,17 @@ class DisplaySchermo:
 
     def regioni(self, con_contenuto=False):
         return self.compositore.regioni(con_contenuto)
+
+    def ricontrolla_console(self):
+        """Il terminale e' ancora nostro? La chiede il giro di disegno.
+
+        Sta qui e non solo dentro la superficie perche' il momento in cui
+        serve e' proprio quello in cui **non si disegna**: lo schermo fermo
+        fra una partita e l'altra. Chi non ha una console da ricontrollare
+        -- il pannello LED -- non ha questo metodo, e chi chiama lo sa.
+        """
+        ricontrolla = getattr(self._superficie, "_ricontrolla_console", None)
+        return bool(ricontrolla and ricontrolla())
 
     def clear(self):
         with self._lock:

@@ -553,6 +553,36 @@ esigi(display.SuperficieFramebuffer._ricontrolla_console(vera) is False,
       "e con «lascia» non si tocca niente, nemmeno nel ricontrollo")
 
 
+# 17.4.1: il ricontrollo deve passare anche da chi disegna, perche' il
+# momento in cui serve e' quello in cui **non** si disegna -- lo schermo
+# fermo fra una partita e l'altra.
+class _SuperficieCheConta:
+    width = height = 8
+
+    def __init__(self):
+        self.quante = 0
+
+    def _ricontrolla_console(self):
+        self.quante += 1
+        return True
+
+    def mostra(self, immagine):
+        pass
+
+    def chiudi(self):
+        pass
+
+
+conta = _SuperficieCheConta()
+schermo_conta = display.DisplaySchermo(
+    {"video": {"filtro_dmd": False}, "display": {"brightness": 100}},
+    superficie=conta)
+esigi(schermo_conta.ricontrolla_console() is True and conta.quante == 1,
+      "il display sa farsi ricontrollare la console da fuori")
+esigi(not hasattr(display.DisplayAssente({}), "ricontrolla_console"),
+      "e senza uscita video la domanda non si pone")
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

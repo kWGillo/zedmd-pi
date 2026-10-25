@@ -215,6 +215,35 @@ esigi(base._CAMPO[2] == 200,
       "«centra» senza argomenti si centra sul campo, che sul pannello e' 200")
 
 
+sep("7. La tela arriva davvero fino al gioco (17.4.1)")
+
+# Il difetto della 17.4: le fondamenta erano giuste, i due giochi convertiti
+# erano giusti, e sullo schermo non cambiava niente -- perche' a
+# `GiochiSource` si passava `display.width/height`, cioe' la tela del DMD,
+# 256x64 anche su un monitor. Si prova il percorso intero, non i pezzi.
+
+from sources.giochi import GiochiSource                   # noqa: E402
+
+cfg_finta = {"giochi": {}, "video": {}, "web": {}, "lingua": "it"}
+sorgente = GiochiSource(cfg_finta, 256, 192)
+esigi((sorgente.width, sorgente.height) == (256, 192),
+      "la sorgente dei giochi tiene la misura che le viene data")
+
+sorgente._gioco = Serpente()
+tela = getattr(sorgente._gioco, "configura_tela", None)
+tela(sorgente.width, sorgente.height)
+esigi((sorgente._gioco.largo, sorgente._gioco.alto) == (256, 192),
+      "e il gioco la riceve per intero")
+
+# E la riga che la passa. Si legge il sorgente invece di costruire tutto
+# `dmdd`: e' quella riga che e' stata sbagliata, ed e' quella che si guarda.
+sorgente_dmdd = open(os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "dmdd.py")).read()
+esigi("GiochiSource(self.cfg, tela_piena[0], tela_piena[1]," in sorgente_dmdd,
+      "dmdd costruisce i giochi con la tela piena, come Doom e il Game Boy")
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]
