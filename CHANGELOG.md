@@ -2,6 +2,64 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.1.1]
+
+### Il cursore che restava sullo schermo
+
+*«Dopo l'avvio del software è apparso per un attimo il login di Debian. È
+tornato subito l'orologio, ma sullo schermo è rimasto il cursore
+lampeggiante.»*
+
+Non era il disegno. Con SDL su KMS prendiamo il controllo della scheda, ma
+`fbcon` — la console di testo del kernel — possiede ancora il terminale
+virtuale: quando `getty` si avvia ci scrive sopra il suo prompt, ed è il lampo
+del login; e il suo cursore continua a lampeggiare per conto suo, perché lo
+disegna il kernel e il nostro fotogramma gli passa sotto.
+
+Adesso, appena presa la scheda a tutto schermo, il programma spegne il cursore
+della console e il suo risparmio schermo — quest'ultimo serviva comunque:
+senza, dopo dieci minuti il kernel avrebbe spento il monitor sotto al nostro
+disegno.
+
+Resta `video.console_staccata`, spenta di suo. Accesa stacca `fbcon` dal
+framebuffer: nessuno può più scriverci sopra, nemmeno `getty`, e il lampo del
+login sparisce. Ma la console sparisce davvero, e se il servizio muore lo
+schermo resta nero — per capire perché servono la pagina web o un'altra
+macchina. Per questo non è il predefinito.
+
+### Un orologio che sa crescere
+
+Preparazione della 17.2, invisibile finché non arriva: l'orologio sa disegnare
+su tele più alte delle 64 righe del pannello.
+
+Tutte le sue misure sono diventate proporzionali, con **due** fattori
+distinti, e la regola che ne è uscita vale la pena scriverla: **i testi
+seguono la larghezza, le cifre seguono l'altezza.** Quanto testo ci sta lo
+decide la larghezza, e su una tela logica alta la larghezza non cambia — a
+1024×768 con scala 4 sono sempre 256 colonne. Scalando tutto con un fattore
+solo, la data in alto a destra diventava un titolo e gli orari del mondo
+passavano da tre città a una.
+
+Le cifre dell'ora sono inoltre limitate dalla larghezza, e non lo erano mai
+state: su una tela 4:1 il vincolo è l'altezza e «00:00» ci sta sempre, su una
+tela 4:3 no. A 256×192 il sessanta per cento dell'altezza fa 115 pixel di
+corpo, e cinque cifre a quel corpo vogliono 345 colonne su 256 disponibili —
+uscivano dai bordi.
+
+La banda degli orari è passata da una frazione fissa dell'altezza a una
+posizione calcolata: appoggiata sopra la barra del timer, in fondo. A 64 righe
+il conto dà 51, cioè il numero di prima.
+
+**A 64 righe e 256 colonne tutti i conti tornano identici ai numeri di prima**
+— verificato uno per uno, costante per costante. Il pannello LED non si muove
+di un pixel, e non è fortuna: è il motivo per cui la conversione si è fatta
+così invece che con un secondo layout da tenere allineato a mano.
+
+Quello che ancora manca per la 17.2: su una tela alta il semaforo delle
+scadenze e la colonna dei rifiuti stanno ai lati dell'ora, e le cifre ormai
+sono larghe quanto la tela — vanno spostati nella striscia in cima. Poi le due
+regioni 50/50 e l'interruttore fra tela logica e risoluzione nativa.
+
 ## [17.1]
 
 ### Le fasce: il monitor smette di essere un pannello con le bande nere

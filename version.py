@@ -3046,6 +3046,31 @@ Storico:
        `video.modo` (auto, fasce, singola) e `video.fasce` (auto, o quante se
        ne vogliono: fasce grandi o fasce tante). Prova nuova:
        `diagnostica/prova_fasce.py`, 40 controlli.
+  17.1.1 **Il cursore che restava sullo schermo, e un orologio che sa
+       crescere.** Dopo l'avvio compariva per un istante il login di Debian,
+       l'orologio tornava subito, ma restava un cursore a lampeggiare. Non
+       era il disegno: con SDL su KMS prendiamo la scheda, ma `fbcon` -- la
+       console di testo del kernel -- possiede ancora il terminale virtuale.
+       `getty` ci scrive sopra il prompt, e il suo cursore continua a
+       lampeggiare perche' lo disegna il kernel, sotto al nostro fotogramma.
+       Adesso, appena preso lo schermo a tutto schermo, si spengono cursore e
+       risparmio schermo della console. `video.console_staccata`, spenta di
+       suo, stacca `fbcon` del tutto e toglie anche il lampo del login -- al
+       prezzo che se il servizio muore lo schermo resta nero.
+       Sotto, la preparazione della 17.2: l'orologio sa disegnare su tele
+       piu' alte delle 64 righe del pannello. Tutte le sue misure sono
+       diventate proporzionali, con **due** fattori distinti -- l'altezza e
+       la larghezza -- e la regola e' che **i testi seguono la larghezza e le
+       cifre seguono l'altezza**: quanto testo ci sta lo decide la larghezza,
+       e su una tela logica alta la larghezza non cambia. Con un fattore solo
+       la data diventava un titolo e gli orari del mondo passavano da tre
+       citta' a una. Le cifre dell'ora sono inoltre limitate dalla larghezza:
+       a 256x192 il sessanta per cento dell'altezza vorrebbe 345 colonne su
+       256, e uscivano dai bordi.
+       A 64 righe e 256 colonne i conti tornano **identici** ai numeri di
+       prima, verificato uno per uno: il pannello LED non si muove di un
+       pixel. Non e' fortuna, e' il motivo per cui la conversione si e' fatta
+       cosi' invece che con un secondo layout da tenere allineato a mano.
 """
 
-__version__ = "17.1"
+__version__ = "17.1.1"

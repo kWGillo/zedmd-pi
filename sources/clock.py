@@ -226,13 +226,103 @@ class ClockSource(Source):
         # che esistano un inverter, un contatore e un broker MQTT. Sa che
         # qualcuno ogni tanto gli da' una riga da scrivere al centro.
         self.energia = None
-        self._font = _load_font(max(12, int(height * 0.60)))
-        self._font_small = _load_font(max(8, int(height * 0.20)))
+        # Dalla 17.2 l'orologio disegna anche su tele piu' alte delle 64
+        # righe del pannello: su un monitor la sua regione e' 256x192, o
+        # 256x96 quando divide lo schermo con qualcos'altro.
+        #
+        # Tutte le misure della classe sono quelle del pannello riportate
+        # alla tela vera, con **due** fattori distinti -- l'altezza e la
+        # larghezza -- perche' la tela logica di un monitor cresce in
+        # verticale e non in orizzontale: a 1024x768 con scala 4 sono 256x192,
+        # cioe' la stessa larghezza e tre volte le righe. Scalare tutto con un
+        # fattore solo allargherebbe la banda degli orari fino a farci stare
+        # una citta' in meno.
+        #
+        # A 64 righe e 256 colonne i conti tornano **identici** ai numeri di
+        # prima -- 64 per 17 diviso 64 fa 17 -- quindi il pannello LED non si
+        # muove di un pixel. Non e' una coincidenza fortunata: e' il motivo
+        # per cui la conversione si fa cosi' invece che con un secondo layout
+        # da tenere allineato a mano.
+        self._qv = height / 64.0
+        self._qo = width / 256.0
+        for nome in ("SEM_RAGGIO", "SEM_PASSO", "SEM_CIMA", "SEM_BANDA",
+                     "MONDO_ALZATA", "TIMER_SPESSORE", "ONAIR_ALTO",
+                     "AGGIORNA_ALTO", "OFFSET_MASSIMO"):
+            setattr(self, nome,
+                    max(1, int(round(getattr(type(self), nome) * self._qv))))
+        # Il corpo della banda in fondo segue la **larghezza**, non l'altezza,
+        # e la ragione e' che li' dentro ci devono stare tre citta'. Su una
+        # tela logica alta la larghezza non cambia: ingrandendo il corpo con
+        # l'altezza, a 192 righe i nomi diventavano tre volte piu' larghi e ne
+        # restava una sola in banda. Un orologio del mondo che passa da tre
+        # citta' a una perche' lo schermo e' piu' alto non e' quello che si
+        # chiedeva allo schermo piu' alto.
+        for nome in ("MONDO_CORPO", "MONDO_STACCO", "MONDO_ACCOSTO",
+                     "ONAIR_LARGO", "AGGIORNA_LARGO"):
+            setattr(self, nome,
+                    max(1, int(round(getattr(type(self), nome) * self._qo))))
+        # E la banda sta **in fondo**, appoggiata sopra la barra del timer,
+        # invece di stare a una frazione fissa dell'altezza: a 64 righe il
+        # conto da' 51, cioe' il numero di prima, e su una tela alta resta
+        # attaccata al bordo di sotto dove la si cerca.
+        self.MONDO_CIMA = max(1, self.height - self.TIMER_SPESSORE
+                              - self.MONDO_CORPO - 1)
+        # I margini che fino alla 17.1 erano scritti dentro al disegno: tre
+        # pixel in orizzontale, due in verticale, e i 34 fra l'ora e il
+        # semaforo.
+        self.MARGINE = max(1, int(round(3 * self._qo)))
+        self.MARGINE_ALTO = max(1, int(round(2 * self._qv)))
+        self.SEM_STACCO = max(1, int(round(34 * self._qo)))
+        self._font = _load_font(self._corpo_ora())
+        # **I testi seguono la larghezza, non l'altezza.** Vale per la data in
+        # alto a destra, per la colonna dei rifiuti e per la banda degli orari,
+        # ed e' la stessa ragione per tutti e tre: quanto testo ci sta lo
+        # decide la larghezza, e su una tela logica alta la larghezza non
+        # cambia. Facendoli crescere con l'altezza, a 192 righe la data
+        # diventava un titolo e gli orari del mondo passavano da tre citta' a
+        # una. Le cifre dell'ora sono l'unica cosa che cresce con l'altezza,
+        # perche' sono l'unica cosa che si guarda da lontano.
+        #
+        # I numeri qui sotto sono i corpi del pannello: a 256 colonne tornano
+        # identici a quelli di prima (0.20 di 64 fa 12, come 12 per 1).
+        self._font_small = _load_font(max(8, int(round(12 * self._qo))))
         # Font della colonna dei rifiuti, dal piu' grande al piu' piccolo. Si
         # sceglie il primo in cui il nome piu' lungo sta nello spazio libero:
         # i nomi li scrive l'utente, e "Indifferenziato" non e' "Carta".
-        self._font_rifiuti = [_load_font(max(6, int(height * f)))
-                              for f in (0.170, 0.155, 0.140, 0.125, 0.110)]
+        self._font_rifiuti = [_load_font(max(6, int(round(corpo * self._qo))))
+                              for corpo in (10, 9, 8, 8, 7)]
+
+    def _corpo_ora(self):
+        """Quanto grandi le cifre, senza che escano dai bordi.
+
+        Fino alla 17.1 bastava una frazione dell'altezza: su una tela 4:1 e'
+        **l'altezza** il vincolo, e «00:00» in larghezza ci sta sempre con
+        abbondanza. Su una tela alta non e' piu' vero -- a 256x192 il sessanta
+        per cento dell'altezza fa 115 pixel di corpo, e cinque cifre a quel
+        corpo vogliono 345 colonne su 256 disponibili: le cifre uscivano dallo
+        schermo a destra e a sinistra.
+        #
+        Quindi si prende il piu' piccolo fra i due vincoli: la frazione
+        dell'altezza di sempre, e il corpo piu' grande per cui l'ora piu'
+        larga sta nella larghezza meno i margini. A 64 righe il secondo non
+        morde mai, quindi il pannello LED resta quello di prima.
+        """
+        alto = max(12, int(self.height * 0.60))
+        disponibile = self.width - 2 * max(1, int(round(3 * self._qo)))
+        if disponibile <= 0:
+            return alto
+        corpo = alto
+        while corpo > 12:
+            font = _load_font(corpo)
+            riquadro = font.getbbox("00:00")
+            if (riquadro[2] - riquadro[0]) <= disponibile:
+                break
+            # Un passo proporzionale invece di uno a uno: da 115 a 83 sono
+            # trenta prove a scendere di un pixel, e questo giro lo si fa a
+            # ogni avvio e a ogni cambio di misura della tela.
+            nuovo = int(corpo * disponibile / float(riquadro[2] - riquadro[0]))
+            corpo = min(corpo - 1, max(12, nuovo))
+        return corpo
 
     def start(self):
         self._running = True
@@ -324,7 +414,7 @@ class ClockSource(Source):
         funziona.
         """
         import scadenze
-        centro_x = sinistra + 34
+        centro_x = sinistra + self.SEM_STACCO
         for indice, quale in enumerate((scadenze.ROSSO, scadenze.GIALLO,
                                         scadenze.VERDE)):
             centro_y = alto + self.SEM_RAGGIO + indice * self.SEM_PASSO
@@ -485,12 +575,13 @@ class ClockSource(Source):
         # avanza alla sua sinistra e si adatta a quello. Un orologio che si
         # sposta quando arriva un promemoria e torna indietro quando se ne va
         # e' un orologio che si muove per conto suo.
-        self._disegna_colonna(draw, colonna, limite=x - 3,
+        self._disegna_colonna(draw, colonna, limite=x - self.MARGINE,
                               fondo=(self.MONDO_CIMA - 1) if banda else None)
 
         if clock["show_date"]:
             box = draw.textbbox((0, 0), date, font=self._font_small)
-            draw.text((self.width - (box[2] - box[0]) - 3, 2), date,
+            draw.text((self.width - (box[2] - box[0]) - self.MARGINE,
+                       self.MARGINE_ALTO), date,
                       font=self._font_small, fill=date_color)
 
         # Il semaforo occupa quello che avanza a destra dell'ora, sotto la
@@ -500,7 +591,8 @@ class ClockSource(Source):
             and self.cfg.get("scadenze", {}).get("semaforo_sempre"))
         if mostra_sem:
             cima = self.SEM_CIMA + (self.SEM_BANDA - self.SEM_ALTEZZA) // 2
-            self._disegna_semaforo(draw, stato_sem, ora_destra + 3, cima,
+            self._disegna_semaforo(draw, stato_sem,
+                                   ora_destra + self.MARGINE, cima,
                                    acceso=sem_acceso)
 
         if meridiem:
@@ -510,7 +602,8 @@ class ClockSource(Source):
             # dove un orologio se lo aspetta.
             riquadro = draw.textbbox((0, 0), meridiem, font=self._font_small)
             alto = riquadro[3] - riquadro[1]
-            draw.text((min(ora_destra + 3, self.width - (riquadro[2] - riquadro[0]) - 1),
+            draw.text((min(ora_destra + self.MARGINE,
+                           self.width - (riquadro[2] - riquadro[0]) - 1),
                        max(0, ora_sotto - alto - riquadro[1])),
                       meridiem, font=self._font_small, fill=date_color)
 

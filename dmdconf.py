@@ -117,6 +117,17 @@ DEFAULTS = {
         # Il fondo fra i punti. Nero pieno e' corretto per un DMD; un grigio
         # molto scuro somiglia piu' al vetro di un pannello spento.
         "filtro_fondo": "#000000",
+        # Staccare la console di testo dal monitor.
+        #
+        # Con SDL su KMS prendiamo il controllo della scheda, ma `fbcon` --
+        # la console del kernel -- possiede ancora il terminale virtuale:
+        # all'avvio `getty` ci scrive sopra il suo prompt per un istante, e il
+        # suo cursore resta a lampeggiare perche' lo disegna il kernel. Il
+        # cursore e il risparmio schermo si spengono sempre; staccare la
+        # console del tutto toglie anche il lampo del login, ma se il servizio
+        # muore lo schermo resta nero e per capire perche' serve la pagina web
+        # o un'altra macchina. Per questo non e' il predefinito.
+        "console_staccata": False,
         # Una tela sola al centro, o piu' tele impilate.
         #
         # La tela e' 4:1 e lo schermo non lo e': ingrandendo al massimo

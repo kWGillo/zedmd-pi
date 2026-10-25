@@ -340,6 +340,63 @@ class Compositore:
 
 # ------------------------------------------------------- le due superfici
 
+def zittisci_console(stacca=False):
+    """Toglie di mezzo la console di testo, sotto il DMD a tutto schermo.
+
+    Il difetto visto sulla 17.1: all'avvio compare per un istante il login di
+    Debian, l'orologio torna subito, ma sullo schermo **resta un cursore che
+    lampeggia**. Non e' un difetto del disegno: e' che sotto di noi la
+    console di testo e' ancora viva.
+
+    Con SDL su KMS prendiamo il controllo della scheda, ma `fbcon` -- la
+    console di testo del kernel -- continua a possedere il terminale
+    virtuale: quando `getty` si avvia ci scrive sopra il suo prompt (il lampo
+    del login), e il suo cursore continua a lampeggiare per conto suo, perche'
+    lo disegna il kernel e non noi.
+
+    Due rimedi, in ordine di violenza:
+
+    * **spegnere il cursore** (`cursor_blink`) e il blanking automatico. E'
+      poco invasivo e risolve quello che si vede;
+    * **staccare `fbcon`** dal framebuffer. Cosi' nessuno puo' piu' scriverci
+      sopra, nemmeno `getty`, e il lampo del login non c'e'. Ma la console
+      sparisce davvero: se il servizio muore lo schermo resta nero, e per
+      capire cosa e' successo serve la pagina web o un'altra macchina. Per
+      questo non e' il predefinito.
+
+    Si scrive in `/sys`, quindi serve root -- il servizio gia' ci gira. Se un
+    file non c'e' o non si lascia scrivere si tira dritto: questa e' una
+    rifinitura, non deve poter impedire al pannello di accendersi.
+    """
+    fatto = []
+    for percorso, valore in (
+            ("/sys/class/graphics/fbcon/cursor_blink", "0"),
+            # Zero spegne il risparmio schermo della console: senza, dopo
+            # dieci minuti il kernel spegne il monitor sotto al nostro
+            # disegno.
+            ("/sys/module/kernel/parameters/consoleblank", "0")):
+        try:
+            with open(percorso, "w") as f:
+                f.write(valore)
+            fatto.append(os.path.basename(percorso))
+        except OSError:
+            pass
+    if stacca:
+        import glob
+        for percorso in sorted(glob.glob("/sys/class/vtconsole/vtcon*/bind")):
+            try:
+                with open(percorso, "r") as f:
+                    if f.read().strip() != "1":
+                        continue
+                with open(percorso, "w") as f:
+                    f.write("0")
+                fatto.append("fbcon staccata")
+            except OSError:
+                pass
+    if fatto:
+        print("[display] console: %s" % ", ".join(fatto))
+    return fatto
+
 class SuperficieSDL:
     """Una finestra, o tutto lo schermo, via SDL.
 
@@ -350,7 +407,7 @@ class SuperficieSDL:
     nient'altro.
     """
 
-    def __init__(self, misura=None, finestra=False, titolo="DMD"):
+    def __init__(self, misura=None, finestra=False, titolo="DMD", stacca=False):
         import pygame                                   # noqa: F401
         self._pygame = pygame
         if not finestra and not os.environ.get("SDL_VIDEODRIVER"):
@@ -370,6 +427,8 @@ class SuperficieSDL:
         except pygame.error:
             pass
         self.width, self.height = self._schermo.get_size()
+        if not finestra:
+            zittisci_console(stacca)
 
     def mostra(self, immagine):
         # Gli eventi vanno consumati anche se non ce ne importa niente:
@@ -399,9 +458,10 @@ class SuperficieFramebuffer:
     DISPOSITIVO = "/dev/fb0"
     INFO = "/sys/class/graphics/fb0/"
 
-    def __init__(self, misura=None, finestra=False, titolo="DMD"):
+    def __init__(self, misura=None, finestra=False, titolo="DMD", stacca=False):
         del finestra, titolo
         self.width, self.height = misura or self._misura_dichiarata()
+        zittisci_console(stacca)
         self._bit = self._bit_dichiarati()
         if self._bit not in (16, 32):
             raise OSError("framebuffer a %d bit per pixel: non so scriverci"
@@ -448,12 +508,12 @@ class SuperficieFramebuffer:
             pass
 
 
-def _apri_superficie(misura, finestra):
+def _apri_superficie(misura, finestra, stacca=False):
     """SDL se c'e', framebuffer altrimenti. Con il motivo, se non c'e' niente."""
     motivi = []
     for classe in (SuperficieSDL, SuperficieFramebuffer):
         try:
-            return classe(misura=misura, finestra=finestra)
+            return classe(misura=misura, finestra=finestra, stacca=stacca)
         except Exception as exc:
             motivi.append("%s: %s" % (classe.__name__, exc))
     raise RuntimeError("nessuna uscita video disponibile -- " + "; ".join(motivi))
@@ -469,7 +529,8 @@ class DisplaySchermo:
         self.cfg = cfg
         misura = _misura_richiesta(conf.get("risoluzione"))
         finestra = _vuole_finestra(conf.get("finestra"))
-        self._superficie = superficie or _apri_superficie(misura, finestra)
+        self._superficie = superficie or _apri_superficie(
+            misura, finestra, bool(conf.get("console_staccata")))
         schermo = (self._superficie.width, self._superficie.height)
         if (conf.get("tela") or "dmd") == "schermo":
             tela = schermo
