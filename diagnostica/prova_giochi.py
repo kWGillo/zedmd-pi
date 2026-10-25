@@ -41,6 +41,8 @@ from sources.giochi.mine import Mine                      # noqa: E402
 from sources.giochi.bongo import Bongo                    # noqa: E402
 from sources.giochi.invasori import Invasori              # noqa: E402
 from sources.giochi.squadriglia import Squadriglia        # noqa: E402
+from sources.giochi.quiz import Quiz                      # noqa: E402
+from sources.giochi.gnam import Gnam                      # noqa: E402
 
 esiti = []
 
@@ -74,7 +76,7 @@ COLONNE_ATTESE = 8        # le colonne di Invasori, che non cambiano
 sep("1. Il campo e il tabellone")
 
 for classe in (Serpente, Mattoni, Pongo, TRex, Mine, Bongo, Invasori,
-               Squadriglia):
+               Squadriglia, Quiz, Gnam):
     g = classe()
     esigi((g.largo, g.alto) == (256, 64),
           "%s: di serie la tela e' quella del pannello" % g.nome)
@@ -376,6 +378,63 @@ esigi(pa.iniziata and al.iniziata,
       "squadriglia: la partita parte su tutte e due le tele")
 esigi(al.x < al.x_massima and al.cima_u <= al.y <= al.alto_u,
       "squadriglia: e il tuo aereo resta dentro il mondo")
+
+
+sep("6-sexies. Super Quiz e Gnam (17.4.9)")
+
+q = Quiz()
+esigi(q.s == 1 and q.per_riga == 62 and q.colonne_risposte == 2,
+      "quiz: sul pannello testo a scala uno, 62 caratteri, due colonne")
+esigi(q.L["domanda"] == 10 and q.L["risposte"] == 28,
+      "quiz: e le righe di sempre")
+
+q = Quiz()
+q.configura_tela(*ALTA)
+esigi(q.s == 2, "quiz: su una tela alta il testo si scrive al doppio")
+esigi(q.per_riga == 30,
+      "quiz: trenta caratteri per riga invece di sessantadue (%d)"
+      % q.per_riga)
+esigi(q.colonne_risposte == 1,
+      "quiz: e le quattro risposte tornano in colonna sola, piu' larghe")
+ultima = q.L["risposte"] + 3 * q.L["passo_risposte"] + base.RIGA * q.s
+esigi(ultima < q.L["conferma"],
+      "quiz: la quarta risposta sta sopra la riga della conferma (%d < %d)"
+      % (ultima, q.L["conferma"]))
+esigi(q.L["barra"] + q.L["alta_barra"] <= q.alto,
+      "quiz: e la barra del tempo sta dentro la tela")
+
+# Il font che si ingrandisce replicando, non interpolando.
+prova = Image.new("RGB", (64, 32))
+base.imposta_tela(64, 32)
+base.scrivi(prova.load(), "A", 1, 1, (255, 255, 255), 2)
+dentro = prova.getbbox()
+esigi(dentro is not None and (dentro[3] - dentro[1]) == base.ALTO * 2,
+      "il font a scala due e' alto il doppio, esatto")
+esigi(base.larghezza_testo("ABC", 2) == base.larghezza_testo("ABC") * 2,
+      "e la misura del testo segue la scala")
+
+g = Gnam()
+esigi(g.casella == 4 and (g.lab_largo, g.lab_alto) == (200, 64),
+      "gnam: sul pannello la casella e' quattro e il labirinto 200x64")
+esigi((g.lab_x, g.lab_y) == (0, 0),
+      "gnam: appoggiato all'angolo, come sempre")
+
+g = Gnam()
+g.configura_tela(*ALTA)
+esigi(g.casella == 5,
+      "gnam: su 256 colonne la casella arriva a cinque e non oltre -- a sei"
+      " le cinquanta colonne del labirinto farebbero trecento pixel")
+esigi(g.lab_largo <= g.campo_l and g.lab_alto <= g.campo_a,
+      "gnam: e il labirinto ci sta dentro")
+esigi(g.lab_x > 0 and g.lab_y > 0,
+      "gnam: centrato in quello che avanza")
+
+pa = gioca(Gnam, 150)
+al = gioca(Gnam, 150, ALTA)
+esigi(pa.punteggio == al.punteggio,
+      "gnam: stessa partita sulle due tele (%d e %d) -- il labirinto e' lo"
+      " stesso, cambia solo quanto e' grande una casella"
+      % (pa.punteggio, al.punteggio))
 
 
 sep("7. La tela arriva davvero fino al gioco (17.4.1)")

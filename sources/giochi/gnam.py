@@ -41,7 +41,7 @@ import random
 
 from PIL import Image
 
-from .base import ALTEZZA, CAMPO, Gioco, centra
+from .base import Gioco, centra, larghezza_testo
 
 # ------------------------------------------------------------ il labirinto
 
@@ -68,7 +68,7 @@ SINISTRA = (
 LABIRINTO = tuple(r + r[::-1] for r in SINISTRA)
 COLONNE = len(LABIRINTO[0])          # 50
 RIGHE = len(LABIRINTO)               # 16
-CASELLA = 4                          # pixel
+CASELLA = 4                          # pixel, sul pannello
 RIGA_TUNNEL = 7
 
 # La casa: dentro, e la casella appena fuori dalla porta.
@@ -136,21 +136,22 @@ def muro(x, y, fantasma=False):
     return False
 
 
-def _disegna_muri():
+def _disegna_muri(casella):
     """I muri come contorni di un pixel, non come blocchi pieni.
 
     Un'area grande di colore uniforme e basso, sul pannello, mostra le
     righe del refresh -- e' la lezione di Squadriglia. Il contorno e' quello
     dell'originale, e tiene acceso un pixel su quattro invece di tutti.
     """
-    img = Image.new("RGB", (CAMPO, ALTEZZA), (0, 0, 0))
+    img = Image.new("RGB", (COLONNE * casella, RIGHE * casella),
+                    (0, 0, 0))
     px = img.load()
     for y in range(RIGHE):
         for x in range(COLONNE):
             c = LABIRINTO[y][x]
-            x0, y0 = x * CASELLA, y * CASELLA
+            x0, y0 = x * casella, y * casella
             if c == "-":
-                for dx in range(CASELLA):
+                for dx in range(casella):
                     px[x0 + dx, y0 + 2] = COLORE_PORTA
                 continue
             if c != "#":
@@ -161,17 +162,17 @@ def _disegna_muri():
                     return False
                 return LABIRINTO[ny][nx] != "#"
             if aperto(x, y - 1):
-                for dx in range(CASELLA):
+                for dx in range(casella):
                     px[x0 + dx, y0] = COLORE_MURO
             if aperto(x, y + 1):
-                for dx in range(CASELLA):
-                    px[x0 + dx, y0 + CASELLA - 1] = COLORE_MURO
+                for dx in range(casella):
+                    px[x0 + dx, y0 + casella - 1] = COLORE_MURO
             if aperto(x - 1, y):
-                for dy in range(CASELLA):
+                for dy in range(casella):
                     px[x0, y0 + dy] = COLORE_MURO
             if aperto(x + 1, y):
-                for dy in range(CASELLA):
-                    px[x0 + CASELLA - 1, y0 + dy] = COLORE_MURO
+                for dy in range(casella):
+                    px[x0 + casella - 1, y0 + dy] = COLORE_MURO
             # Gli spigoli interni: un muro che tocca in diagonale un
             # corridoio, altrimenti gli angoli restano bucati.
             for ddx, ddy, cx, cy in ((-1, -1, 0, 0), (1, -1, 3, 0),
@@ -182,14 +183,16 @@ def _disegna_muri():
     return img
 
 
-_MURI = None
+# Il disegno dei muri, per misura di casella. Si rifa' una volta sola per
+# misura: il labirinto non cambia mai, e rifarlo a ogni fotogramma sarebbe
+# duemilaseicento pixel da ricontrolare trenta volte al secondo.
+_MURI = {}
 
 
-def muri():
-    global _MURI
-    if _MURI is None:
-        _MURI = _disegna_muri()
-    return _MURI
+def muri(casella=CASELLA):
+    if casella not in _MURI:
+        _MURI[casella] = _disegna_muri(casella)
+    return _MURI[casella]
 
 
 # Gli sprite, 4x4.
@@ -232,12 +235,40 @@ class Gnam(Gioco):
     colore_hud = COLORE_TU
 
     COMANDI = ("su", "giu", "sinistra", "destra", "fuoco", "avvia", "esci")
+    TELA_LIBERA = True
 
     # ---------------------------------------------------------------- partita
+
+    def _misura(self):
+        """Quanto e' grande una casella, e dove si appoggia il labirinto.
+
+        Qui la riproporzione ha un tetto, e il tetto e' il labirinto stesso:
+        e' **arte disegnata a mano**, sedici righe da venticinque caratteri
+        specchiate, e le sue cinquanta colonne devono stare nella larghezza
+        della tela. A quattro pixel per casella fanno duecento -- le colonne
+        del pannello, in pixel esatti -- e a cinque fanno duecentocinquanta,
+        che e' il massimo che entra in 256. A sei sarebbero trecento.
+
+        Quindi su un monitor Gnam cresce di un quarto e si centra. Crescere
+        di piu' non e' una moltiplicazione: vuol dire **un labirinto nuovo**,
+        disegnato da una persona e riprovato per raggiungibilita'.
+        """
+        self.casella = max(3, min(self.campo_l // COLONNE,
+                                  self.campo_a // RIGHE))
+        self.lab_largo = COLONNE * self.casella
+        self.lab_alto = RIGHE * self.casella
+        self.lab_x = self.campo_x + (self.campo_l - self.lab_largo) // 2
+        self.lab_y = self.campo_y + (self.campo_a - self.lab_alto) // 2
+
+    def _punto(self, px, x, y, colore):
+        """Un pixel in coordinate di labirinto, portato sulla tela."""
+        if 0 <= x < self.lab_largo and 0 <= y < self.lab_alto:
+            px[self.lab_x + x, self.lab_y + y] = colore
 
     def avvia_partita(self, seme=None):
         if seme is not None or not hasattr(self, "_rnd"):
             self._rnd = random.Random(seme)
+        self._misura()
         self.punteggio = 0
         self.vite = VITE
         self.livello = 1
@@ -566,31 +597,35 @@ class Gnam(Gioco):
     # -------------------------------------------------------------- disegno
 
     def _sprite(self, px, righe, x, y, colore):
-        x0 = int(round(x * CASELLA))
-        y0 = int(round(y * CASELLA))
+        x0 = int(round(x * self.casella))
+        y0 = int(round(y * self.casella))
         for r, riga in enumerate(righe):
             for c, ch in enumerate(riga):
                 if ch == "#":
                     # Nel tunnel lo sprite esce da un lato e rientra
-                    # dall'altro, un pixel alla volta.
-                    xx = (x0 + c) % CAMPO
-                    yy = y0 + r
-                    if 0 <= xx < CAMPO and 0 <= yy < ALTEZZA:
-                        px[xx, yy] = colore
+                    # dall'altro, un pixel alla volta. L'avvolgimento e' sulla
+                    # larghezza del **labirinto**, non su quella del campo:
+                    # fino alla 17.4.9 erano lo stesso numero per coincidenza
+                    # -- cinquanta caselle da quattro pixel fanno esattamente
+                    # le duecento colonne del pannello -- e appena le due
+                    # misure si sono separate Gnam sarebbe sparito nello
+                    # scarto.
+                    self._punto(px, (x0 + c) % self.lab_largo, y0 + r, colore)
 
     def disegna_campo(self, img, px):
         lampo = self._fine_livello > 0 and int(self._fine_livello * 6) % 2 == 0
         if not lampo:
-            img.paste(muri(), (0, 0))
+            img.paste(muri(self.casella), (self.lab_x, self.lab_y))
         for (x, y), cosa in self.palline.items():
-            x0, y0 = x * CASELLA, y * CASELLA
+            x0, y0 = x * self.casella, y * self.casella
+            mezzo = max(1, self.casella // 4)
             if cosa == "o":
                 if int(self._bocca * 4) % 2 == 0 or not self.iniziata:
-                    for dx in (1, 2):
-                        for dy in (1, 2):
-                            px[x0 + dx, y0 + dy] = COLORE_PALLINA
+                    for dx in range(mezzo, self.casella - mezzo):
+                        for dy in range(mezzo, self.casella - mezzo):
+                            self._punto(px, x0 + dx, y0 + dy, COLORE_PALLINA)
             else:
-                px[x0 + 1, y0 + 1] = COLORE_PALLINA
+                self._punto(px, x0 + mezzo, y0 + mezzo, COLORE_PALLINA)
 
         if not self.finita:
             for f in self.fantasmi:
@@ -617,7 +652,12 @@ class Gnam(Gioco):
                 self._sprite(px, forma, self.x, self.y, COLORE_TU)
 
         if not self.iniziata and not self.finita:
-            for y in range(28, 36):
-                for x in range(86, 114):
-                    px[x, y] = (0, 0, 0)
-            centra(px, "FUOCO", 30, COLORE_TU)
+            meta_y = self.lab_y + self.lab_alto // 2
+            larga = larghezza_testo("FUOCO") + 16
+            x0 = self.lab_x + (self.lab_largo - larga) // 2
+            for y in range(meta_y - 4, meta_y + 4):
+                for x in range(x0, x0 + larga):
+                    if 0 <= x < self.largo and 0 <= y < self.alto:
+                        px[x, y] = (0, 0, 0)
+            centra(px, "FUOCO", meta_y - 2, COLORE_TU,
+                   sinistra=self.lab_x, larghezza=self.lab_largo)

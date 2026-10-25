@@ -159,10 +159,10 @@ RIGA = 7        # 5 pixel di altezza piu' due di interlinea
 ALTO = 5        # righe del glifo: l'accento va a -1, la cediglia a +5
 
 
-def larghezza_testo(testo):
+def larghezza_testo(testo, scala=1):
     # Sulla stringa **tradotta**: «Æ» diventa «AE» e occupa due posti, e una
     # riga centrata sul conto sbagliato esce dal pannello.
-    return max(0, len(senza_accenti(testo)) * PASSO - 1)
+    return max(0, (len(senza_accenti(testo)) * PASSO - 1) * scala)
 
 
 def senza_accenti(testo):
@@ -192,33 +192,51 @@ def celle(testo):
     return fuori
 
 
-def _riga_di_bit(px, bit, x, y, colore):
+def _riga_di_bit(px, bit, x, y, colore, scala=1):
     """Tre pixel in una riga, quelli accesi. Il taglio ai bordi e' qui e non
     nei chiamanti: un accento sulla prima riga del pannello non deve far
-    cadere il disegno, deve solo non vedersi."""
+    cadere il disegno, deve solo non vedersi.
+
+    Con `scala` ogni pixel diventa un quadrato di quel lato. Si **replica**,
+    non si interpola: un glifo di tre pixel per cinque ingrandito a sei per
+    dieci resta netto, mentre un TTF rimpicciolito e poi ringrandito sarebbe
+    poltiglia. Ed e' la stessa ragione per cui questo font e' disegnato a
+    mano invece di essere un file.
+    """
     largo, alto = _TELA
     for colonna in range(3):
-        if bit & (1 << (2 - colonna)):
-            xx = x + colonna
-            if 0 <= xx < largo and 0 <= y < alto:
-                px[xx, y] = colore
+        if not bit & (1 << (2 - colonna)):
+            continue
+        for dy in range(scala):
+            yy = y + dy
+            if not 0 <= yy < alto:
+                continue
+            for dx in range(scala):
+                xx = x + colonna * scala + dx
+                if 0 <= xx < largo:
+                    px[xx, yy] = colore
 
 
-def scrivi(px, testo, x, y, colore):
-    """Testo 3x5 pixel per pixel. `px` e' l'accesso ai pixel dell'immagine."""
+def scrivi(px, testo, x, y, colore, scala=1):
+    """Testo 3x5 pixel per pixel. `px` e' l'accesso ai pixel dell'immagine.
+
+    `scala` ingrandisce di un intero: un glifo diventa 6x10 a due, 9x15 a
+    tre. Serve dove la tela e' alta e una riga di testo da cinque pixel
+    sarebbe un filo -- il Super Quiz, che e' fatto solo di parole.
+    """
     for carattere, sopra, sotto in celle(testo):
         glifo = _F.get(carattere)
         if glifo is not None:
             for riga, bit in enumerate(glifo):
-                _riga_di_bit(px, bit, x, y + riga, colore)
+                _riga_di_bit(px, bit, x, y + riga * scala, colore, scala)
         if sopra:
-            _riga_di_bit(px, sopra, x, y - 1, colore)
+            _riga_di_bit(px, sopra, x, y - scala, colore, scala)
         if sotto:
-            _riga_di_bit(px, sotto, x, y + ALTO, colore)
-        x += PASSO
+            _riga_di_bit(px, sotto, x, y + ALTO * scala, colore, scala)
+        x += PASSO * scala
 
 
-def centra(px, testo, y, colore, sinistra=0, larghezza=None):
+def centra(px, testo, y, colore, sinistra=0, larghezza=None, scala=1):
     """Centrato sul **campo di gioco di adesso**, se non si dice altro.
 
     Fino alla 17.4 il valore di serie era la costante `CAMPO`, 200. Adesso
@@ -229,8 +247,9 @@ def centra(px, testo, y, colore, sinistra=0, larghezza=None):
     """
     if larghezza is None:
         larghezza = _CAMPO[2]
-    scrivi(px, testo, sinistra + (larghezza - larghezza_testo(testo)) // 2,
-           y, colore)
+    scrivi(px, testo,
+           sinistra + (larghezza - larghezza_testo(testo, scala)) // 2,
+           y, colore, scala)
 
 
 # ------------------------------------------------------------------ il gioco

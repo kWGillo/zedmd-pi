@@ -220,13 +220,20 @@ vuol dire vederle arrivare per meno tempo. Lì si ingrandisce di un fattore
 intero (due, non di più) e il mondo resta quello: cambia solo quanta parte
 se ne vede.
 
-Gli altri undici restano 256×64 ingranditi di un intero e centrati, finché non
-tocca a loro. Non è pigrizia: la loro geometria è fatta di costanti di modulo e
-di righe assolute, gli sprite sono maschere di collisione e non immagini, la
-fisica di bongo è in pixel al secondo quadrato e l'angolo è in gradi, il
-labirinto di gnam è arte disegnata a mano su celle da quattro pixel. Portarli a
-proporzioni qualsiasi non è una moltiplicazione: è riprogettarli, e si fa uno
-per volta perché ciascuno va riprovato.
+**Sono tutti e tredici**, dalla 17.4.9. Ciascuno a modo suo, perché la forma
+del gioco decide la strada:
+
+| | |
+|---|---|
+| campo chiuso (Snake, Breakout, Pongo, Invasori) | due fattori, uno per asse, applicati alle misure del gioco |
+| scorre di lato (T-Rex, Squadriglia) | il mondo resta in unità e si guarda con uno zoom intero: le figure raddoppiano, e si vede metà mondo per volta |
+| vettoriale (Mine vaganti) | uno zoom solo, isotropo: due fattori diversi farebbero di una mina un'ellisse che cambia misura mentre gira |
+| schermo fisso (Kingo Bongo) | i palazzi si allungano verso il basso: in una parabola conta il dislivello fra i tetti, e quello non cambia |
+| solo parole (Super Quiz) | il testo si scrive al doppio e le risposte tornano in colonna sola |
+| arte disegnata a mano (Gnam) | cresce di un quarto e si centra: più in là serve un labirinto nuovo |
+
+Sul pannello nessuno di loro è cambiato di un pixel, ed è la regola che ha reso
+sicura una conversione fatta un gioco per volta.
 
 «Stirati a tutto schermo» resta per chi preferisce comunque lo schermo pieno
 alla nitidezza, e per i giochi non ancora convertiti.

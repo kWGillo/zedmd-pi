@@ -3519,6 +3519,39 @@ Storico:
        conto: il mondo e' largo 128 unita' invece di 256, quindi un caccia
        attraversa in meta' tempo. In cambio gli aerei sono grandi il doppio
        e il mare ha dove respirare.
+  17.4.9 **Super Quiz e Gnam: tredici su tredici.**
+       **Super Quiz** e' l'unico gioco fatto solo di parole, e per lui
+       riproporzionare non vuol dire ingrandire delle figure: vuol dire
+       decidere quanto e' grande il testo e quante righe ci stanno. Prima
+       pero' bisognava insegnare al font a ingrandirsi, perche' il 3x5 del
+       progetto era a misura fissa: adesso `scrivi`, `larghezza_testo` e
+       `centra` prendono una scala intera, e ogni pixel diventa un quadrato.
+       Si **replica**, non si interpola: un glifo ingrandito resta netto, ed
+       e' la stessa ragione per cui quel font e' disegnato a mano invece di
+       essere un file.
+       La scala e' **due**, e il perche' e' aritmetico: a tre su 256 colonne
+       ci stanno venti caratteri per riga, e una domanda da centoventi
+       caratteri vorrebbe sei righe -- piu' di quante ne restano per le
+       risposte. A due ce ne stanno trentadue, la domanda ci sta in tre
+       righe, e le quattro risposte tornano in **colonna sola** invece che
+       nelle due colonne da sedici caratteri che su 64 righe erano l'unico
+       modo di farcele stare.
+       Le due disposizioni adesso stanno scritte una accanto all'altra in
+       una tabella sola, invece di essere sparse in otto metodi di disegno.
+       **Gnam** ha un tetto, ed e' il labirinto stesso: e' arte disegnata a
+       mano, sedici righe da venticinque caratteri specchiate, e le sue
+       cinquanta colonne devono stare nella larghezza della tela. A quattro
+       pixel per casella fanno duecento -- le colonne del pannello, esatte --
+       a cinque fanno duecentocinquanta, e a sei sarebbero trecento. Quindi
+       su un monitor Gnam cresce **di un quarto** e si centra. Crescere di
+       piu' non e' una moltiplicazione: vuol dire un labirinto nuovo,
+       disegnato da una persona e riprovato per raggiungibilita'.
+       Nel farlo e' venuta fuori una trappola che aspettava: l'avvolgimento
+       del tunnel era `% CAMPO`, cioe' la larghezza del **campo**, e
+       funzionava solo perche' cinquanta caselle da quattro pixel fanno
+       esattamente le duecento colonne del pannello. Due numeri uguali per
+       coincidenza. Appena le due misure si separano -- ed e' quello che
+       succede su un monitor -- Gnam sarebbe sparito nello scarto.
 """
 
-__version__ = "17.4.8"
+__version__ = "17.4.9"

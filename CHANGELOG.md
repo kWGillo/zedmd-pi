@@ -2,6 +2,50 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.9]
+
+### Super Quiz e Gnam: tredici su tredici
+
+**Super Quiz** è l'unico gioco fatto solo di parole, e per lui riproporzionare
+non vuol dire ingrandire delle figure: vuol dire decidere quanto è grande il
+testo e quante righe ci stanno.
+
+Prima però bisognava insegnare al font a ingrandirsi, perché il 3×5 del progetto
+era a misura fissa. Adesso `scrivi`, `larghezza_testo` e `centra` prendono una
+scala intera, e ogni pixel diventa un quadrato: si **replica**, non si
+interpola, ed è la stessa ragione per cui quel font è disegnato a mano invece di
+essere un file.
+
+La scala è **due**, e il perché è aritmetico:
+
+| scala | caratteri per riga | una domanda da 120 caratteri |
+|---|---|---|
+| 1 | 62 | 2 righe |
+| **2** | **30** | **3 righe** |
+| 3 | 20 | 6 righe — più di quante ne restano per le risposte |
+
+A scala due la domanda ci sta in tre righe e le quattro risposte tornano in
+**colonna sola**, invece che nelle due colonne da sedici caratteri che su 64
+righe erano l'unico modo di farcele stare. Le due disposizioni ora stanno scritte
+una accanto all'altra in una tabella sola, invece di essere sparse in otto metodi
+di disegno.
+
+**Gnam** ha un tetto, ed è il labirinto stesso: è arte disegnata a mano, sedici
+righe da venticinque caratteri specchiate, e le sue cinquanta colonne devono
+stare nella larghezza della tela. A quattro pixel per casella fanno duecento — le
+colonne del pannello, esatte — a cinque fanno duecentocinquanta, e a sei
+sarebbero trecento.
+
+Quindi su un monitor Gnam cresce **di un quarto** e si centra. Crescere di più
+non è una moltiplicazione: vuol dire un labirinto nuovo, disegnato da una persona
+e riprovato per raggiungibilità.
+
+Nel farlo è venuta fuori una trappola che aspettava: l'avvolgimento del tunnel
+era `% CAMPO`, cioè la larghezza del **campo**, e funzionava solo perché
+cinquanta caselle da quattro pixel fanno esattamente le duecento colonne del
+pannello. Due numeri uguali per coincidenza — e appena le due misure si separano,
+cosa che succede su un monitor, Gnam sarebbe sparito nello scarto.
+
 ## [17.4.8]
 
 ### Squadriglia

@@ -41,7 +41,9 @@ from PIL import Image
 
 import domande as banca
 
-from .base import ALTEZZA, LARGHEZZA, Gioco, centra, larghezza_testo, scrivi
+from .base import ALTEZZA as ALTEZZA_BASE
+from .base import LARGHEZZA as LARGHEZZA_BASE
+from .base import RIGA, Gioco, centra, imposta_tela, larghezza_testo, scrivi
 
 # La scala dei premi. Quindici gradini, con i due traguardi in grassetto
 # nella testa di chi gioca: il quinto e il decimo.
@@ -151,6 +153,75 @@ class Quiz(Gioco):
     etichetta = "Super Quiz"
     colore_hud = GIALLO
     COMANDI = ("sinistra", "destra", "su", "giu", "fuoco", "esci")
+    TELA_LIBERA = True
+
+    # Da quante righe in su il testo si scrive al doppio.
+    #
+    # Tre sarebbe troppo: a scala tre su 256 colonne ci stanno venti
+    # caratteri per riga, e una domanda da centoventi caratteri vorrebbe sei
+    # righe -- piu' di quante ne restano per le risposte. A due ce ne stanno
+    # trentadue, che e' la misura in cui una domanda ci sta in tre righe e le
+    # quattro risposte in colonna.
+    DOPPIO_DA = 128
+
+    def _misura(self):
+        """Dove va ogni riga, su questa tela.
+
+        Il Quiz e' l'unico gioco fatto **solo** di parole, e per lui
+        riproporzionare non vuol dire ingrandire delle figure: vuol dire
+        decidere quanto e' grande il testo e quante righe ci stanno. Le due
+        disposizioni sono scritte qui una accanto all'altra, invece di
+        essere sparse in otto metodi di disegno come erano prima.
+
+        Sul pannello si tiene quella di sempre, numero per numero, comprese
+        le **due colonne** di risposte -- che su 64 righe sono l'unico modo
+        di far stare quattro risposte senza scriverle in fila. Su una tela
+        alta le risposte tornano in colonna sola, piu' larghe e piu' grandi.
+        """
+        self.s = 2 if self.alto >= self.DOPPIO_DA else 1
+        # Quanti caratteri ci stanno in una riga larga quanto la tela.
+        self.per_riga = max(12, self.largo // (4 * self.s) - 2)
+        if self.s == 1:
+            self.colonne_risposte = 2
+            self.larghezza_risposta = 30
+            self.L = {
+                "testa": 1, "domanda": 10, "passo_domanda": 8,
+                "righe_domanda": 2,
+                "risposte": 28, "passo_risposte": 9,
+                "conferma": 45, "si_no": 55,
+                "esito": 46, "sotto": 55,
+                "barra": 50, "alta_barra": 3, "sicuro": 56,
+                "avvio_titolo": 6, "avvio_domanda": 18, "avvio_voci": 32,
+                "avvio_tempo": 44, "avvio_aiuto": 55,
+                "fine_titolo": 16, "fine_soldi": 28, "fine_quante": 40,
+                "fine_aiuto": 52, "fine_vuoto": 24, "fine_vuoto_aiuto": 44,
+            }
+            self.colonna_x = (2, 130)
+            return
+        self.colonne_risposte = 1
+        self.larghezza_risposta = self.per_riga - 2
+        riga = RIGA * self.s
+        alto = self.alto
+        self.colonna_x = (max(2, self.largo // 12),)
+        self.L = {
+            "testa": 2,
+            "domanda": int(alto * 0.13), "passo_domanda": riga + 2,
+            "righe_domanda": 3,
+            "risposte": int(alto * 0.42), "passo_risposte": riga + 4,
+            "conferma": int(alto * 0.80), "si_no": int(alto * 0.89),
+            "esito": int(alto * 0.80), "sotto": int(alto * 0.89),
+            "barra": int(alto * 0.94), "alta_barra": max(3, alto // 48),
+            "sicuro": int(alto * 0.86),
+            "avvio_titolo": int(alto * 0.10),
+            "avvio_domanda": int(alto * 0.28),
+            "avvio_voci": int(alto * 0.50),
+            "avvio_tempo": int(alto * 0.68),
+            "avvio_aiuto": int(alto * 0.86),
+            "fine_titolo": int(alto * 0.22), "fine_soldi": int(alto * 0.42),
+            "fine_quante": int(alto * 0.62), "fine_aiuto": int(alto * 0.82),
+            "fine_vuoto": int(alto * 0.36),
+            "fine_vuoto_aiuto": int(alto * 0.68),
+        }
 
     # La musica di serie, una per momento. La configurazione puo' cambiarle
     # tutte e quattro: sono nomi di file dentro `suoni/`, senza estensione.
@@ -181,6 +252,7 @@ class Quiz(Gioco):
         # partita, e azzerarlo lo farebbe valere una seconda volta,
         # attraversando da solo la schermata della scelta.
         self._premuti_prima = getattr(self, "_premuti_prima", set())
+        self._misura()
         self.punteggio = 0
         self.vite = 1
         self.livello = 1
@@ -514,7 +586,8 @@ class Quiz(Gioco):
         righe ha bisogno di tutti i 256 pixel, e un gioco fatto di parole non
         ha niente da mettere in una colonna laterale.
         """
-        img = Image.new("RGB", (LARGHEZZA, ALTEZZA), (0, 0, 0))
+        img = Image.new("RGB", (self.largo, self.alto), (0, 0, 0))
+        imposta_tela(self.largo, self.alto, (0, 0, self.largo, self.alto))
         px = img.load()
         if self.fase == "avvio":
             self._disegna_avvio(px)
@@ -528,50 +601,75 @@ class Quiz(Gioco):
         self._disegna_piede(px)
         return img
 
+    def _barretta(self, px, x, y, colore):
+        """Il segno accanto alla voce scelta, alto quanto il testo."""
+        for dy in range(RIGA * self.s - 1):
+            for dx in range(self.s):
+                if 0 <= x + dx < self.largo and 0 <= y - 1 + dy < self.alto:
+                    px[x + dx, y - 1 + dy] = colore
+
     def _disegna_avvio(self, px):
-        centra(px, "SUPER QUIZ", 6, GIALLO, 0, LARGHEZZA)
+        L = self.L
+        centra(px, "SUPER QUIZ", L["avvio_titolo"], GIALLO, 0, self.largo,
+               self.s)
         domanda = ("COME VUOI GIOCARE?" if self.lingua == "it"
                    else "HOW DO YOU WANT TO PLAY?")
-        centra(px, domanda, 18, GRIGIO, 0, LARGHEZZA)
+        centra(px, domanda, L["avvio_domanda"], GRIGIO, 0, self.largo, self.s)
         voci = (("CON IL TEMPO", "TIMED"), ("SENZA TEMPO", "NO TIMER"))
         for indice, voce in enumerate(voci):
             testo = voce[0] if self.lingua == "it" else voce[1]
             scelta = (indice == 1) == self.senza_tempo
-            x = 20 + indice * 122
-            scrivi(px, testo, x + 6, 32, BIANCO if scelta else GRIGIO)
+            y = L["avvio_voci"]
+            if self.s == 1:
+                x = 20 + indice * 122
+            else:
+                # A scala doppia le due voci non ci stanno affiancate: una
+                # sopra l'altra, che e' anche il verso in cui si sceglie.
+                x = max(4, self.largo // 6)
+                y += indice * (RIGA * self.s + 4)
+            scrivi(px, testo, x + 6 * self.s, y,
+                   BIANCO if scelta else GRIGIO, self.s)
             if scelta:
-                for dy in range(6):
-                    px[x, 31 + dy] = GIALLO
-                    px[x + 1, 31 + dy] = GIALLO
+                self._barretta(px, x, y, GIALLO)
         secondi = ("%d SECONDI PER RISPONDERE" if self.lingua == "it"
                    else "%d SECONDS TO ANSWER") % int(self.tempo_risposta)
         centra(px, secondi if not self.senza_tempo else
                ("TUTTO IL TEMPO CHE VUOI" if self.lingua == "it"
-                else "ALL THE TIME YOU WANT"), 44, AZZURRO, 0, LARGHEZZA)
+                else "ALL THE TIME YOU WANT"), L["avvio_tempo"], AZZURRO,
+               0, self.largo, self.s)
         aiuto = ("LEVA SCEGLIE - FUOCO COMINCIA" if self.lingua == "it"
                  else "STICK CHOOSES - FIRE STARTS")
-        centra(px, aiuto, 55, GRIGIO, 0, LARGHEZZA)
+        centra(px, aiuto, L["avvio_aiuto"], GRIGIO, 0, self.largo, self.s)
 
     def _disegna_testa(self, px):
         domanda = self.domanda or {}
-        scrivi(px, domanda.get("categoria", "")[:28].upper(), 2, 1, GRIGIO)
+        quanti = max(8, self.per_riga // 2)
+        scrivi(px, domanda.get("categoria", "")[:quanti].upper(), 2,
+               self.L["testa"], GRIGIO, self.s)
         premio = SCALA[min(self.gradino, len(SCALA) - 1)]
         testo = "%d/%d  %s" % (self.gradino + 1, len(SCALA), soldi(premio))
-        scrivi(px, testo, LARGHEZZA - larghezza_testo(testo) - 2, 1, GIALLO)
+        scrivi(px, testo,
+               self.largo - larghezza_testo(testo, self.s) - 2,
+               self.L["testa"], GIALLO, self.s)
 
     def _disegna_domanda(self, px):
         domanda = self.domanda or {}
-        righe = spezza(domanda.get("domanda", ""), 62, 2)
+        righe = spezza(domanda.get("domanda", ""), self.per_riga,
+                       self.L["righe_domanda"])
         for indice, riga in enumerate(righe):
-            centra(px, riga, 10 + indice * 8, BIANCO, 0, LARGHEZZA)
+            centra(px, riga,
+                   self.L["domanda"] + indice * self.L["passo_domanda"],
+                   BIANCO, 0, self.largo, self.s)
 
     def _disegna_risposte(self, px):
         domanda = self.domanda or {}
         risposte = domanda.get("risposte", [])
         mostra = self.fase in ("giusta", "sbagliata")
         for indice, risposta in enumerate(risposte[:4]):
-            x = COLONNA[indice % 2]
-            y = 28 + (indice // 2) * 9
+            x = self.colonna_x[indice % self.colonne_risposte]
+            y = (self.L["risposte"]
+                 + (indice // self.colonne_risposte)
+                 * self.L["passo_risposte"])
             colore = AZZURRO
             if mostra and indice == domanda.get("giusta"):
                 colore = VERDE
@@ -580,37 +678,38 @@ class Quiz(Gioco):
             elif not mostra and indice == self.scelta:
                 colore = BIANCO
             testo = "%s %s" % (LETTERE[indice],
-                               risposta[:LARGHEZZA_COLONNA - 2])
-            scrivi(px, testo, x + 4, y, colore)
+                               risposta[:self.larghezza_risposta - 2])
+            scrivi(px, testo, x + 4 * self.s, y, colore, self.s)
             if indice == self.scelta and not mostra:
                 # La scelta si vede da un lato, non da una cornice: una
                 # cornice su un pannello cosi' fitto toglie una riga di testo.
-                for dy in range(6):
-                    px[x, y - 1 + dy] = (AMBRA if self.fase == "conferma"
-                                         else GIALLO)
-                    px[x + 1, y - 1 + dy] = (AMBRA if self.fase == "conferma"
-                                             else GIALLO)
+                self._barretta(px, x, y, AMBRA if self.fase == "conferma"
+                               else GIALLO)
 
     def _disegna_piede(self, px):
         domanda = self.domanda or {}
         if self.fase == "conferma":
             testo = "LA ACCENDIAMO?" if self.lingua == "it" else "IS THAT YOUR ANSWER?"
-            centra(px, testo, 45, AMBRA, 0, LARGHEZZA)
-            self._disegna_si_no(px, 55)
+            centra(px, testo, self.L["conferma"], AMBRA, 0, self.largo,
+                   self.s)
+            self._disegna_si_no(px, self.L["si_no"])
             return
         if self.fase == "giusta":
             testo = self.messaggio or ("GIUSTA!" if self.lingua == "it" else "RIGHT!")
-            centra(px, testo, 46, VERDE, 0, LARGHEZZA)
-            curiosita = spezza(domanda.get("curiosita", ""), 62, 1)
+            centra(px, testo, self.L["esito"], VERDE, 0, self.largo, self.s)
+            curiosita = spezza(domanda.get("curiosita", ""),
+                               self.per_riga, 1)
             if curiosita:
-                centra(px, curiosita[0], 55, GRIGIO, 0, LARGHEZZA)
+                centra(px, curiosita[0], self.L["sotto"], GRIGIO, 0,
+                       self.largo, self.s)
             return
         if self.fase == "sbagliata":
             testo = self.messaggio or ("SBAGLIATA" if self.lingua == "it"
                                        else "WRONG")
-            centra(px, testo, 46, ROSSO, 0, LARGHEZZA)
+            centra(px, testo, self.L["esito"], ROSSO, 0, self.largo, self.s)
             resta = ("RESTI CON %s" if self.lingua == "it" else "YOU KEEP %s")
-            centra(px, resta % soldi(self.vinto), 55, GIALLO, 0, LARGHEZZA)
+            centra(px, resta % soldi(self.vinto), self.L["sotto"], GIALLO,
+                   0, self.largo, self.s)
             return
         # Attesa: la barra del tempo, che e' l'unica cosa che si muove.
         self._disegna_tempo(px)
@@ -626,30 +725,34 @@ class Quiz(Gioco):
                 ("NO", False, ROSSO))
         for indice, (testo, quale, colore) in enumerate(voci):
             scelto = (quale == self.conferma)
-            x = LARGHEZZA // 2 - 40 + indice * 56
-            scrivi(px, testo, x + 6, y, colore if scelto else GRIGIO)
+            passo = 56 * self.s
+            x = self.largo // 2 - passo // 2 - 12 * self.s + indice * passo
+            scrivi(px, testo, x + 6 * self.s, y,
+                   colore if scelto else GRIGIO, self.s)
             if scelto:
-                for dy in range(6):
-                    px[x, y - 1 + dy] = colore
-                    px[x + 1, y - 1 + dy] = colore
+                self._barretta(px, x, y, colore)
 
     def _disegna_tempo(self, px):
         if self.senza_tempo:
             traguardo = self.traguardo()
             if traguardo:
                 testo = ("SICURO %s" if self.lingua == "it" else "SAFE %s") % soldi(traguardo)
-                centra(px, testo, 52, GRIGIO, 0, LARGHEZZA)
+                centra(px, testo, self.L["sicuro"], GRIGIO, 0, self.largo,
+                       self.s)
             return
         quota = max(0.0, min(1.0, self.rimasto / max(1.0, self.tempo_risposta)))
-        larghezza = int((LARGHEZZA - 8) * quota)
+        larghezza = int((self.largo - 8) * quota)
         colore = VERDE if quota > 0.5 else (GIALLO if quota > 0.2 else ROSSO)
         for x in range(larghezza):
-            for y in range(50, 53):
-                px[4 + x, y] = colore
+            for y in range(self.L["barra"],
+                           self.L["barra"] + self.L["alta_barra"]):
+                if 0 <= y < self.alto:
+                    px[4 + x, y] = colore
         traguardo = self.traguardo()
         if traguardo:
             testo = ("SICURO %s" if self.lingua == "it" else "SAFE %s") % soldi(traguardo)
-            centra(px, testo, 56, GRIGIO, 0, LARGHEZZA)
+            centra(px, testo, self.L["sicuro"], GRIGIO, 0, self.largo,
+                   self.s)
 
     def _disegna_finale(self, px):
         # Tre finali diversi, e dirli uguali sarebbe una presa in giro: chi
@@ -662,19 +765,25 @@ class Quiz(Gioco):
         else:
             titolo = "PARTITA FINITA" if self.lingua == "it" else "GAME OVER"
         if self.messaggio.startswith("NESSUNA") or self.messaggio.startswith("NO "):
-            centra(px, self.messaggio, 24, ROSSO, 0, LARGHEZZA)
+            centra(px, self.messaggio, self.L["fine_vuoto"], ROSSO, 0,
+                   self.largo, self.s)
             centra(px, "FUOCO PER RIPROVARE" if self.lingua == "it"
-                   else "FIRE TO TRY AGAIN", 44, GRIGIO, 0, LARGHEZZA)
+                   else "FIRE TO TRY AGAIN", self.L["fine_vuoto_aiuto"],
+                   GRIGIO, 0, self.largo, self.s)
             return
-        centra(px, titolo, 16, GRIGIO, 0, LARGHEZZA)
-        centra(px, soldi(self.vinto), 28, GIALLO, 0, LARGHEZZA)
+        centra(px, titolo, self.L["fine_titolo"], GRIGIO, 0, self.largo,
+               self.s)
+        centra(px, soldi(self.vinto), self.L["fine_soldi"], GIALLO, 0,
+               self.largo, self.s)
         quante = ("%d RISPOSTE GIUSTE" if self.lingua == "it"
                   else "%d RIGHT ANSWERS") % self.gradino
-        centra(px, quante, 40, VERDE, 0, LARGHEZZA)
+        centra(px, quante, self.L["fine_quante"], VERDE, 0, self.largo,
+               self.s)
         # E come si rigioca. Una schermata finale che non dice cosa fare e'
         # una schermata da cui si esce spegnendo.
         centra(px, "FUOCO PER RIGIOCARE" if self.lingua == "it"
-               else "FIRE TO PLAY AGAIN", 52, GRIGIO, 0, LARGHEZZA)
+               else "FIRE TO PLAY AGAIN", self.L["fine_aiuto"], GRIGIO, 0,
+               self.largo, self.s)
 
     # Il campo non esiste: qui si disegna tutto a mano, e `disegna` non
     # chiama mai questo metodo. Sta qui perche' la classe base lo pretende.

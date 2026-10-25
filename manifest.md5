@@ -18,7 +18,7 @@ f4da634c02da1d2d9c2bf600287d09c3  copertine.py
 323e7433e983c9d3b69e8f5caadcc395  diagnostica/genera_domande.py
 8475027d8a5b75dac3cdad504cd7d5da  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
-abe7e7c6967fb610dd57ead75bb08212  diagnostica/prova_giochi.py
+9d2a067c0feaa5fa905306f60293d365  diagnostica/prova_giochi.py
 6f6f3eda48e12c7f3baf5f9cbe1efda0  diagnostica/prova_nati_e_morti.py
 826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
@@ -87,15 +87,15 @@ dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 0aec5e5925af657819f9a3367c4e76fb  sources/doom.py
 11718fb8d7c0279fd20fc4d332608a65  sources/gameboy.py
 cc20dfaf532b143691e63e02d2002a6f  sources/giochi/__init__.py
-83488393b2bae8f9095b4788f8854ff1  sources/giochi/base.py
+470a2213bf89726bd6643981e8e12989  sources/giochi/base.py
 199e19b7b31883eba96ba781c0d51df4  sources/giochi/bongo.py
 033d2a7403a0db024204329e95251214  sources/giochi/classifica.py
-71f54d44a50464e82cafa5d08b261fc3  sources/giochi/gnam.py
+b7a1f101a35d604a4cf237729d7851c9  sources/giochi/gnam.py
 cf9dad2479f93698da848261666f400c  sources/giochi/invasori.py
 f698a7664c5b101dbe5e188d0ad3cdc2  sources/giochi/mattoni.py
 c5dd87068ade8def1e9599408335b406  sources/giochi/mine.py
 0e67f0c1a59be47118670086493fbf32  sources/giochi/pongo.py
-7da23eb62fb5ee04a4e657043c5ca725  sources/giochi/quiz.py
+6e89fe73941ef052a90b2d7cf494c56c  sources/giochi/quiz.py
 b6d6a707aa4974d2830c6833a39c5417  sources/giochi/serpente.py
 7d4f8a76640e318409ca606ab406387e  sources/giochi/squadriglia.py
 49fb8c1b0949908b16702dfa35218b4a  sources/giochi/trex.py
@@ -185,7 +185,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 12de3dfc1ea2b2ed0fe2fd8a25723388  templates/video.html
 dfdb476800003318473f792504d1259b  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-d03392b3842461000909cc0106bbfe14  version.py
+876c7e3fd8b75c007c968b38677c76bf  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 43b04420e7a48c57a0315b40e42e902e  webui.py
