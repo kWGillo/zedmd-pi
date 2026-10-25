@@ -2,6 +2,67 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.3.2]
+
+### SDL diceva di disegnare, e non disegnava
+
+*«Ho caricato la 17.3.1 ma lo schermo è sempre buio.»*
+
+La 17.3.1 aveva sistemato l'ordine fra console e scheda video, ma il vetro è
+rimasto nero: l'ordine non era la causa. Una prova dal vivo ha messo le due
+strade una accanto all'altra sulla stessa macchina — una VM con `virtio_gpu` —
+e la risposta non lascia spazio:
+
+```
+--- fb0 ROSSO
+  aperta a 1024x768
+  fotogrammi mandati: 98
+--- SDL VERDE
+ERROR: Could not set videomode on CRTC.
+  aperta a 1024x768
+ERROR: Could not queue pageflip: -22
+```
+
+Il rosso del framebuffer compare sullo schermo e la barra ci scorre sopra. Con
+SDL arriva prima `Could not set videomode on CRTC`, e solo dopo i `-22`: non è
+lo scambio di pagina che fallisce, è che la CRTC non si riesce a prendere. I
+pageflip rifiutati sono la conseguenza, non la malattia.
+
+**Ma il difetto vero è un altro**, ed è il motivo per cui questa storia è durata
+tre versioni: SDL sul KMS *non solleva niente*. Lo scrive sul canale degli
+errori e tira dritto. `set_mode()` restituisce una superficie regolare, `flip()`
+non si lamenta, e il programma passa le settimane convinto di disegnare — mentre
+`/dev/fb0`, che su quella stessa macchina funziona benissimo, non viene mai
+provato, perché la prima strada aveva «funzionato».
+
+Adesso la superficie SDL si controlla da sola. Per il tempo dell'apertura e dei
+primi tre fotogrammi il canale degli errori viene dirottato su un file; se ci si
+trova dentro una frase che vuol dire «non ho disegnato», la superficie **si
+rifiuta** e `_apri_superficie` passa alla successiva. Le righe non si perdono:
+si ristampano nel giornale di bordo senza le ripetizioni — quarantuno righe
+uguali diventano una.
+
+Il ripiego non è silenzioso. All'avvio si legge:
+
+```
+[display] si ripiega su SuperficieFramebuffer -- SuperficieSDL: SDL non disegna sul KMS -- ERROR: Could not set videomode on CRTC.
+```
+
+e la stessa frase sta in cima alla pagina Video.
+
+### `diagnostica/schermo_dal_vivo.py`
+
+Le prove di `display.py` girano su superfici finte, apposta: una macchina di
+sviluppo non ha un vetro, e i conti del compositore si provano senza. Questa è
+l'altra metà, e si lancia dove il vetro c'è. Dipinge tre schermate piene —
+framebuffer, SDL, SDL con la console staccata prima — e chiede quali si sono
+viste.
+
+```
+sudo systemctl stop dmd
+sudo python3 /opt/dmd/diagnostica/schermo_dal_vivo.py
+```
+
 ## [17.3.1]
 
 ### Lo schermo nero: si metteva a tacere la console dopo aver preso la scheda

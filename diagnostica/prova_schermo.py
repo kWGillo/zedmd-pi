@@ -349,6 +349,73 @@ esigi(g._alla_tela(base).size == (200, 50),
       "e una tela piu' piccola della base non scoppia")
 
 
+# ------------------------------------------------- 17.3.2: SDL che non disegna
+#
+# Il guasto vero, quello che ha tenuto il vetro nero per tre versioni: SDL
+# sul KMS non solleva niente. Stampa `Could not set videomode on CRTC`, poi
+# `Could not queue pageflip: -22` venti volte al secondo, e intanto
+# `set_mode()` ha restituito una superficie come se niente fosse.
+#
+# Si prova senza SDL e senza framebuffer, sostituendo le due classi di
+# `display`: quello che conta e' la **scelta**, e la scelta la fa
+# `_apri_superficie` guardando il canale degli errori.
+
+print()
+print("-- SDL che dice di disegnare e non disegna (17.3.2)")
+
+voce = display._VoceDiSDL()
+with voce:
+    os.write(2, b"ERROR: Could not set videomode on CRTC.\n")
+    for _ in range(40):
+        os.write(2, b"ERROR: Could not queue pageflip: -22\n")
+esigi(voce.guasto() == "ERROR: Could not set videomode on CRTC.",
+      "la prima riga che dice «non ho disegnato» viene riconosciuta")
+esigi(len(voce._righe_uniche()) == 2,
+      "quarantuno righe ripetute diventano due nel giornale di bordo")
+
+voce = display._VoceDiSDL()
+with voce:
+    os.write(2, b"Hello from the pygame community.\n")
+esigi(voce.guasto() == "", "e il saluto di pygame non e' un guasto")
+
+sdl_vero, fb_vero = display.SuperficieSDL, display.SuperficieFramebuffer
+aperte = []
+
+
+class SdlCheNonDisegna:
+    def __init__(self, misura=None, finestra=False, titolo="", console=""):
+        aperte.append("sdl")
+        with display._VoceDiSDL() as v:
+            os.write(2, b"ERROR: Could not queue pageflip: -22\n")
+        raise OSError("SDL non disegna sul KMS -- %s" % v.guasto())
+
+
+class FbCheDisegna:
+    def __init__(self, misura=None, finestra=False, titolo="", console=""):
+        aperte.append("fb")
+        self.width, self.height = misura or (1024, 768)
+
+
+try:
+    display.SuperficieSDL = SdlCheNonDisegna
+    display.SuperficieFramebuffer = FbCheDisegna
+    scelta = display._apri_superficie((1024, 768), False, "zitta")
+    esigi(aperte == ["sdl", "fb"],
+          "SDL si prova per primo, e quando si rifiuta si passa al framebuffer")
+    esigi(isinstance(scelta, FbCheDisegna),
+          "la superficie che torna e' quella che disegna davvero")
+    esigi("pageflip" in getattr(scelta, "nota", ""),
+          "e si porta scritto addosso perche' si e' ripiegato")
+
+    del aperte[:]
+    display.SuperficieSDL = FbCheDisegna
+    scelta = display._apri_superficie((1024, 768), False, "zitta")
+    esigi(len(aperte) == 1 and scelta.nota == "",
+          "quando la prima superficie disegna, la seconda non si apre nemmeno")
+finally:
+    display.SuperficieSDL, display.SuperficieFramebuffer = sdl_vero, fb_vero
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

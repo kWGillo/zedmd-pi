@@ -22,11 +22,12 @@ c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
 e9586d217d80679719c9616ef632b54c  diagnostica/prova_regioni.py
-d592589c2c83e40d1a31ba52141ef8ec  diagnostica/prova_schermo.py
+8426f50d101ebd315f83c8210c82fd56  diagnostica/prova_schermo.py
 3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
+1fafe8f1f25c976ce09b10c613b98f86  diagnostica/schermo_dal_vivo.py
 a508962738ddb4832dd5cca7d6795e9f  diagnostica/traduzioni.tsv
-f2796cc18f6843715b3c7f2ca4eaef1d  display.py
+27a299b480ec860f8fd12f6a0a06e7c9  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
 bed93c59a4e582b9db2ee345d52ab038  dmdconf.py
 df5882ad13a821f60a0ba35956669ac3  dmdd.py
@@ -180,7 +181,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 323a2022c60dc631dbba5861f7536da1  templates/video.html
 09eb0a8feaf2b5883b1ef172351f6d02  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-0868f6c2ab877acdfccdbd530937b7d3  version.py
+0b8ce7d8eab8983c81ef1416a000fdbd  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 0b1e11daaf3d4083d3b16151c2fc89db  webui.py

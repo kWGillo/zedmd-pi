@@ -216,7 +216,38 @@ esserci.
 journalctl -u dmd -f
 ```
 
-I motivi che si leggono più spesso: `No module named 'pygame'` con
+**Il caso più insidioso è SDL che dice di disegnare e non disegna.** Sul KMS
+SDL non solleva niente: se non riesce a prendere la CRTC lo scrive e tira
+dritto, e il giornale si riempie di
+
+```
+ERROR: Could not set videomode on CRTC.
+ERROR: Could not queue pageflip: -22
+```
+
+venti volte al secondo. Capita sulle macchine virtuali, dove la scheda video è
+emulata. Dalla 17.3.2 il programma se ne accorge da solo: la superficie SDL si
+rifiuta, si ripiega su `/dev/fb0` — che su quelle stesse macchine funziona — e
+lo dice, all'avvio e in cima alla pagina Video:
+
+```
+[display] si ripiega su SuperficieFramebuffer -- SuperficieSDL: SDL non disegna sul KMS -- ERROR: Could not set videomode on CRTC.
+```
+
+Si perde il vsync, non il disegno.
+
+Per vedere con i propri occhi quale strada funziona, con il servizio fermo:
+
+```
+sudo systemctl stop dmd
+sudo python3 /opt/dmd/diagnostica/schermo_dal_vivo.py
+```
+
+Dipinge tre schermate piene — rossa dal framebuffer, verde da SDL, blu da SDL
+con la console staccata prima — cinque secondi ciascuna. Se una compare, quella
+strada disegna.
+
+Gli altri motivi che si leggono più spesso: `No module named 'pygame'` con
 `/dev/fb0` assente (manca l'uscita video: `apt install python3-pygame`), o,
 dove il pannello è stato chiesto a mano su una macchina che non ce l'ha,
 `No module named 'rgbmatrix'`.

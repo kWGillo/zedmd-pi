@@ -291,5 +291,22 @@ python3 /opt/dmd/diagnostica/prova_regioni.py
 python3 /opt/dmd/diagnostica/prova_piattaforma.py
 ```
 
+Quella che il monitor **lo vuole** è `schermo_dal_vivo.py`: dipinge sullo
+schermo vero, una strada per volta, e dice quale disegna. Si lancia con il
+servizio fermo, perché due programmi non possono tenere la stessa scheda:
+
+```
+sudo systemctl stop dmd
+sudo python3 /opt/dmd/diagnostica/schermo_dal_vivo.py
+sudo systemctl start dmd
+```
+
+Serve quando il servizio risulta `active (running)` e sullo schermo non c'è
+niente — o c'è ancora il `login:` della console, che è lo stesso guasto
+vestito da «non parte in automatico». Sulle macchine virtuali il colpevole è
+quasi sempre SDL, che non riesce a prendere la scheda; dalla 17.3.2 il
+programma ripiega da solo su `/dev/fb0`, e la pagina Video dice che l'ha
+fatto.
+
 Per il resto, la pagina **Video** è il primo posto dove guardare: è fatta
 apposta per rispondere alla domanda «perché il vetro è nero».

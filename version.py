@@ -3176,6 +3176,38 @@ Storico:
        niente, il comportamento fino alla 17.1, come via d'uscita). Chi aveva
        messo `console_staccata: true` se la ritrova migrata su "staccata":
        l'aveva accesa proprio per questo.
+  17.3.2 **SDL diceva di disegnare e non disegnava.** La 17.3.1 aveva
+       sistemato l'ordine, ma lo schermo e' rimasto nero: *«ho caricato la
+       17.3.1 ma lo schermo e' sempre buio»*. L'ordine non era la causa.
+       La prova dal vivo ha messo le due strade una accanto all'altra sulla
+       stessa macchina -- una VM con `virtio_gpu` -- e ha risposto senza
+       possibilita' di equivoco: sul framebuffer il rosso compare e la barra
+       scorre, con SDL arriva prima **`Could not set videomode on CRTC`** e
+       poi i soliti `-22` a ripetizione. Non e' lo scambio di pagina che
+       fallisce: e' che la CRTC non si riesce proprio a prendere, e i
+       pageflip rifiutati sono la conseguenza.
+       Il difetto vero non e' quello, pero'. Il difetto vero e' che **SDL
+       sul KMS non solleva niente**: lo scrive sul canale degli errori e tira
+       dritto. `set_mode()` restituisce una superficie regolare, `flip()` non
+       si lamenta, e il programma passa le settimane convinto di disegnare
+       mentre il vetro e' nero -- e `/dev/fb0`, che su quella stessa macchina
+       funziona benissimo, non viene mai provato perche' la prima strada
+       aveva «funzionato».
+       Adesso la superficie SDL si controlla da sola: per il tempo
+       dell'apertura e dei primi tre fotogrammi il canale degli errori viene
+       dirottato su un file, e se ci si trova dentro una delle frasi che
+       vogliono dire «non ho disegnato» la superficie **si rifiuta**, cosi'
+       `_apri_superficie` passa alla successiva. Le righe non si perdono: si
+       ristampano nel giornale di bordo, senza le ripetizioni -- quarantuno
+       righe uguali diventano una.
+       Il ripiego non e' silenzioso. Chi ripiega se lo porta scritto addosso,
+       la pagina Video lo mostra in cima, e all'avvio si legge
+       `[display] si ripiega su SuperficieFramebuffer -- ...`.
+       Nuova `diagnostica/schermo_dal_vivo.py`: dipinge tre schermate piene
+       sullo schermo vero -- framebuffer, SDL, SDL con la console staccata --
+       e chiede quali si sono viste. Le altre prove di `display.py` girano su
+       superfici finte apposta, perche' una macchina di sviluppo non ha un
+       vetro; questa e' l'altra meta', e si lancia dove il vetro c'e'.
 """
 
-__version__ = "17.3.1"
+__version__ = "17.3.2"

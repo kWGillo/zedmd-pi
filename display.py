@@ -25,6 +25,7 @@ programma usava gia': `width`, `height`, `show(image)`, `clear()`,
 """
 
 import os
+import sys
 import threading
 
 from PIL import Image, ImageChops
@@ -463,6 +464,94 @@ def zittisci_console(modo="zitta"):
         print("[display] console: %s" % ", ".join(fatto))
     return fatto
 
+SPIE_GUASTO = (
+    "could not set videomode",
+    "could not queue pageflip",
+    "could not create",
+    "no usable displays",
+)
+
+
+class _VoceDiSDL:
+    """Trattiene quello che SDL scrive sul canale degli errori.
+
+    Serve perche' SDL, sul KMS, **non solleva niente**. Se non riesce a
+    impostare il modo sulla CRTC lo scrive e tira dritto: `set_mode()`
+    restituisce una superficie regolare, `flip()` non si lamenta, e il
+    programma passa mesi convinto di disegnare mentre il vetro e' nero e il
+    giornale di bordo si riempie di `Could not queue pageflip: -22`.
+
+    L'unico posto dove quel guasto esiste e' il descrittore 2. Lo si dirotta
+    su un file per il tempo dell'apertura e del primo fotogramma, si legge
+    che cosa c'e' finito, e poi lo si rimette dov'era -- ristampando le
+    righe, che nel giornale di bordo ci vogliono comunque.
+    """
+
+    def __init__(self):
+        self.testo = ""
+        self._copia = None
+        self._file = None
+
+    def __enter__(self):
+        try:
+            import tempfile
+            self._file = tempfile.TemporaryFile(mode="w+b")
+            sys.stderr.flush()
+            self._copia = os.dup(2)
+            os.dup2(self._file.fileno(), 2)
+        except Exception:
+            # Senza cattura si fa come prima: meglio una superficie non
+            # controllata che nessuna superficie.
+            self._chiudi()
+        return self
+
+    def __exit__(self, *_):
+        if self._copia is None:
+            self._chiudi()
+            return False
+        try:
+            sys.stderr.flush()
+            os.dup2(self._copia, 2)
+            self._file.seek(0)
+            self.testo = self._file.read().decode("utf-8", "replace")
+        except Exception:
+            self.testo = ""
+        finally:
+            self._chiudi()
+        for riga in self._righe_uniche():
+            print(riga, file=sys.stderr)
+        return False
+
+    def _chiudi(self):
+        for chiudi, oggetto in ((os.close, self._copia), (None, self._file)):
+            try:
+                if oggetto is None:
+                    continue
+                chiudi(oggetto) if chiudi else oggetto.close()
+            except Exception:
+                pass
+        self._copia = None
+        self._file = None
+
+    def _righe_uniche(self):
+        """Le stesse quattro righe ripetute cento volte sono una riga."""
+        viste = []
+        for riga in self.testo.splitlines():
+            riga = riga.rstrip()
+            if riga and riga not in viste:
+                viste.append(riga)
+        return viste
+
+    def guasto(self):
+        """La prima riga che dice «non ho disegnato», o stringa vuota."""
+        for riga in self._righe_uniche():
+            basso = riga.lower()
+            for spia in SPIE_GUASTO:
+                if spia in basso:
+                    return riga.strip()
+        return ""
+
+
 class SuperficieSDL:
     """Una finestra, o tutto lo schermo, via SDL.
 
@@ -497,19 +586,43 @@ class SuperficieSDL:
         #
         # L'ordine giusto e' questo: si mette a tacere la console, e poi si
         # prende la scheda. Chi la prende per ultimo la tiene.
-        if not finestra:
-            zittisci_console(console)
-        pygame.display.init()
-        bandiere = 0 if finestra else pygame.FULLSCREEN
-        if not misura and not finestra:
-            misura = (0, 0)             # SDL: la risoluzione corrente
-        self._schermo = pygame.display.set_mode(misura or (0, 0), bandiere)
-        pygame.display.set_caption(titolo)
-        try:
-            pygame.mouse.set_visible(False)
-        except pygame.error:
-            pass
+        with _VoceDiSDL() as voce:
+            if not finestra:
+                zittisci_console(console)
+            pygame.display.init()
+            bandiere = 0 if finestra else pygame.FULLSCREEN
+            if not misura and not finestra:
+                misura = (0, 0)         # SDL: la risoluzione corrente
+            self._schermo = pygame.display.set_mode(misura or (0, 0), bandiere)
+            pygame.display.set_caption(titolo)
+            try:
+                pygame.mouse.set_visible(False)
+            except pygame.error:
+                pass
+            if not finestra:
+                self._primo_giro()
+        guasto = voce.guasto() if not finestra else ""
+        if guasto:
+            # Qui si fallisce apposta. `_apri_superficie` ha un'altra strada
+            # -- `/dev/fb0` -- e su una macchina dove SDL non riesce a
+            # prendere la CRTC quella strada funziona: e' il caso delle
+            # macchine virtuali con `virtio_gpu` dove la scheda e' gia' di
+            # qualcun altro. Meglio un'uscita senza vsync che un vetro nero.
+            self.chiudi()
+            raise OSError("SDL non disegna sul KMS -- %s" % guasto)
         self.width, self.height = self._schermo.get_size()
+
+    def _primo_giro(self):
+        """Tre fotogrammi neri, per far parlare SDL.
+
+        Il guasto non si vede all'apertura: `set_mode()` riesce comunque, e
+        lo scambio di pagina viene tentato solo quando c'e' qualcosa da
+        scambiare. Tre giri bastano perche' anche con il triplo buffer il
+        primo scambio sia stato chiesto -- e, se viene rifiutato, scritto.
+        """
+        self._schermo.fill((0, 0, 0))
+        for _ in range(3):
+            self._pygame.display.flip()
 
     def mostra(self, immagine):
         # Gli eventi vanno consumati anche se non ce ne importa niente:
@@ -591,14 +704,30 @@ class SuperficieFramebuffer:
 
 
 def _apri_superficie(misura, finestra, console="zitta"):
-    """SDL se c'e', framebuffer altrimenti. Con il motivo, se non c'e' niente."""
+    """SDL se c'e' **e disegna**, framebuffer altrimenti.
+
+    La seconda meta' della frase e' la 17.3.2. Prima bastava che SDL si
+    aprisse, e su una macchina dove non riesce a prendere la CRTC si apriva
+    benissimo: restava solo da guardare un vetro nero. Ora la superficie si
+    rifiuta da sola quando ha visto che non ha disegnato, e la scelta cade
+    su `/dev/fb0`, che su quelle stesse macchine funziona.
+
+    Chi ripiega se lo porta scritto addosso (`nota`), perche' la pagina
+    Video lo dica invece di lasciar indovinare.
+    """
     motivi = []
     for classe in (SuperficieSDL, SuperficieFramebuffer):
         try:
-            return classe(misura=misura, finestra=finestra,
-                          console=console)
+            superficie = classe(misura=misura, finestra=finestra,
+                                console=console)
         except Exception as exc:
             motivi.append("%s: %s" % (classe.__name__, exc))
+            continue
+        superficie.nota = "; ".join(motivi)
+        if motivi:
+            print("[display] si ripiega su %s -- %s"
+                  % (classe.__name__, superficie.nota))
+        return superficie
     raise RuntimeError("nessuna uscita video disponibile -- " + "; ".join(motivi))
 
 
@@ -614,6 +743,7 @@ class DisplaySchermo:
         finestra = _vuole_finestra(conf.get("finestra"))
         self._superficie = superficie or _apri_superficie(
             misura, finestra, conf.get("console") or "zitta")
+        self.motivo = getattr(self._superficie, "nota", "") or ""
         schermo = (self._superficie.width, self._superficie.height)
         if (conf.get("tela") or "dmd") == "schermo":
             tela = schermo
