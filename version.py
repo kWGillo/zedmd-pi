@@ -3577,6 +3577,29 @@ Storico:
        una parola sul vetro: quattordici punti in sei file. Adesso il testo
        senza lingua esplicita segue `clock.language`, e una lingua chiesta
        da una pagina web continua a vincere su tutto.
+  17.4.11 **Le due regioni su uno schermo 21:9, senza rimpicciolire niente.**
+       *«Non possiamo riproporzionare la larghezza del layer, per il 21:9, in
+       modo da far stare 2 righe?»* La domanda giusta, e la risposta e'
+       anche meglio: la larghezza non si tocca affatto.
+       La 17.4.10 aveva risolto rimpicciolendo -- scala da dieci a otto, due
+       bande nere ai lati, 2048 pixel invece di 2560. Funzionava, ma pagava
+       la soluzione sul lato sbagliato. Il problema non era la scala: era la
+       **spartizione delle righe**. Le due regioni si dividevano sempre a
+       meta', e su 108 righe logiche la meta' fa 54 -- meno delle 64 che una
+       sorgente disegna, quindi non ci stava e le regioni non si facevano.
+       Adesso, dove la meta' non basta, il contenuto prende **esattamente la
+       sua tela** -- 64 righe -- e l'orologio tutto quello che resta. Su un
+       2560x1080 fa 36 righe di orologio e 64 di contenuto, con il disegno
+       largo tutti i 2560. Trentasei righe logiche su uno schermo ingrandito
+       dieci volte sono 360 pixel di cifre: l'orologio ci sta comodo, e
+       ridimensionarsi lo sa fare dalla 17.2.
+       Dove la meta' basta -- 1024x768, 1920x1080 -- resta la meta' esatta,
+       che e' quello che era stato chiesto allora: «50% dello schermo
+       all'orologio, il restante 50% ai medi».
+       E la domanda che decide se dividere non e' piu' «quante tele da
+       pannello ci stanno», che su un 21:9 rispondeva **una**: e' piu'
+       modesta e piu' giusta -- ci sta una sorgente con la sua tela, piu' un
+       orologio che si legga?
 """
 
-__version__ = "17.4.10"
+__version__ = "17.4.11"

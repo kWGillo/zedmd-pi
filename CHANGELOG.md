@@ -2,6 +2,44 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.11]
+
+### Le due regioni su uno schermo 21:9, senza rimpicciolire niente
+
+*«Non possiamo riproporzionare la larghezza del layer, per il 21:9, in modo da
+far stare 2 righe?»*
+
+La domanda giusta — e la risposta è anche meglio: la larghezza non si tocca
+affatto.
+
+La 17.4.10 aveva risolto rimpicciolendo: scala da dieci a otto, due bande nere
+ai lati, 2048 pixel invece di 2560. Funzionava, ma pagava la soluzione sul lato
+sbagliato. Il problema non era la scala, era la **spartizione delle righe**: le
+due regioni si dividevano sempre a metà, e su 108 righe logiche la metà fa 54 —
+meno delle 64 che una sorgente disegna. Non ci stava, e per questo le regioni non
+si formavano.
+
+Adesso, dove la metà non basta, il contenuto prende **esattamente la sua tela**
+e l'orologio tutto quello che resta:
+
+| | righe logiche | orologio | contenuto |
+|---|---|---|---|
+| 1024×768 | 192 | 88 | 96 |
+| 1920×1080 | 154 | 69 | 77 |
+| **2560×1080** | **108** | **36** | **64** |
+| 3440×1440 | 110 | 38 | 64 |
+
+Trentasei righe logiche su uno schermo ingrandito dieci volte sono 360 pixel di
+cifre: l'orologio ci sta comodo, e ridimensionarsi lo sa fare dalla 17.2. Il
+disegno resta largo tutti i 2560.
+
+Dove la metà basta resta la metà esatta, che è quello che era stato chiesto
+allora: *«50% dello schermo all'orologio, il restante 50% ai medi»*.
+
+E la domanda che decide se dividere non è più «quante tele da pannello ci
+stanno» — che su un 21:9 rispondeva **una** — ma una più modesta e più giusta:
+ci sta una sorgente con la sua tela, più un orologio che si legga?
+
 ## [17.4.10]
 
 ### Due regioni anche su uno schermo ultralargo

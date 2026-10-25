@@ -83,20 +83,18 @@ def luce(immagine):
                for banda in immagine.split())
 
 
-sep("1. Il moltiplicatore e' intero, e il piu' grande che lascia due tele")
+sep("1. Il moltiplicatore e' intero e il piu' grande che sta dentro")
 
-# Dalla 17.4.10 non si prende piu' la scala **massima** ma la piu' grande che
-# lascia stare due tele in altezza: su uno schermo molto largo la massima
-# riempie la larghezza e lascia troppe poche righe logiche per le due
-# regioni. Dove la massima gia' lasciava due tele -- quasi tutti gli schermi
-# -- il conto da' lo stesso numero di prima.
+# La 17.4.10 aveva provato a prendere una scala **piu' piccola** della
+# massima, per far stare due tele intere in altezza su uno schermo 21:9.
+# Funzionava, ma lasciava due bande nere ai lati. La 17.4.11 torna alla
+# scala massima -- la larghezza si prende tutta -- e risolve dall'altra
+# parte: spartendo diversamente le righe fra le due regioni.
 
 for misura in MISURE:
     c = display.Compositore(TELA, misura)
     x, y, largo, alto = c.riquadro
-    due = min(misura[0] // TELA[0], misura[1] // (2 * TELA[1]))
-    atteso = due if due >= 1 else min(misura[0] // TELA[0],
-                                      misura[1] // TELA[1])
+    atteso = min(misura[0] // TELA[0], misura[1] // TELA[1])
     esigi(c.scala == atteso,
           "%dx%d: scala %s, attesa %d" % (misura[0], misura[1], c.scala, atteso))
     esigi(largo == TELA[0] * atteso and alto == TELA[1] * atteso,
@@ -106,14 +104,20 @@ for misura in MISURE:
     esigi(abs((misura[0] - largo) - 2 * x) <= 1
           and abs((misura[1] - alto) - 2 * y) <= 1,
           "   centrato, con le bande uguali")
-    # E la prova che conta, quella che nasce dallo schermo 21:9: dove ci
-    # stanno due tele, la tela logica deve essere alta abbastanza da
-    # contenerle, se no le due regioni non si formano e resta un solo
-    # riquadro enorme.
+    # E la prova che conta, quella che nasce dallo schermo 21:9: su
+    # qualunque monitor le due regioni si devono poter fare, e il contenuto
+    # deve ricevere **almeno** la sua tela da 64 righe -- se no una sorgente
+    # non ci sta e viene tagliata.
     if misura[1] >= 2 * TELA[1] and misura[0] >= TELA[0]:
-        esigi(c.tela_logica[1] >= 2 * TELA[1] and c.quante >= 2,
-              "   e la tela logica tiene due tele (%d righe, %d tele)"
-              % (c.tela_logica[1], c.quante))
+        r = c.regioni(True)
+        esigi(c.due_regioni,
+              "   e le due regioni si possono fare (%d righe logiche)"
+              % c.tela_logica[1])
+        esigi(r["contenuto"][3] >= TELA[1],
+              "   con almeno %d righe al contenuto (ne ha %d)"
+              % (TELA[1], r["contenuto"][3]))
+        esigi(r["orologio"][3] >= 24,
+              "   e abbastanza all'orologio (%d righe)" % r["orologio"][3])
 
 c = display.Compositore(TELA, (1920, 1080))
 # Il vincolo e' la larghezza, non l'altezza: 1920 / 256 fa sette e mezzo, e

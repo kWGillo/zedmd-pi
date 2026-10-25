@@ -343,6 +343,48 @@ esigi(doom_tela.getpixel((512, 384)) == (40, 0, 0)
       "quella di Doom sta in mezzo, alta 640 su 768")
 
 
+sep("11-bis. Le due regioni su uno schermo 21:9 (17.4.11)")
+
+# *«Non possiamo riproporzionare la larghezza del layer, per il 21:9, in modo
+# da far stare 2 righe?»* La domanda giusta, e la risposta e' ancora meglio:
+# non si tocca la larghezza -- che su un 21:9 si prende tutta -- si spartiscono
+# diversamente le righe. Il contenuto prende la sua tela da 64, l'orologio
+# tutto quello che resta.
+
+for schermo, attese in (((1024, 768), "meta'"),
+                        ((1920, 1080), "meta'"),
+                        ((2560, 1080), "spartite"),
+                        ((3440, 1440), "spartite")):
+    c = display.Compositore(TELA, schermo, {"filtro_dmd": False})
+    r = c.regioni(True)
+    orologio, contenuto = r["orologio"][3], r["contenuto"][3]
+    lh = c.tela_logica[1]
+    esigi(c.scala == min(schermo[0] // 256, schermo[1] // 64),
+          "%dx%d: la scala resta la piu' grande, la larghezza si prende tutta"
+          % schermo)
+    esigi(c.due_regioni,
+          "%dx%d: le due regioni si fanno (%d righe logiche)"
+          % (schermo[0], schermo[1], lh))
+    esigi(contenuto >= 64,
+          "%dx%d: al contenuto almeno la sua tela (%d righe)"
+          % (schermo[0], schermo[1], contenuto))
+    esigi(orologio >= 24,
+          "%dx%d: e all'orologio %d righe, che si leggono"
+          % (schermo[0], schermo[1], orologio))
+    if attese == "meta'":
+        esigi(abs(contenuto - lh // 2) <= 1,
+              "%dx%d: dove la meta' basta resta la meta' esatta, come chiesto"
+              " nella 17.2" % schermo)
+    else:
+        esigi(contenuto == 64,
+              "%dx%d: dove non basta, il contenuto prende esattamente 64"
+              % schermo)
+
+c = display.Compositore(TELA, (256, 64), {"filtro_dmd": False})
+esigi(not c.due_regioni,
+      "sul pannello non si divide niente: 64 righe sono una tela sola")
+
+
 sep("11. Il lampeggio dei due punti non sposta le cifre (17.3.3)")
 
 # *«Quando i due punti scompaiono, l'ultima cifra si sposta a sinistra di

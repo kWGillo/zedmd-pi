@@ -112,6 +112,22 @@ riprogettazione, non una moltiplicazione.
 | orologio con contenuto | 88 |
 | contenuto | 96 |
 
+**Su uno schermo molto largo le righe si spartiscono diversamente.** Dalla
+17.4.11: su un 21:9 la tela logica è bassa — un 2560×1080 ingrandito dieci
+volte dà 108 righe logiche — e la metà farebbe 54, meno delle 64 righe che una
+sorgente disegna. Lì il contenuto prende **esattamente la sua tela**, 64 righe,
+e l'orologio tutto quello che resta:
+
+| | righe logiche | orologio | contenuto |
+|---|---|---|---|
+| 1024×768 | 192 | 88 | 96 |
+| 1920×1080 | 154 | 69 | 77 |
+| 2560×1080 | 108 | 36 | 64 |
+| 3440×1440 | 110 | 38 | 64 |
+
+Dove la metà basta resta la metà esatta. E la larghezza non si tocca mai: su un
+21:9 il disegno si prende tutti i 2560 pixel.
+
 # 4. La pagina Video
 
 Dalla 17.3.4 la voce **Video** non compare nel menu su un Raspberry che sta

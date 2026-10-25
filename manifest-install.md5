@@ -20,13 +20,13 @@ c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 6f6f3eda48e12c7f3baf5f9cbe1efda0  diagnostica/prova_nati_e_morti.py
 826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
-72931dc03f74bec40978aa3ab61f8278  diagnostica/prova_regioni.py
-91312161068340397a56f5350213223a  diagnostica/prova_schermo.py
+0d5aff41c6244dc4ac326b3cc169fd6b  diagnostica/prova_regioni.py
+aa3e8267ebe85aedb58b3cf9f981652a  diagnostica/prova_schermo.py
 3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
 1fafe8f1f25c976ce09b10c613b98f86  diagnostica/schermo_dal_vivo.py
 a508962738ddb4832dd5cca7d6795e9f  diagnostica/traduzioni.tsv
-adf9a961f1dcfd13ca0fb1b8d56c5d1f  display.py
+9b72493d339c8c69d9058edd5cc1b45c  display.py
 7f7ba2ea976ec345c5be99c1478eef09  dmdconf.py
 26d1cf49cb3897c06a3bdef0c2325b6a  dmdd.py
 0e17dea503190ddc88c7c33c37b5e19f  domande.en.csv
@@ -179,7 +179,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 8e4da1571d2f55b9211b110179be1607  templates/updates.html
 12de3dfc1ea2b2ed0fe2fd8a25723388  templates/video.html
-fab6f14b9ea72b877b72553cf03bd92c  version.py
+f31704bc03f18481aac3ba544d360ddc  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 43b04420e7a48c57a0315b40e42e902e  webui.py

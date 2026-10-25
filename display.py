@@ -74,6 +74,12 @@ def tela_dmd(cfg):
 
 # --------------------------------------------------------- il filtro DMD
 
+# Le righe logiche che l'orologio vuole almeno, quando divide lo schermo con
+# una sorgente. Sotto questa misura le cifre diventano un francobollo e tanto
+# vale non dividere affatto.
+MINIMO_OROLOGIO = 32
+
+
 class Compositore:
     """Dalla tela al fotogramma da mandare allo schermo.
 
@@ -142,28 +148,17 @@ class Compositore:
         if self.volute:
             scala = min(sw // tw, sh // (th * self.volute))
         else:
-            # **La scala piu' grande non e' sempre la scala giusta.**
+            # La scala piu' grande che sta dentro, e la larghezza si prende
+            # tutta.
             #
-            # La piu' grande e' quella che riempie la larghezza, e su uno
-            # schermo molto largo lascia troppo poche righe logiche: su un
-            # 2560x1080 il moltiplicatore massimo e' dieci, la tela logica
-            # viene alta 108 righe, e 108 non bastano a due tele da 64. Il
-            # risultato e' uno schermo enorme con **una sola** regione --
-            # niente orologio sopra e media sotto, che e' tutto il senso
-            # della 17.2 su un monitor.
-            #
-            # Quindi si prende la scala piu' grande che lascia stare **due**
-            # tele in altezza. Su un 2560x1080 scende da dieci a otto: il
-            # disegno e' largo 2048 invece di 2560, con due bande ai lati, e
-            # in cambio ci sono 135 righe logiche e le due regioni. Dove la
-            # scala massima gia' lasciava due tele -- 1024x768, 1920x1080 --
-            # questo conto da' lo stesso numero di prima, e non cambia
-            # niente.
-            scala = min(sw // tw, sh // (2 * th))
-            if scala < 1:
-                # Due tele non ci stanno a nessuna scala: si torna al
-                # massimo. E' il pannello, ed e' uno schermo molto basso.
-                scala = min(sw // tw, sh // th)
+            # Nella 17.4.10 questa riga chiedeva la scala piu' grande che
+            # lasciasse stare **due** tele in altezza, per far nascere le due
+            # regioni su uno schermo 21:9. Funzionava, ma al prezzo di due
+            # bande nere ai lati -- su un 2560x1080 il disegno scendeva a
+            # 2048. La 17.4.11 risolve il problema dall'altra parte, dove
+            # andava risolto: non rimpicciolendo tutto, ma **spartendo
+            # diversamente le righe** fra le due regioni. Vedi `regioni`.
+            scala = min(sw // tw, sh // th)
         if scala >= 1:
             largo, alto = tw * scala, th * scala
             quante = max(1, sh // alto)
@@ -203,19 +198,50 @@ class Compositore:
         la tela logica meno il bordo: su 1024x768 sono 256x184 pixel logici,
         cioe' cifre tre volte piu' alte di quelle del pannello.
 
-        Quando c'e' qualcos'altro da mostrare, lo schermo si divide a meta':
-        l'orologio sale nella meta' di sopra e si rimpicciolisce, e la meta'
-        di sotto ospita una sorgente per volta. Una sorgente disegna sempre
-        sulla sua tela da 256x64 e li' dentro si centra: non si stira e non
-        si ridisegna, perche' quelle misure sono le sue.
+        Quando c'e' qualcos'altro da mostrare, lo schermo si divide **a
+        meta'**: l'orologio sale nella meta' di sopra e si rimpicciolisce, e
+        la meta' di sotto ospita una sorgente per volta. Una sorgente
+        disegna sempre sulla sua tela da 256x64 e li' dentro si centra: non
+        si stira e non si ridisegna, perche' quelle misure sono le sue.
+
+        **Tranne dove la meta' non basta.** E' la 17.4.11, e nasce da uno
+        schermo 21:9: su un 2560x1080 la tela logica e' alta 108 righe, e la
+        meta' fa 54 -- meno delle 64 righe che una sorgente disegna. La
+        sorgente non ci starebbe, e per questo le due regioni non si
+        formavano affatto.
+
+        La risposta non e' rimpicciolire tutto il disegno: e' dare al
+        contenuto **esattamente la sua tela**, 64 righe, e all'orologio
+        tutto quello che resta. Su 108 righe fa 44 di orologio e 64 di
+        contenuto. L'orologio ci sta comodo -- si ridimensiona da sempre, e
+        44 righe logiche su uno schermo ingrandito dieci volte sono 440
+        pixel di cifre.
+
+        Dove la meta' basta -- 1024x768, 1920x1080 -- resta la meta' esatta,
+        che e' quello che era stato chiesto: *«50% dello schermo
+        all'orologio, il restante 50% ai medi»*.
         """
         lw, lh = self.tela_logica
         m = self.margine
         if not con_contenuto:
             return {"orologio": (0, m, lw, max(1, lh - 2 * m))}
         meta = lh // 2
-        return {"orologio": (0, m, lw, max(1, meta - 2 * m)),
-                "contenuto": (0, meta, lw, lh - meta)}
+        alta_contenuto = max(meta, min(self.tela[1], lh - MINIMO_OROLOGIO))
+        taglio = lh - alta_contenuto
+        return {"orologio": (0, m, lw, max(1, taglio - 2 * m)),
+                "contenuto": (0, taglio, lw, lh - taglio)}
+
+    @property
+    def due_regioni(self):
+        """Se su questa tela logica le due regioni hanno senso.
+
+        La domanda non e' «quante tele da pannello ci stanno», che era il
+        conto della 17.2 e su uno schermo 21:9 rispondeva **una** -- 108
+        righe logiche, meno di due tele da 64 -- facendo sparire le regioni
+        proprio dove servivano. La domanda giusta e' piu' modesta: ci sta
+        una sorgente con la sua tela, **piu'** un orologio che si legga?
+        """
+        return self.tela_logica[1] >= self.tela[1] + MINIMO_OROLOGIO
 
     def ridimensiona(self, schermo):
         """Lo schermo e' cambiato misura: si rifanno i conti e la maschera."""
@@ -1046,6 +1072,10 @@ class DisplaySchermo:
         """
         if ((self.cfg.get("video") or {}).get("modo") or "auto") == "singola":
             return 1
+        # Due basta: anche dove non ci stanno due tele **intere**, le due
+        # regioni si possono fare lo stesso spartendo le righe diversamente.
+        if self.compositore.due_regioni:
+            return max(2, self.compositore.quante)
         return self.compositore.quante
 
     def set_brightness(self, value):
