@@ -178,7 +178,7 @@ identico al pixel — il 4:1 impone la colonna a destra, ed è il ragionamento
 che quella colonna l'ha inventata.
 
 Convertiti finora: **Snake** (da 49×15 a 50×36 caselle), **Breakout**,
-**Pongo** e **T-Rex**.
+**Pongo**, **T-Rex**, **Mine vaganti** e **Kingo Bongo**.
 
 Un gioco che scorre di lato — T-Rex, e domani Squadriglia — ha un problema
 in più: lo schermo è più alto ma non più largo, quindi ingrandire le figure

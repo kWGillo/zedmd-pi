@@ -46,12 +46,15 @@ import random
 
 from PIL import Image
 
-from .base import ALTEZZA, LARGHEZZA, Gioco, centra, larghezza_testo, scrivi
+from .base import ALTEZZA as ALTEZZA_BASE
+from .base import LARGHEZZA as LARGHEZZA_BASE
+from .base import (STRISCIA, Gioco, centra, imposta_tela,
+                   larghezza_testo, scrivi)
 
 # ------------------------------------------------------------------ il campo
 
-CIMA = 7                        # sopra, il tabellone
-FONDO = ALTEZZA - 1             # l'ultima riga: la strada
+CIMA = STRISCIA                 # sopra, il tabellone
+FONDO = ALTEZZA_BASE - 1        # l'ultima riga del pannello: la strada
 
 # La fisica. Tutto in pixel e secondi. La velocita' sul tabellone va da 5 a
 # 100; per 1,7 diventa pixel al secondo. Con queste due costanti un tiro a
@@ -190,72 +193,83 @@ class Citta(object):
     secondo sarebbero tempo rubato al pannello.
     """
 
-    def __init__(self, rnd):
-        self.pieno = [bytearray(LARGHEZZA) for _ in range(ALTEZZA)]
-        self.proprietario = [0] * LARGHEZZA       # quale palazzo, per colonna
+    def __init__(self, rnd, largo=LARGHEZZA_BASE, alto=ALTEZZA_BASE,
+                 cima=CIMA, piu_basso=ALTO_PIU_BASSO, stelle=26):
+        self.largo, self.alto = largo, alto
+        self.cima, self.piu_basso = cima, piu_basso
+        self.quante_stelle = stelle
+        self.fondo = alto - 1
+        self.pieno = [bytearray(self.largo) for _ in range(self.alto)]
+        self.proprietario = [0] * self.largo       # quale palazzo, per colonna
         self.palazzi = []                         # (x, larghezza, cima)
         self.finestre = {}                        # (x, y) -> accesa
         # Prima le misure, tutte: le altezze servono tutte insieme per sapere
         # di quanto abbassare il quadro.
         misure = []
         x = 0
-        while x < LARGHEZZA:
+        while x < self.largo:
             largo = rnd.randint(16, 27)
-            if LARGHEZZA - (x + largo) < 14:
-                largo = LARGHEZZA - x
+            if self.largo - (x + largo) < 14:
+                largo = self.largo - x
             misure.append([x, largo, rnd.randint(ALTO_MIN, ALTO_MAX)])
             x += largo
-        abbassa = min(m[2] for m in misure) - ALTO_PIU_BASSO
+        abbassa = min(m[2] for m in misure) - self.piu_basso
         for m in misure:
             m[2] -= abbassa
         for indice, (x, largo, alto) in enumerate(misure):
-            cima = FONDO - alto + 1
+            cima = self.fondo - alto + 1
             self.palazzi.append((x, largo, cima))
             colore = indice % len(COLORI_PALAZZI)
-            for xx in range(x, min(LARGHEZZA, x + largo - 1)):   # un pixel di vicolo
+            for xx in range(x, min(self.largo, x + largo - 1)):   # un pixel di vicolo
                 self.proprietario[xx] = colore
-                for yy in range(cima, ALTEZZA):
+                for yy in range(cima, self.alto):
                     self.pieno[yy][xx] = 1
             # Le finestre: colonne ogni tre pixel, piani ogni quattro, alte due.
             # Si continuano anche sotto la strada: servono al disegno della
             # discesa, dove del palazzo si vede un pezzo piu' in basso.
             for fx in range(x + 2, x + largo - 3, 3):
-                for fy in range(cima + 3, FONDO - 1 + ALZATA, 4):
+                for fy in range(cima + 3, self.fondo - 1 + ALZATA, 4):
                     accesa = rnd.random() < 0.45
                     if accesa:
                         self.finestre[(fx, fy)] = True
                         self.finestre[(fx, fy + 1)] = True
-        self.stelle = [(rnd.randint(0, LARGHEZZA - 1), rnd.randint(CIMA + 1, 30))
-                       for _ in range(26)]
+        # Le stelle riempiono il cielo che c'e', non i ventitre' pixel del
+        # pannello: su una tela alta il cielo e' piu' alto e vuole piu'
+        # stelle, se no diventa una fascia di buio.
+        tetto = min(c for _x, _l, c in self.palazzi)
+        cielo = max(1, tetto - self.cima - 1)
+        self.stelle = [(rnd.randint(0, self.largo - 1),
+                        rnd.randint(self.cima + 1, self.cima + cielo))
+                       for _ in range(self.quante_stelle)]
         self._img = None
         self._estesa = None
 
     def solido(self, x, y):
         xi, yi = int(math.floor(x)), int(math.floor(y))
-        if xi < 0 or xi >= LARGHEZZA or yi < 0:
+        if xi < 0 or xi >= self.largo or yi < 0:
             return False
-        if yi >= ALTEZZA:
+        if yi >= self.alto:
             return True
         return self.pieno[yi][xi] == 1
 
     def cima(self, x):
-        """La prima riga piena della colonna, o FONDO."""
-        for y in range(CIMA, ALTEZZA):
+        """La prima riga piena della colonna, o il fondo."""
+        for y in range(self.cima, self.alto):
             if self.pieno[y][x]:
                 return y
-        return FONDO
+        return self.fondo
 
     def alto_minimo(self):
         """L'altezza del palazzo piu' basso, in pixel."""
-        return min(ALTEZZA - cima for _x, _largo, cima in self.palazzi)
+        return min(self.alto - cima for _x, _largo, cima in self.palazzi)
 
     def buca(self, cx, cy, raggio):
         r2 = raggio * raggio
         for y in range(int(cy - raggio) - 1, int(cy + raggio) + 2):
-            if not 0 <= y < ALTEZZA:
+            if not 0 <= y < self.alto:
                 continue
             for x in range(int(cx - raggio) - 1, int(cx + raggio) + 2):
-                if 0 <= x < LARGHEZZA and (x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2 <= r2:
+                if 0 <= x < self.largo and (x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2 <= r2:
                     self.pieno[y][x] = 0
         self._img = None
         self._estesa = None       # dopo un buco non serve piu': la discesa
@@ -266,13 +280,13 @@ class Citta(object):
             # Se la citta' prolungata c'e' gia' -- l'ha disegnata la discesa
             # -- la citta' e' il suo pezzo di sopra: un disegno invece di due.
             if self._estesa is not None:
-                self._img = self._estesa.crop((0, 0, LARGHEZZA, ALTEZZA))
+                self._img = self._estesa.crop((0, 0, self.largo, self.alto))
                 px = self._img.load()
                 for x, y in self.stelle:
                     if not self.pieno[y][x]:
                         px[x, y] = COLORE_STELLA
             else:
-                self._img = self._disegna(ALTEZZA, stelle=True)
+                self._img = self._disegna(self.alto, stelle=True)
         return self._img
 
     def estesa(self):
@@ -283,7 +297,7 @@ class Citta(object):
         volta per ripresa, e poi ogni fotogramma e' un ritaglio.
         """
         if self._estesa is None:
-            self._estesa = self._disegna(ALTEZZA + ALZATA, stelle=False)
+            self._estesa = self._disegna(self.alto + ALZATA, stelle=False)
         return self._estesa
 
     def _righe(self, y):
@@ -291,25 +305,25 @@ class Citta(object):
         ogni palazzo continua com'era all'ultima riga."""
         if y < 0:
             return None
-        return self.pieno[min(y, ALTEZZA - 1)]
+        return self.pieno[min(y, self.alto - 1)]
 
     def _disegna(self, altezza, stelle):
-        img = Image.new("RGB", (LARGHEZZA, altezza), (0, 0, 0))
+        img = Image.new("RGB", (self.largo, altezza), (0, 0, 0))
         px = img.load()
         if stelle:
             for x, y in self.stelle:
                 if not self.pieno[y][x]:
                     px[x, y] = COLORE_STELLA
-        for y in range(CIMA, altezza):
+        for y in range(self.cima, altezza):
             riga = self._righe(y)
             su = self._righe(y - 1)
             giu = self._righe(y + 1) if y + 1 < altezza else None
-            for x in range(LARGHEZZA):
+            for x in range(self.largo):
                 if not riga[x]:
                     continue
                 bordo = (not su[x]
                          or (x == 0 or not riga[x - 1])
-                         or (x == LARGHEZZA - 1 or not riga[x + 1])
+                         or (x == self.largo - 1 or not riga[x + 1])
                          or (giu is not None and not giu[x]))
                 if bordo:
                     px[x, y] = COLORI_PALAZZI[self.proprietario[x]]
@@ -358,11 +372,12 @@ class Banana(object):
                 continue
             if dentro:
                 return ("gorilla", i)
-        if self.x < -12 or self.x > LARGHEZZA + 12 or self.t > VOLO_MAX:
+        if (self.x < -12 or self.x > citta.largo + 12
+                or self.t > VOLO_MAX):
             return ("fuori", None)
-        if self.y >= FONDO:
+        if self.y >= citta.fondo:
             return ("palazzo", None)
-        if self.y >= CIMA and citta.solido(self.x, self.y):
+        if self.y >= citta.cima and citta.solido(self.x, self.y):
             return ("palazzo", None)
         return None
 
@@ -410,12 +425,44 @@ class Bongo(Gioco):
     MUSICA = MUSICA
 
     COMANDI = ("su", "giu", "sinistra", "destra", "fuoco", "avvia", "esci")
+    TELA_LIBERA = True
+
+    # Quanto del cielo in piu' resta cielo. Il resto va dentro i palazzi.
+    #
+    # E' la scelta che tiene in piedi il gioco. In una parabola conta il
+    # **dislivello fra i tetti**, e quello non cambia: se i palazzi si
+    # allungano tutti insieme verso il basso, la traiettoria e' identica a
+    # quella del pannello e non c'e' niente da ritarare. Il cielo invece non
+    # puo' crescere quanto vuole: a 45 gradi l'apice sta a un quarto della
+    # gittata, e la gittata e' inchiodata dai 256 pixel di larghezza. Con un
+    # cielo tre volte piu' alto la banana non ci arriverebbe mai, e quel
+    # «esce dal bordo di sopra» che fa parte del gioco sparirebbe.
+    #
+    # Quindi: un po' di cielo in piu' -- fino a ventiquattro righe -- e tutto
+    # il resto in altezza dei palazzi. E' «allungare i palazzi e alzare il
+    # cielo stellato», con il numero che dice **quanto**.
+    CIELO_IN_PIU = 24
 
     # ---------------------------------------------------------------- partita
+
+    def _misura(self):
+        """Dove sta la strada e quanto sono alti i palazzi, su questa tela."""
+        self.cima = STRISCIA
+        self.fondo = self.alto - 1
+        avanzo = max(0, self.alto - ALTEZZA_BASE)
+        cielo = min(self.CIELO_IN_PIU, avanzo // 4)
+        # Il palazzo piu' basso del quadro: tre righe sul pannello, e tutto
+        # quello che avanza tolto il cielo in piu'.
+        self.piu_basso = ALTO_PIU_BASSO + (avanzo - cielo)
+        # Le stelle crescono con il cielo e con la larghezza, cosi' la
+        # densita' resta quella del pannello invece di diradarsi.
+        self.quante_stelle = max(26, int(round(
+            26 * (1.0 + cielo / 23.0) * self.largo / LARGHEZZA_BASE)))
 
     def avvia_partita(self, seme=None):
         if seme is not None or not hasattr(self, "_rnd"):
             self._rnd = random.Random(seme)
+        self._misura()
         self.punteggio = 0
         self.vite = 0
         self.livello = 1
@@ -432,7 +479,8 @@ class Bongo(Gioco):
         self._nuova_ripresa(TU)
 
     def _nuova_ripresa(self, chi_comincia):
-        self.citta = Citta(self._rnd)
+        self.citta = Citta(self._rnd, self.largo, self.alto,
+                           self.cima, self.piu_basso, self.quante_stelle)
         n = len(self.citta.palazzi)
         self.gorilla = [self._metti_gorilla(1 if n > 3 else 0, +1, COLORE_TU),
                         self._metti_gorilla(n - 2 if n > 3 else n - 1, -1, COLORE_CPU)]
@@ -738,7 +786,7 @@ class Bongo(Gioco):
     def _sprite(self, px, pixel, x0, y0, colore):
         for x, y, c in pixel:
             xx, yy = int(x0) + x, int(y0) + y
-            if 0 <= xx < LARGHEZZA and CIMA <= yy < ALTEZZA:
+            if 0 <= xx < self.largo and self.cima <= yy < self.alto:
                 if c == "B":
                     px[xx, yy] = colore
                 elif c == "F":
@@ -764,7 +812,7 @@ class Bongo(Gioco):
             # Alzare i palazzi di k e' ritagliare la citta' prolungata k
             # righe piu' in basso: la strada resta l'ultima riga, i tetti
             # sono piu' in alto, e i gorilla stanno sopra i loro tetti.
-            img = self.citta.estesa().crop((0, k, LARGHEZZA, k + ALTEZZA))
+            img = self.citta.estesa().crop((0, k, self.largo, k + self.alto))
             px = img.load()
             # Le stelle stanno ferme: il cielo non scende, scendono i
             # palazzi. Solo quelle che in questo istante non sono coperte.
@@ -787,7 +835,7 @@ class Bongo(Gioco):
                 for dy, larga in ((0, 2), (1, 1), (2, 0)):
                     for dx in range(-larga, larga + 1):
                         yy = g.y - 5 + dy
-                        if CIMA <= yy < ALTEZZA:
+                        if self.cima <= yy < self.alto:
                             px[cx + dx, yy] = COLORE_HUD
         if (self.fase == "mira" and self.iniziata and not self.finita
                 and self._discesa <= 0):
@@ -795,11 +843,11 @@ class Bongo(Gioco):
         if self.banana is not None:
             b = self.banana
             f = int(b.t * 12) % 4
-            if b.y < CIMA:
+            if b.y < self.cima:
                 # Fuori dallo schermo in alto: un segno sulla prima riga.
                 xx = int(b.x)
-                if 0 <= xx < LARGHEZZA:
-                    px[xx, CIMA] = COLORE_BANANA
+                if 0 <= xx < self.largo:
+                    px[xx, self.cima] = COLORE_BANANA
             else:
                 self._sprite(px, _pixel(BANANE[f]), b.x - 1, b.y - 1, None)
         for x, y, grande, durata, resta in self.botti:
@@ -810,7 +858,7 @@ class Bongo(Gioco):
             for k in range(passi):
                 a = 2 * math.pi * k / passi
                 xx, yy = int(round(x + math.cos(a) * r)), int(round(y + math.sin(a) * r))
-                if 0 <= xx < LARGHEZZA and CIMA <= yy < ALTEZZA:
+                if 0 <= xx < self.largo and self.cima <= yy < self.alto:
                     px[xx, yy] = colore
         self._disegna_hud(px)
         return img
@@ -830,7 +878,7 @@ class Bongo(Gioco):
         while d <= lungo:
             xx = int(round(x0 + math.cos(a) * d))
             yy = int(round(y0 - math.sin(a) * d))
-            if 0 <= xx < LARGHEZZA and CIMA <= yy < ALTEZZA:
+            if 0 <= xx < self.largo and self.cima <= yy < self.alto:
                 px[xx, yy] = COLORE_MIRA
             d += 2.0
 
@@ -850,18 +898,18 @@ class Bongo(Gioco):
         self._disegna_vento(px, 150, 3)
         scrivi(px, "LIV %d" % self.livello, 176, 1, COLORE_HUD)
         punti = "TU %d-%d CPU" % (self.riprese[TU], self.riprese[CPU])
-        scrivi(px, punti, LARGHEZZA - larghezza_testo(punti) - 1, 1, COLORE_HUD)
+        scrivi(px, punti, self.largo - larghezza_testo(punti) - 1, 1, COLORE_HUD)
 
         if self._scritta is not None and self.iniziata and not self.finita:
-            centra(px, self._scritta[0], 10, COLORE_TITOLO, larghezza=LARGHEZZA)
+            centra(px, self._scritta[0], 10, COLORE_TITOLO, larghezza=self.largo)
         if not self.iniziata and not self.finita:
             self._riquadro(px, 18)
-            centra(px, "KINGO BONGO", 20, COLORE_TITOLO, larghezza=LARGHEZZA)
-            centra(px, "FUOCO PER PARTIRE", 28, COLORE_HUD, larghezza=LARGHEZZA)
+            centra(px, "KINGO BONGO", 20, COLORE_TITOLO, larghezza=self.largo)
+            centra(px, "FUOCO PER PARTIRE", 28, COLORE_HUD, larghezza=self.largo)
         if self.finita:
             self._riquadro(px, 18)
-            centra(px, "GAME OVER", 20, COLORE_FINE, larghezza=LARGHEZZA)
-            centra(px, "FUOCO PER RIGIOCARE", 28, COLORE_HUD, larghezza=LARGHEZZA)
+            centra(px, "GAME OVER", 20, COLORE_FINE, larghezza=self.largo)
+            centra(px, "FUOCO PER RIGIOCARE", 28, COLORE_HUD, larghezza=self.largo)
 
     @staticmethod
     def _riquadro(px, y0):

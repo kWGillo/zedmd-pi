@@ -2,6 +2,47 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.3]
+
+### Mine vaganti e Kingo Bongo
+
+Sei su tredici.
+
+**Mine vaganti** è vettoriale: le mine ruotano, la nave ruota, e tutto è fatto di
+raggi. Due fattori diversi sui due assi farebbero diventare una mina un'ellisse
+che cambia misura mentre gira — quindi un solo zoom intero, come in T-Rex, e il
+campo che vive in unità.
+
+Qui però il guadagno è doppio: il campo cambia **forma**, dal 4,5:1 del pannello
+a qualcosa di quadrato, e per un campo di asteroidi è esattamente quello che ci
+vuole — c'è davvero dove scappare in verticale. Per questo lo schiacciamento
+verticale delle mine, che sul pannello vale 0,6 perché cinquantasette righe sono
+poche, si rilassa fino a sparire. I semi del fondo seguono la densità per area,
+non il numero.
+
+Il codice di disegno non è stato toccato: il campo si costruisce in unità come
+sempre e si ingrandisce di un intero prima di attaccarlo alla tela. Gli spessori
+delle linee — tre pixel per il bagliore, uno per il filo — vengono su giusti da
+soli.
+
+**Kingo Bongo** non si può ingrandire: i due gorilla devono stare tutti e due
+nello schermo, e le colonne restano 256. È il caso in cui vale la tua
+intuizione — *«allungare un po' i palazzi e creare un cielo stellato più
+elevato»* — e il censimento l'ha confermata con i numeri: in una parabola conta
+il **dislivello fra i tetti**, e quello non cambia se i palazzi si allungano
+tutti insieme verso il basso.
+
+Quindi il palazzo più basso passa da tre righe a centosette, la traiettoria è
+identica a quella del pannello, e non c'è stato niente da ritarare.
+
+Il cielo cresce, ma non quanto la tela. A 45 gradi l'apice sta a un quarto della
+gittata, e la gittata è inchiodata dalla larghezza: con un cielo tre volte più
+alto la banana non ci arriverebbe mai, e quel «esce dal bordo di sopra» che fa
+parte del gioco sparirebbe. Ventotto righe di cielo diventano cinquantuno, e le
+stelle crescono con lui.
+
+Restano Invasori, Squadriglia, Gnam e Super Quiz.
+
 ## [17.4.2]
 
 ### Pongo e T-Rex

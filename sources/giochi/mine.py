@@ -37,13 +37,15 @@ import random
 
 from PIL import Image, ImageDraw
 
-from .base import ALTEZZA, LARGHEZZA, Gioco, centra, scrivi
+from .base import ALTEZZA as ALTEZZA_BASE
+from .base import LARGHEZZA as LARGHEZZA_BASE
+from .base import STRISCIA, Gioco, centra, imposta_tela, scrivi
 
 # ------------------------------------------------------------------ il campo
 
 CIMA = 7                               # sopra, il tabellone
-ALTO = ALTEZZA - CIMA                  # 57 righe di spazio
-LARGO = LARGHEZZA
+ALTO = ALTEZZA_BASE - CIMA             # 57 righe di spazio sul pannello
+LARGO = LARGHEZZA_BASE
 
 # La nave
 ROTAZIONE = 4.2                        # radianti al secondo
@@ -139,13 +141,19 @@ def _avvolgi(d, lato):
 class Mina(object):
     __slots__ = ("x", "y", "vx", "vy", "taglia", "specie", "schiusa", "angolo", "giro")
 
-    def __init__(self, x, y, taglia, specie, rnd, fattore):
+    def __init__(self, x, y, taglia, specie, rnd, fattore,
+                 schiaccia=0.6):
         self.x, self.y = x, y
         self.taglia = taglia
         self.specie = specie
         direzione = rnd.uniform(0, 2 * math.pi)
         v = VELOCITA_MINA[taglia] * fattore
-        self.vx, self.vy = math.cos(direzione) * v, math.sin(direzione) * v * 0.6
+        # Lo schiacciamento verticale esiste perche' sul pannello ci sono
+        # 57 righe contro 256 colonne: senza, le mine passerebbero la vita
+        # a rimbalzare fra il sopra e il sotto. Su un campo quadrato non
+        # serve piu', e lo dice chi costruisce la mina.
+        self.vx = math.cos(direzione) * v
+        self.vy = math.sin(direzione) * v * schiaccia
         self.schiusa = SCHIUSA
         self.angolo = rnd.uniform(0, 2 * math.pi)
         self.giro = rnd.choice((-1, 1)) * rnd.uniform(0.4, 1.0)
@@ -174,6 +182,36 @@ class Mine(Gioco):
 
     # ---------------------------------------------------------------- partita
 
+    TELA_LIBERA = True
+
+    # Oltre due, su 256 colonne, la finestra sul campo diventa cosi' stretta
+    # che una mina attraversa prima che si riesca a girare la nave.
+    ZOOM_MAX = 2
+
+    def _misura(self):
+        """Il campo resta in unita'; cambia quanto e' grande e quanto se ne vede.
+
+        Mine vaganti e' un gioco **vettoriale**: le mine ruotano, la nave
+        ruota, e tutto e' fatto di raggi. Due fattori diversi sui due assi
+        farebbero diventare una mina un'ellisse che cambia misura mentre
+        gira. Quindi un solo zoom intero, come in T-Rex: il campo vive in
+        unita' e si disegna ingrandito.
+
+        Il campo cambia **forma**, non solo misura: dal 4,5:1 del pannello
+        si passa a qualcosa di quadrato, e per un campo di asteroidi e'
+        un guadagno -- c'e' davvero dove scappare in verticale. Per questo
+        lo schiacciamento verticale delle mine, che sul pannello esiste
+        perche' 57 righe sono poche, si rilassa fino a sparire.
+        """
+        self.z = max(1, min(self.ZOOM_MAX, self.alto // ALTEZZA_BASE))
+        self.largo_u = max(64, self.largo // self.z)
+        self.alto_u = max(32, (self.alto - STRISCIA) // self.z)
+        forma = (self.alto_u / float(self.largo_u)) / (ALTO / float(LARGO))
+        self.schiaccia = min(1.0, 0.6 * forma)
+        # I semi del fondo: stessa densita' per area, non stesso numero.
+        self.semi_quanti = max(8, int(round(
+            SEMI * (self.largo_u * self.alto_u) / float(LARGO * ALTO))))
+
     def avvia_partita(self, seme=None):
         if seme is not None or not hasattr(self, "_rnd"):
             self._rnd = random.Random(seme)
@@ -186,11 +224,12 @@ class Mine(Gioco):
         self._eventi = []
         self.suoni_del_frame = ()
         self._prima = set()
+        self._misura()
         self._nave_al_centro()
         self._nuovo_livello()
 
     def _nave_al_centro(self):
-        self.x, self.y = LARGO / 2.0, ALTO / 2.0
+        self.x, self.y = self.largo_u / 2.0, self.alto_u / 2.0
         self.vx = self.vy = 0.0
         self.angolo = -math.pi / 2          # la punta in su
         self.spinge = False
@@ -210,13 +249,15 @@ class Mine(Gioco):
         self._posamine = DURATA_POSAMINE
         self._scritta = ("LIVELLO %d" % self.livello, 2.0)
         # I semi: sparsi, ma nessuno addosso al centro, dove sei tu.
-        while len(self._da_seminare) < SEMI:
-            x = self._rnd.uniform(4, LARGO - 4)
-            y = self._rnd.uniform(3, ALTO - 3)
-            if math.hypot(_avvolgi(x - self.x, LARGO), _avvolgi(y - self.y, ALTO)) > 28:
+        sgombro = 28.0 * min(self.largo_u, self.alto_u) / float(ALTO)
+        while len(self._da_seminare) < self.semi_quanti:
+            x = self._rnd.uniform(4, self.largo_u - 4)
+            y = self._rnd.uniform(3, self.alto_u - 3)
+            if math.hypot(_avvolgi(x - self.x, self.largo_u),
+                          _avvolgi(y - self.y, self.alto_u)) > sgombro:
                 self._da_seminare.append((x, y))
         self._da_seminare.sort()
-        self._riga_posamine = self._rnd.uniform(8, ALTO - 8)
+        self._riga_posamine = self._rnd.uniform(8, self.alto_u - 8)
 
     def fattore(self):
         """Quanto vanno piu' veloci le mine, livello dopo livello."""
@@ -316,8 +357,8 @@ class Mine(Gioco):
         if v > VELOCITA_MAX:
             self.vx *= VELOCITA_MAX / v
             self.vy *= VELOCITA_MAX / v
-        self.x = (self.x + self.vx * dt) % LARGO
-        self.y = (self.y + self.vy * dt) % ALTO
+        self.x = (self.x + self.vx * dt) % self.largo_u
+        self.y = (self.y + self.vy * dt) % self.alto_u
         if "speciale" in premuti_ora and self._riposo_salto <= 0:
             self._salto = DURATA_SALTO
             self._riposo_salto = RIPOSO_SALTO + DURATA_SALTO
@@ -341,7 +382,7 @@ class Mine(Gioco):
         garanzia -- nel gioco originale il salto e' un azzardo, e qui pure."""
         migliore, distanza = None, -1.0
         for _ in range(2):
-            x, y = self._rnd.uniform(0, LARGO), self._rnd.uniform(0, ALTO)
+            x, y = self._rnd.uniform(0, self.largo_u), self._rnd.uniform(0, self.alto_u)
             d = min([self._distanza(x, y, m.x, m.y) - m.raggio
                      for m in self.mine] or [999.0])
             if d > distanza:
@@ -350,7 +391,7 @@ class Mine(Gioco):
         self.vx = self.vy = 0.0
 
     def _distanza(self, x1, y1, x2, y2):
-        return math.hypot(_avvolgi(x2 - x1, LARGO), _avvolgi(y2 - y1, ALTO))
+        return math.hypot(_avvolgi(x2 - x1, self.largo_u), _avvolgi(y2 - y1, self.alto_u))
 
     def _perdi(self):
         self._morto = DURATA_MORTE
@@ -366,7 +407,7 @@ class Mine(Gioco):
     def _rinasci(self):
         # Si rinasce al centro, ma solo quando li' non c'e' niente: altrimenti
         # si aspetta ancora un po', come nell'originale.
-        cx, cy = LARGO / 2.0, ALTO / 2.0
+        cx, cy = self.largo_u / 2.0, self.alto_u / 2.0
         libero = all(self._distanza(cx, cy, m.x, m.y) > m.raggio + 16 for m in self.mine) \
             and all(self._distanza(cx, cy, p[0], p[1]) > 16 for p in self.palle)
         if not libero:
@@ -379,8 +420,8 @@ class Mine(Gioco):
     def _muovi_colpi(self, dt):
         vivi = []
         for c in self.colpi:
-            c[0] = (c[0] + c[2] * dt) % LARGO
-            c[1] = (c[1] + c[3] * dt) % ALTO
+            c[0] = (c[0] + c[2] * dt) % self.largo_u
+            c[1] = (c[1] + c[3] * dt) % self.alto_u
             c[4] -= dt
             if c[4] > 0:
                 vivi.append(c)
@@ -392,7 +433,7 @@ class Mine(Gioco):
         if self._posamine <= 0:
             return
         self._posamine -= dt
-        fronte = LARGO * (1.0 - max(0.0, self._posamine) / DURATA_POSAMINE)
+        fronte = self.largo_u * (1.0 - max(0.0, self._posamine) / DURATA_POSAMINE)
         while self._da_seminare and self._da_seminare[0][0] <= fronte:
             self.semi.append(self._da_seminare.pop(0))
         if self._posamine <= 0:
@@ -404,7 +445,7 @@ class Mine(Gioco):
         """Dove sta la posamine, o None se e' gia' passata."""
         if self._posamine <= 0:
             return None
-        return LARGO * (1.0 - self._posamine / DURATA_POSAMINE), self._riga_posamine
+        return self.largo_u * (1.0 - self._posamine / DURATA_POSAMINE), self._riga_posamine
 
     def _schiudi(self, taglia, quante, specie):
         for _ in range(quante):
@@ -424,7 +465,9 @@ class Mine(Gioco):
                 ammesse = self.specie_ammesse()
                 # La specie nuova del livello si fa vedere di piu'.
                 quale = ammesse[-1] if self._rnd.random() < 0.5 else self._rnd.choice(ammesse)
-            self.mine.append(Mina(seme[0], seme[1], taglia, quale, self._rnd, self.fattore()))
+            self.mine.append(Mina(seme[0], seme[1], taglia, quale,
+                                  self._rnd, self.fattore(),
+                                  self.schiaccia))
 
     def _schiudi_se_serve(self):
         if self._posamine > 0 or self.mine or not self.semi:
@@ -438,8 +481,8 @@ class Mine(Gioco):
                 continue
             m.angolo += m.giro * dt
             if m.magnetica() and self.in_gioco():
-                dx = _avvolgi(self.x - m.x, LARGO)
-                dy = _avvolgi(self.y - m.y, ALTO)
+                dx = _avvolgi(self.x - m.x, self.largo_u)
+                dy = _avvolgi(self.y - m.y, self.alto_u)
                 d = math.hypot(dx, dy) or 1.0
                 m.vx += dx / d * ATTRAZIONE * dt
                 m.vy += dy / d * ATTRAZIONE * dt
@@ -448,22 +491,22 @@ class Mine(Gioco):
                 if v > limite:
                     m.vx *= limite / v
                     m.vy *= limite / v
-            m.x = (m.x + m.vx * dt) % LARGO
-            m.y = (m.y + m.vy * dt) % ALTO
+            m.x = (m.x + m.vx * dt) % self.largo_u
+            m.y = (m.y + m.vy * dt) % self.alto_u
 
     def _muovi_palle(self, dt):
         vive = []
         for p in self.palle:
-            p[0] = (p[0] + p[2] * dt) % LARGO
-            p[1] = (p[1] + p[3] * dt) % ALTO
+            p[0] = (p[0] + p[2] * dt) % self.largo_u
+            p[1] = (p[1] + p[3] * dt) % self.alto_u
             p[4] -= dt
             if p[4] > 0:
                 vive.append(p)
         self.palle = vive
 
     def _lancia_palla(self, m):
-        dx = _avvolgi(self.x - m.x, LARGO)
-        dy = _avvolgi(self.y - m.y, ALTO)
+        dx = _avvolgi(self.x - m.x, self.largo_u)
+        dy = _avvolgi(self.y - m.y, self.alto_u)
         d = math.hypot(dx, dy) or 1.0
         v = VELOCITA_PALLA * self.fattore()
         self.palle.append([m.x, m.y, dx / d * v, dy / d * v, DURATA_PALLA])
@@ -584,8 +627,9 @@ class Mine(Gioco):
         return t
 
     def disegna(self):
-        img = Image.new("RGB", (LARGHEZZA, ALTEZZA), (0, 0, 0))
-        campo = Image.new("RGB", (LARGO, ALTO), (0, 0, 0))
+        img = Image.new("RGB", (self.largo, self.alto), (0, 0, 0))
+        imposta_tela(self.largo, self.alto, (0, 0, self.largo, self.alto))
+        campo = Image.new("RGB", (self.largo_u, self.alto_u), (0, 0, 0))
         d = ImageDraw.Draw(campo)
         tratti = self._tratti_campo()
         # Il campo si riattacca: chi e' vicino a un bordo si disegna anche
@@ -595,14 +639,14 @@ class Mine(Gioco):
             xs, ys = (a[0], b[0]), (a[1], b[1])
             spost_x = [0]
             if min(xs) < 0:
-                spost_x.append(LARGO)
-            if max(xs) >= LARGO - 1:
-                spost_x.append(-LARGO)
+                spost_x.append(self.largo_u)
+            if max(xs) >= self.largo_u - 1:
+                spost_x.append(-self.largo_u)
             spost_y = [0]
             if min(ys) < 0:
-                spost_y.append(ALTO)
-            if max(ys) >= ALTO - 1:
-                spost_y.append(-ALTO)
+                spost_y.append(self.alto_u)
+            if max(ys) >= self.alto_u - 1:
+                spost_y.append(-self.alto_u)
             for ox in spost_x:
                 for oy in spost_y:
                     copie.append(((a[0] + ox, a[1] + oy), (b[0] + ox, b[1] + oy), colore))
@@ -611,13 +655,30 @@ class Mine(Gioco):
         pc = campo.load()
         # I semi: un puntino fioco ciascuno, come sul fosforo.
         for x, y in self.semi:
-            pc[int(x) % LARGO, int(y) % ALTO] = COLORE_SEME
+            pc[int(x) % self.largo_u, int(y) % self.alto_u] = COLORE_SEME
         for a, b, colore in copie:
             d.line([a, b], fill=colore, width=1)
-        img.paste(campo, (0, CIMA))
+        # Il campo e' disegnato in unita', e si ingrandisce di un intero: i
+        # punti restano punti invece di diventare poltiglia interpolata, ed
+        # e' la stessa scelta del compositore e dei giochi.
+        if self.z > 1:
+            campo = campo.resize((self.largo_u * self.z, self.alto_u * self.z),
+                                 Image.NEAREST)
+        img.paste(campo, (0, STRISCIA))
         px = img.load()
         self._disegna_hud(ImageDraw.Draw(img), px)
         return img
+
+    def _riga(self, quota):
+        """Una riga del pannello portata su questa tela, per le scritte."""
+        return int(round(quota * self.alto / float(ALTEZZA_BASE)))
+
+    def _velo(self, d, alto, basso):
+        """Il fondo nero sotto le scritte, largo quanto la scritta piu' lunga."""
+        larga = len("FUOCO PER RIGIOCARE") * 4 + 10
+        x0 = max(0, (self.largo - larga) // 2)
+        d.rectangle([x0, self._riga(alto), x0 + larga, self._riga(basso)],
+                    fill=(0, 0, 0))
 
     def _disegna_hud(self, d, px):
         scrivi(px, "%06d" % self.punteggio, 1, 1, COLORE_TITOLO)
@@ -625,16 +686,18 @@ class Mine(Gioco):
         scrivi(px, "LIV %d" % self.livello, 76, 1, COLORE_HUD)
         # Le vite: navette a destra.
         for i in range(max(0, min(8, self.vite))):
-            x0 = LARGHEZZA - 5 - i * 7
+            x0 = self.largo - 5 - i * 7
             for (a, b) in self._sagoma_nave(x0, 3, -math.pi / 2, 0.6):
                 d.line([a, b], fill=COLORE_NAVE, width=1)
         testo, resta = self._scritta
         if resta > 0 and self.iniziata and not self.finita:
             centra(px, testo, 1, COLORE_HUD, sinistra=100, larghezza=80)
         if not self.iniziata and not self.finita:
-            d.rectangle([80, 22, 176, 45], fill=(0, 0, 0))
-            centra(px, "MINE VAGANTI", 26, COLORE_TITOLO, larghezza=LARGHEZZA)
-            centra(px, "FUOCO PER PARTIRE", 36, COLORE_HUD, larghezza=LARGHEZZA)
+            self._velo(d, 22, 45)
+            centra(px, "MINE VAGANTI", self._riga(26), COLORE_TITOLO,
+                   larghezza=self.largo)
+            centra(px, "FUOCO PER PARTIRE", self._riga(36), COLORE_HUD,
+                   larghezza=self.largo)
             # Le quattro specie, come promemoria, ai lati del titolo.
             for i, specie in enumerate(SPECIE):
                 x = (30, 55, 201, 226)[i]
@@ -643,6 +706,8 @@ class Mine(Gioco):
                 for j in range(len(pts)):
                     d.line([pts[j], pts[(j + 1) % len(pts)]], fill=COLORE_MINA[specie])
         if self.finita:
-            d.rectangle([80, 24, 176, 45], fill=(0, 0, 0))
-            centra(px, "GAME OVER", 27, COLORE_FINE, larghezza=LARGHEZZA)
-            centra(px, "FUOCO PER RIGIOCARE", 36, COLORE_HUD, larghezza=LARGHEZZA)
+            self._velo(d, 24, 45)
+            centra(px, "GAME OVER", self._riga(27), COLORE_FINE,
+                   larghezza=self.largo)
+            centra(px, "FUOCO PER RIGIOCARE", self._riga(36), COLORE_HUD,
+                   larghezza=self.largo)

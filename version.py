@@ -3390,6 +3390,36 @@ Storico:
        due funzioni di disegno, e nient'altro del gioco sa che esista.
        La prova lo mostra: stessa partita, stesso seme, **stesso punteggio**
        sulle due tele, per tutti e quattro i giochi convertiti.
+  17.4.3 **Mine vaganti e Kingo Bongo.** Sei su tredici.
+       **Mine vaganti** e' vettoriale: le mine ruotano, la nave ruota, e
+       tutto e' fatto di raggi. Due fattori diversi sui due assi farebbero
+       diventare una mina un'ellisse che cambia misura mentre gira. Quindi
+       uno zoom intero solo, come in T-Rex, e il campo che vive in unita'.
+       Qui pero' il guadagno e' doppio: il campo cambia **forma**, dal
+       4,5:1 del pannello a qualcosa di quadrato, e per un campo di
+       asteroidi e' esattamente quello che ci vuole -- c'e' davvero dove
+       scappare in verticale. Per questo lo schiacciamento verticale delle
+       mine, che sul pannello vale 0,6 perche' cinquantasette righe sono
+       poche, si rilassa fino a sparire. I semi del fondo seguono la
+       densita' per area, non il numero.
+       Il disegno non e' stato toccato: il campo si costruisce in unita'
+       come sempre e si ingrandisce di un intero prima di attaccarlo alla
+       tela. Gli spessori delle linee -- tre pixel per il bagliore, uno per
+       il filo -- vengono su giusti da soli.
+       **Kingo Bongo** non si puo' ingrandire: i due gorilla devono stare
+       tutti e due nello schermo, e le colonne restano 256. E' il caso in
+       cui vale la tua intuizione, e il censimento l'ha confermata con i
+       numeri: in una parabola conta il **dislivello fra i tetti**, e quello
+       non cambia se i palazzi si allungano tutti insieme verso il basso.
+       Quindi i palazzi si allungano -- il piu' basso passa da tre righe a
+       centosette -- e la traiettoria e' identica a quella del pannello,
+       senza ritarare niente.
+       Il cielo cresce, ma non quanto la tela: a 45 gradi l'apice sta a un
+       quarto della gittata, e la gittata e' inchiodata dalla larghezza. Con
+       un cielo tre volte piu' alto la banana non ci arriverebbe mai, e quel
+       «esce dal bordo di sopra» che fa parte del gioco sparirebbe. Ventotto
+       righe di cielo diventano cinquantuno, e le stelle crescono con lui.
+       Restano Invasori, Squadriglia, Gnam e Super Quiz.
 """
 
-__version__ = "17.4.2"
+__version__ = "17.4.3"

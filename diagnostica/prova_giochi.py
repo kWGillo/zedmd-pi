@@ -37,6 +37,8 @@ from sources.giochi.serpente import Serpente              # noqa: E402
 from sources.giochi.mattoni import Mattoni                # noqa: E402
 from sources.giochi.pongo import Pongo                    # noqa: E402
 from sources.giochi.trex import TRex                      # noqa: E402
+from sources.giochi.mine import Mine                      # noqa: E402
+from sources.giochi.bongo import Bongo                    # noqa: E402
 
 esiti = []
 
@@ -68,7 +70,7 @@ ALTA = (256, 192)
 
 sep("1. Il campo e il tabellone")
 
-for classe in (Serpente, Mattoni, Pongo, TRex):
+for classe in (Serpente, Mattoni, Pongo, TRex, Mine, Bongo):
     g = classe()
     esigi((g.largo, g.alto) == (256, 64),
           "%s: di serie la tela e' quella del pannello" % g.nome)
@@ -252,6 +254,58 @@ esigi(pa.punteggio == al.punteggio,
       "trex: stesso punteggio dopo duecento passi (%d e %d) -- il mondo e'"
       " lo stesso, cambia solo quanto se ne vede"
       % (pa.punteggio, al.punteggio))
+
+
+sep("6-ter. Mine vaganti e Kingo Bongo (17.4.3)")
+
+m = Mine()
+esigi((m.z, m.largo_u, m.alto_u) == (1, 256, 57),
+      "mine: sul pannello il campo e' 256x57 a zoom uno")
+esigi(abs(m.schiaccia - 0.6) < 1e-9 and m.semi_quanti == 21,
+      "mine: schiacciamento 0,6 e ventuno semi, come sempre")
+
+m = Mine()
+m.configura_tela(*ALTA)
+esigi(m.z == 2 and m.alto_u > m.largo_u / 2,
+      "mine: su una tela alta zoom due, e il campo diventa quasi quadrato")
+esigi(abs(m.schiaccia - 1.0) < 1e-9,
+      "mine: e lo schiacciamento verticale sparisce, che li' non serve piu'")
+
+pa = gioca(Mine, 150)
+al = gioca(Mine, 150, ALTA)
+esigi(pa.punteggio == al.punteggio and len(pa.mine) == len(al.mine),
+      "mine: stessa partita sulle due tele (%d punti, %d mine)"
+      % (pa.punteggio, len(pa.mine)))
+
+
+def tetti(gioco):
+    return sorted(c for _x, _l, c in gioco.citta.palazzi)
+
+
+b = Bongo()
+esigi((b.cima, b.fondo, b.piu_basso) == (7, 63, 3),
+      "bongo: sul pannello la strada e' la riga 63 e il palazzo piu' basso"
+      " e' di tre righe")
+esigi(len(b.citta.stelle) == 26, "bongo: e le stelle sono ventisei")
+profilo_pannello = tetti(b)
+
+b = Bongo()
+b.configura_tela(*ALTA)
+esigi(b.fondo == 191 and b.piu_basso > 100,
+      "bongo: su una tela alta la strada scende in fondo e i palazzi si"
+      " allungano (il piu' basso e' di %d righe)" % b.piu_basso)
+profilo_alto = tetti(b)
+esigi(abs((profilo_pannello[-1] - profilo_pannello[0])
+          - (profilo_alto[-1] - profilo_alto[0])) <= 6,
+      "bongo: il **dislivello** fra i tetti resta quello -- ed e' l'unica"
+      " cosa che conta in una parabola")
+cielo = profilo_alto[0] - b.cima
+esigi(24 <= cielo <= 60,
+      "bongo: il cielo sopra il tetto piu' alto cresce ma resta una fascia"
+      " (%d righe): se crescesse quanto la tela, la banana non ci"
+      " arriverebbe piu'" % cielo)
+esigi(len(b.citta.stelle) > 26,
+      "bongo: e le stelle crescono col cielo, se no si dirada")
 
 
 sep("7. La tela arriva davvero fino al gioco (17.4.1)")
