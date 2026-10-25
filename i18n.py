@@ -1990,21 +1990,22 @@ STRINGS = {
     "video.giochi.pieno": ("Stirati a tutto schermo", "Stretched to full screen"),
     # Le fasce, dalla 17.1: la tela e' 4:1 e lo schermo no, quindi le bande
     # nere sopra e sotto sono alte un numero esatto di tele.
+    # Le due regioni, dalla 17.2: l'orologio in cima e il contenuto sotto.
     "video.modo": ("Come disegnare", "How to draw"),
-    "video.modo.auto": ("A fasce, se ci stanno", "In bands, if they fit"),
-    "video.modo.fasce": ("A fasce", "In bands"),
+    "video.modo.auto": ("A regioni, se ci stanno", "In regions, if they fit"),
+    "video.modo.regioni": ("A regioni", "In regions"),
     "video.modo.singola": ("Una tela sola, al centro", "A single canvas, centred"),
-    "video.fasce": ("Quante fasce", "How many bands"),
-    "video.fasce.auto": ("Quante ce ne stanno", "As many as fit"),
-    "video.fasce.ora": ("Fasce", "Bands"),
-    "video.fasce.sola": ("Una sola, al centro", "One only, centred"),
-    "video.fasce.quante": ("%(quante)d da %(largo)d×%(alto)d",
-                           "%(quante)d of %(largo)d×%(alto)d"),
-    "video.fasce.hint": (
-        "Poche fasce grandi o tante piccole: a 1920×1080 sono due da 1792, "
-        "o quattro da 1024.",
-        "Few large bands or many small: at 1920×1080 that is two of 1792, or "
-        "four of 1024."),
+    "video.tela.ora": ("Tela logica", "Logical canvas"),
+    "video.regioni.ora": ("Regioni", "Regions"),
+    "video.regioni.due": ("Orologio sopra, contenuto sotto",
+                          "Clock above, content below"),
+    "video.regioni.una": ("Una sola: l'orologio prende tutto",
+                          "One only: the clock takes it all"),
+    "video.regioni.hint": (
+        "Da solo l'orologio prende tutta l'altezza; con qualcos'altro scende "
+        "al cinquanta per cento.",
+        "Alone the clock takes the full height; with anything else it drops "
+        "to fifty per cent."),
     "video.giochi.hint": (
         "I giochi sono disegnati su 256×64: ingranditi di un intero i pixel "
         "restano pixel.",

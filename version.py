@@ -3071,6 +3071,34 @@ Storico:
        prima, verificato uno per uno: il pannello LED non si muove di un
        pixel. Non e' fortuna, e' il motivo per cui la conversione si e' fatta
        cosi' invece che con un secondo layout da tenere allineato a mano.
+  17.2 **Due regioni: l'orologio grande, e il contenuto sotto.** *«Non mi
+       piace la soluzione a tre livelli. Con l'orologio da solo, va
+       ingrandito l'orologio.»* Le tre fasce uguali della 17.1 lasciano il
+       posto a **due regioni**: da solo l'orologio disegna su tutta la tela
+       logica -- a 1024x768 con scala 4 sono 256x192 pixel logici, tre volte
+       le righe del pannello -- e le cifre crescono con lui; quando c'e'
+       qualcos'altro da mostrare scende al cinquanta per cento e la meta' di
+       sotto e' del contenuto.
+       **Cresce la tela logica, non la risoluzione**, ed e' il punto che
+       tiene in piedi tutto: il filtro DMD funziona perche' ogni pixel della
+       tela diventa una cella di celle intere. Disegnando l'orologio a
+       1024x384 veri i punti sparirebbero, e le due meta' dello schermo non
+       si somiglierebbero piu'. Crescendo la tela logica i pixel ci sono
+       ancora, sono solo di piu'.
+       Nella meta' di sotto ci va **una** sorgente, scelta dalla priorita'
+       come ha sempre fatto l'arbitro: finche' un aereo sta passando resta
+       l'aereo. Le sorgenti non si toccano -- disegnano su 256x64 perche'
+       quelle misure sono le loro -- e dentro la regione si centrano senza
+       stirarsi. Restano a schermo intero le interattive (`in_fascia`), chi
+       tiene la presa, e una sorgente forzata a mano.
+       L'orologio cambia misura mentre il programma gira, da 184 righe
+       logiche a 88 e viceversa: `ridimensiona` invece di ricostruirlo, che
+       butterebbe via l'offset scelto dall'utente e il giro degli orari.
+       `video.modo` diventa auto, regioni, singola -- e una configurazione
+       della 17.1 che dice ancora "fasce" vuol dire "regioni", che e' la
+       stessa intenzione. La chiave `video.fasce` non serve piu'.
+       Prova nuova: `diagnostica/prova_regioni.py`, 46 controlli; via la
+       `prova_fasce.py`, che provava un meccanismo che non c'e' piu'.
 """
 
-__version__ = "17.1.1"
+__version__ = "17.2"

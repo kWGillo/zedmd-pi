@@ -226,6 +226,21 @@ class ClockSource(Source):
         # che esistano un inverter, un contatore e un broker MQTT. Sa che
         # qualcuno ogni tanto gli da' una riga da scrivere al centro.
         self.energia = None
+        self.ridimensiona(width, height)
+
+    def ridimensiona(self, width, height):
+        """La tela ha cambiato misura: si rifanno tutte le proporzioni.
+
+        Su un monitor la regione dell'orologio non e' fissa: da solo
+        prende tutta l'altezza, e quando arriva qualcos'altro scende al
+        cinquanta per cento. Il runtime chiama questo invece di ricostruire
+        la sorgente, che butterebbe via il suo stato -- l'offset scelto
+        dall'utente, il giro degli orari del mondo, la firma del
+        fotogramma precedente.
+        """
+        self.width = width
+        self.height = height
+        self._signature = None
         # Dalla 17.2 l'orologio disegna anche su tele piu' alte delle 64
         # righe del pannello: su un monitor la sua regione e' 256x192, o
         # 256x96 quando divide lo schermo con qualcos'altro.

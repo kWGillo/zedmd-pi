@@ -22,10 +22,11 @@
     <tr><td>{{ t('video.schermo.ora') }}</td>
         <td class="mono">{{ schermo_largo }}&times;{{ schermo_alto }}
             {%- if scala %} &middot; &times;{{ scala }}{% endif %}</td></tr>
-    <tr><td>{{ t('video.fasce.ora') }}</td>
-        <td>{% if quante > 1 %}{{ t('video.fasce.quante', quante=quante,
-                                     largo=banda_largo, alto=banda_alto) }}
-            {%- else %}{{ t('video.fasce.sola') }}{% endif %}</td></tr>
+    <tr><td>{{ t('video.regioni.ora') }}</td>
+        <td>{% if quante > 1 %}{{ t('video.regioni.due') }}
+            {%- else %}{{ t('video.regioni.una') }}{% endif %}</td></tr>
+    <tr><td>{{ t('video.tela.ora') }}</td>
+        <td class="mono">{{ logica_largo }}&times;{{ logica_alto }}</td></tr>
     {% endif %}
   </table>
   {% if not pannello_possibile %}
@@ -64,22 +65,14 @@
     <div class="row2">
       <label for="modo">{{ t('video.modo') }}
         <select id="modo" name="modo">
-          {% for valore in ('auto', 'fasce', 'singola') %}
+          {% for valore in ('auto', 'regioni', 'singola') %}
           <option value="{{ valore }}"
                   {{ 'selected' if cfg.video.modo == valore }}>{{ t('video.modo.' + valore) }}</option>
           {% endfor %}
         </select>
       </label>
-      <label for="fasce">{{ t('video.fasce') }}
-        <select id="fasce" name="fasce">
-          {% for valore in ('auto', '2', '3', '4') %}
-          <option value="{{ valore }}"
-                  {{ 'selected' if cfg.video.fasce|string == valore }}>{{ t('video.fasce.' + valore) if valore == 'auto' else valore }}</option>
-          {% endfor %}
-        </select>
-      </label>
     </div>
-    <p class="hint">{{ t('video.fasce.hint') }}</p>
+    <p class="hint">{{ t('video.regioni.hint') }}</p>
 
     <input type="hidden" name="restart" value="1">
     <button type="submit">{{ t('video.applica') }}</button>

@@ -2,6 +2,80 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.2]
+
+### Due regioni: l'orologio grande, e il contenuto sotto
+
+*«Non mi piace la soluzione a tre livelli. Con l'orologio da solo, va
+ingrandito l'orologio. Tutti i testi, semafori e informazioni vanno in alto,
+fusi orari e potenze in basso. Nel caso di media o altre attività l'orologio
+deve traslare in alto e rimpicciolirsi: 50% all'orologio, il restante 50% ai
+media o altre info.»*
+
+Le tre fasce uguali della 17.1 lasciano il posto a **due regioni**.
+
+Da solo l'orologio disegna su tutta la tela logica — a 1024×768 con scala 4
+sono 256×192 pixel logici, cioè tre volte le righe del pannello — e le cifre
+crescono con lui: da corpo 38 a corpo 83. Quando c'è qualcos'altro da mostrare
+scende al cinquanta per cento e la metà di sotto è del contenuto.
+
+### Cresce la tela logica, non la risoluzione
+
+È il punto che tiene in piedi tutto il resto, e vale la pena scriverlo.
+
+Il filtro DMD funziona perché ogni pixel della tela diventa una cella di celle
+intere. Disegnando l'orologio a 1024×384 veri — cifre lisce, font di sistema,
+tipograficamente più belle — i punti sparirebbero dall'orologio, resterebbero
+solo sulle sorgenti da 256×64, e le due metà dello stesso schermo non si
+somiglierebbero più. Facendo crescere la tela logica invece della risoluzione,
+i pixel ci sono ancora: sono solo di più.
+
+### Una sorgente per la metà di sotto
+
+La sceglie la priorità, come ha sempre fatto l'arbitro su una schermata sola:
+finché un aereo sta passando resta l'aereo, e le altre aspettano. Niente
+rotazione a tempo.
+
+Le sorgenti **non si toccano**: disegnano su 256×64 perché quelle misure sono
+le loro, e dentro la regione — alta 96 righe logiche — si centrano senza
+stirarsi. Restano a schermo intero le interattive (`in_fascia = False`), chi
+tiene la presa del pannello, e una sorgente forzata a mano dalla pagina
+Servizi.
+
+### L'orologio cambia misura mentre il programma gira
+
+La sua tela passa da 184 righe logiche a 88 e viceversa, ogni volta che una
+sorgente arriva o se ne va. Il runtime chiama `ridimensiona` invece di
+ricostruire la sorgente, che butterebbe via il suo stato — l'offset scelto
+dall'utente, il giro degli orari del mondo, la firma del fotogramma
+precedente.
+
+### Le manopole
+
+`video.modo` diventa **auto** (a regioni dove ci sta più di una tela, cioè su
+un monitor; mai sul pannello, che di tele ne ha una per costruzione),
+**regioni**, **singola** — la 17.0, una tela da 256×64 ingrandita e centrata,
+che resta disponibile perché un cruscotto non lo vuole per forza chiunque
+abbia un monitor.
+
+Una configurazione della 17.1 che dice ancora `fasce` vuol dire `regioni`: è
+la stessa intenzione, dividere lo schermo. La chiave `video.fasce` non serve
+più — le regioni sono due per definizione.
+
+Prova nuova: `diagnostica/prova_regioni.py`, 46 controlli — la tela logica a
+cinque risoluzioni, le due regioni che coprono lo schermo, la metà di sotto
+che tiene sempre una tela intera, le cifre che non escono dai bordi a cinque
+altezze, il contenuto che si centra invece di stirarsi, la regione ferma che
+non diventa nera, e l'arbitro. Via la `prova_fasce.py`, che provava un
+meccanismo che non c'è più.
+
+### Quello che ancora manca
+
+Su una tela alta il semaforo delle scadenze e la colonna dei rifiuti stanno ai
+lati dell'ora, e le cifre ormai sono larghe quanto la tela: spariscono. Vanno
+spostati nella striscia in cima, come dice la richiesta. E manca
+l'interruttore fra tela logica e risoluzione nativa.
+
 ## [17.1.1]
 
 ### Il cursore che restava sullo schermo

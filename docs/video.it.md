@@ -48,35 +48,39 @@ Nella 17.0, su un monitor, si vedeva un DMD grande con due bande nere. Dalla
 Le informazioni riproporzionate al rapporto dello schermo — 4:3, 16:9, 16:10,
 21:9 — restano un lavoro a parte.
 
-# 3. Le fasce
+# 3. Le due regioni
 
-Dalla 17.1 la tela ingrandita non lascia piu' due bande nere: ci stanno
-dentro altre sorgenti.
+Dalla 17.2 la tela ingrandita non lascia piu' due bande nere: lo schermo si
+divide in **due regioni**.
 
-A 1024x768 con scala 4 lo schermo e' alto 192 righe logiche, cioe' **tre tele
-esatte**. L'orologio sta nella fascia in cima e non concorre per le altre;
-sotto vanno le sorgenti attive in ordine di priorita'; quando non c'e'
-nient'altro l'orologio resta solo, al centro, e quella e' la 17.0.
+**Da solo l'orologio prende tutto.** A 1024x768 con scala 4 disegna su 256x192
+pixel logici -- tre volte le righe del pannello -- e le cifre crescono con lui,
+da corpo 38 a corpo 83. La data resta piccola in alto a destra, gli orari del
+mondo e il valore dell'energia restano in fondo.
 
-**Le fasce non cambiano posto.** Chi ne ha una la tiene finche' resta attivo:
-se quella sopra finisce, le altre non salgono e il posto va al prossimo in
-attesa. L'occhio impara dove guardare, e la volta dopo trova ancora qualcosa.
+**Quando c'e' qualcos'altro da mostrare**, l'orologio sale nella meta' di
+sopra e si rimpicciolisce, e la meta' di sotto ospita una sorgente per volta:
+il Media Player, un aereo, il meteo. La sceglie la priorita', come ha sempre
+fatto l'arbitro -- finche' un aereo sta passando resta l'aereo.
 
-**Meteo, cielo e Info inutili condividono una fascia** e ci girano a
-carosello: non sono mai attivi insieme, e per chi guarda sono una cosa sola,
-la fascia che ogni tanto cambia argomento.
+Le sorgenti non si toccano: disegnano su 256x64 perche' quelle misure sono le
+loro, e dentro la regione si centrano senza stirarsi.
+
+**Perche' la tela logica e non la risoluzione.** Il filtro DMD funziona perche'
+ogni pixel della tela diventa una cella di celle intere. Disegnando l'orologio
+alla risoluzione vera le cifre diventerebbero lisce e i punti sparirebbero da
+meta' schermo. Crescendo la tela logica i pixel ci sono ancora, sono solo di
+piu'.
 
 **Restano a schermo intero** Doom, il Game Boy, i giochi, l'anteprima della
 gestione media e le notifiche di livello allarme. Le prime quattro perche'
 sono interattive; l'allarme perche' e' il livello che non si puo' non vedere.
 
-| a 1920x1080 | scala | fascia | quante |
-|---|---|---|---|
-| auto | x7 | 1792x448 | 2 |
-| 3 | x5 | 1280x320 | 3 |
-| 4 | x4 | 1024x256 | 4 |
-
-Poche fasce grandi o tante piccole: e' la stessa scelta vista dai due lati.
+| a 1024x768 | righe logiche |
+|---|---|
+| orologio da solo | 184 |
+| orologio con contenuto | 88 |
+| contenuto | 96 |
 
 # 4. La pagina Video
 
@@ -90,8 +94,7 @@ Poche fasce grandi o tante piccole: e' la stessa scelta vista dai due lati.
 | **Bagliore %** | l'alone intorno al punto. A zero il bordo è netto |
 | **Fondo** | il colore fra i punti. Nero pieno è corretto per un DMD |
 | **Giochi sullo schermo** | ingranditi di un intero, o stirati a tutto schermo |
-| **Come disegnare** | a fasce dove ce ne sta piu' di una, o una tela sola al centro |
-| **Quante fasce** | quante ce ne stanno, oppure un numero: fasce grandi o fasce tante |
+| **Come disegnare** | a regioni dove ci sta piu' di una tela, o una tela sola al centro |
 
 Le prime tre valgono dal **riavvio del servizio**: la superficie e la misura
 della tela si creano una volta sola, all'avvio. È la stessa ragione per cui la

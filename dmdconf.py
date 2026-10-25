@@ -128,24 +128,20 @@ DEFAULTS = {
         # muore lo schermo resta nero e per capire perche' serve la pagina web
         # o un'altra macchina. Per questo non e' il predefinito.
         "console_staccata": False,
-        # Una tela sola al centro, o piu' tele impilate.
+        # Una tela sola al centro, o lo schermo diviso in due regioni.
         #
-        # La tela e' 4:1 e lo schermo non lo e': ingrandendo al massimo
-        # restano due bande nere sopra e sotto, e quelle bande sono alte un
-        # numero esatto di tele -- a 1024x768 con scala 4 lo schermo e' alto
-        # tre tele esatte. "fasce" ci mette dentro altre sorgenti e il
-        # pannello diventa un cruscotto; "singola" e' la 17.0, una tela sola
-        # al centro. "auto" sceglie le fasce quando ce n'e' piu' di una, cioe'
-        # praticamente sempre su un monitor -- e mai sul pannello LED, che di
-        # tele ne ha una per costruzione.
+        # La tela e' 4:1 e lo schermo non lo e': ingrandendola al massimo
+        # restano due bande nere sopra e sotto. "regioni" le usa -- l'orologio
+        # disegna su una tela piu' alta e prende tutto, e quando c'e'
+        # qualcos'altro da mostrare scende al cinquanta per cento e lascia la
+        # meta' di sotto al contenuto. "singola" e' la 17.0, una tela da
+        # 256x64 ingrandita e centrata, e resta disponibile perche' un
+        # cruscotto non lo vuole per forza chiunque abbia un monitor.
+        #
+        # "auto" sceglie le regioni quando sullo schermo ci sta piu' di una
+        # tela, cioe' praticamente sempre su un monitor -- e mai sul pannello
+        # LED, che di tele ne ha una per costruzione.
         "modo": "auto",
-        # Quante fasce. "auto" prende la scala piu' grande che sta in
-        # larghezza e conta le fasce che ne derivano; un numero fa il
-        # contrario, cioe' la scala piu' grande che fa stare quelle fasce.
-        # Sono le due facce della stessa scelta: fasce grandi o fasce tante.
-        # A 1920x1080: auto da' due fasce da 1792x448, 3 ne da' tre da
-        # 1280x320, 4 quattro da 1024x256.
-        "fasce": "auto",
         # I giochi restano alla loro base 256x64 e si ingrandiscono di un
         # moltiplicatore **intero**: i pixel restano pixel invece di diventare
         # poltiglia interpolata, e le aree che restano fuori restano nere. E'

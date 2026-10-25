@@ -101,9 +101,6 @@ class Arbiter:
         # gli torni all'orologio, e a chiudere ci pensa la sorgente.
         self.hold_name = ""
         self.hold_until = 0.0
-        # Chi sta in quale fascia, dalla 17.1. Il posto si tiene finche' la
-        # sorgente resta attiva: vedi `fasce_scelte`.
-        self._fasce = {}
 
     def register(self, source):
         self.sources[source.name] = source
@@ -223,69 +220,37 @@ class Arbiter:
                 best = source
         return best
 
-    # ------------------------------------------------------------- le fasce
+    # ----------------------------------------------------------- le regioni
 
-    def fasce_scelte(self, quante):
-        """Le sorgenti delle fasce, dalla cima in giu'. None = schermo intero.
+    def contenuto(self):
+        """La sorgente della meta' di sotto, o None se non ce n'e' una.
 
-        L'arbitro di sempre sceglie **una** sorgente: la piu' alta in
-        priorita' fra quelle attive. Qui ne sceglie N, e le regole sono le
-        stesse applicate N volte, con due aggiunte.
+        E' l'arbitro di sempre meno l'orologio: la piu' alta in priorita' fra
+        quelle attive. Niente rotazione a tempo -- finche' un aereo sta
+        passando resta l'aereo, e le altre aspettano, come ha sempre fatto
+        questo programma su una schermata sola.
 
-        **L'orologio sta in cima e non concorre.** Nella fascia 0 c'e' lui,
-        sempre, e non partecipa alla gara per le altre. Quando non c'e'
-        nient'altro resta da solo -- e una fascia sola, centrata, e' esatta-
-        mente il pannello di prima.
-
-        **Le fasce sono stabili.** Una sorgente che ha una fascia la tiene
-        finche' resta attiva. Se quella sopra finisce, le altre **non**
-        salgono: il posto libero va al prossimo in attesa. Una fascia che
-        cambia posto quando quella sopra sparisce e' il modo piu' sicuro di
-        rendere illeggibile un cruscotto -- l'occhio impara dove guardare e
-        poi non trova piu' niente.
-
-        Torna None quando le fasce non si applicano: qualcuno tiene la presa
-        del pannello, o una sorgente e' stata forzata a mano dalla pagina
-        Servizi. In tutti e due i casi qualcuno ha chiesto quella sorgente e
-        basta, e darle una fascia su tre sarebbe disobbedire.
+        Torna None anche quando le regioni non si applicano: qualcuno tiene
+        la presa del pannello, o una sorgente e' stata forzata a mano dalla
+        pagina Servizi. In tutti e due i casi quella sorgente la vuole tutta,
+        e darle meta' schermo sarebbe disobbedire -- chi chiama se ne accorge
+        guardando `holding()`.
         """
-        if quante <= 1 or self.holding():
+        if self.holding() or self.cfg["arbiter"]["force_source"] != "auto":
             return None
-        if self.cfg["arbiter"]["force_source"] != "auto":
-            return None
-        scelte = [None] * quante
-        orologio = self.sources.get("clock")
-        if orologio is not None and not (orologio.enabled and orologio.active()):
-            orologio = None
-        primo = 0
-        if orologio is not None:
-            scelte[0] = orologio
-            primo = 1
-
-        # Il posto non lo tiene la sorgente ma la sua **chiave**: il gruppo
-        # se ne ha uno, il nome altrimenti. Serve al carosello di meteo,
-        # cielo e Info inutili, che si danno il cambio uno per volta: per
-        # l'occhio sono una fascia sola che cambia argomento, e senza questo
-        # alla chiusura di una finestra il posto tornerebbe libero per tutti.
-        candidati = {}
-        for source in sorted(self.sources.values(), key=lambda s: -s.priority):
-            if (source is orologio or not source.enabled or not source.active()
-                    or not source.in_fascia):
+        migliore = None
+        for source in self.sources.values():
+            if (source.name == "clock" or not source.enabled
+                    or not source.active() or not source.in_fascia):
                 continue
-            candidati.setdefault(source.gruppo or source.name, source)
-        # Chi una fascia ce l'ha gia' se la tiene, allo stesso posto.
-        for i in range(primo, quante):
-            chiave = self._fasce.get(i)
-            if chiave and chiave in candidati:
-                scelte[i] = candidati.pop(chiave)
-        # E i posti liberi vanno ai piu' alti in priorita' fra chi aspetta.
-        attesa = sorted(candidati.values(), key=lambda s: -s.priority)
-        for i in range(primo, quante):
-            if scelte[i] is None and attesa:
-                scelte[i] = attesa.pop(0)
-        self._fasce = {i: (s.gruppo or s.name)
-                       for i, s in enumerate(scelte) if s is not None}
-        return scelte
+            if migliore is None or source.priority > migliore.priority:
+                migliore = source
+        return migliore
+
+    def a_regioni(self):
+        """Vero se lo schermo va diviso, falso se va dato a una sorgente sola."""
+        return not (self.holding()
+                    or self.cfg["arbiter"]["force_source"] != "auto")
 
 
 class Runtime:
@@ -510,7 +475,7 @@ class Runtime:
                            self.inutili)
         # Con piu' di una fascia il carosello non aspetta piu' i media: sul
         # pannello LED, che di fasce ne ha una, Turni resta esattamente com'e'.
-        self.turni.fasce = getattr(self.display, "fasce", 1) > 1
+        self.turni.fasce = getattr(self.display, "tele", 1) > 1
         self.turni.start()
         # Doom non passa da apply_services: non e' un servizio. Qui parte solo
         # la lettura della tastiera, se e' stata chiesta.
@@ -564,9 +529,9 @@ class Runtime:
         self._ultimo_frame = None
         self.frame_mostrati = 0
         self.frame_saltati = 0
-        # I nomi che occupano le fasce adesso, per sapere chi entra. Vedi
-        # `_rendi_fasce`.
-        self._fasce_mostrate = ()
+        # Chi occupa le due regioni adesso, per sapere chi entra. Vedi
+        # `_rendi_regioni`.
+        self._regioni_mostrate = ()
 
     # ------------------------------------------------------------------ musica
 
@@ -1191,55 +1156,62 @@ class Runtime:
         """
         self._ultimo_frame = None
 
-    def _rendi_fasce(self, fasce):
-        """Un giro del ciclo in modalita' fasce.
+    def _rendi_regioni(self, contenuto):
+        """Un giro del ciclo con lo schermo diviso in regioni.
 
-        Il trattamento di una sorgente che **entra** in una fascia e' lo
-        stesso che riceveva il vincitore unico: il suono del servizio, il
-        ridisegno completo, e `in_onda()` -- che e' il solo istante in cui si
-        sa che qualcuno la sta davvero guardando, e su cui il meteo conta i
-        suoi turni.
+        L'orologio sta sempre in cima. Da solo prende tutta l'altezza; quando
+        arriva qualcos'altro scende al cinquanta per cento e la meta' di
+        sotto e' del contenuto.
 
-        La differenza e' che adesso puo' entrarne piu' di una per volta, e
-        che le altre restano dove sono.
+        **L'orologio cambia misura, quindi va avvisato.** La sua tela passa
+        da 184 righe logiche a 88 e viceversa, e le sue proporzioni si
+        ricalcolano: `ridimensiona` invece di ricostruirlo, che butterebbe
+        via l'offset scelto dall'utente e il giro degli orari del mondo.
+
+        Il trattamento di una sorgente che **entra** e' lo stesso che riceveva
+        il vincitore unico: il suono del servizio, il ridisegno completo, e
+        `in_onda()` -- che e' il solo istante in cui si sa che qualcuno la
+        sta davvero guardando, e su cui il meteo conta i suoi turni.
         """
-        nomi = tuple(s.name if s is not None else "" for s in fasce)
-        cambiato = nomi != self._fasce_mostrate
+        riquadri = self.display.regioni(contenuto is not None)
+        orologio = riquadri.get("orologio")
+        if orologio and (self.clock.width, self.clock.height) != orologio[2:]:
+            self.clock.ridimensiona(orologio[2], orologio[3])
+            self._regioni_mostrate = ()      # tutto da ridisegnare
+        nomi = (contenuto.name if contenuto is not None else "",)
+        cambiato = nomi != self._regioni_mostrate
         if cambiato:
-            for source in fasce:
-                if source is None or source.name in self._fasce_mostrate:
-                    continue
-                if source.name not in suoni.SUONO_PROPRIO:
+            if contenuto is not None and contenuto.name not in self._regioni_mostrate:
+                if contenuto.name not in suoni.SUONO_PROPRIO:
                     try:
-                        suoni.suona_servizio(self.cfg, source.name)
-                    except Exception as exc:      # pragma: no cover
+                        suoni.suona_servizio(self.cfg, contenuto.name)
+                    except Exception as exc:  # pragma: no cover
                         print("[suoni] avviso non riprodotto: %s" % exc)
-                if hasattr(source, "_dirty"):
-                    source._dirty = True
-                if hasattr(source, "invalidate"):
-                    source.invalidate()
+                if hasattr(contenuto, "_dirty"):
+                    contenuto._dirty = True
+                if hasattr(contenuto, "invalidate"):
+                    contenuto.invalidate()
                 try:
-                    source.in_onda()
-                except Exception as exc:          # pragma: no cover
+                    contenuto.in_onda()
+                except Exception as exc:      # pragma: no cover
                     print("[arbitro] in_onda fallita per %s: %s"
-                          % (source.name, exc))
-            self._fasce_mostrate = nomi
-            # La pagina Servizi chiede "cosa c'e' sul display": con le fasce
-            # la risposta e' la fascia piu' alta in priorita' che non sia
-            # l'orologio, cioe' la cosa per cui vale la pena guardare.
-            vive = [s for s in fasce if s is not None]
-            altre = [s for s in vive if s.name != "clock"]
-            self.arbiter.current = (max(altre, key=lambda s: s.priority)
-                                    if altre else (vive[0] if vive else None))
+                          % (contenuto.name, exc))
+            self._regioni_mostrate = nomi
+            # La pagina Servizi chiede «cosa c'e' sul display»: la risposta e'
+            # il contenuto quando c'e', l'orologio quando e' solo.
+            self.arbiter.current = contenuto or self.clock
             self._blank_shown = False
             self._ridisegna()
-        immagini = [s.frame() if s is not None else None for s in fasce]
+            self.clock.invalidate()
+        pezzi = {"orologio": (self.clock.frame(), orologio)}
+        if contenuto is not None and "contenuto" in riquadri:
+            pezzi["contenuto"] = (contenuto.frame(), riquadri["contenuto"])
         # Si manda allo schermo solo quando c'e' qualcosa di nuovo: le
         # sorgenti tornano None quando non e' cambiato niente, e comporre e
-        # spedire tre fasce ferme trenta volte al secondo sarebbe lavoro
+        # spedire due regioni ferme trenta volte al secondo sarebbe lavoro
         # buttato -- su un Atom si sente.
-        if cambiato or any(i is not None for i in immagini):
-            self.display.mostra_fasce(immagini)
+        if cambiato or any(i is not None for i, _r in pezzi.values()):
+            self.display.mostra_regioni(pezzi)
 
     def render_loop(self):
         from PIL import Image
@@ -1277,13 +1249,13 @@ class Runtime:
                 time.sleep(0.2)
                 continue
 
-            # Dalla 17.1: se lo schermo ha piu' di una fascia, l'arbitro ne
-            # sceglie una per fascia invece di una sola. Torna None quando le
-            # fasce non si applicano -- la presa del pannello, una sorgente
-            # forzata -- e allora si ricade nel ciclo di sempre.
-            fasce = self.arbiter.fasce_scelte(getattr(self.display, "fasce", 1))
-            if fasce is not None:
-                self._rendi_fasce(fasce)
+            # Dalla 17.2: su uno schermo lo spazio si divide in due regioni,
+            # l'orologio in cima e il contenuto sotto. Si ricade nel ciclo di
+            # sempre quando le regioni non si applicano -- il pannello LED,
+            # la modalita' singola, la presa del pannello, una sorgente
+            # forzata a mano.
+            if getattr(self.display, "tele", 1) > 1 and self.arbiter.a_regioni():
+                self._rendi_regioni(self.arbiter.contenuto())
                 elapsed = time.time() - started
                 if elapsed < period:
                     time.sleep(period - elapsed)
