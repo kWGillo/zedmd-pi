@@ -95,9 +95,16 @@ Doom serve ricompilare l'helper una volta sola:
 sudo /opt/dmd/doom/setup_doom.sh
 ```
 
-I **tredici giochi** scritti per il pannello restano per ora 256x64 ingranditi
-di un intero e centrati: la loro geometria e' fatta di costanti di modulo e di
-righe assolute, e riproporzionarla e' un lavoro a parte.
+Dalla 17.4 i **giochi** si riproporzionano, uno per volta. Chi ha imparato a
+disegnarsi su una tela qualunque prende tutto il campo: il tabellone passa da
+colonna di destra a striscia in alto, e il gioco guadagna le 56 colonne e
+tutte le righe in piu'. Chi non l'ha ancora imparato resta 256x64 ingrandito
+di un intero e centrato, come prima.
+
+Convertiti finora: **Snake** e **Breakout**. Gli altri undici seguono: la loro
+geometria e' fatta di costanti di modulo, righe assolute, sprite che sono
+maschere di collisione e fisica tarata su 64 righe, e riproporzionarla e' una
+riprogettazione, non una moltiplicazione.
 
 | a 1024x768 | righe logiche |
 |---|---|
@@ -162,18 +169,26 @@ moltiplicare lo slider e la modalità notte fingerebbero di funzionare.
 
 # 6. I giochi
 
-Restano 256×64 e si ingrandiscono di un intero, centrati, con il nero intorno.
-Le aree non usate sono una scelta, non una mancanza.
+Dalla 17.4 si riproporzionano, **uno per volta**.
 
-Il motivo sta nei giochi stessi: il campo prende i 200 pixel di sinistra e i
-56 di destra sono il tabellone, la fisica di bongo è in pixel al secondo
-quadrato, il labirinto di gnam è arte disegnata a mano su celle da quattro
-pixel. Portarli a proporzioni qualsiasi non sarebbe una moltiplicazione:
-sarebbe riprogettare tredici giochi — e per gnam vorrebbe dire un labirinto
-nuovo, disegnato da una persona.
+Un gioco convertito riceve la misura della tela e si ridisegna addosso: il
+tabellone passa da colonna di destra a striscia di sette righe in alto, e il
+campo si riprende le 56 colonne e tutte le righe in più. Sul pannello resta
+identico al pixel — il 4:1 impone la colonna a destra, ed è il ragionamento
+che quella colonna l'ha inventata.
 
-«Stirati a tutto schermo» esiste per chi preferisce comunque lo schermo pieno
-alla nitidezza.
+Convertiti finora: **Snake** (da 49×15 a 50×36 caselle) e **Breakout**.
+
+Gli altri undici restano 256×64 ingranditi di un intero e centrati, finché non
+tocca a loro. Non è pigrizia: la loro geometria è fatta di costanti di modulo e
+di righe assolute, gli sprite sono maschere di collisione e non immagini, la
+fisica di bongo è in pixel al secondo quadrato e l'angolo è in gradi, il
+labirinto di gnam è arte disegnata a mano su celle da quattro pixel. Portarli a
+proporzioni qualsiasi non è una moltiplicazione: è riprogettarli, e si fa uno
+per volta perché ciascuno va riprovato.
+
+«Stirati a tutto schermo» resta per chi preferisce comunque lo schermo pieno
+alla nitidezza, e per i giochi non ancora convertiti.
 
 # 7. L'audio su un PC
 

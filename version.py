@@ -3303,6 +3303,44 @@ Storico:
        colonna della griglia diventava una striscia stretta e alta un metro
        accanto a schede alte un dito. I suoi comandi adesso si dispongono in
        colonne per conto loro, e su un telefono tornano in fila.
+  17.4 **I giochi su una tela qualunque: le fondamenta, e i primi due.**
+       *«I giochini sono sempre per dmd. Non vengono riproporzionati.»* Vero,
+       e il censimento dei tredici ha detto perche' non bastava una
+       moltiplicazione: la geometria di ogni gioco e' fatta di costanti di
+       modulo, di righe assolute, di sprite disegnati a mano, di fisica in
+       pixel al secondo quadrato e di equilibri tarati su 64 righe.
+       Riproporzionarli e' riprogettarli, uno per uno.
+       Quindi prima le fondamenta. `LARGHEZZA`, `ALTEZZA` e `CAMPO` non sono
+       piu' il destino: `Gioco` ha una tela (`largo`, `alto`) e un campo
+       (`campo_x/y/l/a`), e `configura_tela` gliela dice. Chi non l'ha ancora
+       imparata lo dichiara (`TELA_LIBERA` falso) e resta 256x64 ingrandito
+       di un intero, esattamente come prima: **i giochi si convertono uno
+       per volta senza che gli altri si rompano nel frattempo.**
+       **Il tabellone cambia posto.** Sul pannello resta la colonna di
+       destra: il 4:1 la impone, ed e' il ragionamento della 3.6. Da
+       novantasei righe in su diventa una striscia di sette in cima, e il
+       campo si riprende le 56 colonne **e** tutte le righe in piu'. Anche
+       «GAME OVER» scende al centro del campo invece di restare a meta' di
+       64 righe.
+       E il taglio ai bordi segue la tela. Fino alla 17.3 `_riga_di_bit`
+       tagliava sulle costanti 256x64: su una tela alta qualunque scritta
+       sotto la riga 64 sarebbe sparita **in silenzio**, che e' il modo
+       peggiore di rompersi.
+       **Convertiti: Snake e Breakout.** Snake calcola la casella dal campo
+       -- quadrata, sempre: due lati diversi e il serpente va piu' veloce in
+       una direzione che nell'altra -- e passa da 49x15 a 50x36 caselle.
+       Breakout tiene due fattori, uno per asse, e con quelli muove mattoni,
+       racchetta, palla e velocita'; l'angolo di rimbalzo si conserva **in
+       proporzione al campo** e non in radianti, se no su un campo tre volte
+       piu' alto un tiro a sessanta gradi diventerebbe quasi verticale.
+       Su 200x64 tutti e due tornano al numero esatto che avevano, e la
+       nuova `diagnostica/prova_giochi.py` lo controlla misura per misura --
+       piu' la prova che conta davvero: la stessa partita, con lo stesso
+       seme, rompe gli stessi mattoni sulle due tele.
+       Restano da convertire gli altri undici. Bongo per primo, che e' il
+       piu' facile dei difficili: il censimento dice che basta far scendere
+       la base dei palazzi, perche' quello che conta in una parabola e' il
+       dislivello fra i tetti e quello non cambia.
 """
 
-__version__ = "17.3.6"
+__version__ = "17.4"

@@ -20,6 +20,41 @@ ALTEZZA = 64
 CAMPO = 200                     # campo di gioco, a sinistra
 HUD = LARGHEZZA - CAMPO         # tabellone, a destra
 
+# La striscia del tabellone quando sta in alto invece che a destra: una riga
+# di testo (5) piu' due di aria. E' la stessa misura che bongo, trex, mine e
+# squadriglia si erano gia' scelti per conto loro.
+STRISCIA = 7
+
+# Oltre quante righe il tabellone conviene in alto. Sul pannello sono 64 e
+# il 4:1 impone la colonna a destra; appena la tela diventa alta la colonna
+# e' sprecata, e il campo si riprende le 56 colonne.
+ALTA_DA = 96
+
+# La tela su cui si sta disegnando **adesso**, per il taglio ai bordi.
+#
+# Una variabile di modulo e' una brutta parola, e qui e' la scelta giusta:
+# `scrivi` e `centra` ricevono `px`, che e' il `PixelAccess` di PIL e **non
+# sa quanto e' grande la sua immagine**. L'alternativa era cambiare la firma
+# di `scrivi` e `centra` e con loro tutte le chiamate dei tredici giochi.
+# Un gioco per volta disegna, e disegna in un thread solo: `Gioco.disegna`
+# la imposta prima di cominciare e il taglio si fa su quella.
+_TELA = [LARGHEZZA, ALTEZZA]
+
+# E il campo di gioco di adesso: `x, y, larghezza, altezza`. Serve a `centra`,
+# che cosi' continua a centrare sul campo come ha sempre fatto senza che ogni
+# chiamata debba dirglielo.
+_CAMPO = [0, 0, CAMPO, ALTEZZA]
+
+
+def imposta_tela(largo, alto, campo=None):
+    """Dichiara su che misura si sta disegnando. La chiama chi crea l'immagine."""
+    _TELA[0], _TELA[1] = int(largo), int(alto)
+    _CAMPO[:] = list(campo) if campo else [0, 0, CAMPO, ALTEZZA]
+
+
+def misura_tela():
+    return (_TELA[0], _TELA[1])
+
 # Font 3x5: cinque righe da tre bit. Maiuscole e cifre bastano a un tabellone,
 # e quello che manca diventa uno spazio invece di far cadere il disegno.
 _F = {
@@ -161,10 +196,11 @@ def _riga_di_bit(px, bit, x, y, colore):
     """Tre pixel in una riga, quelli accesi. Il taglio ai bordi e' qui e non
     nei chiamanti: un accento sulla prima riga del pannello non deve far
     cadere il disegno, deve solo non vedersi."""
+    largo, alto = _TELA
     for colonna in range(3):
         if bit & (1 << (2 - colonna)):
             xx = x + colonna
-            if 0 <= xx < LARGHEZZA and 0 <= y < ALTEZZA:
+            if 0 <= xx < largo and 0 <= y < alto:
                 px[xx, y] = colore
 
 
@@ -182,7 +218,17 @@ def scrivi(px, testo, x, y, colore):
         x += PASSO
 
 
-def centra(px, testo, y, colore, sinistra=0, larghezza=CAMPO):
+def centra(px, testo, y, colore, sinistra=0, larghezza=None):
+    """Centrato sul **campo di gioco di adesso**, se non si dice altro.
+
+    Fino alla 17.4 il valore di serie era la costante `CAMPO`, 200. Adesso
+    e' la larghezza del campo com'e' in questo momento, che sul pannello
+    vale esattamente 200: nessuna scritta si sposta di un pixel. Su una tela
+    alta, dove il tabellone passa in alto e il campo prende tutte le
+    colonne, le stesse chiamate si centrano su quelle.
+    """
+    if larghezza is None:
+        larghezza = _CAMPO[2]
     scrivi(px, testo, sinistra + (larghezza - larghezza_testo(testo)) // 2,
            y, colore)
 
@@ -204,7 +250,18 @@ class Gioco:
     # Comandi che il gioco capisce, per la pagina web e per la tastiera.
     COMANDI = ("sinistra", "destra", "fuoco", "avvia", "esci")
 
+    # Vero se il gioco sa disegnarsi su una tela qualunque. I giochi ancora
+    # da riproporzionare lo lasciano falso e restano 256x64 ingranditi di un
+    # intero, come prima della 17.4: cosi' la conversione si fa uno per
+    # volta senza che gli altri si rompano nel frattempo.
+    TELA_LIBERA = False
+
     def __init__(self, seme=None):
+        # La tela. Di serie e' il pannello, e finche' resta il pannello
+        # ogni costante di ogni gioco vale esattamente quanto valeva.
+        self.largo = LARGHEZZA
+        self.alto = ALTEZZA
+        self._posa_campo()
         # Chi vuole sentire i suoni la sostituisce. Di suo non fa niente, e
         # non e' pigrizia: un gioco che sapesse di schede audio e di
         # configurazione non si potrebbe piu' far girare dentro una prova.
@@ -225,6 +282,46 @@ class Gioco:
         self.finita = False
         self._record = 0
         self.avvia_partita(seme)
+
+    # ----------------------------------------------------------- la geometria
+
+    def _posa_campo(self):
+        """Dove sta il campo e dove sta il tabellone, su questa tela.
+
+        Due disposizioni, e la sceglie l'altezza.
+
+        **Il pannello e' 4:1 e non si combatte**: il campo prende le 200
+        colonne di sinistra e le 56 di destra sono il tabellone, che e' il
+        ragionamento della 3.6 e resta giusto. **Una tela alta ribalta il
+        conto**: li' la colonna a destra e' spazio sprecato in larghezza e
+        il tabellone ci sta comodo in una striscia da sette righe in cima,
+        cosi' il campo si riprende le 56 colonne e guadagna tutte le righe
+        in piu'.
+        """
+        if self.alto >= ALTA_DA:
+            self.hud_in_alto = True
+            self.campo_x, self.campo_y = 0, STRISCIA
+            self.campo_l, self.campo_a = self.largo, self.alto - STRISCIA
+        else:
+            self.hud_in_alto = False
+            self.campo_x, self.campo_y = 0, 0
+            self.campo_l = max(1, self.largo - HUD)
+            self.campo_a = self.alto
+
+    def configura_tela(self, largo, alto):
+        """La misura della tela, detta da chi ospita il gioco.
+
+        La chiama `GiochiSource` subito dopo aver costruito il gioco, come
+        gia' fa con `configura` e `configura_lingua`. Siccome la partita e'
+        gia' stata preparata dal costruttore su misura di pannello, qui si
+        ricomincia da capo: e' il fotogramma zero, non si butta via niente.
+
+        Chi non ha ancora imparato a disegnarsi su una tela qualunque
+        (`TELA_LIBERA` falso) **non** la riceve: lo decide chi chiama.
+        """
+        self.largo, self.alto = int(largo), int(alto)
+        self._posa_campo()
+        self.avvia_partita()
 
     # --------------------------------------------------------------- da fare
 
@@ -309,7 +406,9 @@ class Gioco:
                 "record": self.record(), "finita": self.finita}
 
     def disegna(self):
-        img = Image.new("RGB", (LARGHEZZA, ALTEZZA), (0, 0, 0))
+        img = Image.new("RGB", (self.largo, self.alto), (0, 0, 0))
+        imposta_tela(self.largo, self.alto,
+                     (self.campo_x, self.campo_y, self.campo_l, self.campo_a))
         px = img.load()
         self.disegna_campo(img, px)
         self._disegna_hud(px)
@@ -318,10 +417,16 @@ class Gioco:
         return img
 
     def _disegna_hud(self, px):
+        if self.hud_in_alto:
+            self._hud_striscia(px)
+        else:
+            self._hud_colonna(px)
+
+    def _hud_colonna(self, px):
         """Il tabellone a destra: e' lo spazio che il 4:1 regala."""
-        x = CAMPO + 4
-        for colonna in range(ALTEZZA):
-            px[CAMPO + 1, colonna] = (40, 40, 48)      # riga di separazione
+        x = self.campo_l + 4
+        for colonna in range(self.alto):
+            px[self.campo_l + 1, colonna] = (40, 40, 48)   # riga di separazione
         scrivi(px, "SCORE", x, 4, (120, 120, 130))
         scrivi(px, "%06d" % self.punteggio, x, 11, self.colore_hud)
         scrivi(px, "HI", x, 22, (120, 120, 130))
@@ -333,10 +438,32 @@ class Gioco:
             for dx in range(3):
                 px[x + i * 5 - 1 + dx, 53] = self.colore_hud
 
+    def _hud_striscia(self, px):
+        """Il tabellone in alto, su una riga sola.
+
+        La stessa roba della colonna, messa in fila: punteggio, record,
+        livello, vite. Ci sta largamente -- quattro voci fanno un centinaio
+        di pixel su 256 -- e sotto resta una riga di separazione, che e' il
+        confine del campo e serve all'occhio quanto serviva la colonna.
+        """
+        scrivi(px, "%06d" % self.punteggio, 1, 1, self.colore_hud)
+        scrivi(px, "HI", 28, 1, (120, 120, 130))
+        scrivi(px, "%06d" % self.record(), 37, 1, (90, 150, 220))
+        scrivi(px, "LIV %d" % self.livello, 66, 1, (120, 120, 130))
+        for i in range(max(0, min(6, self.vite))):
+            x = self.largo - 5 - i * 5
+            px[x, 2] = self.colore_hud
+            for dx in range(3):
+                px[x - 1 + dx, 3] = self.colore_hud
+        for x in range(self.largo):
+            px[x, STRISCIA - 1] = (40, 40, 48)
+
     def _disegna_fine(self, px):
-        for y in range(24, 40):
-            for x in range(0, CAMPO):
+        """«GAME OVER», al centro del campo e non al centro di 64 righe."""
+        meta = self.campo_y + self.campo_a // 2
+        for y in range(meta - 8, meta + 8):
+            for x in range(self.campo_x, self.campo_x + self.campo_l):
                 if (x + y) % 2 == 0:
                     px[x, y] = (0, 0, 0)
-        centra(px, "GAME OVER", 27, (255, 60, 60))
-        centra(px, "FUOCO PER RIGIOCARE", 35, (150, 150, 160))
+        centra(px, "GAME OVER", meta - 5, (255, 60, 60))
+        centra(px, "FUOCO PER RIGIOCARE", meta + 3, (150, 150, 160))

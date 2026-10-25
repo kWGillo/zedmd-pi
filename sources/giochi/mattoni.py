@@ -38,7 +38,7 @@ verifica leggendo il sorgente.
 import math
 import random
 
-from .base import ALTEZZA, CAMPO, Gioco, centra
+from .base import Gioco, centra
 
 MATTONE_L = 19
 MATTONE_H = 3
@@ -90,6 +90,51 @@ class Mattoni(Gioco):
 
     # -------------------------------------------------------------- partita
 
+    TELA_LIBERA = True
+
+    def _misura(self):
+        """Le misure del muro su **questo** campo.
+
+        Due fattori, uno per asse, rispetto al campo del pannello (200x64).
+        Su quello valgono tutti e due uno, e ogni costante torna esattamente
+        il numero che era: il gioco sul pannello e' quello di sempre, pixel
+        per pixel. Su una tela alta i mattoni diventano piu' spessi, la
+        racchetta scende in fondo al campo e la palla ha piu' cielo.
+
+        La palla resta **quadrata**: e' l'unica misura che non puo' seguire
+        due fattori diversi senza diventare un mattoncino.
+        """
+        self.fx = self.campo_l / 200.0
+        self.fy = self.campo_a / 64.0
+        self.mattone_l = MATTONE_L * self.fx
+        self.mattone_h = MATTONE_H * self.fy
+        self.muro_x = MURO_X * self.fx
+        self.muro_y = MURO_Y * self.fy
+        self.racchetta_l = RACCHETTA_L * self.fx
+        self.racchetta_h = max(1, int(round(RACCHETTA_H * self.fy)))
+        self.racchetta_y = RACCHETTA_Y * self.fy
+        self.racchetta_v = RACCHETTA_V * self.fx
+        self.palla = max(1, int(round(PALLA * min(self.fx, self.fy))))
+        # La fuga fra un mattone e l'altro: un pixel sul pannello, e di
+        # piu' dove i mattoni sono piu' grandi, se no non si vede.
+        self.fuga_x = max(1, int(round(self.fx)))
+        self.fuga_y = max(1, int(round(self.fy)))
+
+    def _dai_angolo(self, angolo):
+        """La velocita' da un angolo, misurato come sul pannello.
+
+        L'angolo si conserva **in proporzione al campo**, non in radianti:
+        una palla che sul pannello attraversa il muro in tre rimbalzi lo fa
+        in tre rimbalzi anche su una tela alta. Tenendo i radianti, su un
+        campo tre volte piu' alto un tiro a sessanta gradi diventerebbe un
+        tiro quasi verticale.
+        """
+        self.vx = math.sin(angolo) * self.velocita * self.fx
+        self.vy = -math.cos(angolo) * self.velocita * self.fy
+
+    def _angolo_di_adesso(self):
+        return math.atan2(self.vx / self.fx, -self.vy / self.fy)
+
     def avvia_partita(self, seme=None):
         self._rnd = random.Random(seme)
         self.punteggio = 0
@@ -104,6 +149,7 @@ class Mattoni(Gioco):
         # modo di vedere da fuori cosa ha chiesto il gioco senza mettersi in
         # mezzo a `suona`.
         self.suoni_del_frame = ()
+        self._misura()
         self._nuovo_livello()
 
     def _nuovo_livello(self):
@@ -112,18 +158,16 @@ class Mattoni(Gioco):
         self._riparti()
 
     def _riparti(self):
-        self.racchetta = CAMPO / 2.0 - RACCHETTA_L / 2
+        self.racchetta = self.campo_l / 2.0 - self.racchetta_l / 2
         self.attaccata = True          # la palla parte ferma sulla racchetta
-        self.bx = self.racchetta + RACCHETTA_L / 2
-        self.by = float(RACCHETTA_Y - PALLA)
+        self.bx = self.racchetta + self.racchetta_l / 2
+        self.by = float(self.racchetta_y - self.palla)
         self.vx, self.vy = 0.0, 0.0
         self.velocita = 46.0 + 5.0 * (self.livello - 1)
         self._colpi = 0
 
     def _lancia(self):
-        angolo = self._rnd.uniform(-0.5, 0.5)
-        self.vx = math.sin(angolo) * self.velocita
-        self.vy = -math.cos(angolo) * self.velocita
+        self._dai_angolo(self._rnd.uniform(-0.5, 0.5))
         self.attaccata = False
         self._segna("lancio")
 
@@ -183,10 +227,11 @@ class Mattoni(Gioco):
             return
 
         if "sinistra" in tasti:
-            self.racchetta -= RACCHETTA_V * dt
+            self.racchetta -= self.racchetta_v * dt
         if "destra" in tasti:
-            self.racchetta += RACCHETTA_V * dt
-        self.racchetta = max(0.0, min(CAMPO - RACCHETTA_L, self.racchetta))
+            self.racchetta += self.racchetta_v * dt
+        self.racchetta = max(0.0, min(self.campo_l - self.racchetta_l,
+                                      self.racchetta))
 
         if self.attaccata:
             # La palla segue la racchetta e non succede niente: nessun evento.
@@ -194,8 +239,8 @@ class Mattoni(Gioco):
             # volte al secondo: un ronzio continuo prima del lancio e, per il
             # resto della partita, un mixer sempre pieno che copriva i
             # mattoni. Il suono del lancio c'e' gia' e arriva quando premi.
-            self.bx = self.racchetta + RACCHETTA_L / 2
-            self.by = float(RACCHETTA_Y - PALLA)
+            self.bx = self.racchetta + self.racchetta_l / 2
+            self.by = float(self.racchetta_y - self.palla)
             if "fuoco" in tasti:
                 self._lancia()
             return
@@ -232,8 +277,8 @@ class Mattoni(Gioco):
             self.bx = 0.0
             self.vx = abs(self.vx)
             self._segna("muro")
-        elif self.bx >= CAMPO - PALLA:
-            self.bx = CAMPO - PALLA
+        elif self.bx >= self.campo_l - self.palla:
+            self.bx = self.campo_l - self.palla
             self.vx = -abs(self.vx)
             self._segna("muro")
         if self.by <= 0:
@@ -244,15 +289,17 @@ class Mattoni(Gioco):
         self._colpisci_mattone()
 
         if (self.vy > 0
-                and RACCHETTA_Y - PALLA <= self.by <= RACCHETTA_Y + RACCHETTA_H
-                and self.racchetta - 1 <= self.bx + PALLA / 2
-                <= self.racchetta + RACCHETTA_L + 1):
-            self.by = float(RACCHETTA_Y - PALLA)
+                and (self.racchetta_y - self.palla <= self.by
+                     <= self.racchetta_y + self.racchetta_h)
+                and self.racchetta - self.fuga_x <= self.bx + self.palla / 2
+                <= self.racchetta + self.racchetta_l + self.fuga_x):
+            self.by = float(self.racchetta_y - self.palla)
             self._segna("racchetta")
             # L'angolo dipende da dove si colpisce: e' quello che trasforma la
             # racchetta da muro a strumento di mira.
-            centro = self.racchetta + RACCHETTA_L / 2
-            scarto = (self.bx + PALLA / 2 - centro) / (RACCHETTA_L / 2)
+            centro = self.racchetta + self.racchetta_l / 2
+            scarto = ((self.bx + self.palla / 2 - centro)
+                      / (self.racchetta_l / 2))
             angolo = max(-1.0, min(1.0, scarto)) * ANGOLO_MAX
             if abs(angolo) < ANGOLO_MIN:
                 # Verso in cui stava gia' andando, cosi' un colpo al centro
@@ -263,10 +310,9 @@ class Mattoni(Gioco):
                 # periodica e certi mattoni non li raggiunge mai: un filo di
                 # caso rompe il ciclo, e a occhio non si vede.
                 angolo = self._rnd.uniform(ANGOLO_MIN, ANGOLO_MIN * 1.7) * verso
-            self.vx = math.sin(angolo) * self.velocita
-            self.vy = -math.cos(angolo) * self.velocita
+            self._dai_angolo(angolo)
 
-        if self.by > ALTEZZA:
+        if self.by > self.campo_a:
             self.vite -= 1
             self._segna("persa")
             if self.vite <= 0:
@@ -277,10 +323,10 @@ class Mattoni(Gioco):
                 self._riparti()
 
     def _colpisci_mattone(self):
-        if self.by > MURO_Y + FILE * MATTONE_H:
+        if self.by > self.muro_y + FILE * self.mattone_h:
             return
-        colonna = int((self.bx - MURO_X) // MATTONE_L)
-        fila = int((self.by - MURO_Y) // MATTONE_H)
+        colonna = int((self.bx - self.muro_x) // self.mattone_l)
+        fila = int((self.by - self.muro_y) // self.mattone_h)
         if not (0 <= colonna < COLONNE and 0 <= fila < FILE):
             return
         if not self.mattoni.get((colonna, fila)):
@@ -293,15 +339,13 @@ class Mattoni(Gioco):
         self.punteggio += PUNTI[fila]
         self._aggiorna_record()
         self.vy = -self.vy
-        self.by += (1 if self.vy > 0 else -1)
+        self.by += (self.fuga_y if self.vy > 0 else -self.fuga_y)
         # Ogni quattro mattoni la palla accelera: senza, la seconda meta' del
         # muro e' solo lavoro di braccia.
         self._colpi += 1
         if self._colpi % 4 == 0:
             self.velocita = min(96.0, self.velocita * 1.06)
-            fattore = self.velocita / max(1e-6, math.hypot(self.vx, self.vy))
-            self.vx *= fattore
-            self.vy *= fattore
+            self._dai_angolo(self._angolo_di_adesso())
 
     # -------------------------------------------------------------- disegno
 
@@ -309,23 +353,32 @@ class Mattoni(Gioco):
         for (colonna, fila), vivo in self.mattoni.items():
             if not vivo:
                 continue
-            x0 = MURO_X + colonna * MATTONE_L
-            y0 = MURO_Y + fila * MATTONE_H
-            for x in range(x0, min(CAMPO, x0 + MATTONE_L - 1)):
-                for y in range(y0, min(ALTEZZA, y0 + MATTONE_H - 1)):
-                    px[x, y] = COLORI[fila]
+            x0 = int(self.muro_x + colonna * self.mattone_l)
+            y0 = int(self.muro_y + fila * self.mattone_h)
+            x1 = int(self.muro_x + (colonna + 1) * self.mattone_l) - self.fuga_x
+            y1 = int(self.muro_y + (fila + 1) * self.mattone_h) - self.fuga_y
+            for x in range(x0, min(self.campo_l, max(x0 + 1, x1))):
+                for y in range(y0, min(self.campo_a, max(y0 + 1, y1))):
+                    self._punto(px, x, y, COLORI[fila])
 
         if not self.finita:
+            racchetta_y = int(self.racchetta_y)
             for x in range(int(self.racchetta),
-                           min(CAMPO, int(self.racchetta) + RACCHETTA_L)):
-                for y in range(RACCHETTA_Y, RACCHETTA_Y + RACCHETTA_H):
-                    px[x, y] = (255, 140, 26)
+                           min(self.campo_l,
+                               int(self.racchetta + self.racchetta_l))):
+                for y in range(racchetta_y, racchetta_y + self.racchetta_h):
+                    self._punto(px, x, y, (255, 140, 26))
 
-        for dx in range(PALLA):
-            for dy in range(PALLA):
-                x, y = int(self.bx) + dx, int(self.by) + dy
-                if 0 <= x < CAMPO and 0 <= y < ALTEZZA:
-                    px[x, y] = (255, 255, 255)
+        for dx in range(self.palla):
+            for dy in range(self.palla):
+                self._punto(px, int(self.bx) + dx, int(self.by) + dy,
+                            (255, 255, 255))
+
+    def _punto(self, px, x, y, colore):
+        """Un pixel in coordinate di campo, portato sulla tela."""
+        if 0 <= x < self.campo_l and 0 <= y < self.campo_a:
+            px[self.campo_x + x, self.campo_y + y] = colore
 
         if self.attaccata and not self.finita:
-            centra(px, "FUOCO PER LANCIARE", 40, (150, 150, 160))
+            centra(px, "FUOCO PER LANCIARE",
+                   self.campo_y + self.campo_a * 40 // 64, (150, 150, 160))

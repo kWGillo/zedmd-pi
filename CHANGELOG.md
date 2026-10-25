@@ -2,6 +2,68 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4]
+
+### I giochi su una tela qualunque: le fondamenta, e i primi due
+
+*«I giochini sono sempre per dmd. Non vengono riproporzionati.»*
+
+Vero. E il censimento dei tredici ha detto perché non bastava una
+moltiplicazione: la geometria di ogni gioco è fatta di costanti di modulo, di
+righe assolute, di sprite disegnati a mano, di fisica in pixel al secondo
+quadrato e di equilibri tarati su 64 righe. Qualche esempio dal censimento:
+
+- gli sprite sono **maschere di collisione**, non immagini: scalarli di 1,5
+  azzera gli urti;
+- in Bongo l'angolo è in gradi, e su un campo più alto `tanθ` cambia significato:
+  la manopola 0-90 smetterebbe di essere in gradi;
+- il labirinto di Gnam è **arte ASCII disegnata a mano**, 16 righe da 25
+  caratteri specchiate, e a `CASELLA=5` sfonda già i 256 pixel di larghezza;
+- in Squadriglia l'oscillazione del bombardiere è legata al **tempo di volo dei
+  tuoi colpi**: scalata con l'altezza, il bombardiere diventa incolpibile.
+
+Quindi prima le fondamenta.
+
+`LARGHEZZA`, `ALTEZZA` e `CAMPO` non sono più il destino. `Gioco` ha una tela
+(`largo`, `alto`) e un campo (`campo_x`, `campo_y`, `campo_l`, `campo_a`), e
+`configura_tela` gliela dice. Chi non l'ha ancora imparata lo dichiara
+(`TELA_LIBERA` falso) e resta 256×64 ingrandito di un intero, esattamente come
+prima: **i giochi si convertono uno per volta senza che gli altri si rompano
+nel frattempo.**
+
+**Il tabellone cambia posto.** Sul pannello resta la colonna di destra — il 4:1
+la impone, ed è il ragionamento della 3.6. Da novantasei righe in su diventa una
+striscia di sette in cima, e il campo si riprende le 56 colonne **e** tutte le
+righe in più. Anche «GAME OVER» scende al centro del campo invece di restare a
+metà di 64 righe.
+
+E il taglio ai bordi segue la tela: fino alla 17.3 `_riga_di_bit` tagliava sulle
+costanti 256×64, quindi su una tela alta qualunque scritta sotto la riga 64
+sarebbe sparita **in silenzio**.
+
+### Snake e Breakout
+
+Snake calcola la casella dal campo — quadrata sempre, perché due lati diversi
+farebbero andare il serpente più veloce in una direzione che nell'altra — e
+passa da 49×15 a **50×36** caselle.
+
+Breakout tiene due fattori, uno per asse, e con quelli muove mattoni, racchetta,
+palla e velocità. L'angolo di rimbalzo si conserva **in proporzione al campo** e
+non in radianti: tenendo i radianti, su un campo tre volte più alto un tiro a
+sessanta gradi diventerebbe quasi verticale e il gioco cambierebbe carattere.
+
+Su 200×64 tutti e due tornano al numero esatto che avevano. La nuova
+`diagnostica/prova_giochi.py` lo controlla misura per misura — mattone 19×3,
+muro a (5, 6), racchetta 22×2 sulla riga 60, casella 4, griglia 49×15 — più la
+prova che conta davvero: **la stessa partita, con lo stesso seme, rompe gli
+stessi mattoni sulle due tele.**
+
+### Cosa manca
+
+Gli altri undici. Bongo per primo, che è il più facile dei difficili: il
+censimento dice che basta far scendere la base dei palazzi, perché quello che
+conta in una parabola è il dislivello fra i tetti — e quello non cambia.
+
 ## [17.3.6]
 
 ### Il cursore tornava lo stesso, e la colpa era della mia memoria

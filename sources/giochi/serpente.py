@@ -36,11 +36,13 @@ preferenza di questo file.
 
 import random
 
-from .base import ALTEZZA, CAMPO, Gioco, centra
+from .base import Gioco, centra
 
-# La casella. Quattro pixel e' il compromesso: a tre il serpente e' un filo
-# che da tre metri non si segue, a cinque la griglia scende a 39x12 e il gioco
-# diventa stretto.
+# La casella sul pannello. Quattro pixel e' il compromesso: a tre il serpente
+# e' un filo che da tre metri non si segue, a cinque la griglia scende a 39x12
+# e il gioco diventa stretto. Dalla 17.4 e' il valore di riferimento e non piu'
+# la misura vera: `_misura_griglia` la ricalcola dal campo, e su 200x64 torna
+# esattamente quattro.
 LATO = 4
 
 # Il margine esiste per una ragione che si vede solo guardando il pannello: se
@@ -48,13 +50,18 @@ LATO = 4
 # l'ultima casella, e il serpente ci viaggia sopra cancellandola. Due pixel
 # per lato tolgono una riga e una colonna e danno alla cornice un posto suo.
 MARGINE = 2
-COLONNE = (CAMPO - 2 * MARGINE) // LATO      # 49
-RIGHE = (ALTEZZA - 2 * MARGINE) // LATO      # 15
+
+# Sul pannello la griglia e' 49x15, e dalla 17.4 non e' piu' una costante:
+# si calcola dal campo. Su 200x64 ridanno esattamente 4, 49 e 15, cioe' il
+# gioco di sempre; su una tela alta la casella resta quadrata -- il lato e'
+# uno solo per tutti e due gli assi, altrimenti il serpente diventa una fila
+# di mattoni e va piu' veloce in una direzione che nell'altra -- e le righe
+# crescono.
 
 # Il corpo si disegna 3x3 dentro la casella da 4: il pixel di margine fa da
 # giunzione fra un anello e l'altro, e da lontano e' quello che fa leggere il
-# serpente come un serpente invece che come una striscia continua.
-CORPO = 3
+# serpente come un serpente invece che come una striscia continua. Anche
+# questo si calcola: sempre un pixel meno del lato.
 
 COLORE_TESTA = (120, 255, 140)
 COLORE_CORPO = (40, 180, 70)
@@ -89,6 +96,7 @@ class Serpente(Gioco):
     nome = "snake"
     etichetta = "Snake"
     MUSICA = "snake_musica"
+    TELA_LIBERA = True
 
     def musica_di_adesso(self):
         # Parte con il primo fuoco, come il serpente.
@@ -109,12 +117,31 @@ class Serpente(Gioco):
         self._eventi = []
         self.suoni_del_frame = ()
         self._ferma = True          # in attesa del primo FUOCO
+        self._misura_griglia()
         self._riparti()
+
+    def _misura_griglia(self):
+        """La casella, e quante ce ne stanno. Su 200x64 torna il gioco di sempre.
+
+        Il lato lo decide il lato piu' stretto in proporzione: cosi' la
+        casella resta **quadrata** su qualunque tela. La griglia poi si
+        centra in quello che avanza, invece di appoggiarsi al margine
+        sinistro e lasciare il resto della divisione tutto a destra.
+        """
+        self.lato = max(3, int(round(LATO * min(self.campo_l / 200.0,
+                                                self.campo_a / 64.0))))
+        self.corpo_lato = max(1, self.lato - 1)
+        self.colonne = (self.campo_l - 2 * MARGINE) // self.lato
+        self.righe = (self.campo_a - 2 * MARGINE) // self.lato
+        larga = self.colonne * self.lato
+        alta = self.righe * self.lato
+        self.griglia_x = self.campo_x + (self.campo_l - larga) // 2
+        self.griglia_y = self.campo_y + (self.campo_a - alta) // 2
 
     def _riparti(self):
         """Rimette il serpente al centro, corto, fermo e rivolto a destra."""
-        centro_y = RIGHE // 2
-        partenza = COLONNE // 4
+        centro_y = self.righe // 2
+        partenza = self.colonne // 4
         # Dalla coda alla testa: l'ultimo elemento e' la testa, cosi' crescere
         # e' un `append` e muoversi e' un `append` piu' un `pop(0)`.
         self.corpo = [(partenza - 2, centro_y), (partenza - 1, centro_y),
@@ -135,7 +162,8 @@ class Serpente(Gioco):
         """
         occupate = set(self.corpo)
         testa = self.corpo[-1]
-        libere = [(x, y) for x in range(COLONNE) for y in range(RIGHE)
+        libere = [(x, y) for x in range(self.colonne)
+                  for y in range(self.righe)
                   if (x, y) not in occupate]
         if not libere:
             return None             # vinto: il serpente riempie la griglia
@@ -229,7 +257,8 @@ class Serpente(Gioco):
         x, y = self.corpo[-1]
         nuova = (x + dx, y + dy)
 
-        if not (0 <= nuova[0] < COLONNE and 0 <= nuova[1] < RIGHE):
+        if not (0 <= nuova[0] < self.colonne
+                and 0 <= nuova[1] < self.righe):
             self._muori("tonfo")
             return
         # La coda si libera nello stesso istante in cui la testa avanza:
@@ -275,14 +304,15 @@ class Serpente(Gioco):
         # La cornice si disegna perche' qui uccide: un campo senza confine
         # visibile su un pannello nero vuol dire morire contro un muro che non
         # si vedeva, che e' la peggiore delle morti.
-        x1 = MARGINE + COLONNE * LATO
-        y1 = MARGINE + RIGHE * LATO
-        for x in range(MARGINE - 1, min(CAMPO, x1 + 1)):
-            px[x, MARGINE - 1] = COLORE_BORDO
-            px[x, min(ALTEZZA - 1, y1)] = COLORE_BORDO
-        for y in range(MARGINE - 1, min(ALTEZZA, y1 + 1)):
-            px[MARGINE - 1, y] = COLORE_BORDO
-            px[min(CAMPO - 1, x1), y] = COLORE_BORDO
+        x0, y0 = self.griglia_x, self.griglia_y
+        x1 = x0 + self.colonne * self.lato
+        y1 = y0 + self.righe * self.lato
+        for x in range(x0 - 1, min(self.largo, x1 + 1)):
+            px[x, y0 - 1] = COLORE_BORDO
+            px[x, min(self.alto - 1, y1)] = COLORE_BORDO
+        for y in range(y0 - 1, min(self.alto, y1 + 1)):
+            px[x0 - 1, y] = COLORE_BORDO
+            px[min(self.largo - 1, x1), y] = COLORE_BORDO
 
         if self.cibo is not None:
             self._casella(px, self.cibo, COLORE_CIBO)
@@ -292,14 +322,14 @@ class Serpente(Gioco):
         self._casella(px, self.corpo[-1], COLORE_TESTA)
 
         if self._ferma and not self.finita:
-            centra(px, "FUOCO PER PARTIRE", 40, (150, 150, 160))
+            centra(px, "FUOCO PER PARTIRE",
+                   self.campo_y + self.campo_a * 5 // 8, (150, 150, 160))
 
-    @staticmethod
-    def _casella(px, cella, colore):
-        x0 = MARGINE + cella[0] * LATO
-        y0 = MARGINE + cella[1] * LATO
-        for dx in range(CORPO):
-            for dy in range(CORPO):
+    def _casella(self, px, cella, colore):
+        x0 = self.griglia_x + cella[0] * self.lato
+        y0 = self.griglia_y + cella[1] * self.lato
+        for dx in range(self.corpo_lato):
+            for dy in range(self.corpo_lato):
                 x, y = x0 + dx, y0 + dy
-                if 0 <= x < CAMPO and 0 <= y < ALTEZZA:
+                if 0 <= x < self.largo and 0 <= y < self.alto:
                     px[x, y] = colore

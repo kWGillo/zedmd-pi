@@ -632,6 +632,20 @@ class GiochiSource(Source):
         lingua = getattr(self._gioco, "configura_lingua", None)
         if lingua is not None:
             lingua(self.lingua())
+        # La misura della tela, a chi la sa usare. Un gioco non la puo'
+        # leggere da solo -- non sa niente ne' di display ne' di
+        # configurazione -- e chi non l'ha ancora imparata (`TELA_LIBERA`
+        # falso) resta sui suoi 256x64, ingranditi di un intero da
+        # `_alla_tela` come prima della 17.4. Cosi' i giochi si convertono
+        # uno per volta senza che gli altri si rompano nel frattempo.
+        #
+        # **Dopo** le due righe qui sopra, e non prima: `configura_tela`
+        # ricomincia la partita, e deve ricominciarla con il livello e la
+        # lingua gia' scelti.
+        if getattr(self._gioco, "TELA_LIBERA", False) and self.width > 0:
+            tela = getattr(self._gioco, "configura_tela", None)
+            if tela is not None:
+                tela(self.width, self.height)
         # Gli effetti arrivano da qui e non da dentro il gioco: cosi' una
         # partita si puo' ancora far girare dentro una prova, in silenzio e
         # senza scheda audio.
