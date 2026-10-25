@@ -358,10 +358,14 @@ sep("11. Il lampeggio dei due punti non sposta le cifre (17.3.2)")
 from PIL import ImageDraw, ImageFont                     # noqa: E402
 from sources.clock import scrivi_ora                     # noqa: E402
 
-FONT_PROVA = [
-    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-]
+from sources.clock import FONT_CANDIDATES, FONT_NOSTRO   # noqa: E402
+
+FONT_PROVA = list(FONT_CANDIDATES)
+
+esigi(os.path.exists(FONT_NOSTRO),
+      "la copia del font viaggia dentro il progetto, in font/")
+esigi(FONT_CANDIDATES.index(FONT_NOSTRO) == 1,
+      "e si cerca dopo quello di sistema, prima del proporzionale")
 
 
 def colonne_accese(img):

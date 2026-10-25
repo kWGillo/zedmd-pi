@@ -24,6 +24,11 @@ mkdir -p /opt/dmd
 cp -r "$SRC_DIR"/*.py "$SRC_DIR"/*.csv "$SRC_DIR"/templates \
       "$SRC_DIR"/static /opt/dmd/
 cp -r "$SRC_DIR"/sources /opt/dmd/
+# 17.3.2: il font dell'orologio, accanto al programma. `sources/clock.py` lo
+# cerca li' dentro quando quello di sistema non c'e'.
+if [ -d "$SRC_DIR/font" ]; then
+    cp -r "$SRC_DIR"/font /opt/dmd/
+fi
 # 3.0: sorgenti e script di Doom. Il binario compilato non si tocca — sta
 # nella stessa cartella ma non e' nostro, e ricompilarlo a ogni aggiornamento
 # vorrebbe dire due minuti di attesa per niente.

@@ -3216,8 +3216,19 @@ Storico:
        riga misurata e la penna sono sempre quelle di `14:22`. Con qualunque
        font, niente si puo' muovere. La prova guarda i pixel con tutti e due
        i font: deve sparire una colonna sola, larga quanto i due punti, in
-       mezzo alle cifre. Il font giusto resta quello per cui la pagina e'
-       disegnata: `sudo apt install fonts-dejavu-core`.
+       mezzo alle cifre.
+       **E il font viaggia nel progetto.** Le proporzioni giuste restano
+       quelle del monospaziato, e l'installer se ne occupa da solo: se il
+       font di sistema c'e' non si tocca niente, se manca si prova
+       `fonts-dejavu-mono` da apt, e se neanche quello si installa la copia
+       che sta in `font/`, in `/usr/local/share/fonts/dmd/`. Niente rete:
+       una copia dentro il progetto funziona anche su una macchina
+       scollegata, e fra cinque anni, quando un indirizzo che oggi risponde
+       potrebbe non rispondere piu'. `sources/clock.py` la cerca comunque da
+       se', subito dopo quella di sistema, cosi' anche un aggiornamento OTA
+       -- che `install.sh` non lo lancia -- si ritrova il font giusto.
+       Licenza Bitstream Vera, che la ridistribuzione la permette
+       espressamente: il testo sta in `font/LICENZA-DejaVu.txt`.
        **Le risoluzioni si leggono dal monitor.** La casella Risoluzione
        della pagina Video si apre su quello che la macchina dichiara in
        `/sys/class/drm/card0-*/modes` -- niente SDL, niente sessione

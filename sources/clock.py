@@ -7,6 +7,7 @@ formato 12 o 24 ore, nomi dei giorni in italiano, francese o inglese.
 
 import colorsys
 import datetime
+import os
 import random
 import time
 
@@ -22,8 +23,22 @@ try:
 except Exception:                                    # pragma: no cover
     fusi = None
 
+# Il font dell'orologio, in ordine di preferenza.
+#
+# Al primo posto quello di sistema: lo aggiorna la distribuzione, ed e'
+# giusto che vinca. Al secondo la copia che viaggia dentro il progetto, in
+# `font/`, perche' da Debian 13 le facce monospaziate di DejaVu stanno in un
+# pacchetto a parte e su quelle macchine il primo indirizzo non risponde.
+# Ultimo il proporzionale, che c'e' sempre ma non ha le larghezze per cui
+# l'orologio e' disegnato: a larghezza fissa `11:11` e `20:38` occupano lo
+# stesso spazio, e un orologio centrato non si muove a ogni minuto.
+FONT_NOSTRO = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "font", "DejaVuSansMono-Bold.ttf")
+
 FONT_CANDIDATES = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+    FONT_NOSTRO,
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
 ]
 

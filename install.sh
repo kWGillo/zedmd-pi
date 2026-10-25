@@ -53,14 +53,36 @@ apt install -y python3 python3-pip python3-dev python3-numpy python3-pil \
                python3-flask python3-paho-mqtt cython3 fonts-dejavu-core \
                tzdata ffmpeg samba samba-common-bin
 
-# Il font dell'orologio e' `DejaVuSansMono-Bold`, e l'orologio e' disegnato
-# sulle larghezze di quel font. Fino a Debian 12 stava dentro
-# `fonts-dejavu-core`; dalla 13 le facce monospaziate sono in un pacchetto a
-# parte, e senza questa riga su quelle macchine si finisce sul font
-# proporzionale. Dove il pacchetto non esiste non succede niente: vuol dire
-# che era gia' tutto in `core`.
-apt install -y fonts-dejavu-mono 2>/dev/null || \
-  echo "    fonts-dejavu-mono non c'e' in questa distribuzione: va bene cosi'"
+# ----------------------------------------------- il font dell'orologio
+#
+# L'orologio e' disegnato sulle larghezze di `DejaVuSansMono-Bold`. Non e'
+# una preferenza estetica: a larghezza fissa `11:11` e `20:38` occupano lo
+# stesso spazio, e un orologio centrato non si sposta a ogni minuto.
+#
+# Fino a Debian 12 quel font stava in `fonts-dejavu-core`, che si installa
+# qui sopra. Dalla 13 le facce monospaziate sono in `fonts-dejavu-mono`, e
+# su quelle macchine ci si ritrovava senza, con il ripiego sul font
+# proporzionale. Quindi: si prova apt, e se il font non c'e' comunque si
+# installa la copia che viaggia nel progetto. Niente rete, niente indirizzi
+# che fra cinque anni potrebbero non rispondere piu'.
+FONT_SISTEMA=/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf
+FONT_NOSTRO="$SRC_DIR/font/DejaVuSansMono-Bold.ttf"
+FONT_DEST=/usr/local/share/fonts/dmd
+
+echo "==> Font dell'orologio"
+if [ ! -f "$FONT_SISTEMA" ]; then
+    apt install -y fonts-dejavu-mono 2>/dev/null || true
+fi
+if [ -f "$FONT_SISTEMA" ]; then
+    echo "    c'e' gia' quello di sistema"
+elif [ -f "$FONT_NOSTRO" ]; then
+    mkdir -p "$FONT_DEST"
+    cp "$FONT_NOSTRO" "$FONT_DEST/"
+    command -v fc-cache >/dev/null 2>&1 && fc-cache -f "$FONT_DEST" >/dev/null 2>&1
+    echo "    installata la copia del progetto in $FONT_DEST"
+else
+    echo "    non trovato: l'orologio usera' il font proporzionale"
+fi
 
 # Su un monitor il disegno esce da SDL: una finestra se c'e' un desktop
 # avviato, il KMS se non c'e'. Se non si installa, `display.py` ripiega su
@@ -91,6 +113,12 @@ mkdir -p /opt/dmd
 cp -r "$SRC_DIR"/*.py "$SRC_DIR"/*.csv "$SRC_DIR"/templates \
       "$SRC_DIR"/static /opt/dmd/
 cp -r "$SRC_DIR"/sources /opt/dmd/
+# Il font dell'orologio va accanto al programma: `sources/clock.py` lo cerca
+# li' dentro, e da li' lo prende anche un aggiornamento OTA, che `install.sh`
+# non lo lancia.
+if [ -d "$SRC_DIR/font" ]; then
+    cp -r "$SRC_DIR"/font /opt/dmd/
+fi
 # Doom: qui arrivano solo i sorgenti e lo script. Compilare richiede di
 # scaricare doomgeneric e un paio di minuti di CPU, e non e' detto che chi
 # installa il DMD voglia anche giocare: lo fa lui quando vuole, con

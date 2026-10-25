@@ -71,12 +71,31 @@ se i due punti si disegnano. Con qualunque font, niente si può muovere.
 La prova guarda i pixel, con tutti e due i font: fra le due immagini deve
 sparire una colonna sola, larga quanto i due punti, e in mezzo alle cifre.
 
-Vale comunque la pena di installare il font giusto, che è quello per cui la
-pagina è disegnata:
+### Il font viaggia nel progetto
 
-```
-sudo apt install fonts-dejavu-core
-```
+Il difetto è sistemato, ma le proporzioni giuste restano quelle di
+`DejaVuSansMono-Bold`, ed è il font per cui l'orologio è disegnato: a larghezza
+fissa `11:11` e `20:38` occupano lo stesso spazio, e un orologio centrato non si
+sposta a ogni minuto.
+
+Adesso una copia del font sta in `font/`, dentro il progetto, e l'installer se
+ne occupa da solo:
+
+1. se il font di sistema c'è, non si tocca niente — lo aggiorna la
+   distribuzione, ed è giusto che vinca;
+2. se non c'è, si prova `apt install fonts-dejavu-mono`;
+3. se neanche quello, si installa la copia del progetto in
+   `/usr/local/share/fonts/dmd/`, con `fc-cache`.
+
+Niente rete: una copia dentro il progetto funziona anche su una macchina
+scollegata, e fra cinque anni, quando un indirizzo che oggi risponde potrebbe
+non rispondere più. `sources/clock.py` la cerca comunque da sé, subito dopo
+quella di sistema, quindi anche un aggiornamento OTA — che `install.sh` non lo
+lancia — si ritrova il font giusto. L'OTA porta la cartella `font/` perché la
+legge dal manifest dell'archivio, come ogni altra cartella nuova.
+
+Licenza Bitstream Vera (ridistribuzione espressamente permessa), testo completo
+in `font/LICENZA-DejaVu.txt`.
 
 ### Le risoluzioni si leggono dal monitor
 

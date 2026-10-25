@@ -21,7 +21,7 @@ c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 6f6f3eda48e12c7f3baf5f9cbe1efda0  diagnostica/prova_nati_e_morti.py
 826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
-b0c3d50a7128a7cf2d7d3d966714b1f6  diagnostica/prova_regioni.py
+cf36ba969f24c8fb0a42d4cf6da5b58f  diagnostica/prova_regioni.py
 e0926a3461f47061b2a80cd9f74d3323  diagnostica/prova_schermo.py
 3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
@@ -40,6 +40,9 @@ bb3118ed4b5ebb8d9f49cc8bbcd6f341  doom/Makefile
 df41cd3789c885ba456f16c32a14f5e1  doomsetup.py
 dfdf560983ea1fbb6640e94af5ef6863  energia.py
 2a032dc6d2a74a9e9aa16eded4a976b3  fasce.py
+33df9c0888683eb0c10e75127ac97c08  font/DejaVuSansMono-Bold.ttf
+275c2e8daff275d1ecaf63b265ba6bcf  font/LEGGIMI.it.md
+425865e1c534c5788b1341d401f131d9  font/LICENZA-DejaVu.txt
 1a11ba22870748dec75083c146dcb650  fusi.py
 f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 075e6985999ab1d4bbcca75759c692b7  gb/setup_gb.sh
@@ -49,7 +52,7 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 e45d351b601929bd837040f66702dfe0  hass.py
 2709a21809071a9eb600655dbc20d361  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
-6c8eaa58aed317dd75d5f0c065742b5b  install.sh
+0925ecd33f6644a201321b84b9f0006c  install.sh
 1ac13b80fea00e4ef49841661298ea1a  inutili.py
 456a3e6e24373f6acbd608aea6c34c8e  libcheck.py
 33804e1f60d47bc20ea370bb2e0b6502  lookup.py
@@ -57,7 +60,7 @@ cec57b0213eef8daddbfa162fdbd9d70  icone.py
 38d51b9735b5f000b62c9770ca1d0bd0  meteo.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
 3cd27398cb063179a7699520644a98e0  nowplaying.py
-e5423d012fbb84dd6b94b6e12287d9b3  ota.py
+f86f2ce2c8f86596e4362eb60308f52f  ota.py
 d2a13bde255f3b4273f817416922bb01  pianeti.py
 b4805d23db47349eb430c63037985457  piattaforma.py
 da71bedebd1b9b84017df1c228648fed  presets.py
@@ -77,7 +80,7 @@ be7a53f3a370b2550970f7cdb510bc53  sources/__init__.py
 62774ea638052119d4dc225d1290e3e6  sources/base.py
 ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 2a299afa099afba8a35b19d1049595bb  sources/cielo.py
-12d76a1d9875bf521e142da14adb8149  sources/clock.py
+7c59b4cfd4b5c20765b517919e3eefe2  sources/clock.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 0aec5e5925af657819f9a3367c4e76fb  sources/doom.py
@@ -179,9 +182,9 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 8e4da1571d2f55b9211b110179be1607  templates/updates.html
 3b29a3298d7020ed5416a9b633083bb4  templates/video.html
-09eb0a8feaf2b5883b1ef172351f6d02  update.sh
+60ffed43d5bec6038bbb513730027755  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-90aae31657a68ca2eacea3d585b55399  version.py
+46b46f7739a6e3582e93ef1a1daff809  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 0cdd6b91c1a261c50e25bad3619fe998  webui.py

@@ -52,7 +52,7 @@ PAYLOAD_FILES = ["dmdd.py", "dmdconf.py", "display.py", "webui.py", "ota.py",
                  "dmd.service", "install.sh", "update.sh", "setup_share.sh",
                  "setup_nowplaying.sh", "verify.sh", "manifest.md5",
                  "manifest-install.md5"]
-PAYLOAD_DIRS = ["sources", "templates", "static"]
+PAYLOAD_DIRS = ["sources", "templates", "static", "font"]
 
 # Presenza minima perche' un archivio sia considerato valido.
 REQUIRED = ["dmdd.py", "version.py", "webui.py", "i18n.py", "libcheck.py",

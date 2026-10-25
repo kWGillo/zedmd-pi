@@ -291,6 +291,22 @@ python3 /opt/dmd/diagnostica/prova_regioni.py
 python3 /opt/dmd/diagnostica/prova_piattaforma.py
 ```
 
+## Il font dell'orologio
+
+Da Debian 13 le facce monospaziate di DejaVu non stanno più in
+`fonts-dejavu-core` ma in `fonts-dejavu-mono`, e l'orologio è disegnato sulle
+larghezze di `DejaVuSansMono-Bold`. Non serve ricordarselo: `install.sh` prova
+il pacchetto e, se non basta, installa da sé la copia che viaggia nel progetto
+(`font/`) in `/usr/local/share/fonts/dmd/`. Per vedere quale sta usando:
+
+```
+ls /usr/share/fonts/truetype/dejavu/ /usr/local/share/fonts/dmd/ 2>/dev/null
+```
+
+Con un font proporzionale il programma funziona lo stesso — dalla 17.3.2 le
+cifre non si spostano più — ma l'ora centrata respira in modo diverso a ogni
+minuto, perché le cifre non hanno tutte la stessa larghezza.
+
 Quella che il monitor **lo vuole** è `schermo_dal_vivo.py`: dipinge sullo
 schermo vero, una strada per volta, e dice quale disegna. Si lancia con il
 servizio fermo, perché due programmi non possono tenere la stessa scheda:
