@@ -267,6 +267,73 @@ esigi(dati is None and errore,
       % errore)
 
 
+sep("8. «Accadde oggi»: il titolo non e' la prima riga del fatto (17.4.14)")
+
+# *«Quando viene mostrato un testo lungo in Accade oggi, i testi finiscono
+# a ridosso della scritta Accade oggi.»* Si misurava: il paragrafo partiva
+# al 17 per cento dell'altezza -- a 64 righe la riga 11 -- e il titolo
+# scritto a corpo 10 dalla riga 1 arriva alla 10. Un pixel di aria, e per
+# di piu' la colonna del testo passa **sotto** il titolo, che e' largo meta'
+# pannello.
+
+import dmdconf                                           # noqa: E402
+from PIL import Image, ImageDraw                         # noqa: E402
+
+from sources.inutili import InutiliSource                # noqa: E402
+
+LUNGO = ("Il presidente degli Stati Uniti John Fitzgerald Kennedy annuncia "
+         "al mondo il blocco navale di Cuba, dando inizio a quella che sara' "
+         "ricordata come la crisi dei missili, il momento piu' vicino alla "
+         "guerra nucleare di tutta la storia del Novecento")
+
+
+def schermata(alto, testo=LUNGO):
+    """Disegna «accadde oggi» su una tela alta `alto` e torna i conti."""
+    sorgente = InutiliSource(dmdconf.load(), 256, alto)
+    sorgente.storia.eventi = lambda quando: [(1962, testo)]
+    img = Image.new("RGB", (256, alto), (0, 0, 0))
+    d = ImageDraw.Draw(img)
+    sorgente._bande = []
+    sorgente._eventi(d)
+    titolo = sorgente._riquadro(d, "ACCADDE OGGI", sorgente._font_piccolo)
+    cima = int(alto * 0.30)
+    passo = max(1, int(alto * 0.22))
+    return sorgente, img, titolo[1], cima, passo
+
+
+for alto in (64, 88, 120, 184):
+    sorgente, img, titolo_fondo, cima, passo = schermata(alto)
+    esigi(cima > titolo_fondo + 1,
+          "a %3d righe il paragrafo comincia **sotto** il titolo (riga %d"
+          " contro %d)" % (alto, cima, titolo_fondo))
+    esigi(cima - titolo_fondo >= max(3, titolo_fondo // 3),
+          "a %3d righe fra il titolo e il testo c'e' aria vera: %d righe"
+          % (alto, cima - titolo_fondo))
+    quante = (alto - cima) // passo
+    esigi(quante >= 3,
+          "a %3d righe del fatto se ne vedono ancora %d: l'aria non si paga"
+          " con una riga in meno" % (alto, quante))
+    esigi(cima + (quante - 1) * passo + titolo_fondo <= alto,
+          "a %3d righe l'ultima riga sta dentro il vetro" % alto)
+    esigi(sorgente._bande and sorgente._bande[0]["y"] == cima,
+          "a %3d righe anche la colonna che sale parte da li', non piu' su"
+          % alto)
+
+# E la riga del titolo resta sgombra: nessun pixel del paragrafo la tocca.
+sorgente, img, titolo_fondo, cima, passo = schermata(64)
+px = img.load()
+sporchi = [(x, y) for y in range(titolo_fondo + 1, cima)
+           for x in range(60, 256) if px[x, y] != (0, 0, 0)]
+esigi(not sporchi,
+      "fra il titolo e il paragrafo non c'e' un pixel acceso (%d trovati)"
+      % len(sporchi))
+
+# Con un testo corto non cambia niente: la schermata resta quella di sempre.
+corta = schermata(64, "Primo volo del Concorde")[0]
+esigi(not corta._bande,
+      "un fatto corto non fa salire niente: resta fermo, come prima")
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

@@ -301,6 +301,11 @@ class AirRadarSource(Source):
         self._dirty = False
 
         self._showing = False
+        # Quanti ne ha mostrati l'ultimo giro e quanti ne ha lasciati fuori
+        # perche' l'intervallo era finito: la sfilata ha un tetto, e un tetto
+        # che non si vede sembra un guasto. Vedi `_show_all`.
+        self._mostrati = 0
+        self._saltati = 0
         self._recent = {}       # hex -> istante dell'ultima visualizzazione
         self._status = ("status.radar.waiting", {})
         self._last_poll = 0.0
@@ -396,6 +401,12 @@ class AirRadarSource(Source):
                                    when=time.strftime(
                                        "%d/%m %H:%M",
                                        time.localtime(self._ultima_rianimazione)))
+        if self._saltati:
+            # Un tetto che non si vede sembra un guasto: se degli aerei sono
+            # rimasti fuori dalla sfilata, lo si dice qui invece di lasciar
+            # credere che il radar ne abbia persi per strada.
+            text += " | " + self.t("status.radar.sfilata", lang,
+                                   shown=self._mostrati, skipped=self._saltati)
         if self._routes_found or self._routes_missing:
             text += " | " + self.t("status.radar.routes", lang,
                                    found=self._routes_found,
@@ -424,13 +435,6 @@ class AirRadarSource(Source):
                 self._cadenza = inizio - self._inizio_precedente
             self._inizio_precedente = inizio
             try:
-                aircraft = self._poll(cfg)
-                self._show_all(aircraft, cfg)
-            except Exception as exc:
-                self._status = ("status.radar.error", {"error": str(exc)})
-                print("[airradar] %s" % exc)
-
-            try:
                 interval = max(INTERVALLO_MINIMO,
                                float(cfg["poll_interval"]))
             except (TypeError, ValueError):
@@ -438,6 +442,18 @@ class AirRadarSource(Source):
                 # thread: prima questa riga stava fuori dal `try` e un errore
                 # qui spegneva il radar per sempre, in silenzio.
                 interval = INTERVALLO_MINIMO
+            try:
+                aircraft = self._poll(cfg)
+                # **La sfilata finisce quando finisce l'intervallo.** Vedi
+                # `_show_all`: senza questa scadenza, con molti aerei nel
+                # raggio il giro durava quanto la sfilata e i dati andavano
+                # a male mentre erano in coda.
+                self._show_all(aircraft, cfg, scadenza=time.time()
+                               + max(0.0, interval - (time.monotonic() - inizio)))
+            except Exception as exc:
+                self._status = ("status.radar.error", {"error": str(exc)})
+                print("[airradar] %s" % exc)
+
             attesa = interval - (time.monotonic() - inizio)
             # Se la sfilata ha gia' consumato tutto l'intervallo non si aspetta
             # quasi niente: si e' in ritardo, e la cosa giusta e' ripartire.
@@ -815,10 +831,34 @@ class AirRadarSource(Source):
             return False
         return bool(first) and first != CSV_COLUMNS
 
-    def _show_all(self, aircraft, cfg):
+    def _show_all(self, aircraft, cfg, scadenza=None):
+        """La sfilata degli aerei trovati, **dentro l'intervallo**.
+
+        Fino alla 17.4.13 qui si sfilavano tutti: con un raggio piccolo sono
+        due o tre e non si notava, con un raggio ampio diventano trenta, e
+        trenta aerei da dieci secondi fanno **cinque minuti** di sfilata.
+        Il guaio non e' la lunghezza: e' che i dati invecchiano in coda.
+        Quello che si vede e' la fotografia scattata all'inizio del giro --
+        posizione, quota, e soprattutto la distanza minima di passaggio -- e
+        al quinto minuto quell'aereo e' a cento chilometri da qui. *«Quando
+        amplio il raggio e ho molti voli, i dati sono sbagliati.»*
+
+        E non finisce li': una cadenza vera di cinque minuti sfonda
+        `TRATTO_MASSIMO_S`, quindi due posizioni consecutive non si uniscono
+        piu' con un segmento e il radar perde il suo stimatore migliore --
+        proprio quando c'e' piu' traffico da seguire.
+
+        Adesso la sfilata dura al massimo quanto l'intervallo. Chi non ci
+        sta non e' perduto: resta nel registro e nella pagina Radar, e al
+        giro dopo e' di nuovo in lista -- in testa, perche' l'elenco e'
+        ordinato per distanza e chi e' stato mostrato va in riposo per il
+        `cooldown`. Il primo aereo si mostra sempre, anche quando
+        l'intervallo e' piu' corto della durata: meglio un aereo che nessuno.
+        """
         cooldown = max(30, int(cfg["cooldown"]))
         duration = max(2, int(cfg["display_seconds"]))
         now = time.time()
+        mostrati = saltati = 0
 
         # Non ripresentare lo stesso aereo finche' non e' passato il tempo di riposo.
         self._recent = {k: t for k, t in self._recent.items() if now - t < cooldown}
@@ -829,6 +869,13 @@ class AirRadarSource(Source):
             key = plane["hex"] or plane["flight"]
             if not key or key in self._recent:
                 continue
+            if (scadenza is not None and mostrati
+                    and time.time() + duration > scadenza):
+                # Non ci sta **per intero** prima della prossima
+                # interrogazione: si lascia stare. Non si segna fra i
+                # mostrati, quindi al giro dopo ha la precedenza di diritto.
+                saltati += 1
+                continue
             self._recent[key] = time.time()
 
             if "route" in (cfg.get("fields") or []) and plane["flight"]:
@@ -836,8 +883,10 @@ class AirRadarSource(Source):
 
             self._showing = True
             self._mostra(plane, cfg, duration)
+            mostrati += 1
 
         self._showing = False
+        self._mostrati, self._saltati = mostrati, saltati
 
     def _pubblica(self, image):
         with self._lock:

@@ -3644,6 +3644,38 @@ Storico:
        quello era stata scartata.
        Dove la scala massima gia' andava bene -- 1024x768, 1920x1080,
        2560x1440, 4K -- non cambia niente, e il pannello LED nemmeno.
+  17.4.14 **Quattro segnalazioni dello stesso pomeriggio.**
+       *«Il radar va in confusione quando amplio il raggio e ho molti
+       voli»*, e quello che si vedeva erano dati sbagliati. La sfilata degli
+       aerei non aveva un tetto: trenta aerei da dieci secondi fanno cinque
+       minuti, e quello che va sul pannello e' la fotografia scattata
+       all'inizio del giro -- al quinto minuto quella distanza di passaggio
+       e' una notizia vecchia. Peggio: una cadenza vera di cinque minuti
+       sfonda `TRATTO_MASSIMO_S`, quindi due posizioni non si uniscono piu'
+       con un segmento e il radar perde il suo stimatore migliore proprio
+       dove c'e' piu' traffico. Adesso la sfilata dura al massimo quanto
+       l'intervallo; chi resta fuori e' nel registro e al giro dopo ha la
+       precedenza, e la riga di stato lo dice.
+       *«Il gioco Quiz time ora e' in inglese.»* Lo stesso difetto della
+       17.4.10, un piano piu' sotto: i giochi chiedevano la lingua a
+       `web.language`, che di serie e' **vuoto** -- vuol dire «decidila dal
+       browser» -- e il vuoto passato a `i18n.resolve` diventa inglese. La
+       regola adesso sta scritta una volta sola, in
+       `sources.base.lingua_del_pannello`, e la usano i giochi, il meteo e i
+       compleanni: sul vetro comanda `clock.language`.
+       *«In Accade oggi i testi finiscono a ridosso della scritta.»* Il
+       paragrafo partiva all'altezza di una frazione fissa -- riga 11 su 64
+       -- e il titolo scritto dalla riga 1 arriva alla 10: un pixel di aria,
+       con la colonna del testo che per di piu' passa sotto il titolo.
+       Adesso comincia dove comincia l'anno, e le righe che si vedono
+       restano tre.
+       *«I giochi sul mini PC Z83 col monitor 21:9 sono lenti e a scatti:
+       risoluzione o risorse?»* Tutte e due, e sono fattore e
+       moltiplicatore: il filtro DMD lavora sui pixel veri -- 22,9 ms a
+       2560x1080 contro 4,3 a 1024x768, su una CPU di fascia alta -- e su un
+       Atom quel conto si moltiplica. Non si indovina, si misura:
+       `diagnostica/misura_video.py` cronometra i quattro stadi del
+       fotogramma su **quella** macchina e dice se ci si sta dentro.
 """
 
-__version__ = "17.4.13"
+__version__ = "17.4.14"

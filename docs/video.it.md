@@ -251,6 +251,50 @@ ondeggiare.
 registro della matrice. Su HDMI non esiste niente del genere, e senza
 moltiplicare lo slider e la modalità notte fingerebbero di funzionare.
 
+# 5-bis. Quando il video va a scatti
+
+*«I giochi su un mini PC Z83, con il monitor 21:9, risultano molto lenti e a
+scatti. Potrebbe essere dato dall'eccessiva risoluzione o un problema di
+risorse?»* Le due cose non sono alternative: sono **fattore e
+moltiplicatore**. Il filtro DMD lavora sui pixel veri dello schermo, non su
+quelli della tela, e il loro numero cresce con la risoluzione; quanto costa
+ogni pixel lo decide la CPU.
+
+Il ciclo dei giochi punta a trenta fotogrammi al secondo, cioè **33 ms per
+fotogramma** — dentro i quali ci deve stare anche il gioco che pensa. Misurato
+su una CPU di fascia alta, il solo disegno:
+
+| schermo | pixel | con filtro | senza filtro |
+|---|---|---|---|
+| 1024×768 | 0,8 M | 4,3 ms | 0,5 ms |
+| 1920×1080 | 2,1 M | 12,5 ms | 2,3 ms |
+| 2560×1080 | 2,8 M | 22,9 ms | 3,0 ms |
+
+Il filtro è dieci volte il resto, e su un Atom da mini PC quei numeri si
+moltiplicano per quattro o cinque: a 2560×1080 il solo fotogramma sfonda il
+budget, e gli scatti non sono un'impressione.
+
+**Il numero vero lo dà la macchina**, non questa tabella:
+
+    python3 diagnostica/misura_video.py
+
+Misura a schermo i quattro stadi del fotogramma — ingrandimento, filtro,
+composizione, consegna — con il filtro acceso e spento, e dice se ci si sta
+dentro. Si può anche passargli una risoluzione da provare
+(`misura_video.py 1920x1080`) per vedere quanto si guadagnerebbe a
+cambiarla.
+
+Le due cure, in quest'ordine:
+
+1. **spegnere il filtro DMD** nella pagina Video: si perde il reticolo dei
+   punti, si guadagna il novanta per cento del tempo di disegno;
+2. **scendere di risoluzione**: dimezzare i pixel dimezza il tempo, filtro o
+   non filtro. Sul 21:9 si può anche restare a 2560×1080 e spegnere il
+   filtro: le due regioni e tutto il resto non cambiano.
+
+Il pannello LED non c'entra niente con tutto questo: lì i pixel sono 16.384 e
+il filtro non esiste: è la matrice vera.
+
 # 6. I giochi
 
 Dalla 17.4 si riproporzionano, **uno per volta**.

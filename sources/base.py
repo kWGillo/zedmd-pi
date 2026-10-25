@@ -7,6 +7,29 @@ Una sorgente non tocca mai il pannello: dichiara se ha qualcosa da mostrare
 import i18n
 
 
+def lingua_del_pannello(cfg):
+    """La lingua delle parole che finiscono sul vetro.
+
+    **`clock.language` prima di tutto**, ed e' la regola scritta in
+    `config.json`: *«web.language non ha effetto sul testo mostrato sul
+    pannello»*. `web.language` e' la lingua dell'**interfaccia**, e di serie
+    e' vuoto -- vuol dire «decidila tu dal browser», che su un pannello
+    appeso al muro non vuol dire niente.
+
+    La regola stava gia' in `Source.t` dalla 17.4.10, ma ogni posto che
+    scrive una parola sul pannello se l'era riscritta a modo suo: il meteo
+    con l'ordine rovesciato, i compleanni guardando solo la web, e i giochi
+    -- quelli da cui e' arrivata la segnalazione, *«il gioco Quiz time ora
+    e' in inglese»* -- passando il vuoto a `i18n.resolve`, che senza
+    preferenza e senza browser risponde `FALLBACK`, cioe' inglese. Adesso la
+    regola sta scritta una volta sola, e questa funzione e' quel posto.
+    """
+    cfg = cfg or {}
+    return (((cfg.get("clock") or {}).get("language")
+             or (cfg.get("web") or {}).get("language") or "").strip()
+            or i18n.FALLBACK)
+
+
 class Source:
     name = "base"
     label = "Base"
@@ -57,10 +80,8 @@ class Source:
         I messaggi di log restano in italiano: sono per chi legge
         `journalctl`, non per l'interfaccia.
         """
-        if not lang:
-            lang = ((self.cfg.get("clock") or {}).get("language")
-                    or (self.cfg.get("web") or {}).get("language") or "")
-        return i18n.translate(key, lang or i18n.FALLBACK, **values)
+        return i18n.translate(key, lang or lingua_del_pannello(self.cfg),
+                              **values)
 
     def start(self):
         """Avvia thread o socket. Chiamato quando il servizio viene abilitato."""

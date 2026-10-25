@@ -36,7 +36,7 @@ from PIL import Image, ImageDraw
 import fasce
 import icone
 import meteo
-from .base import Source
+from .base import Source, lingua_del_pannello
 from .clock import _load_font
 
 try:
@@ -524,8 +524,9 @@ class MeteoSource(Source):
         d.rectangle([self.width - 10, 1, self.width - 6, 5], fill=colore)
 
     def _lingua(self):
-        return ((self.cfg.get("web") or {}).get("language")
-                or (self.cfg.get("clock") or {}).get("language") or "it")
+        # L'ordine conta, e fino alla 17.4.13 era rovesciato: `web.language`
+        # e' la lingua dell'interfaccia, `clock.language` quella del vetro.
+        return lingua_del_pannello(self.cfg)
 
     def unita(self):
         """"C" o "F". La previsione arriva sempre in Celsius: si converte qui."""

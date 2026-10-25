@@ -619,11 +619,28 @@ class InutiliSource(Source):
         # ne passano due per turno -- e contando i turni pure, perche'
         # «accadde oggi» compare un turno su due.
         anno, testo = fatti[self._quante.get("eventi", 0) % len(fatti)]
-        d.text((margine, int(self.height * 0.30)), str(anno),
+        # **Il paragrafo comincia dove comincia l'anno**, non undici righe
+        # piu' su. *«Quando viene mostrato un testo lungo, i testi finiscono
+        # a ridosso della scritta Accadde oggi.»* Era vero e si misurava: il
+        # paragrafo partiva al 17 per cento dell'altezza -- a 64 righe, la
+        # riga 11 -- e il titolo scritto a corpo 10 dalla riga 1 arriva alla
+        # 10. Un pixel di aria, e per di piu' la colonna del testo passa
+        # **sotto** il titolo, che e' largo meta' pannello: «ACCADDE OGGI»
+        # finiva per sembrare la prima riga del fatto invece che un titolo.
+        # Con un testo lungo si nota di piu', perche' la colonna sale e le
+        # righe spariscono proprio li' contro.
+        #
+        # Adesso le due cose che stanno a destra dell'anno cominciano alla
+        # sua stessa altezza: il titolo resta da solo sulla sua riga, come
+        # fa gia' «NATI E MORTI» nell'altra schermata. Le righe che ci
+        # stanno restano **tre**, a 64 righe come su una tela alta: sul
+        # pannello non si perde niente, si guadagna l'aria che distingue un
+        # titolo da un testo.
+        alto = int(self.height * 0.30)
+        d.text((margine, alto), str(anno),
                font=self._font_grande, fill=ANNO_EVENTO)
         sinistra = margine + self._largo(d, "0000", self._font_grande) + 6
         disponibile = self.width - sinistra - margine
-        alto = int(self.height * 0.17) + 1
         passo = max(1, int(self.height * 0.22))
         righe = self._a_capo(d, testo, self._font_piccolo, disponibile,
                              RIGHE_MASSIME)

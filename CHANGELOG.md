@@ -2,6 +2,90 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.14]
+
+### Il radar con molti voli: la sfilata non si mangia l'intervallo
+
+*«Quando amplio il raggio del radar e ho molti voli all'interno dell'area, il
+radar va in confusione»* — e quello che si vedeva erano **dati sbagliati**.
+
+La sfilata degli aerei non aveva un tetto. Con un raggio piccolo sono due o tre
+e non si nota; con un raggio ampio diventano trenta, e trenta aerei da dieci
+secondi fanno **cinque minuti**. Il guaio non è la lunghezza: è che quello che
+va sul pannello è la fotografia scattata all'inizio del giro — posizione,
+quota, e soprattutto la distanza minima di passaggio. Al quinto minuto quel
+«a 2 km» riguarda un aereo che è a cento chilometri da qui.
+
+E c'è un secondo effetto, più nascosto: una cadenza vera di cinque minuti
+sfonda `TRATTO_MASSIMO_S`, i 150 secondi oltre i quali due posizioni non si
+uniscono più con un segmento. Il radar perdeva il suo stimatore migliore —
+quello che ha fatto nascere la 16.4 — proprio dove c'è più traffico da seguire.
+
+Adesso la sfilata dura al massimo quanto l'intervallo: si mostra chi ci sta
+**per intero** prima della prossima interrogazione, e il primo aereo si mostra
+sempre. Chi resta fuori non è perduto: è nel registro e nella pagina Radar, e
+al giro dopo ha la precedenza di diritto — l'elenco è ordinato per distanza e
+chi è passato va in riposo per il `cooldown`. La riga di stato lo dice:
+*«mostrati 2, gli altri 28 restano nel registro»*.
+
+### Super Quiz torna in italiano
+
+*«Il gioco Quiz time ora è in inglese e non più in italiano.»*
+
+È lo stesso difetto della 17.4.10 — il meteo che diceva «Tomorrow» — un piano
+più sotto. I giochi chiedevano la lingua a `web.language`, che è la lingua
+dell'**interfaccia** e di serie è **vuota**, perché vuol dire «decidila tu dal
+browser». Passata a `i18n.resolve` senza preferenza salvata e senza browser da
+interrogare, quella stringa vuota diventa `FALLBACK`, cioè inglese.
+
+La regola adesso sta scritta **una volta sola**, in
+`sources.base.lingua_del_pannello`: sul vetro comanda `clock.language`, e
+`web.language` è l'ultima parola solo se la prima manca. La usano i giochi, il
+meteo (che aveva l'ordine rovesciato) e i compleanni (che guardavano solo la
+web UI). Una prova legge il codice con `ast` e verifica che nessuna sorgente
+chieda più la lingua del pannello a `i18n.resolve`.
+
+### «Accadde oggi»: il titolo non è la prima riga del fatto
+
+*«Quando viene mostrato un testo lungo in Accade oggi, i testi finiscono a
+ridosso della scritta Accade oggi.»*
+
+Si misurava. Il paragrafo partiva al 17% dell'altezza — a 64 righe, la riga 11
+— e il titolo scritto a corpo 10 dalla riga 1 arriva alla 10: **un pixel** di
+aria. E la colonna del testo passa sotto il titolo, che è largo mezzo pannello:
+«ACCADDE OGGI» finiva per sembrare la prima riga del fatto. Con un testo lungo
+si nota di più, perché la colonna sale e le righe spariscono proprio lì contro.
+
+Adesso il paragrafo comincia dove comincia l'anno, come fa già «NATI E MORTI»
+nell'altra schermata. Le righe che si vedono restano **tre**, sul pannello come
+su una tela alta: l'aria non si paga con una riga in meno.
+
+### Perché il video va a scatti: un cronometro invece di un'opinione
+
+*«I giochi sul mini PC Z83, con il monitor 21:9, sono molto lenti e a scatti:
+risoluzione o risorse?»* Tutte e due — sono **fattore e moltiplicatore**. Il
+filtro DMD lavora sui pixel veri dello schermo, e il loro numero cresce con la
+risoluzione; quanto costa ogni pixel lo decide la CPU.
+
+| schermo | pixel | con filtro | senza filtro |
+|---|---|---|---|
+| 1024×768 | 0,8 M | 4,3 ms | 0,5 ms |
+| 1920×1080 | 2,1 M | 12,5 ms | 2,3 ms |
+| 2560×1080 | 2,8 M | 22,9 ms | 3,0 ms |
+
+Sono numeri di una CPU di fascia alta, e il budget di un fotogramma a trenta al
+secondo è 33 ms — dentro i quali ci deve stare anche il gioco che pensa. Su un
+Atom da mini PC quei numeri si moltiplicano per quattro o cinque.
+
+Il numero vero lo dà la macchina: **`diagnostica/misura_video.py`** cronometra
+i quattro stadi del fotogramma — ingrandimento, filtro, composizione, consegna
+— con il filtro acceso e spento, e dice se ci si sta dentro e che cosa
+conviene toccare. Si può passargli una risoluzione da provare per vedere quanto
+si guadagnerebbe a cambiarla.
+
+Nessuna micro-ottimizzazione: ne ho provata una — non ridipingere il fondo a
+ogni fotogramma — e misurata valeva lo 0,5 ms su 23. È stata tolta.
+
 ## [17.4.13]
 
 ### I fusi orari si leggono anche sulla regione di un 21:9

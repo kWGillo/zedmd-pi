@@ -474,6 +474,79 @@ esigi("GiochiSource(self.cfg, tela_piena[0], tela_piena[1]," in sorgente_dmdd,
       "dmdd costruisce i giochi con la tela piena, come Doom e il Game Boy")
 
 
+sep("8. La lingua del pannello, non quella del browser (17.4.14)")
+
+# *«Il gioco Quiz time ora e' in inglese e non piu' in italiano.»* E' lo
+# stesso difetto della 17.4.10 -- il meteo che diceva «Tomorrow» -- un piano
+# piu' sotto: `web.language` e' la lingua dell'**interfaccia** e di serie e'
+# **vuota**, perche' vuol dire «decidila dal browser». Passata a
+# `i18n.resolve` senza preferenza e senza browser, quella vuota diventa
+# `FALLBACK`, cioe' inglese -- e Super Quiz faceva le domande in inglese su
+# un pannello configurato in italiano.
+
+import i18n                                               # noqa: E402
+
+from sources.base import lingua_del_pannello              # noqa: E402
+
+CASI = [
+    ({"clock": {"language": "it"}, "web": {"language": ""}}, "it",
+     "di serie: il pannello e' in italiano, la web UI «decidi tu»"),
+    ({"clock": {"language": "it"}, "web": {"language": "en"}}, "it",
+     "l'interfaccia in inglese **non** porta il pannello in inglese"),
+    ({"clock": {"language": "en"}, "web": {"language": ""}}, "en",
+     "e un pannello in inglese parla inglese"),
+    ({"clock": {"language": ""}, "web": {"language": "it"}}, "it",
+     "senza lingua del pannello vale quella dell'interfaccia"),
+    ({"clock": {}, "web": {}}, i18n.FALLBACK,
+     "e senza niente resta il ripiego dichiarato"),
+]
+for conf, atteso, perche in CASI:
+    esigi(lingua_del_pannello(conf) == atteso,
+          "%s (%s)" % (perche, lingua_del_pannello(conf)))
+
+# E il quiz la chiede da li', non a `i18n.resolve`.
+quiz_it = GiochiSource({"giochi": {}, "video": {},
+                        "clock": {"language": "it"}, "web": {"language": ""}},
+                       256, 64)
+quiz_en = GiochiSource({"giochi": {}, "video": {},
+                        "clock": {"language": "en"}, "web": {"language": ""}},
+                       256, 64)
+esigi(quiz_it.lingua() == "it" and quiz_en.lingua() == "en",
+      "i giochi parlano la lingua del pannello (%s e %s)"
+      % (quiz_it.lingua(), quiz_en.lingua()))
+
+# La banca delle domande segue, che e' il punto della segnalazione.
+from sources.giochi.quiz import Quiz                       # noqa: E402
+
+q = Quiz()
+q.configura_lingua(quiz_it.lingua())
+q.avvia_partita(7)
+esigi(q.lingua == "it",
+      "e Super Quiz pesca dalla banca italiana")
+
+# Nessuno chiede piu' la lingua del pannello a `i18n.resolve`: senza
+# preferenza salvata quella funzione risponde inglese, ed e' giusto cosi' --
+# e' fatta per una richiesta web, dove c'e' un browser da interrogare.
+# Si guarda il codice, non il testo: della parola dentro un commento non
+# importa niente -- la spiegazione del difetto la nomina apposta.
+import ast                                                 # noqa: E402
+import glob                                                # noqa: E402
+
+radice = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+colpevoli = []
+for percorso in glob.glob(os.path.join(radice, "sources", "**", "*.py"),
+                          recursive=True):
+    albero = ast.parse(open(percorso, encoding="utf-8").read())
+    for nodo in ast.walk(albero):
+        if (isinstance(nodo, ast.Attribute) and nodo.attr == "resolve"
+                and isinstance(nodo.value, ast.Name)
+                and nodo.value.id == "i18n"):
+            colpevoli.append(os.path.basename(percorso))
+            break
+esigi(not colpevoli,
+      "nessuna sorgente chiede la lingua del pannello a i18n.resolve (%s)"
+      % (", ".join(colpevoli) or "nessuna"))
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

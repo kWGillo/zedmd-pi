@@ -452,6 +452,9 @@ STRINGS = {
                            "interrogato ogni %(cadence)d s",
                            "%(provider)s: %(count)d aircraft within %(radius).1f km, "
                            "polled every %(cadence)d s"),
+    "status.radar.sfilata": (
+        "mostrati %(shown)d, gli altri %(skipped)d restano nel registro",
+        "showing %(shown)d, the other %(skipped)d stay in the log"),
     "status.radar.revived": (
         "ciclo riavviato %(count)d volte, l'ultima il %(when)s",
         "loop restarted %(count)d times, last on %(when)s"),

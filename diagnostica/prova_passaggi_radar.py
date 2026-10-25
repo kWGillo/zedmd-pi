@@ -411,6 +411,103 @@ esigi(VELOCITA_MASSIMA_MS * 3.6 >= 800,
       % (VELOCITA_MASSIMA_MS * 3.6))
 esigi(abs(KT_TO_MS - 0.514444) < 1e-6, "un nodo resta un nodo")
 
+sep("9. La sfilata non si mangia l'intervallo (17.4.14)")
+
+# *«Quando amplio il raggio del radar e ho molti voli all'interno dell'area,
+# il radar va in confusione»*, e quello che si vedeva erano **dati
+# sbagliati**. Il motivo e' che la sfilata non aveva un tetto: trenta aerei
+# da dieci secondi sono cinque minuti, e quello che si legge sul pannello e'
+# la fotografia scattata all'inizio del giro. Al quinto minuto la distanza
+# minima di passaggio di quell'aereo e' una notizia vecchia -- e la cadenza
+# vera, cinque minuti, sfonda anche `TRATTO_MASSIMO_S`, quindi il radar
+# perde il suo stimatore migliore proprio quando c'e' piu' traffico.
+
+
+class Finto:
+    """Un orologio che cammina solo quando glielo si dice."""
+
+    def __init__(self, adesso=1000.0):
+        self.adesso = adesso
+
+    def time(self):
+        return self.adesso
+
+    def monotonic(self):
+        return self.adesso
+
+    def sleep(self, quanto):
+        self.adesso += quanto
+
+
+def radar_di_prova(quanti):
+    conf = dmdconf.load()
+    conf["air_radar"]["display_seconds"] = 10
+    conf["air_radar"]["cooldown"] = 600
+    conf["air_radar"]["fields"] = ["distance"]
+    conf["air_radar"]["log_enabled"] = False
+    r = _radar.AirRadarSource(conf, 256, 64)
+    r._running = True
+    aerei = [{"hex": "AAA%03d" % i, "flight": "FL%03d" % i,
+              "distance": 0.5 + i * 0.1} for i in range(quanti)]
+    return r, conf["air_radar"], aerei
+
+
+orologio = Finto()
+_vero_time = _radar.time
+_radar.time = orologio
+try:
+    radar, conf_radar, aerei = radar_di_prova(30)
+    radar._mostra = lambda plane, cfg, durata: orologio.sleep(durata)
+
+    partenza = orologio.time()
+    radar._show_all(aerei, conf_radar, scadenza=partenza + 20)
+    durata = orologio.time() - partenza
+    esigi(durata <= 20,
+          "trenta aerei nel raggio e la sfilata dura al massimo l'intervallo"
+          " (%.0f s su 20)" % durata)
+    esigi(radar._mostrati == 2 and radar._saltati == 28,
+          "ne passano due e ventotto restano in lista (%d e %d)"
+          % (radar._mostrati, radar._saltati))
+    esigi(len(radar._recent) == radar._mostrati,
+          "e **solo i mostrati** vanno in riposo: gli altri al giro dopo"
+          " hanno la precedenza (%d in riposo)" % len(radar._recent))
+    fermi = [p["hex"] for p in aerei if p["hex"] not in radar._recent]
+    esigi(fermi and fermi[0] == aerei[2]["hex"],
+          "il primo della lista al prossimo giro e' il terzo piu' vicino,"
+          " perche' l'elenco e' ordinato per distanza")
+
+    # E senza scadenza -- come faceva fino alla 17.4.12 -- la stessa sfilata
+    # dura cinque minuti: il numero da cui e' nata la segnalazione.
+    radar2, conf2, aerei2 = radar_di_prova(30)
+    radar2._mostra = lambda plane, cfg, durata: orologio.sleep(durata)
+    partenza = orologio.time()
+    radar2._show_all(aerei2, conf2)
+    vecchia = orologio.time() - partenza
+    esigi(vecchia >= 300,
+          "senza tetto la stessa sfilata durava %.0f secondi, cioe' %d volte"
+          " l'intervallo" % (vecchia, int(vecchia // 20)))
+    esigi(vecchia > TRATTO_MASSIMO_S,
+          "piu' di quanto due posizioni si possano unire (%.0f s contro %.0f):"
+          " con molto traffico il radar perdeva i tratti" % (vecchia,
+                                                             TRATTO_MASSIMO_S))
+
+    # L'intervallo piu' corto della durata: un aereo si mostra comunque.
+    radar3, conf3, aerei3 = radar_di_prova(5)
+    radar3._mostra = lambda plane, cfg, durata: orologio.sleep(durata)
+    radar3._show_all(aerei3, conf3, scadenza=orologio.time() + 5)
+    esigi(radar3._mostrati == 1,
+          "con l'intervallo piu' corto della durata ne passa comunque uno")
+
+    # Pochi aerei: non cambia niente rispetto a prima.
+    radar4, conf4, aerei4 = radar_di_prova(2)
+    radar4._mostra = lambda plane, cfg, durata: orologio.sleep(durata)
+    radar4._show_all(aerei4, conf4, scadenza=orologio.time() + 30)
+    esigi(radar4._mostrati == 2 and radar4._saltati == 0,
+          "e con due aerei nel raggio sfilano tutti e due, come sempre")
+finally:
+    _radar.time = _vero_time
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

@@ -23,7 +23,7 @@ from PIL import Image
 import suoni
 import vibra
 
-from ..base import Source
+from ..base import Source, lingua_del_pannello
 from ..comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_RY, ABS_X, ABS_Y,
                        BTN_EAST,
                        BTN_MODE, BTN_SELECT, BTN_SOUTH, BTN_START, BTN_TR,
@@ -203,10 +203,19 @@ class GiochiSource(Source):
         return self.cfg.get("giochi") or {}
 
     def lingua(self):
-        """La lingua dell'interfaccia: Super Quiz fa le domande in quella."""
+        """La lingua del **pannello**: Super Quiz fa le domande in quella.
+
+        Fino alla 17.4.13 qui si leggeva `web.language` e lo si passava a
+        `i18n.resolve`, che senza preferenza salvata e senza browser da
+        interrogare risponde `FALLBACK`, cioe' inglese: di serie
+        `web.language` e' vuoto, quindi il quiz faceva le domande in inglese
+        su un pannello configurato in italiano. *«Il gioco Quiz time ora e'
+        in inglese e non piu' in italiano.»* E' lo stesso difetto della
+        17.4.10, un piano piu' sotto: un gioco non e' una pagina web, e la
+        lingua di una pagina non decide che lingua si parla sul vetro.
+        """
         try:
-            import i18n
-            return i18n.resolve((self.cfg.get("web") or {}).get("language"), "")
+            return lingua_del_pannello(self.cfg)
         except Exception:                           # pragma: no cover
             return "it"
 

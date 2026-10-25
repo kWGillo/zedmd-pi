@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw
 import compleanni
 
 from .banner import BLINK_PERIOD
-from .base import Source
+from .base import Source, lingua_del_pannello
 from .clock import _load_font, parse_color
 
 SIZES = {"small": 0.34, "medium": 0.50, "large": 0.72}
@@ -190,10 +190,9 @@ class BirthdaysSource(Source):
             self._dirty = True
 
     def _scorri(self, voce, cfg):
-        # La lingua del pannello e' quella scelta nella web UI; vuota
-        # significa "decidila tu", e per un display fisso l'italiano e' la
-        # scelta giusta.
-        lingua = (self.cfg.get("web") or {}).get("language") or "it"
+        # La lingua del pannello e' `clock.language`, non quella della web
+        # UI: vedi `sources.base.lingua_del_pannello`.
+        lingua = lingua_del_pannello(self.cfg)
         testo = frase(voce, cfg.get("show_age", True), lingua)
         strip = self._striscia(testo, cfg)
 
