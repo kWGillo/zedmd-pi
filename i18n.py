@@ -1957,6 +1957,15 @@ STRINGS = {
         "tutto il resto.",
         "“Let the machine decide” picks the panel on Pi 3 and 4, the "
         "monitor elsewhere."),
+    "settings.video.title": ("Uscita video", "Video output"),
+    "settings.video.hint": (
+        "Il disegno va sul pannello LED, ed è quello che deve fare. La "
+        "pagina Video serve se vuoi mandarlo su un monitor collegato "
+        "all'HDMI: per questo non sta nel menu, ma è qui.",
+        "The drawing goes to the LED panel, which is what it should do. The "
+        "Video page is for sending it to a monitor on HDMI instead: that is "
+        "why it is not in the menu, but it is here."),
+    "settings.video.vai": ("Apri la pagina Video", "Open the Video page"),
     "video.risoluzione": ("Risoluzione", "Resolution"),
     "video.risoluzione.hint": (
         "Vuota vale quella che c'è adesso, ed è quasi sempre la risposta "

@@ -1068,6 +1068,30 @@ def uscita_scelta(cfg):
     return "pannello" if piattaforma.pannello_possibile() else "schermo"
 
 
+def video_nel_menu(cfg):
+    """Se la voce «Video» ha senso nel menu di questa macchina.
+
+    Su un Raspberry che sta davvero pilotando il pannello LED non ne ha: la
+    risoluzione e' 256x64 e non si discute, il filtro DMD su un DMD vero non
+    vuol dire niente, le due regioni nemmeno. E' una pagina nata per i
+    monitor, e li' e' solo una voce in piu' da saltare ogni volta.
+
+    Contano tutte e due le condizioni. Un PC con `uscita: pannello` scritto a
+    mano **non** e' un apparecchio col pannello -- quel pannello non si
+    accendera' mai -- ed e' proprio il caso in cui la pagina Video serve, per
+    leggere in cima perche' il vetro e' nero.
+
+    La voce sparisce dal menu, non la pagina dal programma: resta linkata
+    dalle Impostazioni, perche' e' li' dentro che si sceglie «Monitor», e su
+    un Pi con uno schermo sulla scrivania e' una scelta legittima.
+    """
+    try:
+        return not (piattaforma.pannello_possibile()
+                    and uscita_scelta(cfg) == "pannello")
+    except Exception:
+        return True
+
+
 def crea(cfg):
     """L'uscita video giusta per questa macchina e questa configurazione.
 

@@ -184,6 +184,10 @@ def create_app(runtime):
 
     @app.context_processor
     def inject_globals():
+        # `display` si importa qui dentro come in `page_video`: in cima al
+        # file tirerebbe dentro la libreria matrice all'avvio dell'interfaccia
+        # web, che gira anche dove quella libreria non c'e'.
+        import display as _display
         lang = current_language()
         return {
             "version": __version__,
@@ -198,6 +202,9 @@ def create_app(runtime):
             "c_e_novita": bool((getattr(runtime, "update_info", None)
                                 or {}).get("available")),
             "c_e_esito": bool(ota.ultimo_esito()),
+            # La voce «Video» nel menu: su un apparecchio col pannello non
+            # c'e'. Il perche' sta in `display.video_nel_menu`.
+            "menu_video": _display.video_nel_menu(cfg),
             # `t` chiude sulla lingua della richiesta: nei template basta
             # scrivere t('chiave'), senza ripetere ogni volta la lingua.
             "t": lambda key, **values: i18n.translate(key, lang, **values),

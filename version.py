@@ -3240,6 +3240,24 @@ Storico:
        grafica, si legge anche dal servizio. Solo le uscite collegate, e la
        stessa misura a frequenze diverse una volta sola. Resta una casella
        di testo, cosi' ci si puo' ancora scrivere quello che si vuole.
+  17.3.4 **La voce «Video» sparisce dove non serve.** *«Il menu video non
+       dovrebbe comparire se la piattaforma e' Raspberry ed e' configurato il
+       DMD.»* Giusto: su un apparecchio col pannello quella pagina non ha
+       niente da dire -- la risoluzione e' 256x64 e non si discute, il filtro
+       DMD su un DMD vero non vuol dire niente, le due regioni nemmeno -- ed
+       e' nata per i monitor.
+       Contano tutte e due le condizioni. Un PC con `uscita: pannello`
+       scritto a mano **non** e' un apparecchio col pannello: quel pannello
+       non si accendera' mai, ed e' esattamente il caso in cui la pagina
+       Video serve, perche' in cima c'e' scritto perche' il vetro e' nero.
+       Sparisce la voce, non la pagina. Dentro la pagina Video si sceglie
+       **Monitor**, e su un Pi con uno schermo sulla scrivania e' una scelta
+       legittima: toglierla dal menu e basta vorrebbe dire renderla
+       impossibile senza mettere le mani nel file di configurazione. Quindi
+       le Impostazioni, sul pannello, mostrano un riquadro «Uscita video» che
+       porta li'. E se ci si arriva per indirizzo, la voce ricompare nel menu
+       finche' quella pagina e' aperta, altrimenti ci si ritrova senza il
+       segnaposto di dove si e'.
 """
 
-__version__ = "17.3.3"
+__version__ = "17.3.4"

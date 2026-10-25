@@ -107,6 +107,17 @@ righe assolute, e riproporzionarla e' un lavoro a parte.
 
 # 4. La pagina Video
 
+Dalla 17.3.4 la voce **Video** non compare nel menu su un Raspberry che sta
+pilotando il pannello: lì la pagina non ha niente da dire, perché la
+risoluzione è 256×64, il filtro DMD su un DMD vero non vuol dire niente e le
+due regioni nemmeno. La pagina resta: le Impostazioni mostrano un riquadro
+«Uscita video» che porta lì, perché è lì dentro che si sceglie **Monitor** —
+su un Pi con uno schermo sulla scrivania è una scelta legittima.
+
+Servono tutte e due le condizioni. Su un PC dove qualcuno ha scritto
+`uscita: pannello` a mano la voce resta, perché quel pannello non si accenderà
+mai ed è proprio lì che si va a leggere perché.
+
 | Comando | Cosa fa |
 |---|---|
 | **Uscita** | «Decide la macchina» sceglie il pannello su Pi 3 e 4 e il monitor altrove. Si può forzare: su un Pi con un monitor sulla scrivania, «Monitor» è una scelta legittima |

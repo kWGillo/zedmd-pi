@@ -2,6 +2,31 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.3.4]
+
+### La voce «Video» sparisce dove non serve
+
+*«Il menu video non dovrebbe comparire se la piattaforma è Raspberry ed è
+configurato il DMD.»*
+
+Giusto: su un apparecchio col pannello quella pagina non ha niente da dire. La
+risoluzione è 256×64 e non si discute, il filtro DMD su un DMD vero non vuol
+dire niente, le due regioni nemmeno — è una pagina nata per i monitor, e lì era
+solo una voce in più da saltare ogni volta.
+
+Contano **tutte e due** le condizioni, non una. Un PC con `uscita: pannello`
+scritto a mano non è un apparecchio col pannello: quel pannello non si accenderà
+mai, ed è esattamente il caso in cui la pagina Video serve, perché in cima c'è
+scritto perché il vetro è nero.
+
+Sparisce la voce, non la pagina. Dentro la pagina Video si sceglie **Monitor**,
+e su un Pi con uno schermo sulla scrivania è una scelta legittima: toglierla dal
+menu e basta vorrebbe dire renderla impossibile senza mettere le mani in
+`/etc/dmd/config.json`. Quindi le Impostazioni, sul pannello, mostrano un
+riquadro «Uscita video» che porta lì. E se ci si arriva per indirizzo, la voce
+ricompare nel menu finché quella pagina è aperta: altrimenti ci si ritroverebbe
+dentro una pagina senza il segnaposto di dove si è.
+
 ## [17.3.3]
 
 ### I due punti che lampeggiano spostavano le cifre

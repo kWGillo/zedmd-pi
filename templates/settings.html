@@ -61,6 +61,17 @@
   {% endif %}
 </section>
 
+{% if not menu_video %}
+{# Sul pannello la pagina Video sparisce dal menu: non ha niente da dire.
+   Resta pero' l'unico posto dove si sceglie «Monitor», che su un Pi con uno
+   schermo attaccato e' una scelta legittima -- quindi la porta resta qui. #}
+<section class="card">
+  <h2>{{ t('settings.video.title') }}</h2>
+  <p class="hint">{{ t('settings.video.hint') }}</p>
+  <p><a href="{{ url_for('page_video') }}">{{ t('settings.video.vai') }}</a></p>
+</section>
+{% endif %}
+
 {# Il Night mode sta qui, subito sotto la luminosita': e' una regola di
    luminosita' -- "dalle 22 alle 7 il pannello sta al 15%" -- e chiederla in
    un'altra pagina vuol dire regolare la luminosita' in un posto e la

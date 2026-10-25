@@ -32,7 +32,9 @@
       <a href="{{ url_for('page_giochi') }}" class="{{ 'on' if page in ('giochi', 'doom', 'gameboy') }}">{{ t('nav.giochi') }}</a>
       <a href="{{ url_for('page_telecamera') }}" class="{{ 'on' if page == 'telecamera' }}">{{ t('nav.telecamera') }}</a>
       <a href="{{ url_for('page_services') }}" class="{{ 'on' if page == 'services' }}">{{ t('nav.services') }}</a>
+      {% if menu_video or page == 'video' %}
       <a href="{{ url_for('page_video') }}" class="{{ 'on' if page == 'video' }}">{{ t('nav.video') }}</a>
+      {% endif %}
       <a href="{{ url_for('page_settings') }}" class="{{ 'on' if page == 'settings' }}">{{ t('nav.settings') }}</a>
       <a href="{{ url_for('page_rete') }}" class="{{ 'on' if page == 'rete' }}">{{ t('nav.rete') }}</a>
       <a href="{{ url_for('page_updates') }}" class="{{ 'on' if page == 'updates' }}">{{ t('nav.updates') }}{% if c_e_esito %}<span class="pallino guasto" title="{{ t('nav.updates.esito') }}"></span>{% elif c_e_novita %}<span class="pallino" title="{{ t('nav.updates.badge') }}"></span>{% endif %}</a>

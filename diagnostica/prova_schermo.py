@@ -454,6 +454,34 @@ esigi(display.risoluzioni_disponibili(os.path.join(finto, "niente")) == [],
       "e dove non c'e' niente da leggere torna una lista vuota, non un errore")
 
 
+# ------------------------------- 17.3.4: la voce «Video» sparisce sul pannello
+#
+# *«Il menu video non dovrebbe comparire se la piattaforma e' Raspberry ed e'
+# configurato il DMD.»* Tutte e due le condizioni, non una: su un PC con
+# `uscita: pannello` scritto a mano la pagina serve eccome, perche' quel
+# pannello non si accendera' mai ed e' li' che si legge perche'.
+
+print()
+print("-- la voce «Video» nel menu (17.3.4)")
+
+pannello_vero = piattaforma.pannello_possibile
+try:
+    for e_raspberry in (True, False):
+        piattaforma.pannello_possibile = lambda _v=e_raspberry: _v
+        for scelta, atteso in (("pannello", not e_raspberry),
+                               ("schermo", True),
+                               ("auto", not e_raspberry)):
+            finta_cfg = {"video": {"uscita": scelta}}
+            esigi(display.video_nel_menu(finta_cfg) is atteso,
+                  "pannello possibile=%s uscita=%s -> voce nel menu %s"
+                  % (e_raspberry, scelta, "si" if atteso else "no"))
+finally:
+    piattaforma.pannello_possibile = pannello_vero
+
+esigi(display.video_nel_menu({}) in (True, False),
+      "e con una configurazione vuota risponde comunque")
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]
