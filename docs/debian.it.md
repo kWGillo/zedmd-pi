@@ -101,27 +101,54 @@ eMMC si consuma a scritture.
 
 # 4. L'installazione del DMD
 
-Porta l'archivio sulla macchina. Il suo indirizzo:
+Il programma si scarica **da GitHub, sulla macchina stessa**. Non serve
+copiarci niente da un altro computer: il repository è pubblico, quindi non
+servono né account né chiavi.
+
+<https://github.com/kWGillo/zedmd-pi>
+
+## Con git, ed è la strada consigliata
 
 ```
-hostname -I
+sudo apt install -y git
+git clone https://github.com/kWGillo/zedmd-pi.git
+cd zedmd-pi
 ```
 
-Poi, da dove hai l'archivio:
+È la strada consigliata per un motivo pratico: la cartella resta collegata al
+repository, quindi per aggiornarla bastano due righe (sezione 10), e se un
+giorno vuoi tornare a una versione precedente ce l'hai già tutta.
+
+Il ramo `main` è sempre l'ultima versione pubblicata. Se preferisci fermarti a
+una versione precisa, le versioni sono etichette:
 
 ```
-scp zedmd-pi.tar.gz gillo@INDIRIZZO:~/
+git tag -l 'v*' | sort -V | tail -5
+git checkout v17.4.2
 ```
 
-Sulla macchina:
+## Senza git
+
+Se non vuoi installare git, l'archivio del ramo si scarica con `curl`, che su
+Debian c'è già:
 
 ```
-cd ~ && tar xzf zedmd-pi.tar.gz && cd zedmd-pi
+curl -fsSL https://github.com/kWGillo/zedmd-pi/archive/refs/heads/main.tar.gz -o zedmd-pi.tar.gz
+tar xzf zedmd-pi.tar.gz
+cd zedmd-pi-main
+```
+
+La cartella si chiama `zedmd-pi-main` e non `zedmd-pi`: è GitHub che la nomina
+così, con il nome del ramo attaccato. Dentro è identica.
+
+## Poi, in tutti e due i casi
+
+```
 bash verify.sh
 ```
 
-`verify.sh` deve dire **0 alterati, 0 mancanti**. Se dice altro, l'archivio si
-è rovinato nel trasferimento: ritrasferiscilo, non installare.
+`verify.sh` deve dire **0 alterati, 0 mancanti**. Se dice altro, lo scaricamento
+si è rovinato: rifallo, non installare.
 
 Prima di installare, chiedi alla macchina chi è:
 
@@ -283,7 +310,33 @@ la moltiplicazione della maschera leggono e scrivono megabyte, non fanno conti.
 È il motivo per cui un Atom con LPDDR3 a canale singolo se la cava meglio di
 quanto il suo nome faccia pensare.
 
-# 10. Cosa su un PC non c'è
+# 10. Aggiornare
+
+Tre strade, e la prima è quella che userai quasi sempre.
+
+**Dalla pagina web.** Impostazioni → *Aggiornamenti* controlla questo stesso
+repository, scarica, verifica l'archivio e riavvia il servizio da solo; se il
+servizio non riparte, rimette la versione di prima. Non serve SSH e non serve
+ricordarsi niente.
+
+**Con git**, se hai installato così:
+
+```
+cd ~/zedmd-pi
+git pull
+sudo ./update.sh
+```
+
+`update.sh` copia i file in `/opt/dmd` e riavvia il servizio. Non tocca
+`/etc/dmd/config.json`: le tue impostazioni restano.
+
+**Senza git**, riscarichi l'archivio del ramo come nella sezione 4 e lanci
+`sudo ./update.sh` dalla cartella nuova.
+
+In tutti e tre i casi, prima di installare conviene guardare che cosa cambia:
+il `CHANGELOG.md` nella cartella è lo stesso che sta su GitHub.
+
+# 11. Cosa su un PC non c'è
 
 | | |
 |---|---|
@@ -293,7 +346,7 @@ quanto il suo nome faccia pensare.
 | Luminosità, modalità notte | emulate in software, moltiplicando il fotogramma |
 | Joystick, tastiera, webcam, MQTT, Home Assistant, AirPlay, Samba, servizi internet | funzionano |
 
-# 11. Se qualcosa non torna
+# 12. Se qualcosa non torna
 
 ```
 sudo journalctl -u dmd -f

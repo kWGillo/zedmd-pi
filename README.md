@@ -276,19 +276,29 @@ l'unica strada.
 
 ## Installazione
 
-Dal Mac, copia la cartella sul Raspberry:
+Il programma si scarica **da GitHub, sulla macchina stessa**: il repository è
+pubblico, quindi non servono account né chiavi, e non serve copiare niente da
+un altro computer.
 
 ```bash
-scp -r dmd gillo@dmdpi.local:~/
-```
-
-Poi via SSH:
-
-```bash
-cd ~/dmd
-chmod +x install.sh
+sudo apt install -y git
+git clone https://github.com/kWGillo/zedmd-pi.git
+cd zedmd-pi
+bash verify.sh
 sudo ./install.sh
 ```
+
+`verify.sh` deve dire **0 alterati, 0 mancanti** prima di installare.
+
+Senza git, l'archivio del ramo si scarica con `curl`:
+
+```bash
+curl -fsSL https://github.com/kWGillo/zedmd-pi/archive/refs/heads/main.tar.gz -o zedmd-pi.tar.gz
+tar xzf zedmd-pi.tar.gz && cd zedmd-pi-main
+```
+
+Le versioni sono etichette (`git tag -l 'v*'`): `git checkout v17.4.2` ferma la
+cartella a una versione precisa invece dell'ultima pubblicata.
 
 Lo script installa le dipendenze, compila i binding Python della libreria
 matrice, copia i file in `/opt/dmd`, crea `/etc/dmd/config.json` e registra il

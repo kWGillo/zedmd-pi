@@ -3420,6 +3420,24 @@ Storico:
        «esce dal bordo di sopra» che fa parte del gioco sparirebbe. Ventotto
        righe di cielo diventano cinquantuno, e le stelle crescono con lui.
        Restano Invasori, Squadriglia, Gnam e Super Quiz.
+  17.4.4 **Si scarica da GitHub, e le istruzioni lo dicono.** Il repository
+       e' pubblico, quindi sulla macchina basta `git clone` -- niente
+       account, niente chiavi, e soprattutto niente copiare un archivio da
+       un altro computer. Il manuale di Debian e il README raccontavano
+       ancora la strada vecchia, con `scp` da un Mac, che era quella giusta
+       quando il programma non stava su GitHub.
+       Adesso dicono le due strade vere: `git clone` -- consigliata, perche'
+       la cartella resta collegata e aggiornare diventa `git pull` e
+       `update.sh` -- e, per chi non vuole git, l'archivio del ramo con
+       `curl`, che su Debian c'e' gia'. Con la nota che li' la cartella si
+       chiama `zedmd-pi-main` e non `zedmd-pi`, perche' e' GitHub a
+       nominarla cosi'.
+       E una sezione nuova sull'**aggiornare**, che non c'era: la pagina
+       Aggiornamenti, `git pull`, o il riscaricamento dell'archivio. Con il
+       promemoria che `update.sh` non tocca `/etc/dmd/config.json`.
+       Le istruzioni sono state **eseguite** prima di scriverle, da un clone
+       anonimo: 192 file, zero alterati, i permessi di esecuzione al loro
+       posto e `piattaforma.py` che risponde.
 """
 
-__version__ = "17.4.3"
+__version__ = "17.4.4"

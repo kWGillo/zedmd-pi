@@ -179,7 +179,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 8e4da1571d2f55b9211b110179be1607  templates/updates.html
 3b29a3298d7020ed5416a9b633083bb4  templates/video.html
-9b991a680318dab2ec1d7758c06127a6  version.py
+41bdd9304aa6920a8fe368840ae5dbbf  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 afe563a2fdf7b6e501024d34f74ea6a9  webui.py

@@ -2,6 +2,37 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.4]
+
+### Si scarica da GitHub, e le istruzioni lo dicono
+
+Il repository è pubblico, quindi sulla macchina basta `git clone`: niente
+account, niente chiavi, e soprattutto niente copiare un archivio da un altro
+computer. Il manuale di Debian e il README raccontavano ancora la strada vecchia
+— `scp` da un Mac — che era quella giusta quando il programma non stava su
+GitHub.
+
+```bash
+sudo apt install -y git
+git clone https://github.com/kWGillo/zedmd-pi.git
+cd zedmd-pi
+bash verify.sh
+sudo ./install.sh
+```
+
+Per chi non vuole git, l'archivio del ramo con `curl`, che su Debian c'è già —
+con la nota che lì la cartella si chiama `zedmd-pi-main` e non `zedmd-pi`,
+perché è GitHub a nominarla così.
+
+E una sezione nuova sull'**aggiornare**, che non c'era: la pagina Aggiornamenti,
+oppure `git pull` più `sudo ./update.sh`, oppure il riscaricamento
+dell'archivio. Con il promemoria che `update.sh` non tocca
+`/etc/dmd/config.json`.
+
+Le istruzioni sono state **eseguite** prima di scriverle, da un clone anonimo:
+192 file, zero alterati, i permessi di esecuzione al loro posto e
+`piattaforma.py` che risponde.
+
 ## [17.4.3]
 
 ### Mine vaganti e Kingo Bongo
