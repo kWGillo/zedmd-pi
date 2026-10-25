@@ -1966,6 +1966,16 @@ STRINGS = {
         "Video page is for sending it to a monitor on HDMI instead: that is "
         "why it is not in the menu, but it is here."),
     "settings.video.vai": ("Apri la pagina Video", "Open the Video page"),
+    "video.standby": ("Standby del monitor quando il DMD è spento",
+                      "Put the monitor to standby when the DMD is off"),
+    "video.standby.hint": (
+        "Spento vuol dire fotogramma nero, e un monitor che mostra nero resta "
+        "acceso. Con questo, il monitor riceve il segnale di spegnimento e va "
+        "in standby davvero. Si paga al risveglio: un secondo o due per "
+        "risincronizzarsi.",
+        "Off means a black frame, and a monitor showing black stays on. With "
+        "this, the monitor gets the power-down signal and really goes to "
+        "standby. The price is waking up: a second or two to resync."),
     "video.risoluzione": ("Risoluzione", "Resolution"),
     "video.risoluzione.hint": (
         "Vuota vale quella che c'è adesso, ed è quasi sempre la risposta "

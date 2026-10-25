@@ -583,6 +583,40 @@ esigi(not hasattr(display.DisplayAssente({}), "ricontrolla_console"),
       "e senza uscita video la domanda non si pone")
 
 
+# ------------------------------- 17.4.7: il monitor in standby quando e' spento
+#
+# «Spento» vuol dire fotogramma nero, e un monitor che mostra nero resta
+# acceso. Con il valore 4 di `FB_BLANK_*` il driver manda il segnale di
+# spegnimento e il monitor va in standby davvero.
+
+print()
+print("-- lo standby del monitor (17.4.7)")
+
+finto_blank = tempfile.mkstemp()[1]
+esigi(display.standby_monitor(True, finto_blank) is True
+      and open(finto_blank).read() == display.FB_SPENTO,
+      "spegnere scrive il quattro, che e' FB_BLANK_POWERDOWN")
+esigi(display.standby_monitor(False, finto_blank) is True
+      and open(finto_blank).read() == display.FB_ACCESO,
+      "riaccendere scrive lo zero")
+esigi(display.standby_monitor(True, os.path.join(finto_blank, "niente")) is False,
+      "dove non c'e' niente da scrivere non succede niente, e non e' un errore")
+
+cfg_standby = {"video": {"filtro_dmd": False, "standby": True},
+               "display": {"brightness": 100}}
+schermo_sb = display.DisplaySchermo(cfg_standby,
+                                    superficie=_SuperficieCheConta())
+esigi(hasattr(schermo_sb, "standby"),
+      "il display su schermo sa addormentare il monitor")
+cfg_standby["video"]["standby"] = False
+spento_a_mano = display.DisplaySchermo(cfg_standby,
+                                      superficie=_SuperficieCheConta())
+esigi(spento_a_mano.standby(True) is False,
+      "e con l'impostazione spenta non tocca niente")
+esigi(not hasattr(display.DisplayLed, "standby"),
+      "sul pannello LED il metodo non esiste: non c'e' nessun monitor")
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

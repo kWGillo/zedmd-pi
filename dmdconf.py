@@ -102,6 +102,19 @@ DEFAULTS = {
         # e' quello che serve per provare -- e senza va a tutto schermo sul
         # framebuffer, che e' quello che serve a un apparecchio.
         "finestra": "auto",
+        # Lo standby del monitor quando il DMD e' spento.
+        #
+        # Spento vuol dire fotogramma nero, e un monitor che mostra nero
+        # resta acceso: consuma, scalda, e di notte in una stanza buia si
+        # vede comunque il rettangolo grigio del pannello. Con questo
+        # acceso, quando il DMD si spegne -- il pulsante Spegni, la fascia
+        # notturna -- il monitor riceve il segnale di spegnimento e va in
+        # standby davvero, con il suo LED arancione.
+        #
+        # Il prezzo e' il risveglio: un monitor ci mette un secondo o due a
+        # risincronizzarsi, e qualcuno aspetta anche quindici secondi prima
+        # di decidere di spegnersi. Se la cosa da' fastidio, si spegne qui.
+        "standby": True,
         # Il filtro DMD: ogni pixel della tela diventa un punto tondo con la
         # sua intercapedine, come su un pannello vero. Acceso di default,
         # perche' chi installa questo programma su un monitor sta cercando un

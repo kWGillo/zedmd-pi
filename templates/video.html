@@ -112,6 +112,17 @@
       {{ t('video.filtro.acceso') }}
     </label>
 
+    {# Lo standby ha senso solo dove c'e' un monitor da addormentare: sul
+       pannello LED «spento» vuol dire matrice a zero, e non c'e' nessuno a
+       cui mandare un segnale. #}
+    {% if uscita != 'pannello' %}
+    <label class="check">
+      <input type="checkbox" name="standby" {{ 'checked' if cfg.video.standby }}>
+      {{ t('video.standby') }}
+    </label>
+    <p class="hint">{{ t('video.standby.hint') }}</p>
+    {% endif %}
+
     <div class="row3">
       <label for="filtro_punto">{{ t('video.filtro.punto') }}
         <input type="number" id="filtro_punto" name="filtro_punto"

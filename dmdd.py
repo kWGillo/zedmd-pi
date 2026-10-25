@@ -569,6 +569,10 @@ class Runtime:
         self.pulitore.start()
         self._blank_shown = False
         self._applied_brightness = None
+        # Se il monitor e' in standby adesso. Lo stato sta qui e non nel
+        # display perche' la decisione e' del giro di disegno: il display sa
+        # solo spegnere e accendere.
+        self._schermo_dorme = False
         self.sleeping = False
         self.display_off = bool((self.cfg.get("display") or {}).get("off"))
         self.night = False
@@ -1315,8 +1319,17 @@ class Runtime:
                     self._blank_shown = True
                     self.arbiter.current = None
                     self._ridisegna()
+                    # **Dopo** il fotogramma nero, non prima: cosi' se il
+                    # monitor non onora lo standby resta comunque nero
+                    # invece di restare acceso sull'ultima cosa che c'era.
+                    self._standby(True)
                 time.sleep(0.2)
                 continue
+            # E qui si riaccende, **prima** di disegnare qualunque cosa: un
+            # monitor ci mette un secondo o due a risincronizzarsi, e un
+            # fotogramma mandato a uno schermo ancora addormentato e' un
+            # fotogramma perso.
+            self._standby(False)
 
             # Dalla 17.2: su uno schermo lo spazio si divide in due regioni,
             # l'orologio in cima e il contenuto sotto. Si ricade nel ciclo di
@@ -1400,10 +1413,32 @@ class Runtime:
         except Exception as exc:                  # pragma: no cover - difensivo
             print("[rete] risparmio wifi non applicato: %s" % exc)
 
+    def _standby(self, spento):
+        """Il monitor addormentato mentre il DMD e' spento.
+
+        Si chiama a ogni giro ma tocca il sistema **solo quando cambia**: lo
+        stato se lo ricorda. Chi non ha un monitor da addormentare -- il
+        pannello LED -- non ha il metodo, e qui non succede niente.
+        """
+        if spento == self._schermo_dorme:
+            return
+        self._schermo_dorme = spento
+        try:
+            self.display.standby(spento)
+        except Exception:
+            pass
+
     def shutdown(self, *_args):
         if not self.running:
             return
         self.running = False
+        # Il monitor si riaccende quando il servizio se ne va: lasciarlo
+        # addormentato vorrebbe dire uno schermo morto e nessuno che lo
+        # risveglia.
+        try:
+            self._standby(False)
+        except Exception:
+            pass
         for closing in (self.zedmd_http, self.spotify, self.hass, self.mqtt,
                         self.metadati, getattr(self, "turni", None)):
             try:

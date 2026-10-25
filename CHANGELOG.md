@@ -2,6 +2,37 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.7]
+
+### Il monitor va in standby quando il DMD si spegne
+
+*«Quando premo il tasto spegni DMD, nella configurazione con monitor HDMI,
+sarebbe possibile mandare un segnale di standby al monitor?»*
+
+Sì, e senza dipendenze. Il valore `4` di `FB_BLANK_*` scritto in
+`/sys/class/graphics/fb0/blank` è `FB_BLANK_POWERDOWN`, e il driver lo traduce
+in DPMS verso il monitor: LED arancione, pannello spento, consumo che se ne va.
+
+Prima di scriverlo nel programma lo si è **provato sulla macchina vera**, perché
+non tutti i driver propagano il blanking a DPMS e non tutti i monitor lo
+onorano. Quello di prova ci ha messo quindici secondi a decidersi — è il
+monitor, non noi, e intanto lo schermo è già nero.
+
+Tre dettagli di ordine, e nessuno è casuale:
+
+- lo standby arriva **dopo** il fotogramma nero, non prima: così se il monitor
+  non onora il segnale resta comunque nero, invece di restare acceso sull'ultima
+  cosa che c'era;
+- il risveglio arriva **prima** di disegnare, perché un fotogramma mandato a uno
+  schermo addormentato è un fotogramma perso;
+- alla chiusura del servizio il monitor si riaccende comunque: lasciarlo
+  addormentato senza nessuno che lo risvegli sarebbe un guasto travestito da
+  funzione.
+
+Un interruttore nella pagina Video, acceso di serie, e **solo dove c'è un
+monitor**: sul pannello LED «spento» vuol dire matrice a zero, e non c'è nessuno
+a cui mandare un segnale.
+
 ## [17.4.6]
 
 ### `nomemacchina.local` non rispondeva, e mancava un pacchetto

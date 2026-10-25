@@ -873,6 +873,35 @@ class SuperficieFramebuffer:
             pass
 
 
+# Lo spegnimento del monitor, scritto nel framebuffer.
+#
+# I valori sono quelli di `FB_BLANK_*` del kernel: 0 acceso, 1 nero ma
+# sveglio, 2 e 3 sospensioni intermedie, 4 spegnimento. Il quattro e' quello
+# che il driver traduce in DPMS verso il monitor, cioe' standby vero: il LED
+# diventa arancione e il pannello si spegne. Alcuni monitor ci mettono una
+# decina di secondi a decidersi, ma intanto lo schermo e' gia' nero, quindi
+# l'attesa non si vede.
+SPEGNIMENTO = "/sys/class/graphics/fb0/blank"
+FB_ACCESO = "0"
+FB_SPENTO = "4"
+
+
+def standby_monitor(spento, percorso=SPEGNIMENTO):
+    """Manda il monitor in standby, o lo risveglia. Torna vero se e' riuscito.
+
+    Se il file non c'e' o non si lascia scrivere -- un pannello LED, una
+    macchina senza framebuffer, un container -- non succede niente e non e'
+    un errore: e' una rifinitura, e non deve poter impedire al DMD di
+    spegnersi.
+    """
+    try:
+        with open(percorso, "w") as f:
+            f.write(FB_SPENTO if spento else FB_ACCESO)
+        return True
+    except OSError:
+        return False
+
+
 def risoluzioni_disponibili(radice="/sys/class/drm"):
     """Le misure che il monitor dichiara, dalla piu' grande alla piu' piccola.
 
@@ -1015,6 +1044,16 @@ class DisplaySchermo:
 
     def regioni(self, con_contenuto=False):
         return self.compositore.regioni(con_contenuto)
+
+    def standby(self, spento):
+        """Il monitor in standby quando il DMD e' spento, se l'impostazione c'e'.
+
+        Sul pannello LED questo metodo non esiste: li' «spento» vuol dire
+        matrice a zero, e non c'e' nessun monitor da addormentare.
+        """
+        if not (self.cfg.get("video") or {}).get("standby", True):
+            return False
+        return standby_monitor(spento)
 
     def ricontrolla_console(self):
         """Il terminale e' ancora nostro? La chiede il giro di disegno.

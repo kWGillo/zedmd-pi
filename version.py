@@ -3477,6 +3477,28 @@ Storico:
        fa impazzire, cioe' due macchine con lo stesso nome: avahi rinomina
        la seconda in `-2` da sola, e quando `.local` smette di rispondere
        senza motivo e' il primo sospetto.
+  17.4.7 **Il monitor va in standby quando il DMD si spegne.** *«Quando premo
+       il tasto spegni DMD, sarebbe possibile mandare un segnale di standby
+       al monitor?»* Si', e senza dipendenze: il valore `4` di `FB_BLANK_*`
+       scritto in `/sys/class/graphics/fb0/blank` e' `FB_BLANK_POWERDOWN`, e
+       il driver lo traduce in DPMS verso il monitor. LED arancione, pannello
+       spento, consumo che se ne va.
+       Prima di scriverlo nel programma lo si e' **provato sulla macchina
+       vera**, perche' non tutti i driver propagano il blanking a DPMS e non
+       tutti i monitor lo onorano. Quello di prova ci ha messo quindici
+       secondi a decidersi: e' il monitor, non noi, e intanto lo schermo e'
+       gia' nero.
+       Tre dettagli di ordine, e nessuno e' casuale. Lo standby arriva
+       **dopo** il fotogramma nero, cosi' se il monitor non onora il segnale
+       resta comunque nero invece di restare acceso sull'ultima cosa che
+       c'era. Il risveglio arriva **prima** di disegnare, perche' un
+       fotogramma mandato a uno schermo addormentato e' un fotogramma perso.
+       E alla chiusura del servizio il monitor si riaccende comunque:
+       lasciarlo addormentato senza nessuno che lo risvegli sarebbe un guasto
+       travestito da funzione.
+       Un interruttore nella pagina Video, acceso di serie, e **solo dove c'e'
+       un monitor**: sul pannello LED «spento» vuol dire matrice a zero, e non
+       c'e' nessuno a cui mandare un segnale.
 """
 
-__version__ = "17.4.6"
+__version__ = "17.4.7"

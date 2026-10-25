@@ -136,6 +136,7 @@ mai ed è proprio lì che si va a leggere perché.
 | **Fondo** | il colore fra i punti. Nero pieno è corretto per un DMD |
 | **Giochi sullo schermo** | ingranditi di un intero, o stirati a tutto schermo |
 | **Come disegnare** | a regioni dove ci sta piu' di una tela, o una tela sola al centro |
+| **Standby del monitor** | quando il DMD si spegne, il monitor riceve il segnale di spegnimento e va in standby davvero. Solo su monitor: sul pannello «spento» e' la matrice a zero |
 
 Le prime tre valgono dal **riavvio del servizio**: la superficie e la misura
 della tela si creano una volta sola, all'avvio. È la stessa ragione per cui la
@@ -144,6 +145,37 @@ taratura del pannello riavvia. Il filtro e la scala dei giochi valgono subito.
 La pagina dice anche che macchina è, dove sta andando il disegno, quanto è
 grande la tela e di quanto viene ingrandita. Se il vetro è nero, è lì che si
 guarda: il motivo è scritto in cima.
+
+# 4-bis. Lo standby del monitor
+
+Spento vuol dire fotogramma nero, e un monitor che mostra nero **resta
+acceso**: consuma, scalda, e di notte in una stanza buia si vede comunque il
+rettangolo grigio del pannello.
+
+Con **Standby del monitor** acceso — il predefinito su un monitor — quando il
+DMD si spegne (il pulsante *Spegni*, la fascia notturna) il programma scrive
+nel framebuffer il valore `4`, che e' `FB_BLANK_POWERDOWN`:
+
+```
+/sys/class/graphics/fb0/blank
+```
+
+Il driver lo traduce in DPMS verso il monitor, che va in standby vero: LED
+arancione, pannello spento. Al risveglio si riscrive `0` **prima** di
+disegnare, perche' un fotogramma mandato a uno schermo addormentato e' un
+fotogramma perso.
+
+Due cose da sapere, e sono tutte e due del monitor e non del programma:
+
+* **puo' metterci una decina di secondi a decidersi.** Lo schermo intanto e'
+  gia' nero, quindi l'attesa non si vede, ma se guardi il LED aspettando che
+  cambi colore lo noti;
+* **al risveglio ci mette un secondo o due** a risincronizzarsi. Se la cosa
+  da' fastidio — per esempio perche' una notifica deve comparire subito — si
+  spegne dalla pagina Video.
+
+Dove il file non c'e' o non si lascia scrivere non succede niente: resta il
+fotogramma nero di sempre.
 
 # 5. Il filtro DMD
 

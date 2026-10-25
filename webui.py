@@ -2638,6 +2638,9 @@ def create_app(runtime):
         conf = cfg["video"]
         if request.form.get("c_e_filtro") == "1":
             conf["filtro_dmd"] = request.form.get("filtro_dmd") == "on"
+            # Lo standby viaggia con il filtro perche' e' della stessa
+            # natura: vale subito, non vuole un riavvio del servizio.
+            conf["standby"] = request.form.get("standby") == "on"
         for chiave, basso, alto, predefinito in (
                 ("filtro_punto", 10, 100, 80),
                 ("filtro_bagliore", 0, 100, 25)):
