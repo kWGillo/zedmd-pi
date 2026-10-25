@@ -288,7 +288,14 @@ def tetti(gioco):
     return sorted(c for _x, _l, c in gioco.citta.palazzi)
 
 
+# Lo stesso seme sulle due tele: la citta' la tira a sorte il gioco, e due
+# citta' diverse non si possono confrontare. (Senza seme questa prova
+# falliva una volta ogni tanto -- raramente abbastanza da sembrare un
+# dispetto, abbastanza spesso da non potersene fidare.)
+SEME_BONGO = 20251025
+
 b = Bongo()
+b.avvia_partita(SEME_BONGO)
 esigi((b.cima, b.fondo, b.piu_basso) == (7, 63, 3),
       "bongo: sul pannello la strada e' la riga 63 e il palazzo piu' basso"
       " e' di tre righe")
@@ -297,6 +304,7 @@ profilo_pannello = tetti(b)
 
 b = Bongo()
 b.configura_tela(*ALTA)
+b.avvia_partita(SEME_BONGO)
 esigi(b.fondo == 191 and b.piu_basso > 100,
       "bongo: su una tela alta la strada scende in fondo e i palazzi si"
       " allungano (il piu' basso e' di %d righe)" % b.piu_basso)

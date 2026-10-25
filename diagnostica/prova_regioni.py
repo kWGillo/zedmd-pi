@@ -359,9 +359,10 @@ for schermo, attese in (((1024, 768), "meta'"),
     r = c.regioni(True)
     orologio, contenuto = r["orologio"][3], r["contenuto"][3]
     lh = c.tela_logica[1]
-    esigi(c.scala == min(schermo[0] // 256, schermo[1] // 64),
-          "%dx%d: la scala resta la piu' grande, la larghezza si prende tutta"
-          % schermo)
+    massima = min(schermo[0] // 256, schermo[1] // 64)
+    esigi(c.scala == massima or c.banda[0] >= 0.85 * schermo[0],
+          "%dx%d: scala %d (massima %d), e la larghezza che si butta resta"
+          " sotto il quindici per cento" % (schermo + (c.scala, massima)))
     esigi(c.due_regioni,
           "%dx%d: le due regioni si fanno (%d righe logiche)"
           % (schermo[0], schermo[1], lh))
@@ -483,23 +484,40 @@ for h, (ora, data, banda, cima) in sorted(PRIMA.items()):
           "a %3d righe i corpi sono quelli della 17.4.11: ora %d, data %d, "
           "banda %d, cima %d" % (h, ora, data, banda, cima))
 
-bassa = ClockSource(cfg, 256, 36)
+# E il pavimento dei testi, che e' la 17.4.13: la 17.4.12 li rimpiccioliva
+# quanto l'altezza voleva, e a 36 righe la banda dei fusi finiva a corpo 6.
+# *«I testi del fuso orario sono troppo piccoli e illeggibili.»* Sei righe
+# logiche non fanno una lettera, fanno una macchia, e il filtro DMD la
+# ingrandisce dieci volte. Sotto il corpo del pannello non si scende: a
+# pagare sono le cifre, che di spazio ne hanno.
 pannello = ClockSource(cfg, 256, 64)
-esigi(bassa._font_small.size < pannello._font_small.size,
-      "su 36 righe la data si rimpicciolisce con la regione: corpo %d contro %d"
-      % (bassa._font_small.size, pannello._font_small.size))
-esigi(bassa.MONDO_CORPO < pannello.MONDO_CORPO,
-      "e la banda degli orari pure (%d contro %d)"
-      % (bassa.MONDO_CORPO, pannello.MONDO_CORPO))
-esigi(bassa._corpo_ora() > int(36 * 0.60),
-      "le cifre prendono piu' del sessanta per cento: %d righe su 36"
-      % bassa._corpo_ora())
-esigi(bassa._corpo_ora() / float(bassa._font_small.size)
-      > pannello._corpo_ora() / float(pannello._font_small.size),
-      "quindi l'ora e' piu' grande **rispetto alla data** che sul pannello "
-      "(%.1f contro %.1f volte)"
-      % (bassa._corpo_ora() / float(bassa._font_small.size),
-         pannello._corpo_ora() / float(pannello._font_small.size)))
+for h in (28, 36, 48, 56):
+    c = ClockSource(cfg, 256, h)
+    esigi(c._font_small.size == pannello._font_small.size
+          and c.MONDO_CORPO == pannello.MONDO_CORPO,
+          "a %2d righe data e banda restano quelle del pannello (%d e %d)"
+          % (h, c._font_small.size, c.MONDO_CORPO))
+    esigi(c._corpo_ora() == c.MONDO_CIMA - c.MARGINE_ALTO,
+          "a %2d righe le cifre prendono **tutto** lo spazio sopra la banda"
+          " (%d righe)" % (h, c._corpo_ora()))
+
+bassa = ClockSource(cfg, 256, 48)
+esigi(bassa._corpo_ora() > int(48 * 0.60),
+      "che sulla regione del 21:9 vuol dire piu' del sessanta per cento"
+      " dell'altezza: %d righe su 48" % bassa._corpo_ora())
+esigi(bassa._corpo_ora() > 30,
+      "sulla regione di un 2560x1080 le cifre sono alte 33 righe logiche"
+      " (%d), cioe' quasi trecento pixel veri" % bassa._corpo_ora())
+
+# Ma il pavimento non puo' affamare le cifre: dove non c'e' spazio per
+# tutti e due, e' la banda a cedere -- l'ora non scende mai sotto il suo
+# minimo.
+stretta = ClockSource(cfg, 256, 24)
+esigi(stretta.MONDO_CORPO < pannello.MONDO_CORPO,
+      "a 24 righe la banda cede il passo alle cifre (corpo %d)"
+      % stretta.MONDO_CORPO)
+esigi(stretta._corpo_ora() >= ClockSource.CIFRE_MINIME,
+      "e l'ora resta almeno al suo minimo (%d)" % stretta._corpo_ora())
 
 for h in (24, 28, 32, 36, 48, 63):
     c = ClockSource(cfg, 256, h)
@@ -522,6 +540,53 @@ for h in (36, 64, 184):
     esigi(im is not None and im.size == (256, h),
           "a %3d righe il fotogramma si disegna, e misura 256x%d" % (h, h))
 
+
+sep("13. La scala si abbassa solo quando l'orologio ci guadagna (17.4.13)")
+
+# *«I testi del fuso orario sono troppo piccoli e illeggibili.»* Le righe
+# logiche della regione dell'orologio dipendono dalla scala, e la scala piu'
+# grande non e' sempre la migliore: su un 2560x1080 la scala 10 da' 36 righe
+# all'orologio, la 9 ne da' 48. Il prezzo e' la larghezza -- 2304 invece di
+# 2560 -- e si paga solo finche' e' poco: la 17.4.10 scendeva a scala 8,
+# cioe' a 2048, ed era stata scartata proprio per quello.
+
+ATTESE = [
+    # schermo        scala  righe orologio  cambiata?
+    ((1024, 768),      4,     88,   False),
+    ((1280, 720),      5,     64,   False),
+    ((1920, 1080),     7,     69,   False),
+    ((2560, 1440),    10,     64,   False),
+    ((3840, 2160),    15,     64,   False),
+    ((2560, 1080),     9,     48,   True),
+    ((3440, 1440),    12,     48,   True),
+]
+for schermo, scala, righe, cambiata in ATTESE:
+    c = display.Compositore(TELA, schermo, {})
+    massima = min(schermo[0] // 256, schermo[1] // 64)
+    esigi(c.scala == scala,
+          "%dx%d: scala %d (attesa %d)" % (schermo + (c.scala, scala)))
+    esigi((c.scala != massima) == cambiata,
+          "%dx%d: %s" % (schermo[0], schermo[1],
+                         "si scende di scala, perche' serve" if cambiata
+                         else "la scala massima va gia' bene"))
+    esigi(c.regioni(True)["orologio"][3] == righe,
+          "%dx%d: all'orologio %d righe logiche (attese %d)"
+          % (schermo + (c.regioni(True)["orologio"][3], righe)))
+    esigi(c.banda[0] >= 0.85 * schermo[0],
+          "%dx%d: e la larghezza buttata resta sotto il quindici per cento"
+          " (%d pixel su %d)" % (schermo[0], schermo[1], c.banda[0],
+                                 schermo[0]))
+    orologio = ClockSource(cfg, 256, c.regioni(True)["orologio"][3])
+    esigi(orologio.MONDO_CORPO == 10 and orologio._font_small.size == 12,
+          "%dx%d: cosi' la banda dei fusi e la data restano a corpo di"
+          " pannello" % (schermo[0], schermo[1]))
+
+# E dove la larghezza costerebbe troppo si resta in alto, con l'orologio un
+# po' stretto: e' il patto della 17.4.11, e non si rompe per comodita'.
+c = display.Compositore(TELA, (1920, 800), {})
+esigi(c.scala == min(1920 // 256, 800 // 64),
+      "1920x800: la scala resta la massima, perche' scendere costerebbe un"
+      " quinto della larghezza (scala %d)" % c.scala)
 
 print()
 print("=" * 74)

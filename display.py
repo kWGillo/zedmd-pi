@@ -79,6 +79,35 @@ def tela_dmd(cfg):
 # vale non dividere affatto.
 MINIMO_OROLOGIO = 32
 
+# Le righe logiche sotto le quali la regione dell'orologio si legge male: non
+# le cifre, che sono grandi, ma **i testi piccoli** -- la data e la banda dei
+# fusi orari. E' la 17.4.13, e viene da una foto di un 2560x1080: a 36 righe
+# la banda scendeva a corpo 6, e sei righe logiche ingrandite dieci volte non
+# fanno una lettera, fanno una macchia. Tre quarti del pannello e' la misura
+# sotto cui non si vuole scendere.
+OROLOGIO_COMODO = 48
+
+# Quanta larghezza si e' disposti a buttare per guadagnare quelle righe. Il
+# modo di guadagnarle e' rimpicciolire la scala, e una scala piu' piccola
+# lascia due bande nere ai lati: a un ottavo della larghezza -- 128 pixel per
+# banda su un 2560 -- il cambio conviene; a un quinto no, e infatti la
+# 17.4.10, che scendeva a scala 8, era stata scartata.
+LARGHEZZA_TENUTA = 0.85
+
+
+def spartizione(lh, alta_tela, margine):
+    """Quante righe all'orologio e quante al contenuto, su `lh` righe logiche.
+
+    Il conto sta qui, fuori dalle classi, perche' serve in due momenti: per
+    disegnare le due regioni (`Compositore.regioni`) e **prima**, per
+    scegliere la scala, dove bisogna sapere che regione verrebbe fuori da
+    ogni scala possibile senza averla ancora scelta.
+    """
+    meta = lh // 2
+    alta_contenuto = max(meta, min(alta_tela, lh - MINIMO_OROLOGIO))
+    taglio = lh - alta_contenuto
+    return max(1, taglio - 2 * margine), lh - taglio
+
 
 class Compositore:
     """Dalla tela al fotogramma da mandare allo schermo.
@@ -158,7 +187,13 @@ class Compositore:
             # 2048. La 17.4.11 risolve il problema dall'altra parte, dove
             # andava risolto: non rimpicciolendo tutto, ma **spartendo
             # diversamente le righe** fra le due regioni. Vedi `regioni`.
-            scala = min(sw // tw, sh // th)
+            #
+            # La 17.4.13 rimette un passo indietro, ma uno solo e a ragion
+            # veduta: se dalla scala piu' grande viene fuori una regione
+            # d'orologio troppo bassa per i testi piccoli, si scende di una
+            # scala **finche' la larghezza non costa troppo**. Vedi
+            # `_scala_comoda`.
+            scala = self._scala_comoda(min(sw // tw, sh // th))
         if scala >= 1:
             largo, alto = tw * scala, th * scala
             quante = max(1, sh // alto)
@@ -190,6 +225,47 @@ class Compositore:
         x = (sw - largo) // 2
         y = (sh - alto) // 2
         return scala, (x, y, largo, alto)
+
+    def _scala_comoda(self, scala):
+        """La scala piu' grande che lascia all'orologio una regione leggibile.
+
+        Nasce da una foto di un 2560x1080 con la 17.4.12 installata: *«i
+        testi del fuso orario sono troppo piccoli e illeggibili»*. La regione
+        dell'orologio era alta 36 righe logiche, e a 36 righe la banda dei
+        fusi viene a corpo 6. Il problema non e' la misura sullo schermo --
+        sei righe per dieci fanno sessanta pixel, un'altezza da titolo -- e'
+        la **risoluzione**: con sei righe logiche una lettera non si forma, e
+        ingrandirla dieci volte ingrandisce la macchia.
+
+        Le righe logiche dell'orologio dipendono dalla scala, e la scala piu'
+        grande non e' sempre la migliore: su un 2560x1080 la scala 10 da' 108
+        righe logiche e 36 all'orologio, la scala 9 ne da' 120 e **48**. Il
+        prezzo e' la larghezza, che non si prende piu' tutta: 2304 pixel
+        invece di 2560, due bande nere da 128.
+
+        Quindi si scende di scala solo se due cose sono vere insieme: che
+        l'orologio ci guadagni davvero -- fino a `OROLOGIO_COMODO` righe -- e
+        che la larghezza non costi troppo (`LARGHEZZA_TENUTA`). Sotto quella
+        soglia si preferisce un orologio un po' stretto a uno schermo con due
+        bande nere larghe: e' la 17.4.10, che scendeva a scala 8, ed era
+        stata scartata per questo.
+
+        Dove le due regioni non si formano affatto non c'e' niente da
+        spartire, e la scala resta la piu' grande: e' il caso del pannello.
+        """
+        tw, th = self.tela
+        sw, sh = self.schermo
+        if scala < 2:
+            return scala
+        minima = max(1, -(-int(sw * LARGHEZZA_TENUTA) // tw))
+        for prova in range(scala, minima - 1, -1):
+            lh = sh // prova
+            if lh < th + MINIMO_OROLOGIO:
+                continue              # a questa scala le regioni non ci sono
+            alte, _basse = spartizione(lh, th, 4 if lh > th else 0)
+            if alte >= OROLOGIO_COMODO:
+                return prova
+        return scala
 
     def regioni(self, con_contenuto=False):
         """I riquadri **logici** dell'orologio e del contenuto.
@@ -225,11 +301,9 @@ class Compositore:
         m = self.margine
         if not con_contenuto:
             return {"orologio": (0, m, lw, max(1, lh - 2 * m))}
-        meta = lh // 2
-        alta_contenuto = max(meta, min(self.tela[1], lh - MINIMO_OROLOGIO))
-        taglio = lh - alta_contenuto
-        return {"orologio": (0, m, lw, max(1, taglio - 2 * m)),
-                "contenuto": (0, taglio, lw, lh - taglio)}
+        alte, basse = spartizione(lh, self.tela[1], m)
+        return {"orologio": (0, m, lw, alte),
+                "contenuto": (0, lh - basse, lw, basse)}
 
     @property
     def due_regioni(self):

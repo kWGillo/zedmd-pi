@@ -300,7 +300,19 @@ class ClockSource(Source):
         # una tela alta vale la larghezza e la data resta piccola, su una
         # regione bassa vale l'altezza e la data si rimpicciolisce con lei.
         # A 256x64 valgono tutti e due uno, e il pannello non si muove.
-        self._qt = min(self._qo, self._qv)
+        # **Il pavimento e' il pannello**, ed e' la 17.4.13. Il minore dei
+        # due fattori rimpiccioliva i testi quanto l'altezza voleva, e su una
+        # regione di 36 righe la banda dei fusi finiva a corpo 6: sei righe
+        # logiche non fanno una lettera, fanno una macchia, e ingrandirla
+        # dieci volte ingrandisce la macchia. *«I testi del fuso orario sono
+        # troppo piccoli e illeggibili.»*
+        #
+        # Sotto il corpo del pannello non si scende: quei corpi si leggono su
+        # un pannello vero da sempre, e una regione piu' bassa del pannello
+        # non e' una buona ragione per scriverli piu' piccoli. A pagare sono
+        # le cifre, che di spazio ne hanno in abbondanza -- su un 2560x1080
+        # restano alte 33 righe logiche, cioe' quasi trecento pixel.
+        self._qt = min(self._qo, max(1.0, self._qv))
         for nome in ("SEM_RAGGIO", "SEM_PASSO", "SEM_CIMA", "SEM_BANDA",
                      "MONDO_ALZATA", "TIMER_SPESSORE", "ONAIR_ALTO",
                      "AGGIORNA_ALTO", "OFFSET_MASSIMO"):
@@ -317,22 +329,28 @@ class ClockSource(Source):
                      "ONAIR_LARGO", "AGGIORNA_LARGO"):
             setattr(self, nome,
                     max(1, int(round(getattr(type(self), nome) * self._qo))))
-        # Il corpo della banda segue il fattore dei testi: su una regione
-        # bassa deve stringersi, se no si mangia le righe delle cifre.
-        self.MONDO_CORPO = max(1, int(round(type(self).MONDO_CORPO
-                                            * self._qt)))
-        # E la banda sta **in fondo**, appoggiata sopra la barra del timer,
-        # invece di stare a una frazione fissa dell'altezza: a 64 righe il
-        # conto da' 51, cioe' il numero di prima, e su una tela alta resta
-        # attaccata al bordo di sotto dove la si cerca.
-        self.MONDO_CIMA = max(1, self.height - self.TIMER_SPESSORE
-                              - self.MONDO_CORPO - 1)
         # I margini che fino alla 17.1 erano scritti dentro al disegno: tre
         # pixel in orizzontale, due in verticale, e i 34 fra l'ora e il
         # semaforo.
         self.MARGINE = max(1, int(round(3 * self._qo)))
         self.MARGINE_ALTO = max(1, int(round(2 * self._qv)))
         self.SEM_STACCO = max(1, int(round(34 * self._qo)))
+        # Il corpo della banda segue il fattore dei testi, **ma non puo'
+        # affamare le cifre**: su una regione molto bassa la banda a corpo di
+        # pannello si prenderebbe quasi tutte le righe. Quindi si tiene da
+        # parte lo stretto necessario per l'ora -- `CIFRE_MINIME` -- e la
+        # banda prende il resto. A 48 righe il freno non morde (la banda sta
+        # a 10, il suo corpo di pannello), a 24 si', e li' scende a 9.
+        avanzo = (self.height - self.TIMER_SPESSORE - 1
+                  - self.CIFRE_MINIME - self.MARGINE_ALTO)
+        self.MONDO_CORPO = max(1, min(int(round(type(self).MONDO_CORPO
+                                                * self._qt)), avanzo))
+        # E la banda sta **in fondo**, appoggiata sopra la barra del timer,
+        # invece di stare a una frazione fissa dell'altezza: a 64 righe il
+        # conto da' 51, cioe' il numero di prima, e su una tela alta resta
+        # attaccata al bordo di sotto dove la si cerca.
+        self.MONDO_CIMA = max(1, self.height - self.TIMER_SPESSORE
+                              - self.MONDO_CORPO - 1)
         self._font = _load_font(self._corpo_ora())
         # **I testi seguono la larghezza, non l'altezza.** Vale per la data in
         # alto a destra, per la colonna dei rifiuti e per la banda degli orari,
@@ -374,11 +392,13 @@ class ClockSource(Source):
         # un'ora piccola in mezzo a un vetro grande -- che e' esattamente
         # quello che si vedeva su uno schermo 21:9, dove la regione
         # dell'orologio e' alta 36 righe logiche.
-        spazio = max(12, self.MONDO_CIMA - self.MARGINE_ALTO)
+        spazio = max(self.CIFRE_MINIME,
+                     self.MONDO_CIMA - self.MARGINE_ALTO)
         if self.height < 64:
             alto = spazio
         else:
-            alto = max(12, min(int(self.height * 0.60), spazio))
+            alto = max(self.CIFRE_MINIME,
+                       min(int(self.height * 0.60), spazio))
         disponibile = self.width - 2 * max(1, int(round(3 * self._qo)))
         if disponibile <= 0:
             return alto
@@ -761,6 +781,10 @@ class ClockSource(Source):
     # lasciano spazio), sotto la barra del timer, che parte a 62.
     MONDO_CIMA = 51
     MONDO_CORPO = 10
+    # Sotto questo corpo le cifre non si fanno scendere da nessuno: e' il
+    # minimo per cui «00:00» resta un'ora e non una decorazione, e serve
+    # a dire alla banda dei fusi quanto spazio **non** puo' prendersi.
+    CIFRE_MINIME = 12
 
     # Lo spazio minimo fra una citta' e l'altra, e quello fra un nome e la sua
     # ora.

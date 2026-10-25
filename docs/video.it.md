@@ -113,8 +113,8 @@ riprogettazione, non una moltiplicazione.
 | contenuto | 96 |
 
 **Su uno schermo molto largo le righe si spartiscono diversamente.** Dalla
-17.4.11: su un 21:9 la tela logica è bassa — un 2560×1080 ingrandito dieci
-volte dà 108 righe logiche — e la metà farebbe 54, meno delle 64 righe che una
+17.4.11: su un 21:9 la tela logica è bassa — un 2560×1080 ingrandito nove
+volte dà 120 righe logiche — e la metà farebbe 60, meno delle 64 righe che una
 sorgente disegna. Lì il contenuto prende **esattamente la sua tela**, 64 righe,
 e l'orologio tutto quello che resta:
 
@@ -122,31 +122,47 @@ e l'orologio tutto quello che resta:
 |---|---|---|---|
 | 1024×768 | 192 | 88 | 96 |
 | 1920×1080 | 154 | 69 | 77 |
-| 2560×1080 | 108 | 36 | 64 |
-| 3440×1440 | 110 | 38 | 64 |
+| 2560×1080 | 120 | 48 | 64 |
+| 3440×1440 | 120 | 48 | 64 |
 
-Dove la metà basta resta la metà esatta. E la larghezza non si tocca mai: su un
-21:9 il disegno si prende tutti i 2560 pixel.
+Dove la metà basta resta la metà esatta.
 
-**E in una regione più bassa del pannello l'orologio si riproporziona tutto**,
-dalla 17.4.12. Trentasei righe logiche sono **meno** delle 64 del pannello, e
-fino alla 17.4.11 due conti diversi davano per scontato il contrario: le cifre
-prendevano il sessanta per cento dell'altezza (a 36 righe, 21 contro le 38 del
-pannello) e i testi seguivano la sola larghezza, che su un 21:9 è quella del
-pannello — quindi la data restava grande come sul pannello accanto a cifre più
-piccole. Adesso i testi seguono il minore fra i due fattori e le cifre prendono
-tutto lo spazio sopra la banda degli orari:
+**E su uno schermo molto largo la scala non è sempre la più grande**, dalla
+17.4.13. Le righe logiche della regione dipendono dalla scala, e su un 21:9
+quella massima costa cara: a scala 10 un 2560×1080 dà 108 righe logiche e 36
+all'orologio, a scala 9 ne dà 120 e **48**. Con 36 righe i testi piccoli — la
+data e la banda dei fusi — non si formavano: *«i testi del fuso orario sono
+troppo piccoli e illeggibili»*. Quindi si scende di una scala, ma solo finché
+l'orologio ci guadagna davvero e la larghezza non costa più di un quindici per
+cento:
+
+| schermo | scala | righe orologio | larghezza usata |
+|---|---|---|---|
+| 1024×768 | 4 | 88 | 100% |
+| 1920×1080 | 7 | 69 | 93% |
+| 2560×1440 | 10 | 64 | 100% |
+| 2560×1080 | 9 | 48 | 90% (due bande da 128) |
+| 3440×1440 | 12 | 48 | 89% (due bande da 184) |
+
+Dove scendere costerebbe di più — un 1920×800, dove si perderebbe un quinto
+della larghezza — si resta in alto e l'orologio accetta una regione più bassa.
+
+**E l'orologio si riproporziona dentro la regione che gli tocca.** Le cifre
+prendono tutto lo spazio sopra la banda degli orari quando la regione è più
+bassa del pannello, e il sessanta per cento dell'altezza quando è più alta;
+**i testi non scendono mai sotto il corpo del pannello**, perché quei corpi si
+leggono da sempre:
 
 | tela dell'orologio | cifre | data | banda orari |
 |---|---|---|---|
-| 256×36 (2560×1080) | 27 | 7 | 6 |
+| 256×48 (2560×1080) | 33 | 12 | 10 |
 | 256×64 (pannello) | 38 | 12 | 10 |
 | 256×88 (1024×768 con contenuto) | 52 | 12 | 10 |
 | 256×184 (1024×768 da solo) | 83 | 12 | 10 |
 
-Sul pannello i due fattori valgono entrambi uno, quindi non si muove un pixel;
-e sulle tele più alte, dove la regola della larghezza era quella giusta, non
-cambia niente.
+Sotto le trenta righe non c'è posto per tutti e due, e li' è la banda dei fusi
+a cedere: l'ora non scende mai sotto il suo minimo. Sul pannello non si muove
+un pixel, e sulle tele più alte nemmeno.
 
 # 4. La pagina Video
 

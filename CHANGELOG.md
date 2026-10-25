@@ -2,6 +2,51 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.13]
+
+### I fusi orari si leggono anche sulla regione di un 21:9
+
+*«I testi del fuso orario sono troppo piccoli e illeggibili.»*
+
+Dalla foto di un **2560×1080** con la 17.4.12 installata: le cifre erano
+diventate grandi, ma la banda delle città era scesa a **corpo 6**.
+
+Il difetto non è la misura sullo schermo — sei righe logiche per dieci fanno
+sessanta pixel, un'altezza da titolo — è la **risoluzione**: con sei righe
+logiche una lettera non si forma, e il filtro DMD non fa che ingrandire la
+macchia. Il metro di paragone era già nella stessa foto: «SORGE 16:38», nella
+regione della luna, è a corpo 10 e si legge benissimo.
+
+Due correzioni, una per causa.
+
+**Il pavimento dei testi è il pannello.** La 17.4.12 li rimpiccioliva quanto
+l'altezza voleva; adesso sotto i corpi del pannello non si scende, perché quei
+corpi si leggono su un pannello vero da sempre e una regione più bassa del
+pannello non è una buona ragione per scriverli più piccoli. A pagare sono le
+cifre, che di spazio ne hanno in abbondanza. Dove non c'è posto per tutti e due
+— sotto le trenta righe — è la banda a cedere: l'ora non scende mai sotto il
+suo minimo.
+
+**E la scala non è più sempre la più grande.** Le righe logiche della regione
+dipendono dalla scala, e su un 21:9 la scala massima è una scelta cara: 10 dà
+108 righe logiche e 36 all'orologio, 9 ne dà 120 e **48**. Quindi si scende di
+scala finché l'orologio ci guadagna davvero e la larghezza non costa troppo —
+al massimo un quindici per cento.
+
+| schermo | scala | righe orologio | larghezza usata |
+|---|---|---|---|
+| 1024×768 | 4 | 88 | 100% |
+| 1920×1080 | 7 | 69 | 93% |
+| 2560×1440 | 10 | 64 | 100% |
+| **2560×1080** | **10 → 9** | **36 → 48** | **100% → 90%** |
+| **3440×1440** | **13 → 12** | **38 → 48** | **97% → 89%** |
+
+Sul 2560×1080 le cifre passano da 23 a 33 righe logiche — quasi trecento pixel
+veri — e banda e data tornano ai corpi del pannello. Il prezzo sono due bande
+nere da 128 pixel, un ottavo dello schermo: la 17.4.10 ne chiedeva un quinto, e
+per quello era stata scartata. Dove la scala massima andava già bene non cambia
+niente, e sul pannello LED nemmeno un pixel.
+
 ## [17.4.12]
 
 ### Le proporzioni dell'orologio su una regione bassa

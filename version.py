@@ -285,7 +285,7 @@ Storico:
        il posto all'immagine del tavolo — che era il guasto della 1.12.2 — e
        un aereo di passaggio vale comunque piu' di Doom che gioca da solo.
        I WAD hanno una cartella condivisa in rete tutta loro, /srv/dmd/doom,
-       esposta come \\<ip>\dmd-doom accanto a quella dei media: sono l'unica
+       esposta come \\<ip>\\dmd-doom accanto a quella dei media: sono l'unica
        cosa di Doom che si mette e si toglie a mano, e chiedere una sessione
        SSH per copiare un file non e' un modo di lavorare. Chi arriva dalla
        3.0.1 se li ritrova spostati li' dalla preparazione, e la
@@ -3621,6 +3621,29 @@ Storico:
        A 36 righe: ora da 21 a **27**, data da 12 a **7**, banda da 10 a
        **6**. A 256x64 i due fattori valgono entrambi uno e il pannello non
        si muove di un pixel: ora 38, data 12, banda 10, come dalla 1.0.
+  17.4.13 **I fusi orari si leggono anche sulla regione di un 21:9.**
+       *«I testi del fuso orario sono troppo piccoli e illeggibili.»* Dalla
+       foto di un 2560x1080 con la 17.4.12 installata: l'ora adesso era
+       grande, ma la banda delle citta' era diventata corpo 6.
+       Il difetto non era la misura sullo schermo -- sei righe logiche per
+       dieci fanno sessanta pixel, un'altezza da titolo -- era la
+       **risoluzione**: con sei righe una lettera non si forma, e il filtro
+       DMD ingrandisce la macchia.
+       Due correzioni, una per causa. **Il pavimento dei testi e' il
+       pannello**: sotto quei corpi non si scende, perche' si leggono su un
+       pannello vero da sempre, e a pagare sono le cifre, che di spazio ne
+       hanno; dove non c'e' posto per tutti e due e' la banda a cedere, e
+       l'ora non scende mai sotto il suo minimo. **E la scala non e' piu'
+       sempre la piu' grande**: se da quella viene fuori una regione
+       d'orologio troppo bassa, si scende di una scala finche' la larghezza
+       non costa troppo -- al massimo un quindici per cento.
+       Su un 2560x1080 fa scala 9 invece di 10: la regione dell'orologio
+       passa da 36 righe logiche a 48, le cifre da 23 a 33, la banda e la
+       data tornano a 10 e 12. Il prezzo sono due bande nere da 128 pixel,
+       un ottavo dello schermo; la 17.4.10 ne chiedeva un quinto, e per
+       quello era stata scartata.
+       Dove la scala massima gia' andava bene -- 1024x768, 1920x1080,
+       2560x1440, 4K -- non cambia niente, e il pannello LED nemmeno.
 """
 
-__version__ = "17.4.12"
+__version__ = "17.4.13"

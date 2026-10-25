@@ -83,18 +83,29 @@ def luce(immagine):
                for banda in immagine.split())
 
 
-sep("1. Il moltiplicatore e' intero e il piu' grande che sta dentro")
+sep("1. Il moltiplicatore e' intero e il piu' grande che si puo' permettere")
 
 # La 17.4.10 aveva provato a prendere una scala **piu' piccola** della
 # massima, per far stare due tele intere in altezza su uno schermo 21:9.
-# Funzionava, ma lasciava due bande nere ai lati. La 17.4.11 torna alla
-# scala massima -- la larghezza si prende tutta -- e risolve dall'altra
-# parte: spartendo diversamente le righe fra le due regioni.
+# Funzionava, ma lasciava due bande nere ai lati larghe un quinto dello
+# schermo. La 17.4.11 era tornata alla scala massima -- la larghezza si
+# prende tutta -- risolvendo dall'altra parte: spartendo diversamente le
+# righe fra le due regioni.
+#
+# La 17.4.13 concede **un** passo indietro, e solo quando serve davvero:
+# se dalla scala massima viene fuori una regione d'orologio troppo bassa
+# perche' i testi piccoli si leggano, si scende di scala finche' la
+# larghezza non costa troppo. Su un 2560x1080 fa scala 9 invece di 10 --
+# 2304 pixel invece di 2560, due bande da 128 -- e la regione
+# dell'orologio passa da 36 righe logiche a 48.
+
+ATTESE_SCALA = {(2560, 1080): 9}
 
 for misura in MISURE:
     c = display.Compositore(TELA, misura)
     x, y, largo, alto = c.riquadro
-    atteso = min(misura[0] // TELA[0], misura[1] // TELA[1])
+    atteso = ATTESE_SCALA.get(
+        misura, min(misura[0] // TELA[0], misura[1] // TELA[1]))
     esigi(c.scala == atteso,
           "%dx%d: scala %s, attesa %d" % (misura[0], misura[1], c.scala, atteso))
     esigi(largo == TELA[0] * atteso and alto == TELA[1] * atteso,
