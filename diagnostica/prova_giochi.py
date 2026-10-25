@@ -40,6 +40,7 @@ from sources.giochi.trex import TRex                      # noqa: E402
 from sources.giochi.mine import Mine                      # noqa: E402
 from sources.giochi.bongo import Bongo                    # noqa: E402
 from sources.giochi.invasori import Invasori              # noqa: E402
+from sources.giochi.squadriglia import Squadriglia        # noqa: E402
 
 esiti = []
 
@@ -72,7 +73,8 @@ COLONNE_ATTESE = 8        # le colonne di Invasori, che non cambiano
 
 sep("1. Il campo e il tabellone")
 
-for classe in (Serpente, Mattoni, Pongo, TRex, Mine, Bongo, Invasori):
+for classe in (Serpente, Mattoni, Pongo, TRex, Mine, Bongo, Invasori,
+               Squadriglia):
     g = classe()
     esigi((g.largo, g.alto) == (256, 64),
           "%s: di serie la tela e' quella del pannello" % g.nome)
@@ -345,6 +347,35 @@ al = gioca(Invasori, 200, ALTA)
 esigi(al.vivi() < COLONNE_ATTESE * 5,
       "invasori: dopo duecento passi qualche alieno e' stato colpito (%d vivi"
       " su %d)" % (al.vivi(), COLONNE_ATTESE * 5))
+
+
+sep("6-quinquies. Squadriglia (17.4.8)")
+
+q = Squadriglia()
+esigi((q.z, q.largo_u, q.alto_u) == (1, 256, 64),
+      "squadriglia: sul pannello il mondo e' 256x64 a zoom uno")
+esigi((q.cima_u, q.alto_campo) == (8, 56),
+      "squadriglia: con la striscia da otto righe e il mare sotto")
+esigi(q.x_massima == 120 and q.quante_onde == 26,
+      "squadriglia: non si passa la colonna 120, e le onde sono ventisei")
+
+q = Squadriglia()
+q.configura_tela(*ALTA)
+esigi(q.z == 2 and (q.largo_u, q.alto_u) == (128, 96),
+      "squadriglia: su una tela alta zoom due, mondo 128x96")
+esigi(abs(q.x_massima - 60) < 1,
+      "squadriglia: e il limite di avanzata segue la larghezza del mondo"
+      " (%.0f invece di 120): su 128 unita' la colonna 120 sarebbe il cielo"
+      " nemico" % q.x_massima)
+esigi(q.quante_onde > 8,
+      "squadriglia: le onde seguono l'area del mare, non il numero")
+
+pa = gioca(Squadriglia, 240)
+al = gioca(Squadriglia, 240, ALTA)
+esigi(pa.iniziata and al.iniziata,
+      "squadriglia: la partita parte su tutte e due le tele")
+esigi(al.x < al.x_massima and al.cima_u <= al.y <= al.alto_u,
+      "squadriglia: e il tuo aereo resta dentro il mondo")
 
 
 sep("7. La tela arriva davvero fino al gioco (17.4.1)")

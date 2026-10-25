@@ -3499,6 +3499,26 @@ Storico:
        Un interruttore nella pagina Video, acceso di serie, e **solo dove c'e'
        un monitor**: sul pannello LED «spento» vuol dire matrice a zero, e non
        c'e' nessuno a cui mandare un segnale.
+  17.4.8 **Squadriglia.** Otto su tredici, e restano i due veri: Gnam e
+       Super Quiz.
+       Scorre di lato come T-Rex, quindi vale lo stesso scambio e la stessa
+       tecnica: il mondo vive in unita', lo zoom e' intero, e lo zoom esiste
+       **in una funzione sola** -- quella che mette un pixel sulla tela.
+       Rotte, collisioni e velocita' non sanno nemmeno che la tela sia
+       diversa.
+       Una cosa pero' non si poteva lasciare com'era: le posizioni
+       orizzontali scritte come numeri assoluti su un pannello largo 256.
+       «Non oltre la colonna 120» su un mondo largo 128 vorrebbe dire
+       lasciarti arrivare in fondo al cielo nemico; «quando il caccia arriva
+       alla colonna 190 comincia la picchiata» non vorrebbe dire niente.
+       Quelle tre -- il limite di avanzata, l'innesco della picchiata, il
+       centro del giro della morte -- seguono la larghezza del mondo.
+       Le onde del mare seguono l'**area**, non il numero: ventisei su un
+       mare che cambia forma sarebbero una manciata o una folla.
+       Si gioca un po' piu' stretti, ed e' il prezzo che era stato messo in
+       conto: il mondo e' largo 128 unita' invece di 256, quindi un caccia
+       attraversa in meta' tempo. In cambio gli aerei sono grandi il doppio
+       e il mare ha dove respirare.
 """
 
-__version__ = "17.4.7"
+__version__ = "17.4.8"

@@ -37,12 +37,14 @@ nemici.
 import math
 import random
 
-from .base import ALTEZZA, LARGHEZZA, Gioco, centra, scrivi
+from .base import ALTEZZA as ALTEZZA_BASE
+from .base import LARGHEZZA as LARGHEZZA_BASE
+from .base import Gioco, centra, imposta_tela, scrivi
 
 # ------------------------------------------------------------------ il campo
 
 CIMA = 8                        # sopra c'e' il tabellone
-ALTEZZA_CAMPO = ALTEZZA - CIMA
+ALTEZZA_CAMPO = ALTEZZA_BASE - CIMA
 
 # Il tuo aereo, 9x5, che guarda a destra. Due pose per l'elica.
 AEREO = (
@@ -134,14 +136,19 @@ def _bit(riga, larghezza, colonna):
 class Caccia(object):
     """Un aereo nemico. La traiettoria dipende da `tipo` e dall'eta'."""
 
-    def __init__(self, tipo, y0, velocita, ritardo, squadriglia, rosso, rnd):
+    def __init__(self, tipo, y0, velocita, ritardo, squadriglia, rosso, rnd,
+                 mondo=(LARGHEZZA_BASE, CIMA, ALTEZZA_BASE)):
+        # Il mondo in cui vola: larghezza, prima riga utile, ultima. Gliela
+        # dice chi lo costruisce, perche' su una tela alta il mondo e' piu'
+        # stretto e piu' alto di quello del pannello.
+        self.mondo_largo, self.mondo_cima, self.mondo_alto = mondo
         self.tipo = tipo
         self.y0 = y0
         self.v = velocita
         self.eta = -ritardo              # negativo: non e' ancora entrato
         self.squadriglia = squadriglia
         self.rosso = rosso
-        self.x = LARGHEZZA + 2.0
+        self.x = self.mondo_largo + 2.0
         self.y = y0
         self.vivo = True
         self._bersaglio = None
@@ -156,7 +163,11 @@ class Caccia(object):
         if self.eta < 0:
             return
         a = self.eta
-        x_ingresso = LARGHEZZA + 2.0
+        x_ingresso = self.mondo_largo + 2.0
+        # Le soglie orizzontali seguono la larghezza del mondo: su un
+        # mondo largo 128 «quando arriva alla colonna 190» non vorrebbe
+        # dire niente.
+        fu = self.mondo_largo / float(LARGHEZZA_BASE)
         if self.tipo == "fila":
             self.x = x_ingresso - self.v * a
             self.y = self.y0
@@ -165,14 +176,14 @@ class Caccia(object):
             self.y = self.y0 + 9.0 * math.sin(a * 3.0 + self._fase)
         elif self.tipo == "picchiata":
             self.x = x_ingresso - self.v * a
-            if self.x < 190 and self._bersaglio is None:
+            if self.x < 190 * fu and self._bersaglio is None:
                 self._bersaglio = y_giocatore
             if self._bersaglio is not None:
                 passo = 30.0 * dt
                 d = self._bersaglio - self.y
                 self.y += max(-passo, min(passo, d))
         else:                                   # "giro"
-            centro_x, raggio = 150.0, 11.0
+            centro_x, raggio = 150.0 * fu, 11.0
             arrivo = (x_ingresso - (centro_x + raggio)) / self.v
             giro = 2.0 * math.pi * raggio / self.v
             if a < arrivo:
@@ -185,7 +196,8 @@ class Caccia(object):
             else:
                 self.x = centro_x + raggio - self.v * (a - arrivo - giro)
                 self.y = self.y0
-        self.y = max(float(CIMA), min(float(ALTEZZA - ALTO_CACCIA), self.y))
+        self.y = max(float(self.mondo_cima),
+                     min(float(self.mondo_alto - ALTO_CACCIA), self.y))
 
     def fuori(self):
         return self.entrato() and self.x < -LARGO_CACCIA - 2
@@ -195,6 +207,41 @@ class Squadriglia(Gioco):
     nome = "squadriglia"
     etichetta = "Squadriglia"
     MUSICA = "squadriglia_musica"
+    TELA_LIBERA = True
+
+    # Come T-Rex: oltre due, la finestra sul mondo diventa cosi' stretta che
+    # un caccia entra ed e' gia' addosso.
+    ZOOM_MAX = 2
+
+    def _misura(self):
+        """Il mondo in unita', e lo zoom con cui lo si guarda.
+
+        Squadriglia scorre di lato come T-Rex, e vale lo stesso scambio: lo
+        schermo e' piu' alto ma non piu' largo, quindi ingrandire vuol dire
+        vedere meno mondo per volta. Gli aerei, il mare e le isole sono
+        bitmap -- maschere di collisione, non immagini -- e l'unico
+        ingrandimento che le lascia intere e' un intero.
+
+        Quello che **non** si puo' lasciare com'e' sono le posizioni
+        orizzontali scritte come numeri assoluti su un pannello largo 256:
+        «non oltre la colonna 120» su un mondo largo 128 vorrebbe dire
+        lasciarti arrivare in fondo al cielo nemico. Quelle seguono la
+        larghezza del mondo.
+        """
+        self.z = max(1, min(self.ZOOM_MAX, self.alto // ALTEZZA_BASE))
+        self.largo_u = max(96, self.largo // self.z)
+        self.alto_u = max(48, self.alto // self.z)
+        self.cima_u = max(1, -(-CIMA // self.z))
+        self.alto_campo = self.alto_u - self.cima_u
+        fu = self.largo_u / float(LARGHEZZA_BASE)
+        self.x_massima = X_MASSIMA * fu
+        self.v_colpo = VELOCITA_COLPO * fu
+        self.scorrimento = SCORRIMENTO * fu
+        # Le onde e le isole riempiono un mare piu' grande o piu' piccolo:
+        # si tiene la densita' per area, non il numero.
+        self.quante_onde = max(8, int(round(
+            26 * (self.largo_u * self.alto_campo)
+            / float(LARGHEZZA_BASE * ALTEZZA_CAMPO))))
 
     def musica_di_adesso(self):
         return self.MUSICA if (self.iniziata and not self.finita) else None
@@ -213,20 +260,21 @@ class Squadriglia(Gioco):
         self.livello = 1
         self.finita = False
         self.iniziata = False
+        self._misura()
         self.potenza = 0                 # 0 niente, 1 doppio colpo, 2 scorta
         self._eventi = []
         self.suoni_del_frame = ()
         self._prima = set()
-        self._onde = [(self._rnd.uniform(0, LARGHEZZA),
-                       self._rnd.randint(CIMA + 1, ALTEZZA - 2))
-                      for _ in range(26)]
+        self._onde = [(self._rnd.uniform(0, self.largo_u),
+                       self._rnd.randint(self.cima_u + 1, self.alto_u - 2))
+                      for _ in range(self.quante_onde)]
         self._isole = []
         self._da_isola = self._rnd.uniform(4, 10)
         self._nuovo_livello()
 
     def _nuovo_livello(self):
         self.x = 12.0
-        self.y = CIMA + (ALTEZZA_CAMPO - ALTO_AEREO) / 2.0
+        self.y = self.cima_u + (self.alto_campo - ALTO_AEREO) / 2.0
         self.loop = LOOP_PER_LIVELLO
         self._in_loop = 0.0
         self._protetto = INVULNERABILE_RINASCITA
@@ -303,21 +351,21 @@ class Squadriglia(Gioco):
     def _scorri_mare(self, dt):
         onde = []
         for x, y in self._onde:
-            x -= SCORRIMENTO * dt
+            x -= self.scorrimento * dt
             if x < -3:
-                x = LARGHEZZA + self._rnd.uniform(0, 20)
-                y = self._rnd.randint(CIMA + 1, ALTEZZA - 2)
+                x = self.largo_u + self._rnd.uniform(0, 20)
+                y = self._rnd.randint(self.cima_u + 1, self.alto_u - 2)
             onde.append((x, y))
         self._onde = onde
-        self._isole = [[x - SCORRIMENTO * dt, y, l, a]
+        self._isole = [[x - self.scorrimento * dt, y, l, a]
                        for x, y, l, a in self._isole if x + l > -2]
         self._da_isola -= dt
         if self._da_isola <= 0:
             self._da_isola = self._rnd.uniform(9, 18)
             larga = self._rnd.randint(12, 22)
             alta = self._rnd.randint(8, 13)
-            self._isole.append([float(LARGHEZZA + 2),
-                                self._rnd.randint(CIMA + 2, ALTEZZA - alta - 1),
+            self._isole.append([float(self.largo_u + 2),
+                                self._rnd.randint(self.cima_u + 2, self.alto_u - alta - 1),
                                 larga, alta])
 
     # ------------------------------------------------------------- il tuo aereo
@@ -329,8 +377,8 @@ class Squadriglia(Gioco):
             # In diagonale non si va piu' veloci: e' un aereo, non un cursore.
             dx *= 0.7071
             dy *= 0.7071
-        self.x = max(1.0, min(float(X_MASSIMA), self.x + dx * VELOCITA * dt))
-        self.y = max(float(CIMA), min(float(ALTEZZA - ALTO_AEREO),
+        self.x = max(1.0, min(float(self.x_massima), self.x + dx * VELOCITA * dt))
+        self.y = max(float(self.cima_u), min(float(self.alto_u - ALTO_AEREO),
                                       self.y + dy * VELOCITA * dt))
 
         if self._in_loop > 0:
@@ -394,22 +442,22 @@ class Squadriglia(Gioco):
 
     def _rinasci(self):
         self.x = 12.0
-        self.y = CIMA + (ALTEZZA_CAMPO - ALTO_AEREO) / 2.0
+        self.y = self.cima_u + (self.alto_campo - ALTO_AEREO) / 2.0
         self._protetto = INVULNERABILE_RINASCITA
         self.bombe = []
 
     # ------------------------------------------------------------- i colpi
 
     def _muovi_colpi(self, dt):
-        self.colpi = [[x + VELOCITA_COLPO * dt, y] for x, y in self.colpi
-                      if x + VELOCITA_COLPO * dt < LARGHEZZA]
+        self.colpi = [[x + self.v_colpo * dt, y] for x, y in self.colpi
+                      if x + self.v_colpo * dt < self.largo_u]
 
     def _muovi_bombe(self, dt):
         rimaste = []
         for b in self.bombe:
             b[0] += b[2] * dt
             b[1] += b[3] * dt
-            if -2 < b[0] < LARGHEZZA + 2 and CIMA - 2 < b[1] < ALTEZZA + 2:
+            if -2 < b[0] < self.largo_u + 2 and self.cima_u - 2 < b[1] < self.alto_u + 2:
                 rimaste.append(b)
         self.bombe = rimaste
 
@@ -445,13 +493,13 @@ class Squadriglia(Gioco):
         rossa = self._squadriglie % 4 == 0
         tipo = self._rnd.choice(("fila", "onda", "picchiata", "giro"))
         quanti = 5 if tipo != "giro" else 4
-        y0 = self._rnd.uniform(CIMA + 10, ALTEZZA - 14)
+        y0 = self._rnd.uniform(self.cima_u + 10, self.alto_u - 14)
         v = self._rnd.uniform(55, 70) * self._fattore()
         chiave = self._squadriglie
         self._conti[chiave] = [quanti, 0, 0, rossa]
         for i in range(quanti):
             self.nemici.append(Caccia(tipo, y0, v, i * 0.22, chiave, rossa,
-                                      self._rnd))
+                                      self._rnd, self._mondo()))
 
     def _muovi_nemici(self, dt):
         rimasti = []
@@ -460,7 +508,7 @@ class Squadriglia(Gioco):
             if n.fuori():
                 self._conti[n.squadriglia][2] += 1
                 continue
-            if n.entrato() and 0 < n.x < LARGHEZZA - 10:
+            if n.entrato() and 0 < n.x < self.largo_u - 10:
                 n._spara_fra -= dt * self._fattore()
                 if n._spara_fra <= 0:
                     n._spara_fra = self._rnd.uniform(2.5, 5.0)
@@ -471,7 +519,7 @@ class Squadriglia(Gioco):
 
     def _arriva_bombardiere(self):
         self.bombardiere = {
-            "x": float(LARGHEZZA + 2), "y": CIMA + 10.0,
+            "x": float(self.largo_u + 2), "y": self.cima_u + 10.0,
             "vita": 30 + 10 * min(8, self.livello - 1),
             "t": 0.0, "da_sparo": 2.0, "lampo": 0.0,
         }
@@ -480,14 +528,14 @@ class Squadriglia(Gioco):
         b = self.bombardiere
         b["t"] += dt
         b["lampo"] = max(0.0, b["lampo"] - dt)
-        arrivo = LARGHEZZA - LARGO_BOMBARDIERE - 14
+        arrivo = self.largo_u - LARGO_BOMBARDIERE - 14
         if b["x"] > arrivo:
             b["x"] = max(float(arrivo), b["x"] - 30.0 * dt)
-        meta = CIMA + (ALTEZZA_CAMPO - ALTO_BOMBARDIERE) / 2.0
+        meta = self.cima_u + (self.alto_campo - ALTO_BOMBARDIERE) / 2.0
         # Sale e scende, ma piano: i tuoi colpi ci mettono quasi un secondo ad
         # attraversare il pannello, e un bombardiere che in quel secondo si e'
         # spostato di piu' della sua altezza non si colpisce mai.
-        b["y"] = meta + (ALTEZZA_CAMPO - ALTO_BOMBARDIERE) / 2.0 * 0.6 * \
+        b["y"] = meta + (self.alto_campo - ALTO_BOMBARDIERE) / 2.0 * 0.6 * \
             math.sin(b["t"] * 0.7)
         b["da_sparo"] -= dt * self._fattore()
         if b["da_sparo"] <= 0 and b["x"] <= arrivo + 1:
@@ -627,8 +675,9 @@ class Squadriglia(Gioco):
         # Il mare si fa con un colpo solo, non pixel per pixel: sono 14.000
         # pixel, e su un Raspberry un ciclo Python che li scrive uno a uno si
         # mangia mezzo fotogramma prima di disegnare qualunque cosa.
-        img = Image.new("RGB", (LARGHEZZA, ALTEZZA), COLORE_MARE)
-        img.paste((0, 0, 0), (0, 0, LARGHEZZA, CIMA))
+        img = Image.new("RGB", (self.largo, self.alto), COLORE_MARE)
+        img.paste((0, 0, 0), (0, 0, self.largo, CIMA))
+        imposta_tela(self.largo, self.alto, (0, 0, self.largo, self.alto))
         px = img.load()
         self.disegna_campo(img, px)
         self._disegna_tabellone(px)
@@ -637,8 +686,23 @@ class Squadriglia(Gioco):
         return img
 
     def _metti(self, px, x, y, colore):
-        if 0 <= x < LARGHEZZA and CIMA <= y < ALTEZZA:
-            px[x, y] = colore
+        """Un pixel di mondo sulla tela: ogni unita' diventa un quadrato.
+
+        E' l'unico posto in cui lo zoom esiste. Tutto il resto del gioco --
+        le rotte, le collisioni, le velocita' -- vive in unita' di mondo e
+        non sa che la tela sia piu' grande.
+        """
+        if not (0 <= x < self.largo_u and self.cima_u <= y < self.alto_u):
+            return
+        z = self.z
+        for dy in range(z):
+            yy = y * z + dy
+            if not (CIMA <= yy < self.alto):
+                continue
+            for dx in range(z):
+                xx = x * z + dx
+                if 0 <= xx < self.largo:
+                    px[xx, yy] = colore
 
     def _sprite(self, px, righe, larga, x, y, colore):
         x, y = int(round(x)), int(round(y))
@@ -680,7 +744,7 @@ class Squadriglia(Gioco):
             # La vita rimasta, una barra sotto il tabellone.
             quota = max(0, b["vita"]) / float(30 + 10 * min(8, self.livello - 1))
             for x in range(int(60 * quota)):
-                self._metti(px, LARGHEZZA - 62 + x, CIMA, COLORE_ROSSO)
+                self._metti(px, self.largo_u - 62 + x, self.cima_u, COLORE_ROSSO)
 
         for x, y in self.colpi:
             for dx in range(3):
@@ -710,13 +774,30 @@ class Squadriglia(Gioco):
 
         if not self.iniziata and not self.finita:
             self._riquadro(px, 30, 48)
-            centra(px, "SQUADRIGLIA", 32, COLORE_TU, larghezza=LARGHEZZA)
-            centra(px, "FUOCO PER DECOLLARE", 40, COLORE_HUD,
-                   larghezza=LARGHEZZA)
+            centra(px, "SQUADRIGLIA", self._riga(32), COLORE_TU,
+                   larghezza=self.largo)
+            centra(px, "FUOCO PER DECOLLARE", self._riga(40), COLORE_HUD,
+                   larghezza=self.largo)
+
+    def _mondo(self):
+        """Le tre misure che servono a un caccia per sapere dove vola."""
+        return (self.largo_u, self.cima_u, self.alto_u)
+
+    def _riga(self, quota):
+        """Una riga del pannello portata sulla tela, per le scritte.
+
+        Le scritte e il tabellone vivono in **pixel di tela**, non in unita'
+        di mondo: il font e' 3x5 e non si ingrandisce con lo zoom, se no una
+        riga di testo si mangerebbe un terzo dello schermo.
+        """
+        return int(round(quota * self.alto / float(ALTEZZA_BASE)))
 
     def _riquadro(self, px, alto, basso):
-        for y in range(alto, basso):
-            for x in range(50, LARGHEZZA - 50):
+        margine = max(10, self.largo // 5)
+        for y in range(self._riga(alto), self._riga(basso)):
+            if not 0 <= y < self.alto:
+                continue
+            for x in range(margine, self.largo - margine):
                 px[x, y] = (0, 0, 0)
 
     def _disegna_tabellone(self, px):
@@ -739,9 +820,11 @@ class Squadriglia(Gioco):
             # Quanto manca al bombardiere: una barra che si riempie.
             quota = min(1.0, self._tempo / DURATA_LIVELLO)
             for x in range(int(60 * quota)):
-                px[LARGHEZZA - 62 + x, 3] = (70, 70, 85)
+                px[self.largo - 62 + x, 3] = (70, 70, 85)
 
     def _disegna_fine(self, px):
         self._riquadro(px, 28, 48)
-        centra(px, "GAME OVER", 31, COLORE_ROSSO, larghezza=LARGHEZZA)
-        centra(px, "FUOCO PER RIGIOCARE", 40, COLORE_HUD, larghezza=LARGHEZZA)
+        centra(px, "GAME OVER", self._riga(31), COLORE_ROSSO,
+               larghezza=self.largo)
+        centra(px, "FUOCO PER RIGIOCARE", self._riga(40), COLORE_HUD,
+               larghezza=self.largo)

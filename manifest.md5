@@ -18,7 +18,7 @@ f4da634c02da1d2d9c2bf600287d09c3  copertine.py
 323e7433e983c9d3b69e8f5caadcc395  diagnostica/genera_domande.py
 8475027d8a5b75dac3cdad504cd7d5da  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
-4155e13c987257fb644f4f785e5b44de  diagnostica/prova_giochi.py
+abe7e7c6967fb610dd57ead75bb08212  diagnostica/prova_giochi.py
 6f6f3eda48e12c7f3baf5f9cbe1efda0  diagnostica/prova_nati_e_morti.py
 826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
@@ -97,7 +97,7 @@ c5dd87068ade8def1e9599408335b406  sources/giochi/mine.py
 0e67f0c1a59be47118670086493fbf32  sources/giochi/pongo.py
 7da23eb62fb5ee04a4e657043c5ca725  sources/giochi/quiz.py
 b6d6a707aa4974d2830c6833a39c5417  sources/giochi/serpente.py
-9f1e1bc5394cdb3b6b7620eaeef5e07a  sources/giochi/squadriglia.py
+7d4f8a76640e318409ca606ab406387e  sources/giochi/squadriglia.py
 49fb8c1b0949908b16702dfa35218b4a  sources/giochi/trex.py
 dc872b9812d0af78c1643b97a513e4eb  sources/inutili.py
 979ff6783335db960335d79570c831a3  sources/media.py
@@ -185,7 +185,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 12de3dfc1ea2b2ed0fe2fd8a25723388  templates/video.html
 dfdb476800003318473f792504d1259b  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-b8cbaf09a17e3a5b11f8921f3780a113  version.py
+d03392b3842461000909cc0106bbfe14  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 43b04420e7a48c57a0315b40e42e902e  webui.py

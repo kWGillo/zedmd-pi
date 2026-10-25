@@ -211,7 +211,8 @@ che quella colonna l'ha inventata.
 
 Convertiti finora: **Snake** (da 49×15 a 50×36 caselle), **Breakout**,
 **Pongo**, **T-Rex**, **Mine vaganti**, **Kingo Bongo** e **Invasori**
-(che su una tela alta ritrova le cinque file del cabinato).
+(che su una tela alta ritrova le cinque file del cabinato) e
+**Squadriglia**.
 
 Un gioco che scorre di lato — T-Rex, e domani Squadriglia — ha un problema
 in più: lo schermo è più alto ma non più largo, quindi ingrandire le figure

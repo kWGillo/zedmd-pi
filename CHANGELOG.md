@@ -2,6 +2,35 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.8]
+
+### Squadriglia
+
+Otto su tredici, e restano i due veri: Gnam e Super Quiz.
+
+Scorre di lato come T-Rex, quindi vale lo stesso scambio e la stessa tecnica: il
+mondo vive in unità, lo zoom è intero, e lo zoom esiste **in una funzione sola**
+— quella che mette un pixel sulla tela. Rotte, collisioni e velocità non sanno
+nemmeno che la tela sia diversa.
+
+Una cosa però non si poteva lasciare com'era: le posizioni orizzontali scritte
+come numeri assoluti su un pannello largo 256.
+
+- «non oltre la colonna 120» su un mondo largo 128 vorrebbe dire lasciarti
+  arrivare in fondo al cielo nemico;
+- «quando il caccia arriva alla colonna 190 comincia la picchiata» non vorrebbe
+  dire niente;
+- il centro del giro della morte sta a 150, che su 128 è fuori.
+
+Quelle tre seguono la larghezza del mondo. E le onde del mare seguono l'**area**,
+non il numero: ventisei su un mare che cambia forma sarebbero una manciata o una
+folla.
+
+Si gioca un po' più stretti, ed è il prezzo messo in conto quando hai scelto
+«tutto più grande»: il mondo è largo 128 unità invece di 256, quindi un caccia
+attraversa in metà tempo. In cambio gli aerei sono grandi il doppio e il mare ha
+dove respirare.
+
 ## [17.4.7]
 
 ### Il monitor va in standby quando il DMD si spegne
