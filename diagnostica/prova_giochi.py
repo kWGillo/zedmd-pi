@@ -39,6 +39,7 @@ from sources.giochi.pongo import Pongo                    # noqa: E402
 from sources.giochi.trex import TRex                      # noqa: E402
 from sources.giochi.mine import Mine                      # noqa: E402
 from sources.giochi.bongo import Bongo                    # noqa: E402
+from sources.giochi.invasori import Invasori              # noqa: E402
 
 esiti = []
 
@@ -66,11 +67,12 @@ def gioca(classe, passi, tela=None, seme=7, tasti=("fuoco",)):
 
 
 ALTA = (256, 192)
+COLONNE_ATTESE = 8        # le colonne di Invasori, che non cambiano
 
 
 sep("1. Il campo e il tabellone")
 
-for classe in (Serpente, Mattoni, Pongo, TRex, Mine, Bongo):
+for classe in (Serpente, Mattoni, Pongo, TRex, Mine, Bongo, Invasori):
     g = classe()
     esigi((g.largo, g.alto) == (256, 64),
           "%s: di serie la tela e' quella del pannello" % g.nome)
@@ -306,6 +308,43 @@ esigi(24 <= cielo <= 60,
       " arriverebbe piu'" % cielo)
 esigi(len(b.citta.stelle) > 26,
       "bongo: e le stelle crescono col cielo, se no si dirada")
+
+
+sep("6-quater. Invasori (17.4.5)")
+
+i = Invasori()
+esigi(i.file == 3 and i.tipi == Invasori.TIPI_TRE,
+      "invasori: sul pannello tre file, che e' quello che ci sta su 64 righe")
+esigi((i.passo_x, i.passo_y) == (18.0, 10.0),
+      "invasori: passo 18x10")
+esigi((i.y_nave, i.bunker_y) == (58.0, 46.0),
+      "invasori: la nave sulla riga 58 e i ripari sulla 46")
+esigi((i.bunker_largo, i.bunker_alto) == (14, 5)
+      and (i.passo_lato, i.discesa) == (2, 2),
+      "invasori: ripari 14x5, passo di lato 2, discesa 2")
+
+i = Invasori()
+i.configura_tela(*ALTA)
+esigi(i.file == 5 and i.tipi == Invasori.TIPI_CINQUE,
+      "invasori: su una tela alta tornano le cinque file del cabinato, con"
+      " i tipi dell'originale")
+largo_schiera = (COLONNE_ATTESE - 1) * i.passo_x + 8
+esigi(largo_schiera < i.campo_l - 16,
+      "invasori: e la schiera ha ancora dove muoversi di lato (%d su %d)"
+      % (largo_schiera, i.campo_l))
+fondo = i.ay + (i.file - 1) * i.passo_y + 5
+esigi(fondo < i.bunker_y,
+      "invasori: all'inizio la schiera sta tutta sopra i ripari")
+esigi(i.passo_lato >= 2 and i.discesa >= 2,
+      "invasori: il passo di lato e la discesa restano interi e non si"
+      " fermano a zero")
+
+# Qui **non** si pretende la stessa partita: con cinque file invece di tre
+# il gioco e' un altro apposta. Si pretende che sia giocabile.
+al = gioca(Invasori, 200, ALTA)
+esigi(al.vivi() < COLONNE_ATTESE * 5,
+      "invasori: dopo duecento passi qualche alieno e' stato colpito (%d vivi"
+      " su %d)" % (al.vivi(), COLONNE_ATTESE * 5))
 
 
 sep("7. La tela arriva davvero fino al gioco (17.4.1)")

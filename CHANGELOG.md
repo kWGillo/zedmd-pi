@@ -2,6 +2,39 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.5]
+
+### Invasori, e tornano le cinque file
+
+Sette su tredici.
+
+Qui lo zoom non si poteva usare, e il motivo è aritmetico: gli alieni sono
+larghi otto pixel e le colonne sono otto, quindi con un passo doppio la schiera
+occuperebbe 268 colonne su 256. Non ci starebbe — e soprattutto non avrebbe più
+dove muoversi di lato, che è tutto il gioco.
+
+Quindi gli alieni restano della loro misura e cresce lo **spazio fra loro**: la
+schiera si allarga su tutta la tela, la discesa si allunga, e ci mette molto più
+tempo ad arrivarti addosso.
+
+Il regalo vero è un altro. Nel cabinato del 1978 le file sono **cinque**, e qui
+erano tre solo perché su 64 righe le altre due non ci stavano. Da 128 righe in su
+tornano cinque, con i tipi dell'originale: una fila del primo, due del secondo,
+due del terzo. I punti seguono il tipo, non più il numero di fila.
+
+Rifatti anche due numeri scritti a mano che il censimento aveva segnalato:
+l'arco del riparo stava «a cinque pixel dal bordo» (su un riparo più largo non è
+più il centro di niente), e il buco che apre un colpo era 3×3 fisso, che su
+ripari più spessi li avrebbe resi quasi indistruttibili.
+
+Questa è la prima conversione in cui la partita sulle due tele **non è la
+stessa**, ed è voluto: con cinque file invece di tre il gioco è un altro. La
+prova quindi non pretende lo stesso punteggio — pretende che sul pannello resti
+identico al pixel, e che sulla tela alta la schiera abbia dove muoversi e stia
+tutta sopra i ripari.
+
+Restano Squadriglia, Gnam e Super Quiz.
+
 ## [17.4.4]
 
 ### Si scarica da GitHub, e le istruzioni lo dicono

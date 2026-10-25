@@ -3438,6 +3438,28 @@ Storico:
        Le istruzioni sono state **eseguite** prima di scriverle, da un clone
        anonimo: 192 file, zero alterati, i permessi di esecuzione al loro
        posto e `piattaforma.py` che risponde.
+  17.4.5 **Invasori, e tornano le cinque file.** Sette su tredici.
+       Qui lo zoom non si poteva usare, e il motivo e' aritmetico: gli
+       alieni sono larghi otto pixel e le colonne sono otto, e con un passo
+       doppio la schiera occuperebbe 268 colonne su 256. Non ci starebbe, e
+       soprattutto non avrebbe piu' dove muoversi di lato -- che e' tutto il
+       gioco. Quindi gli alieni restano della loro misura e cresce lo
+       **spazio fra loro**: la schiera si allarga, la discesa si allunga, e
+       ci mette molto piu' tempo ad arrivarti addosso.
+       Il regalo vero e' un altro. Nel cabinato del 1978 le file sono
+       **cinque**, e qui erano tre solo perche' su 64 righe le altre due non
+       ci stavano. Da 128 righe in su tornano cinque, con i tipi
+       dell'originale: una fila del primo, due del secondo, due del terzo. I
+       punti seguono il tipo, non piu' il numero di fila.
+       Rifatti anche due numeri scritti a mano: l'arco del riparo stava «a
+       cinque pixel dal bordo», che su un riparo piu' largo non e' piu' il
+       centro di niente, e il buco che apre un colpo era 3x3 fisso, che su
+       ripari piu' spessi li rendeva quasi indistruttibili.
+       Questa e' la prima conversione in cui la partita sulle due tele **non
+       e' la stessa**, ed e' voluto: con cinque file invece di tre il gioco
+       e' un altro. La prova quindi non pretende lo stesso punteggio -- che
+       sul pannello resti identico al pixel, e che sulla tela alta la schiera
+       abbia dove muoversi e stia tutta sopra i ripari.
 """
 
-__version__ = "17.4.4"
+__version__ = "17.4.5"

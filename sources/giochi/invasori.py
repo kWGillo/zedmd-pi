@@ -14,7 +14,7 @@ sull'originale non c'era posto per mettere.
 
 import random
 
-from .base import ALTEZZA, CAMPO, Gioco, centra
+from .base import Gioco, centra
 
 # Sprite 8x5, due pose per l'animazione: gli alieni dell'originale cambiano
 # forma a ogni passo, ed e' quello che li fa sembrare vivi invece che
@@ -57,6 +57,53 @@ class Invasori(Gioco):
     # voce, e la musica non ha ritmo suo per non litigarci.
     MUSICA = "invaders_musica"
     colore_hud = (120, 255, 120)
+    TELA_LIBERA = True
+
+    # Da quante righe in su ci stanno cinque file di alieni invece di tre.
+    # Nel cabinato del 1978 le file sono cinque, e qui erano tre solo perche'
+    # su 64 righe le altre due non ci stavano: tre file da dieci pixel sono
+    # gia' meta' pannello. Su una tela alta tornano le cinque, con i tipi
+    # dell'originale -- una fila del primo, due del secondo, due del terzo.
+    CINQUE_FILE_DA = 128
+    TIPI_TRE = (0, 1, 2)
+    TIPI_CINQUE = (0, 1, 1, 2, 2)
+
+    def _misura(self):
+        """La schiera, i ripari e la nave su **questo** campo.
+
+        Due fattori, uno per asse, contro il campo del pannello (200x64): su
+        quello valgono uno e ogni numero torna quello che era.
+
+        Gli alieni **non si ingrandiscono**, e non e' una dimenticanza: sono
+        otto pixel per otto colonne, e con un passo doppio la schiera
+        occuperebbe 268 colonne su 256 -- non ci starebbe, e soprattutto non
+        avrebbe piu' dove muoversi di lato, che e' tutto il gioco. Quello che
+        cresce e' lo **spazio fra loro**, e con lui la discesa: su una tela
+        alta la schiera e' larga, distanziata, e ci mette molto piu' tempo ad
+        arrivarti addosso.
+        """
+        self.fx = self.campo_l / 200.0
+        self.fy = self.campo_a / 64.0
+        self.file = 5 if self.campo_a >= self.CINQUE_FILE_DA else FILE
+        self.tipi = self.TIPI_CINQUE if self.file == 5 else self.TIPI_TRE
+        self.passo_x = PASSO_X * self.fx
+        # La schiera occupa sempre la stessa frazione del campo in altezza,
+        # che sul pannello e' tre file da dieci righe su sessantaquattro.
+        self.passo_y = max(ALTO_ALIENO + 2,
+                           self.campo_a * (FILE * PASSO_Y / 64.0) / self.file)
+        self.y_nave = self.campo_a - 6 * self.fy
+        self.y_fondo = self.y_nave - 1
+        self.bunker_y = self.y_nave - 12 * self.fy
+        self.bunker_largo = max(BUNKER_LARGO, int(round(BUNKER_LARGO * self.fx)))
+        self.bunker_alto = max(BUNKER_ALTO, int(round(BUNKER_ALTO * self.fy)))
+        self.v_nave = 62.0 * self.fx
+        self.v_colpo = 105.0 * self.fy
+        self.v_bomba = 46.0 * self.fy
+        # Il passo di lato e la discesa restano **interi**: la schiera si
+        # muove a scatti, e meta' pixel per scatto la farebbe scivolare.
+        self.passo_lato = max(1, int(round(2 * self.fx)))
+        self.discesa = max(1, int(round(2 * self.fy)))
+        self.lungo_colpo = max(3, int(round(3 * self.fy)))
 
     def avvia_partita(self, seme=None):
         self._rnd = random.Random(seme)
@@ -64,17 +111,19 @@ class Invasori(Gioco):
         self.vite = 3
         self.livello = 1
         self.finita = False
+        self._misura()
         self._nuovo_livello()
 
     def _nuovo_livello(self):
         # (colonna, fila) -> vivo. La fila 0 e' la piu' in alto e vale di piu'.
-        self.alieni = {(c, f): True for c in range(COLONNE) for f in range(FILE)}
-        self.ax = 8.0                       # angolo alto-sinistro della schiera
-        self.ay = 3.0 + min(6, (self.livello - 1) * 2)
+        self.alieni = {(c, f): True for c in range(COLONNE)
+                       for f in range(self.file)}
+        self.ax = 8.0 * self.fx             # angolo alto-sinistro
+        self.ay = (3.0 + min(6, (self.livello - 1) * 2)) * self.fy
         self.dir = 1
         self.posa = 0
         self._da_passo = 0.0
-        self.nave_x = CAMPO / 2.0 - LARGA_NAVE / 2
+        self.nave_x = self.campo_l / 2.0 - LARGA_NAVE / 2
         self.colpo = None                   # [x, y] del proiettile del giocatore
         self.bombe = []                     # [[x, y], ...] degli alieni
         self._da_bomba = 0.0
@@ -85,14 +134,19 @@ class Invasori(Gioco):
         """Tre ripari fatti di pixel: si consumano dove vengono colpiti."""
         ripari = []
         for i in range(3):
-            x0 = 24 + i * 56
+            x0 = int(round((24 + i * 56) * self.fx))
+            y0 = int(round(self.bunker_y))
             blocchi = set()
-            for x in range(BUNKER_LARGO):
-                for y in range(BUNKER_ALTO):
+            # L'arco sta al centro del riparo, non a cinque pixel dal bordo:
+            # con un riparo piu' largo quei cinque pixel non sarebbero piu'
+            # il centro di niente.
+            apre = self.bunker_largo // 2
+            for x in range(self.bunker_largo):
+                for y in range(self.bunker_alto):
                     # Un arco: la fila in basso al centro resta aperta.
-                    if y >= BUNKER_ALTO - 2 and 5 <= x <= 8:
+                    if y >= self.bunker_alto - 2 and apre - 2 <= x <= apre + 1:
                         continue
-                    blocchi.add((x0 + x, BUNKER_Y + y))
+                    blocchi.add((x0 + x, y0 + y))
             ripari.append(blocchi)
         return ripari
 
@@ -102,7 +156,8 @@ class Invasori(Gioco):
         return sum(1 for v in self.alieni.values() if v)
 
     def _pos(self, colonna, fila):
-        return (self.ax + colonna * PASSO_X, self.ay + fila * PASSO_Y)
+        return (self.ax + colonna * self.passo_x,
+                self.ay + fila * self.passo_y)
 
     def _intervallo_passo(self):
         """Piu' alieni restano, piu' la schiera e' lenta: e' il cuore del gioco.
@@ -112,7 +167,7 @@ class Invasori(Gioco):
         quell'accelerazione finale il gioco non ha una fine emotiva.
         """
         rimasti = max(1, self.vivi())
-        totale = COLONNE * FILE
+        totale = COLONNE * self.file
         veloce = 0.055
         lento = 0.55 - 0.04 * min(5, self.livello - 1)
         return veloce + (lento - veloce) * (rimasti - 1) / max(1, totale - 1)
@@ -127,17 +182,18 @@ class Invasori(Gioco):
             return
 
         # --- la nave
-        velocita = 62.0
+        velocita = self.v_nave
         if "sinistra" in tasti:
             self.nave_x -= velocita * dt
         if "destra" in tasti:
             self.nave_x += velocita * dt
-        self.nave_x = max(1.0, min(CAMPO - LARGA_NAVE - 1, self.nave_x))
+        self.nave_x = max(1.0, min(self.campo_l - LARGA_NAVE - 1, self.nave_x))
 
         # Un colpo per volta, come nell'originale: e' quello che rende il
         # tempismo una scelta invece di una raffica.
         if "fuoco" in tasti and self.colpo is None:
-            self.colpo = [self.nave_x + LARGA_NAVE / 2, float(Y_NAVE - 1)]
+            self.colpo = [self.nave_x + LARGA_NAVE / 2,
+                          float(self.y_nave - 1)]
             self.suona("sparo")
 
         # --- la schiera
@@ -166,30 +222,33 @@ class Invasori(Gioco):
     def _muovi_schiera(self):
         self.posa ^= 1
         colonne_vive = [c for c in range(COLONNE)
-                        if any(self.alieni.get((c, f)) for f in range(FILE))]
+                        if any(self.alieni.get((c, f))
+                               for f in range(self.file))]
         if not colonne_vive:
             return
-        sinistra = self.ax + min(colonne_vive) * PASSO_X
-        destra = self.ax + max(colonne_vive) * PASSO_X + LARGO_ALIENO
-        if (self.dir > 0 and destra >= CAMPO - 2) or (self.dir < 0 and sinistra <= 2):
+        sinistra = self.ax + min(colonne_vive) * self.passo_x
+        destra = (self.ax + max(colonne_vive) * self.passo_x + LARGO_ALIENO)
+        if ((self.dir > 0 and destra >= self.campo_l - 2)
+                or (self.dir < 0 and sinistra <= 2)):
             self.dir *= -1
-            self.ay += 2
+            self.ay += self.discesa
         else:
-            self.ax += 2 * self.dir
+            self.ax += self.passo_lato * self.dir
 
         # Arrivati in fondo hanno vinto loro, e la partita finisce: non e' una
         # vita persa, e' la fine. Toglierne una sola vorrebbe dire ricominciare
         # con la schiera gia' addosso.
-        file_vive = [f for f in range(FILE)
+        file_vive = [f for f in range(self.file)
                      if any(self.alieni.get((c, f)) for c in range(COLONNE))]
-        if file_vive and self.ay + max(file_vive) * PASSO_Y + ALTO_ALIENO >= Y_FONDO:
+        if (file_vive and self.ay + max(file_vive) * self.passo_y
+                + ALTO_ALIENO >= self.y_fondo):
             self.vite = 0
             self._muori()
 
     def _muovi_colpo(self, dt):
         if self.colpo is None:
             return
-        self.colpo[1] -= 105.0 * dt
+        self.colpo[1] -= self.v_colpo * dt
         x, y = int(self.colpo[0]), int(self.colpo[1])
         if y < 0:
             self.colpo = None
@@ -204,7 +263,7 @@ class Invasori(Gioco):
             if ax <= x < ax + LARGO_ALIENO and ay <= y < ay + ALTO_ALIENO:
                 self.alieni[(colonna, fila)] = False
                 self.suona("colpito")
-                self.punteggio += PUNTI[fila]
+                self.punteggio += PUNTI[self.tipi[fila]]
                 self._aggiorna_record()
                 self.colpo = None
                 return
@@ -216,14 +275,14 @@ class Invasori(Gioco):
             self._sgancia()
         restano = []
         for bomba in self.bombe:
-            bomba[1] += 46.0 * dt
+            bomba[1] += self.v_bomba * dt
             x, y = int(bomba[0]), int(bomba[1])
-            if y >= ALTEZZA:
+            if y >= self.campo_a:
                 continue
             if self._colpisci_bunker(x, y):
                 continue
-            if Y_NAVE <= y < Y_NAVE + ALTA_NAVE \
-                    and self.nave_x - 1 <= x <= self.nave_x + LARGA_NAVE:
+            if (self.y_nave <= y < self.y_nave + ALTA_NAVE
+                    and self.nave_x - 1 <= x <= self.nave_x + LARGA_NAVE):
                 self.vite -= 1
                 self.suona("persa")
                 self._muori()
@@ -235,11 +294,12 @@ class Invasori(Gioco):
         """Spara l'alieno piu' in basso di una colonna a caso: gli altri sono
         coperti dai compagni, e vederli sparare attraverso non torna."""
         colonne = [c for c in range(COLONNE)
-                   if any(self.alieni.get((c, f)) for f in range(FILE))]
+                   if any(self.alieni.get((c, f)) for f in range(self.file))]
         if not colonne or len(self.bombe) >= 3:
             return
         colonna = self._rnd.choice(colonne)
-        fila = max(f for f in range(FILE) if self.alieni.get((colonna, f)))
+        fila = max(f for f in range(self.file)
+                   if self.alieni.get((colonna, f)))
         x, y = self._pos(colonna, fila)
         self.bombe.append([x + LARGO_ALIENO / 2, y + ALTO_ALIENO])
 
@@ -248,8 +308,9 @@ class Invasori(Gioco):
             if (x, y) in blocchi:
                 # Un colpo apre un buco, non cancella il riparo: e' quello che
                 # rende i ripari una risorsa che si consuma.
-                for dx in (-1, 0, 1):
-                    for dy in (-1, 0, 1):
+                raggio = max(1, int(round(min(self.fx, self.fy))))
+                for dx in range(-raggio, raggio + 1):
+                    for dy in range(-raggio, raggio + 1):
                         blocchi.discard((x + dx, y + dy))
                 return True
         return False
@@ -258,7 +319,7 @@ class Invasori(Gioco):
         self.colpo = None
         self.bombe = []
         self._pausa = 1.2
-        self.nave_x = CAMPO / 2.0 - LARGA_NAVE / 2
+        self.nave_x = self.campo_l / 2.0 - LARGA_NAVE / 2
         if self.vite <= 0:
             self.vite = 0
             self.finita = True
@@ -271,32 +332,33 @@ class Invasori(Gioco):
             if not vivo:
                 continue
             x, y = self._pos(colonna, fila)
-            self._sprite(px, ALIENI[fila][self.posa], int(x), int(y),
-                         COLORI[fila], 8)
+            self._sprite(px, ALIENI[self.tipi[fila]][self.posa],
+                         int(x), int(y), COLORI[self.tipi[fila]], 8)
         for blocchi in self._bunker:
             for (x, y) in blocchi:
-                if 0 <= x < CAMPO and 0 <= y < ALTEZZA:
-                    px[x, y] = (90, 220, 110)
+                self._punto(px, x, y, (90, 220, 110))
         if not self.finita:
-            self._sprite(px, NAVE, int(self.nave_x), Y_NAVE, NAVE_COLORE, 8)
+            self._sprite(px, NAVE, int(self.nave_x), int(self.y_nave),
+                         NAVE_COLORE, 8)
         if self.colpo is not None:
             x, y = int(self.colpo[0]), int(self.colpo[1])
-            for dy in range(3):
-                if 0 <= y + dy < ALTEZZA and 0 <= x < CAMPO:
-                    px[x, y + dy] = (255, 255, 255)
+            for dy in range(self.lungo_colpo):
+                self._punto(px, x, y + dy, (255, 255, 255))
         for bomba in self.bombe:
             x, y = int(bomba[0]), int(bomba[1])
-            for dy in range(3):
-                if 0 <= y + dy < ALTEZZA and 0 <= x < CAMPO:
-                    px[x, y + dy] = (255, 80, 80)
+            for dy in range(self.lungo_colpo):
+                self._punto(px, x, y + dy, (255, 80, 80))
         if self._pausa > 0 and not self.finita:
-            centra(px, "PRONTO", 28, (255, 255, 255))
+            centra(px, "PRONTO", self.campo_y + self.campo_a * 28 // 64,
+                   (255, 255, 255))
 
-    @staticmethod
-    def _sprite(px, righe, x0, y0, colore, larghezza):
+    def _punto(self, px, x, y, colore):
+        """Un pixel in coordinate di campo, portato sulla tela."""
+        if 0 <= x < self.campo_l and 0 <= y < self.campo_a:
+            px[self.campo_x + x, self.campo_y + y] = colore
+
+    def _sprite(self, px, righe, x0, y0, colore, larghezza):
         for dy, bit in enumerate(righe):
             for dx in range(larghezza):
                 if bit & (1 << (larghezza - 1 - dx)):
-                    x, y = x0 + dx, y0 + dy
-                    if 0 <= x < CAMPO and 0 <= y < ALTEZZA:
-                        px[x, y] = colore
+                    self._punto(px, x0 + dx, y0 + dy, colore)

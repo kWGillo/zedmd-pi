@@ -16,7 +16,7 @@ f4da634c02da1d2d9c2bf600287d09c3  copertine.py
 323e7433e983c9d3b69e8f5caadcc395  diagnostica/genera_domande.py
 8475027d8a5b75dac3cdad504cd7d5da  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
-28c1069fadee7e59c2287a5999cd8e02  diagnostica/prova_giochi.py
+4155e13c987257fb644f4f785e5b44de  diagnostica/prova_giochi.py
 6f6f3eda48e12c7f3baf5f9cbe1efda0  diagnostica/prova_nati_e_morti.py
 826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
@@ -87,7 +87,7 @@ cc20dfaf532b143691e63e02d2002a6f  sources/giochi/__init__.py
 199e19b7b31883eba96ba781c0d51df4  sources/giochi/bongo.py
 033d2a7403a0db024204329e95251214  sources/giochi/classifica.py
 71f54d44a50464e82cafa5d08b261fc3  sources/giochi/gnam.py
-d8be4b827917e8c222dfe63615a6ff87  sources/giochi/invasori.py
+cf9dad2479f93698da848261666f400c  sources/giochi/invasori.py
 f698a7664c5b101dbe5e188d0ad3cdc2  sources/giochi/mattoni.py
 c5dd87068ade8def1e9599408335b406  sources/giochi/mine.py
 0e67f0c1a59be47118670086493fbf32  sources/giochi/pongo.py
@@ -179,7 +179,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 8e4da1571d2f55b9211b110179be1607  templates/updates.html
 3b29a3298d7020ed5416a9b633083bb4  templates/video.html
-41bdd9304aa6920a8fe368840ae5dbbf  version.py
+0a3b1f8568bf474f991314bada0cab8f  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 afe563a2fdf7b6e501024d34f74ea6a9  webui.py
