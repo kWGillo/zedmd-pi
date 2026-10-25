@@ -204,7 +204,7 @@ noi. Il cursore che restava a lampeggiare è corretto dalla 17.1.1. La manopola 
 
 | | |
 |---|---|
-| `zitta` | predefinito: spegne cursore e risparmio schermo della console |
+| `zitta` | predefinito: mette il terminale in modalità grafica — niente cursore, niente eco dei tasti, niente prompt di login — e spegne il risparmio schermo della console |
 | `staccata` | stacca `fbcon` del tutto: sparisce anche il lampo del login, ma se il servizio muore lo schermo resta nero |
 | `lascia` | non tocca niente: la via d'uscita se su questa macchina `fbcon` litiga con SDL |
 
@@ -213,6 +213,26 @@ noi. Il cursore che restava a lampeggiare è corretto dalla 17.1.1. La manopola 
 se l'è ripreso, quindi ogni fotogramma viene rifiutato. Dalla 17.3.1 la
 console si mette a tacere *prima* di prendere la scheda, che è l'ordine
 giusto; se su questa macchina non bastasse, `lascia` o `staccata`.
+
+**Il cursore e i caratteri che compaiono premendo i tasti.** Sul framebuffer
+— cioè dove si finisce quando SDL non riesce a prendere la scheda — il
+terminale resta vivo sotto il disegno: il cursore lampeggia, e quello che
+scrivi sulla tastiera durante una partita viene stampato in alto. Dalla
+17.3.5 il terminale si mette in modalità grafica, che è quello che SDL fa da
+sé sul KMS, e il kernel smette di disegnarci sopra. Il servizio lo rimette in
+modalità testo quando si ferma.
+
+Se il processo venisse ucciso in malo modo (`kill -9`), il terminale potrebbe
+restare grafico, cioè nero e muto. Si rimette a posto così, da SSH o da un
+altro terminale:
+
+```
+sudo python3 -c "import sys; sys.path.insert(0,'/opt/dmd'); import display; display._grafico_nostro = True; display.rianima_console()"
+```
+
+I tasti premuti nel frattempo restano nella coda del terminale: tornando in
+modalità testo si vedono comparire sulla riga del `login:`. È l'eco che
+riemerge, non un guasto.
 
 # 8. L'audio su un PC
 

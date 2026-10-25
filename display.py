@@ -401,6 +401,72 @@ class Compositore:
 
 # ------------------------------------------------------- le due superfici
 
+# `KDSETMODE` e i suoi due valori, da `linux/kd.h`. Non c'e' niente in
+# Python che li esponga, e sono due costanti che non cambiano dal 1993.
+KDSETMODE = 0x4B3A
+KD_TEXT = 0x00
+KD_GRAPHICS = 0x01
+TERMINALE = "/dev/tty0"
+
+# Se la modalita' grafica l'abbiamo chiesta noi. Serve a non rimettere in
+# modalita' testo un terminale che non avevamo toccato.
+_grafico_nostro = False
+
+
+def _modo_grafico(acceso, dispositivo=TERMINALE):
+    """Mette (o toglie) il terminale virtuale in modalita' grafica.
+
+    In modalita' grafica il kernel non disegna piu' niente sulla console:
+    ne' il cursore, ne' l'eco dei tasti, ne' il prompt di `getty`. E' il
+    modo pulito di dire «lo schermo adesso lo tengo io», ed e' esattamente
+    quello che SDL fa da solo quando apre il KMS. Sul framebuffer non lo fa
+    nessuno, e si vede.
+
+    Torna vero se il terminale e' passato di mano davvero. Se non c'e' o non
+    si lascia aprire -- un container, un processo senza i permessi -- si
+    tira dritto: e' una rifinitura, non deve impedire allo schermo di
+    accendersi.
+    """
+    global _grafico_nostro
+    if acceso and _grafico_nostro:
+        return False
+    if not acceso and not _grafico_nostro:
+        return False
+    try:
+        import fcntl
+        fd = os.open(dispositivo, os.O_RDWR | os.O_NOCTTY)
+    except OSError:
+        return False
+    try:
+        fcntl.ioctl(fd, KDSETMODE, KD_GRAPHICS if acceso else KD_TEXT)
+    except OSError:
+        return False
+    finally:
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+    _grafico_nostro = bool(acceso)
+    if acceso:
+        # L'assicurazione contro l'uscita brutta. Se il processo se ne va per
+        # una strada che non passa da `shutdown`, il terminale resterebbe
+        # grafico -- cioe' nero e muto -- e per rimetterlo a posto ci
+        # vorrebbe un riavvio. `atexit` copre tutto quello che non e' un
+        # segnale non gestibile.
+        import atexit
+        atexit.register(rianima_console)
+    return True
+
+
+def rianima_console():
+    """Rimette il terminale in modalita' testo, se l'avevamo preso noi.
+
+    La chiama `dmdd` quando si spegne, e `atexit` se il programma esce per
+    altre strade. Chiamarla due volte non fa niente.
+    """
+    return _modo_grafico(False)
+
+
 def zittisci_console(modo="zitta"):
     """Toglie di mezzo la console di testo, sotto il DMD a tutto schermo.
 
@@ -415,15 +481,28 @@ def zittisci_console(modo="zitta"):
     del login), e il suo cursore continua a lampeggiare per conto suo, perche'
     lo disegna il kernel e non noi.
 
-    Due rimedi, in ordine di violenza:
+    Tre rimedi, in ordine di violenza:
 
     * **spegnere il cursore** (`cursor_blink`) e il blanking automatico. E'
-      poco invasivo e risolve quello che si vede;
+      poco invasivo, e toglie il lampeggio;
+    * **mettere il terminale in modalita' grafica** (`KDSETMODE` a
+      `KD_GRAPHICS`). E' quello che fa SDL quando prende lo schermo, ed e'
+      la risposta alla 17.3.5: sul framebuffer non c'era nessuno a farlo, e
+      si vedevano il cursore e -- premendo un tasto durante una partita --
+      **i caratteri scritti in alto**, l'eco del terminale che disegna sopra
+      il nostro fotogramma. In modalita' grafica il kernel smette di
+      disegnare sulla console: niente cursore, niente eco, niente prompt di
+      login. Si rimette a posto da soli uscendo (`rianima_console`), quindi
+      non e' una porta che si chiude dietro;
     * **staccare `fbcon`** dal framebuffer. Cosi' nessuno puo' piu' scriverci
       sopra, nemmeno `getty`, e il lampo del login non c'e'. Ma la console
       sparisce davvero: se il servizio muore lo schermo resta nero, e per
       capire cosa e' successo serve la pagina web o un'altra macchina. Per
       questo non e' il predefinito.
+
+    I primi due vanno insieme in «zitta», che e' il predefinito. Il terzo e'
+    «staccata», per chi vuole la certezza che nessuno scriva mai piu' li'
+    sopra.
 
     Si scrive in `/sys`, quindi serve root -- il servizio gia' ci gira. Se un
     file non c'e' o non si lascia scrivere si tira dritto: questa e' una
@@ -436,6 +515,8 @@ def zittisci_console(modo="zitta"):
         return []
     stacca = modo in (True, "staccata")
     fatto = []
+    if _modo_grafico(True):
+        fatto.append("terminale in modalita' grafica")
     for percorso, valore in (
             ("/sys/class/graphics/fbcon/cursor_blink", "0"),
             # Zero spegne il risparmio schermo della console: senza, dopo

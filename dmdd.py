@@ -1395,6 +1395,15 @@ class Runtime:
             self.display.clear()
         except Exception:
             pass
+        # Il terminale virtuale torna in modalita' testo. Se non lo
+        # rimettiamo a posto noi, chi ferma il servizio si ritrova lo schermo
+        # nero e muto: la console c'e' ancora, ma il kernel ha smesso di
+        # disegnarci sopra quando ci siamo presi lo schermo.
+        try:
+            import display as _video
+            _video.rianima_console()
+        except Exception:
+            pass
 
 
 def main():

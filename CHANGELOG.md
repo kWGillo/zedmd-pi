@@ -2,6 +2,36 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.3.5]
+
+### Il cursore, e i caratteri che comparivano premendo i tasti
+
+*«Ho avviato un gioco e vedevo il cursore lampeggiante. Inoltre se premo
+qualche tasto sulla tastiera, appaiono i caratteri in alto.»*
+
+Erano il cursore e l'eco del terminale, disegnati dal kernel sopra il nostro
+fotogramma. E il motivo è il ripiego della 17.3.2: con SDL non succedeva, perché
+SDL, quando prende il KMS, mette da sé il terminale in **modalità grafica**.
+Sul framebuffer non lo fa nessuno, e la console resta viva sotto al disegno.
+Spegnere `cursor_blink` toglieva il lampeggio e basta — l'eco dei tasti il
+kernel la disegna comunque.
+
+Adesso `zitta` — il predefinito — mette il terminale in modalità grafica con
+`KDSETMODE`, esattamente come fa SDL. Il kernel smette di disegnare sulla
+console: niente cursore, niente eco, niente prompt di login.
+
+Non è una porta che si chiude dietro. `rianima_console()` rimette la modalità
+testo quando il servizio si ferma, ed è registrata anche su `atexit` per le
+uscite che da lì non passano. Resta scoperto solo un `kill -9`, e il manuale di
+Debian dice la riga per rimediare.
+
+**Quello che non si tocca** è la tastiera. `KDSKBMODE` a `K_OFF` toglierebbe i
+caratteri anche dalla coda del terminale, ma se il programma morisse prima di
+rimetterla a posto, su quel terminale non si potrebbe più scrivere — e una
+tastiera morta è peggio di un difetto estetico. Il prezzo è che i tasti premuti
+durante una partita ricompaiono sulla riga del `login:` quando il servizio si
+ferma: è l'eco che riemerge, non un guasto.
+
 ## [17.3.4]
 
 ### La voce «Video» sparisce dove non serve

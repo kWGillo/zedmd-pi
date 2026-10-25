@@ -247,6 +247,12 @@ lo dice, all'avvio e in cima alla pagina Video:
 
 Si perde il vsync, non il disegno.
 
+Sul framebuffer il terminale resta vivo sotto al fotogramma, e fino alla
+17.3.4 si vedevano il suo cursore e — premendo un tasto durante una partita —
+i caratteri stampati in alto. Dalla 17.3.5 il terminale si mette in modalità
+grafica, che è quello che SDL fa da sé sul KMS: il kernel smette di disegnarci
+sopra, e torna in modalità testo quando il servizio si ferma.
+
 Per vedere con i propri occhi quale strada funziona, con il servizio fermo:
 
 ```

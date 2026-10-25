@@ -482,6 +482,61 @@ esigi(display.video_nel_menu({}) in (True, False),
       "e con una configurazione vuota risponde comunque")
 
 
+# ------------------- 17.3.5: il terminale in modalita' grafica (cursore ed eco)
+#
+# *«Ho avviato un gioco e vedevo il cursore lampeggiante. Inoltre se premo
+# qualche tasto sulla tastiera, appaiono i caratteri in alto.»* Erano il
+# cursore e l'eco del terminale, disegnati dal kernel sopra il nostro
+# fotogramma: sul framebuffer non c'e' nessuno che metta il terminale in
+# modalita' grafica, cosa che SDL sul KMS fa da sola.
+
+print()
+print("-- il terminale in modalita' grafica (17.3.5)")
+
+esigi(display._modo_grafico(True, tempfile.mkstemp()[1]) is False,
+      "su qualcosa che non e' un terminale non succede niente")
+esigi(display._grafico_nostro is False,
+      "e non si segna di aver preso in mano niente")
+esigi(display.rianima_console() is False,
+      "rimettere a posto un terminale mai preso non fa niente")
+
+
+def _modo_del_terminale():
+    """Legge `KDGETMODE`: 0 testo, 1 grafica. None se non si puo' chiedere."""
+    import array
+    import fcntl
+    try:
+        fd = os.open(display.TERMINALE, os.O_RDWR | os.O_NOCTTY)
+    except OSError:
+        return None
+    buf = array.array("i", [0])
+    try:
+        fcntl.ioctl(fd, 0x4B3B, buf, True)
+        return buf[0]
+    except OSError:
+        return None
+    finally:
+        os.close(fd)
+
+
+if _modo_del_terminale() == display.KD_TEXT:
+    try:
+        esigi(display._modo_grafico(True) is True,
+              "sul terminale vero la modalita' grafica si prende")
+        esigi(_modo_del_terminale() == display.KD_GRAPHICS,
+              "e il kernel conferma: niente piu' cursore, niente piu' eco")
+        esigi(display._modo_grafico(True) is False,
+              "chiederla due volte non la prende due volte")
+    finally:
+        rimesso = display.rianima_console()
+    esigi(rimesso is True and _modo_del_terminale() == display.KD_TEXT,
+          "e uscendo il terminale torna com'era, in modalita' testo")
+    esigi(display.rianima_console() is False,
+          "rimetterlo a posto due volte non fa niente")
+else:
+    print("     (saltate: qui non c'e' un terminale virtuale da provare)")
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

@@ -3258,6 +3258,30 @@ Storico:
        porta li'. E se ci si arriva per indirizzo, la voce ricompare nel menu
        finche' quella pagina e' aperta, altrimenti ci si ritrova senza il
        segnaposto di dove si e'.
+  17.3.5 **Il cursore e i caratteri che comparivano premendo i tasti.** *«Ho
+       avviato un gioco e vedevo il cursore lampeggiante. Inoltre se premo
+       qualche tasto sulla tastiera, appaiono i caratteri in alto.»* Erano
+       il cursore e l'eco del terminale, disegnati dal kernel sopra il
+       nostro fotogramma.
+       Il motivo e' il ripiego della 17.3.2. Con SDL non succedeva, perche'
+       SDL, quando prende il KMS, mette da solo il terminale in modalita'
+       grafica; sul framebuffer non lo fa nessuno, e la console resta viva
+       sotto al disegno. Spegnere `cursor_blink` toglieva il lampeggio e
+       basta: l'eco dei tasti il kernel la disegna comunque.
+       Adesso «zitta» -- il predefinito -- mette il terminale in modalita'
+       grafica con `KDSETMODE`, come fa SDL. Il kernel smette di disegnare
+       sulla console: niente cursore, niente eco, niente prompt di login.
+       Non e' una porta che si chiude dietro: `rianima_console()` rimette la
+       modalita' testo quando il servizio si ferma, ed e' registrata anche
+       su `atexit`, per le uscite che da li' non passano. Resta scoperto
+       solo un `kill -9`, e il manuale di Debian dice la riga per rimediare.
+       Non si tocca invece la **tastiera** (`KDSKBMODE` a `K_OFF`), che
+       toglierebbe anche i caratteri dalla coda del terminale: se il
+       programma morisse prima di rimetterla a posto, su quel terminale non
+       si potrebbe piu' scrivere. Il prezzo e' che i tasti premuti durante
+       una partita ricompaiono sulla riga del `login:` quando il servizio si
+       ferma: e' l'eco che riemerge, e si preferisce quello a una tastiera
+       che puo' restare morta.
 """
 
-__version__ = "17.3.4"
+__version__ = "17.3.5"
