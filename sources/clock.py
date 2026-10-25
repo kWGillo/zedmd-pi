@@ -286,6 +286,21 @@ class ClockSource(Source):
         # da tenere allineato a mano.
         self._qv = height / 64.0
         self._qo = width / 256.0
+        # **Il fattore dei testi**, ed e' la 17.4.12.
+        #
+        # I testi seguono la larghezza, perche' quanto testo ci sta lo decide
+        # la larghezza -- ed e' la ragione per cui la data «in alto a destra
+        # deve restare piccola» su una tela alta. Ma su una regione **bassa**
+        # quella regola si ritorce: a 36 righe logiche, su uno schermo 21:9,
+        # la data restava della misura del pannello mentre le cifre
+        # scendevano a poco piu' della meta', e il risultato era *«la scritta
+        # della data e' troppo grande rispetto all'ora»*.
+        #
+        # Il piu' piccolo dei due fattori tiene tutte e due le promesse: su
+        # una tela alta vale la larghezza e la data resta piccola, su una
+        # regione bassa vale l'altezza e la data si rimpicciolisce con lei.
+        # A 256x64 valgono tutti e due uno, e il pannello non si muove.
+        self._qt = min(self._qo, self._qv)
         for nome in ("SEM_RAGGIO", "SEM_PASSO", "SEM_CIMA", "SEM_BANDA",
                      "MONDO_ALZATA", "TIMER_SPESSORE", "ONAIR_ALTO",
                      "AGGIORNA_ALTO", "OFFSET_MASSIMO"):
@@ -298,10 +313,14 @@ class ClockSource(Source):
         # restava una sola in banda. Un orologio del mondo che passa da tre
         # citta' a una perche' lo schermo e' piu' alto non e' quello che si
         # chiedeva allo schermo piu' alto.
-        for nome in ("MONDO_CORPO", "MONDO_STACCO", "MONDO_ACCOSTO",
+        for nome in ("MONDO_STACCO", "MONDO_ACCOSTO",
                      "ONAIR_LARGO", "AGGIORNA_LARGO"):
             setattr(self, nome,
                     max(1, int(round(getattr(type(self), nome) * self._qo))))
+        # Il corpo della banda segue il fattore dei testi: su una regione
+        # bassa deve stringersi, se no si mangia le righe delle cifre.
+        self.MONDO_CORPO = max(1, int(round(type(self).MONDO_CORPO
+                                            * self._qt)))
         # E la banda sta **in fondo**, appoggiata sopra la barra del timer,
         # invece di stare a una frazione fissa dell'altezza: a 64 righe il
         # conto da' 51, cioe' il numero di prima, e su una tela alta resta
@@ -326,11 +345,11 @@ class ClockSource(Source):
         #
         # I numeri qui sotto sono i corpi del pannello: a 256 colonne tornano
         # identici a quelli di prima (0.20 di 64 fa 12, come 12 per 1).
-        self._font_small = _load_font(max(8, int(round(12 * self._qo))))
+        self._font_small = _load_font(max(6, int(round(12 * self._qt))))
         # Font della colonna dei rifiuti, dal piu' grande al piu' piccolo. Si
         # sceglie il primo in cui il nome piu' lungo sta nello spazio libero:
         # i nomi li scrive l'utente, e "Indifferenziato" non e' "Carta".
-        self._font_rifiuti = [_load_font(max(6, int(round(corpo * self._qo))))
+        self._font_rifiuti = [_load_font(max(5, int(round(corpo * self._qt))))
                               for corpo in (10, 9, 8, 8, 7)]
 
     def _corpo_ora(self):
@@ -348,7 +367,18 @@ class ClockSource(Source):
         larga sta nella larghezza meno i margini. A 64 righe il secondo non
         morde mai, quindi il pannello LED resta quello di prima.
         """
-        alto = max(12, int(self.height * 0.60))
+        # Il sessanta per cento dell'altezza e' la regola del pannello, e
+        # li' resta. Su una regione **piu' bassa** del pannello si prende
+        # invece tutto lo spazio che c'e' sopra la banda degli orari: quelle
+        # righe non le vuole nessun altro, e lasciarle vuote vuol dire
+        # un'ora piccola in mezzo a un vetro grande -- che e' esattamente
+        # quello che si vedeva su uno schermo 21:9, dove la regione
+        # dell'orologio e' alta 36 righe logiche.
+        spazio = max(12, self.MONDO_CIMA - self.MARGINE_ALTO)
+        if self.height < 64:
+            alto = spazio
+        else:
+            alto = max(12, min(int(self.height * 0.60), spazio))
         disponibile = self.width - 2 * max(1, int(round(3 * self._qo)))
         if disponibile <= 0:
             return alto

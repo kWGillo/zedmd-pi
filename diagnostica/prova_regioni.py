@@ -456,6 +456,73 @@ for percorso in FONT_PROVA:
 esigi(provati > 0, "almeno un font di prova trovato sulla macchina")
 
 
+sep("12. Le proporzioni dell'orologio su una regione bassa (17.4.12)")
+
+# *«La scritta della data e' troppo grande rispetto all'ora. L'ora e' troppo
+# piccola rispetto a tutto il resto.»* Dalla foto di un 2560x1080, dove la
+# regione dell'orologio e' alta 36 righe logiche -- **meno** delle 64 del
+# pannello.
+#
+# Due conti separati sbagliavano insieme. Le cifre prendevano il sessanta per
+# cento dell'altezza, che a 36 righe fa 21: un conto tarato su una tela che
+# cresce, applicato a una che si e' ristretta. E i testi seguivano la sola
+# larghezza, che su un 21:9 e' quella del pannello: la data restava a corpo
+# 12, grande come sul pannello, accanto a cifre piu' piccole di quelle del
+# pannello. Da qui il «troppo grande rispetto all'ora».
+#
+# La prova guarda tre cose: che il pannello e le tele **alte** non si siano
+# mosse di un corpo, che su una regione bassa la data si rimpicciolisca e le
+# cifre crescano, e che niente esca dai bordi.
+
+cfg = dmdconf.load()
+PRIMA = {64: (38, 12, 10, 51), 88: (52, 12, 10, 74), 184: (83, 12, 10, 167)}
+for h, (ora, data, banda, cima) in sorted(PRIMA.items()):
+    c = ClockSource(cfg, 256, h)
+    esigi((c._corpo_ora(), c._font_small.size, c.MONDO_CORPO, c.MONDO_CIMA)
+          == (ora, data, banda, cima),
+          "a %3d righe i corpi sono quelli della 17.4.11: ora %d, data %d, "
+          "banda %d, cima %d" % (h, ora, data, banda, cima))
+
+bassa = ClockSource(cfg, 256, 36)
+pannello = ClockSource(cfg, 256, 64)
+esigi(bassa._font_small.size < pannello._font_small.size,
+      "su 36 righe la data si rimpicciolisce con la regione: corpo %d contro %d"
+      % (bassa._font_small.size, pannello._font_small.size))
+esigi(bassa.MONDO_CORPO < pannello.MONDO_CORPO,
+      "e la banda degli orari pure (%d contro %d)"
+      % (bassa.MONDO_CORPO, pannello.MONDO_CORPO))
+esigi(bassa._corpo_ora() > int(36 * 0.60),
+      "le cifre prendono piu' del sessanta per cento: %d righe su 36"
+      % bassa._corpo_ora())
+esigi(bassa._corpo_ora() / float(bassa._font_small.size)
+      > pannello._corpo_ora() / float(pannello._font_small.size),
+      "quindi l'ora e' piu' grande **rispetto alla data** che sul pannello "
+      "(%.1f contro %.1f volte)"
+      % (bassa._corpo_ora() / float(bassa._font_small.size),
+         pannello._corpo_ora() / float(pannello._font_small.size)))
+
+for h in (24, 28, 32, 36, 48, 63):
+    c = ClockSource(cfg, 256, h)
+    esigi(c._corpo_ora() <= c.MONDO_CIMA - c.MARGINE_ALTO,
+          "a %2d righe le cifre stanno sopra la banda (%d righe fino a %d)"
+          % (h, c._corpo_ora(), c.MONDO_CIMA - c.MARGINE_ALTO))
+    larga = c._font.getbbox("00:00")
+    esigi((larga[2] - larga[0]) <= 256 - 2 * c.MARGINE,
+          "a %2d righe «00:00» sta in %d colonne su %d"
+          % (h, larga[2] - larga[0], 256 - 2 * c.MARGINE))
+    esigi(c._font_small.size >= 6 and min(f.size for f in c._font_rifiuti) >= 5,
+          "a %2d righe i testi non scendono sotto il leggibile (data %d)"
+          % (h, c._font_small.size))
+
+# E il disegno vero non deve alzare eccezioni ne' uscire dalla tela.
+for h in (36, 64, 184):
+    c = ClockSource(cfg, 256, h)
+    c._running = True
+    im = c.frame()
+    esigi(im is not None and im.size == (256, h),
+          "a %3d righe il fotogramma si disegna, e misura 256x%d" % (h, h))
+
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

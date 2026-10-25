@@ -3600,6 +3600,27 @@ Storico:
        pannello ci stanno», che su un 21:9 rispondeva **una**: e' piu'
        modesta e piu' giusta -- ci sta una sorgente con la sua tela, piu' un
        orologio che si legga?
+  17.4.12 **Le proporzioni dell'orologio su una regione bassa.**
+       *«La scritta della data e' troppo grande rispetto all'ora. L'ora e'
+       troppo piccola rispetto a tutto il resto.»* Dalla foto di un 2560x1080
+       con le due regioni della 17.4.11 al lavoro.
+       Due conti sbagliavano insieme, e solo lì: la regione dell'orologio su
+       un 21:9 e' alta **36 righe logiche**, cioe' **meno** delle 64 del
+       pannello, e tutti e due i conti davano per scontato che la tela
+       crescesse. Le cifre prendevano il sessanta per cento dell'altezza --
+       che a 36 righe fa 21 contro le 38 del pannello -- e i testi seguivano
+       la sola larghezza, che su un 21:9 e' quella del pannello: la data
+       restava a corpo 12, grande come sul pannello, accanto a cifre piu'
+       piccole di quelle del pannello.
+       Adesso i testi seguono il **minore** fra i due fattori, che tiene
+       tutte e due le promesse -- su una tela alta vale la larghezza e la
+       data resta piccola, su una regione bassa vale l'altezza e la data si
+       rimpicciolisce con lei -- e sotto le 64 righe le cifre prendono tutto
+       lo spazio sopra la banda degli orari, invece di una frazione tarata su
+       una tela che cresce.
+       A 36 righe: ora da 21 a **27**, data da 12 a **7**, banda da 10 a
+       **6**. A 256x64 i due fattori valgono entrambi uno e il pannello non
+       si muove di un pixel: ora 38, data 12, banda 10, come dalla 1.0.
 """
 
-__version__ = "17.4.11"
+__version__ = "17.4.12"

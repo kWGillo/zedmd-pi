@@ -20,7 +20,7 @@ c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 6f6f3eda48e12c7f3baf5f9cbe1efda0  diagnostica/prova_nati_e_morti.py
 826d226ff94a63ca543de86c4bea74aa  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
-0d5aff41c6244dc4ac326b3cc169fd6b  diagnostica/prova_regioni.py
+c76047708358fce8ff9110aaa52f4cae  diagnostica/prova_regioni.py
 aa3e8267ebe85aedb58b3cf9f981652a  diagnostica/prova_schermo.py
 3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
@@ -77,7 +77,7 @@ be7a53f3a370b2550970f7cdb510bc53  sources/__init__.py
 7bca42221ed1585ce540409512f3c35d  sources/base.py
 ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 2a299afa099afba8a35b19d1049595bb  sources/cielo.py
-df011fd90578116e3fdc68d5a84ec696  sources/clock.py
+fa3f3540515bc472bbc0416fe147dc33  sources/clock.py
 18b4d2d760f7974149283c5717470b99  sources/comandi.py
 dbef5e6959d8595ddc44b6c97a56414f  sources/compleanni.py
 0aec5e5925af657819f9a3367c4e76fb  sources/doom.py
@@ -179,7 +179,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 8e4da1571d2f55b9211b110179be1607  templates/updates.html
 12de3dfc1ea2b2ed0fe2fd8a25723388  templates/video.html
-f31704bc03f18481aac3ba544d360ddc  version.py
+f880363b1b19070378cc2c9f342616f1  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 43b04420e7a48c57a0315b40e42e902e  webui.py

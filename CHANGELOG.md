@@ -2,6 +2,44 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.12]
+
+### Le proporzioni dell'orologio su una regione bassa
+
+*«La scritta della data è troppo grande rispetto all'ora. L'ora è troppo piccola
+rispetto a tutto il resto.»*
+
+Dalla foto di un **2560×1080** con le due regioni della 17.4.11 al lavoro. Il
+difetto era vero, e il motivo è che la regione dell'orologio su un 21:9 è alta
+**36 righe logiche** — cioè **meno** delle 64 del pannello — mentre due conti
+diversi davano per scontato che la tela potesse solo crescere.
+
+Le cifre prendevano il sessanta per cento dell'altezza: a 192 righe è la regola
+giusta, a 36 fa **21**, meno delle 38 del pannello. E i testi seguivano la sola
+larghezza — scelta deliberata della 17.2, perché quanto testo ci sta lo decide
+la larghezza — che su un 21:9 è esattamente quella del pannello: la data
+restava a corpo **12**, grande come sul pannello, accanto a cifre più piccole di
+quelle del pannello. Da qui il «troppo grande rispetto all'ora».
+
+Adesso i testi seguono il **minore** fra il fattore della larghezza e quello
+dell'altezza, che tiene tutte e due le promesse: su una tela alta vale la
+larghezza e la data resta piccola, su una regione bassa vale l'altezza e la
+data si rimpicciolisce con lei. E sotto le 64 righe le cifre prendono **tutto**
+lo spazio che c'è sopra la banda degli orari: quelle righe non le vuole nessun
+altro, e lasciarle vuote vuol dire un'ora piccola in mezzo a un vetro grande.
+
+| tela | ora | data | banda |
+|---|---|---|---|
+| **256×36** (21:9) | 21 → **27** | 12 → **7** | 10 → **6** |
+| 256×64 (pannello) | 38 | 12 | 10 |
+| 256×88 | 52 | 12 | 10 |
+| 256×184 | 83 | 12 | 10 |
+
+A 256×64 i due fattori valgono entrambi uno, quindi il pannello LED non si
+muove di un pixel — e le tele **alte**, dove la 17.2 aveva ragione, restano
+identiche. Cambia solo la colonna delle regioni basse, che prima nessuno aveva
+mai visto.
+
 ## [17.4.11]
 
 ### Le due regioni su uno schermo 21:9, senza rimpicciolire niente

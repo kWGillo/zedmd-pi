@@ -128,6 +128,26 @@ e l'orologio tutto quello che resta:
 Dove la metà basta resta la metà esatta. E la larghezza non si tocca mai: su un
 21:9 il disegno si prende tutti i 2560 pixel.
 
+**E in una regione più bassa del pannello l'orologio si riproporziona tutto**,
+dalla 17.4.12. Trentasei righe logiche sono **meno** delle 64 del pannello, e
+fino alla 17.4.11 due conti diversi davano per scontato il contrario: le cifre
+prendevano il sessanta per cento dell'altezza (a 36 righe, 21 contro le 38 del
+pannello) e i testi seguivano la sola larghezza, che su un 21:9 è quella del
+pannello — quindi la data restava grande come sul pannello accanto a cifre più
+piccole. Adesso i testi seguono il minore fra i due fattori e le cifre prendono
+tutto lo spazio sopra la banda degli orari:
+
+| tela dell'orologio | cifre | data | banda orari |
+|---|---|---|---|
+| 256×36 (2560×1080) | 27 | 7 | 6 |
+| 256×64 (pannello) | 38 | 12 | 10 |
+| 256×88 (1024×768 con contenuto) | 52 | 12 | 10 |
+| 256×184 (1024×768 da solo) | 83 | 12 | 10 |
+
+Sul pannello i due fattori valgono entrambi uno, quindi non si muove un pixel;
+e sulle tele più alte, dove la regola della larghezza era quella giusta, non
+cambia niente.
+
 # 4. La pagina Video
 
 Dalla 17.3.4 la voce **Video** non compare nel menu su un Raspberry che sta
