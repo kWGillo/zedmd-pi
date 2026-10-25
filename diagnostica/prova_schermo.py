@@ -501,40 +501,56 @@ esigi(display.rianima_console() is False,
       "rimettere a posto un terminale mai preso non fa niente")
 
 
-def _modo_del_terminale():
-    """Legge `KDGETMODE`: 0 testo, 1 grafica. None se non si puo' chiedere."""
-    import array
-    import fcntl
-    try:
-        fd = os.open(display.TERMINALE, os.O_RDWR | os.O_NOCTTY)
-    except OSError:
-        return None
-    buf = array.array("i", [0])
-    try:
-        fcntl.ioctl(fd, 0x4B3B, buf, True)
-        return buf[0]
-    except OSError:
-        return None
-    finally:
-        os.close(fd)
-
-
-if _modo_del_terminale() == display.KD_TEXT:
+if display.modo_del_terminale() == display.KD_TEXT:
     try:
         esigi(display._modo_grafico(True) is True,
               "sul terminale vero la modalita' grafica si prende")
-        esigi(_modo_del_terminale() == display.KD_GRAPHICS,
+        esigi(display.modo_del_terminale() == display.KD_GRAPHICS,
               "e il kernel conferma: niente piu' cursore, niente piu' eco")
         esigi(display._modo_grafico(True) is False,
               "chiederla due volte non la prende due volte")
+
+        # 17.3.6: il difetto vero. Qualcuno -- SDL che esce, un cambio di
+        # terminale -- rimette la modalita' testo da sotto di noi. La 17.3.5
+        # si fidava della sua variabile e non se ne accorgeva, e il cursore
+        # tornava a lampeggiare sopra la partita.
+        display._modo_grafico(False)
+        display._grafico_nostro = True
+        esigi(display.modo_del_terminale() == display.KD_TEXT,
+              "se qualcuno rimette la modalita' testo da sotto...")
+        esigi(display._modo_grafico(True) is True
+              and display.modo_del_terminale() == display.KD_GRAPHICS,
+              "...il ricontrollo se ne accorge e riprende il terminale")
     finally:
         rimesso = display.rianima_console()
-    esigi(rimesso is True and _modo_del_terminale() == display.KD_TEXT,
+    esigi(rimesso is True and display.modo_del_terminale() == display.KD_TEXT,
           "e uscendo il terminale torna com'era, in modalita' testo")
     esigi(display.rianima_console() is False,
           "rimetterlo a posto due volte non fa niente")
 else:
     print("     (saltate: qui non c'e' un terminale virtuale da provare)")
+
+# Il ricontrollo periodico del framebuffer, senza aprire `/dev/fb0`: si
+# guarda solo che chiami la cosa giusta ogni tot fotogrammi, e che con
+# `lascia` non la chiami mai.
+quante = []
+finta = display.SuperficieFramebuffer.__new__(display.SuperficieFramebuffer)
+finta._giri = 0
+finta._console = "zitta"
+finta._ricontrolla_console = lambda: quante.append(1)
+finta._bit = 32
+finta.width, finta.height = 4, 1
+finta._f = tempfile.TemporaryFile()
+for _ in range(display.SuperficieFramebuffer.OGNI_QUANTI * 2):
+    finta.mostra(Image.new("RGB", (4, 1)))
+esigi(len(quante) == 2,
+      "il terminale si ricontrolla ogni %d fotogrammi, non a ogni fotogramma"
+      % display.SuperficieFramebuffer.OGNI_QUANTI)
+
+vera = display.SuperficieFramebuffer.__new__(display.SuperficieFramebuffer)
+vera._console = "lascia"
+esigi(display.SuperficieFramebuffer._ricontrolla_console(vera) is False,
+      "e con «lascia» non si tocca niente, nemmeno nel ricontrollo")
 
 
 print()

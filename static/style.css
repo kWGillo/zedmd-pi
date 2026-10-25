@@ -524,6 +524,26 @@ table.files tr.now td.mono { color: #6cc8f0; }
   flex-direction: column;
 }
 
+/* Super Quiz non e' una scheda come le altre: dentro ha quattro musiche da
+   scegliere, il tempo di risposta e una pulsantiera di prova. In una colonna
+   della griglia diventava una striscia stretta e alta un metro, accanto a
+   schede alte un dito. Prende la riga intera, e i suoi comandi si
+   dispongono in colonne per conto loro. */
+.gioco.largo { grid-column: 1 / -1; }
+
+.quiz-griglia {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 4px 18px;
+  margin: 6px 0 12px;
+}
+/* Senza questo una colonna di griglia non si stringe sotto il contenuto, e
+   un nome di brano lungo allarga tutta la riga. */
+.quiz-voce { min-width: 0; }
+.quiz-voce label { display: block; margin-bottom: 4px; }
+.quiz-voce select, .quiz-voce input { width: 100%; }
+.quiz-voce .hint { margin: 4px 0 0; flex: none; }
+
 .gioco.on { border-color: var(--accent); background: rgba(255,140,26,.07); }
 .gioco h3 { margin: 0 0 6px; font-size: 15px; }
 .gioco .hint { flex: 1; }

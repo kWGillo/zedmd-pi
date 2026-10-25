@@ -3282,6 +3282,27 @@ Storico:
        una partita ricompaiono sulla riga del `login:` quando il servizio si
        ferma: e' l'eco che riemerge, e si preferisce quello a una tastiera
        che puo' restare morta.
+  17.3.6 **Il cursore tornava lo stesso, e la colpa era della mia memoria.**
+       *«Nonostante le tue correzioni, continuano ad apparire caratteri.»*
+       La 17.3.5 metteva il terminale in modalita' grafica e poi si fidava
+       di una sua variabile. Ma sulla macchina dove serve il primo
+       tentativo e' sempre SDL, SDL fallisce, e `pygame.display.quit()`
+       **rimette il terminale in modalita' testo** uscendo -- rimette a
+       posto quello che crede di aver preso. La chiamata successiva, quella
+       del framebuffer, trovava la variabile gia' a vero e non faceva
+       niente. Il terminale restava di testo, e il cursore e l'eco dei tasti
+       tornavano a disegnarsi sopra la partita.
+       Adesso si guarda **com'e' adesso** e non com'era quando l'abbiamo
+       chiesto: `KDGETMODE` prima di `KDSETMODE`. E non basta una volta
+       sola: ogni trenta fotogrammi -- circa un secondo -- la superficie del
+       framebuffer ricontrolla, e se qualcuno ha rimesso la modalita' testo
+       da sotto la riprende. Costa una `ioctl` che non legge un byte dal
+       disco.
+       **La scheda di Super Quiz** prende la riga intera. Dentro ha quattro
+       musiche, il tempo di risposta e una pulsantiera di prova: in una
+       colonna della griglia diventava una striscia stretta e alta un metro
+       accanto a schede alte un dito. I suoi comandi adesso si dispongono in
+       colonne per conto loro, e su un telefono tornano in fila.
 """
 
-__version__ = "17.3.5"
+__version__ = "17.3.6"

@@ -2,6 +2,44 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.3.6]
+
+### Il cursore tornava lo stesso, e la colpa era della mia memoria
+
+*«Nonostante le tue correzioni, continuano ad apparire caratteri.»*
+
+La 17.3.5 metteva il terminale in modalità grafica e poi si fidava di una sua
+variabile. Ma sulla macchina dove serve, il primo tentativo è sempre SDL, SDL
+fallisce, e `pygame.display.quit()` **rimette il terminale in modalità testo**
+uscendo — rimette a posto quello che crede di aver preso. La chiamata
+successiva, quella del framebuffer, trovava la variabile già a vero e non faceva
+niente. Il terminale restava di testo, e il cursore e l'eco dei tasti tornavano
+a disegnarsi sopra la partita.
+
+L'ordine era questo, e si vede a occhio nudo una volta scritto in fila:
+
+```
+zittisci_console()      -> terminale in modalità grafica
+pygame.display.init()
+set_mode()              -> "Could not set videomode on CRTC"
+chiudi()                -> SDL rimette la modalità TESTO
+SuperficieFramebuffer   -> zittisci_console() di nuovo... che non fa niente
+```
+
+Adesso si guarda **com'è adesso**, non com'era quando l'abbiamo chiesto:
+`KDGETMODE` prima di `KDSETMODE`. E non basta una volta sola: ogni trenta
+fotogrammi — circa un secondo — la superficie del framebuffer ricontrolla, e se
+qualcuno ha rimesso la modalità testo da sotto, la riprende. Costa una `ioctl`
+che non legge un byte dal disco.
+
+### La scheda di Super Quiz prende la riga intera
+
+Dentro ha quattro musiche, il tempo di risposta e una pulsantiera di prova: in
+una colonna della griglia diventava una striscia stretta e alta un metro,
+accanto a schede alte un dito. Adesso occupa la riga, e i suoi comandi si
+dispongono in colonne per conto loro — che su un telefono tornano in fila da
+sole.
+
 ## [17.3.5]
 
 ### Il cursore, e i caratteri che comparivano premendo i tasti

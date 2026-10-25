@@ -401,16 +401,42 @@ class Compositore:
 
 # ------------------------------------------------------- le due superfici
 
-# `KDSETMODE` e i suoi due valori, da `linux/kd.h`. Non c'e' niente in
-# Python che li esponga, e sono due costanti che non cambiano dal 1993.
+# `KDSETMODE`, `KDGETMODE` e i due valori, da `linux/kd.h`. Non c'e' niente
+# in Python che li esponga, e sono costanti che non cambiano dal 1993.
 KDSETMODE = 0x4B3A
+KDGETMODE = 0x4B3B
 KD_TEXT = 0x00
 KD_GRAPHICS = 0x01
 TERMINALE = "/dev/tty0"
 
 # Se la modalita' grafica l'abbiamo chiesta noi. Serve a non rimettere in
-# modalita' testo un terminale che non avevamo toccato.
+# modalita' testo un terminale che non avevamo mai toccato.
 _grafico_nostro = False
+
+
+def modo_del_terminale(dispositivo=TERMINALE):
+    """Com'e' adesso il terminale: `KD_TEXT`, `KD_GRAPHICS`, o None.
+
+    None vuol dire «non si puo' chiedere»: non c'e' un terminale virtuale,
+    o non ci si puo' parlare. Non e' un errore, e' una macchina diversa.
+    """
+    import array
+    import fcntl
+    try:
+        fd = os.open(dispositivo, os.O_RDWR | os.O_NOCTTY)
+    except OSError:
+        return None
+    buf = array.array("i", [0])
+    try:
+        fcntl.ioctl(fd, KDGETMODE, buf, True)
+        return buf[0]
+    except OSError:
+        return None
+    finally:
+        try:
+            os.close(fd)
+        except OSError:
+            pass
 
 
 def _modo_grafico(acceso, dispositivo=TERMINALE):
@@ -422,15 +448,33 @@ def _modo_grafico(acceso, dispositivo=TERMINALE):
     quello che SDL fa da solo quando apre il KMS. Sul framebuffer non lo fa
     nessuno, e si vede.
 
-    Torna vero se il terminale e' passato di mano davvero. Se non c'e' o non
+    **Si guarda com'e' adesso, non com'era quando l'abbiamo chiesto.** E' la
+    17.3.6, e nasce da un difetto preciso: la 17.3.5 si fidava di una sua
+    variabile, e quando il tentativo con SDL falliva -- cioe' sempre, sulla
+    macchina dove serve -- `pygame.display.quit()` rimetteva il terminale in
+    modalita' testo uscendo, perche' SDL rimette a posto quello che crede di
+    aver preso. La chiamata successiva, quella del framebuffer, trovava la
+    variabile gia' a vero e non faceva niente. Risultato: il terminale
+    restava in modalita' testo, e il cursore e l'eco dei tasti tornavano a
+    disegnarsi sopra il gioco.
+
+    Torna vero se il terminale e' passato di mano adesso. Se non c'e' o non
     si lascia aprire -- un container, un processo senza i permessi -- si
     tira dritto: e' una rifinitura, non deve impedire allo schermo di
     accendersi.
     """
     global _grafico_nostro
-    if acceso and _grafico_nostro:
-        return False
     if not acceso and not _grafico_nostro:
+        return False
+    voluto = KD_GRAPHICS if acceso else KD_TEXT
+    adesso = modo_del_terminale(dispositivo)
+    if adesso is None:
+        return False
+    if adesso == voluto:
+        # Gia' com'e' giusto. Se e' grafico e lo volevamo noi, ci si segna
+        # comunque di doverlo rimettere a posto uscendo.
+        if acceso:
+            _segna_da_rimettere()
         return False
     try:
         import fcntl
@@ -438,7 +482,7 @@ def _modo_grafico(acceso, dispositivo=TERMINALE):
     except OSError:
         return False
     try:
-        fcntl.ioctl(fd, KDSETMODE, KD_GRAPHICS if acceso else KD_TEXT)
+        fcntl.ioctl(fd, KDSETMODE, voluto)
     except OSError:
         return False
     finally:
@@ -446,16 +490,26 @@ def _modo_grafico(acceso, dispositivo=TERMINALE):
             os.close(fd)
         except OSError:
             pass
-    _grafico_nostro = bool(acceso)
     if acceso:
-        # L'assicurazione contro l'uscita brutta. Se il processo se ne va per
-        # una strada che non passa da `shutdown`, il terminale resterebbe
-        # grafico -- cioe' nero e muto -- e per rimetterlo a posto ci
-        # vorrebbe un riavvio. `atexit` copre tutto quello che non e' un
-        # segnale non gestibile.
+        _segna_da_rimettere()
+    else:
+        _grafico_nostro = False
+    return True
+
+
+def _segna_da_rimettere():
+    """L'assicurazione contro l'uscita brutta.
+
+    Se il processo se ne va per una strada che non passa da `shutdown`, il
+    terminale resterebbe grafico -- cioe' nero e muto -- e per rimetterlo a
+    posto ci vorrebbe un riavvio. `atexit` copre tutto quello che non sia un
+    segnale non gestibile. Registrarsi due volte non serve a niente.
+    """
+    global _grafico_nostro
+    if not _grafico_nostro:
         import atexit
         atexit.register(rianima_console)
-    return True
+        _grafico_nostro = True
 
 
 def rianima_console():
@@ -733,9 +787,20 @@ class SuperficieFramebuffer:
     DISPOSITIVO = "/dev/fb0"
     INFO = "/sys/class/graphics/fb0/"
 
+    # Ogni quanti fotogrammi si ricontrolla che il terminale sia ancora in
+    # modalita' grafica. Trenta, a venti o trenta fotogrammi al secondo,
+    # fanno circa un secondo, e la spesa e' una `ioctl` che non legge
+    # nemmeno un byte dal disco. Serve perche' il terminale ce lo possono
+    # rimettere in modalita' testo da sotto: SDL uscendo, un cambio di
+    # terminale, un altro programma. Senza, basta una volta sola e per il
+    # resto della giornata il cursore torna a lampeggiare sopra la partita.
+    OGNI_QUANTI = 30
+
     def __init__(self, misura=None, finestra=False, titolo="DMD",
                  console="zitta"):
         del finestra, titolo
+        self._console = console
+        self._giri = 0
         zittisci_console(console)
         self.width, self.height = misura or self._misura_dichiarata()
         self._bit = self._bit_dichiarati()
@@ -759,6 +824,9 @@ class SuperficieFramebuffer:
             return 32
 
     def mostra(self, immagine):
+        self._giri += 1
+        if self._giri % self.OGNI_QUANTI == 0:
+            self._ricontrolla_console()
         if immagine.size != (self.width, self.height):
             immagine = immagine.resize((self.width, self.height))
         if self._bit == 32:
@@ -776,6 +844,21 @@ class SuperficieFramebuffer:
             dati = v.astype("<u2").tobytes()
         self._f.seek(0)
         self._f.write(dati)
+
+    def _ricontrolla_console(self):
+        """Il terminale e' ancora nostro? Se no, lo si riprende.
+
+        Non si ricostruisce niente e non si tocca `fbcon`: si guarda la
+        modalita' e, se qualcuno l'ha rimessa a testo, la si rimette a
+        grafica. Quando non c'e' niente da fare costa una `ioctl`.
+        """
+        if self._console in (False, "lascia", "no"):
+            return False
+        if _modo_grafico(True):
+            print("[display] il terminale era tornato in modalita' testo:"
+                  " ripreso")
+            return True
+        return False
 
     def chiudi(self):
         try:
