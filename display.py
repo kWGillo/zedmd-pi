@@ -28,7 +28,7 @@ import os
 import sys
 import threading
 
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageDraw
 
 try:
     import numpy as _np
@@ -1401,6 +1401,77 @@ def standby_monitor(spento, percorso=SPEGNIMENTO):
         return True
     except OSError:
         return False
+
+
+# Il disegno del testo: sfumato (come fa PIL di suo) o **netto**, cioe' ogni
+# pixel acceso o spento. Vedi `testo_netto`.
+_DISEGNO_VERO = ImageDraw.Draw
+_TESTO_NETTO = False
+
+
+def testo_netto(attivo):
+    """Il testo senza sfumature, per quando il pixel logico e' grosso.
+
+    *«Col filtro spento, potremmo avere delle linee piu' secche e nitide,
+    con meno antialiasing?»* Si', e il posto dove intervenire non e' alla
+    fine della catena: e' all'inizio.
+
+    PIL disegna le lettere **sfumate**: i bordi non sono accesi o spenti, ma
+    a meta'. Su un pannello LED vero e' giusto -- un LED a meta' intensita'
+    esiste -- e a un pixel per cella non si vede. Ma su un monitor quella
+    tela viene ingrandita nove volte, e ogni pixel a meta' diventa un
+    quadrato grigio da 9x9 accanto a uno arancione: non una sfumatura, un
+    **mattone**. E' da li' che viene l'impressione dell'antialiasing acceso
+    per sbaglio.
+
+    Con il filtro DMD il mattone torna a essere un punto meno acceso e si
+    legge bene. Senza filtro, no: meglio allora che il bordo sia netto.
+
+    La scelta si applica in un posto solo -- qui -- perche' le sorgenti sono
+    venticinque e ognuna si fa il suo `ImageDraw`: si cambia quello che
+    `ImageDraw.Draw` restituisce, una volta, invece di passare un'opzione da
+    venticinque parti. Si torna indietro quando si vuole.
+    """
+    global _TESTO_NETTO
+    attivo = bool(attivo)
+    if attivo == _TESTO_NETTO:
+        return attivo
+    if attivo:
+        def disegno(immagine, mode=None):
+            d = _DISEGNO_VERO(immagine, mode)
+            try:
+                d.fontmode = "1"
+            except Exception:                     # pragma: no cover - difensivo
+                pass
+            return d
+        ImageDraw.Draw = disegno
+    else:
+        ImageDraw.Draw = _DISEGNO_VERO
+    _TESTO_NETTO = attivo
+    return attivo
+
+
+def testo_netto_attivo():
+    return _TESTO_NETTO
+
+
+def vuole_testo_netto(cfg, compositore=None):
+    """Se su questa macchina il testo conviene netto.
+
+    `auto` guarda due cose: che il pixel logico sia grosso -- da tre pixel
+    veri in su, cioe' un monitor e non il pannello -- e che il filtro DMD
+    sia spento, perche' con i punti accesi la sfumatura si legge bene ed e'
+    anzi quello che fa somigliare il vetro a un pannello vero.
+    """
+    modo = str(((cfg or {}).get("video") or {}).get("testo_netto")
+               or "auto").strip().lower()
+    if modo in ("si", "sì", "yes", "sempre", "true", "1"):
+        return True
+    if modo in ("no", "mai", "false", "0"):
+        return False
+    if compositore is None:
+        return False
+    return bool(compositore.scala >= 3 and not compositore.filtro)
 
 
 def _colore_rgb(valore):

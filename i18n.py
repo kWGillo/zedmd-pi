@@ -1984,6 +1984,21 @@ STRINGS = {
         "Off means a black frame, and a monitor showing black stays on. With "
         "this, the monitor gets the power-down signal and really goes to "
         "standby. The price is waking up: a second or two to resync."),
+    "video.testo": ("Testo", "Text"),
+    "video.testo.auto": ("netto dove serve", "sharp where it helps"),
+    "video.testo.si": ("sempre netto", "always sharp"),
+    "video.testo.no": ("sempre sfumato", "always smoothed"),
+    "video.testo.hint": (
+        "Le lettere le disegna PIL con i bordi sfumati: su un monitor "
+        "quel mezzo pixel diventa un quadrato grigio grosso come gli altri. "
+        "Con il filtro DMD acceso si legge come un punto meno acceso; con il "
+        "filtro spento conviene il bordo netto. \u00abNetto dove serve\u00bb decide "
+        "da s\u00e9: monitor e filtro spento.",
+        "PIL draws letters with smoothed edges: on a monitor that half pixel "
+        "becomes a grey square as big as the others. With the DMD filter on "
+        "it reads as a dimmer dot; with the filter off a sharp edge is "
+        "better. \u00abSharp where it helps\u00bb decides on its own: monitor and "
+        "filter off."),
     "video.risoluzione": ("Risoluzione", "Resolution"),
     "video.risoluzione.hint": (
         "Vuota vale quella che c'è adesso, ed è quasi sempre la risposta "

@@ -128,6 +128,16 @@ DEFAULTS = {
         # essere la piu' svelta, e il modo di saperlo e' misurare:
         # `diagnostica/misura_video.py` cronometra tutte e due.
         "filtro_a_colori": True,
+        # Il testo sul vetro: sfumato come lo disegna PIL, o **netto**,
+        # cioe' ogni pixel acceso o spento. Su un monitor il pixel logico
+        # viene ingrandito molte volte, e un bordo a meta' intensita'
+        # diventa un quadrato grigio grosso come gli altri: con il filtro
+        # DMD acceso si legge come un punto meno acceso, con il filtro
+        # spento si legge come una sbavatura.
+        #   auto  netto dove serve: monitor, filtro spento
+        #   si    sempre netto
+        #   no    sempre sfumato, com'era prima della 17.4.19
+        "testo_netto": "auto",
         # Quanto del lato della cella e' punto acceso. 0.80 lascia
         # l'intercapedine che si vede su un pannello da 3 mm di passo.
         "filtro_punto": 0.80,

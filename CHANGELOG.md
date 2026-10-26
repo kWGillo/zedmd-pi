@@ -2,6 +2,41 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.19]
+
+### Il testo netto, dove il pixel logico è grosso
+
+*«Col filtro spento, potremmo avere delle linee più secche e nitide, con meno
+antialiasing?»*
+
+Sì — e il posto dove intervenire non è alla fine della catena: è all'inizio.
+
+PIL disegna le lettere con i bordi **sfumati**: non accesi o spenti, ma a metà.
+Su un pannello LED è giusto così, perché un LED a metà intensità esiste davvero
+e a un pixel per cella non si nota. Ma su un monitor quella tela viene
+ingrandita nove volte, e ogni pixel a metà diventa un **quadrato grigio da 9×9**
+accanto a uno arancione: non una sfumatura, un mattone. È da lì che veniva
+l'impressione dell'antialiasing acceso per sbaglio — l'antialiasing c'era
+davvero, solo che nessuno l'aveva aggiunto: era stato ingrandito.
+
+Con il filtro DMD acceso quel mattone torna a essere un punto meno acceso, e
+anzi è proprio quello che fa somigliare il vetro a un pannello vero. Con il
+filtro spento, no. Quindi la scelta sta nella pagina Video, e di serie si
+decide da sé:
+
+| `video.testo_netto` | |
+|---|---|
+| **auto** | netto dove serve: monitor e filtro spento |
+| si | sempre netto |
+| no | sempre sfumato, com'era prima |
+
+Si applica in **un posto solo**. Le sorgenti sono venticinque e ognuna si fa il
+suo `ImageDraw`: passare un'opzione da venticinque parti sarebbe stato un modo
+di sbagliarla in ventiquattro. Si cambia quello che `ImageDraw.Draw`
+restituisce, una volta, e si torna indietro quando si vuole — una prova verifica
+che con il testo netto non resti nessun mezzo tono, e che spegnendolo i mezzi
+toni tornino.
+
 ## [17.4.18]
 
 ### Il fotogramma scritto dentro lo schermo, invece che composto e poi ricopiato

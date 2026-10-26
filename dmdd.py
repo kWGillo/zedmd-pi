@@ -318,6 +318,9 @@ class Runtime:
             # La vedetta parte piu' avanti, quando `self.running` esiste:
             # qui siamo ancora a meta' costruzione.
             self._video_da_riprovare = True
+        # Il testo netto o sfumato: dipende da dove si disegna, quindi si
+        # decide dopo aver aperto l'uscita. Vedi `display.testo_netto`.
+        self.aggiorna_testo()
         self.arbiter = Arbiter(self.cfg)
 
         self.zedmd = ZeDMDSource(
@@ -1491,6 +1494,18 @@ class Runtime:
             except Exception:                 # pragma: no cover - difensivo
                 pass
             return
+
+    def aggiorna_testo(self):
+        """Applica la scelta fra testo netto e sfumato.
+
+        La chiama l'avvio e la chiama la pagina Video: e' una riga, e la
+        differenza si vede al fotogramma dopo.
+        """
+        try:
+            uscita_video.testo_netto(uscita_video.vuole_testo_netto(
+                self.cfg, getattr(self.display, "compositore", None)))
+        except Exception as exc:                  # pragma: no cover - difensivo
+            print("[display] testo netto non applicato: %s" % exc)
 
     def _wifi_sveglio(self):
         """Spegne il risparmio energetico della radio, se e' stato chiesto.

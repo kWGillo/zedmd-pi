@@ -125,6 +125,16 @@
       {{ t('video.filtro.acceso') }}
     </label>
 
+    <label for="testo_netto">{{ t('video.testo') }}
+      <select id="testo_netto" name="testo_netto">
+        {% for valore in ('auto', 'si', 'no') %}
+        <option value="{{ valore }}"
+                {{ 'selected' if (cfg.video.testo_netto or 'auto') == valore }}>{{ t('video.testo.' + valore) }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <p class="hint">{{ t('video.testo.hint') }}</p>
+
     {# Lo standby ha senso solo dove c'e' un monitor da addormentare: sul
        pannello LED «spento» vuol dire matrice a zero, e non c'e' nessuno a
        cui mandare un segnale. #}

@@ -2638,6 +2638,9 @@ def create_app(runtime):
         conf = cfg["video"]
         if request.form.get("c_e_filtro") == "1":
             conf["filtro_dmd"] = request.form.get("filtro_dmd") == "on"
+            netto = (request.form.get("testo_netto") or "auto").strip().lower()
+            conf["testo_netto"] = (netto if netto in ("auto", "si", "no")
+                                   else "auto")
             # Lo standby viaggia con il filtro perche' e' della stessa
             # natura: vale subito, non vuole un riavvio del servizio.
             conf["standby"] = request.form.get("standby") == "on"
@@ -2664,6 +2667,9 @@ def create_app(runtime):
             compositore.bagliore = conf["filtro_bagliore"]
             compositore.fondo = conf["filtro_fondo"]
             compositore.ridimensiona(compositore.schermo)
+        aggiorna = getattr(runtime, "aggiorna_testo", None)
+        if aggiorna is not None:
+            aggiorna()
         runtime._ridisegna()
         return redirect(url_for("page_video"))
 

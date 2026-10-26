@@ -3771,6 +3771,25 @@ Storico:
        con quello che usciva da `componi`. Dove la strada non si puo' fare
        -- una fotografia, troppi colori, niente numpy, SDL invece del
        framebuffer -- si compone e si consegna come sempre.
+  17.4.19 **Il testo netto, dove il pixel logico e' grosso.**
+       *«Col filtro spento, potremmo avere delle linee piu' secche e
+       nitide, con meno antialiasing?»* Si', e il posto dove intervenire non
+       e' alla fine della catena: e' all'inizio. PIL disegna le lettere con
+       i bordi **sfumati** -- mezzi accesi -- e su un pannello LED e' giusto
+       cosi', perche' un LED a meta' intensita' esiste. Ma su un monitor
+       quella tela viene ingrandita nove volte, e ogni mezzo pixel diventa
+       un quadrato grigio da 9x9 accanto a uno arancione: non una
+       sfumatura, un mattone. Da li' veniva l'impressione dell'antialiasing
+       acceso per sbaglio.
+       Con i punti accesi quel mattone torna a essere un punto meno acceso e
+       si legge bene; senza punti, no. Quindi `video.testo_netto`: **auto**
+       lo accende dove serve -- monitor e filtro spento -- **si** sempre,
+       **no** mai, com'era prima.
+       Si applica in un posto solo: le sorgenti sono venticinque e ognuna si
+       fa il suo `ImageDraw`, e passare un'opzione da venticinque parti
+       sarebbe stato un modo di sbagliarla in ventiquattro. Si cambia quello
+       che `ImageDraw.Draw` restituisce, una volta, e si torna indietro
+       quando si vuole.
 """
 
-__version__ = "17.4.18"
+__version__ = "17.4.19"

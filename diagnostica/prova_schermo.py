@@ -812,6 +812,64 @@ esigi(_npd.array_equal(letto_come_rgb(percorso, 1280, 720),
       "e il fotogramma esce lo stesso, dalla strada di sempre")
 uscita._superficie._f.close()
 
+print()
+print("-- il testo netto, dove il pixel logico e' grosso (17.4.19)")
+
+# *«Col filtro spento, potremmo avere delle linee piu' secche e nitide, con
+# meno antialiasing?»* Si': PIL disegna le lettere con i bordi **sfumati**,
+# e su un monitor quel mezzo pixel diventa un quadrato grigio grosso come
+# gli altri. Con i punti accesi si legge come un punto meno acceso; senza,
+# si legge come una sbavatura.
+
+from PIL import ImageDraw as _id                            # noqa: E402
+
+prima = _id.Draw(Image.new("RGB", (8, 8))).fontmode
+esigi(display.testo_netto(True) is True, "il testo netto si accende")
+esigi(_id.Draw(Image.new("RGB", (8, 8))).fontmode == "1",
+      "e da li' in poi PIL disegna senza sfumature, in tutte le sorgenti")
+display.testo_netto(False)
+esigi(_id.Draw(Image.new("RGB", (8, 8))).fontmode == prima,
+      "e si torna indietro quando si vuole (%s)" % prima)
+
+# Il disegno vero: senza sfumature non deve restare **nessun** mezzo tono.
+def toni_di(netto):
+    display.testo_netto(netto)
+    tela = Image.new("RGB", (64, 16), (0, 0, 0))
+    d = _id.Draw(tela)
+    from sources.clock import _load_font
+    d.text((1, 1), "20:49", font=_load_font(12), fill=(255, 140, 26))
+    display.testo_netto(False)
+    dati = tela.tobytes()
+    return {dati[i] for i in range(0, len(dati), 3)}
+
+
+sfumati = toni_di(False)
+netti = toni_di(True)
+esigi(len(sfumati) > 3,
+      "sfumato: i bordi hanno mezzi toni (%d valori diversi di rosso)"
+      % len(sfumati))
+esigi(netti == {0, 255},
+      "netto: o acceso o spento, niente in mezzo (%s)"
+      % ", ".join(str(v) for v in sorted(netti)))
+
+# E la regola di «auto»: il pannello no, il monitor con i punti no, il
+# monitor senza punti si'.
+esigi(display.vuole_testo_netto({}, display.Compositore(TELA, (256, 64), {}))
+      is False,
+      "auto: sul pannello il testo resta sfumato, e li' e' giusto")
+esigi(display.vuole_testo_netto(
+          {}, display.Compositore(TELA, (2560, 1080),
+                                  {"filtro_dmd": True})) is False,
+      "auto: con i punti accesi la sfumatura si legge bene")
+esigi(display.vuole_testo_netto(
+          {}, display.Compositore(TELA, (2560, 1080),
+                                  {"filtro_dmd": False})) is True,
+      "auto: con i punti spenti e il pixel grosso, netto")
+esigi(display.vuole_testo_netto({"video": {"testo_netto": "si"}}, None) is True
+      and display.vuole_testo_netto({"video": {"testo_netto": "no"}},
+                                    None) is False,
+      "e la scelta a mano vince su tutto")
+
 # La misura la decide il framebuffer, non la configurazione: qui non si
 # cambia modo video.
 esigi("vera = self._misura_dichiarata()" in open(os.path.join(
