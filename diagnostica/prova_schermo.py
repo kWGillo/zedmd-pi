@@ -711,6 +711,107 @@ esigi(stretta._mappa_memoria() is None,
       "con la riga allineata in modo strano non si mappa: meglio la strada"
       " lenta che un'immagine storta")
 
+print()
+print("-- il fotogramma scritto dentro lo schermo, senza comporlo (17.4.18)")
+
+# La misura che ha deciso: su un Atom, a 2560x1080 con il filtro acceso,
+# comporre costava **64,7 ms** e consegnare altri 34 -- dieci fotogrammi al
+# secondo. Ma comporre vuol dire costruire un'immagine da undici megabyte
+# per poi ricopiarla; e la via dei colori sa gia' che un pixel della tela
+# diventa sempre la stessa piastrella tinta del suo colore. Allora la si
+# scrive **dove deve stare**, una riga per volta, e di passaggi ne resta uno.
+#
+# La cosa su cui questa prova non transige e' sempre la stessa: gli stessi
+# pixel che usciranno dalla strada di sempre.
+
+import numpy as _npd                                       # noqa: E402
+
+
+def uscita_finta(largo=1280, alto=720, filtro=True):
+    percorso = os.path.join(tempfile.mkdtemp(), "fb")
+    with open(percorso, "wb") as f:
+        f.write(b"\x00" * (largo * alto * 4))
+    sup = display.SuperficieFramebuffer.__new__(display.SuperficieFramebuffer)
+    sup._console = "lascia"
+    sup._giri = 0
+    sup._ricontrolla_console = lambda: None
+    sup.width, sup.height, sup._bit = largo, alto, 32
+    sup._f = open(percorso, "r+b", buffering=0)
+    sup._riga = largo * 4
+    sup._mappa = sup._mappa_memoria()
+    conf = dmdconf.load()
+    conf["video"]["uscita"] = "schermo"
+    conf["video"]["filtro_dmd"] = filtro
+    return display.DisplaySchermo(conf, superficie=sup), percorso
+
+
+def letto_come_rgb(percorso, largo, alto):
+    dati = _npd.frombuffer(open(percorso, "rb").read(), _npd.uint8)
+    dati = dati.reshape(alto, largo, 4)
+    return _npd.stack([dati[:, :, 2], dati[:, :, 1], dati[:, :, 0]], axis=2)
+
+
+def tela_di_colori(misura, quanti=12, seme=7):
+    import random as _r
+    im = Image.new("RGB", misura)
+    px = im.load()
+    rnd = _r.Random(seme)
+    tav = [(rnd.randint(0, 255), rnd.randint(0, 255), 90)
+           for _ in range(quanti)]
+    for y in range(misura[1]):
+        for x in range(misura[0]):
+            px[x, y] = tav[rnd.randrange(quanti)]
+    return im
+
+
+for filtro in (True, False):
+    uscita, percorso = uscita_finta(filtro=filtro)
+    comp = uscita.compositore
+    tela = tela_di_colori(comp.tela_logica)
+    uscita.show(tela)
+    esigi(_npd.array_equal(letto_come_rgb(percorso, 1280, 720),
+                           _npd.asarray(comp.componi(tela))),
+          "filtro %s: scritto dentro lo schermo, identico a quello che"
+          " usciva da `componi`" % ("acceso" if filtro else "spento"))
+    uscita._superficie._f.close()
+
+# Le regioni, e la memoria di quella che non cambia.
+uscita, percorso = uscita_finta()
+comp = uscita.compositore
+riquadri = uscita.regioni(True)
+orologio = tela_di_colori((256, riquadri["orologio"][3]), seme=3)
+contenuto = tela_di_colori((256, 64), seme=5)
+pezzi = {"orologio": (orologio, riquadri["orologio"]),
+         "contenuto": (contenuto, riquadri["contenuto"])}
+uscita.mostra_regioni(pezzi)
+prima = letto_come_rgb(percorso, 1280, 720)
+esigi(_npd.array_equal(prima, _npd.asarray(comp.componi_regioni(pezzi))),
+      "due regioni scritte dentro lo schermo: identiche a `componi_regioni`")
+uscita.mostra_regioni({"orologio": (None, riquadri["orologio"]),
+                       "contenuto": (None, riquadri["contenuto"])})
+esigi(_npd.array_equal(prima, letto_come_rgb(percorso, 1280, 720)),
+      "e due `None` di fila non svuotano niente: la memoria c'e' anche qui")
+uscita.mostra_regioni({"orologio": (None, riquadri["orologio"]),
+                       "contenuto": (contenuto, riquadri["contenuto"])})
+esigi(_npd.array_equal(letto_come_rgb(percorso, 1280, 720), prima),
+      "una regione che si muove non disturba quella ferma")
+
+# E dove la strada diretta non si puo' fare -- troppi colori, come una
+# fotografia -- si compone come sempre, senza che nessuno se ne accorga.
+foto = Image.new("RGB", comp.tela_logica)
+px = foto.load()
+for y in range(comp.tela_logica[1]):
+    for x in range(comp.tela_logica[0]):
+        px[x, y] = ((x * 7 + y) % 256, (x + y * 5) % 256, (x * 3 + y) % 256)
+esigi(comp.disegna_dentro([(foto, (0, 0))],
+                          uscita._superficie.vista_bgrx()) is False,
+      "con una fotografia la strada diretta si tira indietro")
+uscita.show(foto)
+esigi(_npd.array_equal(letto_come_rgb(percorso, 1280, 720),
+                       _npd.asarray(comp.componi(foto))),
+      "e il fotogramma esce lo stesso, dalla strada di sempre")
+uscita._superficie._f.close()
+
 # La misura la decide il framebuffer, non la configurazione: qui non si
 # cambia modo video.
 esigi("vera = self._misura_dichiarata()" in open(os.path.join(

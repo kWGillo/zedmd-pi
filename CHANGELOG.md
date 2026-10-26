@@ -2,6 +2,36 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.18]
+
+### Il fotogramma scritto dentro lo schermo, invece che composto e poi ricopiato
+
+I numeri dell'Atom, 2560×1080, **filtro acceso**: comporre 64,7 ms, consegnare
+34. Dieci fotogrammi al secondo — e la 17.4.17 da sola non bastava, perché il
+problema non era la consegna: erano **due lavori che facevano lo stesso
+lavoro**. Comporre vuol dire costruire un'immagine da undici megabyte;
+consegnare vuol dire ricopiarla. Undici megabyte scritti due volte, per avere
+gli stessi pixel.
+
+La via dei colori della 17.4.15 sapeva già che un pixel della tela diventa
+sempre la stessa piastrella tinta del suo colore. Se è così, la piastrella si
+può scrivere **direttamente dove deve stare**: dentro la memoria dello schermo,
+una riga logica per volta, nelle nove righe vere che le corrispondono. Niente
+immagine intermedia, niente `tobytes`, niente copia. Una passata sola — e le
+righe si scrivono per intero e in ordine, che è il modo in cui la memoria di
+uno schermo vuole essere scritta.
+
+Misurato in laboratorio sullo stesso fotogramma a 2560×1080: **3,9 ms contro
+21,1**. Il numero vero lo dirà l'Atom, ed è il motivo per cui questa versione
+esiste.
+
+Gli stessi pixel, come sempre: due prove confrontano la schermata intera e le
+due regioni — filtro acceso e spento — con quello che usciva da `componi`, e
+una terza verifica che la memoria delle regioni ferme (`frame()` che torna
+`None`) funzioni anche su questa strada. Dove la strada non si può fare — una
+fotografia, più di mille colori, niente numpy, SDL invece del framebuffer — si
+compone e si consegna come si è sempre fatto.
+
 ## [17.4.17]
 
 ### I pixel dentro la memoria dello schermo, senza copie di mezzo

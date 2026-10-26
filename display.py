@@ -163,11 +163,15 @@ class Compositore:
         self._celle = {}               # una piastrella per scala e luminosita'
         self._tavola = None            # (luminosita, tabella) in cache
         self._quadro = None            # il fotogramma, riusato
+        self._posati = None            # dove stavano i pezzi l'ultima volta
         # L'ultimo fotogramma di ogni regione, gia' ingrandito. Serve perche'
         # `frame()` torna None quando l'immagine non e' cambiata: con una
         # sorgente sola voleva dire «non ridisegnare», con due regioni una
         # ferma diventerebbe nera appena l'altra si muove.
         self._ultime_regioni = {}
+        # La stessa memoria, ma **prima** dell'ingrandimento: la usa la
+        # strada diretta, che la tela se la ingrandisce mentre la scrive.
+        self._ultime_logiche = {}
         self.scala, self.riquadro = self._misura()
 
     # ---- geometria
@@ -345,8 +349,11 @@ class Compositore:
         self.schermo = tuple(schermo)
         self.scala, self.riquadro = self._misura()
         self._maschere = {}
+        self._celle = {}
         self._quadro = None
+        self._posati = None
         self._ultime_regioni = {}
+        self._ultime_logiche = {}
 
     # ---- la maschera dei punti
 
@@ -519,6 +526,112 @@ class Compositore:
         fuori = fuori.transpose(0, 2, 1, 3, 4).reshape(alto, largo, 3)
         return Image.fromarray(fuori)
 
+    def _piastrelle_bgrx(self, immagine):
+        """Le piastrelle di questa tela, gia' in ordine BGRX, e i loro indici.
+
+        E' la via dei colori della 17.4.15 portata fino in fondo: invece di
+        **costruire un'immagine** da ricopiare poi nella memoria dello
+        schermo, si tengono da parte le piastrelle -- una per colore, gia'
+        tinte e gia' nell'ordine dei byte che vuole il framebuffer -- e la
+        tabella che dice quale piastrella va in quale casella.
+
+        Da li' il fotogramma si scrive **direttamente** dove deve stare.
+        Vedi `disegna_dentro`, e la misura che l'ha resa necessaria: su un
+        Atom, a 2560x1080, comporre costava 64,7 ms e consegnare altri 34,
+        cioe' dieci fotogrammi al secondo con il filtro acceso.
+
+        Torna `None` quando la strada non si puo' fare, e allora vale quella
+        di sempre.
+        """
+        if (_np is None or not VIA_DEI_COLORI or not self.a_colori
+                or self.scala < 1):
+            return None
+        lato = int(self.scala)
+        if immagine.getcolors(SOGLIA_COLORI) is None:
+            return None
+        arr = _np.asarray(immagine)
+        if arr.ndim != 3 or arr.shape[2] != 3:
+            return None
+        impacchettati = ((arr[:, :, 0].astype(_np.uint32) << 16)
+                         | (arr[:, :, 1].astype(_np.uint32) << 8)
+                         | arr[:, :, 2])
+        unici, indici = _np.unique(impacchettati, return_inverse=True)
+        colori = _np.stack([(unici >> 16) & 255, (unici >> 8) & 255,
+                            unici & 255], axis=1).astype(_np.uint16)
+        piastrelle = _np.zeros((colori.shape[0], lato, lato, 4), _np.uint8)
+        if self.filtro and lato > 2:
+            cella = self._cella_filtrata(lato)
+            tinte = ((colori[:, None, None, :]
+                      * cella[None, :, :, None]) // 255).astype(_np.uint8)
+        else:
+            # Senza filtro la piastrella e' il colore pieno; la luminosita',
+            # che con il filtro viaggia dentro la maschera, qui si applica
+            # al colore.
+            if self.luminosita < 100:
+                quota = max(0, self.luminosita) / 100.0
+                colori = (colori * quota).astype(_np.uint16)
+            tinte = _np.broadcast_to(colori[:, None, None, :],
+                                     (colori.shape[0], lato, lato, 3))
+        # BGRX: il quarto byte resta zero, e lo scrive la piastrella insieme
+        # agli altri tre -- un pixel intero per volta e' quello che la
+        # memoria dello schermo preferisce.
+        piastrelle[:, :, :, 0] = tinte[:, :, :, 2]
+        piastrelle[:, :, :, 1] = tinte[:, :, :, 1]
+        piastrelle[:, :, :, 2] = tinte[:, :, :, 0]
+        return piastrelle, indici.reshape(arr.shape[0], arr.shape[1])
+
+    def disegna_dentro(self, pezzi, vista):
+        """Il fotogramma scritto **dentro** la memoria dello schermo.
+
+        `pezzi` e' una lista di (immagine, (x, y)) in pixel veri; `vista` e'
+        la memoria dello schermo come matrice (altezza, larghezza, 4) in
+        ordine BGRX.
+
+        Qui non si compone niente da nessuna parte: per ogni riga logica si
+        prendono le piastrelle che le servono e si scrivono nelle `scala`
+        righe vere che le corrispondono. Una passata sola, e le righe si
+        scrivono per intero e in ordine -- che e' il modo in cui la memoria
+        di uno schermo vuole essere scritta.
+
+        Torna falso senza aver toccato niente se la strada non si puo'
+        fare: chi chiama compone e consegna come ha sempre fatto.
+        """
+        if _np is None or vista is None or self.scala < 1:
+            return False
+        lato = int(self.scala)
+        sh, sw = vista.shape[0], vista.shape[1]
+        if (sh, sw) != (self.schermo[1], self.schermo[0]):
+            return False
+        pronti = []
+        for immagine, (x, y) in pezzi:
+            if immagine.mode != "RGB":
+                immagine = immagine.convert("RGB")
+            fatto = self._piastrelle_bgrx(immagine)
+            if fatto is None:
+                return False
+            alta, larga = fatto[1].shape
+            if (x < 0 or y < 0 or x + larga * lato > sw
+                    or y + alta * lato > sh):
+                return False
+            pronti.append((fatto[0], fatto[1], x, y))
+        # Il fondo si ridipinge solo quando i pezzi cambiano posto o misura:
+        # intorno al disegno non si muove niente, e due megapixel e mezzo di
+        # nero riscritti trenta volte al secondo sono due megapixel e mezzo
+        # buttati.
+        posti = tuple((x, y, idx.shape) for _p, idx, x, y in pronti)
+        if self._posati != posti:
+            vista[:, :, :3] = _np.array(_colore_rgb(self.fondo),
+                                        dtype=_np.uint8)[::-1]
+            vista[:, :, 3] = 0
+            self._posati = posti
+        for piastrelle, indici, x, y in pronti:
+            alta, larga = indici.shape
+            for dy in range(lato):
+                righe = piastrelle[indici, dy]        # (alta, larga, lato, 4)
+                vista[y + dy::lato, x:x + larga * lato][:alta] = \
+                    righe.reshape(alta, larga * lato, 4)
+        return True
+
     def _grande(self, immagine, misura):
         """Una tela portata a una misura in pixel veri, filtro e luce inclusi."""
         largo, alto = misura
@@ -588,20 +701,58 @@ class Compositore:
         for nome, (immagine, riquadro) in pezzi.items():
             lx, ly, lw, lh = riquadro
             if immagine is not None:
-                tela_w = min(immagine.size[0], lw)
-                tela_h = min(immagine.size[1], lh)
-                misura = (max(1, int(round(tela_w * self.scala))),
-                          max(1, int(round(tela_h * self.scala))))
-                dentro = ((lw - tela_w) // 2, (lh - tela_h) // 2)
-                self._ultime_regioni[nome] = (
-                    self._grande(immagine.crop((0, 0, tela_w, tela_h)), misura),
-                    dentro)
+                self._ricorda(nome, immagine, lw, lh)
             pronta = self._ultime_regioni.get(nome)
             if pronta is None:
-                continue
+                # Niente copia ingrandita, ma c'e' quella logica: e' una
+                # regione disegnata dalla strada diretta, che non ingrandisce
+                # niente perche' ingrandisce scrivendo. La si ingrandisce qui.
+                logica = self._ultime_logiche.get(nome)
+                if logica is None:
+                    continue
+                tela, dentro = logica
+                misura = (max(1, int(round(tela.size[0] * self.scala))),
+                          max(1, int(round(tela.size[1] * self.scala))))
+                pronta = (self._grande(tela, misura), dentro)
+                self._ultime_regioni[nome] = pronta
             grande, dentro = pronta
             fuori.append((grande, self._in_pixel(lx + dentro[0], ly + dentro[1])))
         return self._sfondo_con(fuori)
+
+    def _ricorda(self, nome, immagine, lw, lh):
+        """Mette da parte la tela di una regione, tagliata e centrata.
+
+        La memoria serve a `frame()` che torna `None`: senza, la regione
+        ferma diventerebbe nera appena l'altra si muove. Si tiene la tela
+        **logica**, che e' quella che serve alla strada diretta; la copia
+        ingrandita la rifa' chi ne ha bisogno.
+        """
+        tela_w = min(immagine.size[0], lw)
+        tela_h = min(immagine.size[1], lh)
+        dentro = ((lw - tela_w) // 2, (lh - tela_h) // 2)
+        tela = immagine.crop((0, 0, tela_w, tela_h))
+        self._ultime_logiche[nome] = (tela, dentro)
+        self._ultime_regioni.pop(nome, None)
+        return tela, dentro
+
+    def regioni_dentro(self, pezzi, vista):
+        """Le regioni scritte dentro la memoria dello schermo.
+
+        Vedi `disegna_dentro`: niente immagine composta, niente copia, le
+        tele vanno al loro posto definitivo riga per riga.
+        """
+        pronti = []
+        for nome, (immagine, riquadro) in pezzi.items():
+            lx, ly, lw, lh = riquadro
+            if immagine is not None:
+                self._ricorda(nome, immagine, lw, lh)
+            logica = self._ultime_logiche.get(nome)
+            if logica is None:
+                continue
+            tela, dentro = logica
+            pronti.append((tela, self._in_pixel(lx + dentro[0],
+                                                ly + dentro[1])))
+        return self.disegna_dentro(pronti, vista)
 
     def _in_pixel(self, lx, ly):
         """Da coordinate logiche a pixel veri, con la tela centrata."""
@@ -1154,6 +1305,21 @@ class SuperficieFramebuffer:
         self._f.seek(0)
         self._f.write(dati)
 
+    def vista_bgrx(self):
+        """La memoria dello schermo come matrice (altezza, larghezza, 4).
+
+        Serve a chi sa scriverci dentro da solo -- vedi
+        `Compositore.disegna_dentro` -- e vale `None` quando la mappa non
+        c'e' o il framebuffer non e' a 32 bit.
+        """
+        if self._mappa is None or self._bit != 32:
+            return None
+        try:
+            return _np.frombuffer(self._mappa, dtype=_np.uint8).reshape(
+                self.height, self.width, 4)
+        except Exception:                         # pragma: no cover - difensivo
+            return None
+
     def _scrivi_mappato(self, immagine):
         """I pixel dentro la memoria dello schermo, senza copie di mezzo.
 
@@ -1235,6 +1401,20 @@ def standby_monitor(spento, percorso=SPEGNIMENTO):
         return True
     except OSError:
         return False
+
+
+def _colore_rgb(valore):
+    """Il colore del fondo come terna, da «#rrggbb» o da una terna gia' fatta."""
+    if isinstance(valore, (tuple, list)) and len(valore) >= 3:
+        return tuple(int(v) for v in valore[:3])
+    testo = str(valore or "#000000").strip().lstrip("#")
+    if len(testo) == 6:
+        try:
+            return (int(testo[0:2], 16), int(testo[2:4], 16),
+                    int(testo[4:6], 16))
+        except ValueError:
+            pass
+    return (0, 0, 0)
 
 
 def monitor_collegato(radice="/sys/class/drm"):
@@ -1402,13 +1582,30 @@ class DisplaySchermo:
             self.compositore.luminosita = value
         return value
 
+    def _vista(self):
+        """La memoria dello schermo, se questa superficie la sa dare."""
+        dammi = getattr(self._superficie, "vista_bgrx", None)
+        return dammi() if dammi is not None else None
+
     def show(self, image):
         with self._lock:
+            vista = self._vista()
+            if vista is not None:
+                largo = max(1, int(round(image.size[0] * self.compositore.scala)))
+                alto = max(1, int(round(image.size[1] * self.compositore.scala)))
+                sw, sh = self.compositore.schermo
+                dove = ((sw - largo) // 2, (sh - alto) // 2)
+                if self.compositore.disegna_dentro([(image, dove)], vista):
+                    return
             self._superficie.mostra(self.compositore.componi(image))
 
     def mostra_regioni(self, pezzi):
         """Le due regioni insieme: l'orologio, e sotto il contenuto."""
         with self._lock:
+            vista = self._vista()
+            if vista is not None and self.compositore.regioni_dentro(pezzi,
+                                                                     vista):
+                return
             self._superficie.mostra(self.compositore.componi_regioni(pezzi))
 
     def regioni(self, con_contenuto=False):

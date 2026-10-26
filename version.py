@@ -3749,6 +3749,28 @@ Storico:
        strada, dove non si cambia modo video. Prima la si prendeva per
        buona, e scrivere righe della lunghezza sbagliata non da' uno
        schermo piu' piccolo: ne da' uno storto.
+  17.4.18 **Il fotogramma scritto dentro lo schermo, invece che composto e
+       poi ricopiato.**
+       I numeri dell'Atom, a 2560x1080 con il **filtro acceso**: comporre
+       64,7 ms, consegnare 34. Dieci fotogrammi al secondo, e la 17.4.17 da
+       sola non bastava -- perche' il problema non era la consegna, erano
+       **due lavori che facevano lo stesso lavoro**. Comporre vuol dire
+       costruire un'immagine da undici megabyte; consegnare vuol dire
+       ricopiarla. Undici megabyte scritti due volte.
+       La via dei colori sapeva gia' che un pixel della tela diventa sempre
+       la stessa piastrella tinta del suo colore. Allora la piastrella si
+       scrive **direttamente dove deve stare**, riga per riga, dentro la
+       memoria dello schermo: niente immagine intermedia, niente copia,
+       niente `tobytes`. Una passata sola, e le righe si scrivono per intero
+       e in ordine, che e' come la memoria di uno schermo vuole essere
+       scritta.
+       Misurato in laboratorio sullo stesso fotogramma: **3,9 ms contro
+       21,1**. Il conto vero lo fara' l'Atom.
+       Gli stessi pixel di prima, e due prove lo verificano: la schermata
+       intera e le due regioni, con il filtro acceso e spento, confrontate
+       con quello che usciva da `componi`. Dove la strada non si puo' fare
+       -- una fotografia, troppi colori, niente numpy, SDL invece del
+       framebuffer -- si compone e si consegna come sempre.
 """
 
-__version__ = "17.4.17"
+__version__ = "17.4.18"
