@@ -92,6 +92,21 @@ DEFAULTS = {
         # La chiave nasce qui perche' la 17.1 la accende, e un file di
         # configurazione che non la ha non va migrato.
         "tela": "dmd",
+        # **Quante volte piu' fine del pannello disegnano le sorgenti.**
+        # A 1 la tela e' 256x64 e viene ingrandita: e' il DMD, ed e' li' che
+        # il filtro dei punti ha senso. Ad "auto" la tela e' grande quanto
+        # ci sta nello schermo, le lettere si disegnano alla loro misura
+        # vera e le curve sono curve -- chiesto cosi': «linee simili a
+        # vettoriali». In mezzo ci sono le vie di mezzo: piu' fini e piu'
+        # care, perche' ogni sorgente disegna su piu' pixel.
+        #
+        # I giochi, Doom e il Game Boy restano sulla tela del pannello in
+        # ogni caso: sono fatti di pixel grossi apposta, e il compositore li
+        # ingrandisce come ha sempre fatto.
+        #
+        # Di serie **1**, cioe' il pannello: chi aggiorna non si ritrova lo
+        # schermo cambiato sotto gli occhi senza averlo chiesto.
+        "finezza": 1,
         # La risoluzione dell'uscita su schermo. Vuoto = quella che c'e'
         # adesso, che e' la risposta giusta per un monitor attaccato a una
         # macchina sola: cambiarla da qui vorrebbe dire cambiare il modo

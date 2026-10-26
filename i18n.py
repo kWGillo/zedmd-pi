@@ -1984,6 +1984,25 @@ STRINGS = {
         "Off means a black frame, and a monitor showing black stays on. With "
         "this, the monitor gets the power-down signal and really goes to "
         "standby. The price is waking up: a second or two to resync."),
+    "video.finezza": ("Finezza della tela", "Canvas fineness"),
+    "video.finezza.dmd": ("1 - pannello (DMD)", "1 - panel (DMD)"),
+    "video.finezza.volte": ("%(volte)d volte piu\u2019 fine",
+                            "%(volte)d times finer"),
+    "video.finezza.piena": ("massima - risoluzione dello schermo",
+                            "maximum - screen resolution"),
+    "video.finezza.hint": (
+        "Quante volte piu\u2019 fine del pannello disegnano le sorgenti. A 1 la "
+        "tela e\u2019 256x64 e viene ingrandita: e\u2019 il DMD, ed e\u2019 li\u2019 che il "
+        "filtro dei punti ha senso. Al massimo le lettere si disegnano alla "
+        "loro misura vera e le curve sono curve, ma ogni sorgente disegna su "
+        "molti piu\u2019 pixel. Giochi, Doom e Game Boy restano sulla tela del "
+        "pannello in ogni caso.",
+        "How many times finer than the panel the sources draw. At 1 the "
+        "canvas is 256x64 and gets magnified: that is the DMD, and that is "
+        "where the dot filter makes sense. At maximum, letters are drawn at "
+        "their true size and curves are curves, but every source draws on "
+        "many more pixels. Games, Doom and Game Boy stay on the panel canvas "
+        "in any case."),
     "video.testo": ("Testo", "Text"),
     "video.testo.auto": ("netto dove serve", "sharp where it helps"),
     "video.testo.si": ("sempre netto", "always sharp"),

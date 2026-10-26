@@ -125,6 +125,16 @@
       {{ t('video.filtro.acceso') }}
     </label>
 
+    <label for="finezza">{{ t('video.finezza') }}
+      <select id="finezza" name="finezza">
+        {% for valore, etichetta in finezze %}
+        <option value="{{ valore }}"
+                {{ 'selected' if (cfg.video.finezza|string) == valore }}>{{ etichetta }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <p class="hint">{{ t('video.finezza.hint') }}</p>
+
     <label for="testo_netto">{{ t('video.testo') }}
       <select id="testo_netto" name="testo_netto">
         {% for valore in ('auto', 'si', 'no') %}

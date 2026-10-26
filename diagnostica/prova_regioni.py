@@ -588,6 +588,99 @@ esigi(c.scala == min(1920 // 256, 800 // 64),
       "1920x800: la scala resta la massima, perche' scendere costerebbe un"
       " quinto della larghezza (scala %d)" % c.scala)
 
+sep("14. La finezza della tela: linee vere invece di mattoni (17.4.20)")
+
+# *«Con la risoluzione del monitor non si potrebbero ottenere delle linee
+# simili a vettoriali?»* Si', e meta' del lavoro era gia' fatta: dalla 17.2
+# le sorgenti si ridimensionano, quindi sanno gia' disegnare a qualunque
+# misura. Nessuno aveva mai chiesto loro la misura vera del monitor.
+#
+# La finezza e' quella domanda, e la cosa su cui questa prova insiste e' che
+# **a uno non cambia niente**: chi aggiorna non si ritrova lo schermo
+# cambiato sotto gli occhi senza averlo chiesto.
+
+
+class Vetro:
+    def __init__(self, largo, alto):
+        self.width, self.height = largo, alto
+
+    def mostra(self, immagine):
+        pass
+
+
+def uscita_con(finezza, schermo=(2560, 1080), filtro=False):
+    conf = dmdconf.load()
+    conf["video"]["uscita"] = "schermo"
+    conf["video"]["filtro_dmd"] = filtro
+    conf["video"]["finezza"] = finezza
+    return display.DisplaySchermo(conf, superficie=Vetro(*schermo))
+
+
+uno = uscita_con(1)
+esigi((uno.width, uno.height) == (256, 64) and uno.compositore.scala == 9,
+      "finezza 1: la tela e' quella del pannello e la scala e' quella della"
+      " 17.4.13 (%dx%d, x%d)"
+      % (uno.width, uno.height, uno.compositore.scala))
+r1 = uno.regioni(True)
+esigi((r1["orologio"][3], r1["contenuto"][3]) == (48, 64),
+      "finezza 1: le regioni sono quelle di sempre (%d e %d)"
+      % (r1["orologio"][3], r1["contenuto"][3]))
+esigi(uno.tela_piena == (256, 120),
+      "finezza 1: e i giochi hanno la tela piena di sempre %s"
+      % (uno.tela_piena,))
+
+for quante in (2, 3, 5):
+    u = uscita_con(quante)
+    r = u.regioni(True)
+    esigi((u.width, u.height) == (256 * quante, 64 * quante),
+          "finezza %d: la tela e' %dx%d" % (quante, u.width, u.height))
+    esigi(r["contenuto"][3] == 64 * quante,
+          "finezza %d: la regione del contenuto resta una tela intera (%d)"
+          % (quante, r["contenuto"][3]))
+    # Non la stessa proporzione al pixel -- la scala e' intera, quindi
+    # raddoppiando la finezza non si dimezza esattamente -- ma lo stesso
+    # patto: all'orologio almeno mezza tela, e insieme coprono tutto.
+    esigi(r["orologio"][3] >= display.minimo_orologio(u.height),
+          "finezza %d: all'orologio almeno mezza tela (%d righe su %d)"
+          % (quante, r["orologio"][3], u.height))
+    esigi(r["orologio"][3] + r["contenuto"][3]
+          + 2 * u.compositore.margine == u.compositore.tela_logica[1],
+          "finezza %d: e le due regioni coprono la tela logica" % quante)
+    esigi(u.tela_piena[0] == 256,
+          "finezza %d: i giochi restano in unita' di pannello %s"
+          % (quante, u.tela_piena))
+
+piena = uscita_con("auto")
+esigi(piena.compositore.scala == 1,
+      "finezza massima: un pixel della tela e' un pixel vero (scala %d)"
+      % piena.compositore.scala)
+esigi(piena.width == 2560,
+      "e la tela si prende tutta la larghezza dello schermo (%d)"
+      % piena.width)
+esigi(piena.tela_piena[0] == 256 and piena.tela_piena[1] >= 64,
+      "mentre i giochi continuano a disegnare su 256 colonne %s"
+      % (piena.tela_piena,))
+
+# Il pezzo piccolo dentro la tela grande: si ingrandisce di un intero, non
+# si stira e non resta un francobollo in mezzo allo schermo.
+comp = piena.compositore
+gioco = Image.new("RGB", (256, 108), (10, 10, 10))
+volte = comp._quante_volte(gioco, comp.tela_logica)
+esigi(volte == 10,
+      "un gioco da 256 colonne ci sta dieci volte nella tela fine (%d)"
+      % volte)
+fuori = comp.componi(gioco)
+esigi(fuori.size == comp.schermo,
+      "e composto riempie lo schermo (%s)" % (fuori.size,))
+
+# E su uno schermo piccolo la finezza chiesta troppo grande si accorcia da
+# sola invece di dare una tela che non ci sta.
+esigi(display.finezza_scelta(99, (256, 64), (1024, 768)) == 4,
+      "su 1024x768 la finezza non va oltre quattro (%d)"
+      % display.finezza_scelta(99, (256, 64), (1024, 768)))
+esigi(display.finezza_scelta("auto", (256, 64), (256, 64)) == 1,
+      "e sul pannello la finezza e' uno e non puo' essere altro")
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

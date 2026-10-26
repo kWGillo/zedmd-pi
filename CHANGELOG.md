@@ -2,6 +2,48 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.20]
+
+### La finezza della tela: linee vere invece di mattoni
+
+*«Con la risoluzione del monitor non si potrebbero ottenere delle linee simili
+a vettoriali?»*
+
+Sì — e metà del lavoro era già fatta senza che lo sapessi. Dalla 17.2 le
+sorgenti si ridimensionano: sanno già disegnare a qualunque misura. Quella
+immagine a risoluzione piena non è nata scrivendo codice nuovo, è nata
+costruendo l'orologio con «la tua tela è 2560×432» invece di 256×48. Nessuno
+gli aveva mai chiesto la misura vera del monitor, perché la tela era 256×64 per
+definizione e tutto il resto era ingrandimento.
+
+La **finezza** è quella domanda, ed è un numero: quante volte più fine del
+pannello disegnano le sorgenti.
+
+| finezza | tela su 2560×1080 | cosa si vede |
+|---|---|---|
+| 1 (di serie) | 256×64 ingrandita ×9 | il DMD di sempre, ed è lì che il filtro dei punti ha senso |
+| 3 | 768×192 ingrandita ×3 | i gradini si fanno tre volte più piccoli |
+| massima (10) | 2560×640, scala 1 | lettere alla loro misura vera, curve che sono curve |
+
+**I giochi, Doom e il Game Boy restano sulla tela del pannello** in ogni caso:
+sono fatti di pixel grossi apposta, e a nove volte i pixel non starebbero nei
+trenta fotogrammi al secondo appena conquistati. Li ingrandisce il compositore,
+come ha sempre fatto — ed è il cambiamento vero sotto il cofano: il compositore
+adesso ingrandisce **ogni pezzo per conto suo**, invece di moltiplicare tutto
+per un'unica scala. Sulla stessa uscita convivono una schermata disegnata a
+risoluzione piena, che non va ingrandita affatto, e un gioco da 256 colonne che
+va ingrandito dieci volte.
+
+Di serie la finezza è **1**: chi aggiorna non si ritrova lo schermo cambiato
+sotto gli occhi senza averlo chiesto. Si sceglie nella pagina Video, e l'elenco
+offre solo le finezze che quello schermo regge davvero — su un 1024×768 si
+ferma a quattro, sul pannello LED non esiste.
+
+Il prezzo, detto prima: ogni sorgente disegna su molti più pixel. Per
+l'orologio, che si ridisegna una volta al secondo, non conta; per quello che si
+muove conta eccome, ed è il motivo per cui la finezza è un cursore e non un
+interruttore.
+
 ## [17.4.19]
 
 ### Il testo netto, dove il pixel logico è grosso

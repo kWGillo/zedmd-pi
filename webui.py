@@ -2566,6 +2566,27 @@ def create_app(runtime):
             subprocess.Popen(["systemctl", "restart", "dmd"])
         return redirect(url_for("page_settings"))
 
+    def _finezze(cfg, compositore):
+        """L'elenco per la casella della finezza: (valore, etichetta).
+
+        Si costruisce sullo schermo vero: su un 2560x1080 la tela del
+        pannello ci sta dieci volte, su un 1024x768 quattro. Offrire finezze
+        che non ci stanno sarebbe offrire una scelta finta.
+        """
+        pannello = uscita_video.tela_dmd(cfg)
+        schermo = compositore.schermo if compositore else pannello
+        massima = uscita_video.finezza_scelta("auto", pannello, schermo)
+        lingua = current_language()
+        voci = [("1", i18n.translate("video.finezza.dmd", lingua))]
+        for quante in range(2, massima):
+            voci.append((str(quante),
+                         i18n.translate("video.finezza.volte", lingua,
+                                        volte=quante)))
+        if massima > 1:
+            voci.append((str(massima),
+                         i18n.translate("video.finezza.piena", lingua)))
+        return voci
+
     @app.route("/video")
     def page_video():
         """Dove finisce il disegno: il pannello LED, o un monitor.
@@ -2587,6 +2608,9 @@ def create_app(runtime):
             # chiaro: la casella si riempie da sola invece di chiedere a chi
             # guarda di sapere a memoria che cosa regge il suo schermo.
             risoluzioni=uscita_video.risoluzioni_disponibili(),
+            # Le finezze che questo schermo regge davvero: dalla tela del
+            # pannello fino a quella che ci sta tutta intera.
+            finezze=_finezze(cfg, schermo),
             motivo=getattr(runtime.display, "motivo", ""),
             tela_largo=runtime.display.width, tela_alto=runtime.display.height,
             schermo_largo=schermo.schermo[0] if schermo else 0,
@@ -2641,6 +2665,10 @@ def create_app(runtime):
             netto = (request.form.get("testo_netto") or "auto").strip().lower()
             conf["testo_netto"] = (netto if netto in ("auto", "si", "no")
                                    else "auto")
+            try:
+                conf["finezza"] = max(1, int(request.form.get("finezza") or 1))
+            except (TypeError, ValueError):
+                conf["finezza"] = 1
             # Lo standby viaggia con il filtro perche' e' della stessa
             # natura: vale subito, non vuole un riavvio del servizio.
             conf["standby"] = request.form.get("standby") == "on"

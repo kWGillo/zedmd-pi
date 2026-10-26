@@ -323,10 +323,16 @@ class Runtime:
         self.aggiorna_testo()
         self.arbiter = Arbiter(self.cfg)
 
+        # ZeDMD dichiara la **sua** misura al flipper che gli manda i
+        # fotogrammi, e quella misura e' il pannello: con una tela fine
+        # (17.4.20) direbbe 2560x640 e si aspetterebbe fotogrammi cosi'.
+        # Quelli che arrivano sono 256x64, e li ingrandisce il compositore.
+        tela_pannello = getattr(self.display, "tela_dmd",
+                                (self.display.width, self.display.height))
         self.zedmd = ZeDMDSource(
             self.cfg,
-            self.display.width,
-            self.display.height,
+            tela_pannello[0],
+            tela_pannello[1],
             on_brightness=self.set_brightness,
         )
         self.media = MediaPlayerSource(self.cfg, self.display.width, self.display.height)

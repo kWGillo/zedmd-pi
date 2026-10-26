@@ -100,6 +100,22 @@ VIA_DEI_COLORI = True
 # vale non dividere affatto.
 MINIMO_OROLOGIO = 32
 
+
+def minimo_orologio(alta_tela):
+    """Le righe che l'orologio vuole almeno, su una tela alta `alta_tela`.
+
+    Meta' della tela di una sorgente: a 64 righe fa 32, il numero di sempre,
+    e con la finezza della 17.4.20 -- dove la tela e' la stessa cosa ma piu'
+    fine -- la proporzione resta quella invece di diventare un pelo.
+    """
+    return max(1, int(alta_tela) // 2)
+
+
+def orologio_comodo(alta_tela):
+    """Le righe sotto le quali i testi piccoli non si formano. Vedi
+    `OROLOGIO_COMODO`: tre quarti della tela, cioe' 48 righe su 64."""
+    return max(1, int(alta_tela) * 3 // 4)
+
 # Le righe logiche sotto le quali la regione dell'orologio si legge male: non
 # le cifre, che sono grandi, ma **i testi piccoli** -- la data e la banda dei
 # fusi orari. E' la 17.4.13, e viene da una foto di un 2560x1080: a 36 righe
@@ -125,7 +141,8 @@ def spartizione(lh, alta_tela, margine):
     ogni scala possibile senza averla ancora scelta.
     """
     meta = lh // 2
-    alta_contenuto = max(meta, min(alta_tela, lh - MINIMO_OROLOGIO))
+    alta_contenuto = max(meta, min(alta_tela,
+                                   lh - minimo_orologio(alta_tela)))
     taglio = lh - alta_contenuto
     return max(1, taglio - 2 * margine), lh - taglio
 
@@ -148,8 +165,13 @@ class Compositore:
     davvero: un LED dietro un diffusore, non un quadrato.
     """
 
-    def __init__(self, tela, schermo, conf=None):
+    def __init__(self, tela, schermo, conf=None, tela_dmd=None):
         self.tela = tuple(tela)
+        # La tela del **pannello**, che e' una cosa diversa dalla tela su cui
+        # disegnano le sorgenti quando la finezza e' maggiore di uno: i
+        # giochi, Doom e il Game Boy restano su quella, e il compositore li
+        # ingrandisce. Senza finezza le due coincidono, come e' sempre stato.
+        self.tela_dmd = tuple(tela_dmd or tela)
         self.schermo = tuple(schermo)
         conf = conf or {}
         self.filtro = bool(conf.get("filtro_dmd", True))
@@ -248,10 +270,21 @@ class Compositore:
         # orizzontale la tela logica e' larga esattamente quanto il pannello,
         # e togliere colonne vorrebbe dire che i conti dell'orologio non
         # tornano piu' identici a quelli di sempre.
-        self.margine = 4 if self.tela_logica[1] > th else 0
+        self.margine = self.margine_per(self.tela_logica[1])
         x = (sw - largo) // 2
         y = (sh - alto) // 2
         return scala, (x, y, largo, alto)
+
+    def margine_per(self, righe_logiche):
+        """Il bordo nero sopra e sotto, in unita' della tela.
+
+        Quattro righe su una tela da pannello; con una tela piu' fine, le
+        stesse quattro righe di pannello -- se no su 576 righe un bordo da
+        quattro pixel non lo vedrebbe nessuno.
+        """
+        if righe_logiche <= self.tela[1]:
+            return 0
+        return max(1, 4 * self.tela[1] // max(1, self.tela_dmd[1]))
 
     def _scala_comoda(self, scala):
         """La scala piu' grande che lascia all'orologio una regione leggibile.
@@ -287,10 +320,10 @@ class Compositore:
         minima = max(1, -(-int(sw * LARGHEZZA_TENUTA) // tw))
         for prova in range(scala, minima - 1, -1):
             lh = sh // prova
-            if lh < th + MINIMO_OROLOGIO:
+            if lh < th + minimo_orologio(th):
                 continue              # a questa scala le regioni non ci sono
-            alte, _basse = spartizione(lh, th, 4 if lh > th else 0)
-            if alte >= OROLOGIO_COMODO:
+            alte, _basse = spartizione(lh, th, self.margine_per(lh))
+            if alte >= orologio_comodo(th):
                 return prova
         return scala
 
@@ -342,7 +375,8 @@ class Compositore:
         proprio dove servivano. La domanda giusta e' piu' modesta: ci sta
         una sorgente con la sua tela, **piu'** un orologio che si legga?
         """
-        return self.tela_logica[1] >= self.tela[1] + MINIMO_OROLOGIO
+        return (self.tela_logica[1]
+                >= self.tela[1] + minimo_orologio(self.tela[1]))
 
     def ridimensiona(self, schermo):
         """Lo schermo e' cambiato misura: si rifanno i conti e la maschera."""
@@ -394,7 +428,7 @@ class Compositore:
                     px[x, y] = int(round(255 * quota * quota))
         return cella
 
-    def maschera(self, misura=None):
+    def maschera(self, misura=None, lato=None):
         """La maschera di un riquadro, luminosita' inclusa, in cache.
 
         La luminosita' entra **qui** e non in un secondo passaggio: con il
@@ -407,12 +441,14 @@ class Compositore:
         quando arriva o se ne va una sorgente.
         """
         largo, alto = misura or self.banda
-        chiave = (self.scala, self.punto, self.bagliore, largo, alto,
+        if lato is None:
+            lato = int(self.scala) if self.scala >= 1 else 0
+        lato = int(lato)
+        chiave = (lato, self.punto, self.bagliore, largo, alto,
                   self.luminosita)
         in_cache = self._maschere.get(chiave)
         if in_cache is not None:
             return in_cache
-        lato = int(self.scala) if self.scala >= 1 else 0
         if lato <= 2:
             piena = Image.new("L", (largo, alto), 255)
         else:
@@ -466,7 +502,7 @@ class Compositore:
         self._celle[chiave] = matrice
         return matrice
 
-    def _a_colori(self, immagine, misura):
+    def _a_colori(self, immagine, misura, lato=None):
         """Il filtro DMD fatto **per colore** invece che per pixel.
 
         L'idea e' sua: *\u00ababbassa il numero di colori\u00bb*. Il filtro moltiplica
@@ -488,10 +524,11 @@ class Compositore:
         numpy, scala non intera, o troppi colori (una fotografia, un
         fotogramma di video): allora si moltiplica come si e' sempre fatto.
         """
-        if (_np is None or not VIA_DEI_COLORI or not self.a_colori
-                or self.scala < 1):
+        if _np is None or not VIA_DEI_COLORI or not self.a_colori:
             return None
-        lato = int(self.scala)
+        if lato is None:
+            lato = int(self.scala) if self.scala >= 1 else 0
+        lato = int(lato)
         if lato <= 2:
             # Sotto i tre pixel per cella la maschera e' tutta bianca: non
             # c'e' niente da moltiplicare e la via dei colori sarebbe solo
@@ -526,7 +563,7 @@ class Compositore:
         fuori = fuori.transpose(0, 2, 1, 3, 4).reshape(alto, largo, 3)
         return Image.fromarray(fuori)
 
-    def _piastrelle_bgrx(self, immagine):
+    def _piastrelle_bgrx(self, immagine, lato=None):
         """Le piastrelle di questa tela, gia' in ordine BGRX, e i loro indici.
 
         E' la via dei colori della 17.4.15 portata fino in fondo: invece di
@@ -543,10 +580,13 @@ class Compositore:
         Torna `None` quando la strada non si puo' fare, e allora vale quella
         di sempre.
         """
-        if (_np is None or not VIA_DEI_COLORI or not self.a_colori
-                or self.scala < 1):
+        if _np is None or not VIA_DEI_COLORI or not self.a_colori:
             return None
-        lato = int(self.scala)
+        if lato is None:
+            lato = int(self.scala) if self.scala >= 1 else 0
+        lato = int(lato)
+        if lato < 1:
+            return None
         if immagine.getcolors(SOGLIA_COLORI) is None:
             return None
         arr = _np.asarray(immagine)
@@ -598,33 +638,36 @@ class Compositore:
         """
         if _np is None or vista is None or self.scala < 1:
             return False
-        lato = int(self.scala)
         sh, sw = vista.shape[0], vista.shape[1]
         if (sh, sw) != (self.schermo[1], self.schermo[0]):
             return False
         pronti = []
-        for immagine, (x, y) in pezzi:
+        for immagine, (x, y), lato in pezzi:
             if immagine.mode != "RGB":
                 immagine = immagine.convert("RGB")
-            fatto = self._piastrelle_bgrx(immagine)
+            lato = int(lato)
+            if lato < 1:
+                return False
+            fatto = self._piastrelle_bgrx(immagine, lato)
             if fatto is None:
                 return False
             alta, larga = fatto[1].shape
             if (x < 0 or y < 0 or x + larga * lato > sw
                     or y + alta * lato > sh):
                 return False
-            pronti.append((fatto[0], fatto[1], x, y))
+            pronti.append((fatto[0], fatto[1], x, y, lato))
         # Il fondo si ridipinge solo quando i pezzi cambiano posto o misura:
         # intorno al disegno non si muove niente, e due megapixel e mezzo di
         # nero riscritti trenta volte al secondo sono due megapixel e mezzo
         # buttati.
-        posti = tuple((x, y, idx.shape) for _p, idx, x, y in pronti)
+        posti = tuple((x, y, idx.shape, lato)
+                      for _p, idx, x, y, lato in pronti)
         if self._posati != posti:
             vista[:, :, :3] = _np.array(_colore_rgb(self.fondo),
                                         dtype=_np.uint8)[::-1]
             vista[:, :, 3] = 0
             self._posati = posti
-        for piastrelle, indici, x, y in pronti:
+        for piastrelle, indici, x, y, lato in pronti:
             alta, larga = indici.shape
             for dy in range(lato):
                 righe = piastrelle[indici, dy]        # (alta, larga, lato, 4)
@@ -632,26 +675,59 @@ class Compositore:
                     righe.reshape(alta, larga * lato, 4)
         return True
 
+    def _lato_di(self, immagine, misura):
+        """Quanti pixel veri occupa un pixel di questa tela.
+
+        Si ricava dal rapporto fra la misura chiesta e la tela, non da
+        `scala`: dalla 17.4.20 sulla stessa uscita convivono pezzi
+        ingranditi nove volte e pezzi non ingranditi affatto.
+        """
+        if immagine.size[0] <= 0 or misura[0] % immagine.size[0]:
+            return 0
+        lato = misura[0] // immagine.size[0]
+        if immagine.size[1] * lato != misura[1]:
+            return 0
+        return lato
+
     def _grande(self, immagine, misura):
         """Una tela portata a una misura in pixel veri, filtro e luce inclusi."""
         largo, alto = misura
         if immagine.mode != "RGB":
             immagine = immagine.convert("RGB")
+        lato = self._lato_di(immagine, misura)
         if self.filtro:
-            svelto = self._a_colori(immagine, misura)
+            svelto = self._a_colori(immagine, misura, lato)
             if svelto is not None:
                 return svelto
-        filtro = Image.NEAREST if self.scala >= 1 else Image.BILINEAR
+        filtro = Image.NEAREST if lato >= 1 else Image.BILINEAR
         grande = immagine.resize((largo, alto), filtro)
         if self.filtro:
             # Sul LED la luminosita' e' un registro della matrice. Su un
             # monitor non esiste niente del genere: senza questo, lo slider
             # della pagina e la modalita' notte **fingerebbero** di
             # funzionare. Qui viaggia dentro la maschera.
-            grande = ImageChops.multiply(grande, self.maschera(misura))
+            grande = ImageChops.multiply(grande,
+                                         self.maschera(misura, lato))
         elif self.luminosita < 100:
             grande = grande.point(self.tavola())
         return grande
+
+    def _quante_volte(self, immagine, dentro):
+        """Quante volte ci sta questo pezzo nello spazio che gli tocca.
+
+        In unita' **logiche**: un pezzo grande quanto la sua destinazione sta
+        una volta sola, uno da 256 colonne dentro una tela fine da 2304 ci
+        sta nove. Poi `scala` porta il tutto ai pixel veri.
+
+        E' il perno della finezza (17.4.20): sulla stessa tela convivono
+        schermate disegnate a risoluzione piena -- che non vanno ingrandite
+        affatto -- e giochi disegnati sulla tela del pannello, che vanno
+        ingranditi finche' ci stanno. Prima la domanda non si poneva perche'
+        la risposta era sempre `scala`.
+        """
+        largo, alto = dentro
+        return max(1, min(largo // max(1, immagine.size[0]),
+                          alto // max(1, immagine.size[1])))
 
     def componi(self, immagine):
         """Una tela sola, centrata e ingrandita del moltiplicatore.
@@ -675,8 +751,9 @@ class Compositore:
             immagine = immagine.resize((min(immagine.size[0], lw),
                                         min(immagine.size[1], lh)),
                                        Image.NEAREST)
-        largo = max(1, int(round(immagine.size[0] * self.scala)))
-        alto = max(1, int(round(immagine.size[1] * self.scala)))
+        volte = self._quante_volte(immagine, (lw, lh))
+        largo = max(1, int(round(immagine.size[0] * volte * self.scala)))
+        alto = max(1, int(round(immagine.size[1] * volte * self.scala)))
         grande = self._grande(immagine, (largo, alto))
         if (largo, alto) == self.schermo:
             return grande
@@ -693,47 +770,53 @@ class Compositore:
         fotogramma che quella regione aveva. Senza questa memoria, la meta'
         ferma diventerebbe nera appena l'altra si muove.
 
-        Una tela piu' piccola della sua regione **non si stira**: si centra.
-        E' il caso delle sorgenti, che disegnano su 256x64 perche' quelle
-        misure sono le loro, dentro una regione alta 96 righe logiche.
+        Una tela piu' piccola della sua regione **non si stira**: si
+        ingrandisce di un numero intero di volte finche' ci sta, e quello che
+        avanza si centra. Con la finezza a uno il numero e' sempre uno e la
+        tela si centra e basta, come ha sempre fatto; con una tela fine,
+        invece, l'orologio ci sta esatto e un gioco da 256 colonne ci sta
+        nove volte.
         """
         fuori = []
         for nome, (immagine, riquadro) in pezzi.items():
             lx, ly, lw, lh = riquadro
             if immagine is not None:
                 self._ricorda(nome, immagine, lw, lh)
+            tenuta = self._ultime_logiche.get(nome)
+            if tenuta is None:
+                continue
+            misura, dentro, _volte = self._misura_regione(tenuta, lw, lh)
             pronta = self._ultime_regioni.get(nome)
-            if pronta is None:
-                # Niente copia ingrandita, ma c'e' quella logica: e' una
-                # regione disegnata dalla strada diretta, che non ingrandisce
-                # niente perche' ingrandisce scrivendo. La si ingrandisce qui.
-                logica = self._ultime_logiche.get(nome)
-                if logica is None:
-                    continue
-                tela, dentro = logica
-                misura = (max(1, int(round(tela.size[0] * self.scala))),
-                          max(1, int(round(tela.size[1] * self.scala))))
-                pronta = (self._grande(tela, misura), dentro)
+            if pronta is None or pronta[0].size != misura:
+                pronta = (self._grande(tenuta, misura), dentro)
                 self._ultime_regioni[nome] = pronta
             grande, dentro = pronta
-            fuori.append((grande, self._in_pixel(lx + dentro[0], ly + dentro[1])))
+            fuori.append((grande, self._in_pixel(lx + dentro[0],
+                                                 ly + dentro[1])))
         return self._sfondo_con(fuori)
 
+    def _misura_regione(self, tela, lw, lh):
+        """Quanto grande esce questa tela dentro la sua regione, e di quanto."""
+        volte = self._quante_volte(tela, (lw, lh))
+        misura = (max(1, int(round(tela.size[0] * volte * self.scala))),
+                  max(1, int(round(tela.size[1] * volte * self.scala))))
+        dentro = ((lw - tela.size[0] * volte) // 2,
+                  (lh - tela.size[1] * volte) // 2)
+        return misura, dentro, volte
+
     def _ricorda(self, nome, immagine, lw, lh):
-        """Mette da parte la tela di una regione, tagliata e centrata.
+        """Mette da parte la tela di una regione, tagliata a quanto ci sta.
 
         La memoria serve a `frame()` che torna `None`: senza, la regione
         ferma diventerebbe nera appena l'altra si muove. Si tiene la tela
-        **logica**, che e' quella che serve alla strada diretta; la copia
-        ingrandita la rifa' chi ne ha bisogno.
+        **com'e'**, non ingrandita: quanto ingrandirla lo decide chi
+        disegna, e dipende dalla regione.
         """
-        tela_w = min(immagine.size[0], lw)
-        tela_h = min(immagine.size[1], lh)
-        dentro = ((lw - tela_w) // 2, (lh - tela_h) // 2)
-        tela = immagine.crop((0, 0, tela_w, tela_h))
-        self._ultime_logiche[nome] = (tela, dentro)
+        tela = immagine.crop((0, 0, min(immagine.size[0], lw),
+                              min(immagine.size[1], lh)))
+        self._ultime_logiche[nome] = tela
         self._ultime_regioni.pop(nome, None)
-        return tela, dentro
+        return tela
 
     def regioni_dentro(self, pezzi, vista):
         """Le regioni scritte dentro la memoria dello schermo.
@@ -746,12 +829,13 @@ class Compositore:
             lx, ly, lw, lh = riquadro
             if immagine is not None:
                 self._ricorda(nome, immagine, lw, lh)
-            logica = self._ultime_logiche.get(nome)
-            if logica is None:
+            tenuta = self._ultime_logiche.get(nome)
+            if tenuta is None:
                 continue
-            tela, dentro = logica
-            pronti.append((tela, self._in_pixel(lx + dentro[0],
-                                                ly + dentro[1])))
+            _misura, dentro, volte = self._misura_regione(tenuta, lw, lh)
+            pronti.append((tenuta, self._in_pixel(lx + dentro[0],
+                                                  ly + dentro[1]),
+                           volte * int(self.scala)))
         return self.disegna_dentro(pronti, vista)
 
     def _in_pixel(self, lx, ly):
@@ -1474,6 +1558,39 @@ def vuole_testo_netto(cfg, compositore=None):
     return bool(compositore.scala >= 3 and not compositore.filtro)
 
 
+def finezza_scelta(valore, tela, schermo):
+    """Quante volte piu' fine del pannello disegnano le sorgenti.
+
+    *«Con la risoluzione del monitor non si potrebbero ottenere delle linee
+    simili a vettoriali?»* Si', e il bello e' che meta' del lavoro era gia'
+    fatto: dalla 17.2 le sorgenti si ridimensionano, quindi sanno gia'
+    disegnare a qualunque misura. Nessuno aveva mai chiesto loro la misura
+    vera del monitor.
+
+    La finezza e' quella domanda. A **1** la tela e' quella del pannello,
+    256x64, e viene ingrandita: e' il DMD di sempre, ed e' li' che il filtro
+    dei punti ha senso. Al **massimo** la tela e' grande quanto ci sta nello
+    schermo, le lettere si disegnano alla loro misura vera e le curve sono
+    curve. In mezzo ci sono le vie di mezzo: piu' fini, piu' care.
+
+    I giochi, Doom e il Game Boy restano sulla tela del pannello comunque --
+    sono fatti di pixel grossi apposta, e a nove volte i pixel non
+    starebbero nei trenta fotogrammi al secondo. Li ingrandisce il
+    compositore, come ha sempre fatto.
+    """
+    tw, th = tela
+    sw, sh = schermo
+    massima = max(1, min(sw // max(1, tw), sh // max(1, th)))
+    testo = str(valore or "auto").strip().lower()
+    if testo in ("auto", "max", "massima", "piena", ""):
+        return massima
+    try:
+        quante = int(float(testo))
+    except (TypeError, ValueError):
+        return massima
+    return max(1, min(massima, quante))
+
+
 def _colore_rgb(valore):
     """Il colore del fondo come terna, da «#rrggbb» o da una terna gia' fatta."""
     if isinstance(valore, (tuple, list)) and len(valore) >= 3:
@@ -1604,18 +1721,25 @@ class DisplaySchermo:
             misura, finestra, conf.get("console") or "zitta")
         self.motivo = getattr(self._superficie, "nota", "") or ""
         schermo = (self._superficie.width, self._superficie.height)
+        pannello = tela_dmd(cfg)
         if (conf.get("tela") or "dmd") == "schermo":
             tela = schermo
         else:
-            tela = tela_dmd(cfg)
+            # La finezza: la tela del pannello moltiplicata, cioe' la stessa
+            # geometria disegnata piu' fine. Vedi `finezza_scelta`.
+            self.finezza = finezza_scelta(conf.get("finezza"), pannello,
+                                          schermo)
+            tela = (pannello[0] * self.finezza, pannello[1] * self.finezza)
+        self.tela_dmd = pannello
         self.width, self.height = tela
-        self.compositore = Compositore(tela, schermo, conf)
+        self.compositore = Compositore(tela, schermo, conf, tela_dmd=pannello)
         self.compositore.luminosita = int(cfg.get("display", {}).get(
             "brightness", 100) or 100)
         self._lock = threading.Lock()
-        print("[display] schermo %dx%d, tela %dx%d, scala %s, filtro %s"
+        print("[display] schermo %dx%d, tela %dx%d (finezza %s), scala %s, "
+              "filtro %s"
               % (schermo[0], schermo[1], tela[0], tela[1],
-                 self.compositore.scala,
+                 getattr(self, "finezza", 1), self.compositore.scala,
                  "acceso" if self.compositore.filtro else "spento"))
 
     @property
@@ -1629,7 +1753,16 @@ class DisplaySchermo:
         """
         if ((self.cfg.get("video") or {}).get("modo") or "auto") == "singola":
             return (self.width, self.height)
-        return self.compositore.tela_logica
+        comp = self.compositore
+        if comp.tela_dmd == comp.tela:
+            return comp.tela_logica
+        # Con una tela fine la tela logica e' in unita' fini: un gioco
+        # continua a disegnare in unita' di **pannello**, e il compositore
+        # lo ingrandisce. Qui si risponde in quelle unita'.
+        volte = max(1, comp.tela[0] // max(1, comp.tela_dmd[0]))
+        lato = max(1, int(volte * comp.scala))
+        return (comp.tela_dmd[0], max(comp.tela_dmd[1],
+                                      comp.schermo[1] // lato))
 
     @property
     def tele(self):
@@ -1662,11 +1795,14 @@ class DisplaySchermo:
         with self._lock:
             vista = self._vista()
             if vista is not None:
-                largo = max(1, int(round(image.size[0] * self.compositore.scala)))
-                alto = max(1, int(round(image.size[1] * self.compositore.scala)))
-                sw, sh = self.compositore.schermo
+                comp = self.compositore
+                volte = comp._quante_volte(image, comp.tela_logica)
+                lato = max(1, int(volte * comp.scala))
+                largo = max(1, image.size[0] * lato)
+                alto = max(1, image.size[1] * lato)
+                sw, sh = comp.schermo
                 dove = ((sw - largo) // 2, (sh - alto) // 2)
-                if self.compositore.disegna_dentro([(image, dove)], vista):
+                if comp.disegna_dentro([(image, dove, lato)], vista):
                     return
             self._superficie.mostra(self.compositore.componi(image))
 
@@ -1820,6 +1956,9 @@ class DisplayLed:
         # prodotto colonne per catena non e' piu' quello che si vede.
         self.width = self.matrix.width
         self.height = self.matrix.height
+        # Sul pannello la tela e' il pannello: la finezza e' una cosa dello
+        # schermo, qui i pixel sono LED e sono quelli che sono.
+        self.tela_dmd = (self.width, self.height)
         self._lock = threading.Lock()
 
     def set_brightness(self, value):
@@ -1863,6 +2002,7 @@ class DisplayAssente:
     def __init__(self, cfg, motivo=""):
         self.motivo = motivo or "uscita video non disponibile"
         self.width, self.height = tela_dmd(cfg)
+        self.tela_dmd = (self.width, self.height)
         self.brightness = int((cfg.get("display") or {}).get("brightness", 50))
 
     def set_brightness(self, value):

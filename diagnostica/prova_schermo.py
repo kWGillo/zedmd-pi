@@ -803,7 +803,7 @@ px = foto.load()
 for y in range(comp.tela_logica[1]):
     for x in range(comp.tela_logica[0]):
         px[x, y] = ((x * 7 + y) % 256, (x + y * 5) % 256, (x * 3 + y) % 256)
-esigi(comp.disegna_dentro([(foto, (0, 0))],
+esigi(comp.disegna_dentro([(foto, (0, 0), comp.scala)],
                           uscita._superficie.vista_bgrx()) is False,
       "con una fotografia la strada diretta si tira indietro")
 uscita.show(foto)

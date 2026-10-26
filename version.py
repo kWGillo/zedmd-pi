@@ -3790,6 +3790,28 @@ Storico:
        sarebbe stato un modo di sbagliarla in ventiquattro. Si cambia quello
        che `ImageDraw.Draw` restituisce, una volta, e si torna indietro
        quando si vuole.
+  17.4.20 **La finezza della tela: linee vere invece di mattoni.**
+       *«Con la risoluzione del monitor non si potrebbero ottenere delle
+       linee simili a vettoriali?»* Si', e la meta' del lavoro era gia'
+       fatta senza saperlo: dalla 17.2 le sorgenti si ridimensionano, quindi
+       sanno gia' disegnare a qualunque misura. Nessuno aveva mai chiesto
+       loro la misura vera del monitor -- la tela era 256x64 per definizione,
+       e tutto il resto era ingrandimento.
+       La **finezza** e' quella domanda, ed e' un numero: quante volte piu'
+       fine del pannello disegnano le sorgenti. A 1 e' il DMD di sempre, ed
+       e' li' che il filtro dei punti ha senso. Al massimo la tela e' grande
+       quanto ci sta nello schermo -- su un 2560x1080 diventa 2560x640 -- le
+       lettere si disegnano alla loro misura vera e le curve sono curve.
+       **I giochi, Doom e il Game Boy restano sulla tela del pannello**, e li
+       ingrandisce il compositore: sono fatti di pixel grossi apposta, e a
+       nove volte i pixel non starebbero nei trenta fotogrammi al secondo
+       appena conquistati. Per questo il compositore adesso ingrandisce
+       **ogni pezzo per conto suo**: la stessa uscita porta una schermata
+       disegnata a risoluzione piena e un gioco ingrandito dieci volte.
+       Di serie la finezza e' **1**: chi aggiorna non si ritrova lo schermo
+       cambiato sotto gli occhi senza averlo chiesto. La si sceglie nella
+       pagina Video, e l'elenco offre solo le finezze che quello schermo
+       regge davvero.
 """
 
-__version__ = "17.4.19"
+__version__ = "17.4.20"
