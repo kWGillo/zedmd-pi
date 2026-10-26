@@ -1036,12 +1036,24 @@ class SuperficieFramebuffer:
         self._console = console
         self._giri = 0
         zittisci_console(console)
-        self.width, self.height = misura or self._misura_dichiarata()
+        # **La misura la decide il framebuffer, non la configurazione.** Qui
+        # non si cambia modo video: si scrive dentro la memoria dello schermo
+        # com'e' adesso. Fino alla 17.4.16 una risoluzione chiesta nella
+        # pagina Video veniva presa per buona anche da questa strada, e il
+        # risultato sarebbe stato scrivere righe della lunghezza sbagliata --
+        # un'immagine storta, non piu' piccola. Si dice e si tira dritto.
+        vera = self._misura_dichiarata()
+        if misura and tuple(misura) != vera:
+            print("[display] il framebuffer e' %dx%d: la risoluzione chiesta "
+                  "(%dx%d) non si applica qui" % (vera + tuple(misura)))
+        self.width, self.height = vera
         self._bit = self._bit_dichiarati()
         if self._bit not in (16, 32):
             raise OSError("framebuffer a %d bit per pixel: non so scriverci"
                           % self._bit)
         self._f = open(self.DISPOSITIVO, "r+b", buffering=0)
+        self._riga = self._riga_dichiarata()
+        self._mappa = self._mappa_memoria()
 
     def _dichiarato(self, nome):
         with open(os.path.join(self.INFO, nome), encoding="ascii") as f:
@@ -1057,6 +1069,59 @@ class SuperficieFramebuffer:
         except (OSError, ValueError):
             return 32
 
+    def _riga_dichiarata(self):
+        """Quanti byte occupa una riga **in memoria**.
+
+        Non sempre e' larghezza per byte-per-pixel: certe schede allineano
+        la riga a un multiplo comodo, e scrivere come se fosse compatta
+        darebbe un'immagine storta. Il kernel lo dice in `stride`; dove non
+        lo dice si fa il conto ovvio.
+        """
+        try:
+            return int(self._dichiarato("stride"))
+        except (OSError, ValueError):
+            return self.width * (self._bit // 8)
+
+    def _mappa_memoria(self):
+        """La memoria dello schermo mappata, se si puo'.
+
+        Misurato sul mini PC Atom che ha fatto nascere tutto questo, con un
+        fotogramma da 2560x1080: impacchettare l'immagine in BGRX costava
+        **49,5 ms** e scriverla altri 8,6. Il `tobytes` di PIL costruisce
+        undici megabyte in un buffer nuovo, la `write` li ricopia nel
+        kernel, e il kernel li ricopia nello schermo: tre giri per gli
+        stessi pixel.
+
+        Con la memoria mappata i pixel si scrivono **una volta sola**, al
+        loro posto definitivo, e la conversione RGB -> BGRX la fa numpy per
+        colonne invece che pixel per pixel. Se qualcosa non si puo' fare --
+        niente numpy, `mmap` rifiutata, riga allineata in modo strano -- si
+        torna alla strada di prima, che continua a funzionare.
+        """
+        if _np is None:
+            return None
+        if self._riga != self.width * (self._bit // 8):
+            # Riga allineata: si potrebbe fare lo stesso, riga per riga, ma
+            # e' un caso che qui non si e' mai visto e un codice non provato
+            # su una memoria mappata non e' un affare.
+            return None
+        try:
+            import mmap
+            mappa = mmap.mmap(self._f.fileno(), self._riga * self.height)
+            if self._bit == 32:
+                # Il quarto byte si azzera **una volta sola**, qui: durante
+                # il disegno non lo si tocca piu', ed e' un quarto di lavoro
+                # risparmiato a ogni fotogramma. Su uno schermo XRGB quel
+                # byte non lo guarda nessuno, ma lasciarci dentro quello che
+                # c'era prima della console non e' il modo di cominciare.
+                _np.frombuffer(mappa, dtype=_np.uint8).reshape(
+                    self.height, self.width, 4)[:, :, 3] = 0
+            return mappa
+        except Exception as exc:                  # pragma: no cover - difensivo
+            print("[display] framebuffer non mappabile (%s): si scrive come "
+                  "prima" % exc)
+            return None
+
     def mostra(self, immagine):
         self._giri += 1
         if self._giri % self.OGNI_QUANTI == 0:
@@ -1071,6 +1136,8 @@ class SuperficieFramebuffer:
             # acceso un antialiasing. Un pixel grosso resta un pixel grosso.
             immagine = immagine.resize((self.width, self.height),
                                        Image.NEAREST)
+        if self._mappa is not None and self._scrivi_mappato(immagine):
+            return
         if self._bit == 32:
             # Il framebuffer a 32 bit e' BGRX, non RGBA: i canali vanno
             # scambiati, e il quarto byte resta a zero. PIL sa impacchettarlo
@@ -1086,6 +1153,38 @@ class SuperficieFramebuffer:
             dati = v.astype("<u2").tobytes()
         self._f.seek(0)
         self._f.write(dati)
+
+    def _scrivi_mappato(self, immagine):
+        """I pixel dentro la memoria dello schermo, senza copie di mezzo.
+
+        Torna falso se non ce l'ha fatta: chi chiama ripiega sulla strada di
+        sempre, che non ha mai smesso di funzionare.
+        """
+        try:
+            sorgente = _np.asarray(immagine)
+            if sorgente.shape[:2] != (self.height, self.width):
+                return False
+            vista = _np.frombuffer(self._mappa, dtype=_np.uint8)
+            if self._bit == 32:
+                vista = vista.reshape(self.height, self.width, 4)
+                # Tre colonne invece di undici megabyte impacchettati a
+                # parte. Il quarto byte e' il "don't care" del BGRX: non lo
+                # si tocca, e risparmiarne la scrittura e' un quarto del
+                # lavoro in meno.
+                vista[:, :, 0] = sorgente[:, :, 2]
+                vista[:, :, 1] = sorgente[:, :, 1]
+                vista[:, :, 2] = sorgente[:, :, 0]
+            else:
+                vista = vista.view("<u2").reshape(self.height, self.width)
+                a = sorgente.astype(_np.uint16)
+                _np.copyto(vista, ((a[:, :, 0] >> 3) << 11)
+                           | ((a[:, :, 1] >> 2) << 5) | (a[:, :, 2] >> 3))
+            return True
+        except Exception as exc:                  # pragma: no cover - difensivo
+            print("[display] scrittura mappata fallita (%s): si torna alla "
+                  "strada di prima" % exc)
+            self._mappa = None
+            return False
 
     def _ricontrolla_console(self):
         """Il terminale e' ancora nostro? Se no, lo si riprende.

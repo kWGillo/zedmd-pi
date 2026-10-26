@@ -22,12 +22,12 @@ ab1bb50ca47e2005874da4a006c8345e  diagnostica/prova_giochi.py
 000088f80716e6a8838818bfd0034763  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
 b204886f3dc3e1ce8ac243aef81e9fe4  diagnostica/prova_regioni.py
-078f756978d6222214827f6bf9b5ff00  diagnostica/prova_schermo.py
+d020474022c5e5e2f65aecbbba9851af  diagnostica/prova_schermo.py
 3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
 1fafe8f1f25c976ce09b10c613b98f86  diagnostica/schermo_dal_vivo.py
 a508962738ddb4832dd5cca7d6795e9f  diagnostica/traduzioni.tsv
-de8540b0861adc0eb1a3bf80c6f235b5  display.py
+0f3b5e9f7cac5352abc081ce2f62724f  display.py
 6f3d25956e924db1469241a48fd3d8fe  dmdconf.py
 97282262688c9252fafe5c0431c714d1  dmdd.py
 0e17dea503190ddc88c7c33c37b5e19f  domande.en.csv
@@ -181,7 +181,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 8e4da1571d2f55b9211b110179be1607  templates/updates.html
 20c3c0819cc80cc5dbdbe6d827fe666f  templates/video.html
-6cb042bba6577ba84043714392bedd61  version.py
+a395584bf04b240c371383f8e243161d  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 799225d1088830b218a1894c3076be09  webui.py

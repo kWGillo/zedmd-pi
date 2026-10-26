@@ -3727,6 +3727,28 @@ Storico:
        filtro**, e il valore di serie di PIL e' il bicubico. Un pannello DMD
        sfumato non e' piu' un pannello DMD. Adesso e' a blocchi, come tutto
        il resto della catena.
+  17.4.17 **I pixel dentro la memoria dello schermo, senza copie di mezzo.**
+       La misura che ha cambiato le idee, fatta sul mini PC Atom con un
+       fotogramma da 2560x1080 e il filtro spento: composizione 24,6 ms,
+       **impacchettamento 49,5 ms**, scrittura 8,6. Il collo di bottiglia
+       non era il disegno: era la consegna -- `tobytes("raw", "BGRX")`
+       costruisce undici megabyte in un buffer nuovo, la `write` li ricopia
+       nel kernel e il kernel li ricopia nello schermo. Tre giri per gli
+       stessi pixel, ottantadue millisecondi, dodici fotogrammi al secondo.
+       Adesso la memoria dello schermo si mappa una volta sola e i pixel ci
+       si scrivono dentro **al loro posto definitivo**: tre colonne di
+       numpy, niente buffer intermedio, niente `write`. Il quarto byte --
+       la X di BGRX, che nessuno guarda -- si azzera all'apertura e non si
+       tocca piu': un quarto del lavoro in meno a ogni fotogramma.
+       Dove non si puo' fare -- niente numpy, `mmap` rifiutata, riga
+       allineata in modo insolito -- si torna alla strada di prima, che non
+       ha mai smesso di funzionare, e i byte scritti sono identici: una
+       prova li confronta a 32 e a 16 bit.
+       E **la misura la decide il framebuffer, non la configurazione**: una
+       risoluzione chiesta nella pagina Video non si applica a questa
+       strada, dove non si cambia modo video. Prima la si prendeva per
+       buona, e scrivere righe della lunghezza sbagliata non da' uno
+       schermo piu' piccolo: ne da' uno storto.
 """
 
-__version__ = "17.4.16"
+__version__ = "17.4.17"

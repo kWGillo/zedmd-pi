@@ -2,6 +2,44 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.17]
+
+### I pixel dentro la memoria dello schermo, senza copie di mezzo
+
+La misura che ha cambiato le idee, sul mini PC Atom, fotogramma 2560×1080,
+filtro **spento**:
+
+| | |
+|---|---|
+| composizione | 24,6 ms |
+| **impacchettamento BGRX** | **49,5 ms** |
+| scrittura su `/dev/fb0` | 8,6 ms |
+| **totale** | **82,7 ms → 12 fps** |
+
+Il collo di bottiglia non era il disegno: era la **consegna**. `tobytes("raw",
+"BGRX")` costruisce undici megabyte in un buffer nuovo, la `write` li ricopia
+nel kernel, il kernel li ricopia nello schermo. Tre giri per gli stessi pixel.
+
+Adesso la memoria dello schermo si mappa una volta sola, all'apertura, e i
+pixel ci si scrivono dentro **al loro posto definitivo**: tre colonne di numpy
+— blu, verde, rosso — e basta. Niente buffer intermedio, niente `write`, niente
+copia del kernel. Il quarto byte, la X di BGRX che nessuno guarda, si azzera
+all'apertura e non si tocca più: è un quarto del lavoro risparmiato a ogni
+fotogramma.
+
+Dove non si può fare — niente numpy, `mmap` rifiutata, riga in memoria
+allineata in modo insolito — si torna alla strada di prima, che non ha mai
+smesso di funzionare. E i byte sono gli stessi: una prova li confronta con
+quelli di `tobytes`, a 32 bit e a 16.
+
+### La misura la decide il framebuffer
+
+Su questa strada non si cambia modo video: si scrive nella memoria dello
+schermo com'è adesso. Una risoluzione chiesta nella pagina Video veniva però
+presa per buona anche qui, e scrivere righe della lunghezza sbagliata non dà
+uno schermo più piccolo: ne dà uno **storto**. Adesso si usa quella vera e lo
+si dice nel registro.
+
 ## [17.4.16]
 
 ### Il cartello dei primi cinque secondi

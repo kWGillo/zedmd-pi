@@ -634,11 +634,89 @@ finta._ricontrolla_console = lambda: quante.append(1)
 finta._bit = 32
 finta.width, finta.height = 4, 1
 finta._f = tempfile.TemporaryFile()
+finta._riga = 16
+finta._mappa = None          # questa finta scrive alla vecchia maniera
 for _ in range(display.SuperficieFramebuffer.OGNI_QUANTI * 2):
     finta.mostra(Image.new("RGB", (4, 1)))
 esigi(len(quante) == 2,
       "il terminale si ricontrolla ogni %d fotogrammi, non a ogni fotogramma"
       % display.SuperficieFramebuffer.OGNI_QUANTI)
+
+
+print()
+print("-- i pixel dentro la memoria dello schermo, senza copie (17.4.17)")
+
+# Misurato sul mini PC Atom: impacchettare il fotogramma in BGRX costava
+# **49,5 ms** e scriverlo altri 8,6, contro 24,6 di composizione. Il
+# `tobytes` costruisce undici megabyte in un buffer nuovo, la `write` li
+# ricopia nel kernel, il kernel li ricopia nello schermo: tre giri per gli
+# stessi pixel. Mappata, la memoria dello schermo si scrive **una volta**.
+#
+# La prova non ha un framebuffer vero: ne usa un file, che e' esattamente
+# quello che `mmap` si aspetta, e confronta i byte con quelli che scriveva
+# la strada di prima.
+
+def finto_framebuffer(largo, alto, bit):
+    percorso = os.path.join(tempfile.mkdtemp(), "fb")
+    with open(percorso, "wb") as f:
+        f.write(b"\xa5" * (largo * alto * (bit // 8)))
+    superficie = display.SuperficieFramebuffer.__new__(
+        display.SuperficieFramebuffer)
+    superficie._console = "lascia"
+    superficie._giri = 0
+    superficie._ricontrolla_console = lambda: None
+    superficie.width, superficie.height, superficie._bit = largo, alto, bit
+    superficie._f = open(percorso, "r+b", buffering=0)
+    superficie._riga = largo * (bit // 8)
+    superficie._mappa = superficie._mappa_memoria()
+    return superficie, percorso
+
+
+quadro = Image.new("RGB", (64, 32))
+pix = quadro.load()
+for y in range(32):
+    for x in range(64):
+        pix[x, y] = (x * 4 % 256, y * 8 % 256, (x + y) * 3 % 256)
+
+for bit in (32, 16):
+    superficie, percorso = finto_framebuffer(64, 32, bit)
+    esigi(superficie._mappa is not None,
+          "a %d bit la memoria dello schermo si mappa" % bit)
+    superficie.mostra(quadro)
+    scritto = open(percorso, "rb").read()
+    if bit == 32:
+        atteso = quadro.tobytes("raw", "BGRX")
+        uguali = all(scritto[i:i + 3] == atteso[i:i + 3]
+                     for i in range(0, len(atteso), 4))
+        esigi(uguali,
+              "e i pixel sono quelli di sempre, byte per byte (BGRX)")
+        esigi(set(scritto[3::4]) == {0},
+              "con il quarto byte azzerato una volta sola, all'apertura")
+    else:
+        import numpy as _nptest
+        a = _nptest.asarray(quadro, dtype=_nptest.uint16)
+        atteso = ((((a[:, :, 0] >> 3) << 11) | ((a[:, :, 1] >> 2) << 5)
+                   | (a[:, :, 2] >> 3)).astype("<u2").tobytes())
+        esigi(scritto == atteso, "e a 16 bit l'RGB565 e' identico a prima")
+    superficie._f.close()
+
+# E se la riga in memoria e' allineata -- larghezza per byte non basta --
+# non si mappa niente: si torna alla strada di prima invece di scrivere
+# storto.
+stretta = display.SuperficieFramebuffer.__new__(display.SuperficieFramebuffer)
+stretta.width, stretta.height, stretta._bit = 64, 32, 32
+stretta._riga = 64 * 4 + 64
+stretta._f = tempfile.TemporaryFile()
+esigi(stretta._mappa_memoria() is None,
+      "con la riga allineata in modo strano non si mappa: meglio la strada"
+      " lenta che un'immagine storta")
+
+# La misura la decide il framebuffer, non la configurazione: qui non si
+# cambia modo video.
+esigi("vera = self._misura_dichiarata()" in open(os.path.join(
+          os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+          "display.py"), encoding="utf-8").read(),
+      "e una risoluzione chiesta nella pagina non la si prende per buona")
 
 vera = display.SuperficieFramebuffer.__new__(display.SuperficieFramebuffer)
 vera._console = "lascia"
