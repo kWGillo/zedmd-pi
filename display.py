@@ -1062,7 +1062,15 @@ class SuperficieFramebuffer:
         if self._giri % self.OGNI_QUANTI == 0:
             self._ricontrolla_console()
         if immagine.size != (self.width, self.height):
-            immagine = immagine.resize((self.width, self.height))
+            # **A blocchi, non sfumato.** Qui si capita quando la misura
+            # composta non e' quella del framebuffer -- per esempio con una
+            # risoluzione chiesta nella pagina Video che il framebuffer non
+            # ha seguito. Senza dire quale filtro usare, PIL sfuma
+            # («bicubico»), e un pannello DMD sfumato non e' piu' un
+            # pannello DMD: i punti si impastano e sembra che qualcuno abbia
+            # acceso un antialiasing. Un pixel grosso resta un pixel grosso.
+            immagine = immagine.resize((self.width, self.height),
+                                       Image.NEAREST)
         if self._bit == 32:
             # Il framebuffer a 32 bit e' BGRX, non RGBA: i canali vanno
             # scambiati, e il quarto byte resta a zero. PIL sa impacchettarlo
@@ -1128,6 +1136,36 @@ def standby_monitor(spento, percorso=SPEGNIMENTO):
         return True
     except OSError:
         return False
+
+
+def monitor_collegato(radice="/sys/class/drm"):
+    """Vero se almeno un'uscita della scheda ha qualcosa attaccato.
+
+    La domanda nasce da un avvio senza monitor: *\u00abse il sistema si avvia con
+    il monitor staccato permane la finestra di login e non ritenta di
+    agganciarsi\u00bb*. Ed era vero -- l'uscita video si prova una volta sola, e
+    se fallisce resta `DisplayAssente` fino al riavvio del servizio.
+
+    Per riprovare serve sapere **quando**, e chiederlo a SDL ogni dieci
+    secondi vorrebbe dire aprire e chiudere il video in continuazione. Il
+    kernel la risposta ce l'ha gia' scritta: `status` di ogni connettore dice
+    `connected` o `disconnected`, e leggerla costa una `open`.
+
+    Senza `/sys/class/drm` -- una macchina che non usa KMS -- si risponde
+    **vero**: meglio provare e fallire che non provare mai.
+    """
+    import glob
+    stati = glob.glob(os.path.join(radice, "card*-*", "status"))
+    if not stati:
+        return True
+    for percorso in stati:
+        try:
+            with open(percorso, encoding="ascii") as f:
+                if f.read().strip() == "connected":
+                    return True
+        except OSError:
+            continue
+    return False
 
 
 def risoluzioni_disponibili(radice="/sys/class/drm"):

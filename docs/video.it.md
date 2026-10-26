@@ -308,6 +308,32 @@ Le due cure, in quest'ordine:
 Il pannello LED non c'entra niente con tutto questo: lì i pixel sono 16.384 e
 il filtro non esiste: è la matrice vera.
 
+# 5-ter. Il monitor che arriva dopo, e il cartello degli indirizzi
+
+**All'avvio il pannello dice dove trovarlo.** Dalla 17.4.16, per cinque
+secondi, sul vetro compaiono il nome `.local` e l'indirizzo IPv4 — poi la
+schermata se ne va e non torna. Vale sia sul pannello LED sia sul monitor, e
+non è un servizio: non ha un interruttore e non ha una fascia oraria.
+L'indirizzo si trova senza `nmcli`, quindi funziona anche su una Debian
+minimale.
+
+**E se all'avvio il monitor non c'era, si riprova.** Fino alla 17.4.15 l'uscita
+video si tentava una volta sola: accendendo il computer con il monitor staccato
+restava la riga di login e nient'altro, fino a un riavvio del servizio a mano.
+Adesso una vedetta legge ogni dieci secondi `/sys/class/drm` — costa una `open`,
+non un tentativo di aprire SDL — e appena un connettore dice `connected`
+riprova davvero. Quando l'uscita si apre, il cartello degli indirizzi si rifà:
+chi ha appena attaccato lo schermo sta guardando proprio per sapere quello.
+
+Nel registro si leggono tutte e due le cose:
+
+    journalctl -u dmd -b | grep display
+
+`[display] schermo 2560x1080, tela 256x64, scala 9, filtro spento` è la riga
+che dice su che misura si sta disegnando davvero — utile quando l'immagine
+sembra sfocata: se la risoluzione lì non è quella nativa del monitor, a
+sfumare è lo scaler del monitor, non il programma.
+
 # 6. I giochi
 
 Dalla 17.4 si riproporzionano, **uno per volta**.

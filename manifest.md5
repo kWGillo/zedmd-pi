@@ -24,15 +24,15 @@ ab1bb50ca47e2005874da4a006c8345e  diagnostica/prova_giochi.py
 000088f80716e6a8838818bfd0034763  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
 b204886f3dc3e1ce8ac243aef81e9fe4  diagnostica/prova_regioni.py
-bb2b1609ddde604396a7a2552269062f  diagnostica/prova_schermo.py
+078f756978d6222214827f6bf9b5ff00  diagnostica/prova_schermo.py
 3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
 1fafe8f1f25c976ce09b10c613b98f86  diagnostica/schermo_dal_vivo.py
 a508962738ddb4832dd5cca7d6795e9f  diagnostica/traduzioni.tsv
-0865a4ce27816ea3a6ccae925264b565  display.py
+de8540b0861adc0eb1a3bf80c6f235b5  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
 6f3d25956e924db1469241a48fd3d8fe  dmdconf.py
-26d1cf49cb3897c06a3bdef0c2325b6a  dmdd.py
+97282262688c9252fafe5c0431c714d1  dmdd.py
 0e17dea503190ddc88c7c33c37b5e19f  domande.en.csv
 ed464137667cbfc5cc010d2bd06d64e6  domande.it.csv
 7b7672e912c16111dba04613e96f5a2f  domande.py
@@ -52,7 +52,7 @@ f1664a0691e95cfddc4e544e33c6d44b  gb/gb_dmd.py
 142502bae53c6e71bf26604b42c82ec2  gcalendar.py
 48b68ac87a2559a7efff49d54460ff57  giornate.csv
 e45d351b601929bd837040f66702dfe0  hass.py
-799ffb54223af814a318e2235fc18715  i18n.py
+e7111492c426f46b694d0c77e6ab2675  i18n.py
 cec57b0213eef8daddbfa162fdbd9d70  icone.py
 d7ed711036597d7f61ae5c05fb8785d8  install.sh
 1ac13b80fea00e4ef49841661298ea1a  inutili.py
@@ -78,6 +78,7 @@ c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 be7a53f3a370b2550970f7cdb510bc53  sources/__init__.py
 a34665615c2b88c73e7f2ecc9b26ce1c  sources/airradar.py
 7d9c12d70da7c4fb14dc7291eec051ea  sources/anteprima.py
+ade7c3ca3c89261fd4e6fdec6d9521c2  sources/avvio.py
 304bc9e0d6875caabc28f2b568c4fdd2  sources/banner.py
 06eddb46accd57cd13e51a7a0b65200e  sources/base.py
 ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
@@ -186,7 +187,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 20c3c0819cc80cc5dbdbe6d827fe666f  templates/video.html
 dfdb476800003318473f792504d1259b  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-a823fb54dcd2b388e98eb884f59ae871  version.py
+6cb042bba6577ba84043714392bedd61  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 799225d1088830b218a1894c3076be09  webui.py

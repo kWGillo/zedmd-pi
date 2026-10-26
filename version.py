@@ -3700,6 +3700,33 @@ Storico:
        e' un elenco vero, con «automatica» in cima, e una misura scritta a
        mano non si perde. Dove il monitor non dichiara niente resta la
        casella, che e' il caso per cui era nata.
+  17.4.16 **Il cartello degli indirizzi, il monitor che arriva dopo, e
+       l'ingrandimento che non sfuma.**
+       *«Sarebbe utile che all'avvio sia il DMD sia il monitor pubblichino
+       per 5 secondi il loro IP o il loro indirizzo .local.»* Adesso lo
+       fanno: cinque secondi di cartello, il nome `.local` e l'IPv4, e poi
+       via. Prende la **presa** del pannello invece di vincere una gara di
+       priorita': per quei cinque secondi lo schermo e' suo, niente regioni
+       e nessuna sorgente che lo scavalca -- un indirizzo letto a meta' non
+       serve. L'IPv4 si trova senza `nmcli`: un socket UDP verso un
+       indirizzo di documentazione, nessun pacchetto spedito, e il kernel
+       dice da quale scheda sarebbe uscito.
+       *«Se il sistema si avvia con il monitor staccato, permane la finestra
+       di login e non ritenta di agganciarsi.»* Era vero: l'uscita video si
+       provava una volta sola. Adesso, quando non si apre, una vedetta
+       guarda ogni dieci secondi se in `/sys` e' comparso un connettore
+       collegato -- una lettura di file, non un tentativo di aprire SDL -- e
+       solo allora riprova. Quando ci riesce mette la nuova uscita al posto
+       della vecchia e rifa il cartello degli indirizzi, che e' esattamente
+       quello che serve a chi ha appena attaccato un monitor per vedere che
+       cosa c'e' dentro. Se la tela cambiasse misura, esce con un codice di
+       errore e systemd riavvia pulito.
+       *«Sembra che sia stato applicato un antialiasing.»* Un posto dove il
+       disegno poteva sfumare c'era davvero: quando la misura composta non
+       e' quella del framebuffer, si ridimensionava **senza dire con quale
+       filtro**, e il valore di serie di PIL e' il bicubico. Un pannello DMD
+       sfumato non e' piu' un pannello DMD. Adesso e' a blocchi, come tutto
+       il resto della catena.
 """
 
-__version__ = "17.4.15"
+__version__ = "17.4.16"

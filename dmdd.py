@@ -42,6 +42,7 @@ from sources import (AirRadarSource, BannerSource, BirthdaysSource,
                      ScadenzeSource, SvegliaSource,
                      TelecameraSource,
                      ZeDMDSource, controlla_rom, controlla_wad)
+from sources.avvio import DURATA as DURATA_AVVIO, AvvioSource
 from sources.turni import Turni
 from version import __version__
 from zedmd_http import ZeDMDHttpServer
@@ -308,6 +309,15 @@ class Runtime:
             print("[dmd] il resto del programma continua; apri la pagina "
                   "Video e correggi", flush=True)
             self.display = uscita_video.DisplayAssente(self.cfg, str(exc))
+            # E si continua a provare. «Se il sistema si avvia con il
+            # monitor staccato permane la finestra di login e non ritenta di
+            # agganciarsi.» Vedi `_vedetta_monitor`: non e' un ciclo che
+            # apre e chiude il video, e' una lettura in `/sys` ogni dieci
+            # secondi, e un tentativo vero solo quando c'e' qualcosa di
+            # attaccato.
+            # La vedetta parte piu' avanti, quando `self.running` esiste:
+            # qui siamo ancora a meta' costruzione.
+            self._video_da_riprovare = True
         self.arbiter = Arbiter(self.cfg)
 
         self.zedmd = ZeDMDSource(
@@ -501,6 +511,18 @@ class Runtime:
         # sposta un blocco e' una trappola per il prossimo.
         suoni.notte_in_corso = lambda: getattr(self, "night", False)
 
+        # Il cartello dei primi cinque secondi: dove trovare questo
+        # apparecchio. Si costruisce **qui** e non fra i servizi perche' non
+        # e' un servizio: non ha un interruttore, non ha una fascia oraria,
+        # e dopo cinque secondi non esiste piu'.
+        self.avvio = AvvioSource(self.cfg, self.display.width,
+                                 self.display.height)
+        self.arbiter.register(self.avvio)
+        # La presa, non la priorita': per quei cinque secondi il pannello e'
+        # suo e basta -- niente regioni, nessuna sorgente che lo scavalca.
+        # Un indirizzo letto a meta' non serve a niente.
+        self.arbiter.hold_on(self.avvio.name, DURATA_AVVIO)
+
         for source in (self.sveglia,
                        self.zedmd, self.preview, self.notifiche,
                        self.satelliti, self.status_player, self.radar,
@@ -547,6 +569,9 @@ class Runtime:
         self.zedmd_http.start()
 
         self.running = True
+        if getattr(self, "_video_da_riprovare", False):
+            threading.Thread(target=self._vedetta_monitor,
+                             name="vedetta-monitor", daemon=True).start()
         self.update_info = ota._esito(__version__)
         self.update_info["checked"] = 0
         # Non si interroga GitHub all'avvio: il controllo della libreria e'
@@ -1392,6 +1417,80 @@ class Runtime:
             elapsed = time.time() - started
             if elapsed < period:
                 time.sleep(period - elapsed)
+
+    # Ogni quanto si guarda se e' comparso un monitor, e quanto si aspetta
+    # prima del primo sguardo. Dieci secondi: un monitor acceso dopo il
+    # computer, o un cavo infilato a macchina avviata, si fanno aspettare
+    # qualche secondo comunque, e guardare piu' spesso non li fa arrivare
+    # prima.
+    VEDETTA_OGNI = 10.0
+
+    def _vedetta_monitor(self):
+        """Riprova l'uscita video finche' un monitor non compare.
+
+        «Se il sistema si avvia con il monitor staccato permane la finestra
+        di login e non ritenta di agganciarsi.» Succedeva perche' l'uscita
+        video si prova **una volta sola**, all'avvio: se in quel momento non
+        c'e' niente attaccato, resta `DisplayAssente` e il terminale resta in
+        modalita' testo -- cioe' con la riga di login sopra -- fino al
+        riavvio del servizio.
+
+        Qui si riprova, ma non alla cieca: prima si legge in `/sys` se un
+        connettore ha qualcosa attaccato (`monitor_collegato`), e solo allora
+        si tenta di aprire davvero. Una lettura di file ogni dieci secondi
+        non disturba nessuno; aprire e chiudere SDL ogni dieci secondi si'.
+
+        Quando l'uscita si apre, la tela e' la stessa di prima -- le sorgenti
+        disegnano sulla tela del DMD, non su quella del monitor -- e basta
+        mettere la nuova uscita al posto della vecchia. Se invece la tela
+        cambia misura (configurazione `video.tela: schermo`) le sorgenti sono
+        tarate su un'altra geometria e rifarle a caldo sarebbe una cosa
+        fragile: si esce con un codice di errore e systemd riavvia pulito,
+        che e' quello che si vuole in quel caso.
+        """
+        while self.running:
+            time.sleep(self.VEDETTA_OGNI)
+            if not self.running:
+                return
+            if not isinstance(self.display, uscita_video.DisplayAssente):
+                return                      # qualcuno l'ha gia' rimessa in piedi
+            try:
+                if not uscita_video.monitor_collegato():
+                    continue
+            except Exception:                 # pragma: no cover - difensivo
+                continue
+            try:
+                nuova = uscita_video.crea(self.cfg)
+            except Exception as exc:
+                print("[display] monitor collegato ma l'uscita non si apre "
+                      "ancora: %s" % exc, flush=True)
+                continue
+            if (nuova.width, nuova.height) != (self.display.width,
+                                               self.display.height):
+                print("[display] monitor comparso, ma con una tela diversa "
+                      "(%dx%d invece di %dx%d): riavvio il servizio"
+                      % (nuova.width, nuova.height, self.display.width,
+                         self.display.height), flush=True)
+                try:
+                    nuova.clear()
+                except Exception:
+                    pass
+                os._exit(7)
+            print("[display] monitor comparso: uscita video in piedi "
+                  "(%dx%d)" % (nuova.width, nuova.height), flush=True)
+            self.display = nuova
+            # Il cartello degli indirizzi non l'ha visto nessuno: lo schermo
+            # non c'era. Lo si rifa adesso, che e' esattamente il momento in
+            # cui serve -- qualcuno ha appena attaccato un monitor a questa
+            # macchina per vedere che cosa c'e' dentro.
+            try:
+                self.avvio = AvvioSource(self.cfg, self.display.width,
+                                         self.display.height)
+                self.arbiter.register(self.avvio)
+                self.arbiter.hold_on(self.avvio.name, DURATA_AVVIO)
+            except Exception:                 # pragma: no cover - difensivo
+                pass
+            return
 
     def _wifi_sveglio(self):
         """Spegne il risparmio energetico della radio, se e' stato chiesto.

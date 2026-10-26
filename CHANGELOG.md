@@ -2,6 +2,67 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.16]
+
+### Il cartello dei primi cinque secondi
+
+*«Sarebbe utile che all'avvio sia il DMD sia il monitor pubblichino per 5
+secondi il loro IP o il loro indirizzo .local.»*
+
+È la domanda che ci si fa ogni volta che si sposta l'apparecchio di stanza o si
+cambia router: *dove sta adesso?* Finora la risposta era un altro computer — la
+pagina del router, un `arp-scan`. Ma l'apparecchio **ha** uno schermo e lo
+accende prima di ogni altra cosa: adesso lo dice lui, per cinque secondi, e poi
+torna a fare il suo mestiere.
+
+Due dettagli che contano:
+
+- **prende la presa del pannello**, non vince una gara di priorità: per quei
+  cinque secondi lo schermo è suo e basta, niente regioni e nessuna sorgente
+  che lo scavalca. Un indirizzo letto a metà perché è passato un aereo non
+  serve a niente;
+- **l'IPv4 si trova senza `nmcli`**, che su una Debian minimale può non
+  esserci: si apre un socket UDP verso un indirizzo di documentazione (nessun
+  pacchetto parte) e si guarda da quale scheda il kernel sarebbe uscito. È
+  l'indirizzo da digitare, non il primo della lista.
+
+### Il monitor che arriva dopo
+
+*«Se il sistema si avvia con il monitor staccato, permane la finestra di login
+e non ritenta di agganciarsi.»*
+
+Era vero, e il motivo è che l'uscita video si provava **una volta sola**,
+all'avvio. Senza niente attaccato restava `DisplayAssente`, il terminale restava
+in modalità testo — cioè con la riga di login sopra — e l'unico rimedio era
+riavviare il servizio a mano.
+
+Adesso c'è una vedetta. Non apre e chiude SDL ogni dieci secondi: legge in
+`/sys/class/drm` se un connettore dice `connected`, che costa una `open`, e solo
+allora prova ad aprire davvero. Quando ci riesce, mette la nuova uscita al posto
+della vecchia — la tela è la stessa, le sorgenti disegnano su quella del DMD — e
+**rifà il cartello degli indirizzi**, che è esattamente quello che serve a chi
+ha appena attaccato un monitor per vedere cosa c'è dentro. Se la tela cambiasse
+misura (`video.tela: schermo`) esce con un codice di errore e systemd riavvia
+pulito, invece di rifare a caldo una cosa fragile.
+
+Su una macchina senza KMS la vedetta risponde «sì, prova»: meglio provare e
+fallire che non provare mai.
+
+### L'ingrandimento che non sfuma
+
+*«Sembra che sia stato applicato un antialiasing.»*
+
+Un posto dove il disegno poteva davvero sfumare c'era: quando la misura composta
+non coincide con quella del framebuffer — per esempio con una risoluzione
+scelta nella pagina Video che il framebuffer non ha seguito — si ridimensionava
+**senza dire con quale filtro**, e il valore di serie di PIL è il bicubico. Un
+pannello DMD sfumato non è più un pannello DMD: i punti si impastano e sembra
+che qualcuno abbia acceso un antialiasing. Adesso è a blocchi, come tutto il
+resto della catena.
+
+Resta da capire se è questo il caso visto sul 21:9, o se la risoluzione scelta
+non è più quella nativa: la riga `[display] schermo ...` nel registro lo dice.
+
 ## [17.4.15]
 
 ### Il filtro DMD per colore, non per pixel

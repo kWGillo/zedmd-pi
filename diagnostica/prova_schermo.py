@@ -32,6 +32,7 @@ Le cose su cui insiste
 import os
 import sys
 import tempfile
+import time
 
 os.environ.setdefault("DMD_DATA", tempfile.mkdtemp())
 os.environ.setdefault("DMD_CONFIG", os.path.join(tempfile.mkdtemp(), "config.json"))
@@ -824,6 +825,112 @@ esigi(spenta._a_colori(tela_a_colori(spenta.tela_logica),
                        (spenta.tela_logica[0] * spenta.scala,
                         spenta.tela_logica[1] * spenta.scala)) is None,
       "e c'e' l'interruttore per spegnerla senza toccare il codice")
+
+sep("Il monitor che arriva dopo, e il cartello degli indirizzi (17.4.16)")
+
+# *«Se il sistema si avvia con il monitor staccato, permane la finestra di
+# login e non ritenta di agganciarsi.»* Vero: l'uscita video si provava una
+# volta sola. Adesso, quando non si e' aperta, una vedetta guarda in `/sys`
+# se e' comparso un connettore collegato -- una lettura di file, non un
+# tentativo di aprire SDL -- e solo allora riprova.
+
+drm = tempfile.mkdtemp()
+for nome in ("card0-HDMI-A-1", "card0-DP-1"):
+    os.makedirs(os.path.join(drm, nome))
+    with open(os.path.join(drm, nome, "status"), "w") as f:
+        f.write("disconnected\n")
+esigi(display.monitor_collegato(drm) is False,
+      "con tutti i connettori staccati non si prova nemmeno ad aprire")
+with open(os.path.join(drm, "card0-DP-1", "status"), "w") as f:
+    f.write("connected\n")
+esigi(display.monitor_collegato(drm) is True,
+      "appena uno dice «connected», si riprova")
+esigi(display.monitor_collegato(os.path.join(drm, "vuoto")) is True,
+      "e su una macchina senza KMS si risponde «si'»: meglio provare e"
+      " fallire che non provare mai")
+
+# La vedetta vera, con un'uscita finta che un certo momento comincia a
+# funzionare. Niente attese di dieci secondi: il periodo e' un attributo.
+import threading                                           # noqa: E402
+
+import dmdd                                                # noqa: E402
+
+
+class Vedetta:
+    running = True
+    VEDETTA_OGNI = 0.02
+    _vedetta_monitor = dmdd.Runtime._vedetta_monitor
+
+    def __init__(self, cfg):
+        self.cfg = cfg
+        self.display = display.DisplayAssente(cfg, "niente monitor")
+        self.arbiter = dmdd.Arbiter(cfg)
+
+
+class Apparsa:
+    def __init__(self, misura):
+        self.width, self.height = misura
+
+    def clear(self):
+        pass
+
+
+cfg_vedetta = dmdconf.load()
+spia = Vedetta(cfg_vedetta)
+collegato = {"si": False}
+veri = (display.monitor_collegato, display.crea)
+display.monitor_collegato = lambda *a, **k: collegato["si"]
+display.crea = lambda cfg: Apparsa((spia.display.width, spia.display.height))
+try:
+    threading.Thread(target=spia._vedetta_monitor, daemon=True).start()
+    time.sleep(0.15)
+    esigi(isinstance(spia.display, display.DisplayAssente),
+          "finche' non c'e' niente attaccato l'uscita resta assente")
+    collegato["si"] = True
+    attesa = time.time() + 2.0
+    while time.time() < attesa and isinstance(spia.display,
+                                              display.DisplayAssente):
+        time.sleep(0.02)
+    esigi(isinstance(spia.display, Apparsa),
+          "attaccato il monitor, l'uscita si rialza da sola senza riavvio")
+    esigi(spia.arbiter.hold_name == "avvio",
+          "e il cartello degli indirizzi si rifa': nessuno l'aveva visto,"
+          " lo schermo non c'era")
+finally:
+    display.monitor_collegato, display.crea = veri
+    spia.running = False
+
+# Il cartello: cinque secondi, e dentro c'e' dove trovare l'apparecchio.
+from sources.avvio import AvvioSource, indirizzo_ipv4, nome_locale  # noqa: E402
+
+cartello = AvvioSource(dmdconf.load(), 256, 64, durata=0.3)
+primo = cartello.frame()
+esigi(primo is not None and primo.size == (256, 64),
+      "il cartello si disegna sulla tela del pannello")
+esigi(cartello.frame() is None,
+      "e una volta sola: non cambia, non si ridisegna trenta volte al secondo")
+esigi(cartello.in_fascia is False,
+      "prende la schermata intera: un indirizzo dentro un terzo di schermo"
+      " non si legge")
+acceso = sum(1 for i in range(0, len(primo.tobytes()), 3)
+              if primo.tobytes()[i:i + 3] != b"\x00\x00\x00")
+esigi(acceso > 200,
+      "e qualcosa c'e' scritto davvero (%d pixel accesi)" % acceso)
+esigi(cartello.active() is True, "finche' dura, e' attivo")
+time.sleep(0.35)
+esigi(cartello.active() is False and cartello.frame() is None,
+      "passati i suoi secondi si spegne da solo e non torna")
+esigi(nome_locale().endswith(".local"),
+      "il nome mDNS finisce in .local (%s)" % nome_locale())
+
+# E il ridimensionamento del framebuffer non sfuma piu': un pannello DMD
+# sfumato sembra un antialiasing acceso per sbaglio.
+sorgente_display = open(os.path.join(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))), "display.py"), encoding="utf-8").read()
+esigi("immagine.resize((self.width, self.height),\n"
+      "                                       Image.NEAREST)"
+      in sorgente_display,
+      "il framebuffer ingrandisce a blocchi, non sfumando")
 
 print()
 print("=" * 74)
