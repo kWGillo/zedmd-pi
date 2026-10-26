@@ -2,6 +2,56 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.15]
+
+### Il filtro DMD per colore, non per pixel
+
+*«Abbassa il numero di colori.»* L'idea è di chi guardava gli scatti, ed era
+quella giusta.
+
+Il filtro moltiplicava ogni pixel **vero** dello schermo per la maschera dei
+punti: a 2560×1080 sono due milioni e mezzo di moltiplicazioni per tre canali,
+trenta volte al secondo — misurato su un mini PC Atom, **87 ms** dei 123 di un
+fotogramma intero.
+
+Ma la maschera non è altro che **una piastrella ripetuta**, e un pixel della
+tela diventa sempre quella piastrella tinta del suo colore. Quindi il risultato
+dipende dal **colore**, non da dove sta. Con una dozzina di colori — quelli che
+usa un gioco — le piastrelle diverse sono una dozzina: si tingono una volta, e
+il fotogramma diventa una *copia* invece di due milioni e mezzo di conti.
+
+Quello su cui questa versione non transige: **non cambia un pixel**. La
+piastrella si tinge con la stessa formula di `ImageChops.multiply`, e una prova
+confronta le due strade byte per byte su quattro risoluzioni, anche con la
+luminosità abbassata — che viaggia dentro la maschera, quindi dentro la
+piastrella.
+
+Dove la strada non si può fare si torna da sola a quella di sempre: niente
+numpy, scala sotto i tre pixel per cella (il pannello), o più di **mille**
+colori — una fotografia, un fotogramma di video. Il conto dei colori lo fa PIL
+e smette appena supera il tetto: sei microsecondi, non una `unique` buttata.
+
+`diagnostica/misura_video.py` adesso cronometra **tutte e due** le strade sulla
+macchina vera, e `video.filtro_a_colori` spegne quella nuova se su una macchina
+particolare fosse la più lenta.
+
+### Il menu delle risoluzioni si apre davvero
+
+*«Dopo aver selezionato una risoluzione, se apro il menu a tendina non vedo
+nulla al di fuori di quella attiva: devo cancellare il testo per vedere le
+altre.»*
+
+Era una casella di testo con un `datalist`, e un `datalist` **filtra** i
+suggerimenti con quello che c'è già scritto nella casella: con `2560x1080`
+dentro, l'unico suggerimento che corrisponde è `2560x1080`, e il menu si apre
+praticamente vuoto.
+
+Adesso è un `<select>` vero: «automatica (quella che c'è adesso)» in cima, poi
+tutte le misure che il monitor dichiara. Una risoluzione scritta a mano e non
+dichiarata dal monitor resta come voce sua e non si perde, e dove il monitor non
+dichiara niente resta la casella da riempire — che è il caso per cui era nata
+nella 17.3.3.
+
 ## [17.4.14]
 
 ### Il radar con molti voli: la sfilata non si mangia l'intervallo

@@ -284,6 +284,19 @@ dentro. Si può anche passargli una risoluzione da provare
 (`misura_video.py 1920x1080`) per vedere quanto si guadagnerebbe a
 cambiarla.
 
+**E dalla 17.4.15 il filtro costa meno di prima.** L'idea e' venuta da chi ha
+visto gli scatti: *«abbassa il numero di colori»*. La maschera non e' altro
+che **una piastrella ripetuta**, e un pixel della tela diventa sempre quella
+piastrella tinta del suo colore: il risultato dipende dal colore, non da dove
+sta. Con una dozzina di colori — quelli che usa un gioco — le piastrelle
+diverse sono una dozzina: si tingono una volta e il fotogramma diventa una
+**copia** invece di due milioni e mezzo di moltiplicazioni. Non cambia un
+pixel (una prova confronta le due strade a tappeto), e dove non si puo' fare
+— una fotografia, un fotogramma di video, piu' di mille colori — si torna da
+sola alla strada di sempre. `misura_video.py` cronometra tutte e due, e
+`video.filtro_a_colori` la spegne se su una macchina particolare fosse la
+piu' lenta.
+
 Le due cure, in quest'ordine:
 
 1. **spegnere il filtro DMD** nella pagina Video: si perde il reticolo dei

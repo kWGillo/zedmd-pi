@@ -485,6 +485,67 @@ esigi(display.risoluzioni_disponibili(os.path.join(finto, "niente")) == [],
       "e dove non c'e' niente da leggere torna una lista vuota, non un errore")
 
 
+print()
+print("-- e nel menu si vedono tutte, anche con una gia' scelta (17.4.15)")
+
+# *«Dopo aver selezionato una risoluzione, se apro il menu a tendina non
+# vedo nulla al di fuori di quella attiva: devo cancellare il testo per
+# vedere le altre.»* Era una casella di testo con un `datalist`, e un
+# `datalist` **filtra** i suggerimenti con quello che c'e' gia' scritto:
+# con «2560x1080» nella casella l'unico suggerimento che corrisponde e'
+# 2560x1080, e il menu si apriva praticamente vuoto. Adesso e' un elenco
+# vero.
+
+import re                                                  # noqa: E402
+
+from jinja2 import Environment                             # noqa: E402
+
+MODELLO = os.path.join(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))), "templates", "video.html")
+pagina = open(MODELLO, encoding="utf-8").read()
+inizio = pagina.index('<label for="risoluzione">')
+frammento = pagina[inizio:pagina.index("</label>", pagina.index(
+    '<input type="text" id="risoluzione"')) + len("</label>")]
+
+esigi("<datalist" not in frammento and 'list="' not in frammento,
+      "il `datalist` non c'e' piu' (il commento che lo nomina si', ed e'"
+      " giusto cosi': spiega perche')")
+
+
+class Finta(dict):
+    def __getattr__(self, chiave):
+        return self.get(chiave, "")
+
+
+def rendi(scelta, modi):
+    html = Environment().from_string(frammento).render(
+        cfg=Finta(video=Finta(risoluzione=scelta)),
+        t=lambda chiave, **valori: chiave, risoluzioni=modi)
+    return (re.findall(r'<option value="([^"]*)"', html),
+            re.findall(r'value="([^"]*)"[^>]*selected', html),
+            "<input" in html)
+
+MODI = ["2560x1080", "1920x1080", "1600x900"]
+opzioni, scelte, casella = rendi("2560x1080", MODI)
+esigi(all(m in opzioni for m in MODI),
+      "con una risoluzione impostata si vedono **tutte** le altre: %s"
+      % ", ".join(o or "(auto)" for o in opzioni))
+esigi(scelte == ["2560x1080"], "e quella attiva risulta selezionata")
+esigi(opzioni[0] == "" and not casella,
+      "la prima voce e' «automatica», cioe' la casella vuota di sempre")
+
+opzioni, scelte, _ = rendi("", MODI)
+esigi(scelte == [""], "senza niente scelto e' selezionata «automatica»")
+
+opzioni, scelte, _ = rendi("1280x540", MODI)
+esigi("1280x540" in opzioni and scelte == ["1280x540"],
+      "una misura scritta a mano e non dichiarata dal monitor non si perde")
+
+opzioni, scelte, casella = rendi("1024x768", [])
+esigi(casella and not opzioni,
+      "e dove il monitor non dichiara niente resta la casella da riempire")
+
+
 # ------------------------------- 17.3.4: la voce «Video» sparisce sul pannello
 #
 # *«Il menu video non dovrebbe comparire se la piattaforma e' Raspberry ed e'
@@ -679,6 +740,90 @@ esigi(_Sorgente({"clock": {"language": "en"}}).t(CHIAVE) == "TOMORROW",
 esigi(_Sorgente({"clock": {"language": "it"}}).t(CHIAVE, "en") == "TOMORROW",
       "e una lingua chiesta a voce -- da una pagina web -- vince su tutto")
 
+
+sep("La via dei colori: il filtro per colore invece che per pixel (17.4.15)")
+
+# L'idea e' sua: *«abbassa il numero di colori»*. Il filtro moltiplica ogni
+# pixel **vero** per la maschera -- a 2560x1080 sono due milioni e mezzo di
+# moltiplicazioni per tre canali, trenta volte al secondo. Ma la maschera e'
+# la stessa piastrella ripetuta, e un pixel della tela diventa sempre quella
+# piastrella tinta del suo colore: con dodici colori le piastrelle diverse
+# sono dodici.
+#
+# La cosa su cui questa prova non transige: **non cambia un pixel**.
+
+from PIL import ImageChops                                 # noqa: E402
+
+TAVOLOZZA = [(255, 140, 26), (0, 208, 255), (224, 228, 240), (0, 0, 0),
+             (154, 216, 106), (176, 144, 208), (120, 128, 144), (255, 255, 0),
+             (12, 34, 56), (200, 0, 0), (0, 200, 0), (0, 0, 200)]
+
+
+def tela_a_colori(misura, quanti=12, seme=4):
+    import random as _random
+    im = Image.new("RGB", misura)
+    px = im.load()
+    rnd = _random.Random(seme)
+    for y in range(misura[1]):
+        for x in range(misura[0]):
+            px[x, y] = TAVOLOZZA[rnd.randrange(quanti)]
+    return im
+
+
+for schermo in ((2560, 1080), (1920, 1080), (1280, 720), (1024, 768)):
+    c = display.Compositore(TELA, schermo, {"filtro_dmd": True})
+    tela = tela_a_colori(c.tela_logica)
+    misura = (c.tela_logica[0] * c.scala, c.tela_logica[1] * c.scala)
+    svelto = c._a_colori(tela, misura)
+    sempre = ImageChops.multiply(tela.resize(misura, Image.NEAREST),
+                                 c.maschera(misura))
+    esigi(svelto is not None,
+          "%dx%d: con dodici colori la via dei colori si puo' fare" % schermo)
+    esigi(svelto is not None and svelto.tobytes() == sempre.tobytes(),
+          "%dx%d: e il fotogramma e' identico **pixel per pixel**" % schermo)
+
+# La luminosita' viaggia dentro la maschera: deve viaggiare anche nella
+# piastrella, se no lo slider smetterebbe di funzionare proprio dove la via
+# nuova si accende.
+c = display.Compositore(TELA, (1280, 720), {"filtro_dmd": True})
+c.luminosita = 40
+tela = tela_a_colori(c.tela_logica)
+misura = (c.tela_logica[0] * c.scala, c.tela_logica[1] * c.scala)
+esigi(c._a_colori(tela, misura).tobytes()
+      == ImageChops.multiply(tela.resize(misura, Image.NEAREST),
+                             c.maschera(misura)).tobytes(),
+      "anche con la luminosita' al quaranta per cento non cambia un pixel")
+
+# Troppi colori -- una fotografia, un fotogramma di video -- e si torna alla
+# strada di sempre. Il conto dei colori lo fa PIL e smette appena supera il
+# tetto: costa microsecondi, non millisecondi.
+c = display.Compositore(TELA, (1280, 720), {"filtro_dmd": True})
+misura = (c.tela_logica[0] * c.scala, c.tela_logica[1] * c.scala)
+foto = Image.new("RGB", c.tela_logica)
+px = foto.load()
+for y in range(c.tela_logica[1]):
+    for x in range(c.tela_logica[0]):
+        px[x, y] = ((x * 7 + y) % 256, (x + y * 5) % 256, (x * 3 + y * 11) % 256)
+esigi(foto.getcolors(display.SOGLIA_COLORI) is None,
+      "una fotografia ha piu' colori del tetto (%d)" % display.SOGLIA_COLORI)
+esigi(c._a_colori(foto, misura) is None,
+      "e allora la via dei colori si tira indietro invece di rallentare")
+esigi(c._grande(foto, misura).tobytes()
+      == ImageChops.multiply(foto.resize(misura, Image.NEAREST),
+                             c.maschera(misura)).tobytes(),
+      "il ripiego resta quello di sempre, identico al pixel")
+
+# E dove non ci sono punti da disegnare non si scomoda.
+uno = display.Compositore(TELA, (256, 64), {"filtro_dmd": True})
+esigi(uno._a_colori(Image.new("RGB", (256, 64)), (256, 64)) is None,
+      "a scala uno la maschera e' tutta bianca: niente da guadagnare")
+
+spenta = display.Compositore(TELA, (1280, 720),
+                             {"filtro_dmd": True, "filtro_a_colori": False})
+esigi(spenta._a_colori(tela_a_colori(spenta.tela_logica),
+                       (spenta.tela_logica[0] * spenta.scala,
+                        spenta.tela_logica[1] * spenta.scala)) is None,
+      "e c'e' l'interruttore per spegnerla senza toccare il codice")
 
 print()
 print("=" * 74)

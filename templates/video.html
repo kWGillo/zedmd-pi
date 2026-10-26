@@ -53,15 +53,28 @@
 
     <div class="row2">
       <label for="risoluzione">{{ t('video.risoluzione') }}
-        <input type="text" id="risoluzione" name="risoluzione" class="mono"
-               list="risoluzioni-viste"
-               placeholder="{{ risoluzioni[0] if risoluzioni else '1920x1080' }}"
-               value="{{ cfg.video.risoluzione }}">
-        <datalist id="risoluzioni-viste">
+        {# Un elenco vero, non un `datalist`: quello filtra i suggerimenti
+           con quello che c'e' gia' scritto nella casella, quindi con una
+           risoluzione impostata il menu si apriva **vuoto** e bisognava
+           cancellare il testo per rivedere le altre. Dove il monitor non
+           dichiara niente resta la casella da riempire a mano, che e' il
+           caso per cui era nata. #}
+        {% if risoluzioni %}
+        <select id="risoluzione" name="risoluzione" class="mono">
+          <option value="" {{ 'selected' if not cfg.video.risoluzione }}>{{ t('video.risoluzione.auto') }}</option>
           {% for misura in risoluzioni %}
-          <option value="{{ misura }}"></option>
+          <option value="{{ misura }}"
+                  {{ 'selected' if cfg.video.risoluzione == misura }}>{{ misura }}</option>
           {% endfor %}
-        </datalist>
+          {% if cfg.video.risoluzione and cfg.video.risoluzione not in risoluzioni %}
+          <option value="{{ cfg.video.risoluzione }}" selected>{{ cfg.video.risoluzione }}</option>
+          {% endif %}
+        </select>
+        {% else %}
+        <input type="text" id="risoluzione" name="risoluzione" class="mono"
+               placeholder="1920x1080"
+               value="{{ cfg.video.risoluzione }}">
+        {% endif %}
       </label>
       <label for="finestra">{{ t('video.finestra') }}
         <select id="finestra" name="finestra">

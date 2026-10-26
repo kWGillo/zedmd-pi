@@ -120,6 +120,14 @@ DEFAULTS = {
         # perche' chi installa questo programma su un monitor sta cercando un
         # DMD e non un terminale; si spegne e si vede l'immagine piena.
         "filtro_dmd": True,
+        # La via svelta del filtro: tingere una piastrella per **colore**
+        # invece di moltiplicare ogni pixel dello schermo. Il risultato e'
+        # identico al pixel -- una prova lo verifica -- e su un disegno con
+        # pochi colori costa molto meno. Si puo' spegnere perche' su una
+        # macchina con poca banda di memoria la strada di sempre potrebbe
+        # essere la piu' svelta, e il modo di saperlo e' misurare:
+        # `diagnostica/misura_video.py` cronometra tutte e due.
+        "filtro_a_colori": True,
         # Quanto del lato della cella e' punto acceso. 0.80 lascia
         # l'intercapedine che si vede su un pannello da 3 mm di passo.
         "filtro_punto": 0.80,

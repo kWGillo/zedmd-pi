@@ -2659,6 +2659,7 @@ def create_app(runtime):
         compositore = getattr(runtime.display, "compositore", None)
         if compositore is not None:
             compositore.filtro = conf["filtro_dmd"]
+            compositore.a_colori = conf.get("filtro_a_colori", True)
             compositore.punto = conf["filtro_punto"]
             compositore.bagliore = conf["filtro_bagliore"]
             compositore.fondo = conf["filtro_fondo"]

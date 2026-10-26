@@ -91,7 +91,7 @@ def schermo_configurato():
     return 1920, 1080
 
 
-def tela_di_gioco(misura):
+def tela_di_gioco(misura, colori=0):
     """Una tela piena di roba che cambia: un fotogramma di gioco realistico.
 
     Una tela nera non va bene: il filtro costa uguale, ma l'ingrandimento e
@@ -101,12 +101,15 @@ def tela_di_gioco(misura):
     tela = Image.new("RGB", misura)
     px = tela.load()
     rnd = random.Random(20251025)
+    tavolozza = [(rnd.randint(40, 255), rnd.randint(40, 255),
+                  rnd.randint(40, 255)) for _ in range(colori)] if colori else []
     for y in range(misura[1]):
         for x in range(misura[0]):
-            if (x + y) % 3:
-                continue
-            px[x, y] = (rnd.randint(40, 255), rnd.randint(40, 255),
-                        rnd.randint(40, 255))
+            if tavolozza:
+                px[x, y] = tavolozza[rnd.randrange(colori)]
+            elif (x + y) % 3 == 0:
+                px[x, y] = (rnd.randint(40, 255), rnd.randint(40, 255),
+                            rnd.randint(40, 255))
     return tela
 
 
@@ -116,6 +119,30 @@ def crono(fn, giri=GIRI):
     for _ in range(giri):
         fn()
     return (time.perf_counter() - inizio) / giri * 1000.0
+
+
+def confronto_colori(schermo):
+    """Le due strade del filtro, sulla stessa macchina e sullo stesso disegno.
+
+    La via dei colori (17.4.15) tinge una piastrella per colore invece di
+    moltiplicare ogni pixel: su un disegno con pochi colori -- un gioco, una
+    schermata di testo -- dovrebbe costare molto meno. "Dovrebbe" non basta:
+    qui si vede quanto, su questa macchina.
+    """
+    c = display.Compositore((256, 64), schermo, {"filtro_dmd": True})
+    if c.scala < 3:
+        return
+    tela = tela_di_gioco(c.tela_logica, colori=12)
+    display.VIA_DEI_COLORI = True
+    colori = crono(lambda: c.componi(tela))
+    display.VIA_DEI_COLORI = False
+    sempre = crono(lambda: c.componi(tela))
+    display.VIA_DEI_COLORI = True
+    print()
+    print("  il filtro su un disegno da gioco (dodici colori)")
+    print("    pixel per pixel     %6.1f ms" % sempre)
+    print("    via dei colori      %6.1f ms  -> %.1f volte piu' svelta"
+          % (colori, sempre / colori if colori else 0.0))
 
 
 def misura(schermo):
@@ -174,3 +201,4 @@ if __name__ == "__main__":
         schermi = [schermo_configurato()]
     for s in schermi:
         misura(s)
+        confronto_colori(s)

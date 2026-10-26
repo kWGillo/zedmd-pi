@@ -3676,6 +3676,30 @@ Storico:
        Atom quel conto si moltiplica. Non si indovina, si misura:
        `diagnostica/misura_video.py` cronometra i quattro stadi del
        fotogramma su **quella** macchina e dice se ci si sta dentro.
+  17.4.15 **Il filtro DMD per colore, e il menu delle risoluzioni che si
+       apre.**
+       *«Abbassa il numero di colori.»* L'idea giusta, e viene da chi
+       guardava gli scatti. Il filtro moltiplicava ogni pixel **vero** per
+       la maschera: a 2560x1080 sono due milioni e mezzo di moltiplicazioni
+       per tre canali, trenta volte al secondo, ed e' la voce piu' cara del
+       fotogramma. Ma la maschera e' la stessa piastrella ripetuta, e un
+       pixel della tela diventa sempre quella piastrella tinta del suo
+       colore: il risultato dipende dal **colore**, non da dove sta. Con una
+       dozzina di colori -- quelli di un gioco -- le piastrelle diverse sono
+       una dozzina, si tingono una volta sola, e il fotogramma diventa una
+       copia. Non cambia un pixel, e una prova lo verifica a tappeto su
+       quattro risoluzioni e con la luminosita' abbassata. Dove non si puo'
+       fare -- una fotografia, un fotogramma di video, oltre mille colori --
+       si torna da sola alla strada di sempre, e il conto dei colori lo fa
+       PIL in microsecondi. Si spegne con `video.filtro_a_colori`.
+       *«Dopo aver selezionato una risoluzione, il menu a tendina non mostra
+       nient'altro: devo cancellare il testo per rivedere le altre.»* Era
+       una casella di testo con un `datalist`, e un `datalist` filtra i
+       suggerimenti con quello che c'e' gia' scritto: con una risoluzione
+       impostata l'unico suggerimento che corrispondeva era quella. Adesso
+       e' un elenco vero, con «automatica» in cima, e una misura scritta a
+       mano non si perde. Dove il monitor non dichiara niente resta la
+       casella, che e' il caso per cui era nata.
 """
 
-__version__ = "17.4.14"
+__version__ = "17.4.15"

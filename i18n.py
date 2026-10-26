@@ -1987,6 +1987,8 @@ STRINGS = {
     "video.risoluzione.rilevate": (
         "Il monitor dichiara: {elenco}",
         "The monitor reports: {elenco}"),
+    "video.risoluzione.auto": ("automatica (quella che c'\u00e8 adesso)",
+                               "automatic (the current one)"),
     "video.risoluzione.mute": (
         "Il monitor non dichiara nessuna misura: si scrive a mano.",
         "The monitor reports no size: type it by hand."),

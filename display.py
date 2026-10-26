@@ -30,6 +30,13 @@ import threading
 
 from PIL import Image, ImageChops
 
+try:
+    import numpy as _np
+except ImportError:                                   # pragma: no cover
+    # Non e' una dipendenza: senza, il filtro DMD si fa come si e' sempre
+    # fatto. Con, si fa nel modo svelto -- vedi `Compositore._a_colori`.
+    _np = None
+
 import piattaforma
 
 # La misura del pannello quando non c'e' un pannello a dirla. Sul LED la
@@ -73,6 +80,20 @@ def tela_dmd(cfg):
 
 
 # --------------------------------------------------------- il filtro DMD
+
+# Quanti colori diversi puo' avere una tela perche' convenga filtrarla a
+# tavolozza invece che pixel per pixel. Vedi `Compositore._a_colori`: la
+# spesa cresce con i colori, il guadagno no, e oltre questo numero -- una
+# fotografia, un fotogramma di video -- si torna alla strada di sempre.
+# Mille e ventiquattro e' largo: un gioco ne usa una dozzina, l'orologio
+# meno di cinquanta, il meteo con le sue icone poche centinaia.
+SOGLIA_COLORI = 1024
+
+# L'interruttore della via dei colori. Esiste per poterla spegnere senza
+# toccare il codice -- `diagnostica/misura_video.py` cronometra le due strade
+# accendendolo e spegnendolo -- e perche' una strada nuova deve avere un modo
+# di tornare a quella vecchia che non sia "si riscrive".
+VIA_DEI_COLORI = True
 
 # Le righe logiche che l'orologio vuole almeno, quando divide lo schermo con
 # una sorgente. Sotto questa misura le cifre diventano un francobollo e tanto
@@ -132,12 +153,14 @@ class Compositore:
         self.schermo = tuple(schermo)
         conf = conf or {}
         self.filtro = bool(conf.get("filtro_dmd", True))
+        self.a_colori = bool(conf.get("filtro_a_colori", True))
         self.punto = max(0.1, min(1.0, float(conf.get("filtro_punto", 0.80))))
         self.bagliore = max(0.0, min(1.0, float(conf.get("filtro_bagliore", 0.25))))
         self.fondo = conf.get("filtro_fondo") or "#000000"
         self.volute = 0
         self.luminosita = 100
         self._maschere = {}            # una maschera per misura di regione
+        self._celle = {}               # una piastrella per scala e luminosita'
         self._tavola = None            # (luminosita, tabella) in cache
         self._quadro = None            # il fotogramma, riusato
         # L'ultimo fotogramma di ogni regione, gia' ingrandito. Serve perche'
@@ -416,11 +439,95 @@ class Compositore:
 
     # ---- il fotogramma
 
+    def _cella_filtrata(self, lato):
+        """La cella del filtro, luminosita' inclusa, come matrice numpy.
+
+        E' **una** piastrella della maschera: la maschera intera non e' altro
+        che questa ripetuta, e per il conto a tavolozza basta la piastrella.
+        """
+        chiave = (lato, self.punto, self.bagliore, self.luminosita)
+        in_cache = self._celle.get(chiave)
+        if in_cache is not None:
+            return in_cache
+        cella = self._cella(lato)
+        if self.luminosita < 100:
+            quota = max(0, self.luminosita) / 100.0
+            cella = cella.point([int(v * quota) for v in range(256)])
+        matrice = _np.asarray(cella, dtype=_np.uint16)
+        if len(self._celle) > 8:
+            self._celle.clear()
+        self._celle[chiave] = matrice
+        return matrice
+
+    def _a_colori(self, immagine, misura):
+        """Il filtro DMD fatto **per colore** invece che per pixel.
+
+        L'idea e' sua: *\u00ababbassa il numero di colori\u00bb*. Il filtro moltiplica
+        ogni pixel dello schermo per la maschera -- a 2560x1080 sono due
+        milioni e mezzo di moltiplicazioni per tre canali, trenta volte al
+        secondo, ed e' la voce piu' cara del fotogramma: misurata su un mini
+        PC Atom, 87 ms dei 123 di un fotogramma intero.
+
+        Ma la maschera e' **la stessa piastrella ripetuta**, e un pixel della
+        tela diventa sempre quella piastrella tinta del suo colore. Quindi il
+        risultato dipende solo dal **colore**, non da dove sta: con una
+        dozzina di colori -- che e' quello che usa un gioco -- le piastrelle
+        diverse sono una dozzina, si calcolano una volta, e il fotogramma
+        diventa una **copia** invece di due milioni e mezzo di conti.
+
+        Non cambia un pixel: la piastrella si tinge con la stessa formula di
+        `ImageChops.multiply`, e una prova confronta le due strade pixel per
+        pixel. Torna `None` quando la strada non si puo' fare -- niente
+        numpy, scala non intera, o troppi colori (una fotografia, un
+        fotogramma di video): allora si moltiplica come si e' sempre fatto.
+        """
+        if (_np is None or not VIA_DEI_COLORI or not self.a_colori
+                or self.scala < 1):
+            return None
+        lato = int(self.scala)
+        if lato <= 2:
+            # Sotto i tre pixel per cella la maschera e' tutta bianca: non
+            # c'e' niente da moltiplicare e la via dei colori sarebbe solo
+            # lavoro in piu'. Succede sul pannello, dove la scala e' uno.
+            return None
+        largo, alto = misura
+        tela_l, tela_a = immagine.size
+        if (tela_l * lato, tela_a * lato) != (largo, alto):
+            return None
+        # La domanda «quanti colori ci sono?» la sa gia' rispondere PIL, e la
+        # risponde **presto**: `getcolors` smette di contare appena supera il
+        # tetto, quindi su una fotografia costa sei microsecondi invece dei
+        # cinque millesimi di secondo di una `unique` buttata via.
+        if immagine.getcolors(SOGLIA_COLORI) is None:
+            return None
+        arr = _np.asarray(immagine)
+        if arr.ndim != 3 or arr.shape[2] != 3:
+            return None
+        # I tre byte di un colore in un numero solo: cosi' i colori distinti
+        # si contano con una `unique` su interi invece che su terne.
+        impacchettati = ((arr[:, :, 0].astype(_np.uint32) << 16)
+                         | (arr[:, :, 1].astype(_np.uint32) << 8)
+                         | arr[:, :, 2])
+        unici, indici = _np.unique(impacchettati, return_inverse=True)
+        colori = _np.stack([(unici >> 16) & 255, (unici >> 8) & 255,
+                            unici & 255], axis=1).astype(_np.uint16)
+        cella = self._cella_filtrata(lato)
+        # La stessa formula di `ImageChops.multiply`, che tronca: (a*b)//255.
+        piastrelle = ((colori[:, None, None, :] * cella[None, :, :, None])
+                      // 255).astype(_np.uint8)
+        fuori = piastrelle[indici.reshape(tela_a, tela_l)]
+        fuori = fuori.transpose(0, 2, 1, 3, 4).reshape(alto, largo, 3)
+        return Image.fromarray(fuori)
+
     def _grande(self, immagine, misura):
         """Una tela portata a una misura in pixel veri, filtro e luce inclusi."""
         largo, alto = misura
         if immagine.mode != "RGB":
             immagine = immagine.convert("RGB")
+        if self.filtro:
+            svelto = self._a_colori(immagine, misura)
+            if svelto is not None:
+                return svelto
         filtro = Image.NEAREST if self.scala >= 1 else Image.BILINEAR
         grande = immagine.resize((largo, alto), filtro)
         if self.filtro:
