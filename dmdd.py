@@ -542,6 +542,20 @@ class Runtime:
                        self.doom, self.giochi, self.gameboy,
                        self.clock):
             self.arbiter.register(source)
+        # Sorgenti locali: un `custom.py` accanto a questo file — fuori da
+        # `sources/` e dal manifest dell'aggiornamento, quindi salvo dagli
+        # OTA — puo' registrarne di sue, con la stessa forma di quelle di
+        # serie. Se manca non cambia niente; se e' rotto, una riga nel
+        # registro e l'avvio continua: una schermata locale non deve poter
+        # fermare il pannello.
+        if os.path.exists(os.path.join(os.path.dirname(
+                os.path.abspath(__file__)), "custom.py")):
+            try:
+                import custom
+                custom.registra(self.arbiter, self.cfg, self.display.width,
+                                self.display.height)
+            except Exception as exc:
+                print("[dmd] custom.py ignorato: %s" % exc, flush=True)
         self.arbiter.apply_services()
         # Il turno fra meteo e cielo: uno ogni due media, a turno. Parte
         # sempre, anche con il Cielo spento -- allora da' tutto lo spazio al
