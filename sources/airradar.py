@@ -263,6 +263,16 @@ def post_json(url, payload, timeout=12):
 
 ROUTESET_URL = "https://api.adsb.lol/api/0/routeset"
 
+# Standing data VRS di adsb.lol: un file JSON per nominativo, con codici
+# ICAO, codici IATA e gli aeroporti interi. La directory e' data dalle
+# prime due lettere del nominativo: SKW3830 sta in routes/SK/.
+VRS_URL = "https://vrs-standing-data.adsb.lol/routes/%s/%s.json"
+
+# Una rotta hexdb piu' vecchia di un anno non si mostra. Il database
+# tiene voci del 2019 — SKW3830 dava ancora Minneapolis-Fargo nel 2026
+# — e l'updatetime che hexdb stesso pubblica serve proprio a scartarle.
+HEXDB_MAX_AGE_S = 365 * 24 * 3600
+
 
 # Sotto questo non si scende, qualunque cosa dica la configurazione: e' un
 # servizio pubblico e gratuito, e interrogarlo dieci volte al secondo sarebbe
@@ -630,7 +640,9 @@ class AirRadarSource(Source):
         if found and ("route" in (cfg.get("fields") or []) or cfg.get("log_route", True)):
             self.resolve_routes(found)
             for plane in found:
-                plane["route"] = self._route_cache.get(plane["flight"], "")
+                _rotta = self._route_cache.get(plane["flight"], "")
+                plane["route"] = (_rotta if self._rotta_plausibile(
+                    _rotta, plane, (lat, lon), radius_km) else "")
 
         self._log_flights(found, cfg)
         # Lo stato si conserva come chiave e valori, non come frase gia'
@@ -855,6 +867,11 @@ class AirRadarSource(Source):
         `cooldown`. Il primo aereo si mostra sempre, anche quando
         l'intervallo e' piu' corto della durata: meglio un aereo che nessuno.
         """
+        # Come in _poll: dmdconf si importa qui (patch locale,
+        # ottobre 2026): senza questa riga il controllo di
+        # applicabilita' qui sotto solleva NameError.
+        import dmdconf
+
         cooldown = max(30, int(cfg["cooldown"]))
         duration = max(2, int(cfg["display_seconds"]))
         now = time.time()
@@ -862,6 +879,14 @@ class AirRadarSource(Source):
 
         # Non ripresentare lo stesso aereo finche' non e' passato il tempo di riposo.
         self._recent = {k: t for k, t in self._recent.items() if now - t < cooldown}
+
+        # Raggio del pannello: serve al filtro di rotta per giudicare anche
+        # un aereo che ci arrivera' (distanza di passaggio), non solo uno
+        # che ci e' gia' (distanza attuale). Vedi _rotta_plausibile.
+        try:
+            _raggio = float(cfg.get("radius_km") or 0.0) or None
+        except (TypeError, ValueError):
+            _raggio = None
 
         for plane in aircraft:
             if not self._running:
@@ -879,7 +904,9 @@ class AirRadarSource(Source):
             self._recent[key] = time.time()
 
             if "route" in (cfg.get("fields") or []) and plane["flight"]:
-                plane["route"] = self._lookup_route(plane["flight"])
+                _rotta = self._lookup_route(plane["flight"])
+                plane["route"] = (_rotta if self._rotta_plausibile(
+                    _rotta, plane, dmdconf.posizione(self.cfg), _raggio) else "")
 
             self._showing = True
             self._mostra(plane, cfg, duration)
@@ -984,6 +1011,57 @@ class AirRadarSource(Source):
 
     # ------------------------------------------------------------------ rotta
 
+    # ------------------------------------------------------------------
+    # Filtro di applicabilita' della rotta (patch locale per Micky).
+    # Le banche dati gratuite delle rotte sono storiche: per un numero di
+    # volo riciclato possono restituire la rotta di un altro giorno (es.
+    # SKW3830 dato come Minneapolis-Fargo mentre atterrava a Seattle).
+    # Un aereo basso e vicino a casa sta per forza partendo o arrivando a
+    # un aeroporto della zona: se nessuno dei due capi della rotta e' un
+    # aeroporto di Seattle, la rotta non e' la sua e si nasconde -- restano
+    # numero di volo, tipo, quota, velocita' e distanza, che sono dati
+    # veri e in diretta. In quota (sorvoli) la rotta si tiene sempre:
+    # li' non c'e' contraddizione possibile.
+    # Dal 25 ottobre 2026 "vicino" conta in due sensi: dove l'aereo e'
+    # adesso e dove la sua rotta lo portera'. Il pannello mostra un aereo
+    # anche quando e' ancora lontano, se passera' entro il raggio -- e
+    # SKW4070 ha mostrato cosi' una rotta stale Detroit-Buffalo mentre
+    # scendeva su Seattle, perche' al momento dell'interrogazione era
+    # ancora oltre gli 80 km. La distanza di passaggio e' gia' calcolata
+    # per il pannello e sta in plane["distance"].
+    _AEROPORTI_ZONA = {"SEA", "KSEA", "BFI", "KBFI",
+                       "RNT", "KRNT", "PAE", "KPAE"}
+
+    def _rotta_plausibile(self, route, plane, casa, raggio=None):
+        if not route or casa is None:
+            return True
+        alt = plane.get("altitude")
+        if alt is None or alt >= 12000:
+            return True
+        try:
+            dist = haversine_km(casa[0], casa[1],
+                                float(plane["lat"]), float(plane["lon"]))
+        except (TypeError, ValueError, KeyError):
+            dist = None
+        if dist is not None and dist <= 80.0:
+            vicino = True
+        else:
+            # Non e' vicino adesso, ma il pannello lo mostra perche' la
+            # sua rotta lo portera' entro il raggio: vale come vicino.
+            try:
+                passaggio = float(plane.get("distance"))
+            except (TypeError, ValueError):
+                passaggio = None
+            limite = raggio if raggio is not None else 80.0
+            vicino = passaggio is not None and passaggio <= limite
+        if not vicino:
+            return True
+        codici = [c.strip().upper() for c in route.split(FRECCIA) if c.strip()]
+        if not codici:
+            return True
+        capi = {codici[0], codici[-1]}
+        return bool(capi & self._AEROPORTI_ZONA)
+
     def resolve_routes(self, planes):
         """Chiede in un colpo solo le rotte di tutti i voli non ancora noti.
 
@@ -1030,12 +1108,115 @@ class AirRadarSource(Source):
             self._route_cache[callsign] = route
             self._routes_found += 1
 
-    def _lookup_route(self, callsign):
-        """Origine e destinazione da hexdb.io.
+    # ------------------------------------------------------------ le rotte
+    #
+    # Patch locale per Micky, ottobre 2026: due fonti incrociate invece
+    # di una, e un controllo di eta' su hexdb.
+    #
+    # Il problema era un nominativo riciclato: hexdb serve per SKW3830
+    # ancora la rotta del maggio 2019 (Minneapolis-Fargo), mentre quel
+    # volo oggi fa Seattle-Spokane. Le banche dati per nominativo vanno
+    # a male cosi', in silenzio, e l'unica difesa che si aveva era il
+    # filtro di applicabilita' piu' sotto, che nasconde la rotta invece
+    # di correggerla. Ora la ricerca prova prima lo standing data VRS
+    # di adsb.lol — che per SKW3830 da' la rotta giusta — e poi hexdb,
+    # ma solo se la sua voce non e' piu' vecchia di un anno. Se due
+    # fonti sono d'accordo, vince l'accordo; se no, vince l'ordine.
+    #
+    # L'endpoint hexdb in testo semplice e' stato tolto: porta gli
+    # stessi dati dell'API JSON ma senza updatetime, e tenerlo avrebbe
+    # fatto rientrare dalla finestra le voci vecchie appena scartate.
 
-        Due tentativi: prima l'API JSON, poi l'endpoint in testo semplice.
-        L'esito viene messo in cache anche quando e' negativo, per non
-        tempestare il servizio con lo stesso volo sconosciuto.
+    @staticmethod
+    def _codici_rotta(testo):
+        """I codici di una rotta, normalizzati per confrontarla.
+
+        "KSEA-KGEG-KSEA" e "SEA-GEG-SEA" sono la stessa rotta: i codici
+        ICAO statunitensi perdono la K iniziale (quattro lettere che
+        cominciano per K sono Stati Uniti per definizione). Il resto
+        resta com'e': un codice di tre lettere non si tocca.
+        """
+        codici = []
+        for parte in (testo or "").replace(FRECCIA, "-").split("-"):
+            codice = parte.strip().upper()
+            if not codice:
+                continue
+            if len(codice) == 4 and codice.startswith("K"):
+                codice = codice[1:]
+            codici.append(codice)
+        return tuple(codici)
+
+    @staticmethod
+    def _stessa_rotta(prima, seconda):
+        codici_a = AirRadarSource._codici_rotta(prima)
+        codici_b = AirRadarSource._codici_rotta(seconda)
+        return bool(codici_a) and codici_a == codici_b
+
+    @staticmethod
+    def _hexdb_fresco(updatetime, adesso):
+        """Vero se la voce hexdb si puo' ancora mostrare.
+
+        Senza updatetime non si puo' giudicare, e si tiene: togliere
+        dati perche' manca un campo sarebbe peggio che mostrarli. Con
+        un updatetime piu' vecchio di un anno, invece, la voce e' storia
+        e non informazione.
+        """
+        if updatetime is None:
+            return True
+        try:
+            eta = adesso - float(updatetime)
+        except (TypeError, ValueError):
+            return True
+        return eta <= HEXDB_MAX_AGE_S
+
+    @staticmethod
+    def _rotta_da_codici(codici):
+        """"SEA-GEG-SEA" in "SEA → GEG → SEA", o "" se non e' una rotta."""
+        codici = str(codici or "").strip()
+        if ("-" not in codici or len(codici) > 40
+                or "unknown" in codici.lower()):
+            return ""
+        parti = [p.strip() for p in codici.split("-") if p.strip()]
+        return FRECCIA.join(parti) if len(parti) >= 2 else ""
+
+    def _rotta_vrs(self, callsign):
+        """La rotta dallo standing data VRS di adsb.lol, o "".
+
+        Un 404 vuol dire solo che quel nominativo non c'e' nel file:
+        non e' un errore, e' una risposta, e non si stampa niente.
+        """
+        if len(callsign) < 2:
+            return ""
+        try:
+            data = fetch_json(VRS_URL % (callsign[:2], callsign), timeout=6)
+        except Exception:
+            return ""
+        if not isinstance(data, dict):
+            return ""
+        # IATA prima: piu' corti e leggibili, stessa regola del routeset.
+        return (self._rotta_da_codici(data.get("_airport_codes_iata"))
+                or self._rotta_da_codici(data.get("airport_codes")))
+
+    def _rotta_hexdb(self, callsign):
+        """La rotta da hexdb.io, solo se la voce non e' vecchia, o ""."""
+        try:
+            data = fetch_json("https://hexdb.io/api/v1/route/icao/%s" % callsign,
+                              timeout=6)
+        except Exception:
+            return ""
+        if not isinstance(data, dict):
+            return ""
+        if not self._hexdb_fresco(data.get("updatetime"), time.time()):
+            return ""
+        return self._rotta_da_codici(data.get("route", ""))
+
+    def _lookup_route(self, callsign):
+        """Origine e destinazione, da piu' fonti incrociate.
+
+        VRS prima, hexdb (solo se fresca) dopo; se due fonti sono
+        d'accordo vince l'accordo, altrimenti vince l'ordine. L'esito
+        viene messo in cache anche quando e' negativo, per non
+        tempestare i servizi con lo stesso volo sconosciuto.
         """
         callsign = callsign.strip().upper()
         if not callsign:
@@ -1043,25 +1224,22 @@ class AirRadarSource(Source):
         if callsign in self._route_cache:
             return self._route_cache[callsign]
 
+        candidati = []
+        for rotta in (self._rotta_vrs(callsign),
+                      self._rotta_hexdb(callsign)):
+            if rotta:
+                candidati.append(rotta)
+
         route = ""
-        for url, as_json in (
-                ("https://hexdb.io/api/v1/route/icao/%s" % callsign, True),
-                ("https://hexdb.io/callsign-route-iata?callsign=%s" % callsign, False)):
-            try:
-                if as_json:
-                    data = fetch_json(url, timeout=6)
-                    text = data.get("route", "") if isinstance(data, dict) else str(data)
-                else:
-                    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-                    with urllib.request.urlopen(request, timeout=6) as response:
-                        text = response.read().decode("utf-8", "replace").strip()
-                text = (text or "").strip().strip('"')
-                # Formato atteso: "LIMC-EGLL". Scali multipli restano tali.
-                if "-" in text and len(text) <= 40 and "unknown" not in text.lower():
-                    route = FRECCIA.join(part.strip() for part in text.split("-") if part.strip())
+        for indice, prima in enumerate(candidati):
+            for seconda in candidati[indice + 1:]:
+                if self._stessa_rotta(prima, seconda):
+                    route = prima
                     break
-            except Exception:
-                continue
+            if route:
+                break
+        if not route and candidati:
+            route = candidati[0]
 
         self._route_cache[callsign] = route
         if not route:
