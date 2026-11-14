@@ -19,10 +19,11 @@ c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 cd21d278edc7b457692724e5c7ddbabd  diagnostica/misura_video.py
 ab1bb50ca47e2005874da4a006c8345e  diagnostica/prova_giochi.py
 20e12cf4f1f4b9b1cc6b536853b96b14  diagnostica/prova_nati_e_morti.py
+62e994e01f1265f94940a5477845a167  diagnostica/prova_nomi.py
 000088f80716e6a8838818bfd0034763  diagnostica/prova_passaggi_radar.py
 7e9331887bd76e2919bd0866b32c5d6c  diagnostica/prova_piattaforma.py
 c80018172111d5ae281a3496e6cf6de2  diagnostica/prova_regioni.py
-b579267e149f754308856434fd8b5949  diagnostica/prova_schermo.py
+be170879c09d7ab47ba42a55b1a3df1a  diagnostica/prova_schermo.py
 3ce325428f4180017a0ee604c8282b0b  diagnostica/rifai_manifest.sh
 c36e0875cf83bfdfc43bd9daaa551558  diagnostica/scarica_tdb.sh
 1fafe8f1f25c976ce09b10c613b98f86  diagnostica/schermo_dal_vivo.py
@@ -67,7 +68,7 @@ acf8a6145e40984fc50e310c763bc7c4  pulsante.py
 6921403aa108685fc815df75682f552d  rete.py
 374d8f430239d5d2ebb9ab5748c9fec5  rifiuti.py
 3c11488d3dd9c9c4018c4d535395a513  santi.csv
-c05a1ffb6fadd1bf3bc93852e683c453  satelliti.py
+79096a16a35b877568c61dd6f3fd8fae  satelliti.py
 5698878038d0f306ecebc25bde34d88c  scadenze.py
 c35ce2b769ac15925a4f51b73dc23317  setup_nowplaying.sh
 7ee163e5c89f7ac983b26ae09a1a4b92  setup_share.sh
@@ -181,8 +182,8 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 7029e8aa17fd02a731275a765171bd70  templates/telecamera.html
 8e4da1571d2f55b9211b110179be1607  templates/updates.html
 413c8667bf3de07a3dc1d6e12b12f8b9  templates/video.html
-549715d7c0aad274f57e64ea2d5ef9df  version.py
+ba4705ade9b54aecac07a5a16aefc2a0  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
-925d42f3d59ff1228e1903c11ba4c677  webui.py
+6b98fbe17876bdc9d3678370720e4449  webui.py
 f2f3da904ff25e05c861b6f1277b1349  zedmd_http.py

@@ -3812,6 +3812,27 @@ Storico:
        cambiato sotto gli occhi senza averlo chiesto. La si sceglie nella
        pagina Video, e l'elenco offre solo le finezze che quello schermo
        regge davvero.
+  17.4.21 **La pagina Video si riapre, e una prova che apre le pagine.**
+       Una schermata del browser: *Internal Server Error* su `/video`. Dentro,
+       una riga sola di vero -- `NameError: name 'uscita_video' is not
+       defined`. Nella web UI il modulo `display` si importa **dentro** la
+       funzione della pagina e con un altro nome; la funzione nuova della
+       finezza, accanto, usava quel nome senza averlo. Python non se ne
+       accorge finche' non ci passa, e li' ci passa solo chi apre quella
+       pagina: a scoprirlo e' andato chi la usa, che e' il modo peggiore.
+       La correzione e' una riga. Quello che conta e' il resto: nessuna
+       prova di questo progetto apriva una pagina. Adesso `prova_schermo`
+       apre la pagina Video con un'uscita finta -- a finezza 1 e a finezza
+       piena -- e guarda che esca davvero.
+       E c'e' una prova nuova, `diagnostica/prova_nomi.py`: chiede a
+       pyflakes quali nomi, in tutto il progetto, vengono usati senza essere
+       mai definiti. Costa un secondo e avrebbe fermato questo 500 prima che
+       partisse. Dove pyflakes non c'e' si salta dicendolo: e' uno strumento
+       da banco di lavoro, non una dipendenza dell'apparecchio.
+       Lanciata la prima volta ha trovato anche un `precedente` che non
+       nasceva da nessuna parte, nel calcolo dello spegnimento dei
+       satelliti: oggi quella riga e' protetta da un'altra riga, il che vuol
+       dire che funziona per caso. Adesso nasce.
 """
 
-__version__ = "17.4.20"
+__version__ = "17.4.21"

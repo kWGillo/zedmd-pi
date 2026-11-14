@@ -621,13 +621,20 @@ def _componi(voce, lat, lon, quota_km, soglia, prima, campioni, dopo):
     # capita nel 13% dei passaggi visibili.
     spegnimento = None
     acceso_prima = None
+    # L'istante precedente comincia a non esistere: oggi la riga che lo usa
+    # e' protetta da `acceso_prima`, che diventa vero solo dopo un giro
+    # intero, ma il nome non nasceva da nessuna parte -- e una riga che
+    # funziona per via di un'altra riga e' una trappola per chi tocca il
+    # ciclo domani. Lo trova anche `diagnostica/prova_nomi.py`.
+    precedente = None
     for istante, _el in campioni:
         jd, fr = _giuliano(istante)
         errore, r, _v = sat.sgp4(jd, fr)
         if errore != 0:
             continue
         adesso_acceso = illuminato(r, jd, fr)
-        if acceso_prima and not adesso_acceso and spegnimento is None:
+        if (acceso_prima and not adesso_acceso and spegnimento is None
+                and precedente is not None):
             spegnimento = _ombra(sat, precedente, istante, lat, lon, quota_km)
         acceso_prima = adesso_acceso
         precedente = istante

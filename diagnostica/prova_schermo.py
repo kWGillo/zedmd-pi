@@ -1170,6 +1170,59 @@ esigi("immagine.resize((self.width, self.height),\n"
       "il framebuffer ingrandisce a blocchi, non sfumando")
 
 print()
+print("-- la pagina Video si apre davvero (17.4.21)")
+
+# Una schermata del browser: **Internal Server Error** sulla pagina Video,
+# e dentro una riga sola di vero -- `NameError: name 'uscita_video' is not
+# defined`. Il modulo `display`, dentro quella pagina, si importa con un
+# altro nome e l'import sta **dentro** la funzione: una funzione nuova
+# accanto non lo trovava. Nessuna prova di questo progetto apriva una
+# pagina, quindi a scoprirlo e' andato chi la usa, che e' il modo peggiore.
+#
+# Adesso la pagina si apre qui, con un'uscita finta e un `runtime` ridotto
+# all'osso: non si controlla com'e' fatta, si controlla che **esca**.
+
+import webui                                               # noqa: E402
+
+
+class VetroFinto:
+    width, height = 1280, 720
+
+    def mostra(self, immagine):
+        pass
+
+
+class RuntimeFinto:
+    def __init__(self, conf, uscita):
+        self.cfg = conf
+        self.display = uscita
+        self.arbiter = type("Arbitro", (),
+                            {"trattengono": lambda self: [],
+                             "sources": {}})()
+
+    def _ridisegna(self):
+        pass
+
+
+for finezza in (1, "auto"):
+    conf_pagina = dmdconf.load()
+    conf_pagina["video"]["uscita"] = "schermo"
+    conf_pagina["video"]["finezza"] = finezza
+    uscita_pagina = display.DisplaySchermo(conf_pagina,
+                                           superficie=VetroFinto())
+    app = webui.create_app(RuntimeFinto(conf_pagina, uscita_pagina))
+    risposta = app.test_client().get("/video")
+    esigi(risposta.status_code == 200,
+          "finezza %s: la pagina Video risponde 200 (%d)"
+          % (finezza, risposta.status_code))
+    pagina = risposta.data.decode("utf-8", "replace")
+    esigi('name="finezza"' in pagina,
+          "finezza %s: e dentro c'e' la casella della finezza" % finezza)
+    esigi('name="risoluzione"' in pagina and 'name="testo_netto"' in pagina,
+          "finezza %s: insieme a risoluzione e testo" % finezza)
+
+
+print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]
 if falliti:

@@ -2573,6 +2573,10 @@ def create_app(runtime):
         pannello ci sta dieci volte, su un 1024x768 quattro. Offrire finezze
         che non ci stanno sarebbe offrire una scelta finta.
         """
+        # L'import sta qui dentro come in `page_video`: `display` tira su
+        # PIL e la piattaforma, e la web UI deve poter nascere anche dove
+        # l'uscita video non parte -- e' tutto il senso di `DisplayAssente`.
+        import display as uscita_video
         pannello = uscita_video.tela_dmd(cfg)
         schermo = compositore.schermo if compositore else pannello
         massima = uscita_video.finezza_scelta("auto", pannello, schermo)

@@ -2,6 +2,42 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.21]
+
+### La pagina Video si riapre
+
+*Internal Server Error* su `/video`, e dentro una riga sola di vero:
+
+    NameError: name 'uscita_video' is not defined
+
+Nella web UI il modulo `display` si importa **dentro** la funzione della pagina
+e con un altro nome (`import display as uscita_video`). La funzione nuova della
+finezza, scritta accanto, usava quel nome senza averlo: Python non se ne accorge
+finché non ci passa, e lì ci passa solo chi apre quella pagina.
+
+La correzione è una riga. Quello che conta è il resto.
+
+### Due prove che mancavano
+
+**Nessuna prova di questo progetto apriva una pagina.** Le prove guardano quello
+che il programma fa — geometrie, fotogrammi, partite, passaggi di aerei — e la
+web UI non la apriva nessuno finché non la apriva l'utente, che è il modo
+peggiore di scoprire un difetto. Adesso `prova_schermo` apre la pagina Video con
+un'uscita finta, a finezza 1 e a finezza piena, e controlla che esca davvero
+insieme alle sue caselle.
+
+E c'è `diagnostica/prova_nomi.py`: chiede a pyflakes quali nomi, in tutto il
+progetto, vengono usati senza essere mai definiti. Costa un secondo e avrebbe
+fermato questo 500 prima che partisse. Si guarda **solo** quello — F821, i nomi
+che non esistono — perché righe lunghe e import inutilizzati sono opinioni, non
+difetti. Dove pyflakes non c'è la prova si salta dicendolo: è uno strumento da
+banco di lavoro, non una dipendenza dell'apparecchio.
+
+Lanciata la prima volta ha trovato anche dell'altro: un `precedente` che non
+nasceva da nessuna parte, nel calcolo dello spegnimento dei satelliti. Lì la
+riga funziona perché è protetta da un'altra riga — cioè funziona per caso, e il
+giorno che qualcuno tocca quel ciclo smette. Adesso quel nome nasce.
+
 ## [17.4.20]
 
 ### La finezza della tela: linee vere invece di mattoni
