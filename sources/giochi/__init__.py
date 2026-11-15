@@ -30,7 +30,11 @@ from ..comandi import (ABS_HAT0X, ABS_HAT0Y, ABS_RX, ABS_RY, ABS_X, ABS_Y,
                        BTN_TR2, BTN_WEST, Lettore, joystick, tastiere)
 from .base import ALTEZZA, CAMPO, LARGHEZZA, Gioco, centra, scrivi
 from .classifica import Classifica, Epilogo
+from .assedio import Assedio
+from .blocchi import Blocchi
 from .bongo import Bongo
+from .bruco import Bruco
+from .flipper import Flipper
 from .gnam import Gnam
 from .invasori import Invasori
 from .mattoni import Mattoni
@@ -47,9 +51,9 @@ from .trex import TRex
 # deve trovarsi un gioco diverso da quello di ieri. Pongo e' arrivato dopo
 # Snake, Squadriglia dopo Pongo, Gnam Gnam dopo Squadriglia, Mine vaganti
 # dopo Gnam Gnam, T-Rex e Kingo Bongo dopo Mine vaganti, Super Quiz
-# dopo tutti.
+# dopo tutti, e Blocchi, Assedio, Bruco e Flipper dopo Super Quiz.
 GIOCHI = (Mattoni, Invasori, Serpente, Pongo, Squadriglia, Gnam, Mine, TRex,
-          Bongo, Quiz)
+          Bongo, Quiz, Blocchi, Assedio, Bruco, Flipper)
 NOMI = tuple(g.nome for g in GIOCHI)
 
 
