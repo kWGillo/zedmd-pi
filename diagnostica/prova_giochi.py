@@ -547,6 +547,33 @@ esigi(not colpevoli,
       "nessuna sorgente chiede la lingua del pannello a i18n.resolve (%s)"
       % (", ".join(colpevoli) or "nessuna"))
 
+sep("9. Un fotogramma costa lo stesso con la palla ferma (17.4.22)")
+
+# La scritta FUOCO PER LANCIARE era finita dentro `_punto`: ridisegnata per
+# ogni pixel del muro, finche' la palla stava sulla racchetta. Cento volte
+# piu' lento, racchetta a scatti, e la palla non partiva. La prova non conta
+# millisecondi -- dipendono dalla macchina -- ma il **rapporto** fra i due
+# casi, che non dipende da niente: devono costare piu' o meno uguale.
+import time as _tempo                                        # noqa: E402
+
+for classe in (Serpente, Mattoni, Pongo, TRex, Mine, Bongo, Invasori):
+    g = classe(seme=7)
+    g.avvia_partita(7)
+    inizio = _tempo.perf_counter()
+    for _ in range(5):
+        g.disegna()
+    fermo = (_tempo.perf_counter() - inizio) / 5
+    g.passo(1.0 / 30, {"fuoco"})
+    for _ in range(3):
+        g.passo(1.0 / 30, set())
+    inizio = _tempo.perf_counter()
+    for _ in range(5):
+        g.disegna()
+    via = (_tempo.perf_counter() - inizio) / 5
+    esigi(fermo < max(via, 0.002) * 10,
+          "%s: il primo fotogramma non costa dieci volte gli altri"
+          " (%.1f contro %.1f ms)" % (classe.__name__, fermo * 1000, via * 1000))
+
 print()
 print("=" * 74)
 falliti = [m for ok, m in esiti if not ok]

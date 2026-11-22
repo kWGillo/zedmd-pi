@@ -2,6 +2,48 @@
 
 Tutte le modifiche rilevanti del progetto.
 
+## [17.4.22]
+
+### Il player che non compariva
+
+*«Sento la musica ma non vedo l'interfaccia.»* Su Spotify e su Apple Music,
+via AirPlay: la musica usciva, il pannello restava sulle foto.
+
+La pagina Now Playing lo diceva già, in fondo: *la pipe non c'è:
+/tmp/shairport-sync-metadata*. È da lì che arrivano titolo, artista e
+posizione, e senza quelli il player non ha niente da mostrare — quindi non si
+mostra.
+
+shairport-sync quella pipe la crea **una volta sola**, quando parte. Se dopo
+qualcuno la cancella, non la rifà. E qualcuno c'è: la pulizia periodica di
+`/tmp` di systemd, che sui Debian recenti toglie i file non toccati da dieci
+giorni — e una pipe resta intatta per tutto il tempo in cui non si ascolta
+musica. Il lettore del DMD aspettava, riprovando ogni cinque secondi, una pipe
+che nessuno avrebbe più creato.
+
+Due correzioni:
+
+- **il lettore la rifà da sé** quando manca, con i permessi giusti perché
+  shairport-sync ci possa scrivere. Lui, quando una scrittura fallisce, chiude
+  e riapre per nome, e trova quella nuova: niente da riavviare;
+- **al primo avvio il DMD scrive `/etc/tmpfiles.d/dmd-shairport.conf`**, una
+  riga `x` che toglie la pipe dalla pulizia. Dal programma e non
+  dall'installatore, perché l'aggiornamento via rete non esegue script.
+
+### Breakout: la racchetta a scatti e la palla che non partiva
+
+Dalla 17.4, per un rientro sbagliato, la scritta *FUOCO PER LANCIARE* stava
+**dentro** la funzione che disegna un singolo pixel. Finché la palla era sulla
+racchetta, la scritta si ridisegnava per ogni pixel del muro: un fotogramma
+costava cento volte tanto (189 ms contro 1,2 su un PC, molto di più sul Pi).
+Da lì i due sintomi: la racchetta avanzava a balzi, e un FUOCO premuto e
+lasciato dentro un fotogramma così lungo non lo vedeva nessuno.
+
+La scritta torna alla fine del disegno, una volta per fotogramma. E
+`prova_giochi` ha una prova nuova: in ogni gioco il primo fotogramma, con la
+partita ferma, non deve costare dieci volte quelli dopo. Non conta i
+millisecondi, che dipendono dalla macchina, ma il rapporto, che no.
+
 ## [17.4.21]
 
 ### La pagina Video si riapre

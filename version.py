@@ -3833,6 +3833,20 @@ Storico:
        nasceva da nessuna parte, nel calcolo dello spegnimento dei
        satelliti: oggi quella riga e' protetta da un'altra riga, il che vuol
        dire che funziona per caso. Adesso nasce.
+  17.4.22 **Il player che non compariva, e Breakout che non partiva.**
+       Now Playing: la musica AirPlay usciva, il pannello restava sulle
+       foto. La pipe dei metadati, `/tmp/shairport-sync-metadata`, non
+       c'era piu': shairport-sync la crea solo quando parte, e la pulizia
+       periodica di `/tmp` di systemd l'aveva tolta. Il lettore aspettava
+       per sempre una pipe che nessuno avrebbe rifatto. Adesso se la rifa'
+       da solo, e al primo avvio scrive una regola in
+       `/etc/tmpfiles.d/dmd-shairport.conf` che la toglie dalla pulizia.
+       Breakout: la scritta FUOCO PER LANCIARE, per un rientro sbagliato
+       dalla 17.4, stava dentro la funzione che disegna un pixel. Con la
+       palla ferma la si ridisegnava per ogni pixel del muro: fotogramma
+       cento volte piu' lento, racchetta a scatti, e un FUOCO breve non lo
+       vedeva nessuno. Una prova nuova confronta il primo fotogramma con
+       gli altri, in tutti i giochi.
 """
 
-__version__ = "17.4.21"
+__version__ = "17.4.22"

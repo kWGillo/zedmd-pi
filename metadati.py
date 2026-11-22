@@ -204,7 +204,7 @@ class Metadati:
 
     def _apri(self):
         percorso = self.percorso()
-        if not esiste(percorso):
+        if not esiste(percorso) and not crea(percorso):
             self.errore = "la pipe non c'e': %s" % percorso
             return None
         try:
@@ -288,3 +288,71 @@ def esiste(percorso=None):
         return stat.S_ISFIFO(os.stat(percorso).st_mode)
     except OSError:
         return False
+
+
+def crea(percorso=None):
+    """Rifa la FIFO se manca. Vero se adesso c'e'.
+
+    shairport-sync la crea **solo quando parte**. Se dopo qualcuno la
+    cancella -- e qualcuno c'e': la pulizia di `/tmp` di systemd, che sui
+    Debian recenti butta i file non toccati da dieci giorni, e una pipe
+    resta intatta per tutto il tempo in cui non si ascolta musica -- lei non
+    la rifa', e il lettore aspettava per sempre una pipe che nessuno avrebbe
+    piu' creato. La musica continuava a uscire, il titolo non arrivava piu',
+    e il player sul pannello non compariva. Mai, fino al riavvio.
+
+    Rifarla da qui basta: shairport-sync, quando una scrittura fallisce,
+    chiude e riapre **per nome**, e trova quella nuova.
+
+    Si crea solo dove non c'e' niente: un file vero con quel nome non e'
+    affar nostro, e non lo si cancella per metterci una pipe.
+    """
+    percorso = percorso or PIPE
+    if esiste(percorso):
+        return True
+    if os.path.lexists(percorso):
+        return False
+    try:
+        os.mkfifo(percorso, 0o666)
+        # Il permesso si rimette a mano: `mkfifo` passa dalla umask, e
+        # shairport-sync scrive come utente suo, non come root.
+        os.chmod(percorso, 0o666)
+    except OSError:
+        return False
+    print("[metadati] la pipe mancava: ricreata in %s" % percorso)
+    return esiste(percorso)
+
+
+# La regola che toglie la pipe dalla pulizia periodica di `/tmp`. Il tipo
+# `x` di tmpfiles.d vuol dire «non toccare»; al riavvio `/tmp` si svuota lo
+# stesso, ed e' giusto cosi': shairport-sync rifa la pipe quando riparte.
+TMPFILES = "/etc/tmpfiles.d/dmd-shairport.conf"
+
+
+def proteggi(percorso=None, regola=TMPFILES):
+    """Chiede a systemd di non cancellare la pipe. Vero se la regola c'e'.
+
+    Si scrive dal programma e non da `install.sh` perche' l'aggiornamento
+    via rete non esegue nessuno script: le macchine gia' installate la
+    ricevono cosi', al primo avvio della versione nuova.
+    """
+    percorso = percorso or PIPE
+    if not percorso.startswith("/tmp/") and not percorso.startswith("/var/tmp/"):
+        return True
+    testo = ("# Scritto dal DMD Controller (metadati.py): la pipe dei metadati\n"
+             "# di shairport-sync non va tolta dalla pulizia periodica.\n"
+             "x %s\n" % percorso)
+    try:
+        with open(regola) as f:
+            if f.read() == testo:
+                return True
+    except OSError:
+        pass
+    if not os.path.isdir(os.path.dirname(regola)):
+        return False
+    try:
+        with open(regola, "w") as f:
+            f.write(testo)
+    except OSError:
+        return False
+    return True

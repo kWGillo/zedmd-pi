@@ -380,11 +380,17 @@ class Mattoni(Gioco):
                 self._punto(px, int(self.bx) + dx, int(self.by) + dy,
                             (255, 255, 255))
 
+        # Una volta per fotogramma, alla fine del disegno. Fino alla 17.4.21
+        # queste righe stavano per errore dentro `_punto`: la scritta veniva
+        # ridisegnata per **ogni pixel** del muro finche' la palla era ferma,
+        # e il fotogramma durava cento volte tanto. Racchetta a scatti, e un
+        # FUOCO premuto e rilasciato dentro un fotogramma cosi' lungo non lo
+        # vedeva nessuno: la palla non partiva.
+        if self.attaccata and not self.finita:
+            centra(px, "FUOCO PER LANCIARE",
+                   self.campo_y + self.campo_a * 40 // 64, (150, 150, 160))
+
     def _punto(self, px, x, y, colore):
         """Un pixel in coordinate di campo, portato sulla tela."""
         if 0 <= x < self.campo_l and 0 <= y < self.campo_a:
             px[self.campo_x + x, self.campo_y + y] = colore
-
-        if self.attaccata and not self.finita:
-            centra(px, "FUOCO PER LANCIARE",
-                   self.campo_y + self.campo_a * 40 // 64, (150, 150, 160))

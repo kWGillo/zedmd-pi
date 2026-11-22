@@ -828,6 +828,13 @@ class Runtime:
                     print("[dmd] pipe dei metadati non attivata: %s" % motivo)
         except Exception as exc:
             print("[dmd] pipe dei metadati non attivata: %s" % exc)
+        # Fuori dalla pulizia periodica di /tmp: e' cosi' che la pipe era
+        # sparita sotto i piedi di shairport-sync (17.4.22).
+        try:
+            if not metadati.proteggi(percorso):
+                print("[dmd] regola tmpfiles per la pipe non scritta")
+        except Exception as exc:
+            print("[dmd] regola tmpfiles per la pipe non scritta: %s" % exc)
         try:
             self.metadati.start()
         except Exception as exc:

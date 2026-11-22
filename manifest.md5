@@ -19,7 +19,7 @@ f4da634c02da1d2d9c2bf600287d09c3  copertine.py
 8475027d8a5b75dac3cdad504cd7d5da  diagnostica/genera_suoni.py
 c7c7d8335561c71a78345bad47c31dad  diagnostica/misura_refresh.sh
 cd21d278edc7b457692724e5c7ddbabd  diagnostica/misura_video.py
-ab1bb50ca47e2005874da4a006c8345e  diagnostica/prova_giochi.py
+9c282b55b307a61c4f2ab19268976e6d  diagnostica/prova_giochi.py
 20e12cf4f1f4b9b1cc6b536853b96b14  diagnostica/prova_nati_e_morti.py
 62e994e01f1265f94940a5477845a167  diagnostica/prova_nomi.py
 000088f80716e6a8838818bfd0034763  diagnostica/prova_passaggi_radar.py
@@ -33,7 +33,7 @@ a508962738ddb4832dd5cca7d6795e9f  diagnostica/traduzioni.tsv
 30acbdd739de059aa305e2f14ac1e3af  display.py
 459a3419469d0eb3d1c3f041539c0c91  dmd.service
 2e334f519881a1ab96dbc92e301e854c  dmdconf.py
-2dd72a67db0ee5356d9161fe3349687f  dmdd.py
+7631418ab76804c83348f107f5ca0347  dmdd.py
 0e17dea503190ddc88c7c33c37b5e19f  domande.en.csv
 ed464137667cbfc5cc010d2bd06d64e6  domande.it.csv
 7b7672e912c16111dba04613e96f5a2f  domande.py
@@ -59,7 +59,7 @@ d7ed711036597d7f61ae5c05fb8785d8  install.sh
 1ac13b80fea00e4ef49841661298ea1a  inutili.py
 456a3e6e24373f6acbd608aea6c34c8e  libcheck.py
 33804e1f60d47bc20ea370bb2e0b6502  lookup.py
-501367bdb38413b33dbd3b3c5fe8bb17  metadati.py
+bd2a3545588e0b2879f2d9a2a601a5dd  metadati.py
 38d51b9735b5f000b62c9770ca1d0bd0  meteo.py
 477148cd1daa8474b90f3177bfe16af3  mqttbus.py
 3cd27398cb063179a7699520644a98e0  nowplaying.py
@@ -95,7 +95,7 @@ ca1c8804516628fa534b5986b04f81f5  sources/calendario.py
 033d2a7403a0db024204329e95251214  sources/giochi/classifica.py
 b7a1f101a35d604a4cf237729d7851c9  sources/giochi/gnam.py
 cf9dad2479f93698da848261666f400c  sources/giochi/invasori.py
-f698a7664c5b101dbe5e188d0ad3cdc2  sources/giochi/mattoni.py
+5568a76634c757b99b1a176dddb3d66e  sources/giochi/mattoni.py
 c5dd87068ade8def1e9599408335b406  sources/giochi/mine.py
 0e67f0c1a59be47118670086493fbf32  sources/giochi/pongo.py
 6e89fe73941ef052a90b2d7cf494c56c  sources/giochi/quiz.py
@@ -188,7 +188,7 @@ d1f6103bcc793e09ae4f76dcaec7eef0  templates/sveglia.html
 413c8667bf3de07a3dc1d6e12b12f8b9  templates/video.html
 dfdb476800003318473f792504d1259b  update.sh
 ff54c3447cf7b589baee5f2ccdab0ac4  verify.sh
-ba4705ade9b54aecac07a5a16aefc2a0  version.py
+8d52da74247ba472b978c66ceea3a1d5  version.py
 867d737fa214c4afec86d9e9220ce9c1  vibra.py
 c436ce6aa38b09ed7a88886909dc5d2e  webcam.py
 6b98fbe17876bdc9d3678370720e4449  webui.py
